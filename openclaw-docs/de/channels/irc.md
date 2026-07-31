@@ -5,16 +5,17 @@ read_when:
 summary: Einrichtung des IRC-Plugins, Zugriffskontrollen und Fehlerbehebung
 title: IRC
 x-i18n:
-    generated_at: "2026-07-12T01:22:30Z"
+    generated_at: "2026-07-26T18:19:14Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 23e288f18a57a3ee74a433feb1ffb7dda0480f998cf74d4ec825bd7f3c0745c5
+    source_hash: 85c3da80b45d6611872ddbd10b3be4a5742b46e355e8bb554353a478f2a1702f
     source_path: channels/irc.md
     workflow: 16
 ---
 
-Verwenden Sie IRC, wenn Sie OpenClaw in klassischen Kanälen (`#room`) und Direktnachrichten nutzen möchten.
+Verwenden Sie IRC, wenn Sie OpenClaw in klassischen Kanälen (`#room`) und Direktnachrichten einsetzen möchten.
 Installieren Sie das offizielle IRC-Plugin und konfigurieren Sie es anschließend unter `channels.irc`.
 
 ## Schnellstart
@@ -42,65 +43,71 @@ openclaw plugins install @openclaw/irc
 }
 ```
 
-3. Starten Sie den Gateway oder starten Sie ihn neu:
+3. Starten Sie den Gateway bzw. starten Sie ihn neu:
 
 ```bash
 openclaw gateway run
 ```
 
-Bevorzugen Sie für die Bot-Koordination einen privaten IRC-Server. Wenn Sie bewusst ein öffentliches IRC-Netzwerk verwenden, sind Libera.Chat, OFTC und Snoonet gängige Optionen. Vermeiden Sie leicht vorhersehbare öffentliche Kanäle für den Hintergrundverkehr von Bots oder Schwärmen.
+Bevorzugen Sie für die Bot-Koordination einen privaten IRC-Server. Wenn Sie absichtlich ein öffentliches IRC-Netzwerk verwenden, gehören Libera.Chat, OFTC und Snoonet zu den gängigen Optionen. Vermeiden Sie vorhersehbare öffentliche Kanäle für den Backchannel-Datenverkehr von Bots oder Schwärmen.
+
+## Dauerhafte Verarbeitung eingehender Nachrichten
+
+OpenClaw schreibt jedes akzeptierte IRC-`PRIVMSG` vor den regulären Richtlinienprüfungen und der Agent-Weiterleitung in seine dauerhafte Eingangswarteschlange. Ausstehende oder erneut zustellbare Nachrichten überstehen einen Neustart des Gateways und werden weiterhin pro Kanal oder Direktnachrichten-Gegenstelle serialisiert.
+
+IRC stellt keine erneut abrufbare Zustellungs-ID bereit und sendet keine Nachrichten erneut, die ein nicht verbundener Client verpasst hat. OpenClaw weist daher eine lokale ID zu, die nur innerhalb der aktuellen TCP-Verbindung stabil ist. Die Warteschlange schützt das lokale Zeitfenster zwischen Annahme und Weiterleitung. Sie kann keine Nachricht wiederherstellen, die OpenClaw nie erreicht hat, und keine erneute Serverzustellung über mehrere Verbindungen hinweg deduplizieren.
 
 ## Verbindungseinstellungen
 
 | Schlüssel                     | Standardwert                  | Hinweise                                                    |
 | ----------------------------- | ----------------------------- | ----------------------------------------------------------- |
 | `host`                        | keiner (erforderlich)         | Hostname des IRC-Servers                                    |
-| `port`                        | `6697` mit TLS, `6667` unverschlüsselt | 1–65535                                            |
-| `tls`                         | `true`                        | Nur für bewusst gewählten Klartexttransport auf `false` setzen |
-| `nick`                        | keiner (erforderlich)         | Nick des Bots                                               |
+| `port`                        | `6697` mit TLS, `6667` unverschlüsselt | 1-65535                                                     |
+| `tls`                         | `true`                        | Setzen Sie `false` nur bei beabsichtigter Klartextübertragung |
+| `nick`                        | keiner (erforderlich)         | Bot-Nick                                                    |
 | `username`                    | Nick, andernfalls `openclaw`  | IRC-Benutzername                                            |
 | `realname`                    | `OpenClaw`                    | Realname-/GECOS-Feld                                        |
 | `password` / `passwordFile`   | keiner                        | Serverpasswort; die Datei muss eine reguläre Datei sein     |
-| `channels`                    | keine                         | Beizutretende Kanäle (`["#openclaw"]`)                      |
-| `accounts` / `defaultAccount` | keine                         | Einrichtung mehrerer Konten; Umgebungsvariablen ergänzen nur das Standardkonto |
+| `channels`                    | keiner                        | Beizutretende Kanäle (`["#openclaw"]`)                      |
+| `accounts` / `defaultAccount` | keiner                        | Einrichtung mehrerer Konten; Umgebungsvariablen befüllen nur das Standardkonto |
 
-## Sicherheitsvorgaben
+## Sicherheitsstandardwerte
 
-- IRC verwendet rohe TCP-/TLS-Sockets außerhalb des vom OpenClaw-Betreiber verwalteten Forward-Proxy-Routings. Setzen Sie in Bereitstellungen, die sämtlichen ausgehenden Datenverkehr durch diesen Forward-Proxy leiten müssen, `channels.irc.enabled=false`, sofern direkter ausgehender IRC-Datenverkehr nicht ausdrücklich genehmigt wurde.
-- `channels.irc.dmPolicy` ist standardmäßig `"pairing"`: Unbekannte Absender von Direktnachrichten erhalten einen Kopplungscode, den Sie mit `openclaw pairing approve irc <code>` genehmigen.
-- `channels.irc.groupPolicy` ist standardmäßig `"allowlist"`.
+- IRC verwendet unformatierte TCP-/TLS-Sockets außerhalb des vom OpenClaw-Betreiber verwalteten Forward-Proxy-Routings. Legen Sie in Bereitstellungen, die sämtlichen ausgehenden Datenverkehr durch diesen Forward-Proxy leiten müssen, `channels.irc.enabled=false` fest, sofern direkter ausgehender IRC-Datenverkehr nicht ausdrücklich genehmigt wurde.
+- `channels.irc.dmPolicy` verwendet standardmäßig `"pairing"`: Unbekannte Absender von Direktnachrichten erhalten einen Kopplungscode, den Sie mit `openclaw pairing approve irc <code>` genehmigen.
+- `channels.irc.groupPolicy` verwendet standardmäßig `"allowlist"`.
 - Legen Sie bei `groupPolicy="allowlist"` mit `channels.irc.groups` die zulässigen Kanäle fest.
-- Verwenden Sie TLS (`channels.irc.tls=true`), sofern Sie nicht bewusst Klartexttransport akzeptieren.
+- Verwenden Sie TLS (`channels.irc.tls=true`), sofern Sie nicht bewusst eine Klartextübertragung akzeptieren.
 
-## Zugriffssteuerung
+## Zugriffskontrolle
 
-Für IRC-Kanäle gibt es zwei getrennte „Schranken“:
+Für IRC-Kanäle gibt es zwei separate „Schranken“:
 
 1. **Kanalzugriff** (`groupPolicy` + `groups`): ob der Bot überhaupt Nachrichten aus einem Kanal akzeptiert.
-2. **Absenderzugriff** (`groupAllowFrom` / kanalspezifisches `groups["#channel"].allowFrom`): wer den Bot innerhalb dieses Kanals auslösen darf.
+2. **Absenderzugriff** (`groupAllowFrom` / kanalspezifisch `groups["#channel"].allowFrom`): wer den Bot innerhalb dieses Kanals auslösen darf.
 
 Konfigurationsschlüssel:
 
 - Zulassungsliste für Direktnachrichten (Absenderzugriff für Direktnachrichten): `channels.irc.allowFrom`
-- Zulassungsliste für Gruppenabsender (Absenderzugriff in Kanälen): `channels.irc.groupAllowFrom`
-- Kanalspezifische Steuerung (Kanal-, Absender- und Erwähnungsregeln): `channels.irc.groups["#channel"]` mit `requireMention`, `allowFrom`, `enabled`, `tools`, `toolsBySender`, `skills` und `systemPrompt`
-- `channels.irc.groupPolicy="open"` erlaubt nicht konfigurierte Kanäle (**standardmäßig ist weiterhin eine Erwähnung erforderlich**)
+- Zulassungsliste für Gruppenabsender (Absenderzugriff für Kanäle): `channels.irc.groupAllowFrom`
+- Kanalspezifische Steuerung (Regeln für Kanal, Absender und Erwähnungen): `channels.irc.groups["#channel"]` mit `requireMention`, `allowFrom`, `enabled`, `tools`, `toolsBySender`, `skills` und `systemPrompt`
+- `channels.irc.groupPolicy="open"` erlaubt nicht konfigurierte Kanäle (**standardmäßig weiterhin nur bei Erwähnung**)
 
-Einträge in Zulassungslisten sollten stabile Absenderidentitäten (`nick!user@host`) verwenden.
-Der Abgleich nur anhand des Nicks ist veränderlich und wird ausschließlich aktiviert, wenn `channels.irc.dangerouslyAllowNameMatching: true` gesetzt ist.
+Einträge in Zulassungslisten sollten stabile Absenderidentitäten verwenden (`nick!user@host`).
+Der Abgleich ausschließlich anhand des Nicks ist veränderlich und nur aktiviert, wenn `channels.irc.dangerouslyAllowNameMatching: true`.
 
 ### Häufiger Stolperstein: `allowFrom` gilt für Direktnachrichten, nicht für Kanäle
 
-Wenn Sie Protokolleinträge wie diesen sehen:
+Wenn Protokolleinträge wie der folgende angezeigt werden:
 
 - `irc: drop group sender alice!ident@host (policy=allowlist)`
 
-...bedeutet dies, dass der Absender für **Gruppen-/Kanalnachrichten** nicht zugelassen war. Beheben Sie dies auf eine der folgenden Arten:
+...bedeutet dies, dass der Absender für **Gruppen-/Kanalnachrichten** nicht zugelassen war. Beheben Sie dies durch:
 
-- Legen Sie `channels.irc.groupAllowFrom` fest (global für alle Kanäle), oder
-- legen Sie kanalspezifische Absender-Zulassungslisten fest: `channels.irc.groups["#channel"].allowFrom`
+- Festlegen von `channels.irc.groupAllowFrom` (global für alle Kanäle) oder
+- Festlegen kanalspezifischer Absender-Zulassungslisten: `channels.irc.groups["#channel"].allowFrom`
 
-Beispiel (allen Personen in `#openclaw` erlauben, mit dem Bot zu kommunizieren):
+Beispiel (allen Personen in `#openclaw` die Kommunikation mit dem Bot erlauben):
 
 ```json5
 {
@@ -117,11 +124,11 @@ Beispiel (allen Personen in `#openclaw` erlauben, mit dem Bot zu kommunizieren):
 
 ## Auslösen von Antworten (Erwähnungen)
 
-Selbst wenn ein Kanal zulässig ist (über `groupPolicy` + `groups`) und der Absender zugelassen ist, verlangt OpenClaw in Gruppenkontexten standardmäßig eine **Erwähnung**. Der Bot gilt als erwähnt, wenn die Nachricht den verbundenen Bot-Nick enthält oder Ihren konfigurierten Erwähnungsmustern entspricht.
+Selbst wenn ein Kanal zulässig ist (über `groupPolicy` + `groups`) und der Absender zugelassen ist, verwendet OpenClaw in Gruppenkontexten standardmäßig eine **Erwähnungsschranke**. Der Bot gilt als erwähnt, wenn die Nachricht den Nick des verbundenen Bots enthält oder Ihren konfigurierten Erwähnungsmustern entspricht.
 
-Daher können Protokolleinträge wie `drop channel … (missing-mention)` erscheinen, sofern die Nachricht kein Erwähnungsmuster enthält, das zum Bot passt.
+Daher werden möglicherweise Protokolleinträge wie `drop channel … (missing-mention)` angezeigt, sofern die Nachricht kein zum Bot passendes Erwähnungsmuster enthält.
 
-Damit der Bot in einem IRC-Kanal **ohne erforderliche Erwähnung** antwortet, deaktivieren Sie die Erwähnungspflicht für diesen Kanal:
+Deaktivieren Sie die Erwähnungsschranke für den Kanal, damit der Bot in einem IRC-Kanal **ohne erforderliche Erwähnung** antwortet:
 
 ```json5
 {
@@ -139,7 +146,7 @@ Damit der Bot in einem IRC-Kanal **ohne erforderliche Erwähnung** antwortet, de
 }
 ```
 
-Oder erlauben Sie **alle** IRC-Kanäle (ohne kanalspezifische Zulassungsliste) und lassen Sie den Bot dennoch ohne Erwähnungen antworten:
+Oder erlauben Sie **alle** IRC-Kanäle (ohne kanalspezifische Zulassungsliste) und antworten Sie weiterhin ohne Erwähnungen:
 
 ```json5
 {
@@ -157,9 +164,9 @@ Oder erlauben Sie **alle** IRC-Kanäle (ohne kanalspezifische Zulassungsliste) u
 ## Sicherheitshinweis (für öffentliche Kanäle empfohlen)
 
 Wenn Sie `allowFrom: ["*"]` in einem öffentlichen Kanal zulassen, kann jede Person dem Bot Prompts senden.
-Beschränken Sie zur Risikoreduzierung die Werkzeuge für diesen Kanal.
+Beschränken Sie die Werkzeuge für diesen Kanal, um das Risiko zu verringern.
 
-### Gleiche Werkzeuge für alle Personen im Kanal
+### Dieselben Werkzeuge für alle Personen im Kanal
 
 ```json5
 {
@@ -178,9 +185,9 @@ Beschränken Sie zur Risikoreduzierung die Werkzeuge für diesen Kanal.
 }
 ```
 
-### Unterschiedliche Werkzeuge je Absender (Eigentümer erhält mehr Berechtigungen)
+### Unterschiedliche Werkzeuge je Absender (der Besitzer erhält mehr Befugnisse)
 
-Verwenden Sie `toolsBySender`, um für `"*"` eine strengere Richtlinie und für Ihren Nick eine weniger strenge Richtlinie anzuwenden:
+Verwenden Sie `toolsBySender`, um auf `"*"` eine strengere Richtlinie und auf Ihren Nick eine weniger strenge Richtlinie anzuwenden:
 
 ```json5
 {
@@ -206,11 +213,11 @@ Verwenden Sie `toolsBySender`, um für `"*"` eine strengere Richtlinie und für 
 
 Hinweise:
 
-- Schlüssel in `toolsBySender` sollten explizite Präfixe verwenden (`channel:`, `id:`, `e164:`, `username:`, `name:`). Verwenden Sie für IRC `id:` mit dem Wert der Absenderidentität: `id:alice` oder für einen zuverlässigeren Abgleich `id:alice!~alice@203.0.113.7`.
-- Veraltete Schlüssel ohne Präfix werden weiterhin akzeptiert, ausschließlich wie `id:` abgeglichen und lösen eine Warnung zur bevorstehenden Entfernung aus.
-- Die erste passende Absenderrichtlinie hat Vorrang; `"*"` dient als Platzhalter-Ausweichregel.
+- Schlüssel für `toolsBySender` sollten explizite Präfixe verwenden (`channel:`, `id:`, `e164:`, `username:`, `name:`). Verwenden Sie für IRC `id:` mit dem Wert der Absenderidentität: `id:alice` oder `id:alice!~alice@203.0.113.7` für einen zuverlässigeren Abgleich.
+- Veraltete Schlüssel ohne Präfix werden weiterhin akzeptiert, nur als `id:` abgeglichen und lösen eine Veraltungswarnung aus.
+- Die erste passende Absenderrichtlinie wird angewendet; `"*"` dient als Platzhalter-Ausweichregel.
 
-Weitere Informationen zum Gruppenzugriff im Vergleich zur Erwähnungspflicht und zu deren Zusammenspiel finden Sie unter: [/channels/groups](/de/channels/groups).
+Weitere Informationen zum Gruppenzugriff und zur Erwähnungsschranke sowie zu deren Zusammenspiel finden Sie unter: [/channels/groups](/de/channels/groups).
 
 ## NickServ
 
@@ -230,7 +237,7 @@ So identifizieren Sie sich nach dem Verbindungsaufbau bei NickServ:
 }
 ```
 
-Die NickServ-Identifizierung wird standardmäßig bei jedem gesetzten Passwort ausgeführt (`enabled` muss nur zum Deaktivieren auf `false` gesetzt werden). `service` ist standardmäßig `NickServ`; `passwordFile` ist eine Alternative zum direkt angegebenen `password`.
+Die NickServ-Identifizierung wird standardmäßig immer ausgeführt, wenn ein Passwort festgelegt ist (`enabled` muss nur zum Deaktivieren auf `false` gesetzt werden). `service` verwendet standardmäßig `NickServ`; `passwordFile` ist eine Alternative zum direkt angegebenen `password`.
 
 Optionale einmalige Registrierung beim Verbindungsaufbau (`register: true` erfordert `registerEmail`):
 
@@ -264,18 +271,18 @@ Das Standardkonto unterstützt:
 - `IRC_NICKSERV_PASSWORD`
 - `IRC_NICKSERV_REGISTER_EMAIL`
 
-`IRC_HOST` kann nicht über eine `.env`-Datei im Arbeitsbereich festgelegt werden; siehe [`.env`-Dateien im Arbeitsbereich](/de/gateway/security).
+`IRC_HOST` kann nicht über eine `.env` des Arbeitsbereichs festgelegt werden; siehe [`.env`-Dateien des Arbeitsbereichs](/de/gateway/security).
 
 ## Fehlerbehebung
 
-- Wenn der Bot eine Verbindung herstellt, aber in Kanälen nie antwortet, prüfen Sie `channels.irc.groups` **und**, ob die Erwähnungspflicht Nachrichten verwirft (`missing-mention`). Wenn er ohne direkte Ansprache antworten soll, legen Sie für den Kanal `requireMention:false` fest.
-- Wenn die Anmeldung fehlschlägt, prüfen Sie die Verfügbarkeit des Nicks und das Serverpasswort.
-- Wenn TLS in einem benutzerdefinierten Netzwerk fehlschlägt, prüfen Sie Host, Port und die Zertifikatskonfiguration.
+- Wenn der Bot eine Verbindung herstellt, aber nie in Kanälen antwortet, überprüfen Sie `channels.irc.groups` **und** ob die Erwähnungsschranke Nachrichten verwirft (`missing-mention`). Wenn der Bot ohne Ping antworten soll, legen Sie für den Kanal `requireMention:false` fest.
+- Wenn die Anmeldung fehlschlägt, überprüfen Sie die Verfügbarkeit des Nicks und das Serverpasswort.
+- Wenn TLS in einem benutzerdefinierten Netzwerk fehlschlägt, überprüfen Sie Host, Port und Zertifikatseinrichtung.
 
 ## Verwandte Themen
 
-- [Kanalübersicht](/de/channels) — alle unterstützten Kanäle
+- [Übersicht der Kanäle](/de/channels) — alle unterstützten Kanäle
 - [Kopplung](/de/channels/pairing) — Authentifizierung von Direktnachrichten und Kopplungsablauf
-- [Gruppen](/de/channels/groups) — Verhalten von Gruppenchats und Erwähnungspflicht
+- [Gruppen](/de/channels/groups) — Verhalten von Gruppenchats und Erwähnungsschranke
 - [Kanal-Routing](/de/channels/channel-routing) — Sitzungs-Routing für Nachrichten
 - [Sicherheit](/de/gateway/security) — Zugriffsmodell und Absicherung

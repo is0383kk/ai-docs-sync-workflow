@@ -1,207 +1,418 @@
 ---
 read_when:
-    - आपको जानना होगा कि किस SDK सबपाथ से इम्पोर्ट करना है
-    - आप OpenClawPluginApi पर सभी पंजीकरण विधियों के लिए एक संदर्भ चाहते हैं
-    - आप एक विशिष्ट SDK निर्यात देख रहे हैं
+    - आपको पता होना चाहिए कि किस SDK उप-पथ से आयात करना है
+    - आप OpenClawPluginApi पर सभी पंजीकरण विधियों का संदर्भ चाहते हैं
+    - आप किसी विशिष्ट SDK एक्सपोर्ट को खोज रहे हैं
 sidebarTitle: Plugin SDK overview
-summary: इम्पोर्ट मैप, पंजीकरण API संदर्भ, और SDK आर्किटेक्चर
-title: Plugin SDK अवलोकन
+summary: इम्पोर्ट मैप, पंजीकरण API संदर्भ और SDK आर्किटेक्चर
+title: Plugin SDK का अवलोकन
 x-i18n:
-    generated_at: "2026-07-01T18:13:26Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:19:57Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c7df77e34db9b780ee0747a0f2178861624f528d9f7aec8592d6954a96869e96
+    source_hash: 4f490aa8670c57cfc1a635fb1f5d9950fa1cabdb3d45abbc2295da796edcd52e
     source_path: plugins/sdk-overview.md
     workflow: 16
 ---
 
-Plugin SDK, plugins और कोर के बीच typed अनुबंध है। यह पेज
-**क्या import करना है** और **क्या register कर सकते हैं** के लिए संदर्भ है।
+Plugin SDK, plugins और core के बीच टाइप किया हुआ अनुबंध है। यह पृष्ठ
+**क्या इम्पोर्ट करना है** और **आप क्या पंजीकृत कर सकते हैं** का संदर्भ है।
 
 <Note>
-  यह पेज OpenClaw के अंदर `openclaw/plugin-sdk/*` का उपयोग करने वाले Plugin
-  लेखकों के लिए है। बाहरी apps, scripts, dashboards, CI jobs, और IDE extensions
-  जो Gateway के जरिए agents चलाना चाहते हैं, वे इसके बजाय
-  [बाहरी apps के लिए Gateway integrations](/hi/gateway/external-apps) का उपयोग करें।
+  यह पृष्ठ OpenClaw के भीतर `openclaw/plugin-sdk/*` का उपयोग करने वाले
+  Plugin लेखकों के लिए है। Gateway के माध्यम से एजेंट चलाने वाले बाहरी ऐप्स,
+  स्क्रिप्ट, डैशबोर्ड, CI जॉब और IDE एक्सटेंशन के लिए इसके बजाय
+  [बाहरी ऐप्स के लिए Gateway एकीकरण](/hi/gateway/external-apps) का उपयोग करें।
 </Note>
 
 <Tip>
-इसके बजाय how-to guide खोज रहे हैं? [Plugins बनाना](/hi/plugins/building-plugins) से शुरू करें, channel plugins के लिए [Channel plugins](/hi/plugins/sdk-channel-plugins), provider plugins के लिए [Provider plugins](/hi/plugins/sdk-provider-plugins), local AI CLI backends के लिए [CLI backend plugins](/hi/plugins/cli-backend-plugins), और tool या lifecycle hook plugins के लिए [Plugin hooks](/hi/plugins/hooks) का उपयोग करें।
+इसके बजाय कोई व्यावहारिक मार्गदर्शिका खोज रहे हैं? [Plugins बनाना](/hi/plugins/building-plugins) से शुरू करें। चैनलों के लिए [चैनल plugins](/hi/plugins/sdk-channel-plugins), मॉडल प्रदाताओं के लिए [प्रदाता plugins](/hi/plugins/sdk-provider-plugins), स्थानीय AI CLI बैकएंड के लिए [CLI बैकएंड plugins](/hi/plugins/cli-backend-plugins), मूल एजेंट निष्पादकों के लिए [एजेंट हार्नेस plugins](/hi/plugins/sdk-agent-harness), और टूल या लाइफ़साइकल हुक के लिए [Plugin हुक](/hi/plugins/hooks) का उपयोग करें।
 </Tip>
 
-## Import convention
+## इम्पोर्ट परंपरा
 
-हमेशा किसी विशिष्ट subpath से import करें:
+हमेशा किसी विशिष्ट सबपाथ से इम्पोर्ट करें:
 
 ```typescript
 import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 import { defineChannelPluginEntry } from "openclaw/plugin-sdk/channel-core";
 ```
 
-हर subpath एक छोटा, self-contained module है। इससे startup तेज रहता है और
-circular dependency समस्याएं रुकती हैं। channel-specific entry/build helpers के लिए
-`openclaw/plugin-sdk/channel-core` को प्राथमिकता दें; व्यापक umbrella surface और
-`buildChannelConfigSchema` जैसे shared helpers के लिए `openclaw/plugin-sdk/core` रखें।
+प्रत्येक सबपाथ एक छोटा, स्व-निहित मॉड्यूल है। इससे स्टार्टअप तेज़ रहता है और
+चक्रीय निर्भरता संबंधी समस्याएँ रुकती हैं। चैनल-विशिष्ट एंट्री/बिल्ड सहायकों के लिए,
+`openclaw/plugin-sdk/channel-core` को प्राथमिकता दें; व्यापक समग्र सतह और
+`buildChannelConfigSchema` जैसे साझा सहायकों के लिए
+`openclaw/plugin-sdk/core` रखें।
 
-channel config के लिए, channel-owned JSON Schema को
-`openclaw.plugin.json#channelConfigs` के जरिए publish करें। `plugin-sdk/channel-config-schema`
-subpath shared schema primitives और generic builder के लिए है। OpenClaw के
-bundled plugins, retained bundled-channel schemas के लिए `plugin-sdk/bundled-channel-config-schema` का उपयोग करते हैं। Deprecated compatibility exports
-`plugin-sdk/channel-config-schema-legacy` पर बने रहते हैं; कोई भी bundled schema subpath
-नए plugins के लिए pattern नहीं है।
+चैनल कॉन्फ़िगरेशन के लिए, चैनल के स्वामित्व वाला JSON Schema
+`openclaw.plugin.json#channelConfigs` के माध्यम से प्रकाशित करें। `plugin-sdk/channel-config-schema`
+सबपाथ साझा स्कीमा प्रिमिटिव और जेनेरिक बिल्डर के लिए है। OpenClaw के
+बंडल किए गए plugins, बनाए रखे गए बंडल-चैनल स्कीमा के लिए
+`plugin-sdk/bundled-channel-config-schema` का उपयोग करते हैं। वह बंडल स्कीमा सबपाथ नए
+plugins के लिए प्रतिमान नहीं है।
 
 <Warning>
-  provider- या channel-branded convenience seams import न करें (उदाहरण के लिए
+  प्रदाता या चैनल के नाम वाले सुविधा सीम इम्पोर्ट न करें (उदाहरण के लिए
   `openclaw/plugin-sdk/slack`, `.../discord`, `.../signal`, `.../whatsapp`)।
-  Bundled plugins अपने `api.ts` /
-  `runtime-api.ts` barrels के अंदर generic SDK subpaths compose करते हैं; core consumers को या तो वे plugin-local
-  barrels उपयोग करने चाहिए या जब जरूरत सचमुच cross-channel हो तब एक narrow generic SDK contract जोड़ना चाहिए।
+  बंडल किए गए plugins अपने स्वयं के `api.ts` /
+  `runtime-api.ts` बैरल के भीतर जेनेरिक SDK सबपाथ संयोजित करते हैं; core उपभोक्ताओं
+  को या तो उन Plugin-स्थानीय बैरल का उपयोग करना चाहिए या आवश्यकता वास्तव में
+  विभिन्न चैनलों पर लागू होने पर एक सीमित जेनेरिक SDK अनुबंध जोड़ना
+  चाहिए।
 
-Generated export map में bundled-plugin helper seams का एक छोटा set अब भी दिखता है
-जब उनका tracked owner usage हो। वे सिर्फ bundled-plugin
-maintenance के लिए मौजूद हैं और नए third-party
-plugins के लिए recommended import paths नहीं हैं।
+बंडल किए गए Plugin के सहायक सीम का एक छोटा समूह, जब उनका ट्रैक किया गया स्वामी
+उपयोग मौजूद होता है, तब भी जनरेट किए गए एक्सपोर्ट मैप में दिखाई देता है। वे केवल
+बंडल किए गए Plugin के रखरखाव के लिए मौजूद हैं और नए तृतीय-पक्ष
+plugins के लिए अनुशंसित इम्पोर्ट पथ नहीं हैं।
 
-`openclaw/plugin-sdk/discord` और `openclaw/plugin-sdk/telegram-account` को
-tracked owner usage के लिए deprecated compatibility facades के रूप में भी रखा गया है। उन
-import paths को नए plugins में copy न करें; इसके बजाय injected runtime helpers और
-generic channel SDK subpaths का उपयोग करें।
+`openclaw/plugin-sdk/discord` और `openclaw/plugin-sdk/telegram-account` को भी
+ट्रैक किए गए स्वामी उपयोग के लिए अप्रचलित संगतता फ़साड के रूप में रखा गया है। उन
+इम्पोर्ट पथों को नए plugins में कॉपी न करें; इसके बजाय इंजेक्ट किए गए रनटाइम सहायक और
+जेनेरिक चैनल SDK सबपाथ का उपयोग करें।
 </Warning>
 
-## Subpath reference
+## सबपाथ संदर्भ
 
-Plugin SDK को area के अनुसार grouped narrow subpaths के set के रूप में expose किया गया है (plugin
-entry, channel, provider, auth, runtime, capability, memory, और reserved
-bundled-plugin helpers)। पूरे catalog के लिए — grouped और linked — देखें
-[Plugin SDK subpaths](/hi/plugins/sdk-subpaths)।
+Plugin SDK को क्षेत्र के अनुसार समूहित सीमित सबपाथ के समूह के रूप में उपलब्ध कराया
+गया है (Plugin एंट्री, चैनल, प्रदाता, प्रमाणीकरण, रनटाइम, क्षमता, मेमोरी और आरक्षित
+बंडल-Plugin सहायक)। समूहित और लिंक की गई पूरी सूची के लिए
+[Plugin SDK सबपाथ](/hi/plugins/sdk-subpaths) देखें।
 
-compiler entrypoint inventory
-`scripts/lib/plugin-sdk-entrypoints.json` में रहता है; package exports, public subset से
-`scripts/lib/plugin-sdk-private-local-only-subpaths.json` में listed repo-local test/internal subpaths घटाने के बाद generated होते हैं।
-public export count audit करने के लिए
-`pnpm plugin-sdk:surface` चलाएं। Deprecated public
-subpaths जो पर्याप्त पुराने हैं और bundled extension production code द्वारा unused हैं,
-`scripts/lib/plugin-sdk-deprecated-public-subpaths.json` में tracked हैं; broad
-deprecated re-export barrels
-`scripts/lib/plugin-sdk-deprecated-barrel-subpaths.json` में tracked हैं।
+कंपाइलर एंट्रीपॉइंट सूची
+`scripts/lib/plugin-sdk-entrypoints.json` में रहती है; टाइप किए हुए सार्वजनिक एक्सपोर्ट में
+`scripts/lib/plugin-sdk-private-local-only-subpaths.json` में सूचीबद्ध आंतरिक
+सबपाथ शामिल नहीं होते। उस सूची की प्रोडक्शन एंट्रियाँ अलग से
+प्रकाशित आधिकारिक plugins के लिए केवल-JavaScript होस्ट रनटाइम एक्सपोर्ट बनाए
+रखती हैं, जबकि केवल-परीक्षण एंट्रियाँ एक्सपोर्ट नहीं की जातीं। सार्वजनिक एक्सपोर्ट
+की संख्या का ऑडिट करने के लिए `pnpm plugin-sdk:surface` चलाएँ। पर्याप्त पुराने और
+बंडल किए गए एक्सटेंशन के प्रोडक्शन कोड द्वारा अप्रयुक्त अप्रचलित सार्वजनिक सबपाथ
+`scripts/lib/plugin-sdk-deprecated-public-subpaths.json` में ट्रैक किए जाते हैं; व्यापक
+अप्रचलित री-एक्सपोर्ट बैरल
+`scripts/lib/plugin-sdk-deprecated-barrel-subpaths.json` में ट्रैक किए जाते हैं।
 
-## Registration API
+## पंजीकरण API
 
-`register(api)` callback को इन
-methods वाला `OpenClawPluginApi` object मिलता है:
+`register(api)` कॉलबैक को इन विधियों वाला एक `OpenClawPluginApi` ऑब्जेक्ट
+मिलता है:
 
-### Capability registration
+किसी सत्र के लिए बाहरी टीम-चैट सतह उपलब्ध कराने वाले plugins,
+`openclaw/plugin-sdk/session-discussion` द्वारा एक्सपोर्ट किए गए एकल प्रोसेस-व्यापी प्रदाता को
+पंजीकृत कर सकते हैं। इसकी `info({ sessionKey })` विधि
+बताती है कि चर्चा अनुपलब्ध है, खोलने के लिए तैयार है या पहले से खुली है;
+`open({ sessionKey })` चर्चा बनाती या समाधान करती है और उसके एम्बेड
+तथा बाहरी URL लौटाती है। दूसरा प्रदाता पंजीकृत करने पर वर्तमान प्रदाता बदल जाता है।
 
-| Method                                           | यह क्या register करता है              |
-| ------------------------------------------------ | ------------------------------------- |
-| `api.registerProvider(...)`                      | Text inference (LLM)                  |
-| `api.registerAgentHarness(...)`                  | Experimental low-level agent executor |
-| `api.registerCliBackend(...)`                    | Local CLI inference backend           |
-| `api.registerChannel(...)`                       | Messaging channel                     |
-| `api.registerEmbeddingProvider(...)`             | Reusable vector embedding provider    |
-| `api.registerSpeechProvider(...)`                | Text-to-speech / STT synthesis        |
-| `api.registerRealtimeTranscriptionProvider(...)` | Streaming realtime transcription      |
-| `api.registerRealtimeVoiceProvider(...)`         | Duplex realtime voice sessions        |
-| `api.registerMediaUnderstandingProvider(...)`    | Image/audio/video analysis            |
-| `api.registerImageGenerationProvider(...)`       | Image generation                      |
-| `api.registerMusicGenerationProvider(...)`       | Music generation                      |
-| `api.registerVideoGenerationProvider(...)`       | Video generation                      |
-| `api.registerWebFetchProvider(...)`              | Web fetch / scrape provider           |
-| `api.registerWebSearchProvider(...)`             | Web search                            |
+### क्षमता पंजीकरण
 
-`api.registerEmbeddingProvider(...)` के साथ registered embedding providers को
-plugin manifest में `contracts.embeddingProviders` में भी listed होना चाहिए। यह
-reusable vector generation के लिए generic embedding surface है। Memory search
-इस generic provider surface को consume कर सकता है। पुराना
+| विधि                                           | यह क्या पंजीकृत करती है                                                                                                                         |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `api.registerProvider(...)`                      | टेक्स्ट अनुमान (LLM)                                                                                                                      |
+| `api.registerWorkerProvider(...)`                | क्लाउड-वर्कर लाइफ़साइकल लीज़                                                                                                             |
+| `api.registerModelCatalogProvider(...)`          | टेक्स्ट और मीडिया जनरेशन के लिए मॉडल कैटलॉग पंक्तियाँ                                                                                          |
+| `api.registerAgentHarness(...)`                  | [प्रायोगिक](/hi/plugins/sdk-agent-harness) मूल एजेंट निष्पादक (Codex, Copilot)                                                         |
+| `api.registerCliBackend(...)`                    | स्थानीय CLI अनुमान बैकएंड                                                                                                               |
+| `api.registerChannel(...)`                       | मैसेजिंग चैनल                                                                                                                         |
+| `api.registerEmbeddingProvider(...)`             | पुनः उपयोग योग्य वेक्टर एम्बेडिंग प्रदाता                                                                                                        |
+| `api.registerSpeechProvider(...)`                | टेक्स्ट-टू-स्पीच / STT संश्लेषण                                                                                                            |
+| `api.registerRealtimeTranscriptionProvider(...)` | स्ट्रीमिंग रीयलटाइम ट्रांसक्रिप्शन                                                                                                          |
+| `api.registerRealtimeVoiceProvider(...)`         | डुप्लेक्स रीयलटाइम वॉइस सत्र                                                                                                            |
+| `api.registerMediaUnderstandingProvider(...)`    | इमेज/ऑडियो/वीडियो विश्लेषण                                                                                                                |
+| `api.registerTranscriptSourceProvider(...)`      | लाइव या इम्पोर्ट किया हुआ मीटिंग ट्रांसक्रिप्ट स्रोत; मीटिंग plugins, `plugin-sdk/transcripts` से `createMeetingTranscriptSourceProvider` का उपयोग कर सकते हैं |
+| `api.registerImageGenerationProvider(...)`       | इमेज जनरेशन                                                                                                                          |
+| `api.registerMusicGenerationProvider(...)`       | संगीत जनरेशन                                                                                                                          |
+| `api.registerVideoGenerationProvider(...)`       | वीडियो जनरेशन                                                                                                                          |
+| `api.registerWebFetchProvider(...)`              | वेब फ़ेच / स्क्रेप प्रदाता                                                                                                               |
+| `api.registerWebSearchProvider(...)`             | वेब खोज                                                                                                                                |
+| `api.registerCompactionProvider(...)`            | प्लग करने योग्य ट्रांसक्रिप्ट-Compaction बैकएंड                                                                                                   |
+
+वर्कर प्रदाताओं को `contracts.workerProviders` में अपना आईडी भी घोषित करना होगा।
+Core, `provision(profile, operationId)` से पहले स्थायी अभिप्राय सहेजता है। प्रदाता बाहरी आवंटन से पहले सेटिंग्स सत्यापित करते हैं और स्थायी प्रोफ़ाइल अस्वीकृति के लिए `WorkerProviderError` थ्रो करते हैं। ऑपरेशन आईडी दोहराए जाने पर `provision` को उसी लीज़ को अपनाना होगा।
+Core सत्यापित प्रोफ़ाइल सेटिंग्स को लीज़ के साथ सहेजता है और वह स्नैपशॉट `destroy({ leaseId, profile })` को देता है, जिसे आइडेम्पोटेंट होना चाहिए, तथा `inspect({ leaseId, profile })` को देता है, जो `active`, `destroyed` या `unknown` लौटाता है। इससे प्रदाता Gateway पुनः शुरू होने या नामित प्रोफ़ाइल हटाए जाने के बाद लाइफ़साइकल कॉल रूट कर सकते हैं। SSH एंडपॉइंट, `keyRef` के लिए `SecretRef` का उपयोग करते हैं, इनलाइन कुंजी सामग्री का कभी नहीं, और विश्वसनीय प्रोविज़निंग आउटपुट से एक `hostKey` को होस्टनाम या टिप्पणी के बिना ठीक `algorithm base64` के रूप में शामिल करते हैं। Core, `hostKey` पिन करता है और पहले कनेक्शन से मिली कुंजी पर कभी भरोसा नहीं करता। डायनेमिक `keyRef` बनाने वाला प्रदाता `resolveSshIdentity({ leaseId, profile, keyRef })` लागू कर सकता है; मौजूद होने पर वह रिज़ॉल्वर प्रामाणिक होता है, जबकि इसके बिना प्रदाता कॉन्फ़िगर किए गए जेनेरिक सीक्रेट रिज़ॉल्वर का उपयोग करते हैं।
+नवीकरणीय लीज़ वाले प्रदाता `renew(leaseId)` भी लागू कर सकते हैं।
+अस्थायी या अनिश्चित विफलताओं पर `inspect` को थ्रो करना होगा; केवल प्रामाणिक अनुपस्थिति के लिए `unknown` लौटाएँ। Core किसी सक्रिय स्थानीय रिकॉर्ड को अनाथ चिह्नित करता है, या सहेजे गए नष्ट करने के अनुरोध के बाद अनुपस्थिति को टियरडाउन पूर्ण होने के रूप में मानता है।
+
+`api.registerEmbeddingProvider(...)` के साथ पंजीकृत एम्बेडिंग प्रदाताओं को
+Plugin मैनिफ़ेस्ट में `contracts.embeddingProviders` में भी सूचीबद्ध होना चाहिए। यह
+पुनः उपयोग योग्य वेक्टर जनरेशन के लिए जेनेरिक एम्बेडिंग सतह है। मेमोरी खोज
+इस जेनेरिक प्रदाता सतह का उपयोग कर सकती है। पुराना
 `api.registerMemoryEmbeddingProvider(...)` और
-`contracts.memoryEmbeddingProviders` seam deprecated compatibility है, जब तक
-existing memory-specific providers migrate होते हैं।
+`contracts.memoryEmbeddingProviders` सीम, मौजूदा मेमोरी-विशिष्ट प्रदाताओं के
+माइग्रेट होने तक अप्रचलित संगतता है।
 
-Memory-specific providers जो अभी भी runtime `batchEmbed(...)` expose करते हैं, वे
-existing per-file batching contract पर रहते हैं, जब तक उनका runtime explicitly
-`sourceWideBatchEmbed: true` set न करे। वह opt-in memory host को host batch limits तक
-multiple dirty memory files और enabled sources से chunks को एक `batchEmbed(...)` call में submit करने देता है। JSONL request files upload करने वाले Batch adapters को
-अपने upload-size cap के साथ-साथ अपने request-count
-cap से पहले provider jobs split करने होंगे। provider को input chunk प्रति एक embedding उसी order में return करनी होगी जैसे
-`batch.chunks`; जब provider file-local batches expect करता हो या
-larger source-wide job में input ordering preserve नहीं कर सकता हो, flag omit करें।
+जो मेमोरी-विशिष्ट प्रदाता अब भी रनटाइम `batchEmbed(...)` उपलब्ध कराते हैं, वे
+मौजूदा प्रति-फ़ाइल बैचिंग अनुबंध पर बने रहते हैं, जब तक उनका रनटाइम स्पष्ट रूप से
+`sourceWideBatchEmbed: true` सेट न करे। इस ऑप्ट-इन से मेमोरी होस्ट,
+होस्ट बैच सीमाओं तक कई बदली हुई मेमोरी फ़ाइलों और सक्षम स्रोतों के चंक एक
+`batchEmbed(...)` कॉल में सबमिट कर सकता है। JSONL अनुरोध फ़ाइलें अपलोड करने वाले
+बैच अडैप्टर को प्रदाता जॉब उनके अनुरोध-संख्या सीमा के साथ-साथ अपलोड-आकार सीमा
+से पहले भी विभाजित करने होंगे। प्रदाता को `batch.chunks` के समान क्रम में
+प्रत्येक इनपुट चंक के लिए एक एम्बेडिंग लौटानी होगी; जब प्रदाता फ़ाइल-स्थानीय बैच
+अपेक्षित करता हो या बड़े स्रोत-व्यापी जॉब में इनपुट क्रम सुरक्षित न रख सके, तो
+फ़्लैग छोड़ दें।
 
-### Tools and commands
+### टूल और कमांड
 
-fixed tool names वाले simple tool-only plugins के लिए [`defineToolPlugin`](/hi/plugins/tool-plugins) का उपयोग करें।
-mixed plugins
-या fully dynamic tool registration के लिए सीधे `api.registerTool(...)` का उपयोग करें।
+निश्चित टूल नामों वाले सरल, केवल-टूल plugins के लिए
+[`defineToolPlugin`](/hi/plugins/tool-plugins) का उपयोग करें। मिश्रित plugins
+या पूर्णतः डायनेमिक टूल पंजीकरण के लिए सीधे `api.registerTool(...)` का उपयोग करें।
 
-| Method                          | यह क्या register करता है                        |
-| ------------------------------- | ------------------------------------------------ |
-| `api.registerTool(tool, opts?)` | Agent tool (required या `{ optional: true }`)    |
-| `api.registerCommand(def)`      | Custom command (LLM को bypass करता है)           |
+| विधि                                 | यह क्या पंजीकृत करती है                                                                                                                        |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `api.registerTool(tool, opts?)`        | एजेंट टूल (आवश्यक या `{ optional: true }`)                                                                                            |
+| `api.registerCommand(def)`             | कस्टम कमांड (LLM को बायपास करती है)                                                                                                        |
+| `api.registerNodeHostCommand(command)` | `openclaw node run` द्वारा संभाली जाने वाली कमांड; वैकल्पिक `agentTool` मेटाडेटा, Node के कनेक्ट होने पर इसे एजेंट को दिखाई देने वाले टूल के रूप में उपलब्ध करा सकता है |
 
-जब agent को short,
-command-owned routing hint चाहिए हो, Plugin commands `agentPromptGuidance` set कर सकते हैं। वह text command के बारे में ही रखें; core prompt builders में
-provider- या plugin-specific policy न जोड़ें।
+जब एजेंट को कमांड के स्वामित्व वाला एक छोटा रूटिंग संकेत चाहिए, तब Plugin कमांड
+`agentPromptGuidance` सेट कर सकती हैं। उस टेक्स्ट को स्वयं कमांड तक सीमित रखें;
+core प्रॉम्प्ट बिल्डर में प्रदाता या Plugin-विशिष्ट नीति न जोड़ें।
 
-Guidance entries legacy strings हो सकती हैं, जो हर prompt surface पर लागू होती हैं, या
-structured entries:
+मार्गदर्शन प्रविष्टियाँ लीगेसी स्ट्रिंग हो सकती हैं, जो प्रत्येक प्रॉम्प्ट सतह पर
+लागू होती हैं, या संरचित प्रविष्टियाँ हो सकती हैं:
 
 ```ts
 agentPromptGuidance: [
-  "Global command hint.",
-  { text: "Only show this in the main OpenClaw prompt.", surfaces: ["openclaw_main"] },
+  "वैश्विक कमांड संकेत।",
+  { text: "इसे केवल मुख्य OpenClaw प्रॉम्प्ट में दिखाएँ।", surfaces: ["openclaw_main"] },
 ];
 ```
 
-Structured `surfaces` में `openclaw_main`, `codex_app_server`,
-`cli_backend`, `acp_backend`, या `subagent` शामिल हो सकते हैं। `pi_main`, `openclaw_main` के लिए deprecated alias बना रहता है। intentional all-surface guidance के लिए `surfaces` omit करें। खाली `surfaces` array pass न करें; उसे reject किया जाता है ताकि accidental scope loss
-global prompt text न बन जाए।
+संरचित `surfaces` में `openclaw_main`, `codex_app_server`,
+`cli_backend`, `acp_backend`, या `subagent` शामिल हो सकते हैं। `pi_main`, `openclaw_main` के लिए एक बहिष्कृत उपनाम बना हुआ है।
+जानबूझकर सभी सतहों के लिए मार्गदर्शन देने हेतु `surfaces` को छोड़ दें। खाली `surfaces` सरणी
+पास न करें; इसे अस्वीकार कर दिया जाता है, ताकि दायरे की आकस्मिक हानि वैश्विक प्रॉम्प्ट टेक्स्ट
+न बन जाए।
 
-Native Codex app-server developer instructions बाकी prompt
-surfaces से अधिक strict हैं: केवल `codex_app_server` पर explicitly scoped guidance को
-उस higher-priority lane में promote किया जाता है। Legacy string guidance और unscoped structured
-guidance compatibility के लिए non-Codex prompt surfaces पर उपलब्ध रहती हैं।
+नेटिव Codex app-server डेवलपर निर्देश अन्य प्रॉम्प्ट
+सतहों की तुलना में अधिक सख्त हैं: केवल `codex_app_server` के लिए स्पष्ट रूप से दायरे में रखा गया मार्गदर्शन ही
+उस उच्च-प्राथमिकता लेन में प्रोन्नत किया जाता है। संगतता के लिए लेगेसी स्ट्रिंग मार्गदर्शन और बिना दायरे वाला संरचित
+मार्गदर्शन गैर-Codex प्रॉम्प्ट सतहों के लिए उपलब्ध रहता है।
 
-### Infrastructure
+Node-होस्ट कमांड कनेक्ट किए गए Node होस्ट पर चलते हैं, Gateway
+प्रक्रिया के भीतर नहीं। यदि `agentTool` मौजूद है, तो सफल
+Gateway कनेक्शन के बाद Node एक डिस्क्रिप्टर प्रकाशित करता है; Gateway इसे एजेंट रन के लिए केवल तभी उपलब्ध कराता है, जब वह
+Node कनेक्ट हो और केवल तब, जब डिस्क्रिप्टर का `command`, Node की
+स्वीकृत कमांड सतह में हो। किसी गैर-खतरनाक कमांड को डिफ़ॉल्ट Node कमांड अनुमत-सूची में
+शामिल करने के लिए `agentTool.defaultPlatforms` सेट करें; अन्यथा स्पष्ट
+`gateway.nodes.commands.allow` या Node-इनवोक नीति आवश्यक करें। `agentTool.name`
+प्रदाता-सुरक्षित होना चाहिए: किसी अक्षर से शुरू हो, केवल अक्षरों, अंकों,
+अंडरस्कोर या हाइफ़न का उपयोग करे और 64 वर्णों के भीतर रहे। MCP-समर्थित Node टूल
+`agentTool.mcp` मेटाडेटा सेट कर सकते हैं, ताकि कैटलॉग और टूल-खोज सतहें
+रिमोट MCP सर्वर/टूल पहचान दिखा सकें, लेकिन निष्पादन फिर भी
+विज्ञापित Node कमांड के माध्यम से होता है।
 
-| Method                                         | यह क्या register करता है                  |
-| ---------------------------------------------- | ------------------------------------------ |
-| `api.registerHook(events, handler, opts?)`     | Event hook                                 |
-| `api.registerHttpRoute(params)`                | Gateway HTTP endpoint                      |
-| `api.registerGatewayMethod(name, handler)`     | Gateway RPC method                         |
-| `api.registerGatewayDiscoveryService(service)` | Local Gateway discovery advertiser         |
-| `api.registerCli(registrar, opts?)`            | CLI subcommand                             |
-| `api.registerNodeCliFeature(registrar, opts?)` | `openclaw nodes` के तहत Node feature CLI   |
-| `api.registerService(service)`                 | Background service                         |
-| `api.registerInteractiveHandler(registration)` | Interactive handler                        |
-| `api.registerAgentToolResultMiddleware(...)`   | Runtime tool-result middleware             |
-| `api.registerMemoryPromptSupplement(builder)`  | Additive memory-adjacent prompt section    |
-| `api.registerMemoryCorpusSupplement(adapter)`  | Additive memory search/read corpus         |
+### अवसंरचना
 
-### Workflow plugins के लिए host hooks
+| विधि                                            | यह क्या पंजीकृत करती है                                               |
+| ----------------------------------------------- | ---------------------------------------------------------------------- |
+| `api.registerHook(events, handler, opts?)`      | इवेंट हुक                                                             |
+| `api.registerHttpRoute(params)`                 | Gateway HTTP एंडपॉइंट                                                  |
+| `api.registerGatewayMethod(name, handler)`      | Gateway RPC विधि                                                       |
+| `api.registerGatewayDiscoveryService(service)`  | स्थानीय Gateway खोज विज्ञापक                                           |
+| `api.registerCli(registrar, opts?)`             | CLI उपकमांड                                                            |
+| `api.registerNodeCliFeature(registrar, opts?)`  | `openclaw nodes` के अंतर्गत Node सुविधा CLI                            |
+| `api.registerService(service)`                  | पृष्ठभूमि सेवा                                                         |
+| `api.registerInteractiveHandler(registration)`  | इंटरैक्टिव हैंडलर                                                      |
+| `api.registerAgentToolResultMiddleware(...)`    | रनटाइम टूल-परिणाम मिडलवेयर                                             |
+| `api.registerMemoryPromptSupplement(builder)`   | योगात्मक मेमोरी-समीपस्थ प्रॉम्प्ट अनुभाग                               |
+| `api.registerMemoryPromptPreparation(prepare)`  | मेमोरी-समीपस्थ प्रॉम्प्ट अनुभाग के लिए एसिंक तैयारी                    |
+| `api.registerMemoryCorpusSupplement(adapter)`   | योगात्मक मेमोरी खोज/पठन कॉर्पस                                         |
+| `api.registerHostedMediaResolver(resolver)`     | ब्राउज़र-शैली के होस्टेड मीडिया URL के लिए रिज़ॉल्वर                    |
+| `api.registerMcpServerConnectionResolver(...)`  | स्थिर सर्वर नाम के लिए प्रति-अनुरोधकर्ता MCP ट्रांसपोर्ट (`url`/`headers`) |
+| `api.registerTextTransforms(transforms)`        | Plugin-स्वामित्व वाले प्रॉम्प्ट/संदेश संगतता टेक्स्ट पुनर्लेखन         |
+| `api.registerConfigMigration(migrate)`          | Plugin रनटाइम लोड होने से पहले चलने वाला हल्का कॉन्फ़िग माइग्रेशन      |
+| `api.registerMigrationProvider(provider)`       | `openclaw migrate` के लिए आयातक                                        |
+| `api.registerAutoEnableProbe(probe)`            | कॉन्फ़िग जाँच जो इस Plugin को स्वतः सक्षम कर सकती है                   |
+| `api.registerReload(registration)`              | रीलोड प्रबंधन के लिए रीस्टार्ट/हॉट/नोऑप कॉन्फ़िग-प्रीफ़िक्स नीति       |
+| `api.registerNodeHostCommand(command)`          | युग्मित Nodes के लिए उपलब्ध कमांड हैंडलर                                |
+| `api.registerNodeInvokePolicy(policy)`          | Node द्वारा इनवोक किए गए कमांड के लिए अनुमत-सूची/स्वीकृति नीति         |
+| `api.registerSecurityAuditCollector(collector)` | `openclaw security audit` के लिए निष्कर्ष संग्राहक                       |
 
-Host hooks उन plugins के लिए SDK seams हैं जिन्हें सिर्फ provider, channel, या tool जोड़ने के बजाय host
-lifecycle में participate करना होता है। वे
-generic contracts हैं; Plan Mode उनका उपयोग कर सकता है, लेकिन approval workflows,
-workspace policy gates, background monitors, setup wizards, और UI companion
-plugins भी कर सकते हैं।
+#### अभिस्वीकृति के बाद का Webhook कार्य
 
-| विधि                                                                               | इसका स्वामित्व वाला अनुबंध                                                                                                                                           |
-| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `api.session.state.registerSessionExtension(...)`                                    | Plugin-स्वामित्व वाली, JSON-संगत सत्र स्थिति, जो Gateway सत्रों के माध्यम से प्रोजेक्ट की जाती है                                                                             |
-| `api.session.workflow.enqueueNextTurnInjection(...)`                                 | एक सत्र के लिए अगले एजेंट टर्न में इंजेक्ट किया गया टिकाऊ exactly-once संदर्भ                                                                             |
-| `api.registerTrustedToolPolicy(...)`                                                 | Manifest-gated विश्वसनीय pre-plugin टूल नीति, जो टूल पैरामीटर ब्लॉक या फिर से लिख सकती है                                                                        |
-| `api.registerToolMetadata(...)`                                                      | टूल कार्यान्वयन बदले बिना टूल कैटलॉग प्रदर्शन मेटाडेटा                                                                                     |
-| `api.registerCommand(...)`                                                           | स्कोप किए गए plugin कमांड; कमांड परिणाम `continueAgent: true` या `suppressReply: true` सेट कर सकते हैं; Discord नेटिव कमांड `descriptionLocalizations` का समर्थन करते हैं |
-| `api.session.controls.registerControlUiDescriptor(...)`                              | सत्र, टूल, रन या सेटिंग सतहों के लिए Control UI योगदान descriptor                                                                           |
-| `api.lifecycle.registerRuntimeLifecycle(...)`                                        | रीसेट/डिलीट/रीलोड पथों पर plugin-स्वामित्व वाले runtime संसाधनों के लिए cleanup callbacks                                                                          |
-| `api.agent.events.registerAgentEventSubscription(...)`                               | workflow स्थिति और monitors के लिए sanitized event subscriptions                                                                                              |
-| `api.runContext.setRunContext(...)` / `getRunContext(...)` / `clearRunContext(...)`  | प्रति-रन plugin scratch state, जो terminal run lifecycle पर साफ की जाती है                                                                                             |
-| `api.session.workflow.registerSessionSchedulerJob(...)`                              | plugin-स्वामित्व वाली scheduler jobs के लिए cleanup metadata; काम schedule नहीं करता या task records नहीं बनाता                                                            |
-| `api.session.workflow.sendSessionAttachment(...)`                                    | सक्रिय direct-outbound सत्र route पर bundled-only host-mediated file attachment delivery                                                            |
-| `api.session.workflow.scheduleSessionTurn(...)` / `unscheduleSessionTurnsByTag(...)` | bundled-only Cron-backed scheduled session turns और tag-based cleanup                                                                                    |
-| `api.session.controls.registerSessionAction(...)`                                    | typed session actions जिन्हें clients Gateway के माध्यम से dispatch कर सकते हैं                                                                                             |
+जो Webhook रूट प्रसंस्करण पूरा होने से पहले अनुरोध को अभिस्वीकृत करते हैं, उन्हें
+उस पृथक कार्य को उसके अपने ट्रैक किए गए प्रवेश रूट पर स्थानांतरित करना चाहिए:
 
-नए plugin कोड के लिए grouped namespaces का उपयोग करें:
+```typescript
+import { runDetachedWebhookWork } from "openclaw/plugin-sdk/webhook-request-guards";
+
+void runDetachedWebhookWork(() => processWebhookEvent(event)).catch((error) => {
+  runtime.error?.(`webhook प्रेषण विफल रहा: ${String(error)}`);
+});
+```
+
+HTTP अनुरोध के अभी भी प्रवेशित होने के दौरान `runDetachedWebhookWork(...)` को समकालिक रूप से
+कॉल करें। सहायक तुरंत एक स्वतंत्र रूट आरक्षित करता है, फिर अगली माइक्रोटास्क में
+कॉलबैक शुरू करता है, ताकि अनुरोध हैंडलर पहले अपनी
+अभिस्वीकृति लिख सके। लौटाया गया प्रॉमिस कॉलबैक परिणाम अपनाता है; अस्वीकृति प्रबंधन का
+उत्तरदायित्व फिर भी कॉलर का है। इससे अभिस्वीकृति के बाद का कतार कार्य स्वीकार होता रहता है और
+रीस्टार्ट या निलंबन ड्रेन उसके लिए प्रतीक्षा करते हैं। लौटने से पहले सभी प्रसंस्करण की
+प्रतीक्षा करने वाले हैंडलरों को इस सहायक की आवश्यकता नहीं है।
+
+#### अनुरोधकर्ता-दायरे वाले MCP कनेक्शन
+
+MCP सर्वर **पहचान** (नाम, टूल फ़िल्टर) को `mcp.servers`, किसी
+नेटिव Plugin के `mcpServers` मैनिफ़ेस्ट फ़ील्ड या किसी बंडल मैनिफ़ेस्ट में स्थिर रखें। वैकल्पिक रूप से कनेक्शन रिज़ॉल्वर पंजीकृत करें, ताकि प्रत्येक विश्वसनीय
+संदेश अनुरोधकर्ता को अपना अलग ट्रांसपोर्ट मिले:
+
+```ts
+api.registerMcpServerConnectionResolver({
+  serverName: "user-email",
+  resolve: async (ctx) => {
+    // ctx.requesterSenderId होस्ट द्वारा विश्वसनीय है; यहाँ प्रेषक पहचान कभी न गढ़ें।
+    const token = await lookupUserToken(ctx.requesterSenderId);
+    if (!token) {
+      return null; // वर्तमान रन के लिए इस सर्वर को छोड़ दें
+    }
+    return {
+      url: "https://mcp.example.com/email",
+      headers: { Authorization: `Bearer ${token}` },
+    };
+  },
+});
+```
+
+अनुबंध टिप्पणियाँ:
+
+- रिज़ॉल्वर संदर्भ में केवल विश्वसनीय होस्ट पहचान होती है (`requesterSenderId`,
+  वैकल्पिक `agentAccountId` / `messageChannel`)। भविष्य के विश्वसनीय फ़ील्ड (उदाहरण के लिए,
+  Cron/उप-एजेंट उपयोगकर्ता संदर्भ) योगात्मक रूप से जोड़े जा सकते हैं।
+- एक Plugin एक सर्वर नाम का स्वामी होता है: किसी अन्य
+  Plugin से समान `serverName` के लिए डुप्लिकेट
+  `registerMcpServerConnectionResolver` को त्रुटि निदान के साथ अस्वीकार किया जाता है (पहला पंजीकरण प्रभावी रहता है), इसलिए
+  कनेक्शन स्वामित्व कभी भी Plugin लोड क्रम पर निर्भर नहीं होता।
+- टूल नाम पूर्ण घोषित सर्वर समुच्चय से निकाले जाते हैं, ताकि आंशिक रिज़ॉल्यूशन
+  अनुरोधकर्ताओं या टर्न के बीच सुरक्षित सर्वर नामों को कभी न बदले। कोर यह
+  सत्यापित नहीं करता कि विभिन्न अनुरोधकर्ता एंडपॉइंट समान टूल स्कीमा प्रदान करते हैं; रिज़ॉल्वर को
+  प्रत्येक अनुरोधकर्ता को उसी तार्किक सेवा पर इंगित करना चाहिए, अन्यथा टूल
+  स्कीमा (और प्रॉम्प्ट-कैश स्थिरता) प्रत्येक अनुरोधकर्ता के अनुसार भिन्न हो जाते हैं।
+- विश्वसनीय `requesterSenderId` के बिना रन (Cron, उप-एजेंट, Heartbeat, सार्वजनिक
+  Gateway) अनुरोधकर्ता-दायरे वाले सर्वर कभी मूर्त रूप नहीं देते। कोई साझा
+  फ़ॉलबैक कनेक्शन नहीं है।
+- `resolve` प्रति सर्वर 10 सेकंड तक सीमित है; टाइमआउट या अपवाद उस
+  सर्वर को रन से छोड़ देता है, बिना स्थिर MCP को विफल किए।
+- रिज़ॉल्व किए गए कनेक्शनों को प्रति अनुरोधकर्ता अधिकतम हर 5 मिनट में पुनः सत्यापित किया जाता है:
+  रोटेशन नए क्रेडेंशियल के साथ ट्रांसपोर्ट को फिर से बनाता है, और `null` परिणाम
+  उसे निरस्त कर देता है (कैश किया गया रनटाइम सत्र के बीच में भी निपटाया जाता है)। इसलिए निरस्त या
+  रोटेट किया गया क्रेडेंशियल 5 मिनट तक उपयोग में रह सकता है।
+- रिज़ॉल्व किए गए `headers` कभी लॉग या स्थायी रूप से संग्रहीत नहीं किए जाते; कोर क्रेडेंशियल रोटेशन का पता लगाने के लिए केवल एक क्षणिक
+  इन-मेमोरी कुंजीबद्ध डाइजेस्ट (प्रक्रिया-स्थानीय HMAC) रखता है और
+  रिज़ॉल्व किए गए हेडर/URL क्रेडेंशियल मानों को लॉग/डीबग-कैप्चर
+  रिडैक्शन रजिस्ट्री में पंजीकृत करता है।
+- अनुरोधकर्ता-दायरे वाले सर्वर MCP App दृश्य नहीं बनाते: कोई दृश्य
+  अनुरोधकर्ता-प्रमाणित रन से अधिक समय तक रहता है और Gateway दृश्य सीमा में अनुरोधकर्ता
+  पहचान नहीं होती, इसलिए इन सर्वरों के लिए ऐप पूर्वावलोकन फ़ेल-क्लोज़्ड रहते हैं। टूल परिणाम
+  अप्रभावित रहते हैं।
+- रिज़ॉल्वर के बिना स्थिर सर्वर मौजूदा सत्र-दायरे वाले जीवनचक्र को बनाए रखते हैं।
+- **हार्नेस वितरण नियम:** अनुरोधकर्ता-दायरे वाले सर्वर कभी भी हार्नेस-नेटिव
+  MCP क्लाइंट कॉन्फ़िग (Codex थ्रेड `mcp_servers`, CLI `-c mcp_servers=…`, या किसी
+  अन्य सत्र-साझा MCP प्रोजेक्शन) में प्रवेश नहीं करते। इसके बजाय हार्नेस उन्हें रन-दायरे वाले
+  टूल के रूप में वितरित करते हैं:
+  - एम्बेडेड रनर: सत्र MCP रनटाइम + बंडल टूल (स्थिर + दायरे वाले)।
+  - Codex app-server: `materializeRequesterScopedMcpToolsForHarnessRun` के माध्यम से डायनेमिक टूल
+    (केवल दायरे वाले; स्थिर
+    सर्वर Codex के नेटिव MCP क्लाइंट पर बने रहते हैं)।
+- दायरे वाले टूल **विनिर्देश** उस सत्र में पहले सफल रिज़ॉल्व के बाद सत्र-स्थिर
+  रहते हैं, इसलिए साझा-थ्रेड हार्नेस (Codex) प्रेषक बदलने पर
+  थ्रेड रोटेट नहीं करते। किसी भी अनुरोधकर्ता के रिज़ॉल्व होने से पहले, कोई दायरे वाला विनिर्देश विज्ञापित नहीं होता।
+- साझा-थ्रेड हार्नेस पर अप्रमाणित अनुरोधकर्ता फिर भी विज्ञापित
+  दायरे वाले टूल देखते हैं; किसी एक को कॉल करने पर उस अनुरोधकर्ता के लिए साफ़ कनेक्ट-नहीं टूल त्रुटि
+  लौटती है। OpenClaw कभी किसी अन्य अनुरोधकर्ता के क्रेडेंशियल पर फ़ॉलबैक नहीं करता।
+
+मेमोरी प्रॉम्प्ट पूरक बिल्डरों को वैकल्पिक `agentId`,
+`agentSessionKey`, और `sandboxed` संदर्भ मिलता है। मेमोरी कॉर्पस पूरक `search`
+और `get` कॉल को वैकल्पिक `agentId` और `sandboxed` संदर्भ मिलता है। एजेंट-स्वामित्व वाले
+स्टोरेज वाले Plugins को पंजीकरण के दौरान एक वैश्विक पथ कैप्चर करने के बजाय
+प्रत्येक कॉल के लिए उस स्टोरेज को रिज़ॉल्व करना चाहिए। यदि किसी बहु-एजेंट संचालन में एजेंट आईडी आवश्यक हो लेकिन
+अनुपस्थित हो, तो कोई मनमाना एजेंट चुनने के बजाय फ़ेल-क्लोज़्ड करें।
+
+जब प्रॉम्प्ट टेक्स्ट एसिंक
+Plugin स्थिति पर निर्भर हो, तब `registerMemoryPromptPreparation(...)` का उपयोग करें। कॉलबैक प्रत्येक पूर्ण एजेंट प्रॉम्प्ट से पहले एक बार चलता है और
+समकालिक मेमोरी प्रॉम्प्ट बिल्डरों के समान टूल, एजेंट, सत्र और सैंडबॉक्स संदर्भ प्राप्त करता है।
+स्थायी स्थिति लोड करने से पहले वर्तमान स्टोरेज-स्वामी इंस्टेंस को सत्यापित करें, फिर केवल
+उस रन की पंक्तियाँ लौटाएँ। OpenClaw उन पंक्तियों को फ़्रीज़ करता है और
+अपरिवर्तनीय परिणाम को समकालिक प्रॉम्प्ट संयोजन को सौंपता है। स्थायित्व,
+परमाणु प्रतिस्थापन और स्वामी-निष्कासन विलोपन को स्वामी Plugin के भीतर रखें; किसी
+प्रॉम्प्ट बिल्डर से फ़ाइलों की पोलिंग या पठन न करें।
+
+Telegram इंटरैक्टिव हैंडलर सफल होने के बाद टेक्स्ट को
+Telegram के सामान्य इनबाउंड एजेंट पथ से रूट करने के लिए `{ submitText }` लौटा सकते हैं। इनबाउंड नीति द्वारा टेक्स्ट छोड़ दिए जाने या प्रसंस्करण विफल होने पर OpenClaw
+कॉलबैक बटन बनाए रखता है, ताकि अवरोधक स्थिति बदलने के बाद
+उपयोगकर्ता पुनः प्रयास कर सके। यह परिणाम फ़ील्ड
+Telegram-विशिष्ट है; अन्य चैनल अपने स्वयं के इंटरैक्टिव परिणाम अनुबंध बनाए रखते हैं।
+
+### वर्कफ़्लो Plugins के लिए होस्ट हुक
+
+होस्ट हुक उन Plugins के लिए SDK सीम हैं, जिन्हें केवल प्रदाता, चैनल या टूल जोड़ने के बजाय होस्ट
+जीवनचक्र में भाग लेना होता है। वे
+सामान्य अनुबंध हैं; Plan Mode उनका उपयोग कर सकता है, लेकिन स्वीकृति वर्कफ़्लो,
+वर्कस्पेस नीति गेट, पृष्ठभूमि मॉनिटर, सेटअप विज़ार्ड और UI सहयोगी
+Plugins भी कर सकते हैं।
+
+| विधि                                                                                 | वह अनुबंध जिसका स्वामित्व इसके पास है                                                                                                                            |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api.session.state.registerSessionExtension(...)`                                    | Plugin-स्वामित्व वाली, JSON-संगत सत्र स्थिति, जिसे Gateway सत्रों के माध्यम से प्रक्षेपित किया जाता है                                                           |
+| `api.session.workflow.enqueueNextTurnInjection(...)`                                 | एक सत्र के लिए अगले एजेंट टर्न में अंतःक्षेपित टिकाऊ, ठीक-एक-बार संदर्भ                                                                                           |
+| `api.registerTrustedToolPolicy(...)`                                                 | मैनिफ़ेस्ट-नियंत्रित विश्वसनीय प्री-Plugin टूल नीति, जो टूल पैरामीटर को अवरुद्ध या पुनर्लिखित कर सकती है                                                          |
+| `api.registerToolMetadata(...)`                                                      | टूल कार्यान्वयन को बदले बिना टूल कैटलॉग प्रदर्शन मेटाडेटा                                                                                                        |
+| `api.registerCommand(...)`                                                           | सीमित-दायरे वाले Plugin कमांड; कमांड परिणाम `continueAgent: true` या `suppressReply: true` सेट कर सकते हैं; Discord नेटिव कमांड `descriptionLocalizations` का समर्थन करते हैं |
+| `api.session.controls.registerControlUiDescriptor(...)`                              | सत्र, टूल, रन, सेटिंग या टैब सतहों के लिए Control UI योगदान वर्णनकर्ता                                                                                           |
+| `api.lifecycle.registerRuntimeLifecycle(...)`                                        | रीसेट/हटाने/रीलोड पथों पर Plugin-स्वामित्व वाले रनटाइम संसाधनों के लिए क्लीनअप कॉलबैक                                                                             |
+| `api.agent.events.registerAgentEventSubscription(...)`                               | वर्कफ़्लो स्थिति और मॉनिटर के लिए स्वच्छ की गई ईवेंट सदस्यताएँ                                                                                                   |
+| `api.runContext.setRunContext(...)` / `getRunContext(...)` / `clearRunContext(...)`  | प्रति-रन Plugin अस्थायी स्थिति, जिसे टर्मिनल रन जीवनचक्र पर साफ़ किया जाता है                                                                                     |
+| `api.session.workflow.registerSessionSchedulerJob(...)`                              | Plugin-स्वामित्व वाले शेड्यूलर जॉब के लिए क्लीनअप मेटाडेटा; यह कार्य शेड्यूल नहीं करता या टास्क रिकॉर्ड नहीं बनाता                                                |
+| `api.session.workflow.sendSessionAttachment(...)`                                    | केवल-बंडल होस्ट-मध्यस्थ फ़ाइल अटैचमेंट वितरण, सक्रिय प्रत्यक्ष-आउटबाउंड सत्र रूट पर                                                                                |
+| `api.session.workflow.scheduleSessionTurn(...)` / `unscheduleSessionTurnsByTag(...)` | केवल-बंडल Cron-समर्थित शेड्यूल किए गए सत्र टर्न और टैग-आधारित क्लीनअप                                                                                             |
+| `api.session.controls.registerSessionAction(...)`                                    | टाइप किए गए सत्र एक्शन, जिन्हें क्लाइंट Gateway के माध्यम से डिस्पैच कर सकते हैं                                                                                   |
+
+एक `surface: "tab"` वर्णनकर्ता Control UI में साइडबार टैब जोड़ता है। सक्रिय
+plugins के टैब वर्णनकर्ता Gateway
+हेलो (`controlUiTabs`) में डैशबोर्ड क्लाइंटों को बताए जाते हैं, इसलिए टैब केवल Plugin के सक्षम रहने पर दिखाई देता है।
+बंडल किए गए plugins अपने टैब के लिए प्रथम-श्रेणी का डैशबोर्ड दृश्य भेज सकते हैं; अन्य
+plugins `path` को Plugin HTTP रूट पर सेट कर सकते हैं (देखें
+`api.registerHttpRoute(...)`), जिसे डैशबोर्ड सैंडबॉक्स किए गए फ़्रेम में रेंडर करता है।
+`icon` डैशबोर्ड आइकन नाम का संकेत है, `group` साइडबार अनुभाग चुनता है
+(`control` या `agent`), `order` Plugin टैब के बीच क्रम निर्धारित करता है, और `requiredScopes`
+उन कनेक्शनों से टैब छिपाता है जिनके पास वे ऑपरेटर स्कोप नहीं हैं:
+
+Gateway-संरक्षित बाहरी टैब के लिए, वर्णनकर्ता `path` को उसी
+Plugin के `auth: "gateway"` HTTP रूट के अंतर्गत पंजीकृत करें। प्रमाणित बूटस्ट्रैप के बाद, ब्राउज़र को
+उस Plugin और रूट मूल तक सीमित एक अल्पकालिक, HttpOnly अनुदान मिलता है, ताकि
+सैंडबॉक्स किया गया फ़्रेम Gateway बेयरर टोकन को अपने URL
+या JavaScript में कॉपी किए बिना लोड हो सके। प्रमाणित पैरेंट बाहरी टैब के
+सक्रिय रहने पर और नेविगेशन या ब्राउज़र फिर से शुरू होने के बाद उसे माउंट करने से पहले अनुदान नवीनीकृत करता है। यह
+माउंट करने से पहले उसी अपारदर्शी सैंडबॉक्स से अनुदान की जाँच भी करता है, ताकि ब्राउज़र के
+वे गोपनीयता मोड जो कुकी अवरुद्ध करते हैं, अनुपलब्ध पैनल के साथ सुरक्षित रूप से विफल हों।
+फ़्रेम अनुदान केवल `GET` और `HEAD` स्वीकार करता है और हमेशा
+`operator.read` वहन करता है; `requiredScopes` टैब की दृश्यता नियंत्रित करता है, लेकिन
+कुकी अनुदान का दायरा कभी नहीं बढ़ाता। परिवर्तन स्पष्ट Gateway-प्रमाणित पैरेंट या
+बेयरर सतहों पर ही रहते हैं। बाहरी टैब के लिए HTTPS/Tailscale Serve या
+ब्राउज़र-विश्वसनीय लूपबैक ओरिजिन आवश्यक है; LAN होस्ट पर सादा HTTP ऐसा पैनल माउंट करने के बजाय
+सुरक्षित-संदर्भ त्रुटि दिखाता है जो प्रमाणित नहीं हो सकता।
+तृतीय-पक्ष कुकी का पूर्ण अवरोध भी Gateway-संरक्षित टैब को अनुपलब्ध बना देता है।
+सभी नेटिव Plugin सतहों की तरह, फ़्रेम इंस्टॉल किए गए
+Plugin की विश्वास सीमा के भीतर रहता है; OpenClaw इंस्टॉल किए गए plugins को परस्पर
+पृथक ब्राउज़र सुरक्षा प्रिंसिपल नहीं मानता।
+कुकी अनुदान ब्राउज़र की होस्टनाम सीमा का उपयोग करते हैं, पोर्ट सीमा का नहीं।
+परस्पर अविश्वसनीय सेवाओं को Gateway होस्टनाम पर, अन्य
+पोर्ट पर भी, सह-होस्ट न करें।
+Plugin-प्रबंधित प्रमाणीकरण द्वारा समर्थित टैब अपना प्रत्यक्ष iframe व्यवहार बनाए रखते हैं और इस
+Gateway अनुदान का अनुरोध या इसकी आवश्यकता नहीं रखते।
+
+```typescript
+api.session.controls.registerControlUiDescriptor({
+  surface: "tab",
+  id: "logbook",
+  label: "दैनिकी",
+  description: "स्क्रीन स्नैपशॉट से बनी समयरेखा के रूप में आपका दिन।",
+  icon: "sun",
+  group: "control",
+  requiredScopes: ["operator.write"],
+});
+```
+
+नए Plugin कोड के लिए समूहीकृत नेमस्पेस का उपयोग करें:
 
 - `api.session.state.registerSessionExtension(...)`
 - `api.session.workflow.enqueueNextTurnInjection(...)`
@@ -216,8 +427,8 @@ plugins भी कर सकते हैं।
 - `api.runContext.setRunContext(...)` / `getRunContext(...)` / `clearRunContext(...)`
 - `api.lifecycle.registerRuntimeLifecycle(...)`
 
-बराबर flat methods मौजूदा plugins के लिए deprecated compatibility
-aliases के रूप में उपलब्ध रहेंगे। ऐसा नया plugin कोड न जोड़ें जो सीधे
+समतुल्य सपाट विधियाँ मौजूदा plugins के लिए अप्रचलित संगतता
+उपनामों के रूप में उपलब्ध रहती हैं। ऐसा नया Plugin कोड न जोड़ें जो सीधे
 `api.registerSessionExtension`, `api.enqueueNextTurnInjection`,
 `api.registerControlUiDescriptor`, `api.registerRuntimeLifecycle`,
 `api.registerAgentEventSubscription`, `api.emitAgentEvent`,
@@ -226,67 +437,65 @@ aliases के रूप में उपलब्ध रहेंगे। ऐ�
 `api.sendSessionAttachment`, `api.scheduleSessionTurn`, या
 `api.unscheduleSessionTurnsByTag` को कॉल करता हो।
 
-`scheduleSessionTurn(...)` Gateway Cron scheduler पर session-scoped सुविधा है।
-Cron timing का स्वामी है और turn चलने पर background task record बनाता है;
-Plugin SDK केवल target session, plugin-स्वामित्व वाली naming और cleanup को
-सीमित करता है। जब काम को खुद durable multi-step Task Flow state चाहिए, तो scheduled
-turn के अंदर `api.runtime.tasks.managedFlows` का उपयोग करें।
+`scheduleSessionTurn(...)` Gateway
+Cron शेड्यूलर पर सत्र-सीमित सुविधा है। Cron समय-निर्धारण का स्वामी है और
+टर्न चलने पर पृष्ठभूमि टास्क रिकॉर्ड बनाता है; Plugin SDK केवल लक्ष्य सत्र, Plugin-स्वामित्व वाली
+नामकरण व्यवस्था और क्लीनअप को सीमित करता है। जब कार्य को ही टिकाऊ बहु-चरणीय Task Flow स्थिति चाहिए,
+तब शेड्यूल किए गए टर्न के भीतर `api.runtime.tasks.managedFlows` का उपयोग करें।
 
-अनुबंध जानबूझकर authority को विभाजित करते हैं:
+अनुबंध जानबूझकर अधिकार विभाजित करते हैं:
 
-- External plugins session extensions, UI descriptors, commands, tool
-  metadata, next-turn injections और normal hooks के स्वामी हो सकते हैं।
-- Trusted tool policies सामान्य `before_tool_call` hooks से पहले चलती हैं और
-  host-trusted होती हैं। Bundled policies पहले चलती हैं; installed-plugin policies को
-  explicit enablement और
-  `contracts.trustedToolPolicies` में उनके local ids की आवश्यकता होती है, और वे plugin-load order में आगे चलती हैं। Policy ids
-  registering plugin के scope में होते हैं।
-- Reserved command ownership bundled-only है। External plugins को अपने
-  command names या aliases का उपयोग करना चाहिए।
-- `allowPromptInjection=false` prompt-mutating hooks को निष्क्रिय करता है, जिनमें
+- बाहरी plugins सत्र एक्सटेंशन, UI वर्णनकर्ता, कमांड, टूल
+  मेटाडेटा, अगले-टर्न अंतःक्षेपण और सामान्य हुक के स्वामी हो सकते हैं।
+- विश्वसनीय टूल नीतियाँ सामान्य `before_tool_call` हुक से पहले चलती हैं और
+  होस्ट-विश्वसनीय होती हैं। बंडल नीतियाँ पहले चलती हैं; इंस्टॉल किए गए Plugin की नीतियों को
+  स्पष्ट सक्षमता के साथ उनके स्थानीय आईडी
+  `contracts.trustedToolPolicies` में चाहिए, और वे Plugin-लोड क्रम में इसके बाद चलती हैं। नीति आईडी
+  पंजीकरण करने वाले Plugin तक सीमित होते हैं।
+- आरक्षित कमांड स्वामित्व केवल-बंडल है। बाहरी plugins को अपने
+  कमांड नाम या उपनाम उपयोग करने चाहिए।
+- `allowPromptInjection=false` प्रॉम्प्ट बदलने वाले हुक अक्षम करता है, जिनमें
   `agent_turn_prepare`, `before_prompt_build`, `heartbeat_prompt_contribution`,
-  legacy `before_agent_start` से prompt fields, और
-  `enqueueNextTurnInjection` शामिल हैं।
+  और `enqueueNextTurnInjection` शामिल हैं।
 
-non-Plan consumers के उदाहरण:
+गैर-Plan उपभोक्ताओं के उदाहरण:
 
-| Plugin archetype             | उपयोग किए गए hooks                                                                                                                             |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Approval workflow            | Session extension, command continuation, next-turn injection, UI descriptor                                                            |
-| Budget/workspace policy gate | Trusted tool policy, tool metadata, session projection                                                                                 |
-| Background lifecycle monitor | Runtime lifecycle cleanup, agent event subscription, session scheduler ownership/cleanup, heartbeat prompt contribution, UI descriptor |
-| Setup या onboarding wizard   | Session extension, scoped commands, Control UI descriptor                                                                              |
+| Plugin प्रारूप                  | उपयोग किए गए हुक                                                                                                                               |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| अनुमोदन वर्कफ़्लो              | सत्र एक्सटेंशन, कमांड निरंतरता, अगले-टर्न अंतःक्षेपण, UI वर्णनकर्ता                                                                             |
+| बजट/कार्यस्थान नीति गेट        | विश्वसनीय टूल नीति, टूल मेटाडेटा, सत्र प्रक्षेपण                                                                                                |
+| पृष्ठभूमि जीवनचक्र मॉनिटर      | रनटाइम जीवनचक्र क्लीनअप, एजेंट ईवेंट सदस्यता, सत्र शेड्यूलर स्वामित्व/क्लीनअप, Heartbeat प्रॉम्प्ट योगदान, UI वर्णनकर्ता                         |
+| सेटअप या ऑनबोर्डिंग विज़ार्ड   | सत्र एक्सटेंशन, सीमित-दायरे वाले कमांड, Control UI वर्णनकर्ता                                                                                   |
 
 <Note>
-  Reserved core admin namespaces (`config.*`, `exec.approvals.*`, `wizard.*`,
-  `update.*`) हमेशा `operator.admin` रहते हैं, भले ही कोई plugin एक
-  संकरे gateway method scope को assign करने की कोशिश करे। Plugin-स्वामित्व वाली methods के लिए
-  plugin-specific prefixes को प्राथमिकता दें।
+  आरक्षित कोर एडमिन नेमस्पेस (`config.*`, `exec.approvals.*`, `wizard.*`,
+  `update.*`) हमेशा `operator.admin` ही रहते हैं, भले ही कोई Plugin
+  अधिक संकीर्ण Gateway विधि स्कोप निर्दिष्ट करने का प्रयास करे। Plugin-स्वामित्व वाली विधियों के लिए
+  Plugin-विशिष्ट उपसर्गों को प्राथमिकता दें।
 </Note>
 
-<Accordion title="tool-result middleware का उपयोग कब करें">
-  Bundled plugins और matching
-  manifest contracts वाले explicitly enabled installed plugins `api.registerAgentToolResultMiddleware(...)` का उपयोग तब कर सकते हैं जब
-  उन्हें execution के बाद और runtime द्वारा उस result को model में वापस feed करने से पहले
-  tool result को फिर से लिखना हो। यह tokenjuice जैसे async output reducers के लिए trusted runtime-neutral
-  seam है।
+<Accordion title="टूल-परिणाम मिडलवेयर का उपयोग कब करें">
+  बंडल किए गए plugins और मेल खाते
+  मैनिफ़ेस्ट अनुबंधों वाले स्पष्ट रूप से सक्षम इंस्टॉल किए गए plugins `api.registerAgentToolResultMiddleware(...)` का उपयोग तब कर सकते हैं,
+  जब उन्हें निष्पादन के बाद और रनटाइम द्वारा परिणाम को मॉडल में
+  वापस देने से पहले टूल परिणाम को पुनर्लिखना हो। यह tokenjuice जैसे असिंक्रोनस
+  आउटपुट रिड्यूसर के लिए विश्वसनीय, रनटाइम-निरपेक्ष सीम है।
 
-Plugins को प्रत्येक targeted
-runtime के लिए `contracts.agentToolResultMiddleware` declare करना होगा,
-उदाहरण के लिए `["openclaw", "codex"]`। उस
-contract के बिना, या explicit enablement के बिना, installed plugins यह middleware register नहीं कर सकते; ऐसे काम के लिए
-normal OpenClaw plugin hooks रखें जिन्हें pre-model tool-result
-timing की आवश्यकता नहीं है। पुराना
-embedded-runner-only extension factory registration path हटा दिया गया है।
+Plugins को प्रत्येक लक्षित
+रनटाइम के लिए `contracts.agentToolResultMiddleware` घोषित करना आवश्यक है, उदाहरण के लिए `["openclaw", "codex"]`। उस
+अनुबंध या स्पष्ट सक्षमता के बिना इंस्टॉल किए गए plugins यह मिडलवेयर पंजीकृत नहीं कर सकते; ऐसे कार्यों के लिए
+सामान्य OpenClaw Plugin हुक रखें जिन्हें प्री-मॉडल टूल-परिणाम
+समय की आवश्यकता नहीं है। पुराना
+केवल-एम्बेडेड-रनर एक्सटेंशन फ़ैक्टरी पंजीकरण पथ हटा दिया गया है।
 </Accordion>
 
-### Gateway discovery registration
+### Gateway खोज पंजीकरण
 
-`api.registerGatewayDiscoveryService(...)` plugin को active
-Gateway को mDNS/Bonjour जैसे local discovery transport पर advertise करने देता है। OpenClaw
-service को Gateway startup के दौरान कॉल करता है जब local discovery सक्षम हो, current
-Gateway ports और non-secret TXT hint data पास करता है, और Gateway shutdown के दौरान लौटाए गए
-`stop` handler को कॉल करता है।
+`api.registerGatewayDiscoveryService(...)` किसी Plugin को सक्रिय
+Gateway का विज्ञापन mDNS/Bonjour जैसे स्थानीय खोज ट्रांसपोर्ट पर करने देता है। स्थानीय खोज सक्षम होने पर OpenClaw
+Gateway स्टार्टअप के दौरान सेवा को कॉल करता है, वर्तमान
+Gateway पोर्ट और गैर-गोपनीय TXT संकेत डेटा पास करता है, और Gateway शटडाउन के दौरान लौटाए गए
+`stop` हैंडलर को कॉल करता है।
 
 ```typescript
 api.registerGatewayDiscoveryService({
@@ -302,28 +511,28 @@ api.registerGatewayDiscoveryService({
 });
 ```
 
-Gateway discovery plugins को advertised TXT values को secrets या
-authentication नहीं मानना चाहिए। Discovery एक routing hint है; Gateway auth और TLS pinning अभी भी
-trust के स्वामी हैं।
+Gateway खोज plugins को विज्ञापित TXT मानों को गोपनीय जानकारी या
+प्रमाणीकरण नहीं मानना चाहिए। खोज एक रूटिंग संकेत है; Gateway प्रमाणीकरण और TLS पिनिंग अब भी
+विश्वास के स्वामी हैं।
 
-### CLI registration metadata
+### CLI पंजीकरण मेटाडेटा
 
-`api.registerCli(registrar, opts?)` दो प्रकार के command metadata स्वीकार करता है:
+`api.registerCli(registrar, opts?)` दो प्रकार के कमांड मेटाडेटा स्वीकार करता है:
 
-- `commands`: registrar के स्वामित्व वाले explicit command names
-- `descriptors`: CLI help,
-  routing और lazy plugin CLI registration के लिए उपयोग किए जाने वाले parse-time command descriptors
-- `parentPath`: nested command groups के लिए वैकल्पिक parent command path, जैसे
+- `commands`: पंजीयक के स्वामित्व वाले स्पष्ट कमांड नाम
+- `descriptors`: CLI सहायता,
+  रूटिंग और आलसी Plugin CLI पंजीकरण के लिए पार्स-समय कमांड वर्णनकर्ता
+- `parentPath`: नेस्टेड कमांड समूहों के लिए वैकल्पिक पैरेंट कमांड पथ, जैसे
   `["nodes"]`
 
-paired-node features के लिए,
+युग्मित-Node सुविधाओं के लिए,
 `api.registerNodeCliFeature(registrar, opts?)` को प्राथमिकता दें। यह
-`api.registerCli(..., { parentPath: ["nodes"] })` के around एक छोटा wrapper है और
-`openclaw nodes canvas` जैसे commands को explicit plugin-स्वामित्व वाली node features बनाता है।
+`api.registerCli(..., { parentPath: ["nodes"] })` के चारों ओर एक छोटा रैपर है और
+`openclaw nodes canvas` जैसे कमांड को स्पष्ट रूप से Plugin-स्वामित्व वाली Node सुविधाएँ बनाता है।
 
-यदि आप चाहते हैं कि कोई plugin command सामान्य root CLI path में lazy-loaded रहे,
-तो ऐसे `descriptors` दें जो उस
-registrar द्वारा expose किए गए हर top-level command root को cover करें।
+यदि आप चाहते हैं कि कोई Plugin कमांड सामान्य रूट CLI पथ में आलसी रूप से लोड हो,
+तो ऐसे `descriptors` प्रदान करें जो उस
+पंजीयक द्वारा उजागर किए गए प्रत्येक शीर्ष-स्तरीय कमांड रूट को समेटते हों।
 
 ```typescript
 api.registerCli(
@@ -335,7 +544,7 @@ api.registerCli(
     descriptors: [
       {
         name: "matrix",
-        description: "Manage Matrix accounts, verification, devices, and profile state",
+        description: "Matrix खातों, सत्यापन, डिवाइस और प्रोफ़ाइल स्थिति को प्रबंधित करें",
         hasSubcommands: true,
       },
     ],
@@ -343,7 +552,7 @@ api.registerCli(
 );
 ```
 
-Nested commands को resolved parent command `program` के रूप में मिलता है:
+नेस्टेड कमांड समाधान किए गए पैरेंट कमांड को `program` के रूप में प्राप्त करते हैं:
 
 ```typescript
 api.registerCli(
@@ -356,7 +565,7 @@ api.registerCli(
     descriptors: [
       {
         name: "canvas",
-        description: "Capture or render canvas content from a paired node",
+        description: "युग्मित नोड से कैनवास सामग्री कैप्चर या रेंडर करें",
         hasSubcommands: true,
       },
     ],
@@ -364,173 +573,196 @@ api.registerCli(
 );
 ```
 
-`commands` को अकेले केवल तब उपयोग करें जब आपको lazy root CLI registration की आवश्यकता न हो।
-वह eager compatibility path समर्थित रहता है, लेकिन वह parse-time lazy loading के लिए
-descriptor-backed placeholders install नहीं करता।
+`commands` का अकेले उपयोग केवल तभी करें, जब आपको लेज़ी रूट CLI पंजीकरण की आवश्यकता न हो।
+वह तत्पर संगतता पथ अब भी समर्थित है, लेकिन वह पार्स-समय लेज़ी लोडिंग के लिए
+डिस्क्रिप्टर-समर्थित प्लेसहोल्डर इंस्टॉल नहीं करता।
 
-### CLI backend registration
+### CLI बैकएंड पंजीकरण
 
-`api.registerCliBackend(...)` plugin को `claude-cli` या `my-cli` जैसे local
-AI CLI backend के लिए default config का स्वामी बनने देता है।
+`api.registerCliBackend(...)` किसी Plugin को `claude-cli` या `my-cli` जैसे स्थानीय
+AI CLI बैकएंड के लिए डिफ़ॉल्ट कॉन्फ़िगरेशन का स्वामी बनने देता है।
 
-- बैकएंड `id`, `my-cli/gpt-5` जैसे मॉडल refs में provider prefix बन जाता है।
-- बैकएंड `config`, `agents.defaults.cliBackends.<id>` जैसी ही आकृति का उपयोग करता है।
-- उपयोगकर्ता config फिर भी प्राथमिक रहती है। CLI चलाने से पहले OpenClaw, plugin default के ऊपर
-  `agents.defaults.cliBackends.<id>` को merge करता है।
-- जब किसी बैकएंड को merge के बाद compatibility rewrites की आवश्यकता हो, तो `normalizeConfig` का उपयोग करें
-  (उदाहरण के लिए पुराने flag shapes को normalize करना)।
-- request-scoped argv rewrites के लिए `resolveExecutionArgs` का उपयोग करें, जो
-  CLI dialect से संबंधित हों, जैसे OpenClaw thinking levels को native effort
-  flag पर map करना। hook को `ctx.executionMode` मिलता है; ephemeral `/btw` calls के लिए
-  backend-native isolation flags जोड़ने हेतु `"side-question"` का उपयोग करें। यदि वे flags
-  किसी अन्यथा हमेशा चालू CLI के लिए native tools को भरोसेमंद ढंग से disable करते हैं, तो
+- बैकएंड `id`, `my-cli/gpt-5` जैसे मॉडल संदर्भों में प्रोवाइडर प्रीफ़िक्स बन जाता है।
+- बैकएंड `config` प्रामाणिक कमांड अडैप्टर है: argv, परिवेश,
+  पार्सर, सत्र, इमेज और विश्वसनीयता व्यवहार Plugin कोड में रहते हैं।
+- उपयोगकर्ता मॉडल संदर्भों या मॉडल-स्कोप्ड `agentRuntime.id` के माध्यम से बैकएंड चुनते हैं;
+  `openclaw.json` अडैप्टर को दोबारा नहीं लिखता।
+- जब पंजीकृत स्थिर फ़ील्ड को रनटाइम-सजग
+  नॉर्मलाइज़ेशन पास की आवश्यकता हो, तब `normalizeConfig` का उपयोग करें।
+- CLI डायलेक्ट से संबंधित अनुरोध-स्कोप्ड argv पुनर्लेखन के लिए
+  `resolveExecutionArgs` का उपयोग करें, जैसे OpenClaw के चिंतन स्तरों को किसी नेटिव प्रयास
+  फ़्लैग से मैप करना। हुक को `ctx.executionMode` प्राप्त होता है; अस्थायी `/btw` कॉल के लिए
+  बैकएंड-नेटिव आइसोलेशन फ़्लैग जोड़ने हेतु `"side-question"` का उपयोग करें। यदि वे फ़्लैग
+  किसी अन्यथा हमेशा-सक्रिय CLI के नेटिव टूल को विश्वसनीय रूप से अक्षम करते हैं, तो
   `sideQuestionToolMode: "disabled"` भी घोषित करें।
+- बैकएंड-स्वामित्व वाले लॉन्च परिवेश या अस्थायी
+  प्रमाणीकरण/कॉन्फ़िगरेशन ब्रिज के लिए `prepareExecution` का उपयोग करें। इसका `ctx.contextTokenBudget` रन के लिए चुनी गई प्रभावी टोकन
+  सीमा है, ताकि नेटिव-Compaction बैकएंड प्रोवाइडर-विशिष्ट कोर शाखाओं के बिना
+  अपनी सीमा को संरेखित कर सकें। जब बैकएंड स्टेजिंग को बंडल की गई MCP सेटिंग विस्तारित करनी हो,
+  तब इसे कोर द्वारा तैयार `ctx.env` भी प्राप्त होता है।
+- जो बैकएंड किसी विशिष्ट रन के लिए सभी नेटिव टूल अक्षम कर सकते हैं, वे
+  `nativeToolMode: "selectable"` घोषित कर सकते हैं। प्रतिबंधित कॉल एक सटीक
+  `ctx.toolAvailability.native` सूची और कैनोनिकल
+  `ctx.toolAvailability.openClaw` नाम पास करते हैं। `toolAvailabilityEnforcement: "execution-args"` घोषित करें
+  और अंतिम नए/पुनरारंभ argv में अनुबंध लागू करें, या `"prepare-execution"` घोषित करें, उसे
+  स्टेज की गई नीति में लागू करें और `toolAvailabilityEnforced: true` लौटाएँ। OpenClaw
+  cron `toolsAllow` जैसी रनटाइम सीमाओं के लिए नेटिव टूल अक्षम करता है और घोषित
+  प्रवर्तन पथ अधूरा होने पर सुरक्षित रूप से विफल होता है।
 
-end-to-end authoring guide के लिए, देखें
-[CLI backend plugins](/hi/plugins/cli-backend-plugins).
+आरंभ से अंत तक लेखन मार्गदर्शिका के लिए,
+[CLI बैकएंड Plugin](/hi/plugins/cli-backend-plugins) देखें।
 
-### Exclusive slots
+### विशिष्ट स्लॉट
 
-| Method                                     | यह क्या register करता है                                                                                                                                                                                  |
+| विधि                                     | यह क्या पंजीकृत करती है                                                                                                                                                                                  |
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `api.registerContextEngine(id, factory)`   | Context engine (एक समय में एक active)। Lifecycle callbacks को `runtimeSettings` मिलता है जब host model/provider/mode diagnostics दे सकता है; पुराने strict engines को उस key के बिना फिर से try किया जाता है। |
-| `api.registerMemoryCapability(capability)` | Unified memory capability                                                                                                                                                                          |
-| `api.registerMemoryPromptSection(builder)` | Memory prompt section builder                                                                                                                                                                      |
-| `api.registerMemoryFlushPlan(resolver)`    | Memory flush plan resolver                                                                                                                                                                         |
-| `api.registerMemoryRuntime(runtime)`       | Memory runtime adapter                                                                                                                                                                             |
+| `api.registerContextEngine(id, factory)`   | संदर्भ इंजन (एक समय में एक सक्रिय)। जब होस्ट मॉडल/प्रोवाइडर/मोड निदान प्रदान कर सकता है, तब जीवनचक्र कॉलबैक को `runtimeSettings` प्राप्त होता है; पुराने सख्त इंजनों को उस कुंजी के बिना पुनः आज़माया जाता है। |
+| `api.registerMemoryCapability(capability)` | एकीकृत मेमोरी क्षमता                                                                                                                                                                          |
 
-### Deprecated memory embedding adapters
+### अप्रचलित मेमोरी एम्बेडिंग अडैप्टर
 
-| Method                                         | यह क्या register करता है                              |
+| विधि                                         | यह क्या पंजीकृत करती है                              |
 | ---------------------------------------------- | ---------------------------------------------- |
-| `api.registerMemoryEmbeddingProvider(adapter)` | active plugin के लिए Memory embedding adapter |
+| `api.registerMemoryEmbeddingProvider(adapter)` | सक्रिय Plugin के लिए मेमोरी एम्बेडिंग अडैप्टर |
 
-- `registerMemoryCapability` पसंदीदा exclusive memory-plugin API है।
-- `registerMemoryCapability`, `publicArtifacts.listArtifacts(...)` को भी expose कर सकता है
-  ताकि companion plugins किसी specific
-  memory plugin के private layout में जाने के बजाय
-  `openclaw/plugin-sdk/memory-host-core` के जरिए exported memory artifacts का उपयोग कर सकें।
-- `registerMemoryPromptSection`, `registerMemoryFlushPlan`, और
-  `registerMemoryRuntime` legacy-compatible exclusive memory-plugin APIs हैं।
-- `MemoryFlushPlan.model`, active fallback
-  chain inherit किए बिना flush turn को exact `provider/model`
-  reference पर pin कर सकता है, जैसे `ollama/qwen3:8b`।
-- `registerMemoryEmbeddingProvider` deprecated है। नए embedding providers को
+- `registerMemoryCapability` विशिष्ट मेमोरी-Plugin API है।
+- `registerMemoryCapability` होस्ट-प्रबंधित निर्यातों के लिए `publicArtifacts.listArtifacts(...)`
+  भी उजागर कर सकता है। उन घोषित आर्टिफ़ैक्ट की गणना करने वाले सहायक Plugin, केंद्रित सार्वजनिक उपभोक्ता
+  API उपलब्ध होने तक, बनाए रखे गए `openclaw/plugin-sdk/memory-host-core` फ़साड से
+  `listActiveMemoryPublicArtifacts(...)` का उपयोग करना जारी रखते हैं; उन्हें किसी अन्य Plugin के निजी लेआउट में प्रवेश नहीं करना चाहिए।
+- `MemoryFlushPlan.model` सक्रिय फ़ॉलबैक
+  शृंखला को विरासत में लिए बिना फ़्लश टर्न को `ollama/qwen3:8b` जैसे किसी सटीक `provider/model`
+  संदर्भ पर पिन कर सकता है।
+- `registerMemoryEmbeddingProvider` अप्रचलित है। नए एम्बेडिंग प्रोवाइडर को
   `api.registerEmbeddingProvider(...)` और
   `contracts.embeddingProviders` का उपयोग करना चाहिए।
-- Existing memory-specific providers migration
-  window के दौरान काम करना जारी रखते हैं, लेकिन plugin inspection इसे
-  non-bundled plugins के लिए compatibility debt के रूप में report करता है।
+- मौजूदा मेमोरी-विशिष्ट प्रोवाइडर माइग्रेशन
+  अवधि के दौरान काम करना जारी रखते हैं, लेकिन Plugin निरीक्षण इसे
+  गैर-बंडल Plugin के लिए संगतता ऋण के रूप में रिपोर्ट करता है।
 
-### Events और lifecycle
+### इवेंट और जीवनचक्र
 
-| Method                                       | यह क्या करता है                  |
+| विधि                                       | यह क्या करती है                  |
 | -------------------------------------------- | ----------------------------- |
-| `api.on(hookName, handler, opts?)`           | Typed lifecycle hook          |
-| `api.onConversationBindingResolved(handler)` | Conversation binding callback |
+| `api.on(hookName, handler, opts?)`           | टाइप किया हुआ जीवनचक्र हुक          |
+| `api.onConversationBindingResolved(handler)` | वार्तालाप बाइंडिंग कॉलबैक |
 
-उदाहरणों, common hook names, और guard
-semantics के लिए [Plugin hooks](/hi/plugins/hooks) देखें।
+उदाहरणों, सामान्य हुक नामों और गार्ड
+सिमैंटिक्स के लिए [Plugin हुक](/hi/plugins/hooks) देखें।
 
-### Hook decision semantics
+### हुक निर्णय सिमैंटिक्स
 
-`before_install` plugin-runtime lifecycle hook है, operator install
-policy surface नहीं। जब allow/block decision को CLI और Gateway-backed install या update paths
-को cover करना हो, तो `security.installPolicy` का उपयोग करें।
+`before_install` एक Plugin-रनटाइम जीवनचक्र हुक है, ऑपरेटर इंस्टॉल
+नीति सतह नहीं। जब अनुमति/अवरोध निर्णय को CLI और Gateway-समर्थित इंस्टॉल या अपडेट
+पथों को समाहित करना हो, तब `security.installPolicy` का उपयोग करें।
 
-- `before_tool_call`: `{ block: true }` लौटाना terminal है। जब कोई भी handler इसे set करता है, lower-priority handlers skip हो जाते हैं।
-- `before_tool_call`: `{ block: false }` लौटाना no decision माना जाता है (`block` omit करने जैसा), override नहीं।
-- `before_install`: `{ block: true }` लौटाना terminal है। जब कोई भी handler इसे set करता है, lower-priority handlers skip हो जाते हैं।
-- `before_install`: `{ block: false }` लौटाना no decision माना जाता है (`block` omit करने जैसा), override नहीं।
-- `reply_dispatch`: `{ handled: true, ... }` लौटाना terminal है। जब कोई handler dispatch claim करता है, lower-priority handlers और default model dispatch path skip हो जाते हैं।
-- `message_sending`: `{ cancel: true }` लौटाना terminal है। जब कोई भी handler इसे set करता है, lower-priority handlers skip हो जाते हैं।
-- `message_sending`: `{ cancel: false }` लौटाना no decision माना जाता है (`cancel` omit करने जैसा), override नहीं।
-- `message_received`: जब आपको inbound thread/topic routing की आवश्यकता हो, तो typed `threadId` field का उपयोग करें। channel-specific extras के लिए `metadata` रखें।
-- `message_sending`: channel-specific `metadata` पर fallback करने से पहले typed `replyToId` / `threadId` routing fields का उपयोग करें।
-- `gateway_start`: internal `gateway:startup` hooks पर निर्भर रहने के बजाय gateway-owned startup state के लिए `ctx.config`, `ctx.workspaceDir`, और `ctx.getCron?.()` का उपयोग करें।
-- `cron_changed`: gateway-owned cron lifecycle changes को observe करें। external wake schedulers को sync करते समय `event.job?.state?.nextRunAtMs` और `ctx.getCron?.()` का उपयोग करें, और due checks तथा execution के लिए OpenClaw को source of truth बनाए रखें।
+- `before_tool_call`: `{ block: true }` लौटाना अंतिम है। किसी भी हैंडलर द्वारा इसे सेट करने के बाद, कम प्राथमिकता वाले हैंडलर छोड़ दिए जाते हैं।
+- `before_tool_call`: `{ block: false }` लौटाना कोई निर्णय न होने के रूप में माना जाता है (`block` को छोड़ने के समान), ओवरराइड के रूप में नहीं।
+- `before_install`: `{ block: true }` लौटाना अंतिम है। किसी भी हैंडलर द्वारा इसे सेट करने के बाद, कम प्राथमिकता वाले हैंडलर छोड़ दिए जाते हैं।
+- `before_install`: `{ block: false }` लौटाना कोई निर्णय न होने के रूप में माना जाता है (`block` को छोड़ने के समान), ओवरराइड के रूप में नहीं।
+- `reply_dispatch`: `{ handled: true, ... }` लौटाना अंतिम है। किसी भी हैंडलर द्वारा डिस्पैच का दावा करने के बाद, कम प्राथमिकता वाले हैंडलर और डिफ़ॉल्ट मॉडल डिस्पैच पथ छोड़ दिए जाते हैं।
+- `message_sending`: `{ cancel: true }` लौटाना अंतिम है। किसी भी हैंडलर द्वारा इसे सेट करने के बाद, कम प्राथमिकता वाले हैंडलर छोड़ दिए जाते हैं।
+- `message_sending`: `{ cancel: false }` लौटाना कोई निर्णय न होने के रूप में माना जाता है (`cancel` को छोड़ने के समान), ओवरराइड के रूप में नहीं।
+- `message_received`: जब आपको इनबाउंड थ्रेड/विषय रूटिंग की आवश्यकता हो, तब टाइप किए गए `threadId` फ़ील्ड का उपयोग करें। चैनल-विशिष्ट अतिरिक्त मानों के लिए `metadata` रखें।
+- `message_sending`: चैनल-विशिष्ट `metadata` पर फ़ॉलबैक करने से पहले टाइप किए गए `replyToId` / `threadId` रूटिंग फ़ील्ड का उपयोग करें।
+- `gateway_start`: आंतरिक `gateway:startup` हुक पर निर्भर रहने के बजाय Gateway-स्वामित्व वाली स्टार्टअप स्थिति के लिए `ctx.config`, `ctx.workspaceDir` और `ctx.getCron?.()` का उपयोग करें। इस समय Cron अब भी लोड हो रहा हो सकता है।
+- `cron_reconciled`: स्टार्टअप या शेड्यूलर रीलोड के बाद पूर्ण बाहरी cron प्रोजेक्शन फिर से बनाएँ। इसमें `reason` और प्रभावी `enabled` स्थिति शामिल है, जिसमें `enabled: false` भी है, जबकि `ctx.getCron?.()` सटीक समन्वित शेड्यूलर लौटाता है। स्थायी प्रोजेक्शन कार्य में `ctx.abortSignal` पास करें; उस शेड्यूलर स्नैपशॉट के प्रतिस्थापित होने या Gateway के बंद होने पर यह निरस्त हो जाता है।
+- `cron_changed`: Gateway-स्वामित्व वाले cron जीवनचक्र परिवर्तनों का निरीक्षण करें। `scheduled` और `removed` इवेंट कमिट-पश्चात समन्वय संकेत हैं, क्रमबद्ध डेल्टा लॉग नहीं। जब जॉब का अगला वेक नहीं होता, तब शेड्यूल किए गए इवेंट का `event.nextRunAtMs` अनुपस्थित होता है; हटाए गए इवेंट में हटाए गए जॉब का स्नैपशॉट अब भी रहता है।
 
-### API object fields
+बाहरी वेक शेड्यूलर को `cron_changed` इवेंट को डीबाउंस या समेकित करना चाहिए,
+फिर `cron_reconciled` द्वारा अंतिम बार कैप्चर किए गए शेड्यूलर से पूर्ण स्थायी दृश्य
+दोबारा पढ़ना चाहिए। `cron_changed` संदर्भ से शेड्यूलर न अपनाएँ: किसी पुराने
+शेड्यूलर का अलग हुआ संकेत बाद के रीलोड के साथ ओवरलैप कर सकता है।
 
-| Field                    | Type                      | Description                                                                                 |
+Gateway स्टार्टअप या शेड्यूलर प्रतिस्थापन के समय लोड की गई स्थायी स्थिति के लिए पूर्ण-स्नैपशॉट
+ट्रिगर के रूप में `cron_reconciled` का उपयोग करें। इसे केवल Plugin के
+हॉट रीलोड के लिए दोबारा नहीं चलाया जाता। निरीक्षण हैंडलर समानांतर चलते हैं और फ़ायर-एंड-फ़ॉरगेट
+डिस्पैच ओवरलैप कर सकते हैं, इसलिए उपभोक्ताओं को इवेंट पूर्ण होने के क्रम पर निर्भर नहीं रहना चाहिए।
+देयता जाँच और निष्पादन के लिए OpenClaw को सत्य का स्रोत बनाए रखें।
+
+स्थायी प्रतिस्थापन, पुनः प्रयास/बैकऑफ़ और स्वच्छ
+शटडाउन वाले सिंगल-फ़्लाइट अडैप्टर के लिए [सुरक्षित बाहरी cron प्रोजेक्शन](/hi/plugins/hooks#safe-external-cron-projection) देखें।
+
+### API ऑब्जेक्ट फ़ील्ड
+
+| फ़ील्ड                    | प्रकार                      | विवरण                                                                                 |
 | ------------------------ | ------------------------- | ------------------------------------------------------------------------------------------- |
-| `api.id`                 | `string`                  | Plugin id                                                                                   |
-| `api.name`               | `string`                  | Display name                                                                                |
-| `api.version`            | `string?`                 | Plugin version (optional)                                                                   |
-| `api.description`        | `string?`                 | Plugin description (optional)                                                               |
-| `api.source`             | `string`                  | Plugin source path                                                                          |
-| `api.rootDir`            | `string?`                 | Plugin root directory (optional)                                                            |
-| `api.config`             | `OpenClawConfig`          | Current config snapshot (available होने पर active in-memory runtime snapshot)                  |
-| `api.pluginConfig`       | `Record<string, unknown>` | `plugins.entries.<id>.config` से Plugin-specific config                                   |
-| `api.runtime`            | `PluginRuntime`           | [Runtime helpers](/hi/plugins/sdk-runtime)                                                     |
-| `api.logger`             | `PluginLogger`            | Scoped logger (`debug`, `info`, `warn`, `error`)                                            |
-| `api.registrationMode`   | `PluginRegistrationMode`  | Current load mode; `"setup-runtime"` lightweight pre-full-entry startup/setup window है |
-| `api.resolvePath(input)` | `(string) => string`      | plugin root के सापेक्ष path resolve करें                                                        |
+| `api.id`                 | `string`                  | Plugin आईडी                                                                                   |
+| `api.name`               | `string`                  | प्रदर्शन नाम                                                                                |
+| `api.version`            | `string?`                 | Plugin संस्करण (वैकल्पिक)                                                                   |
+| `api.description`        | `string?`                 | Plugin विवरण (वैकल्पिक)                                                               |
+| `api.source`             | `string`                  | Plugin स्रोत पथ                                                                          |
+| `api.rootDir`            | `string?`                 | Plugin रूट डायरेक्टरी (वैकल्पिक)                                                            |
+| `api.config`             | `OpenClawConfig`          | वर्तमान कॉन्फ़िगरेशन स्नैपशॉट (उपलब्ध होने पर सक्रिय इन-मेमोरी रनटाइम स्नैपशॉट)                  |
+| `api.pluginConfig`       | `Record<string, unknown>` | `plugins.entries.<id>.config` से Plugin-विशिष्ट कॉन्फ़िगरेशन                                   |
+| `api.runtime`            | `PluginRuntime`           | [रनटाइम सहायक](/hi/plugins/sdk-runtime)                                                     |
+| `api.logger`             | `PluginLogger`            | स्कोप्ड लॉगर (`debug`, `info`, `warn`, `error`)                                            |
+| `api.registrationMode`   | `PluginRegistrationMode`  | वर्तमान लोड मोड; `"setup-runtime"` हल्की, पूर्ण-एंट्री-पूर्व स्टार्टअप/सेटअप अवधि है |
+| `api.resolvePath(input)` | `(string) => string`      | Plugin रूट के सापेक्ष पथ का समाधान करें                                                        |
 
-## Internal module convention
+## आंतरिक मॉड्यूल परिपाटी
 
-अपने plugin के भीतर, internal imports के लिए local barrel files का उपयोग करें:
+अपने Plugin के भीतर, आंतरिक इंपोर्ट के लिए स्थानीय बैरल फ़ाइलों का उपयोग करें:
 
-```
+```text
 my-plugin/
-  api.ts            # Public exports for external consumers
-  runtime-api.ts    # Internal-only runtime exports
-  index.ts          # Plugin entry point
-  setup-entry.ts    # Lightweight setup-only entry (optional)
+  api.ts            # बाहरी उपभोक्ताओं के लिए सार्वजनिक निर्यात
+  runtime-api.ts    # केवल आंतरिक रनटाइम निर्यात
+  index.ts          # Plugin प्रवेश बिंदु
+  setup-entry.ts    # हल्की, केवल-सेटअप एंट्री (वैकल्पिक)
 ```
 
 <Warning>
-  production code से अपने ही plugin को `openclaw/plugin-sdk/<your-plugin>`
-  के जरिए कभी import न करें। internal imports को `./api.ts` या
-  `./runtime-api.ts` से route करें। SDK path केवल external contract है।
+  प्रोडक्शन कोड से कभी भी अपने स्वयं के Plugin को `openclaw/plugin-sdk/<your-plugin>`
+  के माध्यम से इम्पोर्ट न करें। आंतरिक इम्पोर्ट को `./api.ts` या
+  `./runtime-api.ts` के माध्यम से रूट करें। SDK पथ केवल बाहरी अनुबंध है।
 </Warning>
 
-Facade-loaded bundled plugin public surfaces (`api.ts`, `runtime-api.ts`,
-`index.ts`, `setup-entry.ts`, और समान public entry files), जब OpenClaw पहले से चल रहा हो, तो
-active runtime config snapshot को प्राथमिकता देते हैं। यदि अभी कोई runtime
-snapshot मौजूद नहीं है, तो वे disk पर resolved config file पर fallback करते हैं।
-Packaged bundled plugin facades को OpenClaw के plugin
-facade loaders के जरिए load किया जाना चाहिए; `dist/extensions/...` से direct imports manifest
-और runtime sidecar checks को bypass करते हैं, जिन्हें packaged installs plugin-owned code के लिए उपयोग करते हैं।
+फ़साड द्वारा लोड किए गए बंडल Plugin के सार्वजनिक सरफ़ेस (`api.ts`, `runtime-api.ts`,
+`index.ts`, `setup-entry.ts`, और इसी तरह की सार्वजनिक एंट्री फ़ाइलें), OpenClaw के पहले से चल रहे होने पर
+सक्रिय रनटाइम कॉन्फ़िग स्नैपशॉट को प्राथमिकता देते हैं। यदि अभी तक कोई रनटाइम
+स्नैपशॉट मौजूद नहीं है, तो वे डिस्क पर मौजूद रिज़ॉल्व की गई कॉन्फ़िग फ़ाइल का उपयोग करते हैं।
+पैकेज किए गए बंडल Plugin फ़साड को OpenClaw के Plugin
+फ़साड लोडर के माध्यम से लोड किया जाना चाहिए; `dist/extensions/...` से सीधे इम्पोर्ट करने पर वे मैनिफ़ेस्ट
+और रनटाइम साइडकार जाँच बायपास हो जाती हैं, जिनका उपयोग पैकेज किए गए इंस्टॉल Plugin-स्वामित्व वाले कोड के लिए करते हैं।
 
-Provider plugins एक narrow plugin-local contract barrel expose कर सकते हैं जब कोई
-helper जानबूझकर provider-specific हो और अभी generic SDK
-subpath में न आता हो। Bundled examples:
+प्रोवाइडर Plugin एक सीमित, Plugin-स्थानीय अनुबंध बैरल उपलब्ध करा सकते हैं, जब कोई
+हेल्पर जानबूझकर प्रोवाइडर-विशिष्ट हो और अभी किसी सामान्य SDK
+सबपाथ में उपयुक्त न हो। बंडल उदाहरण:
 
 - **Anthropic**: Claude
-  beta-header और `service_tier` stream helpers के लिए public `api.ts` / `contract-api.ts` seam।
-- **`@openclaw/openai-provider`**: `api.ts` provider builders,
-  default-model helpers, और realtime provider builders export करता है।
-- **`@openclaw/openrouter-provider`**: `api.ts` provider builder
-  के साथ onboarding/config helpers export करता है।
+  बीटा-हेडर और `service_tier` स्ट्रीम हेल्पर के लिए सार्वजनिक `api.ts` / `contract-api.ts` सीम।
+- **`@openclaw/openai-provider`**: `api.ts` प्रोवाइडर बिल्डर,
+  डिफ़ॉल्ट-मॉडल हेल्पर और रियलटाइम प्रोवाइडर बिल्डर एक्सपोर्ट करता है।
+- **`@openclaw/openrouter-provider`**: `api.ts` प्रोवाइडर बिल्डर
+  के साथ ऑनबोर्डिंग/कॉन्फ़िग हेल्पर एक्सपोर्ट करता है।
 
 <Warning>
-  Extension production code को `openclaw/plugin-sdk/<other-plugin>`
-  imports से भी बचना चाहिए। यदि कोई helper सचमुच shared है, तो दो plugins को couple करने के बजाय
-  उसे neutral SDK subpath में promote करें
-  जैसे `openclaw/plugin-sdk/speech`, `.../provider-model-shared`, या कोई अन्य
-  capability-oriented surface।
+  एक्सटेंशन के प्रोडक्शन कोड को भी `openclaw/plugin-sdk/<other-plugin>`
+  इम्पोर्ट से बचना चाहिए। यदि कोई हेल्पर वास्तव में साझा है, तो दो Plugin को एक-दूसरे से जोड़ने के बजाय
+  उसे `openclaw/plugin-sdk/speech`, `.../provider-model-shared`, या किसी अन्य
+  क्षमता-उन्मुख सरफ़ेस जैसे तटस्थ SDK सबपाथ में प्रोमोट करें।
 </Warning>
 
 ## संबंधित
 
 <CardGroup cols={2}>
-  <Card title="Entry points" icon="door-open" href="/hi/plugins/sdk-entrypoints">
-    `definePluginEntry` और `defineChannelPluginEntry` options।
+  <Card title="एंट्री पॉइंट" icon="door-open" href="/hi/plugins/sdk-entrypoints">
+    `definePluginEntry` और `defineChannelPluginEntry` विकल्प।
   </Card>
-  <Card title="Runtime helpers" icon="gears" href="/hi/plugins/sdk-runtime">
-    पूरा `api.runtime` namespace reference।
+  <Card title="रनटाइम हेल्पर" icon="gears" href="/hi/plugins/sdk-runtime">
+    संपूर्ण `api.runtime` नेमस्पेस संदर्भ।
   </Card>
-  <Card title="Setup और config" icon="sliders" href="/hi/plugins/sdk-setup">
-    Packaging, manifests, और config schemas।
+  <Card title="सेटअप और कॉन्फ़िग" icon="sliders" href="/hi/plugins/sdk-setup">
+    पैकेजिंग, मैनिफ़ेस्ट और कॉन्फ़िग स्कीमा।
   </Card>
-  <Card title="Testing" icon="vial" href="/hi/plugins/sdk-testing">
-    Test utilities और lint rules।
+  <Card title="परीक्षण" icon="vial" href="/hi/plugins/sdk-testing">
+    परीक्षण यूटिलिटी और लिंट नियम।
   </Card>
-  <Card title="SDK migration" icon="arrows-turn-right" href="/hi/plugins/sdk-migration">
-    deprecated surfaces से migrate करना।
+  <Card title="SDK माइग्रेशन" icon="arrows-turn-right" href="/hi/plugins/sdk-migration">
+    अप्रचलित सरफ़ेस से माइग्रेट करना।
   </Card>
-  <Card title="Plugin internals" icon="diagram-project" href="/hi/plugins/architecture">
-    गहरी architecture और capability model।
+  <Card title="Plugin की आंतरिक संरचना" icon="diagram-project" href="/hi/plugins/architecture">
+    विस्तृत आर्किटेक्चर और क्षमता मॉडल।
   </Card>
 </CardGroup>

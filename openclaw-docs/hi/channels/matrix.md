@@ -2,45 +2,37 @@
 read_when:
     - OpenClaw में Matrix सेट अप करना
     - Matrix E2EE और सत्यापन कॉन्फ़िगर करना
-summary: Matrix समर्थन स्थिति, सेटअप, और कॉन्फ़िगरेशन उदाहरण
-title: मैट्रिक्स
+summary: Matrix समर्थन की स्थिति, सेटअप और कॉन्फ़िगरेशन के उदाहरण
+title: Matrix
 x-i18n:
-    generated_at: "2026-07-01T12:58:57Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:08:25Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2aa86a477c4f15e792ba01c45bb06f37a55fee26ee2c895bfa308ff57ef6d819
+    source_hash: aa84c7d9d9019040a3fec3cfaabb78590006a4a2dd4bb95836f2cf37072777c5
     source_path: channels/matrix.md
     workflow: 16
 ---
 
-Matrix, OpenClaw के लिए डाउनलोड किया जा सकने वाला channel plugin है।
-यह आधिकारिक `matrix-js-sdk` का उपयोग करता है और DMs, rooms, threads, media, reactions, polls, location, और E2EE का समर्थन करता है।
+Matrix एक डाउनलोड करने योग्य चैनल Plugin (`@openclaw/matrix`) है, जो आधिकारिक `matrix-js-sdk` पर आधारित है। यह DM, रूम, थ्रेड, मीडिया, प्रतिक्रियाओं, पोल, लोकेशन और E2EE का समर्थन करता है।
 
-## इंस्टॉल करें
-
-channel कॉन्फ़िगर करने से पहले ClawHub से Matrix इंस्टॉल करें:
+## इंस्टॉल करना
 
 ```bash
 openclaw plugins install @openclaw/matrix
 ```
 
-Bare plugin specs पहले ClawHub आज़माते हैं, फिर npm fallback। registry source को बाध्य करने के लिए, `openclaw plugins install clawhub:@openclaw/matrix` या `openclaw plugins install npm:@openclaw/matrix` का उपयोग करें।
+बिना स्रोत वाले Plugin विनिर्देश पहले ClawHub आज़माते हैं, फिर npm फ़ॉलबैक का उपयोग करते हैं। `openclaw plugins install clawhub:@openclaw/matrix` या `npm:@openclaw/matrix` से किसी स्रोत को अनिवार्य करें। स्थानीय चेकआउट से: `openclaw plugins install ./path/to/local/matrix-plugin`।
 
-local checkout से:
-
-```bash
-openclaw plugins install ./path/to/local/matrix-plugin
-```
-
-`plugins install` plugin को register और enable करता है, इसलिए अलग से `openclaw plugins enable matrix` चरण की आवश्यकता नहीं है। फिर भी plugin तब तक कुछ नहीं करता जब तक आप नीचे channel कॉन्फ़िगर नहीं करते। सामान्य plugin व्यवहार और install नियमों के लिए [Plugins](/hi/tools/plugin) देखें।
+`plugins install` Plugin को पंजीकृत और सक्षम करता है; अलग `enable` चरण की आवश्यकता नहीं है। नीचे दिए गए अनुसार कॉन्फ़िगर होने तक चैनल फिर भी कुछ नहीं करता। इंस्टॉल करने के सामान्य नियमों के लिए [Plugins](/hi/tools/plugin) देखें।
 
 ## सेटअप
 
-1. अपने homeserver पर Matrix account बनाएँ।
-2. `channels.matrix` को या तो `homeserver` + `accessToken`, या `homeserver` + `userId` + `password` के साथ कॉन्फ़िगर करें।
-3. gateway को restart करें।
-4. bot के साथ DM शुरू करें, या इसे room में invite करें ([auto-join](#auto-join) देखें - नए invites केवल तब land होते हैं जब `autoJoin` उन्हें allow करता है)।
+1. अपने होमसर्वर पर एक Matrix खाता बनाएँ।
+2. `channels.matrix` को `homeserver` + `accessToken`, या `homeserver` + `userId` + `password` के साथ कॉन्फ़िगर करें।
+3. Gateway को पुनः आरंभ करें।
+4. बॉट के साथ DM शुरू करें या उसे किसी रूम में आमंत्रित करें। नए आमंत्रण केवल तभी पहुँचते हैं, जब [`autoJoin`](#auto-join) उन्हें अनुमति देता है।
 
 ### इंटरैक्टिव सेटअप
 
@@ -49,13 +41,11 @@ openclaw channels add
 openclaw configure --section channels
 ```
 
-wizard पूछता है: homeserver URL, auth method (access token या password), user ID (केवल password auth), optional device name, E2EE enable करना है या नहीं, और room access तथा auto-join कॉन्फ़िगर करना है या नहीं।
+विज़ार्ड होमसर्वर URL, प्रमाणीकरण विधि (टोकन या पासवर्ड), उपयोगकर्ता ID (केवल पासवर्ड प्रमाणीकरण), वैकल्पिक डिवाइस नाम, E2EE सक्षम करना है या नहीं, और रूम एक्सेस/स्वतः-जुड़ने की जानकारी माँगता है। यदि मेल खाने वाले `MATRIX_*` पर्यावरण चर पहले से मौजूद हैं और खाते में कोई सहेजा हुआ प्रमाणीकरण नहीं है, तो विज़ार्ड पर्यावरण-चर शॉर्टकट प्रस्तुत करता है। `openclaw channels resolve --channel matrix "Project Room"` वाली अनुमति-सूची सहेजने से पहले रूम नामों का समाधान करें। विज़ार्ड में E2EE सक्षम करने पर वही बूटस्ट्रैप चलता है जो [`openclaw matrix encryption setup`](#encryption-and-verification) में है।
 
-यदि matching `MATRIX_*` env vars पहले से मौजूद हैं और चयनित account में saved auth नहीं है, तो wizard env-var shortcut प्रदान करता है। allowlist save करने से पहले room names resolve करने के लिए, `openclaw channels resolve --channel matrix "Project Room"` चलाएँ। जब E2EE enable होता है, wizard config लिखता है और [`openclaw matrix encryption setup`](#encryption-and-verification) जैसा ही bootstrap चलाता है।
+### न्यूनतम कॉन्फ़िगरेशन
 
-### न्यूनतम कॉन्फ़िग
-
-Token-based:
+टोकन-आधारित:
 
 ```json5
 {
@@ -70,7 +60,7 @@ Token-based:
 }
 ```
 
-Password-based (token पहले login के बाद cache किया जाता है):
+पासवर्ड-आधारित (पहले लॉगिन के बाद टोकन कैश किया जाता है):
 
 ```json5
 {
@@ -86,16 +76,14 @@ Password-based (token पहले login के बाद cache किया ज
 }
 ```
 
-### Auto-join
+### स्वतः जुड़ना
 
-`channels.matrix.autoJoin` default रूप से `off` है। default के साथ, bot नए rooms या DMs में fresh invites से तब तक दिखाई नहीं देगा जब तक आप manually join नहीं करते।
-
-OpenClaw invite time पर नहीं बता सकता कि invited room DM है या group, इसलिए सभी invites - DM-style invites सहित - पहले `autoJoin` से गुजरते हैं। `dm.policy` केवल बाद में apply होता है, bot के join करने और room classify होने के बाद।
+`channels.matrix.autoJoin` का डिफ़ॉल्ट `"off"` है: जब तक आप मैन्युअल रूप से नहीं जुड़ते, बॉट नए आमंत्रणों से आए नए रूम या DM में दिखाई नहीं देगा। OpenClaw आमंत्रण के समय यह नहीं बता सकता कि आमंत्रण DM के लिए है या समूह के लिए, इसलिए हर आमंत्रण पहले `autoJoin` से होकर जाता है; `dm.policy` बाद में ही लागू होता है, जब बॉट जुड़ चुका हो और रूम का वर्गीकरण हो गया हो।
 
 <Warning>
-bot कौन-से invites accept करता है इसे restrict करने के लिए `autoJoin: "allowlist"` के साथ `autoJoinAllowlist` set करें, या हर invite accept करने के लिए `autoJoin: "always"`।
+स्वीकार किए जाने वाले आमंत्रणों को सीमित करने के लिए `autoJoin: "allowlist"` के साथ `autoJoinAllowlist` सेट करें, या हर आमंत्रण स्वीकार करने के लिए `autoJoin: "always"` सेट करें।
 
-`autoJoinAllowlist` केवल stable targets accept करता है: `!roomId:server`, `#alias:server`, या `*`। plain room names reject किए जाते हैं; alias entries homeserver के विरुद्ध resolve होती हैं, invited room द्वारा claimed state के विरुद्ध नहीं।
+`autoJoinAllowlist` केवल `!roomId:server`, `#alias:server`, या `*` स्वीकार करता है। सामान्य रूम नाम अस्वीकार किए जाते हैं; उपनामों का समाधान होमसर्वर के आधार पर होता है, न कि आमंत्रित रूम द्वारा दावा की गई स्थिति के आधार पर।
 </Warning>
 
 ```json5
@@ -112,50 +100,42 @@ bot कौन-से invites accept करता है इसे restrict क�
 }
 ```
 
-हर invite accept करने के लिए, `autoJoin: "always"` का उपयोग करें।
+### अनुमति-सूची लक्ष्य प्रारूप
 
-### Allowlist target formats
+- DM (`dm.allowFrom`, `groupAllowFrom`, `groups.<room>.users`): `@user:server` का उपयोग करें। प्रदर्शन नाम डिफ़ॉल्ट रूप से अनदेखे किए जाते हैं (परिवर्तनीय); केवल स्पष्ट प्रदर्शन-नाम संगतता के लिए `dangerouslyAllowNameMatching: true` सेट करें।
+- रूम अनुमति-सूची कुंजियाँ (`groups`, पुराना उपनाम `rooms`): `!room:server` या `#alias:server` का उपयोग करें। सामान्य नाम तब तक अनदेखे किए जाते हैं, जब तक `dangerouslyAllowNameMatching: true` न हो।
+- आमंत्रण अनुमति-सूचियाँ (`autoJoinAllowlist`): `!room:server`, `#alias:server`, या `*` का उपयोग करें। सामान्य नाम हमेशा अस्वीकार किए जाते हैं।
 
-DM और room allowlists को stable IDs से भरना सबसे अच्छा है:
+### खाता ID सामान्यीकरण
 
-- DMs (`dm.allowFrom`, `groupAllowFrom`, `groups.<room>.users`): `@user:server` का उपयोग करें। Display names default रूप से ignore किए जाते हैं क्योंकि वे mutable हैं; `dangerouslyAllowNameMatching: true` केवल तब set करें जब आपको स्पष्ट रूप से display-name entries के साथ compatibility चाहिए।
-- Room allowlist keys (`groups`, legacy `rooms`): `!room:server` या `#alias:server` का उपयोग करें। plain room names default रूप से ignore किए जाते हैं; `dangerouslyAllowNameMatching: true` केवल तब set करें जब आपको joined-room name lookup के साथ स्पष्ट रूप से compatibility चाहिए।
-- Invite allowlists (`autoJoinAllowlist`): `!room:server`, `#alias:server`, या `*` का उपयोग करें। plain room names reject किए जाते हैं।
+विज़ार्ड किसी सुविधाजनक नाम को सामान्यीकृत खाता ID में बदलता है (`Ops Bot` -> `ops-bot`)। स्कोप वाले पर्यावरण-चर नामों में विराम-चिह्नों को हेक्स-एस्केप किया जाता है, ताकि खातों में टकराव न हो: `-` (0x2D) `_X2D_` बनता है, इसलिए `ops-prod` पर्यावरण उपसर्ग `MATRIX_OPS_X2D_PROD_` से मैप होता है।
 
-### Account ID normalization
+### कैश किए गए क्रेडेंशियल
 
-wizard friendly name को normalized account ID में convert करता है। उदाहरण के लिए, `Ops Bot` `ops-bot` बन जाता है। scoped env-var names में punctuation escape किया जाता है ताकि दो accounts collide न कर सकें: `-` → `_X2D_`, इसलिए `ops-prod` `MATRIX_OPS_X2D_PROD_*` पर map होता है।
+Matrix साझा `state/openclaw.sqlite` Plugin स्थिति में खाते के क्रेडेंशियल कैश करता है। कैश किए गए क्रेडेंशियल मौजूद होने पर OpenClaw Matrix को कॉन्फ़िगर किया हुआ मानता है, भले ही कॉन्फ़िगरेशन फ़ाइल में `accessToken` न हो—इसमें सेटअप, `openclaw doctor`, और चैनल-स्थिति जाँच शामिल हैं। अपग्रेड, हटाई जा चुकी `~/.openclaw/credentials/matrix/credentials*.json` फ़ाइलों को `openclaw doctor --fix` के माध्यम से आयात करते हैं, SQLite पंक्तियों को सत्यापित करते हैं, फिर फ़ाइलों को संग्रहित करते हैं।
 
-### Cached credentials
+### पर्यावरण चर
 
-Matrix cached credentials को `~/.openclaw/credentials/matrix/` के अंतर्गत store करता है:
+कॉन्फ़िगरेशन-कुंजी-समर्थित पर्यावरण चर, जिनका उपयोग तब किया जाता है जब समतुल्य कॉन्फ़िगरेशन कुंजी सेट न हो। डिफ़ॉल्ट खाता बिना उपसर्ग वाले नामों का उपयोग करता है; नामित खाते प्रत्यय से पहले खाता टोकन जोड़ते हैं ([सामान्यीकरण](#account-id-normalization) देखें)।
 
-- default account: `credentials.json`
-- named accounts: `credentials-<account>.json`
+| डिफ़ॉल्ट खाता       | नामित खाता (`<ID>` = खाता टोकन) |
+| --------------------- | -------------------------------------- |
+| `MATRIX_HOMESERVER`   | `MATRIX_<ID>_HOMESERVER`               |
+| `MATRIX_ACCESS_TOKEN` | `MATRIX_<ID>_ACCESS_TOKEN`             |
+| `MATRIX_USER_ID`      | `MATRIX_<ID>_USER_ID`                  |
+| `MATRIX_PASSWORD`     | `MATRIX_<ID>_PASSWORD`                 |
+| `MATRIX_DEVICE_ID`    | `MATRIX_<ID>_DEVICE_ID`                |
+| `MATRIX_DEVICE_NAME`  | `MATRIX_<ID>_DEVICE_NAME`              |
 
-जब वहाँ cached credentials मौजूद होते हैं, OpenClaw Matrix को configured मानता है, भले ही access token config file में न हो - यह setup, `openclaw doctor`, और channel-status probes को cover करता है।
+खाते `ops` के लिए नाम `MATRIX_OPS_HOMESERVER`, `MATRIX_OPS_ACCESS_TOKEN`, आदि बन जाते हैं। `MATRIX_HOMESERVER` (और कोई भी `*_HOMESERVER` स्कोप वाला रूप) कार्यक्षेत्र के `.env` से सेट नहीं किया जा सकता; [कार्यस्थल `.env` फ़ाइलें](/hi/gateway/security) देखें।
 
-### Environment variables
-
-जब equivalent config key set न हो तो उपयोग किए जाते हैं। default account unprefixed names का उपयोग करता है; named accounts suffix से पहले account ID inserted करते हैं।
-
-| Default account       | Named account (`<ID>` normalized account ID है) |
-| --------------------- | --------------------------------------------------- |
-| `MATRIX_HOMESERVER`   | `MATRIX_<ID>_HOMESERVER`                            |
-| `MATRIX_ACCESS_TOKEN` | `MATRIX_<ID>_ACCESS_TOKEN`                          |
-| `MATRIX_USER_ID`      | `MATRIX_<ID>_USER_ID`                               |
-| `MATRIX_PASSWORD`     | `MATRIX_<ID>_PASSWORD`                              |
-| `MATRIX_DEVICE_ID`    | `MATRIX_<ID>_DEVICE_ID`                             |
-| `MATRIX_DEVICE_NAME`  | `MATRIX_<ID>_DEVICE_NAME`                           |
-| `MATRIX_RECOVERY_KEY` | `MATRIX_<ID>_RECOVERY_KEY`                          |
-
-account `ops` के लिए, names `MATRIX_OPS_HOMESERVER`, `MATRIX_OPS_ACCESS_TOKEN`, आदि बन जाते हैं। recovery-key env vars recovery-aware CLI flows (`verify backup restore`, `verify device`, `verify bootstrap`) द्वारा पढ़े जाते हैं जब आप key को `--recovery-key-stdin` के माध्यम से pipe करते हैं।
-
-`MATRIX_HOMESERVER` workspace `.env` से set नहीं किया जा सकता; [Workspace `.env` files](/hi/gateway/security) देखें।
+<Note>
+पुनर्प्राप्ति कुंजी कॉन्फ़िगरेशन-समर्थित पर्यावरण चर नहीं है: OpenClaw इसे कभी भी सीधे पर्यावरण से नहीं पढ़ता। CLI मार्गदर्शन पाठ डिफ़ॉल्ट खाते के लिए इसे `MATRIX_RECOVERY_KEY` नामक शेल चर, या नामित खाते के लिए `MATRIX_RECOVERY_KEY_<ID>` (सामान्य बड़े अक्षरों वाली खाता ID, हेक्स-एस्केपिंग के बिना) के माध्यम से पाइप करने का सुझाव देता है—[पुनर्प्राप्ति कुंजी से इस डिवाइस को सत्यापित करें](#verify-this-device-with-a-recovery-key) देखें।
+</Note>
 
 ## कॉन्फ़िगरेशन उदाहरण
 
-DM pairing, room allowlist, और E2EE के साथ एक व्यावहारिक baseline:
+DM पेयरिंग, रूम अनुमति-सूची और E2EE के साथ एक व्यावहारिक आधारभूत कॉन्फ़िगरेशन:
 
 ```json5
 {
@@ -182,28 +162,27 @@ DM pairing, room allowlist, और E2EE के साथ एक व्याव�
       autoJoinAllowlist: ["!roomid:example.org"],
       threadReplies: "inbound",
       replyToMode: "off",
-      streaming: "partial",
+      streaming: { mode: "partial" },
     },
   },
 }
 ```
 
-## Streaming previews
+## स्ट्रीमिंग पूर्वावलोकन
 
-Matrix reply streaming opt-in है। `streaming` नियंत्रित करता है कि OpenClaw in-flight assistant reply कैसे deliver करता है; `blockStreaming` नियंत्रित करता है कि प्रत्येक completed block अपने Matrix message के रूप में preserve किया जाए या नहीं।
+Matrix उत्तर स्ट्रीमिंग वैकल्पिक है। `streaming.mode` नियंत्रित करता है कि OpenClaw प्रगति पर मौजूद सहायक उत्तर कैसे वितरित करता है; `streaming.block.enabled` नियंत्रित करता है कि हर पूर्ण ब्लॉक को उसके अपने Matrix संदेश के रूप में रखा जाए या नहीं।
 
 ```json5
 {
   channels: {
     matrix: {
-      streaming: "partial",
+      streaming: { mode: "partial" },
     },
   },
 }
 ```
 
-live answer previews रखने लेकिन interim tool/progress lines छिपाने के लिए, object
-form का उपयोग करें:
+लाइव उत्तर पूर्वावलोकन बनाए रखने लेकिन अंतरिम टूल/प्रगति पंक्तियाँ छिपाने के लिए:
 
 ```json5
 {
@@ -220,7 +199,7 @@ form का उपयोग करें:
 }
 ```
 
-पूर्ण object form `{ mode, preview, progress }` accept करता है:
+पूर्ण कॉन्फ़िगरेशन `{ mode, chunkMode, block, preview, progress }` स्वीकार करता है:
 
 ```json5
 {
@@ -229,11 +208,11 @@ form का उपयोग करें:
       streaming: {
         mode: "progress",
         progress: {
-          label: "auto", // pick from configured or built-in labels (false to hide)
-          labels: ["Thinking", "Writing", "Searching"], // candidates for label: "auto"
-          maxLines: 8, // max rolling progress lines (default: 8)
-          maxLineChars: 120, // max chars per line before truncation (default: 120)
-          toolProgress: true, // show tool/progress activity (default: true)
+          label: "auto", // कॉन्फ़िगर किए गए या अंतर्निहित लेबल में से चुनें (छिपाने के लिए false)
+          labels: ["Thinking", "Writing", "Searching"], // label: "auto" के लिए उम्मीदवार
+          maxLines: 8, // अधिकतम क्रमागत प्रगति पंक्तियाँ (डिफ़ॉल्ट: 8)
+          maxLineChars: 120, // काटने से पहले प्रति पंक्ति अधिकतम वर्ण (डिफ़ॉल्ट: 120)
+          toolProgress: true, // टूल/प्रगति गतिविधि दिखाएँ (डिफ़ॉल्ट: true)
         },
       },
     },
@@ -241,62 +220,59 @@ form का उपयोग करें:
 }
 ```
 
-- `progress.label`: custom label, configured या built-in labels में से चुनने के लिए `"auto"` या unset, या label line छिपाने के लिए `false`।
-- `progress.labels`: candidate labels जो केवल तब उपयोग होते हैं जब `label` `"auto"` या unset हो। built-in defaults के लिए unset छोड़ें।
-- `progress.maxLines`: draft में रखी जाने वाली maximum rolling progress lines। इस limit के बाद, पुरानी lines trim कर दी जाती हैं।
-- `progress.maxLineChars`: truncation से पहले प्रति compact progress line maximum characters।
-- `progress.toolProgress`: जब `true` (default), live tool/progress activity draft में दिखाई देती है।
+- `progress.label`: कस्टम लेबल, कॉन्फ़िगर किया गया या अंतर्निहित लेबल चुनने के लिए `"auto"`/सेट न किया हुआ, या इसे छिपाने के लिए `false`।
+- `progress.labels`: केवल तभी उपयोग किए जाने वाले उम्मीदवार, जब `label`, `"auto"` हो या सेट न हो।
+- `progress.maxLines`: ड्राफ़्ट में रखी जाने वाली अधिकतम क्रमागत प्रगति पंक्तियाँ; इससे अधिक होने पर पुरानी पंक्तियाँ हटा दी जाती हैं।
+- `progress.maxLineChars`: काटने से पहले प्रत्येक संक्षिप्त प्रगति पंक्ति में वर्णों की अधिकतम संख्या।
+- `progress.toolProgress`: `true` (डिफ़ॉल्ट) होने पर लाइव टूल/प्रगति गतिविधि ड्राफ़्ट में दिखाई देती है।
 
-| `streaming`       | Behavior                                                                                                                                                            |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `"off"` (default) | full reply की प्रतीक्षा करें, एक बार send करें। `true` ↔ `"partial"`, `false` ↔ `"off"`।                                                                                        |
-| `"partial"`       | model के current block लिखने पर एक normal text message को in place edit करें। Stock Matrix clients पहले preview पर notify कर सकते हैं, final edit पर नहीं।              |
-| `"quiet"`         | `"partial"` जैसा ही, लेकिन message non-notifying notice होता है। Recipients को notification केवल तब मिलता है जब per-user push rule finalized edit से match करता है (नीचे देखें)। |
-| `"progress"`      | progress draft का उपयोग करके individual compact progress lines भेजता है।                                                                                                     |
+| `streaming.mode`  | व्यवहार                                                                                                                                                 |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"off"` (डिफ़ॉल्ट) | पूरे उत्तर की प्रतीक्षा करें, एक बार भेजें।                                                                                                                      |
+| `"partial"`       | मॉडल द्वारा वर्तमान ब्लॉक लिखते समय एक सामान्य टेक्स्ट संदेश को उसी स्थान पर संपादित करें। मानक क्लाइंट अंतिम संपादन पर नहीं, बल्कि पहले पूर्वावलोकन पर सूचना दे सकते हैं।          |
+| `"quiet"`         | `"partial"` के समान, लेकिन संदेश सूचना न देने वाली सूचना है। अंतिम संपादन से प्रति-उपयोगकर्ता पुश नियम मेल खाने पर प्राप्तकर्ताओं को एक बार सूचित किया जाता है (नीचे देखें)। |
+| `"progress"`      | प्रगति ड्राफ़्ट का उपयोग करके अलग-अलग संक्षिप्त प्रगति पंक्तियाँ भेजता है।                                                                                          |
 
-`blockStreaming`, `streaming` से independent है:
+`streaming.block.enabled` (डिफ़ॉल्ट `false`), `streaming.mode` से स्वतंत्र है:
 
-| `streaming`             | `blockStreaming: true`                                              | `blockStreaming: false` (default)                    |
+| `streaming.mode`        | `block.enabled: true`                                               | `block.enabled: false` (डिफ़ॉल्ट)                     |
 | ----------------------- | ------------------------------------------------------------------- | ---------------------------------------------------- |
-| `"partial"` / `"quiet"` | current block के लिए live draft, completed blocks messages के रूप में रखे गए | current block के लिए live draft, in place finalized |
-| `"off"`                 | प्रत्येक finished block के लिए एक notifying Matrix message                     | full reply के लिए एक notifying Matrix message      |
+| `"partial"` / `"quiet"` | वर्तमान ब्लॉक के लिए लाइव ड्राफ़्ट, पूर्ण ब्लॉक संदेशों के रूप में रखे जाते हैं | वर्तमान ब्लॉक के लिए लाइव ड्राफ़्ट, उसी स्थान पर अंतिम रूप दिया जाता है |
+| `"off"`                 | प्रत्येक पूर्ण ब्लॉक के लिए एक सूचना देने वाला Matrix संदेश                     | पूरे उत्तर के लिए एक सूचना देने वाला Matrix संदेश      |
 
-Notes:
+टिप्पणियाँ:
 
-- यदि preview Matrix की per-event size limit से आगे बढ़ता है, OpenClaw preview streaming रोक देता है और final-only delivery पर fallback करता है।
-- Media replies हमेशा attachments normally भेजते हैं। यदि stale preview अब safely reuse नहीं किया जा सकता, तो OpenClaw final media reply भेजने से पहले उसे redact करता है।
-- Matrix preview streaming active होने पर tool-progress preview updates default रूप से enabled होते हैं। answer text के लिए preview edits रखने लेकिन tool progress को normal delivery path पर छोड़ने के लिए `streaming.preview.toolProgress: false` set करें।
-- Preview edits में अतिरिक्त Matrix API calls लगती हैं। यदि आप सबसे conservative rate-limit profile चाहते हैं तो `streaming: "off"` छोड़ें।
+- यदि कोई पूर्वावलोकन Matrix की प्रति-इवेंट आकार सीमा से आगे बढ़ता है, तो OpenClaw पूर्वावलोकन स्ट्रीमिंग रोक देता है और केवल-अंतिम वितरण पर वापस चला जाता है।
+- मीडिया उत्तर हमेशा अटैचमेंट सामान्य रूप से भेजते हैं; यदि किसी पुराने पूर्वावलोकन का सुरक्षित रूप से पुनः उपयोग नहीं किया जा सकता, तो OpenClaw अंतिम मीडिया उत्तर भेजने से पहले उसे हटा देता है।
+- पूर्वावलोकन स्ट्रीमिंग सक्रिय होने पर टूल-प्रगति पूर्वावलोकन अपडेट डिफ़ॉल्ट रूप से चालू रहते हैं। उत्तर टेक्स्ट के लिए पूर्वावलोकन संपादन बनाए रखने लेकिन टूल प्रगति को सामान्य वितरण पथ पर छोड़ने के लिए `streaming.preview.toolProgress: false` सेट करें।
+- पूर्वावलोकन संपादनों में अतिरिक्त Matrix API कॉल लगती हैं। सबसे रूढ़िवादी दर-सीमा प्रोफ़ाइल के लिए `streaming.mode: "off"` को यथावत रखें।
+- पुराने स्केलर/बूलियन `streaming` मानों और समतल `blockStreaming` / `chunkMode` कुंजियों को `openclaw doctor --fix` द्वारा इस नेस्टेड संरचना में फिर से लिखा जाता है।
 
-## Voice messages
+## वॉइस संदेश
 
-Inbound Matrix voice notes को room mention gate से पहले transcribe किया जाता है। इससे bot का नाम बोलने वाला voice note `requireMention: true` room में agent को trigger कर सकता है, और agent को केवल audio attachment placeholder के बजाय transcript मिलता है।
+इनबाउंड Matrix वॉइस नोट्स को रूम उल्लेख गेट से पहले ट्रांसक्राइब किया जाता है, इसलिए `requireMention: true` रूम में बॉट का नाम बोलने वाला वॉइस नोट एजेंट को ट्रिगर कर सकता है, और एजेंट को केवल ऑडियो अटैचमेंट प्लेसहोल्डर के बजाय ट्रांसक्रिप्ट मिलता है।
 
-Matrix `tools.media.audio` के अंतर्गत configured shared audio media provider का उपयोग करता है, जैसे OpenAI `gpt-4o-mini-transcribe`। provider setup और limits के लिए [Media tools overview](/hi/tools/media-overview) देखें।
+Matrix, `tools.media.audio` के अंतर्गत साझा ऑडियो मीडिया प्रदाता का उपयोग करता है, जैसे OpenAI `gpt-4o-mini-transcribe`। प्रदाता सेटअप और सीमाओं के लिए [मीडिया टूल का अवलोकन](/hi/tools/media-overview) देखें।
 
-Behavior details:
-
-- `m.audio` इवेंट और `audio/*` MIME प्रकार वाले `m.file` इवेंट पात्र हैं.
-- एन्क्रिप्टेड रूम में, OpenClaw ट्रांसक्रिप्शन से पहले मौजूदा Matrix मीडिया पाथ के माध्यम से अटैचमेंट को डिक्रिप्ट करता है.
-- एजेंट प्रॉम्प्ट में ट्रांसक्रिप्ट को मशीन-जनित और अविश्वसनीय के रूप में चिह्नित किया जाता है.
-- अटैचमेंट को पहले से ट्रांसक्राइब किया हुआ चिह्नित किया जाता है ताकि डाउनस्ट्रीम मीडिया टूल उसी वॉयस नोट को फिर से ट्रांसक्राइब न करें.
-- ऑडियो ट्रांसक्रिप्शन को वैश्विक रूप से अक्षम करने के लिए `tools.media.audio.enabled: false` सेट करें.
+- `m.audio` इवेंट और `audio/*` MIME प्रकार वाले `m.file` इवेंट पात्र हैं।
+- एन्क्रिप्टेड रूम में, OpenClaw ट्रांसक्रिप्शन से पहले मौजूदा Matrix मीडिया पथ के माध्यम से अटैचमेंट को डिक्रिप्ट करता है।
+- एजेंट प्रॉम्प्ट में ट्रांसक्रिप्ट को मशीन-जनित और अविश्वसनीय के रूप में चिह्नित किया जाता है।
+- अटैचमेंट को पहले से ट्रांसक्राइब किया हुआ चिह्नित किया जाता है, ताकि डाउनस्ट्रीम मीडिया टूल उसे दोबारा ट्रांसक्राइब न करें।
+- ऑडियो ट्रांसक्रिप्शन को वैश्विक रूप से अक्षम करने के लिए `tools.media.audio.enabled: false` सेट करें।
 
 ## अनुमोदन मेटाडेटा
 
-Matrix नेटिव अनुमोदन प्रॉम्प्ट सामान्य `m.room.message` इवेंट होते हैं जिनमें `com.openclaw.approval` के अंतर्गत OpenClaw-विशिष्ट कस्टम इवेंट सामग्री होती है. Matrix कस्टम इवेंट-सामग्री कुंजियों की अनुमति देता है, इसलिए सामान्य क्लाइंट अभी भी टेक्स्ट बॉडी रेंडर करते हैं, जबकि OpenClaw-aware क्लाइंट संरचित अनुमोदन id, kind, state, उपलब्ध निर्णय, और exec/plugin विवरण पढ़ सकते हैं.
+Matrix के मूल अनुमोदन प्रॉम्प्ट सामान्य `m.room.message` इवेंट होते हैं, जिनमें `com.openclaw.approval` कुंजी के अंतर्गत OpenClaw-विशिष्ट सामग्री होती है। सामान्य क्लाइंट फिर भी टेक्स्ट बॉडी रेंडर करते हैं; OpenClaw-संगत क्लाइंट संरचित अनुमोदन आईडी, प्रकार, स्थिति, निर्णय और exec/plugin विवरण पढ़ सकते हैं।
 
-जब कोई अनुमोदन प्रॉम्प्ट एक Matrix इवेंट के लिए बहुत लंबा होता है, OpenClaw दृश्यमान टेक्स्ट को खंडों में बांटता है और केवल पहले खंड से `com.openclaw.approval` जोड़ता है. allow/deny निर्णयों के लिए प्रतिक्रियाएं उसी पहले इवेंट से बंधी होती हैं, इसलिए लंबे प्रॉम्प्ट single-event प्रॉम्प्ट की तरह ही वही अनुमोदन लक्ष्य रखते हैं.
+जब कोई प्रॉम्प्ट एक Matrix इवेंट के लिए बहुत लंबा होता है, तो OpenClaw दृश्यमान टेक्स्ट को खंडों में बाँटता है और केवल पहले खंड में `com.openclaw.approval` संलग्न करता है। अनुमति/अस्वीकृति प्रतिक्रियाएँ उसी पहले इवेंट से जुड़ती हैं, इसलिए लंबे प्रॉम्प्ट का अनुमोदन लक्ष्य एकल-इवेंट प्रॉम्प्ट जैसा ही रहता है।
 
-### शांत अंतिम previews के लिए self-hosted push rules
+### शांत अंतिम रूप दिए गए पूर्वावलोकनों के लिए स्वयं-होस्ट किए गए पुश नियम
 
-`streaming: "quiet"` प्राप्तकर्ताओं को केवल तब सूचित करता है जब कोई ब्लॉक या turn अंतिम हो जाता है - प्रति-यूज़र push rule को अंतिम preview marker से मेल खाना होता है. पूरी विधि (recipient token, pusher check, rule install, प्रति-homeserver notes) के लिए [शांत previews के लिए Matrix push rules](/hi/channels/matrix-push-rules) देखें.
+`streaming.mode: "quiet"` प्राप्तकर्ताओं को केवल किसी ब्लॉक या टर्न को अंतिम रूप दिए जाने पर सूचित करता है—प्रति-उपयोगकर्ता पुश नियम को अंतिम रूप दिए गए पूर्वावलोकन मार्कर से मेल खाना चाहिए। पूरी विधि के लिए [शांत पूर्वावलोकनों हेतु Matrix पुश नियम](/hi/channels/matrix-push-rules) देखें।
 
-## Bot-to-bot रूम
+## बॉट-से-बॉट रूम
 
-डिफ़ॉल्ट रूप से, अन्य कॉन्फ़िगर किए गए OpenClaw Matrix खातों से आए Matrix संदेशों को अनदेखा किया जाता है.
-
-जब आप जानबूझकर inter-agent Matrix ट्रैफ़िक चाहते हैं, तो `allowBots` का उपयोग करें:
+डिफ़ॉल्ट रूप से, अन्य कॉन्फ़िगर किए गए OpenClaw Matrix खातों से आने वाले Matrix संदेशों को अनदेखा किया जाता है। इंटर-एजेंट ट्रैफ़िक को जानबूझकर अनुमति देने के लिए `allowBots` का उपयोग करें:
 
 ```json5
 {
@@ -313,33 +289,34 @@ Matrix नेटिव अनुमोदन प्रॉम्प्ट सा�
 }
 ```
 
-- `allowBots: true` अनुमति प्राप्त रूम और DM में अन्य कॉन्फ़िगर किए गए Matrix bot खातों से संदेश स्वीकार करता है.
-- `allowBots: "mentions"` उन संदेशों को केवल तब स्वीकार करता है जब वे रूम में इस bot का दृश्यमान उल्लेख करते हैं. DM अभी भी अनुमत हैं.
-- `groups.<room>.allowBots` एक रूम के लिए account-level सेटिंग को ओवरराइड करता है.
-- स्वीकार किए गए configured-bot संदेश साझा [bot loop protection](/hi/channels/bot-loop-protection) का उपयोग करते हैं. `channels.defaults.botLoopProtection` कॉन्फ़िगर करें, फिर जब किसी रूम को अलग budget चाहिए तो `channels.matrix.botLoopProtection` या `channels.matrix.groups.<room>.botLoopProtection` से ओवरराइड करें.
-- OpenClaw self-reply loops से बचने के लिए उसी Matrix user ID से आए संदेशों को अभी भी अनदेखा करता है.
-- Matrix यहां कोई नेटिव bot flag प्रदर्शित नहीं करता; OpenClaw "bot-authored" को "इस OpenClaw gateway पर किसी अन्य कॉन्फ़िगर किए गए Matrix खाते द्वारा भेजा गया" मानता है.
+- `allowBots: true` अनुमत रूम और DM में अन्य कॉन्फ़िगर किए गए Matrix बॉट खातों से संदेश स्वीकार करता है।
+- `allowBots: "mentions"` रूम में उन संदेशों को केवल तभी स्वीकार करता है, जब उनमें इस बॉट का स्पष्ट उल्लेख हो; DM फिर भी हमेशा अनुमत रहते हैं।
+- `groups.<room>.allowBots` एक रूम के लिए खाता-स्तरीय सेटिंग को ओवरराइड करता है।
+- स्वीकार किए गए कॉन्फ़िगर-बॉट संदेश साझा [बॉट लूप सुरक्षा](/hi/channels/bot-loop-protection) का उपयोग करते हैं। `channels.defaults.botLoopProtection` कॉन्फ़िगर करें, फिर प्रति-खाता `channels.matrix.botLoopProtection` या प्रति-रूम `channels.matrix.groups.<room>.botLoopProtection` से ओवरराइड करें।
+- स्व-उत्तर लूप से बचने के लिए OpenClaw अब भी उसी Matrix उपयोगकर्ता आईडी से आए संदेशों को अनदेखा करता है।
+- Matrix में कोई मूल बॉट फ़्लैग नहीं है; OpenClaw "बॉट द्वारा लिखा गया" का अर्थ "इस OpenClaw Gateway पर किसी अन्य कॉन्फ़िगर किए गए Matrix खाते द्वारा भेजा गया" मानता है।
 
-साझा रूम में bot-to-bot ट्रैफ़िक सक्षम करते समय strict room allowlists और mention requirements का उपयोग करें.
+साझा रूम में बॉट-से-बॉट ट्रैफ़िक सक्षम करते समय सख्त रूम अनुमति-सूचियों और उल्लेख आवश्यकताओं का उपयोग करें।
 
 ## एन्क्रिप्शन और सत्यापन
 
-एन्क्रिप्टेड (E2EE) रूम में, outbound image events `thumbnail_file` का उपयोग करते हैं ताकि image previews पूर्ण अटैचमेंट के साथ एन्क्रिप्टेड रहें. अनएन्क्रिप्टेड रूम अभी भी सादा `thumbnail_url` उपयोग करते हैं. कोई कॉन्फ़िगरेशन आवश्यक नहीं है - Plugin E2EE स्थिति को स्वचालित रूप से पहचानता है.
+एन्क्रिप्टेड (E2EE) रूम में, आउटबाउंड इमेज इवेंट `thumbnail_file` का उपयोग करते हैं, ताकि इमेज पूर्वावलोकन पूरे अटैचमेंट के साथ एन्क्रिप्ट हों; अनएन्क्रिप्टेड रूम साधारण `thumbnail_url` का उपयोग करते हैं। किसी कॉन्फ़िगरेशन की आवश्यकता नहीं है—Plugin स्वचालित रूप से E2EE स्थिति का पता लगाता है।
 
-सभी `openclaw matrix` कमांड `--verbose` (पूर्ण diagnostics), `--json` (machine-readable output), और `--account <id>` (multi-account setups) स्वीकार करते हैं. आउटपुट डिफ़ॉल्ट रूप से संक्षिप्त होता है, शांत आंतरिक SDK logging के साथ. नीचे दिए गए उदाहरण canonical form दिखाते हैं; आवश्यकता अनुसार flags जोड़ें.
+सभी `openclaw matrix` कमांड `--verbose` (पूर्ण निदान), `--json` (मशीन-पठनीय आउटपुट) और `--account <id>` (बहु-खाता सेटअप) स्वीकार करते हैं। डिफ़ॉल्ट रूप से आउटपुट संक्षिप्त होता है।
 
 ### एन्क्रिप्शन सक्षम करें
 
 ```bash
 openclaw matrix encryption setup
+printf '%s\n' "$MATRIX_RECOVERY_KEY" | openclaw matrix encryption setup --recovery-key-stdin
 ```
 
-secret storage और cross-signing को bootstrap करता है, आवश्यकता होने पर room-key backup बनाता है, फिर status और अगले चरण प्रिंट करता है. उपयोगी flags:
+यह गुप्त भंडारण और क्रॉस-साइनिंग को बूटस्ट्रैप करता है, आवश्यकता होने पर रूम-कुंजी बैकअप बनाता है, फिर स्थिति और अगले चरण प्रिंट करता है। उपयोगी फ़्लैग:
 
-- `--recovery-key <key>` bootstrapping से पहले recovery key लागू करें (नीचे documented stdin form को प्राथमिकता दें)
-- `--force-reset-cross-signing` वर्तमान cross-signing identity को हटाकर नई बनाएं (केवल जानबूझकर उपयोग करें)
+- `--recovery-key-stdin` पुनर्प्राप्ति कुंजी को प्रोसेस आर्ग्युमेंट में उजागर किए बिना stdin से पढ़ता है; संगतता के लिए `--recovery-key <key>` उपलब्ध रहता है
+- `--force-reset-cross-signing` वर्तमान क्रॉस-साइनिंग पहचान को त्यागकर नई पहचान बनाता है (केवल जानबूझकर उपयोग के लिए)
 
-नए खाते के लिए, निर्माण के समय E2EE सक्षम करें:
+किसी नए खाते के लिए, खाता बनाते समय E2EE सक्षम करें:
 
 ```bash
 openclaw matrix account add \
@@ -348,9 +325,7 @@ openclaw matrix account add \
   --enable-e2ee
 ```
 
-`--encryption` `--enable-e2ee` का alias है.
-
-समतुल्य manual config:
+`--encryption`, `--enable-e2ee` का उपनाम है। समकक्ष मैन्युअल कॉन्फ़िगरेशन:
 
 ```json5
 {
@@ -366,137 +341,137 @@ openclaw matrix account add \
 }
 ```
 
-### स्थिति और trust signals
+### स्थिति और विश्वसनीयता संकेत
 
 ```bash
 openclaw matrix verify status
 openclaw matrix verify status --include-recovery-key --json
 ```
 
-`verify status` तीन स्वतंत्र trust signals रिपोर्ट करता है (`--verbose` वे सभी दिखाता है):
+`verify status` तीन स्वतंत्र विश्वसनीयता संकेतों की रिपोर्ट करता है (`--verbose` उन सभी को दिखाता है):
 
-- `Locally trusted`: केवल इस क्लाइंट द्वारा trusted
-- `Cross-signing verified`: SDK cross-signing के माध्यम से verification रिपोर्ट करता है
-- `Signed by owner`: आपकी अपनी self-signing key द्वारा signed (केवल diagnostic)
+- `Locally trusted`: केवल इस क्लाइंट द्वारा विश्वसनीय
+- `Cross-signing verified`: SDK क्रॉस-साइनिंग के माध्यम से सत्यापन की रिपोर्ट करता है
+- `Signed by owner`: आपकी अपनी स्व-साइनिंग कुंजी द्वारा हस्ताक्षरित (केवल निदान के लिए)
 
-`Verified by owner` केवल तब `yes` बनता है जब `Cross-signing verified` `yes` हो. केवल local trust या owner signature पर्याप्त नहीं है.
+`Verified by owner`, `yes` केवल तभी है, जब `Cross-signing verified`, `yes` हो; केवल स्थानीय विश्वास या स्वामी का हस्ताक्षर पर्याप्त नहीं है।
 
-`--allow-degraded-local-state` Matrix खाते को पहले तैयार किए बिना best-effort diagnostics लौटाता है; offline या partially-configured probes के लिए उपयोगी.
+`--allow-degraded-local-state` Matrix खाते को पहले तैयार किए बिना सर्वोत्तम-प्रयास निदान लौटाता है; यह ऑफ़लाइन या आंशिक रूप से कॉन्फ़िगर की गई जाँच के लिए उपयोगी है।
 
-### इस device को recovery key से verify करें
+### पुनर्प्राप्ति कुंजी से इस डिवाइस को सत्यापित करें
 
-recovery key संवेदनशील है - इसे command line पर पास करने के बजाय stdin के माध्यम से pipe करें. `MATRIX_RECOVERY_KEY` सेट करें (या named account के लिए `MATRIX_<ID>_RECOVERY_KEY`):
+कुंजी को कमांड लाइन पर देने के बजाय पुनर्प्राप्ति कुंजी को stdin के माध्यम से पाइप करें:
 
 ```bash
 printf '%s\n' "$MATRIX_RECOVERY_KEY" | openclaw matrix verify device --recovery-key-stdin
 ```
 
-कमांड तीन स्थितियां रिपोर्ट करता है:
+कमांड तीन स्थितियों की रिपोर्ट करता है:
 
-- `Recovery key accepted`: Matrix ने secret storage या device trust के लिए key स्वीकार की.
-- `Backup usable`: room-key backup trusted recovery material के साथ load किया जा सकता है.
-- `Device verified by owner`: इस device को पूर्ण Matrix cross-signing identity trust है.
+- `Recovery key accepted`: Matrix ने गुप्त भंडारण या डिवाइस विश्वास के लिए कुंजी स्वीकार कर ली।
+- `Backup usable`: विश्वसनीय पुनर्प्राप्ति सामग्री से रूम-कुंजी बैकअप लोड किया जा सकता है।
+- `Device verified by owner`: इस डिवाइस को पूर्ण Matrix क्रॉस-साइनिंग पहचान विश्वास प्राप्त है।
 
-पूर्ण identity trust अधूरा होने पर यह non-zero exit करता है, भले ही recovery key ने backup material unlock कर दिया हो. उस स्थिति में, किसी अन्य Matrix client से self-verification पूरा करें:
+पूर्ण पहचान विश्वास अधूरा होने पर यह गैर-शून्य स्थिति के साथ बाहर निकलता है, भले ही पुनर्प्राप्ति कुंजी ने बैकअप सामग्री अनलॉक कर दी हो। ऐसी स्थिति में, किसी अन्य Matrix क्लाइंट से स्व-सत्यापन पूरा करें:
 
 ```bash
 openclaw matrix verify self
 ```
 
-`verify self` सफलतापूर्वक exit करने से पहले `Cross-signing verified: yes` की प्रतीक्षा करता है. प्रतीक्षा समायोजित करने के लिए `--timeout-ms <ms>` का उपयोग करें.
+`verify self` सफलतापूर्वक बाहर निकलने से पहले `Cross-signing verified: yes` की प्रतीक्षा करता है। प्रतीक्षा समायोजित करने के लिए `--timeout-ms <ms>` का उपयोग करें।
 
-literal-key form `openclaw matrix verify device "<recovery-key>"` भी स्वीकार किया जाता है, लेकिन key आपकी shell history में चली जाती है.
+शाब्दिक-कुंजी रूप `openclaw matrix verify device "<recovery-key>"` भी काम करता है, लेकिन कुंजी शेल इतिहास में दर्ज हो जाती है।
 
-### cross-signing को bootstrap या repair करें
+### क्रॉस-साइनिंग को बूटस्ट्रैप या सुधारें
 
 ```bash
 openclaw matrix verify bootstrap
 ```
 
-`verify bootstrap` एन्क्रिप्टेड खातों के लिए repair और setup कमांड है. क्रम में, यह:
+यह एन्क्रिप्टेड खातों के लिए सुधार/सेटअप कमांड है। क्रम से, यह:
 
-- secret storage को bootstrap करता है, संभव होने पर मौजूदा recovery key का पुनः उपयोग करता है
-- cross-signing को bootstrap करता है और missing public keys अपलोड करता है
-- current device को mark और cross-sign करता है
-- यदि server-side room-key backup पहले से मौजूद नहीं है तो उसे बनाता है
+- गुप्त भंडारण को बूटस्ट्रैप करता है और जहाँ संभव हो, मौजूदा पुनर्प्राप्ति कुंजी का पुनः उपयोग करता है
+- क्रॉस-साइनिंग को बूटस्ट्रैप करता है और अनुपलब्ध सार्वजनिक कुंजियाँ अपलोड करता है
+- वर्तमान डिवाइस को चिह्नित और क्रॉस-साइन करता है
+- यदि पहले से मौजूद न हो, तो सर्वर-साइड रूम-कुंजी बैकअप बनाता है
 
-यदि homeserver को cross-signing keys अपलोड करने के लिए UIA चाहिए, OpenClaw पहले no-auth आज़माता है, फिर `m.login.dummy`, फिर `m.login.password` (`channels.matrix.password` आवश्यक).
+यदि होमसर्वर को क्रॉस-साइनिंग कुंजियाँ अपलोड करने के लिए UIA की आवश्यकता है, तो OpenClaw पहले बिना प्रमाणीकरण के प्रयास करता है, फिर `m.login.dummy`, और उसके बाद `m.login.password` (जिसके लिए `channels.matrix.password` आवश्यक है) आज़माता है।
 
-उपयोगी flags:
+उपयोगी फ़्लैग:
 
-- `--recovery-key-stdin` (`printf '%s\n' "$MATRIX_RECOVERY_KEY" | …` के साथ pair करें) या `--recovery-key <key>`
-- `--force-reset-cross-signing` वर्तमान cross-signing identity को हटाने के लिए (केवल जानबूझकर; active recovery key को stored होना या `--recovery-key-stdin` के साथ supplied होना आवश्यक)
+- `--recovery-key-stdin` (`printf '%s\n' "$MATRIX_RECOVERY_KEY" | ...` के साथ उपयोग करें) या `--recovery-key <key>`
+- `--force-reset-cross-signing` वर्तमान क्रॉस-साइनिंग पहचान को त्यागने के लिए (केवल जानबूझकर; सक्रिय पुनर्प्राप्ति कुंजी का संग्रहीत होना या `--recovery-key-stdin` के साथ दिया जाना आवश्यक है)
 
-### Room-key backup
+### रूम-कुंजी बैकअप
 
 ```bash
 openclaw matrix verify backup status
 printf '%s\n' "$MATRIX_RECOVERY_KEY" | openclaw matrix verify backup restore --recovery-key-stdin
 ```
 
-`backup status` दिखाता है कि server-side backup मौजूद है या नहीं और यह device उसे decrypt कर सकता है या नहीं. `backup restore` backed-up room keys को local crypto store में import करता है; यदि recovery key पहले से disk पर है तो आप `--recovery-key-stdin` छोड़ सकते हैं.
+`backup status` दिखाता है कि सर्वर-साइड बैकअप मौजूद है या नहीं और यह डिवाइस उसे डिक्रिप्ट कर सकता है या नहीं। `backup restore` बैकअप की गई रूम कुंजियों को स्थानीय क्रिप्टो स्टोर में आयात करता है; यदि पुनर्प्राप्ति कुंजी पहले से डिस्क पर है, तो `--recovery-key-stdin` छोड़ दें।
 
-टूटे हुए backup को fresh baseline से बदलने के लिए (unrecoverable old history खोने को स्वीकार करता है; यदि current backup secret unloadable है तो secret storage को फिर से बना भी सकता है):
+टूटे हुए बैकअप को नई आधाररेखा से बदलने के लिए (पुनर्प्राप्त न हो सकने वाले पुराने इतिहास को खोना स्वीकार करता है; यदि वर्तमान बैकअप सीक्रेट लोड नहीं हो सकता, तो गुप्त भंडारण भी दोबारा बना सकता है):
 
 ```bash
 openclaw matrix verify backup reset --yes
 ```
 
-`--rotate-recovery-key` केवल तब जोड़ें जब आप जानबूझकर चाहते हों कि previous recovery key fresh backup baseline को unlock करना बंद कर दे.
+`--rotate-recovery-key` केवल तभी जोड़ें, जब पिछली पुनर्प्राप्ति कुंजी से नई बैकअप आधाररेखा को अनलॉक करना जानबूझकर बंद करना हो।
 
-### verifications को list करना, request करना, और respond करना
+### सत्यापनों को सूचीबद्ध करना, अनुरोध करना और उनका उत्तर देना
 
 ```bash
 openclaw matrix verify list
 ```
 
-चुने गए खाते के लिए pending verification requests सूचीबद्ध करता है.
+चयनित खाते के लिए लंबित सत्यापन अनुरोधों को सूचीबद्ध करता है।
 
 ```bash
 openclaw matrix verify request --own-user
 openclaw matrix verify request --user-id @ops:example.org --device-id ABCDEF
 ```
 
-इस OpenClaw खाते से verification request भेजता है. `--own-user` self-verification request करता है (आप उसी user के किसी अन्य Matrix client में prompt स्वीकार करते हैं); `--user-id`/`--device-id`/`--room-id` किसी और को target करते हैं. `--own-user` को अन्य targeting flags के साथ combine नहीं किया जा सकता.
+इस खाते से सत्यापन अनुरोध भेजता है। `--own-user` स्व-सत्यापन का अनुरोध करता है (उसी उपयोगकर्ता के किसी अन्य Matrix क्लाइंट में प्रॉम्प्ट स्वीकार करें); `--user-id`/`--device-id`/`--room-id` किसी अन्य व्यक्ति को लक्षित करते हैं। `--own-user` को अन्य लक्ष्यीकरण फ़्लैग के साथ जोड़ा नहीं जा सकता।
 
-Lower-level lifecycle handling के लिए - आम तौर पर किसी अन्य client से inbound requests को shadow करते समय - ये कमांड किसी विशिष्ट request `<id>` पर काम करते हैं (`verify list` और `verify request` द्वारा printed):
+निम्न-स्तरीय जीवनचक्र प्रबंधन के लिए—आमतौर पर किसी अन्य क्लाइंट से आने वाले अनुरोधों की निगरानी करते समय—ये कमांड किसी विशिष्ट अनुरोध `<id>` पर कार्य करते हैं (जिसे `verify list` और `verify request` प्रिंट करते हैं):
 
 | कमांड                                    | उद्देश्य                                                             |
 | ------------------------------------------ | ------------------------------------------------------------------- |
-| `openclaw matrix verify accept <id>`       | inbound request स्वीकार करें                                           |
-| `openclaw matrix verify start <id>`        | SAS flow शुरू करें                                                  |
-| `openclaw matrix verify sas <id>`          | SAS emoji या decimals प्रिंट करें                                     |
-| `openclaw matrix verify confirm-sas <id>`  | पुष्टि करें कि SAS दूसरे client द्वारा दिखाए गए से match करता है            |
-| `openclaw matrix verify mismatch-sas <id>` | जब emoji या decimals match न करें तो SAS reject करें              |
-| `openclaw matrix verify cancel <id>`       | रद्द करें; optional `--reason <text>` और `--code <matrix-code>` लेता है |
+| `openclaw matrix verify accept <id>`       | इनबाउंड अनुरोध स्वीकार करना                                           |
+| `openclaw matrix verify start <id>`        | SAS प्रवाह शुरू करना                                                  |
+| `openclaw matrix verify sas <id>`          | SAS इमोजी या दशमलव प्रिंट करना                                     |
+| `openclaw matrix verify confirm-sas <id>`  | पुष्टि करना कि SAS दूसरे क्लाइंट द्वारा दिखाए गए मान से मेल खाता है            |
+| `openclaw matrix verify mismatch-sas <id>` | इमोजी या दशमलव मेल न खाने पर SAS अस्वीकार करना              |
+| `openclaw matrix verify cancel <id>`       | रद्द करना; वैकल्पिक `--reason <text>` और `--code <matrix-code>` स्वीकार करता है |
 
-`accept`, `start`, `sas`, `confirm-sas`, `mismatch-sas`, और `cancel` सभी `--user-id` और `--room-id` को DM follow-up hints के रूप में स्वीकार करते हैं जब verification किसी specific direct-message room से anchored हो.
+`accept`, `start`, `sas`, `confirm-sas`, `mismatch-sas`, और `cancel` सभी `--user-id` और `--room-id` को DM फ़ॉलो-अप संकेतों के रूप में स्वीकार करते हैं, जब सत्यापन किसी विशिष्ट डायरेक्ट-मैसेज रूम से जुड़ा हो।
 
-### Multi-account notes
+### बहु-खाता संबंधी टिप्पणियाँ
 
-`--account <id>` के बिना, Matrix CLI commands implicit default account का उपयोग करते हैं. यदि आपके पास कई named accounts हैं और आपने `channels.matrix.defaultAccount` सेट नहीं किया है, तो वे guess करने से इंकार करेंगे और आपसे चुनने को कहेंगे. जब किसी named account के लिए E2EE disabled या unavailable हो, errors उस account की config key की ओर संकेत करते हैं, उदाहरण के लिए `channels.matrix.accounts.assistant.encryption`.
+`--account <id>` के बिना, Matrix CLI कमांड अंतर्निहित डिफ़ॉल्ट खाते का उपयोग करते हैं। कई नामित खाते होने और `channels.matrix.defaultAccount` न दिए जाने पर, कमांड अनुमान लगाने से इनकार करते हैं और आपसे खाता चुनने को कहते हैं। किसी नामित खाते के लिए E2EE अक्षम या अनुपलब्ध होने पर, त्रुटियाँ उस खाते की कॉन्फ़िगरेशन कुंजी की ओर संकेत करती हैं, उदाहरण के लिए `channels.matrix.accounts.assistant.encryption`।
 
 <AccordionGroup>
   <Accordion title="स्टार्टअप व्यवहार">
-    `encryption: true` के साथ, `startupVerification` डिफ़ॉल्ट रूप से `"if-unverified"` होता है. startup पर unverified device किसी अन्य Matrix client में self-verification request करता है, duplicates छोड़ता है और cooldown लागू करता है (डिफ़ॉल्ट रूप से 24 घंटे). `startupVerificationCooldownHours` से tune करें या `startupVerification: "off"` से disable करें.
+    `encryption: true` के साथ, `startupVerification` डिफ़ॉल्ट रूप से `"if-unverified"` होता है। स्टार्टअप पर कोई असत्यापित डिवाइस दूसरे Matrix क्लाइंट में स्व-सत्यापन का अनुरोध करता है, डुप्लिकेट अनुरोध छोड़ता है और कूलडाउन लागू करता है (डिफ़ॉल्ट रूप से 24 घंटे)। `startupVerificationCooldownHours` से समायोजित करें या `startupVerification: "off"` से अक्षम करें।
 
-    Startup एक conservative crypto bootstrap pass भी चलाता है जो current secret storage और cross-signing identity का पुनः उपयोग करता है. यदि bootstrap state broken है, OpenClaw `channels.matrix.password` के बिना भी guarded repair का प्रयास करता है; यदि homeserver को password UIA चाहिए, startup warning log करता है और non-fatal रहता है. Already-owner-signed devices सुरक्षित रखे जाते हैं.
+    स्टार्टअप मौजूदा गुप्त भंडारण और क्रॉस-साइनिंग पहचान का पुनः उपयोग करते हुए एक सावधानीपूर्ण क्रिप्टो बूटस्ट्रैप चरण भी चलाता है। यदि बूटस्ट्रैप स्थिति टूटी हुई है, तो OpenClaw `channels.matrix.password` के बिना भी नियंत्रित सुधार का प्रयास करता है; यदि होमसर्वर को पासवर्ड UIA की आवश्यकता होती है, तो स्टार्टअप चेतावनी लॉग करता है और गैर-घातक बना रहता है। स्वामी द्वारा पहले से हस्ताक्षरित डिवाइस सुरक्षित रखे जाते हैं।
 
-    पूर्ण upgrade flow के लिए [Matrix migration](/hi/channels/matrix-migration) देखें.
-
-  </Accordion>
-
-  <Accordion title="Verification notices">
-    Matrix strict DM verification room में verification lifecycle notices को `m.notice` messages के रूप में post करता है: request, ready ("Verify by emoji" guidance के साथ), start/completion, और उपलब्ध होने पर SAS (emoji/decimal) details.
-
-    किसी अन्य Matrix client से incoming requests को tracked और auto-accepted किया जाता है. self-verification के लिए, OpenClaw SAS flow अपने आप शुरू करता है और emoji verification उपलब्ध होते ही अपनी side confirm करता है - आपको अभी भी अपने Matrix client में compare करके "They match" confirm करना होगा.
-
-    Verification system notices agent chat pipeline को forward नहीं किए जाते.
+    पूर्ण अपग्रेड प्रवाह के लिए [Matrix माइग्रेशन](/hi/channels/matrix-migration) देखें।
 
   </Accordion>
 
-  <Accordion title="हटाया गया या अमान्य Matrix device">
-    यदि `verify status` कहता है कि current device अब homeserver पर listed नहीं है, तो नया OpenClaw Matrix device बनाएं. password login के लिए:
+  <Accordion title="सत्यापन सूचनाएँ">
+    Matrix सख्त DM सत्यापन रूम में सत्यापन जीवनचक्र सूचनाएँ `m.notice` संदेशों के रूप में पोस्ट करता है: अनुरोध, तैयार ("Verify by emoji" मार्गदर्शन के साथ), प्रारंभ/पूर्णता और उपलब्ध होने पर SAS (इमोजी/दशमलव) विवरण।
+
+    किसी अन्य Matrix क्लाइंट से आने वाले अनुरोध ट्रैक और स्वतः स्वीकार किए जाते हैं। स्व-सत्यापन के लिए, OpenClaw SAS प्रवाह स्वचालित रूप से शुरू करता है और इमोजी सत्यापन उपलब्ध होते ही अपनी ओर से पुष्टि करता है—आपको फिर भी अपने Matrix क्लाइंट में इमोजी की तुलना करके "They match" की पुष्टि करनी होगी।
+
+    सत्यापन सिस्टम सूचनाएँ एजेंट चैट पाइपलाइन को अग्रेषित नहीं की जाती हैं।
+
+  </Accordion>
+
+  <Accordion title="हटाया गया या अमान्य Matrix डिवाइस">
+    यदि `verify status` बताता है कि वर्तमान डिवाइस अब होमसर्वर पर सूचीबद्ध नहीं है, तो नया OpenClaw Matrix डिवाइस बनाएँ। पासवर्ड लॉगिन के लिए:
 
 ```bash
 openclaw matrix account add \
@@ -507,7 +482,7 @@ openclaw matrix account add \
   --device-name OpenClaw-Gateway
 ```
 
-    टोकन auth के लिए, अपने Matrix क्लाइंट या admin UI में एक ताज़ा access token बनाएं, फिर OpenClaw अपडेट करें:
+    टोकन प्रमाणीकरण के लिए, अपने Matrix क्लाइंट या एडमिन UI में नया एक्सेस टोकन बनाएँ, फिर OpenClaw अपडेट करें:
 
 ```bash
 openclaw matrix account add \
@@ -516,12 +491,12 @@ openclaw matrix account add \
   --access-token '<token>'
 ```
 
-    `assistant` को विफल कमांड के account ID से बदलें, या default account के लिए `--account` छोड़ दें।
+    विफल कमांड से प्राप्त खाता ID से `assistant` को बदलें, या डिफ़ॉल्ट खाते के लिए `--account` को छोड़ दें।
 
   </Accordion>
 
   <Accordion title="डिवाइस स्वच्छता">
-    पुराने OpenClaw-प्रबंधित डिवाइस जमा हो सकते हैं। सूची बनाएं और हटाएं:
+    OpenClaw द्वारा प्रबंधित पुराने डिवाइस जमा हो सकते हैं। उन्हें सूचीबद्ध करें और अप्रचलित डिवाइस हटाएँ:
 
 ```bash
 openclaw matrix devices list
@@ -530,134 +505,126 @@ openclaw matrix devices prune-stale
 
   </Accordion>
 
-  <Accordion title="Crypto store">
-    Matrix E2EE आधिकारिक `matrix-js-sdk` Rust crypto पथ का उपयोग करता है, जिसमें IndexedDB shim के रूप में `fake-indexeddb` होता है। Crypto स्थिति `crypto-idb-snapshot.json` में बनी रहती है (प्रतिबंधात्मक फ़ाइल अनुमतियां)।
+  <Accordion title="क्रिप्टो स्टोर">
+    Matrix E2EE, IndexedDB शिम के रूप में `fake-indexeddb` के साथ आधिकारिक `matrix-js-sdk` Rust क्रिप्टो पथ का उपयोग करता है। क्रिप्टो स्थिति `crypto-idb-snapshot.json` में बनी रहती है (प्रतिबंधात्मक फ़ाइल अनुमतियों के साथ)।
 
-    एन्क्रिप्टेड runtime स्थिति `~/.openclaw/matrix/accounts/<account>/<homeserver>__<user>/<token-hash>/` के अंतर्गत रहती है और इसमें sync store, crypto store, recovery key, IDB snapshot, thread bindings, और startup verification state शामिल होते हैं। जब token बदलता है लेकिन account identity वही रहती है, OpenClaw सबसे अच्छा मौजूदा root दोबारा उपयोग करता है ताकि पिछली स्थिति दिखाई देती रहे।
+    एन्क्रिप्टेड रनटाइम स्थिति `~/.openclaw/matrix/accounts/<account>/<homeserver>__<user>/<token-hash>/` के अंतर्गत रहती है और इसमें सिंक स्टोर, क्रिप्टो स्टोर, पुनर्प्राप्ति कुंजी, IDB स्नैपशॉट, थ्रेड बाइंडिंग और स्टार्टअप सत्यापन स्थिति शामिल होती है। जब टोकन बदलता है लेकिन खाते की पहचान समान रहती है, तो OpenClaw सर्वोत्तम मौजूदा रूट का पुनः उपयोग करता है, ताकि पिछली स्थिति दिखाई देती रहे।
 
-    एक single पुराना token-hash root सामान्य token-rotation continuity path हो सकता है। यदि OpenClaw `matrix: multiple populated token-hash storage roots detected` लॉग करता है, तो account directory जांचें और stale sibling roots को केवल यह पुष्टि करने के बाद archive करें कि चुना गया active root स्वस्थ है। Stale roots को तुरंत हटाने के बजाय उन्हें `_archive/` directory में ले जाना बेहतर है।
+    एकमात्र पुराना टोकन-हैश रूट, टोकन रोटेशन की सामान्य निरंतरता का पथ हो सकता है। यदि OpenClaw `matrix: multiple populated token-hash storage roots detected` लॉग करता है, तो खाता डायरेक्टरी की जाँच करें और चयनित सक्रिय रूट के स्वस्थ होने की पुष्टि करने के बाद ही अप्रचलित सिबलिंग रूट को संग्रहित करें। अप्रचलित रूट को तुरंत हटाने के बजाय उन्हें `_archive/` डायरेक्टरी में ले जाना बेहतर है।
 
   </Accordion>
 </AccordionGroup>
 
-## Profile प्रबंधन
-
-चुने गए account के लिए Matrix self-profile अपडेट करें:
+## प्रोफ़ाइल प्रबंधन
 
 ```bash
 openclaw matrix profile set --name "OpenClaw Assistant"
 openclaw matrix profile set --avatar-url https://cdn.example.org/avatar.png
 ```
 
-आप दोनों options एक ही call में दे सकते हैं। Matrix `mxc://` avatar URLs को सीधे स्वीकार करता है; जब आप `http://` या `https://` देते हैं, तो OpenClaw पहले file upload करता है और resolved `mxc://` URL को `channels.matrix.avatarUrl` (या per-account override) में store करता है।
+दोनों विकल्प एक ही कॉल में पास करें। Matrix सीधे `mxc://` अवतार URL स्वीकार करता है; `http://`/`https://` पास करने पर पहले फ़ाइल अपलोड होती है और समाधान किया गया `mxc://` URL, `channels.matrix.avatarUrl` (या प्रति-खाता ओवरराइड) में संग्रहीत होता है।
 
-## Threads
+## थ्रेड
 
-Matrix automatic replies और message-tool sends, दोनों के लिए native Matrix threads का समर्थन करता है। दो independent knobs behavior नियंत्रित करते हैं:
+Matrix स्वचालित उत्तरों और संदेश-टूल से भेजे गए संदेशों, दोनों के लिए नेटिव थ्रेड का समर्थन करता है। दो स्वतंत्र नियंत्रण व्यवहार निर्धारित करते हैं:
 
-### Session routing (`sessionScope`)
+### सत्र रूटिंग (`sessionScope`)
 
-`dm.sessionScope` तय करता है कि Matrix DM rooms OpenClaw sessions से कैसे map होते हैं:
+`dm.sessionScope` निर्धारित करता है कि Matrix DM रूम OpenClaw सत्रों से कैसे मैप होते हैं:
 
-- `"per-user"` (default): समान routed peer वाले सभी DM rooms एक session share करते हैं।
-- `"per-room"`: हर Matrix DM room को अपनी session key मिलती है, भले ही peer वही हो।
+- `"per-user"` (डिफ़ॉल्ट): समान रूट किए गए पीयर वाले सभी DM रूम एक ही सत्र साझा करते हैं।
+- `"per-room"`: प्रत्येक Matrix DM रूम को अपनी अलग सत्र कुंजी मिलती है, भले ही पीयर समान हो।
 
-Explicit conversation bindings हमेशा `sessionScope` पर जीतते हैं, इसलिए bound rooms और threads अपना चुना हुआ target session बनाए रखते हैं।
+स्पष्ट वार्तालाप बाइंडिंग को हमेशा `sessionScope` पर प्राथमिकता मिलती है; बाउंड रूम और थ्रेड अपने चुने हुए लक्ष्य सत्र को बनाए रखते हैं।
 
-### Reply threading (`threadReplies`)
+### उत्तर थ्रेडिंग (`threadReplies`)
 
-`threadReplies` तय करता है कि bot अपना reply कहां post करता है:
+`threadReplies` निर्धारित करता है कि बॉट अपना उत्तर कहाँ पोस्ट करता है:
 
-- `"off"`: replies top-level होते हैं। Inbound threaded messages parent session पर रहते हैं।
-- `"inbound"`: thread के अंदर reply केवल तब करें जब inbound message पहले से उसी thread में था।
-- `"always"`: triggering message पर rooted thread के अंदर reply करें; वह conversation पहले trigger से ही matching thread-scoped session के through route होती है।
+- `"off"`: उत्तर शीर्ष-स्तर पर होते हैं। इनबाउंड थ्रेडेड संदेश पैरेंट सत्र पर बने रहते हैं।
+- `"inbound"`: केवल तभी किसी थ्रेड के भीतर उत्तर दें, जब इनबाउंड संदेश पहले से उसी थ्रेड में था।
+- `"always"`: ट्रिगर करने वाले संदेश पर आधारित थ्रेड के भीतर उत्तर दें; वह वार्तालाप पहले ट्रिगर से आगे मिलान करने वाले थ्रेड-स्कोप्ड सत्र के माध्यम से रूट होता है।
 
-`dm.threadReplies` इसे केवल DMs के लिए override करता है - उदाहरण के लिए, room threads को isolated रखें जबकि DMs को flat रखें।
+`dm.threadReplies` इसे केवल DM के लिए ओवरराइड करता है—उदाहरण के लिए, DM को समतल रखते हुए रूम थ्रेड को अलग रखें।
 
-### Thread inheritance और slash commands
+### थ्रेड इनहेरिटेंस और स्लैश कमांड
 
-- Inbound threaded messages thread root message को extra agent context के रूप में शामिल करते हैं।
-- Message-tool sends समान room (या समान DM user target) को target करते समय current Matrix thread को auto-inherit करते हैं, जब तक कि explicit `threadId` न दिया गया हो।
-- DM user-target reuse केवल तब लागू होता है जब current session metadata समान Matrix account पर वही DM peer साबित करता है; अन्यथा OpenClaw सामान्य user-scoped routing पर वापस चला जाता है।
-- `/focus`, `/unfocus`, `/agents`, `/session idle`, `/session max-age`, और thread-bound `/acp spawn` सभी Matrix rooms और DMs में काम करते हैं।
-- Top-level `/focus` एक नया Matrix thread बनाता है और `threadBindings.spawnSessions` enabled होने पर उसे target session से bind करता है।
-- Existing Matrix thread के अंदर `/focus` या `/acp spawn --thread here` चलाने से वह thread वहीं bind हो जाता है।
+- इनबाउंड थ्रेडेड संदेशों में अतिरिक्त एजेंट संदर्भ के रूप में थ्रेड का मूल संदेश शामिल होता है।
+- समान रूम (या समान DM उपयोगकर्ता लक्ष्य) को लक्षित करते समय संदेश-टूल से भेजे गए संदेश वर्तमान Matrix थ्रेड को स्वतः इनहेरिट करते हैं, जब तक कि स्पष्ट `threadId` न दिया गया हो।
+- DM उपयोगकर्ता-लक्ष्य का पुनः उपयोग तभी सक्रिय होता है, जब वर्तमान सत्र मेटाडेटा उसी Matrix खाते पर समान DM पीयर को प्रमाणित करता है; अन्यथा OpenClaw सामान्य उपयोगकर्ता-स्कोप्ड रूटिंग पर वापस जाता है।
+- `/focus`, `/unfocus`, `/agents`, `/session idle`, `/session max-age`, और थ्रेड-बाउंड `/acp spawn` सभी Matrix रूम और DM में काम करते हैं।
+- जब `threadBindings.spawnSessions` सक्षम होता है, तब शीर्ष-स्तरीय `/focus` एक नया Matrix थ्रेड बनाता है और उसे लक्ष्य सत्र से बाइंड करता है।
+- किसी मौजूदा Matrix थ्रेड के भीतर `/focus` या `/acp spawn --thread here` चलाने पर वही थ्रेड यथास्थान बाइंड हो जाता है।
 
-जब OpenClaw समान shared session पर किसी दूसरे DM room से टकराता हुआ Matrix DM room detect करता है, तो वह उस room में एक one-time `m.notice` post करता है जो `/focus` escape hatch की ओर इशारा करता है और `dm.sessionScope` change का सुझाव देता है। Notice केवल तब दिखाई देता है जब thread bindings enabled हों।
+जब OpenClaw किसी Matrix DM रूम को समान साझा सत्र पर किसी अन्य DM रूम से टकराते हुए पहचानता है, तो यह `/focus` बचाव-पथ की ओर संकेत करने वाली और `dm.sessionScope` परिवर्तन का सुझाव देने वाली एकबारगी `m.notice` पोस्ट करता है। यह सूचना केवल थ्रेड बाइंडिंग सक्षम होने पर दिखाई देती है।
 
-## ACP conversation bindings
+## ACP वार्तालाप बाइंडिंग
 
-Matrix rooms, DMs, और existing Matrix threads को chat surface बदले बिना durable ACP workspaces में बदला जा सकता है।
+Matrix रूम, DM और मौजूदा Matrix थ्रेड, चैट सतह बदले बिना स्थायी ACP कार्यस्थान बन सकते हैं।
 
-तेज़ operator flow:
+त्वरित ऑपरेटर प्रवाह:
 
-- जिस Matrix DM, room, या existing thread का उपयोग जारी रखना चाहते हैं, उसके अंदर `/acp spawn codex --bind here` चलाएं।
-- Top-level Matrix DM या room में, current DM/room chat surface बना रहता है और future messages spawned ACP session को route होते हैं।
-- Existing Matrix thread के अंदर, `--bind here` उस current thread को वहीं bind करता है।
-- `/new` और `/reset` वही bound ACP session वहीं reset करते हैं।
-- `/acp close` ACP session बंद करता है और binding हटाता है।
+- उपयोग जारी रखने के लिए Matrix DM, रूम या मौजूदा थ्रेड के भीतर `/acp spawn codex --bind here` चलाएँ।
+- शीर्ष-स्तरीय DM या रूम में, वर्तमान DM/रूम चैट सतह बना रहता है और भविष्य के संदेश बनाए गए ACP सत्र पर रूट होते हैं।
+- किसी मौजूदा थ्रेड के भीतर, `--bind here` उसी वर्तमान थ्रेड को यथास्थान बाइंड करता है।
+- `/new` और `/reset` उसी बाउंड ACP सत्र को यथास्थान रीसेट करते हैं।
+- `/acp close` ACP सत्र को बंद करता है और बाइंडिंग हटाता है।
 
-नोट्स:
+`--bind here` कोई चाइल्ड Matrix थ्रेड नहीं बनाता। `threadBindings.spawnSessions`, `/acp spawn --thread auto|here` को नियंत्रित करता है, जहाँ OpenClaw को चाइल्ड थ्रेड बनाना या बाइंड करना आवश्यक होता है।
 
-- `--bind here` child Matrix thread नहीं बनाता।
-- `threadBindings.spawnSessions` `/acp spawn --thread auto|here` को gate करता है, जहां OpenClaw को child Matrix thread बनाना या bind करना होता है।
+### थ्रेड बाइंडिंग कॉन्फ़िगरेशन
 
-### Thread binding config
-
-Matrix `session.threadBindings` से global defaults inherit करता है, और per-channel overrides का भी समर्थन करता है:
+Matrix, `session.threadBindings` से वैश्विक डिफ़ॉल्ट इनहेरिट करता है और प्रति-चैनल ओवरराइड का समर्थन करता है:
 
 - `threadBindings.enabled`
 - `threadBindings.idleHours`
 - `threadBindings.maxAgeHours`
-- `threadBindings.spawnSessions`
+- `threadBindings.spawnSessions`: सबएजेंट और ACP थ्रेड स्पॉन, दोनों को नियंत्रित करता है।
+- बहिष्कृत `threadBindings.spawnSubagentSessions` / `threadBindings.spawnAcpSessions` कुंजियों को `openclaw doctor --fix` द्वारा `spawnSessions` में माइग्रेट किया जाता है।
 - `threadBindings.defaultSpawnContext`
 
-Matrix thread-bound session spawns default रूप से on हैं:
+Matrix थ्रेड-बाउंड सत्र स्पॉन डिफ़ॉल्ट रूप से चालू होते हैं। शीर्ष-स्तरीय `/focus` और `/acp spawn --thread auto|here` को Matrix थ्रेड बनाने/बाइंड करने से रोकने के लिए `threadBindings.spawnSessions: false` सेट करें। जब नेटिव सबएजेंट थ्रेड स्पॉन को पैरेंट ट्रांसक्रिप्ट फ़ोर्क नहीं करना चाहिए, तब `threadBindings.defaultSpawnContext: "isolated"` सेट करें।
 
-- Top-level `/focus` और `/acp spawn --thread auto|here` को Matrix threads बनाने/bind करने से रोकने के लिए `threadBindings.spawnSessions: false` set करें।
-- जब native subagent thread spawns को parent transcript fork नहीं करना चाहिए, तो `threadBindings.defaultSpawnContext: "isolated"` set करें।
+## प्रतिक्रियाएँ
 
-## Reactions
+Matrix आउटबाउंड प्रतिक्रियाओं, इनबाउंड प्रतिक्रिया सूचनाओं और अभिस्वीकृति प्रतिक्रियाओं का समर्थन करता है।
 
-Matrix outbound reactions, inbound reaction notifications, और ack reactions का समर्थन करता है।
+आउटबाउंड प्रतिक्रिया टूलिंग को `channels.matrix.actions.reactions` नियंत्रित करता है:
 
-Outbound reaction tooling `channels.matrix.actions.reactions` से gated है:
+- `react` किसी Matrix इवेंट में प्रतिक्रिया जोड़ता है।
+- `reactions` किसी Matrix इवेंट के लिए वर्तमान प्रतिक्रिया सारांश सूचीबद्ध करता है।
+- `emoji=""` उस इवेंट पर बॉट की अपनी प्रतिक्रियाएँ हटाता है।
+- `remove: true` बॉट से केवल निर्दिष्ट इमोजी प्रतिक्रिया हटाता है।
 
-- `react` Matrix event में reaction जोड़ता है।
-- `reactions` Matrix event के लिए current reaction summary list करता है।
-- `emoji=""` उस event पर bot की अपनी reactions हटाता है।
-- `remove: true` bot से केवल specified emoji reaction हटाता है।
+**समाधान क्रम** (पहला परिभाषित मान प्रभावी होता है):
 
-**Resolution order** (पहली defined value जीतती है):
+| सेटिंग                 | क्रम                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| `ackReaction`           | प्रति-खाता -> चैनल -> `messages.ackReaction` -> एजेंट पहचान इमोजी फ़ॉलबैक   |
+| `ackReactionScope`      | प्रति-खाता -> चैनल -> `messages.ackReactionScope` -> डिफ़ॉल्ट `"group-mentions"` |
+| `reactionNotifications` | प्रति-खाता -> चैनल -> डिफ़ॉल्ट `"own"`                                           |
 
-| Setting                 | Order                                                                            |
-| ----------------------- | -------------------------------------------------------------------------------- |
-| `ackReaction`           | per-account → channel → `messages.ackReaction` → agent identity emoji fallback   |
-| `ackReactionScope`      | per-account → channel → `messages.ackReactionScope` → default `"group-mentions"` |
-| `reactionNotifications` | per-account → channel → default `"own"`                                          |
+`reactionNotifications: "own"` जोड़े गए `m.reaction` इवेंट को तब अग्रेषित करता है, जब वे बॉट द्वारा लिखे गए Matrix संदेशों को लक्षित करते हैं; `"off"` प्रतिक्रिया सिस्टम इवेंट अक्षम करता है। प्रतिक्रियाओं को हटाना सिस्टम इवेंट में संश्लेषित नहीं किया जाता—Matrix उन्हें स्वतंत्र `m.reaction` निष्कासन के बजाय रिडैक्शन के रूप में प्रदर्शित करता है।
 
-`reactionNotifications: "own"` added `m.reaction` events को तब forward करता है जब वे bot-authored Matrix messages को target करते हैं; `"off"` reaction system events को disable करता है। Reaction removals को system events में synthesize नहीं किया जाता क्योंकि Matrix उन्हें redactions के रूप में surface करता है, standalone `m.reaction` removals के रूप में नहीं।
+## इतिहास संदर्भ
 
-## History context
+- `channels.matrix.historyLimit` नियंत्रित करता है कि किसी रूम संदेश द्वारा एजेंट को ट्रिगर करने पर कितने हालिया रूम संदेश `InboundHistory` के रूप में शामिल किए जाते हैं। यह `messages.groupChat.historyLimit` पर फ़ॉलबैक करता है; यदि दोनों सेट न हों, तो प्रभावी डिफ़ॉल्ट `0` होता है (अक्षम)।
+- Matrix रूम इतिहास केवल रूम तक सीमित होता है; DM सामान्य सत्र इतिहास का उपयोग जारी रखते हैं।
+- रूम इतिहास केवल लंबित संदेशों का होता है: OpenClaw उन रूम संदेशों को बफ़र करता है जिन्होंने अभी तक उत्तर ट्रिगर नहीं किया है, फिर उल्लेख या अन्य ट्रिगर आने पर उस विंडो का स्नैपशॉट लेता है।
+- वर्तमान ट्रिगर संदेश `InboundHistory` में शामिल नहीं होता; वह उस टर्न के लिए मुख्य इनबाउंड बॉडी में बना रहता है।
+- समान Matrix इवेंट के पुनः प्रयास, नए रूम संदेशों की ओर आगे बढ़ने के बजाय मूल इतिहास स्नैपशॉट का पुनः उपयोग करते हैं।
 
-- `channels.matrix.historyLimit` नियंत्रित करता है कि जब Matrix room message agent को trigger करता है, तो कितने recent room messages `InboundHistory` के रूप में शामिल किए जाते हैं। यह `messages.groupChat.historyLimit` पर fallback करता है; यदि दोनों unset हैं, तो effective default `0` है। Disable करने के लिए `0` set करें।
-- Matrix room history केवल room-only है। DMs सामान्य session history का उपयोग जारी रखते हैं।
-- Matrix room history pending-only है: OpenClaw उन room messages को buffer करता है जिन्होंने अभी reply trigger नहीं किया, फिर mention या अन्य trigger आने पर उस window का snapshot लेता है।
-- Current trigger message `InboundHistory` में शामिल नहीं होता; वह उस turn के लिए main inbound body में रहता है।
-- उसी Matrix event की retries newer room messages तक drift करने के बजाय original history snapshot को दोबारा उपयोग करती हैं।
+## संदर्भ दृश्यता
 
-## Context visibility
+Matrix, प्राप्त किए गए उत्तर टेक्स्ट, थ्रेड रूट और लंबित इतिहास जैसे पूरक रूम संदर्भ के लिए साझा `contextVisibility` नियंत्रण का समर्थन करता है।
 
-Matrix fetched reply text, thread roots, और pending history जैसे supplemental room context के लिए shared `contextVisibility` control का समर्थन करता है।
+- `contextVisibility: "all"` डिफ़ॉल्ट है। पूरक संदर्भ प्राप्त रूप में रखा जाता है।
+- `contextVisibility: "allowlist"` पूरक संदर्भ को सक्रिय रूम/उपयोगकर्ता अनुमतिसूची जाँच द्वारा अनुमत प्रेषकों तक फ़िल्टर करता है।
+- `contextVisibility: "allowlist_quote"`, `allowlist` की तरह व्यवहार करता है, लेकिन फिर भी एक स्पष्ट उद्धृत उत्तर बनाए रखता है।
 
-- `contextVisibility: "all"` default है। Supplemental context received रूप में रखा जाता है।
-- `contextVisibility: "allowlist"` supplemental context को active room/user allowlist checks द्वारा allowed senders तक filter करता है।
-- `contextVisibility: "allowlist_quote"` `allowlist` जैसा व्यवहार करता है, लेकिन फिर भी एक explicit quoted reply रखता है।
+यह केवल पूरक संदर्भ की दृश्यता को प्रभावित करता है, न कि यह कि इनबाउंड संदेश स्वयं उत्तर ट्रिगर कर सकता है या नहीं। ट्रिगर प्राधिकरण अब भी `groupPolicy`, `groups`, `groupAllowFrom`, और DM नीति सेटिंग से आता है।
 
-यह setting supplemental context visibility को affect करती है, यह नहीं कि inbound message खुद reply trigger कर सकता है या नहीं।
-Trigger authorization अभी भी `groupPolicy`, `groups`, `groupAllowFrom`, और DM policy settings से आता है।
-
-## DM और room policy
+## DM और रूम नीति
 
 ```json5
 {
@@ -678,7 +645,7 @@ Trigger authorization अभी भी `groupPolicy`, `groups`, `groupAllowFrom`
 }
 ```
 
-Rooms को चालू रखते हुए DMs को पूरी तरह silent करने के लिए, `dm.enabled: false` set करें:
+रूम को चालू रखते हुए DM को पूरी तरह मौन करने के लिए `dm.enabled: false` सेट करें:
 
 ```json5
 {
@@ -692,74 +659,74 @@ Rooms को चालू रखते हुए DMs को पूरी तर�
 }
 ```
 
-Mention-gating और allowlist behavior के लिए [Groups](/hi/channels/groups) देखें।
+उल्लेख-गेटिंग और अनुमतिसूची व्यवहार के लिए [समूह](/hi/channels/groups) देखें।
 
-Matrix DMs के लिए pairing example:
+Matrix DM के लिए पेयरिंग उदाहरण:
 
 ```bash
 openclaw pairing list matrix
 openclaw pairing approve matrix <CODE>
 ```
 
-यदि कोई unapproved Matrix user approval से पहले आपको message करता रहता है, तो OpenClaw वही pending pairing code दोबारा उपयोग करता है और नया code mint करने के बजाय short cooldown के बाद reminder reply भेज सकता है।
+यदि कोई अस्वीकृत Matrix उपयोगकर्ता स्वीकृति से पहले संदेश भेजता रहता है, तो OpenClaw उसी लंबित पेयरिंग कोड का पुनः उपयोग करता है और नया कोड बनाने के बजाय एक छोटे कूलडाउन के बाद अनुस्मारक उत्तर भेज सकता है।
 
-Shared DM pairing flow और storage layout के लिए [Pairing](/hi/channels/pairing) देखें।
+साझा DM पेयरिंग प्रवाह और स्टोरेज लेआउट के लिए [पेयरिंग](/hi/channels/pairing) देखें।
 
-## Direct room repair
+## डायरेक्ट रूम सुधार
 
-यदि direct-message state sync से बाहर drift हो जाती है, तो OpenClaw stale `m.direct` mappings के साथ समाप्त हो सकता है जो live DM के बजाय पुराने solo rooms की ओर point करते हैं। किसी peer के लिए current mapping inspect करें:
+यदि डायरेक्ट-संदेश स्थिति में विचलन आ जाता है, तो OpenClaw में पुराने एकल रूम की ओर संकेत करने वाली अप्रचलित `m.direct` मैपिंग रह सकती हैं, जबकि उन्हें सक्रिय DM की ओर संकेत करना चाहिए। किसी पीयर के लिए वर्तमान मैपिंग की जाँच करें:
 
 ```bash
 openclaw matrix direct inspect --user-id @alice:example.org
 ```
 
-इसे repair करें:
+इसे सुधारें:
 
 ```bash
 openclaw matrix direct repair --user-id @alice:example.org
 ```
 
-दोनों commands multi-account setups के लिए `--account <id>` स्वीकार करते हैं। Repair flow:
+बहु-खाता सेटअप के लिए दोनों कमांड `--account <id>` स्वीकार करते हैं। सुधार प्रवाह:
 
-- ऐसे strict 1:1 DM को prefer करता है जो पहले से `m.direct` में mapped है
-- उस user के साथ किसी भी currently joined strict 1:1 DM पर fallback करता है
-- यदि कोई healthy DM मौजूद नहीं है, तो fresh direct room बनाता है और `m.direct` rewrite करता है
+- `m.direct` में पहले से मैप किए गए सख्त 1:1 DM को प्राथमिकता देता है
+- उस उपयोगकर्ता के साथ वर्तमान में जुड़े किसी भी सख्त 1:1 DM पर फ़ॉलबैक करता है
+- यदि कोई स्वस्थ DM मौजूद नहीं है, तो नया डायरेक्ट रूम बनाता है और `m.direct` को पुनः लिखता है
 
-यह पुराने rooms को automatically delete नहीं करता। यह healthy DM चुनता है और mapping update करता है ताकि future Matrix sends, verification notices, और अन्य direct-message flows सही room को target करें।
+यह पुराने रूम को स्वतः नहीं हटाता। यह स्वस्थ DM चुनता है और मैपिंग अपडेट करता है, ताकि भविष्य के Matrix संदेश, सत्यापन सूचनाएँ और अन्य डायरेक्ट-संदेश प्रवाह सही रूम को लक्षित करें।
 
-## Exec approvals
+## निष्पादन स्वीकृतियाँ
 
-Matrix native approval client के रूप में काम कर सकता है। `channels.matrix.execApprovals` (या per-account override के लिए `channels.matrix.accounts.<account>.execApprovals`) के अंतर्गत configure करें:
+Matrix एक नेटिव स्वीकृति क्लाइंट के रूप में कार्य कर सकता है। `channels.matrix.execApprovals` के अंतर्गत कॉन्फ़िगर करें (या प्रति-खाता ओवरराइड के लिए `channels.matrix.accounts.<account>.execApprovals`):
 
-- `enabled`: Matrix-native prompts के through approvals deliver करें। Unset या `"auto"` होने पर, कम से कम एक approver resolve होते ही Matrix auto-enable हो जाता है। Explicit रूप से disable करने के लिए `false` set करें।
-- `approvers`: Matrix user IDs (`@owner:example.org`) जिन्हें exec requests approve करने की अनुमति है। Optional - `channels.matrix.dm.allowFrom` पर fallback करता है।
-- `target`: prompts कहां जाते हैं। `"dm"` (default) approver DMs को भेजता है; `"channel"` originating Matrix room या DM को भेजता है; `"both"` दोनों को भेजता है।
-- `agentFilter` / `sessionFilter`: किन agents/sessions से Matrix delivery trigger होती है, इसके लिए optional allowlists।
+- `enabled`: Matrix-नेटिव प्रॉम्प्ट के माध्यम से स्वीकृतियाँ वितरित करें। अनसेट या `"auto"` होने पर, कम-से-कम एक अनुमोदक का समाधान होते ही यह स्वतः सक्षम हो जाता है; स्पष्ट रूप से अक्षम करने के लिए `false` सेट करें।
+- `approvers`: निष्पादन अनुरोध स्वीकृत करने की अनुमति वाले Matrix उपयोगकर्ता ID (`@owner:example.org`)। यह `channels.matrix.dm.allowFrom` पर फ़ॉलबैक करता है।
+- `target`: प्रॉम्प्ट कहाँ जाएँ। `"dm"` (डिफ़ॉल्ट) अनुमोदक के DM में भेजता है; `"channel"` मूल रूम या DM में भेजता है; `"both"` दोनों में भेजता है।
+- `agentFilter` / `sessionFilter`: किन एजेंटों/सत्रों द्वारा Matrix वितरण ट्रिगर किया जाए, इसके लिए वैकल्पिक अनुमतिसूचियाँ।
 
-Approval kinds के बीच authorization थोड़ा अलग है:
+स्वीकृति के प्रकारों के बीच प्राधिकरण थोड़ा भिन्न होता है:
 
-- **Exec approvals** `execApprovals.approvers` का उपयोग करते हैं, और `dm.allowFrom` पर fallback करते हैं।
-- **Plugin approvals** केवल `dm.allowFrom` के through authorize होते हैं।
+- **Exec अनुमोदन** `execApprovals.approvers` का उपयोग करते हैं और उपलब्ध न होने पर `dm.allowFrom` का उपयोग करते हैं।
+- **Plugin अनुमोदन** केवल `dm.allowFrom` के माध्यम से प्राधिकृत करते हैं।
 
-दोनों kinds Matrix reaction shortcuts और message updates share करते हैं। Approvers primary approval message पर reaction shortcuts देखते हैं:
+दोनों प्रकार Matrix प्रतिक्रिया शॉर्टकट और संदेश अपडेट साझा करते हैं। अनुमोदकों को प्राथमिक अनुमोदन संदेश पर प्रतिक्रिया शॉर्टकट दिखाई देते हैं:
 
-- `✅` एक बार allow करें
-- `❌` deny करें
-- `♾️` हमेशा allow करें (जब effective exec policy इसकी अनुमति देती है)
+- ✅ एक बार अनुमति दें
+- ❌ अस्वीकार करें
+- ♾️ हमेशा अनुमति दें (जब प्रभावी exec नीति इसकी अनुमति देती है)
 
-Fallback स्लैश कमांड: `/approve <id> allow-once`, `/approve <id> allow-always`, `/approve <id> deny`.
+फ़ॉलबैक स्लैश कमांड: `/approve <id> allow-once`, `/approve <id> allow-always`, `/approve <id> deny`।
 
-केवल resolved approvers ही approve या deny कर सकते हैं। exec approvals के लिए channel delivery में command text शामिल होता है - `channel` या `both` केवल भरोसेमंद rooms में सक्षम करें।
+केवल निर्धारित अनुमोदक ही अनुमोदन या अस्वीकार कर सकते हैं। exec अनुमोदनों के लिए चैनल डिलीवरी में कमांड टेक्स्ट शामिल होता है—`channel` या `both` को केवल विश्वसनीय रूम में सक्षम करें।
 
-संबंधित: [Exec approvals](/hi/tools/exec-approvals).
+संबंधित: [Exec अनुमोदन](/hi/tools/exec-approvals)।
 
 ## स्लैश कमांड
 
-स्लैश कमांड (`/new`, `/reset`, `/model`, `/focus`, `/unfocus`, `/agents`, `/session`, `/acp`, `/approve`, आदि) DMs में सीधे काम करते हैं। rooms में, OpenClaw उन commands को भी पहचानता है जिनके आगे bot का अपना Matrix mention लगा होता है, इसलिए `@bot:server /new` custom mention regex के बिना command path को trigger करता है। इससे bot उन room-style `@mention /command` posts के प्रति responsive रहता है जिन्हें Element और समान clients तब emit करते हैं जब कोई user command type करने से पहले bot को tab-complete करता है।
+स्लैश कमांड (`/new`, `/reset`, `/model`, `/focus`, `/unfocus`, `/agents`, `/session`, `/acp`, `/approve`, आदि) सीधे DM में काम करते हैं। रूम में, OpenClaw बॉट के अपने Matrix उल्लेख से पहले लगाए गए कमांड को भी पहचानता है, इसलिए `@bot:server /new` किसी कस्टम उल्लेख regex के बिना कमांड पथ को ट्रिगर करता है—इससे बॉट रूम-शैली की उन `@mention /command` पोस्ट के प्रति प्रतिक्रियाशील रहता है जिन्हें Element और इसी तरह के क्लाइंट तब भेजते हैं, जब उपयोगकर्ता कमांड टाइप करने से पहले बॉट का नाम टैब-कम्प्लीट करता है।
 
-Authorization rules अभी भी लागू होते हैं: command senders को plain messages की तरह ही वही DM या room allowlist/owner policies पूरी करनी होंगी।
+प्राधिकरण नियम फिर भी लागू होते हैं: कमांड भेजने वालों को सामान्य संदेशों जैसी ही DM या रूम अनुमति-सूची/स्वामी नीतियों को पूरा करना होगा।
 
-## Multi-account
+## एकाधिक खाते
 
 ```json5
 {
@@ -789,31 +756,29 @@ Authorization rules अभी भी लागू होते हैं: comman
 }
 ```
 
-**Inheritance:**
+**इनहेरिटेंस:**
 
-- Top-level `channels.matrix` values named accounts के लिए defaults की तरह काम करते हैं, जब तक कोई account उन्हें override न करे।
-- inherited room entry को `groups.<room>.account` के साथ किसी specific account तक scope करें। `account` के बिना entries accounts के बीच shared रहती हैं; `account: "default"` तब भी काम करता है जब default account top level पर configured हो।
+- शीर्ष-स्तरीय `channels.matrix` मान नामित खातों के लिए डिफ़ॉल्ट के रूप में काम करते हैं, जब तक कोई खाता उन्हें ओवरराइड न करे।
+- इनहेरिट की गई रूम प्रविष्टि को `groups.<room>.account` के साथ किसी विशिष्ट खाते तक सीमित करें। `account` के बिना प्रविष्टियाँ खातों के बीच साझा होती हैं; शीर्ष स्तर पर डिफ़ॉल्ट खाता कॉन्फ़िगर होने पर `account: "default"` अब भी काम करता है।
 
-**Default account selection:**
+**डिफ़ॉल्ट खाते का चयन:**
 
-- implicit routing, probing, और CLI commands जिस named account को prefer करें, उसे चुनने के लिए `defaultAccount` set करें।
-- अगर आपके पास multiple accounts हैं और उनमें से एक का नाम literally `default` है, तो OpenClaw उसे implicit रूप से use करता है, भले ही `defaultAccount` unset हो।
-- अगर आपके पास multiple named accounts हैं और कोई default selected नहीं है, तो CLI commands अनुमान लगाने से इनकार करते हैं - `defaultAccount` set करें या `--account <id>` pass करें।
-- Top-level `channels.matrix.*` block को implicit `default` account की तरह केवल तभी माना जाता है जब उसका auth complete हो (`homeserver` + `accessToken`, या `homeserver` + `userId` + `password`)। Named accounts `homeserver` + `userId` से discoverable रहते हैं, जब cached credentials auth को cover करते हैं।
+- उस नामित खाते को चुनने के लिए `defaultAccount` सेट करें जिसे अप्रत्यक्ष रूटिंग, जाँच और CLI कमांड प्राथमिकता देते हैं।
+- यदि आपके पास एकाधिक खाते हैं और उनमें से एक का नाम अक्षरशः `default` है, तो `defaultAccount` सेट न होने पर भी OpenClaw उसका अप्रत्यक्ष रूप से उपयोग करता है।
+- एकाधिक नामित खाते होने और कोई डिफ़ॉल्ट चयनित न होने पर, CLI कमांड अनुमान लगाने से इनकार करते हैं—`defaultAccount` सेट करें या `--account <id>` पास करें।
+- शीर्ष-स्तरीय `channels.matrix.*` ब्लॉक को केवल तभी अप्रत्यक्ष `default` खाता माना जाता है, जब उसका प्रमाणीकरण पूर्ण हो (`homeserver` + `accessToken`, या `homeserver` + `userId` + `password`)। कैश किए गए क्रेडेंशियल द्वारा प्रमाणीकरण पूरा होने के बाद नामित खाते `homeserver` + `userId` से खोजे जा सकते हैं।
 
-**Promotion:**
+**प्रोमोशन:**
 
-- जब OpenClaw repair या setup के दौरान single-account config को multi-account में promote करता है, तो यदि existing named account मौजूद हो या `defaultAccount` पहले से किसी account की ओर point करता हो, वह उसे preserve करता है। केवल Matrix auth/bootstrap keys promoted account में move होती हैं; shared delivery-policy keys top level पर रहती हैं।
+- जब OpenClaw मरम्मत या सेटअप के दौरान एकल-खाता कॉन्फ़िगरेशन को एकाधिक-खाता कॉन्फ़िगरेशन में प्रोमोट करता है, तो वह मौजूदा नामित खाते को सुरक्षित रखता है, यदि ऐसा कोई खाता मौजूद हो या `defaultAccount` पहले से किसी खाते की ओर संकेत करता हो। केवल Matrix प्रमाणीकरण/बूटस्ट्रैप कुंजियाँ प्रोमोट किए गए खाते में जाती हैं; साझा डिलीवरी-नीति कुंजियाँ शीर्ष स्तर पर रहती हैं।
 
-shared multi-account pattern के लिए [Configuration reference](/hi/gateway/config-channels#multi-account-all-channels) देखें।
+साझा एकाधिक-खाता पैटर्न के लिए [कॉन्फ़िगरेशन संदर्भ](/hi/gateway/config-channels#multi-account-all-channels) देखें।
 
-## Private/LAN homeservers
+## निजी/LAN होमसर्वर
 
-Default रूप से, OpenClaw SSRF protection के लिए private/internal Matrix homeservers को block करता है, जब तक आप
-per account explicit रूप से opt in न करें।
+डिफ़ॉल्ट रूप से, OpenClaw SSRF सुरक्षा के लिए निजी/आंतरिक Matrix होमसर्वर को ब्लॉक करता है, जब तक कि आप प्रत्येक खाते के लिए स्पष्ट रूप से अनुमति न दें।
 
-अगर आपका homeserver localhost, LAN/Tailscale IP, या internal hostname पर चलता है, तो उस Matrix account के लिए
-`network.dangerouslyAllowPrivateNetwork` सक्षम करें:
+यदि आपका होमसर्वर localhost, किसी LAN/Tailscale IP या आंतरिक होस्टनाम पर चलता है, तो उस खाते के लिए `network.dangerouslyAllowPrivateNetwork` सक्षम करें:
 
 ```json5
 {
@@ -829,7 +794,7 @@ per account explicit रूप से opt in न करें।
 }
 ```
 
-CLI setup example:
+CLI सेटअप उदाहरण:
 
 ```bash
 openclaw matrix account add \
@@ -839,12 +804,11 @@ openclaw matrix account add \
   --access-token syt_ops_xxx
 ```
 
-यह opt-in केवल trusted private/internal targets को allow करता है। Public cleartext homeservers जैसे
-`http://matrix.example.org:8008` block रहते हैं। जहाँ संभव हो `https://` prefer करें।
+यह स्पष्ट अनुमति केवल विश्वसनीय निजी/आंतरिक लक्ष्यों की अनुमति देती है। `http://matrix.example.org:8008` जैसे सार्वजनिक क्लियरटेक्स्ट होमसर्वर ब्लॉक ही रहते हैं। जब भी संभव हो, `https://` को प्राथमिकता दें।
 
-## Matrix traffic को proxy करना
+## Matrix ट्रैफ़िक को प्रॉक्सी करना
 
-अगर आपके Matrix deployment को explicit outbound HTTP(S) proxy चाहिए, तो `channels.matrix.proxy` set करें:
+यदि आपके Matrix परिनियोजन को स्पष्ट आउटबाउंड HTTP(S) प्रॉक्सी की आवश्यकता है, तो `channels.matrix.proxy` सेट करें:
 
 ```json5
 {
@@ -858,119 +822,116 @@ openclaw matrix account add \
 }
 ```
 
-Named accounts top-level default को `channels.matrix.accounts.<id>.proxy` के साथ override कर सकते हैं।
-OpenClaw runtime Matrix traffic और account status probes के लिए वही proxy setting use करता है।
+नामित खाते `channels.matrix.accounts.<id>.proxy` के साथ शीर्ष-स्तरीय डिफ़ॉल्ट को ओवरराइड कर सकते हैं। OpenClaw रनटाइम Matrix ट्रैफ़िक और खाता-स्थिति जाँच के लिए समान प्रॉक्सी सेटिंग का उपयोग करता है।
 
-## Target resolution
+## लक्ष्य निर्धारण
 
-जहाँ भी OpenClaw आपसे room या user target मांगता है, Matrix इन target forms को accept करता है:
+जहाँ भी OpenClaw किसी रूम या उपयोगकर्ता लक्ष्य की माँग करता है, Matrix इन लक्ष्य प्रारूपों को स्वीकार करता है:
 
-- Users: `@user:server`, `user:@user:server`, या `matrix:user:@user:server`
-- Rooms: `!room:server`, `room:!room:server`, या `matrix:room:!room:server`
-- Aliases: `#alias:server`, `channel:#alias:server`, या `matrix:channel:#alias:server`
+- उपयोगकर्ता: `@user:server`, `user:@user:server`, या `matrix:user:@user:server`
+- रूम: `!room:server`, `room:!room:server`, या `matrix:room:!room:server`
+- उपनाम: `#alias:server`, `channel:#alias:server`, या `matrix:channel:#alias:server`
 
-Matrix room IDs case-sensitive होते हैं। explicit delivery targets, cron jobs, bindings, या allowlists configure करते समय Matrix से मिली exact room ID casing use करें।
-OpenClaw storage के लिए internal session keys को canonical रखता है, इसलिए वे lowercase
-keys Matrix delivery IDs के लिए reliable source नहीं हैं।
+Matrix रूम ID केस-संवेदी होते हैं। स्पष्ट डिलीवरी लक्ष्य, Cron जॉब, बाइंडिंग या अनुमति-सूचियाँ कॉन्फ़िगर करते समय Matrix से मिले रूम ID के अक्षरों का सटीक केस उपयोग करें। OpenClaw भंडारण के लिए आंतरिक सत्र कुंजियों को कैनोनिकल रखता है, इसलिए वे लोअरकेस कुंजियाँ Matrix डिलीवरी ID का विश्वसनीय स्रोत नहीं हैं।
 
-Live directory lookup logged-in Matrix account use करता है:
+लाइव डायरेक्टरी खोज लॉग-इन किए गए Matrix खाते का उपयोग करती है:
 
-- User lookups उस homeserver पर Matrix user directory query करते हैं।
-- Room lookups explicit room IDs और aliases को सीधे accept करते हैं। Joined-room name lookup best-effort है और runtime room allowlists पर केवल तब लागू होता है जब `dangerouslyAllowNameMatching: true` set हो।
-- अगर room name को ID या alias में resolve नहीं किया जा सकता, तो runtime allowlist resolution द्वारा उसे ignore किया जाता है।
+- उपयोगकर्ता खोज उस होमसर्वर की Matrix उपयोगकर्ता डायरेक्टरी से क्वेरी करती है।
+- रूम खोज स्पष्ट रूम ID और उपनामों को सीधे स्वीकार करती है। जुड़े हुए रूम के नाम की खोज यथासंभव की जाती है और केवल रनटाइम रूम अनुमति-सूचियों पर तब लागू होती है, जब `dangerouslyAllowNameMatching: true` सेट हो।
+- यदि किसी रूम नाम को ID या उपनाम में निर्धारित नहीं किया जा सकता, तो रनटाइम अनुमति-सूची निर्धारण में उसे अनदेखा कर दिया जाता है।
 
-## Configuration reference
+## कॉन्फ़िगरेशन संदर्भ
 
-Allowlist-style user fields (`groupAllowFrom`, `dm.allowFrom`, `groups.<room>.users`) full Matrix user IDs accept करते हैं (सबसे सुरक्षित)। Non-ID user entries default रूप से ignore की जाती हैं। अगर आप `dangerouslyAllowNameMatching: true` set करते हैं, तो exact Matrix directory display-name matches startup पर और monitor running रहने के दौरान allowlist बदलने पर resolve किए जाते हैं; जिन entries को resolve नहीं किया जा सकता, उन्हें runtime पर ignore किया जाता है।
+अनुमति-सूची शैली के उपयोगकर्ता फ़ील्ड (`groupAllowFrom`, `dm.allowFrom`, `groups.<room>.users`) पूर्ण Matrix उपयोगकर्ता ID स्वीकार करते हैं, जो सबसे सुरक्षित विकल्प है। गैर-ID प्रविष्टियाँ डिफ़ॉल्ट रूप से अनदेखी की जाती हैं। यदि `dangerouslyAllowNameMatching: true` सेट है, तो Matrix डायरेक्टरी के प्रदर्शन-नाम से सटीक मिलान स्टार्टअप पर और मॉनिटर के चलते समय अनुमति-सूची बदलने पर निर्धारित किए जाते हैं; जिन प्रविष्टियों का निर्धारण नहीं हो सकता, उन्हें रनटाइम पर अनदेखा किया जाता है।
 
-Room allowlist keys (`groups`, legacy `rooms`) room IDs या aliases होने चाहिए। Plain room-name keys default रूप से ignore की जाती हैं; `dangerouslyAllowNameMatching: true` joined room names के खिलाफ best-effort lookup restore करता है।
+रूम अनुमति-सूची कुंजियाँ (`groups`, पुराना `rooms`) रूम ID या उपनाम होनी चाहिए। सामान्य रूम-नाम कुंजियाँ डिफ़ॉल्ट रूप से अनदेखी की जाती हैं; `dangerouslyAllowNameMatching: true` जुड़े हुए रूम नामों के लिए यथासंभव खोज को पुनर्स्थापित करता है।
 
-### Account and connection
+### खाता और कनेक्शन
 
-- `enabled`: channel को enable या disable करें।
-- `name`: account के लिए optional display label।
-- `defaultAccount`: जब multiple Matrix accounts configured हों तो preferred account ID।
-- `accounts`: named per-account overrides। Top-level `channels.matrix` values defaults के रूप में inherit होते हैं।
-- `homeserver`: homeserver URL, उदाहरण के लिए `https://matrix.example.org`।
-- `network.dangerouslyAllowPrivateNetwork`: इस account को `localhost`, LAN/Tailscale IPs, या internal hostnames से connect करने दें।
-- `proxy`: Matrix traffic के लिए optional HTTP(S) proxy URL। Per-account override supported है।
-- `userId`: full Matrix user ID (`@bot:example.org`)।
-- `accessToken`: token-based auth के लिए access token। Plaintext और SecretRef values env/file/exec providers में supported हैं ([Secrets Management](/hi/gateway/secrets))।
-- `password`: password-based login के लिए password। Plaintext और SecretRef values supported हैं।
-- `deviceId`: explicit Matrix device ID।
-- `deviceName`: password-login time पर use होने वाला device display name।
-- `avatarUrl`: profile sync और `profile set` updates के लिए stored self-avatar URL।
-- `initialSyncLimit`: startup sync के दौरान fetched events की maximum संख्या।
+- `enabled`: चैनल को सक्षम या अक्षम करें।
+- `name`: खाते के लिए वैकल्पिक प्रदर्शन लेबल।
+- `defaultAccount`: एकाधिक Matrix खाते कॉन्फ़िगर होने पर प्राथमिकता प्राप्त खाता ID।
+- `accounts`: प्रत्येक नामित खाते के लिए ओवरराइड। शीर्ष-स्तरीय `channels.matrix` मान डिफ़ॉल्ट के रूप में इनहेरिट होते हैं।
+- `homeserver`: होमसर्वर URL, उदाहरण के लिए `https://matrix.example.org`।
+- `network.dangerouslyAllowPrivateNetwork`: इस खाते को `localhost`, LAN/Tailscale IP या आंतरिक होस्टनाम से कनेक्ट होने दें।
+- `proxy`: Matrix ट्रैफ़िक के लिए वैकल्पिक HTTP(S) प्रॉक्सी URL। प्रति-खाता ओवरराइड समर्थित है।
+- `userId`: पूर्ण Matrix उपयोगकर्ता ID (`@bot:example.org`)।
+- `accessToken`: टोकन-आधारित प्रमाणीकरण के लिए एक्सेस टोकन। env/file/exec प्रदाताओं में प्लेनटेक्स्ट और SecretRef मान समर्थित हैं ([गोपनीय जानकारी प्रबंधन](/hi/gateway/secrets))।
+- `password`: पासवर्ड-आधारित लॉगिन के लिए पासवर्ड। प्लेनटेक्स्ट और SecretRef मान समर्थित हैं।
+- `deviceId`: स्पष्ट Matrix डिवाइस ID।
+- `deviceName`: पासवर्ड लॉगिन के समय उपयोग किया जाने वाला डिवाइस प्रदर्शन नाम।
+- `avatarUrl`: प्रोफ़ाइल सिंक और `profile set` अपडेट के लिए संग्रहीत स्वयं का अवतार URL।
+- `initialSyncLimit`: स्टार्टअप सिंक के दौरान प्राप्त किए जाने वाले इवेंट की अधिकतम संख्या।
 
-### Encryption
+### एन्क्रिप्शन
 
-- `encryption`: E2EE enable करें। Default: `false`।
-- `startupVerification`: `"if-unverified"` (E2EE on होने पर default) या `"off"`। जब यह device unverified हो, तो startup पर self-verification auto-request करता है।
-- `startupVerificationCooldownHours`: अगले automatic startup request से पहले cooldown। Default: `24`।
+- `encryption`: E2EE सक्षम करें। डिफ़ॉल्ट: `false`।
+- `startupVerification`: `"if-unverified"` (E2EE चालू होने पर डिफ़ॉल्ट) या `"off"`। यह डिवाइस असत्यापित होने पर स्टार्टअप के दौरान स्वयं-सत्यापन का स्वचालित अनुरोध करता है।
+- `startupVerificationCooldownHours`: अगले स्वचालित स्टार्टअप अनुरोध से पहले का कूलडाउन। डिफ़ॉल्ट: `24`।
 
-### Access and policy
+### पहुँच और नीति
 
-- `groupPolicy`: `"open"`, `"allowlist"`, या `"disabled"`। Default: `"allowlist"`।
-- `groupAllowFrom`: room traffic के लिए user IDs की allowlist।
-- `mentionPatterns`: room mentions के लिए scoped regex patterns। `{ mode: "allow"|"deny", allowIn: [roomId, ...], denyIn: [roomId, ...] }` वाला object। Controls whether configured `agents.list[].groupChat.mentionPatterns` apply per-room.
-- `dm.enabled`: जब `false` हो, सभी DMs ignore करें। Default: `true`।
-- `dm.policy`: `"pairing"` (default), `"allowlist"`, `"open"`, या `"disabled"`। Bot के join करने और room को DM के रूप में classify करने के बाद लागू होता है; invite handling को affect नहीं करता।
-- `dm.allowFrom`: DM traffic के लिए user IDs की allowlist।
-- `dm.sessionScope`: `"per-user"` (default) या `"per-room"`।
-- `dm.threadReplies`: reply threading के लिए DM-only override (`"off"`, `"inbound"`, `"always"`)।
-- `allowBots`: other configured Matrix bot accounts से messages accept करें (`true` या `"mentions"`)।
-- `allowlistOnly`: जब `true` हो, सभी active DM policies (`"disabled"` को छोड़कर) और `"open"` group policies को `"allowlist"` पर force करता है। `"disabled"` policies को change नहीं करता।
-- `dangerouslyAllowNameMatching`: जब `true` हो, user allowlist entries के लिए Matrix display-name directory lookup और room allowlist keys के लिए joined-room name lookup allow करता है। Full `@user:server` IDs और room IDs या aliases prefer करें।
-- `autoJoin`: `"always"`, `"allowlist"`, या `"off"`। Default: `"off"`। DM-style invites सहित हर Matrix invite पर लागू होता है।
-- `autoJoinAllowlist`: जब `autoJoin` `"allowlist"` हो तो allowed rooms/aliases। Alias entries homeserver के खिलाफ resolve की जाती हैं, invited room द्वारा claimed state के खिलाफ नहीं।
-- `contextVisibility`: supplemental context visibility (`"all"` default, `"allowlist"`, `"allowlist_quote"`)।
+- `groupPolicy`: `"open"`, `"allowlist"`, या `"disabled"`। डिफ़ॉल्ट: `"allowlist"`।
+- `groupAllowFrom`: रूम ट्रैफ़िक के लिए उपयोगकर्ता ID की अनुमति-सूची।
+- `mentionPatterns`: रूम उल्लेखों के लिए सीमित regex पैटर्न। `{ mode: "allow"|"deny", allowIn: [roomId, ...], denyIn: [roomId, ...] }` वाला ऑब्जेक्ट। यह नियंत्रित करता है कि कॉन्फ़िगर किए गए `agents.entries.*.groupChat.mentionPatterns` प्रत्येक रूम पर लागू होते हैं या नहीं।
+- `dm.enabled`: `false` होने पर सभी DM अनदेखे करें। डिफ़ॉल्ट: `true`।
+- `dm.policy`: `"pairing"` (डिफ़ॉल्ट), `"allowlist"`, `"open"`, या `"disabled"`। यह बॉट के जुड़ने और रूम को DM के रूप में वर्गीकृत करने के बाद लागू होता है; यह आमंत्रण प्रबंधन को प्रभावित नहीं करता।
+- `dm.allowFrom`: DM ट्रैफ़िक के लिए उपयोगकर्ता ID की अनुमति-सूची।
+- `dm.sessionScope`: `"per-user"` (डिफ़ॉल्ट) या `"per-room"`।
+- `dm.threadReplies`: उत्तर थ्रेडिंग के लिए केवल-DM ओवरराइड (`"off"`, `"inbound"`, `"always"`)।
+- `allowBots`: अन्य कॉन्फ़िगर किए गए Matrix बॉट खातों से संदेश स्वीकार करें (`true` या `"mentions"`)।
+- `allowlistOnly`: `true` होने पर सभी सक्रिय DM नीतियों (`"disabled"` को छोड़कर) और `"open"` समूह नीतियों को बाध्य करके `"allowlist"` करता है। यह `"disabled"` नीतियों को नहीं बदलता।
+- `dangerouslyAllowNameMatching`: `true` होने पर उपयोगकर्ता अनुमति-सूची प्रविष्टियों के लिए Matrix प्रदर्शन-नाम डायरेक्टरी खोज और रूम अनुमति-सूची कुंजियों के लिए जुड़े हुए रूम के नाम की खोज की अनुमति देता है। पूर्ण `@user:server` ID और रूम ID या उपनाम को प्राथमिकता दें।
+- `autoJoin`: `"always"`, `"allowlist"`, या `"off"`। डिफ़ॉल्ट: `"off"`। DM-शैली के आमंत्रणों सहित प्रत्येक Matrix आमंत्रण पर लागू होता है।
+- `autoJoinAllowlist`: जब `autoJoin`, `"allowlist"` हो, तब अनुमत रूम/उपनाम। उपनाम प्रविष्टियाँ होमसर्वर के अनुसार निर्धारित होती हैं, आमंत्रित रूम द्वारा दावा की गई स्थिति के अनुसार नहीं।
+- `contextVisibility`: पूरक संदर्भ दृश्यता (`"all"` डिफ़ॉल्ट, `"allowlist"`, `"allowlist_quote"`)।
 
-### Reply behavior
+### उत्तर व्यवहार
 
-- `replyToMode`: `"off"`, `"first"`, `"all"`, या `"batched"`।
-- `threadReplies`: `"off"`, `"inbound"`, या `"always"`।
-- `threadBindings`: thread-bound session routing और lifecycle के लिए per-channel overrides।
-- `streaming`: `"off"` (default), `"partial"`, `"quiet"`, `"progress"`, या object form `{ mode, preview: { toolProgress }, progress: { label, labels, maxLines, maxLineChars, toolProgress } }`। `true` ↔ `"partial"`, `false` ↔ `"off"`।
-- `blockStreaming`: जब `true` हो, completed assistant blocks separate progress messages के रूप में रखे जाते हैं।
-- `markdown`: outbound text के लिए optional Markdown rendering config।
-- `responsePrefix`: outbound replies के आगे जोड़ी जाने वाली optional string।
-- `textChunkLimit`: जब `chunkMode: "length"` हो तो characters में outbound chunk size। Default: `4000`।
-- `chunkMode`: `"length"` (default, character count से split करता है) या `"newline"` (line boundaries पर split करता है)।
-- `historyLimit`: recent room messages की संख्या, जो room message agent को trigger करने पर `InboundHistory` के रूप में include होती है। `messages.groupChat.historyLimit` पर falls back; effective default `0` (disabled)।
-- `mediaMaxMb`: outbound sends और inbound processing के लिए MB में media size cap।
+- `replyToMode`: `"off"` (डिफ़ॉल्ट), `"first"`, `"all"`, या `"batched"`।
+- `threadReplies`: `"off"` (शीर्ष-स्तरीय डिफ़ॉल्ट स्पष्ट रूप से सेट न होने पर `"inbound"` में हल होता है), `"inbound"`, या `"always"`।
+- `threadBindings`: थ्रेड-बाउंड सत्र रूटिंग और जीवनचक्र के लिए प्रति-चैनल ओवरराइड।
+- `streaming`: नेस्टेड ऑब्जेक्ट `{ mode, chunkMode, block: { enabled, coalesce }, preview: { toolProgress }, progress: { label, labels, maxLines, maxLineChars, toolProgress } }`। `mode`, `"off"` (डिफ़ॉल्ट), `"partial"`, `"quiet"`, या `"progress"` है। पुराने स्केलर/बूलियन वर्तनी-रूप `openclaw doctor --fix` के माध्यम से माइग्रेट होते हैं।
+- `streaming.block.enabled`: जब `true` हो, तो पूर्ण हो चुके सहायक ब्लॉक अलग-अलग प्रगति संदेशों के रूप में रखे जाते हैं। डिफ़ॉल्ट: `false`।
+- `markdown`: आउटबाउंड टेक्स्ट के लिए वैकल्पिक Markdown रेंडरिंग कॉन्फ़िगरेशन।
+- `responsePrefix`: आउटबाउंड उत्तरों से पहले जोड़ी जाने वाली वैकल्पिक स्ट्रिंग।
+- `textChunkLimit`: `streaming.chunkMode: "length"` होने पर वर्णों में आउटबाउंड खंड का आकार। डिफ़ॉल्ट: `4000`।
+- `streaming.chunkMode`: `"length"` (डिफ़ॉल्ट, वर्ण संख्या के अनुसार विभाजित करता है) या `"newline"` (पंक्ति सीमाओं पर विभाजित करता है)।
+- `historyLimit`: किसी कक्ष संदेश द्वारा एजेंट को ट्रिगर किए जाने पर `InboundHistory` के रूप में शामिल किए जाने वाले हालिया कक्ष संदेशों की संख्या। `messages.groupChat.historyLimit` पर फ़ॉलबैक होता है; प्रभावी डिफ़ॉल्ट `0` (अक्षम)।
+- `mediaMaxMb`: आउटबाउंड प्रेषण और इनबाउंड प्रोसेसिंग के लिए MB में मीडिया आकार सीमा। डिफ़ॉल्ट: `20`।
 
-### Reaction settings
+### प्रतिक्रिया सेटिंग्स
 
-- `ackReaction`: इस channel/account के लिए ack reaction override।
-- `ackReactionScope`: scope override (`"group-mentions"` default, `"group-all"`, `"direct"`, `"all"`, `"none"`, `"off"`)।
-- `reactionNotifications`: inbound reaction notification mode (`"own"` default, `"off"`)।
+- `ackReaction`: इस चैनल/खाते के लिए अभिस्वीकृति प्रतिक्रिया ओवरराइड।
+- `ackReactionScope`: दायरा ओवरराइड (`"group-mentions"` डिफ़ॉल्ट, `"group-all"`, `"direct"`, `"all"`, `"none"`, `"off"`)।
+- `reactionNotifications`: इनबाउंड प्रतिक्रिया सूचना मोड (`"own"` डिफ़ॉल्ट, `"off"`)।
 
-### Tooling and per-room overrides
+### टूलिंग और प्रति-कक्ष ओवरराइड
 
-- `actions`: प्रति-action tool gating (`messages`, `reactions`, `pins`, `profile`, `memberInfo`, `channelInfo`, `verification`).
-- `groups`: प्रति-room नीति मैप। Session पहचान resolution के बाद स्थिर room ID का उपयोग करती है। (`rooms` एक legacy alias है।)
-  - `groups.<room>.account`: inherited room entry को किसी विशिष्ट account तक सीमित करें।
-  - `groups.<room>.enabled`: प्रति-room toggle। जब `false` हो, तो room को ऐसे अनदेखा किया जाता है मानो वह map में हो ही नहीं।
-  - `groups.<room>.requireMention`: channel-level mention requirement का प्रति-room override।
-  - `groups.<room>.allowBots`: channel-level setting (`true` या `"mentions"`) का प्रति-room override।
-  - `groups.<room>.botLoopProtection`: bot-to-bot loop protection budget के लिए प्रति-room override।
-  - `groups.<room>.users`: प्रति-room sender allowlist।
-  - `groups.<room>.tools`: प्रति-room tool allow/deny overrides।
-  - `groups.<room>.autoReply`: प्रति-room mention-gating override। `true` उस room के लिए mention requirements को अक्षम करता है; `false` उन्हें फिर से लागू करता है।
-  - `groups.<room>.skills`: प्रति-room skill filter।
-  - `groups.<room>.systemPrompt`: प्रति-room system prompt snippet।
+- `actions`: प्रत्येक क्रिया के अनुसार टूल गेटिंग (`messages`, `reactions`, `pins`, `profile`, `memberInfo`, `channelInfo`, `verification`)।
+- `groups`: प्रत्येक रूम के अनुसार नीति मैप। समाधान के बाद सत्र पहचान स्थिर रूम ID का उपयोग करती है। (`rooms` एक पुराना उपनाम है।)
+  - `groups.<room>.account`: विरासत में मिली एक रूम प्रविष्टि को किसी विशिष्ट खाते तक सीमित करें।
+  - `groups.<room>.enabled`: प्रत्येक रूम के अनुसार टॉगल। जब `false` हो, तो रूम को इस तरह अनदेखा किया जाता है मानो वह मैप में न हो।
+  - `groups.<room>.requireMention`: चैनल-स्तरीय उल्लेख आवश्यकता का प्रत्येक रूम के अनुसार ओवरराइड।
+  - `groups.<room>.allowBots`: चैनल-स्तरीय सेटिंग का प्रत्येक रूम के अनुसार ओवरराइड (`true` या `"mentions"`)।
+  - `groups.<room>.botLoopProtection`: बॉट-से-बॉट लूप सुरक्षा बजट का प्रत्येक रूम के अनुसार ओवरराइड।
+  - `groups.<room>.users`: प्रत्येक रूम के अनुसार प्रेषक अनुमति-सूची।
+  - `groups.<room>.tools`: प्रत्येक रूम के अनुसार टूल अनुमति/अस्वीकृति ओवरराइड।
+  - `groups.<room>.autoReply`: प्रत्येक रूम के अनुसार उल्लेख-गेटिंग ओवरराइड। `true` उस रूम के लिए उल्लेख आवश्यकताओं को अक्षम करता है; `false` उन्हें फिर से अनिवार्य करता है।
+  - `groups.<room>.skills`: प्रत्येक रूम के अनुसार स्किल फ़िल्टर।
+  - `groups.<room>.systemPrompt`: प्रत्येक रूम के अनुसार सिस्टम प्रॉम्प्ट अंश।
 
-### Exec approval settings
+### निष्पादन अनुमोदन सेटिंग्स
 
-- `execApprovals.enabled`: Matrix-native prompts के माध्यम से exec approvals deliver करें।
-- `execApprovals.approvers`: approve करने की अनुमति वाले Matrix user IDs। `dm.allowFrom` पर fallback करता है।
-- `execApprovals.target`: `"dm"` (default), `"channel"`, या `"both"`।
-- `execApprovals.agentFilter` / `execApprovals.sessionFilter`: delivery के लिए वैकल्पिक agent/session allowlists।
+- `execApprovals.enabled`: Matrix-मूल प्रॉम्प्ट के माध्यम से निष्पादन अनुमोदन वितरित करें।
+- `execApprovals.approvers`: अनुमोदन की अनुमति वाले Matrix उपयोगकर्ता ID। उपलब्ध न होने पर `dm.allowFrom` का उपयोग होता है।
+- `execApprovals.target`: `"dm"` (डिफ़ॉल्ट), `"channel"`, या `"both"`।
+- `execApprovals.agentFilter` / `execApprovals.sessionFilter`: वितरण के लिए वैकल्पिक एजेंट/सत्र अनुमति-सूचियाँ।
 
-## Related
+## संबंधित
 
-- [Channels Overview](/hi/channels) - सभी समर्थित channels
-- [Pairing](/hi/channels/pairing) - DM authentication और pairing flow
-- [Groups](/hi/channels/groups) - group chat behavior और mention gating
-- [Channel Routing](/hi/channels/channel-routing) - messages के लिए session routing
-- [Security](/hi/gateway/security) - access model और hardening
+- [चैनलों का अवलोकन](/hi/channels) - सभी समर्थित चैनल
+- [युग्मन](/hi/channels/pairing) - DM प्रमाणीकरण और युग्मन प्रवाह
+- [समूह](/hi/channels/groups) - समूह चैट व्यवहार और उल्लेख गेटिंग
+- [चैनल रूटिंग](/hi/channels/channel-routing) - संदेशों के लिए सत्र रूटिंग
+- [सुरक्षा](/hi/gateway/security) - अभिगम मॉडल और सुदृढ़ीकरण

@@ -1,13 +1,14 @@
 ---
 read_when:
-    - می‌خواهید به مدل‌های میزبانی‌شده در OpenCode دسترسی داشته باشید
+    - می‌خواهید به مدل‌های میزبانی‌شده توسط OpenCode دسترسی داشته باشید
     - می‌خواهید بین کاتالوگ‌های Zen و Go یکی را انتخاب کنید
 summary: از کاتالوگ‌های OpenCode Zen و Go با OpenClaw استفاده کنید
 title: OpenCode
 x-i18n:
-    generated_at: "2026-07-12T10:40:43Z"
+    generated_at: "2026-07-27T17:04:20Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: de287eb8a349f26c265f95b8b1de3af4035aa2bdc3501c7279f714d297bb8b9b
     source_path: providers/opencode.md
@@ -17,14 +18,14 @@ x-i18n:
 OpenCode دو کاتالوگ میزبانی‌شده را در OpenClaw ارائه می‌کند:
 
 | کاتالوگ | پیشوند            | ارائه‌دهنده زمان اجرا |
-| ------- | ----------------- | --------------------- |
-| **Zen** | `opencode/...`    | `opencode`            |
-| **Go**  | `opencode-go/...` | `opencode-go`         |
+| ------- | ----------------- | ---------------- |
+| **Zen** | `opencode/...`    | `opencode`       |
+| **Go**  | `opencode-go/...` | `opencode-go`    |
 
-هر دو کاتالوگ از یک کلید API متعلق به OpenCode استفاده می‌کنند (`OPENCODE_API_KEY`، با نام مستعار
+هر دو کاتالوگ از یک کلید API متعلق به OpenCode استفاده می‌کنند (`OPENCODE_API_KEY`، نام مستعار
 `OPENCODE_ZEN_API_KEY`). OpenClaw شناسه‌های ارائه‌دهنده زمان اجرا را جدا نگه می‌دارد تا
-مسیریابی بالادستی برای هر مدل درست باقی بماند، اما راه‌اندازی اولیه و مستندات آن‌ها را به‌عنوان
-یک پیکربندی OpenCode در نظر می‌گیرند.
+مسیریابی بالادستی برای هر مدل درست باقی بماند، اما راه‌اندازی اولیه و مستندات آن‌ها را
+یک پیکربندی واحد OpenCode در نظر می‌گیرند.
 
 ## شروع به کار
 
@@ -50,7 +51,7 @@ OpenCode دو کاتالوگ میزبانی‌شده را در OpenClaw ارائ
         openclaw config set agents.defaults.model.primary "opencode/claude-opus-4-6"
         ```
       </Step>
-      <Step title="بررسی در دسترس بودن مدل‌ها">
+      <Step title="بررسی دردسترس‌بودن مدل‌ها">
         ```bash
         openclaw models list --provider opencode
         ```
@@ -79,7 +80,7 @@ OpenCode دو کاتالوگ میزبانی‌شده را در OpenClaw ارائ
         openclaw config set agents.defaults.model.primary "opencode-go/kimi-k2.6"
         ```
       </Step>
-      <Step title="بررسی در دسترس بودن مدل‌ها">
+      <Step title="بررسی دردسترس‌بودن مدل‌ها">
         ```bash
         openclaw models list --provider opencode-go
         ```
@@ -102,10 +103,10 @@ OpenCode دو کاتالوگ میزبانی‌شده را در OpenClaw ارائ
 
 ### Zen
 
-| ویژگی                | مقدار                                                                                         |
-| -------------------- | --------------------------------------------------------------------------------------------- |
+| ویژگی         | مقدار                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------- |
 | ارائه‌دهنده زمان اجرا | `opencode`                                                                                    |
-| مدل‌های نمونه         | `opencode/claude-opus-4-6`، `opencode/gpt-5.5`، `opencode/gemini-3.1-pro`، `opencode/glm-5.2` |
+| مدل‌های نمونه   | `opencode/claude-opus-4-6`، `opencode/gpt-5.5`، `opencode/gemini-3.1-pro`، `opencode/glm-5.2` |
 
 برای مشاهده فهرست کامل و فعلی، `openclaw models list --provider opencode` را اجرا کنید؛ این فهرست
 ردیف‌های سطح رایگان مانند `opencode/big-pickle` و
@@ -113,10 +114,10 @@ OpenCode دو کاتالوگ میزبانی‌شده را در OpenClaw ارائ
 
 ### Go
 
-| ویژگی                | مقدار                                                                    |
-| -------------------- | ------------------------------------------------------------------------ |
+| ویژگی         | مقدار                                                                    |
+| ---------------- | ------------------------------------------------------------------------ |
 | ارائه‌دهنده زمان اجرا | `opencode-go`                                                            |
-| مدل‌های نمونه         | `opencode-go/kimi-k2.6`، `opencode-go/glm-5`، `opencode-go/minimax-m2.5` |
+| مدل‌های نمونه   | `opencode-go/kimi-k2.6`، `opencode-go/glm-5`، `opencode-go/minimax-m2.5` |
 
 برای مشاهده جدول کامل مدل‌های Go، به [OpenCode Go](/fa/providers/opencode-go) مراجعه کنید.
 
@@ -128,28 +129,28 @@ OpenCode دو کاتالوگ میزبانی‌شده را در OpenClaw ارائ
   </Accordion>
 
   <Accordion title="اعتبارنامه‌های مشترک">
-    وارد کردن یک کلید OpenCode هنگام پیکربندی، اعتبارنامه‌های هر دو ارائه‌دهنده
-    زمان اجرا را ذخیره می‌کند. لازم نیست راه‌اندازی اولیه هر کاتالوگ را جداگانه انجام دهید.
+    واردکردن یک کلید OpenCode هنگام راه‌اندازی، اعتبارنامه‌ها را برای هر دو ارائه‌دهنده
+    زمان اجرا ذخیره می‌کند. نیازی نیست راه‌اندازی اولیه هر کاتالوگ را جداگانه انجام دهید.
   </Accordion>
 
   <Accordion title="دریافت کلید API">
     یک حساب OpenCode ایجاد کنید و در
-    [opencode.ai/auth](https://opencode.ai/auth) یک کلید API بسازید. صورت‌حساب و دسترس‌پذیری
-    کاتالوگ از داشبورد OpenCode مدیریت می‌شوند.
+    [opencode.ai/auth](https://opencode.ai/auth) یک کلید API بسازید. صورت‌حساب و
+    دردسترس‌بودن کاتالوگ از داشبورد OpenCode مدیریت می‌شوند.
   </Accordion>
 
   <Accordion title="رفتار بازپخش Gemini">
     ارجاع‌های OpenCode مبتنی بر Gemini در مسیر پراکسی Gemini باقی می‌مانند؛ بنابراین OpenClaw
-    پاک‌سازی امضای تفکر Gemini را در آن مسیر حفظ می‌کند، بدون آنکه اعتبارسنجی بومی بازپخش
-    Gemini یا بازنویسی‌های راه‌اندازی اولیه را فعال کند.
+    پاک‌سازی امضای تفکر Gemini را در آنجا حفظ می‌کند، بدون اینکه اعتبارسنجی بازپخش بومی Gemini
+    یا بازنویسی‌های راه‌اندازی اولیه را فعال کند.
   </Accordion>
 
-  <Accordion title="رفتار بازپخش مدل‌های غیر Gemini">
+  <Accordion title="رفتار بازپخش غیر Gemini">
     ارجاع‌های OpenCode غیر Gemini، خط‌مشی حداقلی بازپخش سازگار با OpenAI را حفظ می‌کنند.
   </Accordion>
 </AccordionGroup>
 
-## مطالب مرتبط
+## مرتبط
 
 <CardGroup cols={2}>
   <Card title="OpenCode Go" href="/fa/providers/opencode-go" icon="server">

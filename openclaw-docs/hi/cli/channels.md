@@ -1,15 +1,17 @@
 ---
 read_when:
-    - आप channel खाते जोड़ना/हटाना चाहते हैं (WhatsApp/Telegram/Discord/Google Chat/Slack/Mattermost (Plugin)/Signal/iMessage/Matrix)
-    - आप चैनल की स्थिति जाँचना या चैनल लॉग्स को tail करना चाहते हैं
-summary: '`openclaw channels` के लिए CLI संदर्भ (खाते, स्थिति, लॉगिन/लॉगआउट, लॉग)'
+    - आप चैनल खाते (Discord, Google Chat, iMessage, Matrix, Signal, Slack, Telegram, WhatsApp और अन्य) जोड़ना या हटाना चाहते हैं
+    - आप चैनल की स्थिति जाँचना या चैनल लॉग लगातार देखना चाहते हैं
+    - आपको किसी विफल इनबाउंड चैनल इवेंट का निरीक्षण करना या उसे फिर से सबमिट करना होगा
+summary: '`openclaw channels` के लिए CLI संदर्भ (खाते, स्थिति, डेड लेटर्स, क्षमताएँ, समाधान, लॉग, लॉगिन/लॉगआउट)'
 title: चैनल
 x-i18n:
-    generated_at: "2026-06-28T22:47:04Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:36:55Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 58a964b4db9526defab6ee47b7a99c11086e345d42c8d20f5262fc134337947f
+    source_hash: 8e5b7d674264af51d6fec34c8c95256129d66918b7c4515ac0f2c2bd311f2c3b
     source_path: cli/channels.md
     workflow: 16
 ---
@@ -31,32 +33,54 @@ openclaw channels list --all
 openclaw channels status
 openclaw channels capabilities
 openclaw channels capabilities --channel discord --target channel:123
-openclaw channels capabilities --channel discord --target channel:<voice-channel-id>
 openclaw channels resolve --channel slack "#general" "@jane"
 openclaw channels logs --channel all
+openclaw channels dead-letters list --channel telegram --account default
 ```
 
-`channels list` केवल चैट चैनल दिखाता है: डिफ़ॉल्ट रूप से कॉन्फ़िगर किए गए खाते, हर खाते के लिए `installed`, `configured`, और `enabled` स्थिति टैग के साथ। `--all` पास करें ताकि वे बंडल किए गए चैनल भी दिखें जिनका अभी कोई कॉन्फ़िगर किया गया खाता नहीं है, और वे इंस्टॉल किए जा सकने वाले कैटलॉग चैनल भी दिखें जो अभी डिस्क पर नहीं हैं। Auth providers (OAuth + API keys) और model-provider usage/quota snapshots अब यहाँ प्रिंट नहीं होते; provider auth profiles के लिए `openclaw models auth list` और usage के लिए `openclaw status` या `openclaw models list` का उपयोग करें।
+`channels list` केवल चैट चैनल दिखाता है: डिफ़ॉल्ट रूप से कॉन्फ़िगर किए गए खाते, प्रत्येक खाते के लिए `installed`, `configured`, और `enabled` स्थिति टैग के साथ (मशीन आउटपुट के लिए `--json`)। उन बंडल किए गए चैनलों को भी दिखाने के लिए `--all` दें जिनका अभी कोई कॉन्फ़िगर किया गया खाता नहीं है और उन इंस्टॉल-योग्य कैटलॉग चैनलों को भी, जो अभी डिस्क पर नहीं हैं। प्रदाता प्रमाणीकरण और मॉडल उपयोग की जानकारी अन्य स्थानों पर उपलब्ध है: प्रदाता प्रमाणीकरण प्रोफ़ाइल के लिए `openclaw models auth list`, उपयोग/कोटा के लिए `openclaw status` या `openclaw models list`।
 
-## स्थिति / क्षमताएँ / हल करें / लॉग
+## स्थिति / क्षमताएँ / समाधान / लॉग
 
-- `channels status`: `--channel <name>`, `--probe`, `--timeout <ms>`, `--json`
-- `channels capabilities`: `--channel <name>`, `--account <id>` (केवल `--channel` के साथ), `--target <dest>`, `--timeout <ms>`, `--json`
-- `channels resolve`: `<entries...>`, `--channel <name>`, `--account <id>`, `--kind <auto|user|group>`, `--json`
-- `channels logs`: `--channel <name|all>`, `--lines <n>`, `--json`
+- `channels status`: `--channel <name>`, `--probe`, `--timeout <ms>` (डिफ़ॉल्ट `10000`), `--json`
+- `channels capabilities`: `--channel <name>`, `--account <id>` (`--channel` आवश्यक), `--target <dest>` (`--channel` आवश्यक), `--timeout <ms>` (डिफ़ॉल्ट `10000`, अधिकतम `30000`), `--json`
+- `channels resolve <entries...>`: `--channel <name>`, `--account <id>`, `--kind <auto|user|group>` (डिफ़ॉल्ट `auto`), `--json`
+- `channels logs`: `--channel <name|all>` (डिफ़ॉल्ट `all`), `--lines <n>` (डिफ़ॉल्ट `200`), `--json`
 
-`channels status --probe` लाइव पाथ है: पहुँच योग्य gateway पर यह प्रति-खाता
-`probeAccount` और वैकल्पिक `auditAccount` जाँच चलाता है, इसलिए आउटपुट में transport
-स्थिति के साथ `works`, `probe failed`, `audit ok`, या `audit failed` जैसे probe परिणाम शामिल हो सकते हैं।
-अगर gateway पहुँच योग्य नहीं है, तो `channels status` लाइव probe आउटपुट के बजाय केवल-कॉन्फ़िग सारांशों पर वापस चला जाता है।
+`channels status --probe` लाइव पथ है: पहुँच योग्य Gateway पर यह प्रत्येक खाते के लिए
+`probeAccount` और वैकल्पिक `auditAccount` जाँच चलाता है, इसलिए आउटपुट में ट्रांसपोर्ट
+स्थिति के साथ `works`, `probe failed`, `audit ok`, या `audit failed` जैसे प्रोब परिणाम शामिल हो सकते हैं।
+यदि Gateway पहुँच योग्य नहीं है, तो `channels status` लाइव प्रोब आउटपुट के बजाय
+केवल-कॉन्फ़िगरेशन सारांश पर वापस चला जाता है।
 
-चैनल socket-health signal के रूप में `openclaw sessions`, Gateway `sessions.list`, या agent
-`sessions_list` tool का उपयोग न करें। ये surfaces
-stored conversation rows रिपोर्ट करते हैं, provider runtime state नहीं। Discord provider
-restart के बाद, connected लेकिन quiet account स्वस्थ हो सकता है, जबकि अगले inbound या outbound conversation event तक कोई Discord session
-row दिखाई न दे।
+## इनबाउंड डेड लेटर
 
-## खाते जोड़ें / हटाएँ
+जिन इनबाउंड इवेंट की पुनःप्रयास नीति समाप्त हो जाती है, वे क्यू की मौजूदा विफल-प्रविष्टि अवधारण अवधि तक साझा स्थिति डेटाबेस में बने रहते हैं। इस कमांड से किसी एक चैनल खाते का निरीक्षण करें:
+
+```bash
+openclaw channels dead-letters list --channel telegram --account default
+openclaw channels dead-letters list --channel telegram --account default --json
+```
+
+टेक्स्ट दृश्य इवेंट आईडी, विफलता के कारण, प्रयासों की संख्या और विफलता की अवधि दिखाता है। निदान के लिए JSON आउटपुट में संरक्षित पेलोड, मेटाडेटा, लेन और प्रयासों के टाइमस्टैम्प भी शामिल होते हैं।
+
+मूल समस्या सुधारने के बाद, किसी एक इवेंट को उसकी मूल इवेंट आईडी के साथ फिर से क्यू में डालें:
+
+```bash
+openclaw channels dead-letters resubmit <event-id> --channel telegram --account default
+```
+
+इन कमांड को Gateway होस्ट पर चलाएँ, ताकि वे चैनल रनटाइम वाले उसी साझा स्थिति डेटाबेस को एक्सेस करें। पुनःसबमिशन पेलोड, मेटाडेटा और लेन को सुरक्षित रखता है, लेकिन प्रयास काउंटर और क्यू अवधि को रीसेट कर देता है। यह उस इवेंट के विफलता चिह्न को परमाण्विक रूप से बदलता है, इसलिए इवेंट के लंबित या क्लेम किए हुए होने पर कमांड दोहराने से दूसरा डिस्पैच बनाने के बजाय अनुरोध अस्वीकार हो जाता है। चल रहा चैनल इसे अपने अगले इनग्रेस ड्रेन पर उठा लेता है। पूर्ण हो चुके इवेंट टर्मिनल बने रहते हैं और उन्हें पुनःसबमिट नहीं किया जा सकता। पेलोड अवधारण जोड़े जाने से पहले बनाई गई विफल पंक्तियाँ अब भी सूची में दिखाई दे सकती हैं, लेकिन उनका पेलोड अनुपलब्ध होने के कारण पुनःसबमिशन उन्हें अस्वीकार कर देता है।
+
+`openclaw health` प्रत्येक चैनल खाते के लिए डेड-लेटर की संख्या और सबसे पुरानी विफलता की अवधि रिपोर्ट करता है। `openclaw doctor` प्रभावित खातों के नाम बताता है और निरीक्षण कमांड की ओर इंगित करता है।
+
+चैनल सॉकेट स्वास्थ्य संकेत के रूप में `openclaw sessions`, Gateway `sessions.list`, या एजेंट
+`sessions_list` टूल का उपयोग न करें। ये सतहें प्रदाता रनटाइम स्थिति नहीं, बल्कि
+संग्रहीत वार्तालाप पंक्तियाँ रिपोर्ट करती हैं। Discord प्रदाता के
+पुनःआरंभ होने के बाद, जुड़ा हुआ लेकिन निष्क्रिय खाता स्वस्थ हो सकता है, भले ही अगले इनबाउंड या आउटबाउंड वार्तालाप इवेंट तक
+कोई Discord सेशन पंक्ति दिखाई न दे।
+
+## खाते जोड़ना / हटाना
 
 ```bash
 openclaw channels add --channel telegram --token <bot-token>
@@ -65,82 +89,97 @@ openclaw channels remove --channel telegram --delete
 ```
 
 <Tip>
-`openclaw channels add --help` प्रति-चैनल flags (token, private key, app token, signal-cli paths, आदि) दिखाता है।
+`openclaw channels add telegram --help` या `openclaw channels add --channel telegram --help` केवल Telegram के सेटअप फ़्लैग दिखाता है। `openclaw channels add --help` केवल साझा कमांड एनवेलप दिखाता है।
 </Tip>
 
-`channels remove` केवल installed/configured channel plugins पर काम करता है। installable catalog channels के लिए पहले `channels add` का उपयोग करें।
-runtime-backed channel plugins के लिए, `channels remove` config अपडेट करने से पहले running Gateway से चुने गए खाते को रोकने के लिए भी कहता है, इसलिए किसी खाते को disable या delete करने पर पुराना listener restart तक active नहीं रहता।
+`channels remove` केवल इंस्टॉल/कॉन्फ़िगर किए गए चैनल Plugin पर काम करता है। इंस्टॉल-योग्य कैटलॉग चैनलों के लिए पहले `channels add` का उपयोग करें। `--delete` के बिना यह खाता अक्षम करने के लिए पूछता है और उसका कॉन्फ़िगरेशन बनाए रखता है; `--delete` बिना संकेत दिए कॉन्फ़िगरेशन प्रविष्टियाँ हटा देता है।
+रनटाइम-समर्थित चैनल Plugin के लिए, `channels remove` कॉन्फ़िगरेशन अपडेट करने से पहले चल रहे Gateway से चयनित खाता रोकने को भी कहता है, ताकि खाता अक्षम करने या हटाने के बाद पुराना लिसनर पुनःआरंभ होने तक सक्रिय न रहे।
 
-सामान्य non-interactive add surfaces में शामिल हैं:
+साझा नियंत्रण एनवेलप में केवल `--channel`, `--account`, और वैकल्पिक खाता डिस्प्ले `--name` होते हैं। प्रत्येक आधुनिक चैनल Plugin अपने क्रेडेंशियल, ट्रांसपोर्ट और प्रदाता-विशिष्ट अर्थविज्ञान का स्वामी होता है। पोज़िशनल आईडी या `--channel <id>` से चैनल चुने जाने के बाद, CLI चैनल रनटाइम कोड लोड किए बिना केवल बंडल किए गए या इंस्टॉल किए गए Plugin पैकेज मेटाडेटा से उस चैनल के विकल्प बनाता है।
 
-- bot-token channels: `--token`, `--bot-token`, `--app-token`, `--token-file`
-- Signal/iMessage transport fields: `--signal-number`, `--cli-path`, `--http-url`, `--http-host`, `--http-port`, `--db-path`, `--service`, `--region`
-- Google Chat fields: `--webhook-path`, `--webhook-url`, `--audience-type`, `--audience`
-- Matrix fields: `--homeserver`, `--user-id`, `--access-token`, `--password`, `--device-name`, `--initial-sync-limit`
-- Nostr fields: `--private-key`, `--relay-urls`
-- Tlon fields: `--ship`, `--url`, `--code`, `--group-channels`, `--dm-allowlist`, `--auto-discover-channels`
-- supported होने पर default-account env-backed auth के लिए `--use-env`
+`--token`, `--url`, या `--use-env` जैसे सामान्य दिखने वाले फ़्लैग भी आधुनिक अनुबंध द्वारा संभाले जाने पर चैनल के स्वामित्व में रहते हैं। जब चयनित तृतीय-पक्ष Plugin अब भी पुराने साझा सेटअप अडैप्टर का उपयोग करता है, तो कोर केवल उस चैनल के लिए जारी किया गया संगतता फ़्लैग सेट उसके पुराने `cliAddOptions` के साथ पंजीकृत करता है। असंबंधित पुराने फ़ील्ड अन्य चैनलों में लीक नहीं होते, और चयनित आधुनिक चैनल उन संगतता फ़्लैग को अस्वीकार करता है जिन्हें उसने घोषित नहीं किया है।
 
-अगर flag-driven add command के दौरान किसी channel plugin को install करना पड़े, तो OpenClaw interactive plugin install prompt खोले बिना channel के default install source का उपयोग करता है।
+चैनल के स्वामित्व वाले फ़्लैग के उदाहरण:
 
-जब आप बिना flags के `openclaw channels add` चलाते हैं, तो interactive wizard prompt कर सकता है:
+| चैनल     | फ़्लैग                                                                                                |
+| ----------- | ---------------------------------------------------------------------------------------------------- |
+| Google Chat | `--webhook-path`, `--webhook-url`, `--audience-type`, `--audience`                                   |
+| iMessage    | `--cli-path`, `--db-path`, `--service`, `--region`                                                   |
+| Matrix      | `--homeserver`, `--user-id`, `--access-token`, `--password`, `--device-name`, `--initial-sync-limit` |
+| Nostr       | `--private-key`, `--relay-urls`                                                                      |
+| Signal      | `--signal-number`, `--signal-transport`, `--cli-path`, `--http-url`, `--http-host`, `--http-port`    |
+| Tlon        | `--ship`, `--url`, `--code`, `--group-channels`, `--dm-allowlist`, `--auto-discover-channels`        |
+| WhatsApp    | `--auth-dir`                                                                                         |
 
-- चुने गए हर channel के लिए account ids
-- उन accounts के लिए optional display names
+यदि फ़्लैग-आधारित जोड़ने के कमांड के दौरान किसी चैनल Plugin को इंस्टॉल करना आवश्यक हो, तो OpenClaw इंटरैक्टिव Plugin इंस्टॉल संकेत खोले बिना चैनल के डिफ़ॉल्ट इंस्टॉल स्रोत का उपयोग करता है।
+
+निर्देशित सेटअप और फ़्लैग-आधारित सेटअप, दोनों चयनित चैनल के पार्सर, सत्यापन, खाता समाधान, कॉन्फ़िगरेशन राइटर और लेखन-पश्चात हुक से होकर गुजरते हैं। असमर्थित फ़्लैग वैश्विक इनपुट बैग के माध्यम से स्वीकार किए जाने के बजाय स्वामी चैनल की सेटअप त्रुटि के साथ विफल होते हैं।
+
+जब आप बिना किसी प्रत्यक्ष खाते, क्रेडेंशियल या चैनल-कॉन्फ़िगरेशन फ़्लैग के `openclaw channels add` चलाते हैं, तो इंटरैक्टिव विज़ार्ड संकेत दे सकता है। पोज़िशनल चैनल आईडी और `--channel <id>`, दोनों मार्गदर्शन को छोड़े बिना उस चैनल को पहले से चुनते हैं:
+
+```bash
+openclaw channels add telegram
+openclaw channels add --channel telegram
+```
+
+विज़ार्ड इनके लिए संकेत दे सकता है:
+
+- प्रत्येक चयनित चैनल के लिए खाता आईडी
+- उन खातों के लिए वैकल्पिक प्रदर्शन नाम
 - `Route these channel accounts to agents now?`
 
-अगर आप अभी bind करने की पुष्टि करते हैं, तो wizard पूछता है कि हर configured channel account का मालिक कौन-सा agent होना चाहिए और account-scoped routing bindings लिखता है।
+यदि आप अभी बाइंड करने की पुष्टि करते हैं, तो विज़ार्ड पूछता है कि प्रत्येक कॉन्फ़िगर किए गए चैनल खाते का स्वामी कौन-सा एजेंट होना चाहिए और खाता-स्कोप्ड रूटिंग बाइंडिंग लिखता है।
 
-आप बाद में वही routing rules `openclaw agents bindings`, `openclaw agents bind`, और `openclaw agents unbind` से भी प्रबंधित कर सकते हैं ([agents](/hi/cli/agents) देखें)।
+आप बाद में `openclaw agents bindings`, `openclaw agents bind`, और `openclaw agents unbind` से भी उन्हीं रूटिंग नियमों को प्रबंधित कर सकते हैं ([एजेंट](/hi/cli/agents) देखें)।
 
-जब आप किसी ऐसे channel में non-default account जोड़ते हैं जो अभी भी single-account top-level settings का उपयोग कर रहा है, OpenClaw नया account लिखने से पहले account-scoped top-level values को channel के account map में promote करता है। अधिकांश channels उन values को `channels.<channel>.accounts.default` में रखते हैं, लेकिन bundled channels मौजूदा matching promoted account को भी preserve कर सकते हैं। Matrix वर्तमान उदाहरण है: अगर कोई named account पहले से मौजूद है, या `defaultAccount` किसी existing named account की ओर points करता है, तो promotion नया `accounts.default` बनाने के बजाय उस account को preserve करता है।
+जब आप ऐसे चैनल में गैर-डिफ़ॉल्ट खाता जोड़ते हैं जो अब भी एकल-खाता शीर्ष-स्तरीय सेटिंग्स का उपयोग कर रहा है, तो OpenClaw नया खाता लिखने से पहले उन शीर्ष-स्तरीय मानों को चैनल के खाता मैप में प्रोमोट करता है। यदि चैनल में ठीक एक नामित खाता है, या `defaultAccount` किसी खाते की ओर इंगित करता है, तो प्रोमोशन मौजूदा नामित खाते का पुनः उपयोग करता है; अन्यथा मान `channels.<channel>.accounts.default` में पहुँचते हैं।
 
-Routing behavior consistent रहता है:
+रूटिंग व्यवहार सुसंगत रहता है:
 
-- मौजूदा channel-only bindings (बिना `accountId`) default account से match करना जारी रखते हैं।
-- `channels add` non-interactive mode में bindings को auto-create या rewrite नहीं करता।
-- Interactive setup वैकल्पिक रूप से account-scoped bindings जोड़ सकता है।
+- मौजूदा केवल-चैनल बाइंडिंग (`accountId` के बिना) डिफ़ॉल्ट खाते से मेल खाती रहती हैं।
+- `channels add` गैर-इंटरैक्टिव मोड में बाइंडिंग को स्वतः बनाता या फिर से लिखता नहीं है।
+- इंटरैक्टिव सेटअप वैकल्पिक रूप से खाता-स्कोप्ड बाइंडिंग जोड़ सकता है।
 
-अगर आपका config पहले से mixed state में था (named accounts मौजूद और top-level single-account values अभी भी set), तो उस channel के लिए चुने गए promoted account में account-scoped values move करने के लिए `openclaw doctor --fix` चलाएँ। अधिकांश channels `accounts.default` में promote करते हैं; Matrix इसके बजाय existing named/default target को preserve कर सकता है।
+यदि आपका कॉन्फ़िगरेशन पहले से मिश्रित स्थिति में था (नामित खाते मौजूद थे और शीर्ष-स्तरीय एकल-खाता मान अब भी सेट थे), तो खाता-स्कोप्ड मानों को उस चैनल के लिए चुने गए प्रोमोटेड खाते में ले जाने हेतु `openclaw doctor --fix` चलाएँ।
 
-## लॉगिन और लॉगआउट (interactive)
+## लॉगिन और लॉगआउट (इंटरैक्टिव)
 
 ```bash
 openclaw channels login --channel whatsapp
 openclaw channels logout --channel whatsapp
 ```
 
-- `channels login` `--verbose` को support करता है।
-- `channels login` और `logout` channel infer कर सकते हैं जब केवल एक supported login target configured हो।
-- `channels logout` reachable होने पर live Gateway path को prefer करता है, इसलिए logout channel auth state clear करने से पहले किसी भी active listener को रोक देता है। अगर local Gateway reachable नहीं है, तो यह local auth cleanup पर fallback करता है।
-- Gateway host पर terminal से `channels login` चलाएँ। Agent `exec` इस interactive login flow को block करता है; chat से उपलब्ध होने पर channel-native agent login tools, जैसे `whatsapp_login`, का उपयोग किया जाना चाहिए।
+- `channels login`, `--account <id>` और `--verbose` का समर्थन करता है; `channels logout`, `--account <id>` का समर्थन करता है।
+- जब केवल एक कॉन्फ़िगर किया गया चैनल उस क्रिया का समर्थन करता है, तो `channels login` और `logout` चैनल का अनुमान लगा सकते हैं; कई चैनल होने पर `--channel` दें।
+- पहुँच योग्य होने पर `channels logout` लाइव Gateway पथ को प्राथमिकता देता है, ताकि लॉगआउट चैनल प्रमाणीकरण स्थिति साफ़ करने से पहले किसी भी सक्रिय लिसनर को रोक दे। यदि स्थानीय Gateway पहुँच योग्य नहीं है, तो यह स्थानीय प्रमाणीकरण सफ़ाई पर वापस चला जाता है; `gateway.mode: "remote"` के साथ Gateway त्रुटि के कारण कमांड विफल हो जाता है।
+- सफल लॉगिन के बाद, CLI पहुँच योग्य स्थानीय Gateway से खाता शुरू करने को कहता है; रिमोट मोड में यह प्रमाणीकरण को स्थानीय रूप से सहेजता है और सूचित करता है कि रिमोट रनटाइम पुनःआरंभ नहीं किया गया।
+- Gateway होस्ट के टर्मिनल से `channels login` चलाएँ। एजेंट `exec` इस इंटरैक्टिव लॉगिन प्रवाह को अवरुद्ध करता है; उपलब्ध होने पर चैट से `whatsapp_login` जैसे चैनल-नेटिव एजेंट लॉगिन टूल का उपयोग किया जाना चाहिए।
 
 ## समस्या निवारण
 
-- broad probe के लिए `openclaw status --deep` चलाएँ।
-- guided fixes के लिए `openclaw doctor` का उपयोग करें।
-- `openclaw channels list` अब model provider usage/quota snapshots print नहीं करता। इनके लिए `openclaw status` (overview) या `openclaw models list` (per-provider) का उपयोग करें।
-- gateway unreachable होने पर `openclaw channels status` config-only summaries पर fallback करता है। अगर supported channel credential SecretRef के ज़रिए configured है लेकिन current command path में unavailable है, तो यह उस account को not configured दिखाने के बजाय degraded notes के साथ configured के रूप में report करता है।
+- व्यापक प्रोब के लिए `openclaw status --deep` चलाएँ।
+- निर्देशित सुधारों के लिए `openclaw doctor` का उपयोग करें।
+- Gateway पहुँच योग्य न होने पर `openclaw channels status` केवल-कॉन्फ़िगरेशन सारांश पर वापस चला जाता है। यदि समर्थित चैनल क्रेडेंशियल SecretRef के माध्यम से कॉन्फ़िगर किया गया है, लेकिन वर्तमान कमांड पथ में उपलब्ध नहीं है, तो वह खाते को कॉन्फ़िगर नहीं दिखाने के बजाय निम्नीकृत टिप्पणियों के साथ कॉन्फ़िगर किया हुआ रिपोर्ट करता है।
 
-## क्षमताओं का probe
+## क्षमता प्रोब
 
-provider capability hints (जहाँ उपलब्ध हों वहाँ intents/scopes) और static feature support प्राप्त करें:
+प्रदाता क्षमता संकेत (जहाँ उपलब्ध हों, वहाँ इंटेंट/स्कोप) और स्थिर सुविधा समर्थन प्राप्त करें:
 
 ```bash
 openclaw channels capabilities
 openclaw channels capabilities --channel discord --target channel:123
 ```
 
-नोट्स:
+टिप्पणियाँ:
 
-- `--channel` optional है; हर channel (extensions सहित) list करने के लिए इसे omit करें।
-- `--account` केवल `--channel` के साथ valid है।
-- `--target` `channel:<id>` या raw numeric channel id accept करता है और केवल Discord पर apply होता है। Discord voice channels के लिए, permission check missing `ViewChannel`, `Connect`, `Speak`, `SendMessages`, और `ReadMessageHistory` को flag करता है।
-- Probes provider-specific हैं: Discord intents + optional channel permissions; Slack bot + user scopes; Telegram bot flags + webhook; Signal daemon version; Microsoft Teams app token + Graph roles/scopes (जहाँ known हो वहाँ annotated)। बिना probes वाले channels `Probe: unavailable` report करते हैं।
+- `--channel` वैकल्पिक है; प्रत्येक चैनल (Plugin द्वारा उपलब्ध कराए गए चैनलों सहित) को सूचीबद्ध करने के लिए इसे छोड़ दें।
+- `--account` केवल `--channel` के साथ मान्य है।
+- `--target` में `channel:<id>` या अपरिष्कृत संख्यात्मक चैनल आईडी स्वीकार की जाती है और यह केवल Discord पर लागू होता है। Discord वॉइस चैनलों के लिए, अनुमति जाँच अनुपलब्ध `ViewChannel`, `Connect`, `Speak`, `SendMessages`, और `ReadMessageHistory` को चिह्नित करती है।
+- जाँचें प्रदाता-विशिष्ट होती हैं: Discord बॉट पहचान + इंटेंट और वैकल्पिक चैनल अनुमतियाँ; Slack बॉट + उपयोगकर्ता स्कोप; Telegram बॉट फ़्लैग + Webhook; Signal डेमन संस्करण; Microsoft Teams ऐप टोकन + Graph भूमिकाएँ/स्कोप (जहाँ ज्ञात हों, वहाँ टिप्पणी सहित)। जिन चैनलों के लिए जाँच उपलब्ध नहीं है, वे `Probe: unavailable` रिपोर्ट करते हैं।
 
-## नामों को IDs में resolve करें
+## नामों को आईडी में बदलें
 
-provider directory का उपयोग करके channel/user names को IDs में resolve करें:
+प्रदाता निर्देशिका का उपयोग करके चैनल/उपयोगकर्ता नामों को आईडी में बदलें:
 
 ```bash
 openclaw channels resolve --channel slack "#general" "@jane"
@@ -148,14 +187,14 @@ openclaw channels resolve --channel discord "My Server/#support" "@someone"
 openclaw channels resolve --channel matrix "Project Room"
 ```
 
-नोट्स:
+टिप्पणियाँ:
 
-- target type force करने के लिए `--kind user|group|auto` का उपयोग करें।
-- जब कई entries का समान नाम हो, तो resolution active matches को prefer करता है।
-- `channels resolve` read-only है। अगर selected account SecretRef के ज़रिए configured है लेकिन वह credential current command path में unavailable है, तो command पूरे run को abort करने के बजाय notes के साथ degraded unresolved results return करता है।
-- `channels resolve` channel plugins install नहीं करता। installable catalog channel के लिए names resolve करने से पहले `channels add --channel <name>` का उपयोग करें।
+- लक्ष्य प्रकार को बाध्य करने के लिए `--kind user|group|auto` का उपयोग करें।
+- जब एक ही नाम वाली एकाधिक प्रविष्टियाँ होती हैं, तो समाधान सक्रिय मिलानों को प्राथमिकता देता है।
+- `channels resolve` केवल पढ़ने योग्य है। यदि कोई चयनित खाता SecretRef के माध्यम से कॉन्फ़िगर किया गया है, लेकिन वह क्रेडेंशियल वर्तमान कमांड पथ में उपलब्ध नहीं है, तो कमांड पूरा निष्पादन निरस्त करने के बजाय टिप्पणियों सहित सीमित अनसुलझे परिणाम लौटाता है।
+- `channels resolve` चैनल Plugin इंस्टॉल नहीं करता। इंस्टॉल किए जा सकने वाले कैटलॉग चैनल के नाम हल करने से पहले `channels add --channel <name>` का उपयोग करें।
 
 ## संबंधित
 
-- [CLI reference](/hi/cli)
-- [Channels overview](/hi/channels)
+- [CLI संदर्भ](/hi/cli)
+- [चैनलों का अवलोकन](/hi/channels)

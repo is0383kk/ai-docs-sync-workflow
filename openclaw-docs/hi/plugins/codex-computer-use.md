@@ -1,92 +1,96 @@
 ---
 read_when:
-    - आप चाहते हैं कि Codex-mode OpenClaw एजेंट Codex Computer Use का उपयोग करें
-    - आप Codex Computer Use, PeekabooBridge, और प्रत्यक्ष cua-driver MCP के बीच चयन कर रहे हैं
-    - आप Codex Computer Use और प्रत्यक्ष cua-driver MCP सेटअप के बीच निर्णय ले रहे हैं
+    - आप चाहते हैं कि Codex-मोड OpenClaw एजेंट Codex Computer Use का उपयोग करें
+    - आप Codex Computer Use, PeekabooBridge और प्रत्यक्ष cua-driver MCP में से चयन कर रहे हैं
     - आप बंडल किए गए Codex Plugin के लिए computerUse कॉन्फ़िगर कर रहे हैं
-    - आप /codex computer-use स्थिति या इंस्टॉल की समस्या निवारण कर रहे हैं
+    - आप /codex कंप्यूटर-उपयोग की स्थिति या इंस्टॉलेशन की समस्या का निवारण कर रहे हैं
 summary: Codex-मोड OpenClaw एजेंटों के लिए Codex Computer Use सेट अप करें
 title: Codex कंप्यूटर उपयोग
 x-i18n:
-    generated_at: "2026-06-30T14:03:28Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:06:33Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 4cb785e2fda0d89a7e7770df0c2a4b3aa23f97cb1c8515a7d555a8409acfd3b2
+    source_hash: 6b11d00c74bc2990a4e33b6ffe23209ed76a1e10180ce5950dbb5073ea57ad05
     source_path: plugins/codex-computer-use.md
     workflow: 16
 ---
 
-Computer Use स्थानीय डेस्कटॉप नियंत्रण के लिए Codex-native MCP Plugin है। OpenClaw
-डेस्कटॉप ऐप को vendor नहीं करता, स्वयं डेस्कटॉप actions निष्पादित नहीं करता, या
-Codex अनुमतियों को bypass नहीं करता। bundled `codex` Plugin केवल Codex app-server तैयार करता है:
-यह Codex Plugin support सक्षम करता है, configured Codex
-Computer Use Plugin को ढूंढता या install करता है, जांचता है कि `computer-use` MCP server उपलब्ध है, और
-फिर Codex-mode turns के दौरान native MCP tool calls का स्वामित्व Codex को देता है।
+Computer Use स्थानीय डेस्कटॉप नियंत्रण के लिए एक Codex-नेटिव MCP plugin है। OpenClaw
+डेस्कटॉप ऐप को वेंडर नहीं करता, स्वयं डेस्कटॉप कार्रवाइयाँ निष्पादित नहीं करता, या
+Codex अनुमतियों को बायपास नहीं करता। बंडल किया गया `codex` plugin केवल Codex app-server तैयार करता है:
+यह Codex plugin समर्थन सक्षम करता है, कॉन्फ़िगर किया गया Computer Use
+plugin खोजता या इंस्टॉल करता है, जाँचता है कि `computer-use` MCP सर्वर उपलब्ध है, और फिर
+Codex-मोड टर्न के दौरान नेटिव MCP टूल कॉल का स्वामित्व Codex को देता है।
 
-इस पृष्ठ का उपयोग तब करें जब OpenClaw पहले से native Codex harness का उपयोग कर रहा हो। स्वयं
-runtime setup के लिए, [Codex harness](/hi/plugins/codex-harness) देखें।
+इस पृष्ठ का उपयोग तब करें जब OpenClaw पहले से नेटिव Codex हार्नेस का उपयोग कर रहा हो। स्वयं
+रनटाइम सेटअप के लिए, [Codex हार्नेस](/hi/plugins/codex-harness) देखें।
+
+यह OpenClaw के अंतर्निहित [Node-समर्थित कंप्यूटर टूल](/hi/nodes/computer-use) से अलग है। अंतर्निहित टूल का उपयोग तब करें जब उसी एजेंट अनुबंध को किसी युग्मित Mac को नियंत्रित करना हो, चाहे एजेंट Gateway पर चले या किसी अन्य Node पर। Codex Computer Use का उपयोग तब करें जब Codex app-server को स्थानीय MCP इंस्टॉलेशन, अनुमतियों और नेटिव टूल कॉल का स्वामित्व लेना हो।
 
 ## OpenClaw.app और Peekaboo
 
-OpenClaw.app का Peekaboo integration Codex Computer Use से अलग है। macOS
-app एक PeekabooBridge socket host कर सकता है ताकि `peekaboo` CLI, Peekaboo के अपने
-automation tools के लिए app की स्थानीय Accessibility और Screen Recording grants का पुनः उपयोग कर सके।
-वह bridge Codex Computer Use को install या proxy नहीं करता, और
-Codex Computer Use PeekabooBridge socket के माध्यम से call नहीं करता।
+OpenClaw.app का Peekaboo एकीकरण Codex Computer Use से अलग है।
+macOS ऐप PeekabooBridge सॉकेट होस्ट कर सकता है, ताकि `peekaboo` CLI
+Peekaboo के अपने ऑटोमेशन टूल के लिए ऐप की स्थानीय Accessibility और Screen Recording अनुमतियों का पुनः उपयोग कर सके।
+वह ब्रिज Codex Computer Use को इंस्टॉल या प्रॉक्सी नहीं करता, और
+Codex Computer Use PeekabooBridge सॉकेट के माध्यम से कॉल नहीं करता।
 
-जब आप चाहते हैं कि OpenClaw.app Peekaboo CLI automation के लिए
-permission-aware host बने, तो [Peekaboo bridge](/hi/platforms/mac/peekaboo) का उपयोग करें। इस पृष्ठ का उपयोग तब करें जब किसी
-Codex-mode OpenClaw agent के लिए turn शुरू होने से पहले Codex का native `computer-use` MCP Plugin
+जब आप चाहते हैं कि OpenClaw.app, Peekaboo CLI ऑटोमेशन के लिए
+अनुमति-जागरूक होस्ट हो, तब [Peekaboo ब्रिज](/hi/platforms/mac/peekaboo) का उपयोग करें। इस पृष्ठ का उपयोग तब करें जब किसी
+Codex-मोड OpenClaw एजेंट के लिए टर्न शुरू होने से पहले Codex का नेटिव `computer-use` MCP plugin
 उपलब्ध होना चाहिए।
 
-## iOS app
+## iOS ऐप
 
-iOS app Codex Computer Use से अलग है। यह Codex `computer-use` MCP server को
-install या proxy नहीं करता और यह desktop-control backend नहीं है।
-इसके बजाय, iOS app OpenClaw node के रूप में connect करता है और `canvas.*`, `camera.*`, `screen.*`,
-`location.*`, और `talk.*` जैसे node commands के माध्यम से mobile
-capabilities expose करता है।
+iOS ऐप Codex Computer Use से अलग है। यह Codex
+`computer-use` MCP सर्वर को इंस्टॉल या प्रॉक्सी नहीं करता और यह डेस्कटॉप-नियंत्रण बैकएंड नहीं है।
+इसके बजाय, iOS ऐप OpenClaw Node के रूप में कनेक्ट होता है और
+`canvas.*`, `camera.*`, `screen.*`,
+`location.*`, और `talk.*` जैसे Node कमांड के माध्यम से मोबाइल
+क्षमताएँ उपलब्ध कराता है।
 
-जब आप चाहते हैं कि कोई agent gateway के माध्यम से iPhone node चलाए, तो
-[iOS](/hi/platforms/ios) का उपयोग करें। इस पृष्ठ का उपयोग तब करें जब Codex-mode agent को Codex के native Computer Use Plugin के माध्यम से स्थानीय
-macOS desktop नियंत्रित करना चाहिए।
+जब आप चाहते हैं कि कोई एजेंट Gateway के माध्यम से iPhone Node को संचालित करे,
+तब [iOS](/hi/platforms/ios) का उपयोग करें। इस पृष्ठ का उपयोग तब करें जब किसी Codex-मोड एजेंट को
+Codex के नेटिव Computer Use plugin के माध्यम से स्थानीय macOS डेस्कटॉप नियंत्रित करना हो।
 
-## Direct cua-driver MCP
+## प्रत्यक्ष cua-driver MCP
 
-Codex Computer Use desktop control expose करने का एकमात्र तरीका नहीं है। यदि आप चाहते हैं कि
-OpenClaw-managed runtimes TryCua के driver को सीधे call करें, तो
-Codex-specific marketplace flow के बजाय OpenClaw की MCP registry के माध्यम से upstream
-`cua-driver mcp` server का उपयोग करें।
+डेस्कटॉप नियंत्रण उपलब्ध कराने का एकमात्र तरीका Codex Computer Use नहीं है। यदि आप चाहते हैं कि
+OpenClaw-प्रबंधित रनटाइम TryCua के ड्राइवर को सीधे कॉल करें, तो
+Codex-विशिष्ट मार्केटप्लेस प्रवाह के बजाय OpenClaw की MCP रजिस्ट्री के माध्यम से अपस्ट्रीम
+`cua-driver mcp` सर्वर का उपयोग करें।
 
-`cua-driver` install करने के बाद, या तो उससे OpenClaw command मांगें:
+`cua-driver` इंस्टॉल करने के बाद, या तो उससे OpenClaw कमांड माँगें:
 
 ```bash
 cua-driver mcp-config --client openclaw
 ```
 
-या stdio server स्वयं register करें:
+या stdio सर्वर को सीधे पंजीकृत करें:
 
 ```bash
 openclaw mcp set cua-driver '{"command":"cua-driver","args":["mcp"]}'
 ```
 
-वह path upstream MCP tool surface को intact रखता है, जिसमें driver
-schemas और structured MCP responses शामिल हैं। इसका उपयोग तब करें जब आप CUA driver को
-सामान्य OpenClaw MCP server के रूप में उपलब्ध चाहते हैं। इस पृष्ठ पर Codex Computer Use setup का उपयोग तब करें जब
-Codex app-server को Plugin installation, MCP reloads,
-और Codex-mode turns के भीतर native tool calls का स्वामित्व रखना चाहिए।
+यह पथ ड्राइवर स्कीमा और संरचित MCP प्रतिक्रियाओं सहित
+अपस्ट्रीम MCP टूल सतह को अक्षुण्ण रखता है। इसका उपयोग तब करें जब आप चाहते हैं कि CUA ड्राइवर
+सामान्य OpenClaw MCP सर्वर के रूप में उपलब्ध हो। इस पृष्ठ पर Codex Computer Use सेटअप का
+उपयोग तब करें जब Codex app-server को plugin इंस्टॉलेशन, MCP रीलोड और
+Codex-मोड टर्न के भीतर नेटिव टूल कॉल का स्वामित्व लेना हो।
 
-CUA का driver macOS-specific है और अब भी स्थानीय macOS permissions की आवश्यकता रखता है
-जिनके लिए उसका app prompt करता है, जैसे Accessibility और Screen Recording। OpenClaw
-`cua-driver` install नहीं करता, वे permissions grant नहीं करता, या upstream
-driver के safety model को bypass नहीं करता।
+CUA का ड्राइवर macOS, Windows (x64 और ARM64), और
+Linux (x64 और ARM64, पूर्वावलोकन स्तर) के लिए प्री-रिलीज़ बिल्ड प्रदान करता है। इसे अभी भी उन स्थानीय OS
+अनुमतियों की आवश्यकता होती है जिनके लिए इसका ऐप संकेत देता है, जैसे macOS पर Accessibility और Screen Recording।
+OpenClaw `cua-driver` इंस्टॉल नहीं करता, वे अनुमतियाँ प्रदान नहीं करता, या
+अपस्ट्रीम ड्राइवर के सुरक्षा मॉडल को बायपास नहीं करता।
 
-## Quick setup
+## त्वरित सेटअप
 
-जब Codex-mode turns में thread शुरू होने से पहले Computer Use उपलब्ध होना आवश्यक हो, तब
-`plugins.entries.codex.config.computerUse` set करें। `autoInstall: true`
-Computer Use को opt in करता है और OpenClaw को turn से पहले इसे install या re-enable करने देता है:
+जब किसी थ्रेड के शुरू होने से पहले Codex-मोड टर्न के लिए
+Computer Use उपलब्ध होना आवश्यक हो, तब `plugins.entries.codex.config.computerUse` सेट करें। `autoInstall: true`
+Computer Use को सक्षम करता है और OpenClaw को टर्न से पहले इसे इंस्टॉल या पुनः सक्षम करने देता है:
 
 ```json5
 {
@@ -104,39 +108,55 @@ Computer Use को opt in करता है और OpenClaw को turn स�
   },
   agents: {
     defaults: {
-      model: "openai/gpt-5.5",
+      model: "openai/gpt-5.6-sol",
     },
   },
 }
 ```
 
-इस config के साथ, OpenClaw प्रत्येक Codex-mode turn से पहले Codex app-server जांचता है।
-यदि Computer Use missing है लेकिन Codex app-server ने पहले ही installable marketplace discover कर लिया है, तो
-OpenClaw Codex app-server से Plugin install या re-enable करने और MCP servers reload करने को कहता है।
-macOS पर, जब कोई matching marketplace registered नहीं है
-और standard Codex app bundle मौजूद है, तो OpenClaw fail होने से पहले
-`/Applications/Codex.app/Contents/Resources/plugins/openai-bundled` से bundled Codex marketplace register करने का भी प्रयास करता है।
-यदि setup फिर भी MCP server उपलब्ध नहीं करा पाता, तो turn
-thread शुरू होने से पहले fail हो जाता है।
+इस कॉन्फ़िगरेशन के साथ, OpenClaw प्रत्येक Codex-मोड
+टर्न से पहले Codex app-server की जाँच करता है। यदि Computer Use अनुपस्थित है, लेकिन Codex app-server ने पहले ही
+इंस्टॉल करने योग्य मार्केटप्लेस खोज लिया है, तो OpenClaw Codex app-server से plugin को इंस्टॉल या
+पुनः सक्षम करने और MCP सर्वर रीलोड करने के लिए कहता है। macOS पर एक पृथक
+Codex app-server शुरू करने से पहले, नेटिव क्लाइंट अनुपस्थित होने पर ऑटो-इंस्टॉल चयनित डेस्कटॉप ऐप बंडल से आधिकारिक हस्ताक्षरित
+Computer Use सेवा ऐप को उस Codex होम की `computer-use` डायरेक्टरी में भी कॉपी करता है।
+macOS पर, जब कोई मेल खाता
+मार्केटप्लेस पंजीकृत नहीं है और मानक डेस्कटॉप ऐप बंडल मौजूद है, तब OpenClaw
+`/Applications/ChatGPT.app/Contents/Resources/plugins/openai-bundled` से बंडल किए गए Codex मार्केटप्लेस को पंजीकृत करने का भी प्रयास करता है, और
+लेगेसी स्टैंडअलोन इंस्टॉलेशन के लिए `/Applications/Codex.app/Contents/Resources/plugins/openai-bundled` को
+फ़ॉलबैक के रूप में बनाए रखता है। यदि सेटअप फिर भी
+MCP सर्वर उपलब्ध नहीं करा पाता, तो थ्रेड शुरू होने से पहले टर्न विफल हो जाता है।
+सख्त तत्परता विफलताएँ हार्नेस प्रीफ़्लाइट विफलताएँ होती हैं, इसलिए मॉडल फ़ॉलबैक
+प्रत्येक मॉडल उम्मीदवार के लिए वही स्थानीय तत्परता क्रम दोहराता नहीं है।
 
-Computer Use config बदलने के बाद, यदि कोई existing Codex thread पहले ही शुरू हो चुका है, तो testing से पहले affected chat में `/new` या `/reset` का उपयोग करें।
+Computer Use कॉन्फ़िगरेशन बदलने के बाद, यदि कोई मौजूदा Codex थ्रेड पहले ही शुरू हो चुका है, तो परीक्षण से पहले प्रभावित
+चैट में `/new` या `/reset` का उपयोग करें।
 
-macOS managed stdio startup पर, OpenClaw signed desktop Codex app
-bundle को `/Applications/Codex.app/Contents/Resources/codex` पर prefer करता है जब यह मौजूद हो।
-यह Computer Use को उस app bundle के अधीन रखता है जो स्थानीय desktop-control
-permissions का स्वामी है। यदि desktop app installed नहीं है, तो OpenClaw Plugin के पास installed
-managed Codex binary पर fallback करता है। यदि कोई installed desktop app
-unsupported app-server version के साथ initialize करता है, तो OpenClaw उस child को close करता है
-और stale desktop app को plugin-local fallback shadow करने देने के बजाय अगले managed binary candidate को retry करता है।
-Explicit `appServer.command`
-config या `OPENCLAW_CODEX_APP_SERVER_BIN` अब भी इस managed
-selection को override करता है।
+macOS पर, Computer Use के लिए प्रबंधित स्टार्टअप पहले
+`/Applications/ChatGPT.app/Contents/Resources/codex` पर डेस्कटॉप ऐप बाइनरी को प्राथमिकता देता है, फिर लेगेसी
+स्टैंडअलोन इंस्टॉलेशन के लिए `/Applications/Codex.app/Contents/Resources/codex` पर
+फ़ॉलबैक करता है। यह एकबारगी Computer Use स्थिति और
+इंस्टॉल कमांड पर भी लागू होता है, जो अपना स्वयं का क्लाइंट शुरू करते हैं। यह डेस्कटॉप नियंत्रण को
+उस ऐप बंडल के अधीन रखता है जिसके पास स्थानीय macOS अनुमतियाँ हैं। यदि डेस्कटॉप ऐप
+इंस्टॉल नहीं है, तो OpenClaw plugin के साथ इंस्टॉल की गई प्रबंधित Codex बाइनरी पर फ़ॉलबैक करता है।
+डिफ़ॉल्ट पृथक एजेंट होम वाले सामान्य प्रबंधित Codex टर्न
+पहले उस पिन किए गए पैकेज को प्राथमिकता देते हैं, ताकि कोई पुराना डेस्कटॉप ऐप वर्तमान मॉडल
+समर्थन को ओवरराइड न कर सके। उपयोगकर्ता-स्कोप वाले होम डेस्कटॉप-प्रथम रहते हैं, क्योंकि वे नेटिव
+Computer Use स्थिति लोड कर सकते हैं। ऐसा पृथक एजेंट होम, जिसका प्रभावी Codex कॉन्फ़िगरेशन
+Computer Use सक्षम करता है, वह भी डेस्कटॉप-प्रथम रहता है। स्पष्ट
+`appServer.command` कॉन्फ़िगरेशन या `OPENCLAW_CODEX_APP_SERVER_BIN` अब भी
+इस प्रबंधित चयन को ओवरराइड करता है।
 
-## Commands
+OpenClaw एक चल रहे Gateway के भीतर नेटिव Codex कॉन्फ़िगरेशन रीड और Computer Use इंस्टॉलेशन को
+क्रमबद्ध करता है। कोई अलग Codex प्रक्रिया या दूसरा Gateway
+उस फ़ेंस का हिस्सा नहीं है। Gateway के बाहर नेटिव Codex plugin कॉन्फ़िगरेशन बदलने के बाद,
+नए चयन पर निर्भर होने से पहले Gateway पुनः आरंभ करें और नई चैट शुरू करें।
 
-किसी भी chat surface से `/codex computer-use` commands का उपयोग करें जहां `codex`
-Plugin command surface उपलब्ध है। ये OpenClaw chat/runtime commands हैं,
-`openclaw codex ...` CLI subcommands नहीं:
+## कमांड
+
+जहाँ `codex` plugin कमांड सतह उपलब्ध हो, वहाँ किसी भी चैट सतह से
+`/codex computer-use` कमांड का उपयोग करें। ये OpenClaw चैट/रनटाइम
+कमांड हैं, `openclaw codex ...` CLI उपकमांड नहीं:
 
 ```text
 /codex computer-use status
@@ -146,177 +166,233 @@ Plugin command surface उपलब्ध है। ये OpenClaw chat/runtime
 /codex computer-use install --marketplace <name>
 ```
 
-`status` read-only है। यह marketplace sources add नहीं करता, Plugins install नहीं करता, या
-Codex Plugin support enable नहीं करता। यदि कोई config Computer Use को opt in नहीं करता, तो `status`
-one-off install command के बाद भी disabled report कर सकता है।
+`status` डिफ़ॉल्ट कार्रवाई है और केवल-पढ़ने योग्य है: यह मार्केटप्लेस
+स्रोत नहीं जोड़ता, plugin इंस्टॉल नहीं करता, या Codex plugin समर्थन सक्षम नहीं करता। यदि कोई कॉन्फ़िगरेशन
+Computer Use को सक्षम नहीं करता, तो एकबारगी इंस्टॉल कमांड के बाद भी `status`
+अक्षम की रिपोर्ट कर सकता है।
 
-`install` Codex app-server Plugin support enable करता है, optionally configured
-marketplace source add करता है, Codex
-app-server के माध्यम से configured Plugin install या re-enable करता है, MCP servers reload करता है, और verify करता है कि MCP server tools expose करता है।
-क्योंकि installation trusted host resources बदलता है, केवल owner या
-`operator.admin` Gateway client `install` चला सकता है। अन्य authorized senders
-overrides सहित read-only `status` command का उपयोग जारी रख सकते हैं।
+`install` Codex app-server plugin समर्थन सक्षम करता है, वैकल्पिक रूप से
+कॉन्फ़िगर किया गया मार्केटप्लेस स्रोत जोड़ता है, Codex app-server के माध्यम से कॉन्फ़िगर किए गए plugin को
+इंस्टॉल या पुनः सक्षम करता है, MCP सर्वर रीलोड करता है, और सत्यापित करता है कि MCP
+सर्वर टूल उपलब्ध कराता है। क्योंकि इंस्टॉलेशन विश्वसनीय होस्ट संसाधनों को बदलता है,
+केवल कोई स्वामी या `operator.admin` Gateway क्लाइंट `install` चला सकता है। अन्य
+अधिकृत प्रेषक ओवरराइड सहित केवल-पढ़ने योग्य `status` कमांड का
+उपयोग जारी रख सकते हैं।
 
-## Marketplace choices
+पुराने रिलीज़ एकबारगी `--plugin`, `--server`, और `--mcp-server`
+पहचान ओवरराइड स्वीकार करते थे। इसके बजाय `computerUse.pluginName` और
+`computerUse.mcpServerName` को स्थायी रूप से कॉन्फ़िगर करें। जब किसी लेगेसी पहचान फ़्लैग का
+उपयोग होता है, तो कमांड स्थायी किए जाने वाले सटीक सेटिंग की पहचान करता है और अपने माइग्रेशन मार्गदर्शन में
+अनुरोधित कार्रवाई तथा सभी समर्थित मार्केटप्लेस फ़्लैग दोहराता है।
 
-OpenClaw वही app-server API उपयोग करता है जिसे Codex स्वयं expose करता है। marketplace
-fields चुनते हैं कि Codex को `computer-use` कहां ढूंढना चाहिए।
+## मार्केटप्लेस विकल्प
 
-| Field                | कब उपयोग करें                                                   | Install support                                          |
+OpenClaw उसी app-server API का उपयोग करता है जिसे Codex स्वयं उपलब्ध कराता है।
+मार्केटप्लेस फ़ील्ड चुनते हैं कि Codex को `computer-use` कहाँ खोजना चाहिए।
+
+| फ़ील्ड                | कब उपयोग करें                                                        | इंस्टॉल समर्थन                                          |
 | -------------------- | --------------------------------------------------------------- | -------------------------------------------------------- |
-| No marketplace field | आप चाहते हैं कि Codex app-server उन marketplaces का उपयोग करे जिन्हें वह पहले से जानता है। | हां, जब app-server local marketplace return करता है। |
-| `marketplaceSource`  | आपके पास Codex marketplace source है जिसे app-server add कर सकता है। | हां, explicit `/codex computer-use install` के लिए। |
-| `marketplacePath`    | आप host पर local marketplace file path पहले से जानते हैं। | हां, explicit install और turn-start auto-install के लिए। |
-| `marketplaceName`    | आप name से पहले से registered एक marketplace चुनना चाहते हैं। | हां, केवल तब जब selected marketplace का local path हो। |
+| कोई मार्केटप्लेस फ़ील्ड नहीं | आप चाहते हैं कि Codex app-server उन मार्केटप्लेस का उपयोग करे जिन्हें वह पहले से जानता है। | हाँ, जब app-server कोई स्थानीय मार्केटप्लेस लौटाता है।        |
+| `marketplaceSource`  | आपके पास ऐसा Codex मार्केटप्लेस स्रोत है जिसे app-server जोड़ सकता है।         | हाँ, स्पष्ट `/codex computer-use install` के लिए।         |
+| `marketplacePath`    | आपको होस्ट पर स्थानीय मार्केटप्लेस फ़ाइल पथ पहले से पता है।   | हाँ, स्पष्ट इंस्टॉल और टर्न-प्रारंभ ऑटो-इंस्टॉल के लिए।   |
+| `marketplaceName`    | आप पहले से पंजीकृत किसी मार्केटप्लेस को नाम से चुनना चाहते हैं।  | हाँ, केवल तब जब चयनित मार्केटप्लेस का कोई स्थानीय पथ हो। |
 
-Fresh Codex homes को अपनी official marketplaces seed करने के लिए थोड़ा समय लग सकता है।
-Install के दौरान, OpenClaw `plugin/list` को
-`marketplaceDiscoveryTimeoutMs` milliseconds तक poll करता है। default 60 seconds है।
+नए Codex होम को अपने आधिकारिक
+मार्केटप्लेस सीड करने के लिए कुछ समय की आवश्यकता हो सकती है। इंस्टॉल के दौरान, OpenClaw
+`marketplaceDiscoveryTimeoutMs` मिलीसेकंड (डिफ़ॉल्ट 60 सेकंड) तक `plugin/list` को पोल करता है।
 
-यदि multiple known marketplaces में Computer Use है, तो OpenClaw
-`openai-bundled`, फिर `openai-curated`, फिर `local` को prefer करता है। Unknown ambiguous matches
-fail closed करते हैं और आपसे `marketplaceName` या `marketplacePath` set करने को कहते हैं।
+यदि कई ज्ञात मार्केटप्लेस में Computer Use मौजूद है, तो OpenClaw
+`openai-bundled`, फिर `openai-curated`, फिर `local` को प्राथमिकता देता है। अज्ञात अस्पष्ट
+मिलान सुरक्षित रूप से विफल होते हैं और आपसे `marketplaceName` या
+`marketplacePath` सेट करने के लिए कहते हैं।
 
-## Bundled macOS marketplace
+## बंडल किया गया macOS मार्केटप्लेस
 
-Recent Codex desktop builds यहां Computer Use bundle करते हैं:
+वर्तमान ChatGPT डेस्कटॉप बिल्ड यहाँ Computer Use बंडल करते हैं; लेगेसी स्टैंडअलोन
+Codex डेस्कटॉप बिल्ड `Codex.app` के अंतर्गत समान लेआउट का उपयोग करते हैं:
 
 ```text
+/Applications/ChatGPT.app/Contents/Resources/plugins/openai-bundled/plugins/computer-use
 /Applications/Codex.app/Contents/Resources/plugins/openai-bundled/plugins/computer-use
 ```
 
-जब `computerUse.autoInstall` true है और `computer-use` containing कोई marketplace
-registered नहीं है, तो OpenClaw standard bundled
-marketplace root को automatically add करने का प्रयास करता है:
+जब `computerUse.autoInstall` true हो और
+`computer-use` वाला कोई मार्केटप्लेस पंजीकृत न हो, तो OpenClaw पहले मौजूद मानक
+बंडल किए गए मार्केटप्लेस रूट को जोड़ने का प्रयास करता है:
 
 ```text
+/Applications/ChatGPT.app/Contents/Resources/plugins/openai-bundled
 /Applications/Codex.app/Contents/Resources/plugins/openai-bundled
 ```
 
-आप इसे Codex के साथ shell से explicitly भी register कर सकते हैं:
+आप इसे Codex के साथ शेल से स्पष्ट रूप से भी पंजीकृत कर सकते हैं:
 
 ```bash
-codex plugin marketplace add /Applications/Codex.app/Contents/Resources/plugins/openai-bundled
+codex plugin marketplace add /Applications/ChatGPT.app/Contents/Resources/plugins/openai-bundled
 ```
 
-यदि आप nonstandard Codex app path उपयोग करते हैं, तो `/codex computer-use install
---source <marketplace-root>` एक बार चलाएं या `computerUse.marketplacePath` को
-local marketplace file path पर set करें। `--marketplace-path` का उपयोग केवल तब करें जब आपके पास
-marketplace JSON file path हो, bundled marketplace root नहीं।
+यदि आप गैर-मानक Codex ऐप पथ का उपयोग करते हैं, तो `/codex computer-use install
+--source <marketplace-root>` एक बार चलाएँ, या `computerUse.marketplacePath` को
+स्थानीय मार्केटप्लेस फ़ाइल पथ पर सेट करें। `--marketplace-path` का उपयोग केवल तब करें जब आपके पास
+मार्केटप्लेस JSON फ़ाइल पथ हो, बंडल किया गया मार्केटप्लेस रूट नहीं।
 
-## Remote catalog limit
+### साझा plugin कैश
 
-Codex app-server remote-only catalog entries list और read कर सकता है, लेकिन यह
-वर्तमान में remote `plugin/install` support नहीं करता। इसका अर्थ है कि `marketplaceName`
-status checks के लिए remote-only marketplace select कर सकता है, लेकिन installs और re-enables को
-अब भी `marketplaceSource` या `marketplacePath` के माध्यम से local marketplace चाहिए।
+डिफ़ॉल्ट `pluginCacheMode: "independent"` प्रत्येक Codex होम और उसके
+plugin कैश को अप्रबंधित छोड़ता है। app-server स्टार्टअप से पहले बंडल किए गए
+Computer Use plugin को सक्रिय Codex होम के खोजे जा सकने वाले plugin कैश में कॉपी करने के लिए `pluginCacheMode: "shared"` सेट करें।
+साझा मोड पुराने कैश किए गए संस्करणों को सुरक्षित रखता है, क्योंकि
+चल रहे Codex क्लाइंट अब भी अपनी संस्करणित plugin डायरेक्टरी को संदर्भित कर सकते हैं; विफल
+प्रतिस्थापन कॉपी भी सक्रिय कैश को सुरक्षित रखती है। स्पष्ट
+`marketplaceName` या `marketplacePath` कॉन्फ़िगरेशन इस
+सामंजस्य को अक्षम करता है, ताकि OpenClaw उस चयन को ओवरराइड न करे।
 
-यदि status कहता है कि Plugin remote Codex marketplace में उपलब्ध है लेकिन remote
-install unsupported है, तो local source या path के साथ install चलाएं:
+## रिमोट कैटलॉग सीमा
+
+Codex app-server केवल-रिमोट कैटलॉग प्रविष्टियों को सूचीबद्ध और पढ़ सकता है, लेकिन यह
+वर्तमान में रिमोट `plugin/install` का समर्थन नहीं करता। इसका अर्थ है कि `marketplaceName`
+स्थिति जाँच के लिए केवल-रिमोट मार्केटप्लेस चुन सकता है, लेकिन इंस्टॉल और
+पुनः सक्षम करने के लिए अब भी `marketplaceSource` या
+`marketplacePath` के माध्यम से स्थानीय मार्केटप्लेस आवश्यक है।
+
+यदि स्थिति बताती है कि plugin किसी रिमोट Codex मार्केटप्लेस में उपलब्ध है, लेकिन
+रिमोट इंस्टॉल असमर्थित है, तो स्थानीय स्रोत या पथ के साथ इंस्टॉल चलाएँ:
 
 ```text
 /codex computer-use install --source <marketplace-source>
 /codex computer-use install --marketplace-path <path>
 ```
 
-## Configuration reference
+## कॉन्फ़िगरेशन संदर्भ
 
-| Field                           | Default        | Meaning                                                                        |
+| फ़ील्ड                           | डिफ़ॉल्ट        | अर्थ                                                                        |
 | ------------------------------- | -------------- | ------------------------------------------------------------------------------ |
-| `enabled`                       | inferred       | Computer Use require करें। जब कोई अन्य Computer Use field set हो, तो default true होता है। |
-| `autoInstall`                   | false          | Turn start पर already discovered marketplaces से install या re-enable करें। |
-| `marketplaceDiscoveryTimeoutMs` | 60000          | Install कितनी देर तक Codex app-server marketplace discovery की प्रतीक्षा करता है। |
-| `marketplaceSource`             | unset          | Codex app-server `marketplace/add` को pass की जाने वाली source string। |
-| `marketplacePath`               | unset          | Plugin containing local Codex marketplace file path। |
-| `marketplaceName`               | unset          | Select करने के लिए registered Codex marketplace name। |
-| `pluginName`                    | `computer-use` | Codex marketplace Plugin name। |
-| `mcpServerName`                 | `computer-use` | Installed Plugin द्वारा exposed MCP server name। |
+| `enabled`                       | अनुमानित       | Computer Use आवश्यक करें। किसी अन्य Computer Use फ़ील्ड के सेट होने पर डिफ़ॉल्ट रूप से true होता है। |
+| `autoInstall`                   | false          | मूल क्लाइंट का प्रावधान करें और टर्न शुरू होने पर Plugin इंस्टॉल या फिर से सक्षम करें। |
+| `marketplaceDiscoveryTimeoutMs` | 60000          | Codex app-server मार्केटप्लेस खोज के लिए इंस्टॉल कितनी देर प्रतीक्षा करता है।             |
+| `liveTestTimeoutMs`             | 60000          | अस्थायी तत्परता थ्रेड और उसके क्लीनअप अनुरोधों की समय-सीमा।           |
+| `toolCallTimeoutMs`             | 60000          | Computer Use `list_apps` तत्परता टूल कॉल की समय-सीमा।                  |
+| `healthCheckEnabled`            | false          | स्वामी app-server क्लाइंट के सक्रिय रहने के दौरान समय-समय पर तत्परता जाँच चलाएँ।    |
+| `healthCheckIntervalMinutes`    | 60             | जाँच की आवृत्ति; स्वीकृत मान 30, 60, 120 या 240 मिनट हैं।                |
+| `pluginCacheMode`               | `independent`  | बंडल किए गए डेस्कटॉप Plugin से Codex-home कैश रीफ़्रेश करने के लिए `shared` का उपयोग करें।  |
+| `strictReadiness`               | false          | चेतावनी के साथ जारी रखने के बजाय विफल लाइव जाँच पर स्टार्टअप रोकें।      |
+| `autoRepair`                    | false          | पुराने स्कोप किए गए Computer Use MCP चाइल्ड को समाप्त करें और विफल जाँच का एक बार पुनः प्रयास करें।     |
+| `marketplaceSource`             | सेट नहीं          | Codex app-server `marketplace/add` को भेजी गई स्रोत स्ट्रिंग।                    |
+| `marketplacePath`               | सेट नहीं          | Plugin वाली स्थानीय Codex मार्केटप्लेस फ़ाइल का पथ।                       |
+| `marketplaceName`               | सेट नहीं          | चुनने के लिए पंजीकृत Codex मार्केटप्लेस नाम।                                   |
+| `pluginName`                    | `computer-use` | Codex मार्केटप्लेस Plugin का नाम।                                                 |
+| `mcpServerName`                 | `computer-use` | इंस्टॉल किए गए Plugin द्वारा उपलब्ध कराया गया MCP सर्वर नाम।                               |
 
-Turn-start auto-install configured `marketplaceSource`
-values को जानबूझकर refuse करता है। नया source add करना explicit setup operation है, इसलिए
-`/codex computer-use install --source <marketplace-source>` एक बार उपयोग करें, फिर
-`autoInstall` को discovered local marketplaces से future re-enables handle करने दें।
-Turn-start auto-install configured `marketplacePath` उपयोग कर सकता है, क्योंकि वह
-host पर पहले से local path है।
+टर्न शुरू होने पर स्वतः इंस्टॉल जानबूझकर कॉन्फ़िगर किए गए `marketplaceSource`
+मानों को अस्वीकार करता है। नया स्रोत जोड़ना एक स्पष्ट सेटअप प्रक्रिया है, इसलिए
+`/codex computer-use install --source <marketplace-source>` का एक बार उपयोग करें, फिर
+`autoInstall` को खोजे गए स्थानीय मार्केटप्लेस से भविष्य में फिर से सक्षम करने दें।
+टर्न शुरू होने पर स्वतः इंस्टॉल कॉन्फ़िगर किए गए `marketplacePath` का उपयोग कर सकता है, क्योंकि वह
+होस्ट पर पहले से एक स्थानीय पथ है।
 
-## What OpenClaw checks
+प्रत्येक फ़ील्ड पर्यावरण चर ओवरराइड भी स्वीकार करता है, जिसकी जाँच तब की जाती है जब
+संबंधित कॉन्फ़िग कुंजी सेट न हो:
 
-OpenClaw internally stable setup reason report करता है और chat के लिए user-facing
-status format करता है:
+| फ़ील्ड                           | पर्यावरण चर                                                        |
+| ------------------------------- | -------------------------------------------------------------- |
+| `enabled`                       | `OPENCLAW_CODEX_COMPUTER_USE`                                  |
+| `autoInstall`                   | `OPENCLAW_CODEX_COMPUTER_USE_AUTO_INSTALL`                     |
+| `marketplaceDiscoveryTimeoutMs` | `OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_DISCOVERY_TIMEOUT_MS` |
+| `liveTestTimeoutMs`             | `OPENCLAW_CODEX_COMPUTER_USE_LIVE_TEST_TIMEOUT_MS`             |
+| `toolCallTimeoutMs`             | `OPENCLAW_CODEX_COMPUTER_USE_TOOL_CALL_TIMEOUT_MS`             |
+| `healthCheckEnabled`            | `OPENCLAW_CODEX_COMPUTER_USE_HEALTH_CHECK_ENABLED`             |
+| `healthCheckIntervalMinutes`    | `OPENCLAW_CODEX_COMPUTER_USE_HEALTH_CHECK_INTERVAL_MINUTES`    |
+| `pluginCacheMode`               | `OPENCLAW_CODEX_COMPUTER_USE_PLUGIN_CACHE_MODE`                |
+| `strictReadiness`               | `OPENCLAW_CODEX_COMPUTER_USE_STRICT_READINESS`                 |
+| `autoRepair`                    | `OPENCLAW_CODEX_COMPUTER_USE_AUTO_REPAIR`                      |
+| `marketplaceSource`             | `OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_SOURCE`               |
+| `marketplacePath`               | `OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_PATH`                 |
+| `marketplaceName`               | `OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_NAME`                 |
+| `pluginName`                    | `OPENCLAW_CODEX_COMPUTER_USE_PLUGIN_NAME`                      |
+| `mcpServerName`                 | `OPENCLAW_CODEX_COMPUTER_USE_MCP_SERVER_NAME`                  |
 
-| कारण                         | अर्थ                                                    | अगला कदम                                      |
+## OpenClaw क्या जाँचता है
+
+OpenClaw आंतरिक रूप से एक स्थिर सेटअप कारण की रिपोर्ट करता है और
+चैट के लिए उपयोगकर्ता-दृश्य स्थिति को प्रारूपित करता है:
+
+| कारण                       | अर्थ                                                | अगला चरण                                     |
 | ---------------------------- | ------------------------------------------------------ | --------------------------------------------- |
-| `disabled`                   | `computerUse.enabled` false पर रिज़ॉल्व हुआ।           | `enabled` या कोई अन्य Computer Use फ़ील्ड सेट करें। |
-| `marketplace_missing`        | कोई मेल खाता marketplace उपलब्ध नहीं था।              | source, path, या marketplace नाम कॉन्फ़िगर करें। |
-| `plugin_not_installed`       | Marketplace मौजूद है, लेकिन plugin इंस्टॉल नहीं है।   | install चलाएँ या `autoInstall` सक्षम करें।   |
-| `plugin_disabled`            | Plugin इंस्टॉल है लेकिन Codex config में disabled है।  | इसे फिर से सक्षम करने के लिए install चलाएँ।  |
-| `remote_install_unsupported` | चुना गया marketplace केवल remote है।                  | `marketplaceSource` या `marketplacePath` का उपयोग करें। |
-| `mcp_missing`                | Plugin सक्षम है, लेकिन MCP server उपलब्ध नहीं है।     | Codex Computer Use और OS permissions जाँचें।  |
-| `ready`                      | Plugin और MCP tools उपलब्ध हैं।                       | Codex-mode turn शुरू करें।                    |
-| `check_failed`               | status check के दौरान Codex app-server request विफल हुई। | app-server connectivity और logs जाँचें।       |
-| `auto_install_blocked`       | turn-start setup को नया source जोड़ना पड़ेगा।         | पहले explicit install चलाएँ।                  |
+| `disabled`                   | `computerUse.enabled` का परिणाम false आया।               | `enabled` या कोई अन्य Computer Use फ़ील्ड सेट करें।  |
+| `marketplace_missing`        | कोई मेल खाता मार्केटप्लेस उपलब्ध नहीं था।                 | स्रोत, पथ या मार्केटप्लेस नाम कॉन्फ़िगर करें।  |
+| `plugin_not_installed`       | मार्केटप्लेस मौजूद है, लेकिन Plugin इंस्टॉल नहीं है।   | इंस्टॉल चलाएँ या `autoInstall` सक्षम करें।          |
+| `plugin_disabled`            | Plugin इंस्टॉल है, लेकिन Codex कॉन्फ़िग में अक्षम है।      | इसे फिर से सक्षम करने के लिए इंस्टॉल चलाएँ।                  |
+| `remote_install_unsupported` | चयनित मार्केटप्लेस केवल रिमोट है।                   | `marketplaceSource` या `marketplacePath` का उपयोग करें। |
+| `mcp_missing`                | Plugin सक्षम है, लेकिन MCP सर्वर उपलब्ध नहीं है।  | Codex Computer Use और OS अनुमतियाँ जाँचें।  |
+| `ready`                      | Plugin और MCP टूल उपलब्ध हैं।                    | Codex-मोड टर्न शुरू करें।                    |
+| `check_failed`               | स्थिति जाँच के दौरान Codex app-server अनुरोध विफल हुआ। | app-server कनेक्टिविटी और लॉग जाँचें।       |
+| `auto_install_blocked`       | टर्न-स्टार्ट सेटअप के लिए नया स्रोत जोड़ना आवश्यक होगा।       | पहले स्पष्ट इंस्टॉल चलाएँ।                   |
 
-Chat output में plugin state, MCP server state, marketplace, उपलब्ध होने पर tools,
-और विफल setup step के लिए विशिष्ट message शामिल होता है।
+चैट आउटपुट में Plugin की स्थिति, MCP सर्वर की स्थिति, मार्केटप्लेस,
+उपलब्ध होने पर टूल और विफल सेटअप चरण के लिए विशिष्ट संदेश शामिल होते हैं।
 
-## macOS permissions
+## macOS अनुमतियाँ
 
-Computer Use macOS-specific है। Codex-owned MCP server को apps का निरीक्षण या
-control करने से पहले local OS permissions की ज़रूरत हो सकती है। अगर OpenClaw कहता है कि Computer Use
-इंस्टॉल है लेकिन MCP server उपलब्ध नहीं है, तो पहले Codex-side Computer
-Use setup सत्यापित करें:
+यह Codex-स्वामित्व वाला Computer Use पथ macOS पर चलता है, जहाँ MCP सर्वर को
+ऐप्स का निरीक्षण या नियंत्रण करने से पहले स्थानीय OS अनुमतियों की आवश्यकता हो सकती है। (Windows और Linux Node होस्ट पर
+क्रॉस-प्लेटफ़ॉर्म डेस्कटॉप नियंत्रण के लिए
+[cua-computer पूर्तिकर्ता](/hi/nodes/computer-use#windows-and-linux-experimental-via-cua-driver) देखें।)
+यदि OpenClaw कहता है कि Computer Use इंस्टॉल है, लेकिन MCP सर्वर उपलब्ध नहीं है,
+तो पहले Codex-पक्ष का Computer Use सेटअप सत्यापित करें:
 
-- Codex app-server उसी host पर चल रहा है जहाँ desktop control होना चाहिए।
-- Computer Use plugin Codex config में सक्षम है।
-- `computer-use` MCP server Codex app-server MCP status में दिखाई देता है।
-- macOS ने desktop-control app के लिए आवश्यक permissions दे दिए हैं।
-- वर्तमान host session नियंत्रित किए जा रहे desktop तक पहुँच सकता है।
+- Codex app-server उसी होस्ट पर चल रहा है जहाँ डेस्कटॉप नियंत्रण
+  होना चाहिए।
+- Computer Use Plugin Codex कॉन्फ़िग में सक्षम है।
+- Codex app-server MCP स्थिति में `computer-use` MCP सर्वर दिखाई देता है।
+- macOS ने डेस्कटॉप-नियंत्रण ऐप के लिए आवश्यक अनुमतियाँ प्रदान कर दी हैं।
+- वर्तमान होस्ट सत्र नियंत्रित किए जा रहे डेस्कटॉप तक पहुँच सकता है।
 
-जब `computerUse.enabled` true होता है, तो OpenClaw जानबूझकर fail closed करता है। एक
-Codex-mode turn को उन native desktop tools के बिना चुपचाप आगे नहीं बढ़ना चाहिए
-जिनकी config ने आवश्यकता बताई है।
+`computerUse.enabled` के true होने पर OpenClaw जानबूझकर बंद होकर विफल होता है।
+Codex-मोड टर्न को उन मूल डेस्कटॉप टूल के बिना चुपचाप आगे नहीं बढ़ना चाहिए
+जिनकी कॉन्फ़िग में आवश्यकता है।
 
-## Troubleshooting
+## समस्या निवारण
 
-**Status कहता है कि installed नहीं है।** `/codex computer-use install` चलाएँ। अगर
-marketplace discover नहीं होता है, तो `--source` या `--marketplace-path` पास करें।
+**स्थिति बताती है कि इंस्टॉल नहीं है।** `/codex computer-use install` चलाएँ। यदि
+मार्केटप्लेस नहीं मिलता है, तो `--source` या `--marketplace-path` दें।
 
-**Status कहता है कि installed है लेकिन disabled है।** `/codex computer-use install` फिर से चलाएँ।
-Codex app-server install plugin config को वापस enabled पर लिखता है।
+**स्थिति बताती है कि इंस्टॉल है लेकिन अक्षम है।** `/codex computer-use install`
+फिर से चलाएँ। Codex app-server इंस्टॉल Plugin कॉन्फ़िग को फिर से सक्षम के रूप में लिखता है।
 
-**Status कहता है कि remote install unsupported है।** local marketplace source या
-path का उपयोग करें। Remote-only catalog entries को inspect किया जा सकता है लेकिन
-वर्तमान app-server API के माध्यम से install नहीं किया जा सकता।
+**स्थिति बताती है कि रिमोट इंस्टॉल समर्थित नहीं है।** स्थानीय मार्केटप्लेस
+स्रोत या पथ का उपयोग करें। केवल-रिमोट कैटलॉग प्रविष्टियों का निरीक्षण किया जा सकता है, लेकिन
+वर्तमान app-server API के माध्यम से इंस्टॉल नहीं किया जा सकता।
 
-**Status कहता है कि MCP server unavailable है।** MCP
-servers reload कराने के लिए install एक बार फिर चलाएँ। अगर यह फिर भी unavailable रहता है, तो Codex Computer Use app,
-Codex app-server MCP status, या macOS permissions ठीक करें।
+**स्थिति बताती है कि MCP सर्वर उपलब्ध नहीं है।** इंस्टॉल को एक बार फिर से चलाएँ ताकि MCP
+सर्वर पुनः लोड हों। यदि यह फिर भी उपलब्ध न हो, तो Codex Computer Use ऐप,
+Codex app-server MCP स्थिति या macOS अनुमतियाँ ठीक करें।
 
-**Status या probe `computer-use.list_apps` पर time out होता है।** Plugin और MCP
-server मौजूद हैं, लेकिन local Computer Use bridge ने जवाब नहीं दिया। Codex Computer Use को quit या
-restart करें, ज़रूरत हो तो Codex Desktop को relaunch करें, फिर एक
-fresh OpenClaw session में retry करें। अगर host ने पहले पुराने
-managed Codex app-server के ज़रिए Computer Use चलाया था, तो desktop bundled
-marketplace से installed plugin refresh करें:
+**स्थिति या जाँच की `computer-use.list_apps` पर समय-सीमा समाप्त हो जाती है।** Plugin और
+MCP सर्वर मौजूद हैं, लेकिन स्थानीय Computer Use ब्रिज ने उत्तर नहीं दिया।
+Codex Computer Use बंद या पुनः आरंभ करें, आवश्यकता होने पर Codex Desktop दोबारा लॉन्च करें, फिर
+नए OpenClaw सत्र में पुनः प्रयास करें। यदि होस्ट पहले किसी पुराने प्रबंधित Codex app-server के माध्यम से
+Computer Use चलाता था, तो डेस्कटॉप के बंडल किए गए मार्केटप्लेस से इंस्टॉल किए गए Plugin को
+रीफ़्रेश करें (स्वतंत्र Codex डेस्कटॉप इंस्टॉल के लिए `Codex.app` पथ का उपयोग करें):
 
 ```text
-/codex computer-use install --source /Applications/Codex.app/Contents/Resources/plugins/openai-bundled
+/codex computer-use install --source /Applications/ChatGPT.app/Contents/Resources/plugins/openai-bundled
 ```
 
-**Computer Use tool कहता है `Native hook relay unavailable`।** Codex-native
-tool hook local bridge या Gateway fallback के ज़रिए active OpenClaw relay तक नहीं पहुँच सका।
-`/new` या `/reset` के साथ fresh OpenClaw session शुरू करें। अगर यह
-एक बार काम करता है और बाद में किसी tool call पर फिर fail होता है, तो `/new` केवल
-वर्तमान attempt को clear कर रहा है; Codex app-server या OpenClaw Gateway को restart करें ताकि पुराने threads
-और hook registrations drop हो जाएँ, फिर fresh session में retry करें।
+**Computer Use टूल `Native hook relay unavailable` बताता है।**
+Codex-मूल टूल हुक स्थानीय ब्रिज या Gateway फ़ॉलबैक के माध्यम से किसी सक्रिय OpenClaw रिले तक
+नहीं पहुँच सका। `/new` या `/reset` के साथ नया OpenClaw सत्र शुरू करें।
+यदि यह एक बार काम करता है और बाद के टूल कॉल पर फिर विफल हो जाता है,
+तो `/new` केवल वर्तमान प्रयास को साफ़ कर रहा है; Codex app-server या
+OpenClaw Gateway को पुनः आरंभ करें ताकि पुराने थ्रेड और हुक पंजीकरण हटा दिए जाएँ, फिर
+नए सत्र में पुनः प्रयास करें।
 
-**Turn-start auto-install source से इनकार करता है।** यह intentional है। पहले
-explicit `/codex computer-use install --source <marketplace-source>` के साथ
-source जोड़ें, फिर भविष्य का turn-start auto-install discovered local
-marketplace का उपयोग कर सकेगा।
+**टर्न-स्टार्ट स्वतः इंस्टॉल किसी स्रोत को अस्वीकार करता है।** यह जानबूझकर किया गया है। पहले
+स्पष्ट `/codex computer-use install --source
+<marketplace-source>` के साथ स्रोत जोड़ें, फिर भविष्य का टर्न-स्टार्ट स्वतः इंस्टॉल
+खोजे गए स्थानीय मार्केटप्लेस का उपयोग कर सकता है।
 
-## Related
+## संबंधित
 
-- [Codex harness](/hi/plugins/codex-harness)
-- [Peekaboo bridge](/hi/platforms/mac/peekaboo)
-- [iOS app](/hi/platforms/ios)
+- [Codex हार्नेस](/hi/plugins/codex-harness)
+- [Peekaboo ब्रिज](/hi/platforms/mac/peekaboo)
+- [iOS ऐप](/hi/platforms/ios)

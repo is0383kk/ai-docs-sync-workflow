@@ -1,30 +1,47 @@
 ---
 read_when:
     - Sie installieren, konfigurieren oder überprüfen das llama-cpp-Plugin
-summary: Lokale GGUF-Embeddings über node-llama-cpp.
+summary: Lokale GGUF-Textinferenz und Embeddings über node-llama-cpp.
 title: Llama-Cpp-Plugin
 x-i18n:
-    generated_at: "2026-07-12T01:57:13Z"
+    generated_at: "2026-07-26T17:58:08Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: be9fd199e252fd3f905e8064316e45b9b2816945a2e5e16a56a6a88fdd55ef8e
+    source_hash: 2756d4b3e00bbe37b4dedec1d54d28bfe6662e8105504317a402293254ce0240
     source_path: plugins/reference/llama-cpp.md
     workflow: 16
 ---
 
 # Llama-Cpp-Plugin
 
-Lokale GGUF-Embeddings über node-llama-cpp.
+Lokale GGUF-Textinferenz und Embeddings über node-llama-cpp.
 
 ## Distribution
 
 - Paket: `@openclaw/llama-cpp-provider`
 - Installationsweg: npm; ClawHub
 
-## Schnittstelle
+## Oberfläche
 
-Verträge: embeddingProviders
+Provider: `llama-cpp`; Verträge: `embeddingProviders`
+
+<!-- openclaw-plugin-reference:manual-start -->
+
+## Standard-Textmodell
+
+Während der interaktiven Einrichtung bietet OpenClaw Gemma 4 E4B IT Q4_K_M als
+gebündelten Download mit einer Größe von ungefähr 5.0 GB an. Das Angebot setzt
+insgesamt mindestens 16 GiB RAM voraus. Bereits zwischengespeicherte Modelle
+werden auch auf kleineren Systemen weiterhin erkannt.
+
+Um ein anderes Modell zu verwenden, setzen Sie `params.modelPath` auf eine beliebige benutzerdefinierte GGUF-Datei. Benutzerdefinierte Modelle
+unterliegen nicht der RAM-Anforderung für den gebündelten Download. Auf Systemen, die
+diese Anforderung nicht erfüllen, können Sie außerdem ein kleineres Modell über Ollama oder LM Studio ausführen oder
+einen Cloud-Provider wählen.
+
+<!-- openclaw-plugin-reference:manual-end -->
 
 ## Zugehörige Dokumentation
 

@@ -2,41 +2,44 @@
 read_when:
     - Thiết lập hỗ trợ iMessage
     - Gỡ lỗi gửi/nhận iMessage
-summary: Hỗ trợ iMessage gốc thông qua imsg (JSON-RPC qua stdio), với các hành động API riêng tư cho trả lời, tapbacks, hiệu ứng, cuộc thăm dò, tệp đính kèm và quản lý nhóm. Được ưu tiên cho các thiết lập OpenClaw iMessage mới khi yêu cầu về máy chủ phù hợp.
+summary: Hỗ trợ iMessage nguyên bản thông qua imsg (JSON-RPC qua stdio), với các hành động API riêng tư cho phản hồi, tapback, hiệu ứng, cuộc thăm dò ý kiến, tệp đính kèm và quản lý nhóm. Đây là lựa chọn ưu tiên cho các thiết lập iMessage OpenClaw mới khi đáp ứng các yêu cầu về máy chủ.
 title: iMessage
 x-i18n:
-    generated_at: "2026-07-01T13:05:50Z"
-    model: gpt-5.5
+    generated_at: "2026-07-19T05:36:25Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 0fbddd770d05762c64b81e9c6443ac8fd487ba15a34ed70b068a69776d355b81
+    source_hash: 215364b4a0424db3fccb27e29815f2a94c55ebe66d1eec21ed85e4b7947ea1ab
     source_path: channels/imessage.md
     workflow: 16
 ---
 
 <Note>
-Đối với các triển khai iMessage của OpenClaw, hãy dùng `imsg` trên một máy chủ macOS Messages đã đăng nhập. Nếu Gateway của bạn chạy trên Linux hoặc Windows, trỏ `channels.imessage.cliPath` đến một SSH wrapper chạy `imsg` trên Mac.
+Đối với cách triển khai OpenClaw iMessage thông thường, hãy chạy Gateway và `imsg` trên cùng máy chủ macOS Messages đã đăng nhập. Nếu Gateway chạy ở nơi khác, hãy trỏ `channels.imessage.cliPath` đến một trình bao bọc SSH trong suốt chạy `imsg` trên máy Mac.
 
-**Khôi phục đầu vào là tự động.** Sau khi bridge hoặc gateway khởi động lại, iMessage phát lại các tin nhắn bị bỏ lỡ khi nó ngừng hoạt động và chặn "backlog bomb" cũ mà Apple có thể xả ra sau khi khôi phục Push, đồng thời khử trùng lặp để không có gì được gửi đi hai lần. Không có cấu hình nào cần bật — xem [Khôi phục đầu vào sau khi bridge hoặc gateway khởi động lại](#inbound-recovery-after-a-bridge-or-gateway-restart).
+**Quá trình khôi phục tin nhắn đến diễn ra tự động.** Sau khi cầu nối hoặc Gateway khởi động lại, iMessage phát lại các tin nhắn bị bỏ lỡ trong thời gian ngừng hoạt động và chặn loạt tin nhắn tồn đọng cũ mà Apple có thể đẩy ra sau khi khôi phục Push, đồng thời loại bỏ trùng lặp để không có nội dung nào được phân phối hai lần. Không có cấu hình nào cần bật — xem [Khôi phục tin nhắn đến sau khi cầu nối hoặc Gateway khởi động lại](#inbound-recovery-after-a-bridge-or-gateway-restart).
 </Note>
 
 <Warning>
-Hỗ trợ BlueBubbles đã bị gỡ bỏ. Di chuyển cấu hình `channels.bluebubbles` sang `channels.imessage`; OpenClaw chỉ hỗ trợ iMessage thông qua `imsg`. Bắt đầu với [Gỡ bỏ BlueBubbles và đường dẫn iMessage imsg](/vi/announcements/bluebubbles-imessage) để xem thông báo ngắn, hoặc [Chuyển từ BlueBubbles](/vi/channels/imessage-from-bluebubbles) để xem bảng di chuyển đầy đủ.
+Hỗ trợ BlueBubbles đã bị loại bỏ. Hãy di chuyển cấu hình `channels.bluebubbles` sang `channels.imessage`; OpenClaw chỉ hỗ trợ iMessage thông qua `imsg`. Hãy bắt đầu với [Loại bỏ BlueBubbles và đường dẫn imsg iMessage](/vi/announcements/bluebubbles-imessage) để xem thông báo ngắn, hoặc [Chuyển từ BlueBubbles](/vi/channels/imessage-from-bluebubbles) để xem bảng di chuyển đầy đủ.
 </Warning>
 
-Trạng thái: tích hợp CLI ngoài gốc. Gateway khởi chạy `imsg rpc` và giao tiếp qua JSON-RPC trên stdio (không có daemon/cổng riêng). Các hành động nâng cao yêu cầu `imsg launch` và một phép thăm dò API riêng tư thành công.
+Trạng thái: tích hợp CLI bên ngoài nguyên bản. Gateway khởi chạy `imsg rpc` và giao tiếp bằng JSON-RPC qua stdio — không có daemon hoặc cổng riêng. Chế độ API riêng tư được đặc biệt khuyến nghị để có một kênh iMessage đầy đủ; các thao tác trả lời, tapback, hiệu ứng, cuộc thăm dò ý kiến, trả lời tệp đính kèm và thao tác nhóm yêu cầu `imsg launch` cùng một lần thăm dò API riêng tư thành công.
+
+Đối với thiết lập cục bộ phổ biến, trình thiết lập OpenClaw có thể đề nghị cài đặt hoặc cập nhật `imsg` qua Homebrew sau khi người dùng xác nhận trên máy Mac Messages đã đăng nhập. Việc thiết lập thủ công và các mô hình trình bao bọc SSH vẫn do người vận hành quản lý: hãy cài đặt hoặc cập nhật `imsg` trong cùng ngữ cảnh người dùng sẽ chạy Gateway hoặc trình bao bọc.
 
 <CardGroup cols={3}>
-  <Card title="Private API actions" icon="wand-sparkles" href="#private-api-actions">
-    Trả lời, tapback, hiệu ứng, khảo sát, tệp đính kèm và quản lý nhóm.
+  <Card title="Thao tác API riêng tư" icon="wand-sparkles" href="#private-api-actions">
+    Trả lời, tapback, hiệu ứng, cuộc thăm dò ý kiến, tệp đính kèm và quản lý nhóm.
   </Card>
-  <Card title="Pairing" icon="link" href="/vi/channels/pairing">
-    DM iMessage mặc định ở chế độ ghép đôi.
+  <Card title="Ghép nối" icon="link" href="/vi/channels/pairing">
+    Tin nhắn trực tiếp iMessage mặc định sử dụng chế độ ghép nối.
   </Card>
-  <Card title="Remote Mac" icon="terminal" href="#remote-mac-over-ssh">
-    Dùng SSH wrapper khi Gateway không chạy trên Mac Messages.
+  <Card title="Máy Mac từ xa" icon="terminal" href="#remote-mac-over-ssh">
+    Sử dụng trình bao bọc SSH khi Gateway không chạy trên máy Mac Messages.
   </Card>
-  <Card title="Configuration reference" icon="settings" href="/vi/gateway/config-channels#imessage">
+  <Card title="Tham chiếu cấu hình" icon="settings" href="/vi/gateway/config-channels#imessage">
     Tham chiếu đầy đủ các trường iMessage.
   </Card>
 </CardGroup>
@@ -44,20 +47,23 @@ Trạng thái: tích hợp CLI ngoài gốc. Gateway khởi chạy `imsg rpc` v�
 ## Thiết lập nhanh
 
 <Tabs>
-  <Tab title="Local Mac (fast path)">
+  <Tab title="Máy Mac cục bộ (đường dẫn nhanh)">
     <Steps>
-      <Step title="Install and verify imsg">
+      <Step title="Cài đặt và xác minh imsg">
 
 ```bash
 brew install steipete/tap/imsg
+brew update && brew upgrade imsg
 imsg rpc --help
 imsg launch
 openclaw channels status --probe
 ```
 
+        Khi trình hướng dẫn thiết lập cục bộ phát hiện thiếu lệnh `imsg` mặc định, trình này có thể nhắc cài đặt `steipete/tap/imsg` qua Homebrew. Nếu phát hiện `imsg` do Homebrew quản lý, trình này có thể nhắc cài đặt lại hoặc cập nhật. Các trình bao bọc `cliPath` tùy chỉnh không bị sửa đổi.
+
       </Step>
 
-      <Step title="Configure OpenClaw">
+      <Step title="Cấu hình OpenClaw">
 
 ```json5
 {
@@ -73,7 +79,7 @@ openclaw channels status --probe
 
       </Step>
 
-      <Step title="Start gateway">
+      <Step title="Khởi động Gateway">
 
 ```bash
 openclaw gateway
@@ -81,25 +87,30 @@ openclaw gateway
 
       </Step>
 
-      <Step title="Approve first DM pairing (default dmPolicy)">
+      <Step title="Phê duyệt ghép nối tin nhắn trực tiếp đầu tiên (dmPolicy mặc định)">
 
 ```bash
 openclaw pairing list imessage
 openclaw pairing approve imessage <CODE>
 ```
 
-        Yêu cầu ghép đôi hết hạn sau 1 giờ.
+        Yêu cầu ghép nối hết hạn sau 1 giờ.
       </Step>
     </Steps>
 
   </Tab>
 
-  <Tab title="Remote Mac over SSH">
-    OpenClaw chỉ yêu cầu `cliPath` tương thích với stdio, vì vậy bạn có thể trỏ `cliPath` đến một wrapper script SSH vào Mac từ xa và chạy `imsg`.
+  <Tab title="Máy Mac từ xa qua SSH">
+    Hầu hết các thiết lập không cần SSH. Chỉ sử dụng mô hình này khi Gateway không thể chạy trên máy Mac Messages đã đăng nhập. OpenClaw chỉ yêu cầu một `cliPath` tương thích với stdio, vì vậy bạn có thể trỏ `cliPath` đến một tập lệnh bao bọc dùng SSH để kết nối đến máy Mac từ xa và chạy `imsg`.
+    Hãy cài đặt và cập nhật `imsg` trên máy Mac từ xa đó, không phải trên máy chủ Gateway:
+
+```bash
+ssh messages-mac 'brew install steipete/tap/imsg && brew update && brew upgrade imsg'
+```
 
 ```bash
 #!/usr/bin/env bash
-exec ssh -T gateway-host imsg "$@"
+exec ssh -T messages-mac imsg "$@"
 ```
 
     Cấu hình khuyến nghị khi bật tệp đính kèm:
@@ -110,10 +121,10 @@ exec ssh -T gateway-host imsg "$@"
     imessage: {
       enabled: true,
       cliPath: "~/.openclaw/scripts/imsg-ssh",
-      remoteHost: "user@gateway-host", // used for SCP attachment fetches
+      remoteHost: "user@gateway-host", // dùng để tìm nạp tệp đính kèm qua SCP
       includeAttachments: true,
-      // Optional: override allowed attachment roots.
-      // Defaults include /Users/*/Library/Messages/Attachments
+      // Tùy chọn: các thư mục gốc tệp đính kèm bổ sung được phép (hợp nhất với
+      // /Users/*/Library/Messages/Attachments mặc định).
       attachmentRoots: ["/Users/*/Library/Messages/Attachments"],
       remoteAttachmentRoots: ["/Users/*/Library/Messages/Attachments"],
     },
@@ -121,21 +132,21 @@ exec ssh -T gateway-host imsg "$@"
 }
 ```
 
-    Nếu `remoteHost` chưa được đặt, OpenClaw cố gắng tự phát hiện bằng cách phân tích SSH wrapper script.
-    `remoteHost` phải là `host` hoặc `user@host` (không có dấu cách hoặc tùy chọn SSH).
-    OpenClaw dùng kiểm tra host-key nghiêm ngặt cho SCP, vì vậy khóa máy chủ relay phải đã tồn tại trong `~/.ssh/known_hosts`.
-    Đường dẫn tệp đính kèm được xác thực theo các gốc được phép (`attachmentRoots` / `remoteAttachmentRoots`).
+    Nếu `remoteHost` chưa được đặt, OpenClaw sẽ cố gắng tự động phát hiện bằng cách phân tích tập lệnh bao bọc SSH.
+    `remoteHost` phải là `host` hoặc `user@host` (không có dấu cách hoặc tùy chọn SSH); các giá trị không an toàn sẽ bị bỏ qua.
+    OpenClaw sử dụng chế độ kiểm tra khóa máy chủ nghiêm ngặt cho SCP, vì vậy khóa của máy chủ chuyển tiếp phải tồn tại sẵn trong `~/.ssh/known_hosts`.
+    Đường dẫn tệp đính kèm được xác thực dựa trên các thư mục gốc được phép (`attachmentRoots` / `remoteAttachmentRoots`).
 
 <Warning>
-Bất kỳ `cliPath` wrapper hoặc proxy SSH nào bạn đặt trước `imsg` PHẢI hoạt động như một ống stdio trong suốt cho JSON-RPC chạy lâu dài. OpenClaw trao đổi các thông điệp JSON-RPC nhỏ, đóng khung bằng dòng mới, qua stdin/stdout của wrapper trong suốt vòng đời của kênh:
+Mọi trình bao bọc `cliPath` hoặc proxy SSH mà bạn đặt phía trước `imsg` PHẢI hoạt động như một đường ống stdio trong suốt dành cho JSON-RPC tồn tại lâu dài. OpenClaw trao đổi các thông điệp JSON-RPC nhỏ được phân khung bằng dòng mới qua stdin/stdout của trình bao bọc trong toàn bộ thời gian tồn tại của kênh:
 
-- Chuyển tiếp từng đoạn/dòng stdin **ngay khi có byte khả dụng** — đừng chờ EOF.
-- Chuyển tiếp kịp thời từng đoạn/dòng stdout theo hướng ngược lại.
-- Giữ nguyên dòng mới.
-- Tránh các lệnh đọc chặn kích thước cố định (`read(4096)`, `cat | buffer`, shell `read` mặc định) có thể làm đói các frame nhỏ.
-- Giữ stderr tách khỏi luồng stdout JSON-RPC.
+- Chuyển tiếp từng đoạn/dòng stdin **ngay khi có byte khả dụng** — không chờ EOF.
+- Chuyển tiếp nhanh từng đoạn/dòng stdout theo chiều ngược lại.
+- Giữ nguyên các dòng mới.
+- Tránh các thao tác đọc chặn theo kích thước cố định (`read(4096)`, `cat | buffer`, `read` mặc định của shell) có thể làm các khung nhỏ bị thiếu dữ liệu.
+- Giữ stderr tách biệt khỏi luồng stdout JSON-RPC.
 
-Wrapper đệm stdin cho đến khi một khối lớn đầy sẽ tạo ra triệu chứng giống như sự cố iMessage — `imsg rpc timeout (chats.list)` hoặc kênh khởi động lại lặp lại — dù bản thân `imsg rpc` vẫn khỏe mạnh. `ssh -T host imsg "$@"` (ở trên) là an toàn vì nó chuyển tiếp các đối số `cliPath` của OpenClaw như `rpc` và `--db`. Các pipeline như `ssh host imsg | grep -v '^DEBUG'` thì KHÔNG — công cụ đệm theo dòng vẫn có thể giữ frame; dùng `stdbuf -oL -eL` trên mọi stage nếu bạn bắt buộc phải lọc.
+Một trình bao bọc đệm stdin cho đến khi đầy một khối lớn sẽ tạo ra các triệu chứng trông giống như iMessage ngừng hoạt động — `imsg rpc timeout (chats.list)` hoặc kênh khởi động lại nhiều lần — mặc dù bản thân `imsg rpc` vẫn hoạt động bình thường. `ssh -T host imsg "$@"` (ở trên) an toàn vì nó chuyển tiếp các đối số `cliPath` của OpenClaw, chẳng hạn như `rpc` và `--db`. Các pipeline như `ssh host imsg | grep -v '^DEBUG'` thì KHÔNG — các công cụ đệm theo dòng vẫn có thể giữ lại khung; hãy sử dụng `stdbuf -oL -eL` ở mọi giai đoạn nếu bắt buộc phải lọc.
 </Warning>
 
   </Tab>
@@ -143,104 +154,101 @@ Wrapper đệm stdin cho đến khi một khối lớn đầy sẽ tạo ra tri�
 
 ## Yêu cầu và quyền (macOS)
 
-- Messages phải được đăng nhập trên Mac chạy `imsg`.
-- Cần Full Disk Access cho ngữ cảnh tiến trình chạy OpenClaw/`imsg` (truy cập DB Messages).
-- Cần quyền Automation để gửi tin nhắn qua Messages.app.
-- Đối với hành động nâng cao (react / edit / unsend / threaded reply / effects / polls / group ops), System Integrity Protection phải bị tắt — xem [Bật API riêng tư của imsg](#enabling-the-imsg-private-api) bên dưới. Gửi/nhận văn bản và phương tiện cơ bản hoạt động mà không cần điều này.
+- Messages phải được đăng nhập trên máy Mac chạy `imsg`.
+- Ngữ cảnh tiến trình chạy OpenClaw/`imsg` phải có quyền Truy cập toàn bộ ổ đĩa (để truy cập cơ sở dữ liệu Messages).
+- Cần có quyền Tự động hóa để gửi tin nhắn thông qua Messages.app.
+- Đối với các thao tác nâng cao (bày tỏ cảm xúc / chỉnh sửa / thu hồi / trả lời theo luồng / hiệu ứng / cuộc thăm dò ý kiến / thao tác nhóm), phải tắt System Integrity Protection — xem [Bật API riêng tư của imsg](#enabling-the-imsg-private-api). Việc gửi/nhận văn bản và phương tiện cơ bản vẫn hoạt động khi không tắt tính năng này.
 
 <Tip>
-Quyền được cấp theo từng ngữ cảnh tiến trình. Nếu gateway chạy headless (LaunchAgent/SSH), hãy chạy một lệnh tương tác một lần trong cùng ngữ cảnh đó để kích hoạt lời nhắc:
+Quyền được cấp theo từng ngữ cảnh tiến trình. Nếu Gateway chạy không giao diện (LaunchAgent/SSH), hãy chạy một lệnh tương tác một lần trong cùng ngữ cảnh đó để kích hoạt lời nhắc:
 
 ```bash
 imsg chats --limit 1
-# or
-imsg send <handle> "test"
+# hoặc
+imsg send <handle> "kiểm tra"
 ```
 
 </Tip>
 
-<Accordion title="SSH wrapper sends fail with AppleEvents -1743">
-  Một thiết lập remote-SSH có thể đọc cuộc trò chuyện, vượt qua `channels status --probe`, và xử lý tin nhắn đầu vào trong khi gửi đầu ra vẫn thất bại với lỗi ủy quyền AppleEvents:
+<Accordion title="Gửi qua trình bao bọc SSH không thành công với AppleEvents -1743">
+  Thiết lập SSH từ xa có thể đọc cuộc trò chuyện, vượt qua `channels status --probe` và xử lý tin nhắn đến trong khi quá trình gửi đi vẫn không thành công do lỗi ủy quyền AppleEvents:
 
 ```text
-Not authorized to send Apple events to Messages. (-1743)
+Không được ủy quyền gửi sự kiện Apple đến Messages. (-1743)
 ```
 
-Kiểm tra cơ sở dữ liệu TCC của người dùng Mac đã đăng nhập hoặc System Settings > Privacy & Security > Automation. Nếu mục Automation được ghi cho `/usr/libexec/sshd-keygen-wrapper` thay vì tiến trình `imsg` hoặc shell cục bộ, macOS có thể không hiển thị nút bật/tắt Messages dùng được cho client phía máy chủ SSH đó:
+Kiểm tra cơ sở dữ liệu TCC của người dùng đã đăng nhập trên máy Mac hoặc System Settings > Privacy & Security > Automation. Nếu mục Automation được ghi cho `/usr/libexec/sshd-keygen-wrapper` thay vì tiến trình `imsg` hoặc shell cục bộ, macOS có thể không hiển thị nút chuyển Messages có thể sử dụng cho máy khách phía máy chủ SSH đó:
 
 ```text
 kTCCServiceAppleEvents | /usr/libexec/sshd-keygen-wrapper | auth_value=0 | com.apple.MobileSMS
 ```
 
-Ở trạng thái đó, việc lặp lại `tccutil reset AppleEvents` hoặc chạy lại `imsg send` qua cùng SSH wrapper có thể tiếp tục thất bại vì ngữ cảnh tiến trình cần Messages Automation là SSH wrapper, không phải một ứng dụng mà UI có thể cấp quyền.
+Trong trạng thái đó, việc lặp lại `tccutil reset AppleEvents` hoặc chạy lại `imsg send` thông qua cùng trình bao bọc SSH có thể tiếp tục không thành công vì ngữ cảnh tiến trình cần quyền Tự động hóa Messages là trình bao bọc SSH, không phải một ứng dụng mà giao diện người dùng có thể cấp quyền.
 
-Thay vào đó, hãy dùng một trong các ngữ cảnh tiến trình `imsg` được hỗ trợ:
+Thay vào đó, hãy sử dụng một trong các ngữ cảnh tiến trình `imsg` được hỗ trợ:
 
-- Chạy Gateway, hoặc ít nhất bridge `imsg`, trong phiên cục bộ của người dùng Messages đã đăng nhập.
-- Khởi động Gateway bằng LaunchAgent cho người dùng đó sau khi cấp Full Disk Access và Automation từ cùng phiên.
-- Nếu bạn giữ cấu trúc SSH hai người dùng, hãy xác minh rằng một lệnh `imsg send` đầu ra thực sự thành công qua đúng wrapper trước khi bật kênh. Nếu không thể cấp Automation, hãy cấu hình lại sang thiết lập `imsg` một người dùng thay vì dựa vào SSH wrapper để gửi.
+- Chạy Gateway, hoặc ít nhất là cầu nối `imsg`, trong phiên cục bộ của người dùng Messages đã đăng nhập.
+- Khởi động Gateway bằng LaunchAgent cho người dùng đó sau khi cấp quyền Truy cập toàn bộ ổ đĩa và Tự động hóa từ cùng phiên.
+- Nếu giữ mô hình SSH hai người dùng, hãy xác minh rằng một lệnh `imsg send` gửi đi thực sự thành công thông qua đúng trình bao bọc trước khi bật kênh. Nếu không thể cấp quyền Tự động hóa, hãy cấu hình lại thành thiết lập `imsg` một người dùng thay vì dựa vào trình bao bọc SSH để gửi.
 
 </Accordion>
 
 ## Bật API riêng tư của imsg
 
-`imsg` đi kèm hai chế độ vận hành:
+`imsg` được cung cấp với hai chế độ vận hành. Đối với OpenClaw, chế độ API riêng tư là thiết lập được khuyến nghị vì nó mang đến cho kênh các thao tác iMessage nguyên bản mà người dùng mong đợi. Chế độ cơ bản vẫn hữu ích cho các bản cài đặt ít rủi ro, quá trình xác minh ban đầu hoặc các máy chủ không thể tắt SIP.
 
-- **Chế độ cơ bản** (mặc định, không cần thay đổi SIP): văn bản và phương tiện đầu ra qua `send`, theo dõi/lịch sử đầu vào, danh sách cuộc trò chuyện. Đây là những gì bạn có ngay sau khi `brew install steipete/tap/imsg` mới cùng các quyền macOS chuẩn ở trên.
-- **Chế độ API riêng tư**: `imsg` tiêm một helper dylib vào `Messages.app` để gọi các hàm `IMCore` nội bộ. Điều này mở khóa `react`, `edit`, `unsend`, `reply` (theo luồng), `sendWithEffect`, `poll` và `poll-vote` (khảo sát Messages gốc), `renameGroup`, `setGroupIcon`, `addParticipant`, `removeParticipant`, `leaveGroup`, cùng chỉ báo đang nhập và biên nhận đã đọc.
+- **Chế độ cơ bản** (mặc định, không cần thay đổi SIP): văn bản và phương tiện gửi đi qua `send`, theo dõi/lịch sử tin nhắn đến, danh sách cuộc trò chuyện. Đây là những gì có sẵn ngay từ đầu với một bản `brew install steipete/tap/imsg` mới cùng các quyền macOS tiêu chuẩn ở trên.
+- **Chế độ API riêng tư**: `imsg` chèn một dylib trợ giúp vào `Messages.app` để gọi các hàm `IMCore` nội bộ. Chế độ này mở khóa `react`, `edit`, `unsend`, `reply` (theo luồng), `sendWithEffect`, `poll` và `poll-vote` (các cuộc thăm dò ý kiến nguyên bản của Messages), `renameGroup`, `setGroupIcon`, `addParticipant`, `removeParticipant`, `leaveGroup`, cùng chỉ báo đang nhập và xác nhận đã đọc.
 
-Để dùng bề mặt hành động nâng cao mà trang kênh này ghi lại, bạn cần chế độ API riêng tư. README của `imsg` nêu rõ yêu cầu:
+Bề mặt thao tác được khuyến nghị trên trang này yêu cầu chế độ API riêng tư. README của `imsg` nêu rõ yêu cầu này:
 
-> Các tính năng nâng cao như `read`, `typing`, `launch`, gửi phong phú dựa trên bridge, sửa đổi tin nhắn và quản lý cuộc trò chuyện là tùy chọn bật. Chúng yêu cầu tắt SIP và tiêm một helper dylib vào `Messages.app`. `imsg launch` từ chối tiêm khi SIP đang bật.
+> Các tính năng nâng cao như `read`, `typing`, `launch`, gửi nội dung phong phú có cầu nối hỗ trợ, thay đổi tin nhắn và quản lý cuộc trò chuyện là tùy chọn chủ động. Chúng yêu cầu tắt SIP và chèn một dylib trợ giúp vào `Messages.app`. `imsg launch` từ chối chèn khi SIP đang bật.
 
-Kỹ thuật tiêm helper dùng dylib riêng của `imsg` để truy cập API riêng tư của Messages. Không có máy chủ bên thứ ba hoặc runtime BlueBubbles trong đường dẫn iMessage của OpenClaw.
+Kỹ thuật chèn trình trợ giúp sử dụng dylib riêng của `imsg` để truy cập các API riêng tư của Messages. Không có máy chủ bên thứ ba hoặc runtime BlueBubbles trong đường dẫn iMessage của OpenClaw.
 
 <Warning>
-**Tắt SIP là một đánh đổi bảo mật thực sự.** SIP là một trong những lớp bảo vệ cốt lõi của macOS chống lại việc chạy mã hệ thống đã sửa đổi; tắt nó trên toàn hệ thống sẽ mở thêm bề mặt tấn công và tác dụng phụ. Đáng chú ý, **tắt SIP trên máy Mac Apple Silicon cũng vô hiệu hóa khả năng cài đặt và chạy ứng dụng iOS trên Mac của bạn**.
+**Việc tắt SIP là một sự đánh đổi bảo mật thực sự.** SIP là một trong những cơ chế bảo vệ cốt lõi của macOS chống lại việc chạy mã hệ thống đã bị sửa đổi; tắt SIP trên toàn hệ thống sẽ làm tăng bề mặt tấn công và các tác dụng phụ. Đáng chú ý, **việc tắt SIP trên máy Mac dùng Apple Silicon cũng vô hiệu hóa khả năng cài đặt và chạy ứng dụng iOS trên máy Mac**.
 
-Hãy xem đây là một lựa chọn vận hành có chủ đích, không phải mặc định. Nếu mô hình đe dọa của bạn không thể chấp nhận việc SIP bị tắt, iMessage tích hợp chỉ giới hạn ở chế độ cơ bản — chỉ gửi/nhận văn bản và phương tiện, không có reactions / edit / unsend / effects / group ops.
+Hãy coi đây là một lựa chọn vận hành có chủ đích, đặc biệt trên máy Mac cá nhân chính. Để OpenClaw iMessage đạt chất lượng vận hành thực tế, nên dùng một máy Mac chuyên dụng hoặc người dùng bot macOS mà trên đó bạn thấy phù hợp khi bật cầu nối. Nếu mô hình mối đe dọa của bạn không chấp nhận việc SIP bị tắt ở bất kỳ đâu, iMessage đi kèm sẽ bị giới hạn ở chế độ cơ bản — chỉ gửi/nhận văn bản và phương tiện, không có bày tỏ cảm xúc / chỉnh sửa / thu hồi / hiệu ứng / thao tác nhóm.
 </Warning>
 
 ### Thiết lập
 
-1. **Cài đặt (hoặc nâng cấp) `imsg`** trên Mac chạy Messages.app:
+1. **Cài đặt (hoặc nâng cấp) `imsg`** trên máy Mac chạy Messages.app:
 
    ```bash
    brew install steipete/tap/imsg
+   brew update && brew upgrade imsg
    imsg --version
    imsg status --json
    ```
 
-   Đầu ra `imsg status --json` báo cáo `bridge_version`, `rpc_methods` và `selectors` theo từng phương thức để bạn có thể thấy bản build hiện tại hỗ trợ gì trước khi bắt đầu.
+   Đầu ra `imsg status --json` báo cáo `bridge_version`, `rpc_methods` và `selectors` theo từng phương thức để bạn có thể xem bản dựng hiện tại hỗ trợ những gì trước khi bắt đầu.
 
-2. **Tắt System Integrity Protection, và (trên macOS hiện đại) Library Validation.** Việc tiêm một helper dylib không phải của Apple vào `Messages.app` đã ký bởi Apple cần SIP tắt **và** library validation được nới lỏng. Bước SIP trong Recovery-mode phụ thuộc vào phiên bản macOS:
-   - **macOS 10.13-10.15 (Sierra-Catalina):** tắt Library Validation qua Terminal, khởi động lại vào Recovery Mode, chạy `csrutil disable`, khởi động lại.
-   - **macOS 11+ (Big Sur trở lên), Intel:** Recovery Mode (hoặc Internet Recovery), `csrutil disable`, khởi động lại.
-   - **macOS 11+, Apple Silicon:** trình tự khởi động bằng nút nguồn để vào Recovery; trên các phiên bản macOS gần đây, giữ phím **Left Shift** khi bạn nhấp Continue, rồi `csrutil disable`. Thiết lập máy ảo theo một luồng riêng, nên hãy tạo snapshot VM trước.
+2. **Tắt System Integrity Protection và (trên macOS hiện đại) Library Validation.** Việc chèn một dylib trợ giúp không phải của Apple vào `Messages.app` được Apple ký yêu cầu phải tắt SIP **và** nới lỏng quy trình xác thực thư viện. Bước SIP trong chế độ Khôi phục phụ thuộc vào phiên bản macOS:
+   - **macOS 10.13-10.15 (Sierra-Catalina):** tắt Library Validation qua Terminal, khởi động lại vào Recovery Mode, chạy `csrutil disable`, rồi khởi động lại.
+   - **macOS 11+ (Big Sur trở lên), Intel:** vào Recovery Mode (hoặc Internet Recovery), chạy `csrutil disable`, rồi khởi động lại.
+   - **macOS 11+, Apple Silicon:** dùng trình tự khởi động bằng nút nguồn để vào Recovery; trên các phiên bản macOS gần đây, giữ phím **Left Shift** khi bạn nhấp vào Continue, rồi chạy `csrutil disable`. Thiết lập máy ảo tuân theo một quy trình riêng, vì vậy trước tiên hãy tạo ảnh chụp nhanh VM.
 
-   **Trên macOS 11 trở lên, chỉ `csrutil disable` thường là chưa đủ.** Apple vẫn áp dụng library validation đối với `Messages.app` như một platform binary, nên helper ký adhoc bị từ chối (`Library Validation failed: ... platform binary, but mapped file is not`) ngay cả khi SIP đã tắt. Sau khi tắt SIP, cũng tắt library validation và khởi động lại:
+   **Trên macOS 11 trở lên, chỉ `csrutil disable` thường là chưa đủ.** Apple vẫn thực thi quy trình xác thực thư viện đối với `Messages.app` dưới dạng tệp nhị phân nền tảng, nên trình trợ giúp được ký adhoc sẽ bị từ chối (`Library Validation failed: ... platform binary, but mapped file is not`) ngay cả khi SIP đã tắt. Sau khi tắt SIP, hãy tắt cả quy trình xác thực thư viện và khởi động lại:
 
    ```bash
    sudo defaults write /Library/Preferences/com.apple.security.libraryvalidation.plist DisableLibraryValidation -bool true
    ```
 
-   **macOS 26 (Tahoe), đã xác minh trên 26.5.1:** SIP tắt **cộng với** lệnh `DisableLibraryValidation` ở trên là đủ để tiêm helper trên các phiên bản 26.0 đến 26.5.x. **Không cần boot-args.** Plist là yếu tố quyết định và là bước thiếu phổ biến nhất khi tiêm thất bại trên Tahoe:
-   - **Có plist:** `imsg launch` tiêm được và `imsg status` báo cáo `advanced_features: true`.
-   - **Không có plist (ngay cả khi SIP tắt):** `imsg launch` thất bại với `Failed to launch: Timeout waiting for Messages.app to initialize`. AMFI từ chối helper adhoc khi tải, nên bridge không bao giờ sẵn sàng và quá trình launch hết thời gian chờ. Timeout đó là triệu chứng mà hầu hết mọi người gặp trên Tahoe, và cách sửa là plist ở trên, không phải biện pháp nào mạnh tay hơn.
+   **macOS 26 (Tahoe), đã xác minh trên 26.5.1:** tắt SIP **cộng với** lệnh `DisableLibraryValidation` ở trên là đủ để chèn trình trợ giúp trên các phiên bản từ 26.0 đến 26.5.x. **Không cần boot-args.** Plist là yếu tố quyết định và là bước thường bị thiếu nhất khi quá trình chèn thất bại trên Tahoe:
+   - **Có plist:** `imsg launch` chèn thành công và `imsg status` báo cáo `advanced_features: true`.
+   - **Không có plist (ngay cả khi SIP đã tắt):** `imsg launch` thất bại với `Failed to launch: Timeout waiting for Messages.app to initialize`. AMFI từ chối trình trợ giúp adhoc khi tải, nên bridge không bao giờ sẵn sàng và quá trình khởi chạy hết thời gian chờ. Đây là triệu chứng mà phần lớn người dùng gặp trên Tahoe; cách khắc phục là plist ở trên, không phải biện pháp nào quyết liệt hơn.
 
-   Điều này đã được xác nhận bằng kiểm thử trước/sau có kiểm soát trên macOS 26.5.1 (Apple Silicon): có plist thì dylib được map vào `Messages.app` và bridge khởi động; xóa plist rồi khởi động lại thì `imsg launch` tạo ra lỗi timeout ở trên, với dylib không được map.
+   Nếu việc chèn `imsg launch` hoặc một số `selectors` cụ thể bắt đầu trả về false sau khi nâng cấp macOS, cổng kiểm tra này thường là nguyên nhân. Hãy kiểm tra trạng thái SIP và xác thực thư viện trước khi cho rằng chính bước SIP đã thất bại. Nếu các cài đặt đó chính xác nhưng bridge vẫn không thể chèn, hãy thu thập `imsg status --json` cùng đầu ra của `imsg launch` và báo cáo cho dự án `imsg` thay vì làm suy yếu thêm các biện pháp kiểm soát bảo mật trên toàn hệ thống.
 
-   Nếu việc tiêm qua `imsg launch` hoặc các `selectors` cụ thể bắt đầu trả về false sau khi nâng cấp macOS, cổng kiểm tra này thường là nguyên nhân. Hãy kiểm tra trạng thái SIP và xác thực thư viện trước khi cho rằng chính bước SIP đã thất bại. Nếu các thiết lập đó đúng mà bridge vẫn không thể tiêm, hãy thu thập `imsg status --json` cùng đầu ra của `imsg launch` và báo cáo cho dự án `imsg` thay vì nới lỏng thêm các kiểm soát bảo mật trên toàn hệ thống.
-
-   Làm theo quy trình Recovery mode của Apple cho máy Mac của bạn để tắt SIP trước khi chạy `imsg launch`.
-
-3. **Tiêm helper.** Khi SIP đã tắt và Messages.app đã đăng nhập:
+3. **Chèn trình trợ giúp.** Khi SIP đã tắt và Messages.app đã đăng nhập:
 
    ```bash
    imsg launch
    ```
 
-   `imsg launch` từ chối tiêm khi SIP vẫn đang bật, nên lệnh này cũng đóng vai trò xác nhận rằng bước 2 đã có hiệu lực.
+   `imsg launch` từ chối chèn khi SIP vẫn được bật, vì vậy thao tác này cũng đồng thời xác nhận rằng bước 2 đã có hiệu lực.
 
 4. **Xác minh bridge từ OpenClaw:**
 
@@ -248,63 +256,63 @@ Hãy xem đây là một lựa chọn vận hành có chủ đích, không phả
    openclaw channels status --probe
    ```
 
-   Mục iMessage nên báo cáo `works`, và `imsg status --json | jq '{rpc_methods, selectors}'` nên hiển thị các năng lực mà bản dựng macOS của bạn phơi bày. Tạo cuộc thăm dò ý kiến yêu cầu `selectors.pollPayloadMessage`; bỏ phiếu yêu cầu cả `selectors.pollVoteMessage` và phương thức RPC `poll.vote`. Plugin OpenClaw chỉ quảng bá các hành động được probe đã lưu trong bộ nhớ đệm hỗ trợ, trong khi bộ nhớ đệm trống vẫn giữ trạng thái lạc quan và probe ở lần gửi đầu tiên.
+   Mục iMessage phải báo cáo `works`, và `imsg status --json | jq '{rpc_methods, selectors}'` phải hiển thị các khả năng được bản dựng macOS của bạn cung cấp. Việc tạo cuộc thăm dò yêu cầu `selectors.pollPayloadMessage`; bỏ phiếu yêu cầu cả `selectors.pollVoteMessage` và phương thức RPC `poll.vote`. Plugin OpenClaw chỉ quảng bá những hành động được probe lưu trong bộ nhớ đệm hỗ trợ, còn bộ nhớ đệm trống vẫn giả định lạc quan và thực hiện probe trong lần điều phối đầu tiên.
 
-Nếu `openclaw channels status --probe` báo cáo kênh là `works` nhưng các hành động cụ thể ném lỗi "iMessage `<action>` requires the imsg private API bridge" tại thời điểm gửi, hãy chạy lại `imsg launch` — helper có thể bị rơi ra (Messages.app khởi động lại, cập nhật hệ điều hành, v.v.) và trạng thái `available: true` đã lưu trong bộ nhớ đệm sẽ tiếp tục quảng bá hành động cho đến khi lần probe tiếp theo làm mới.
+Nếu `openclaw channels status --probe` báo cáo kênh là `works` nhưng các hành động cụ thể phát sinh lỗi "iMessage `<action>` requires the imsg private API bridge" tại thời điểm điều phối, hãy chạy lại `imsg launch` — trình trợ giúp có thể bị ngắt kết nối (Messages.app khởi động lại, cập nhật hệ điều hành, v.v.) và trạng thái `available: true` được lưu trong bộ nhớ đệm sẽ tiếp tục quảng bá các hành động cho đến khi probe tiếp theo làm mới trạng thái.
 
-### Khi bạn không thể tắt SIP
+### Khi SIP vẫn được bật
 
-Nếu việc tắt SIP không phù hợp với mô hình đe dọa của bạn:
+Nếu việc tắt SIP không phù hợp với mô hình mối đe dọa của bạn:
 
-- `imsg` quay về chế độ cơ bản — chỉ văn bản + media + nhận.
-- Plugin OpenClaw vẫn quảng bá gửi văn bản/media và giám sát đầu vào; nó chỉ ẩn `react`, `edit`, `unsend`, `reply`, `sendWithEffect`, và các thao tác nhóm khỏi bề mặt hành động (theo cổng năng lực từng phương thức).
-- Bạn có thể chạy một máy Mac không dùng Apple Silicon riêng (hoặc một máy Mac bot chuyên dụng) với SIP tắt cho khối lượng công việc iMessage, trong khi vẫn bật SIP trên các thiết bị chính của bạn. Xem [Người dùng macOS bot chuyên dụng (danh tính iMessage riêng)](#deployment-patterns) bên dưới.
+- `imsg` chuyển về chế độ cơ bản — chỉ văn bản + phương tiện + nhận.
+- Plugin OpenClaw vẫn quảng bá chức năng gửi văn bản/phương tiện và giám sát đầu vào; Plugin ẩn `react`, `edit`, `unsend`, `reply`, `sendWithEffect` và các thao tác nhóm khỏi bề mặt hành động (theo cổng khả năng của từng phương thức).
+- Bạn có thể chạy một máy Mac không dùng Apple Silicon riêng biệt (hoặc máy Mac dành riêng cho bot) với SIP đã tắt để xử lý khối lượng công việc iMessage, trong khi vẫn bật SIP trên các thiết bị chính. Xem [Người dùng macOS dành riêng cho bot (danh tính iMessage riêng)](#deployment-patterns) ở bên dưới.
 
 ## Kiểm soát truy cập và định tuyến
 
 <Tabs>
-  <Tab title="DM policy">
+  <Tab title="Chính sách DM">
     `channels.imessage.dmPolicy` kiểm soát tin nhắn trực tiếp:
 
     - `pairing` (mặc định)
-    - `allowlist`
-    - `open` (yêu cầu `allowFrom` bao gồm `"*"`)
+    - `allowlist` (yêu cầu ít nhất một mục `allowFrom`)
+    - `open` (yêu cầu `allowFrom` chứa `"*"`)
     - `disabled`
 
     Trường danh sách cho phép: `channels.imessage.allowFrom`.
 
-    Các mục danh sách cho phép phải định danh người gửi: handle hoặc nhóm truy cập người gửi tĩnh (`accessGroup:<name>`). Dùng `channels.imessage.groupAllowFrom` cho các mục tiêu chat như `chat_id:*`, `chat_guid:*`, hoặc `chat_identifier:*`; dùng `channels.imessage.groups` cho các khóa registry `chat_id` dạng số.
+    Các mục trong danh sách cho phép phải xác định người gửi: handle hoặc nhóm truy cập người gửi tĩnh (`accessGroup:<name>`). Dùng `channels.imessage.groupAllowFrom` cho các đích trò chuyện như `chat_id:*`, `chat_guid:*` hoặc `chat_identifier:*`; dùng `channels.imessage.groups` cho các khóa sổ đăng ký `chat_id` dạng số.
 
   </Tab>
 
-  <Tab title="Group policy + mentions">
-    `channels.imessage.groupPolicy` kiểm soát xử lý nhóm:
+  <Tab title="Chính sách nhóm + lượt đề cập">
+    `channels.imessage.groupPolicy` kiểm soát việc xử lý nhóm:
 
-    - `allowlist` (mặc định khi được cấu hình)
+    - `allowlist` (mặc định)
     - `open`
     - `disabled`
 
-    Danh sách cho phép người gửi nhóm: `channels.imessage.groupAllowFrom`.
+    Danh sách cho phép người gửi trong nhóm: `channels.imessage.groupAllowFrom`.
 
-    Các mục `groupAllowFrom` cũng có thể tham chiếu nhóm truy cập người gửi tĩnh (`accessGroup:<name>`).
+    Các mục `groupAllowFrom` cũng có thể tham chiếu đến nhóm truy cập người gửi tĩnh (`accessGroup:<name>`).
 
-    Dự phòng runtime: nếu `groupAllowFrom` chưa được đặt, kiểm tra người gửi nhóm iMessage dùng `allowFrom`; đặt `groupAllowFrom` khi quyền vào DM và nhóm cần khác nhau.
-    Ghi chú runtime: nếu `channels.imessage` hoàn toàn thiếu, runtime quay về `groupPolicy="allowlist"` và ghi cảnh báo (ngay cả khi `channels.defaults.groupPolicy` được đặt).
+    Phương án dự phòng khi chạy: nếu `groupAllowFrom` chưa được đặt, quá trình kiểm tra người gửi trong nhóm iMessage sẽ dùng `allowFrom`; hãy đặt `groupAllowFrom` khi tiêu chí cho phép DM và nhóm cần khác nhau. Một `groupAllowFrom: []` được đặt rõ ràng thành rỗng sẽ không dùng phương án dự phòng — nó chặn mọi người gửi trong nhóm theo `allowlist`.
+    Lưu ý khi chạy: nếu hoàn toàn thiếu `channels.imessage`, runtime sẽ dùng dự phòng `groupPolicy="allowlist"` và ghi cảnh báo (ngay cả khi `channels.defaults.groupPolicy` đã được đặt).
 
     <Warning>
-    Định tuyến nhóm có **hai** cổng danh sách cho phép chạy nối tiếp, và cả hai đều phải vượt qua:
+    Định tuyến nhóm theo `groupPolicy: "allowlist"` chạy **hai** cổng liên tiếp:
 
-    1. **Danh sách cho phép người gửi / mục tiêu chat** (`channels.imessage.groupAllowFrom`) — handle, `chat_guid`, `chat_identifier`, hoặc `chat_id`.
-    2. **Registry nhóm** (`channels.imessage.groups`) — với `groupPolicy: "allowlist"`, cổng này yêu cầu hoặc một mục wildcard `groups: { "*": { ... } }` (đặt `allowAll = true`), hoặc một mục rõ ràng theo từng `chat_id` dưới `groups`.
+    1. **Danh sách cho phép người gửi** (`channels.imessage.groupAllowFrom`) — handle, `accessGroup:<name>`, `chat_guid`, `chat_identifier` hoặc `chat_id`. Danh sách có hiệu lực trống (không có `groupAllowFrom` và không có phương án dự phòng `allowFrom`) sẽ chặn mọi người gửi trong nhóm.
+    2. **Sổ đăng ký nhóm** (`channels.imessage.groups`) — được thực thi khi ánh xạ có mục: cuộc trò chuyện phải khớp với một mục `chat_id` cụ thể hoặc ký tự đại diện `groups: { "*": { ... } }`. Khi `groups` trống hoặc bị thiếu, chỉ danh sách cho phép người gửi quyết định việc cho phép.
 
-    Nếu cổng 2 không có gì, mọi tin nhắn nhóm đều bị loại bỏ. Plugin phát ra hai tín hiệu cấp `warn` ở mức nhật ký mặc định:
+    Nếu không cấu hình danh sách cho phép người gửi trong nhóm có hiệu lực, mọi tin nhắn nhóm sẽ bị loại bỏ trước cổng sổ đăng ký. Mỗi cổng có tín hiệu cấp `warn` riêng ở cấp nhật ký mặc định và mỗi tín hiệu nêu một cách khắc phục khác nhau:
 
-    - một lần cho mỗi tài khoản khi khởi động: `imessage: groupPolicy="allowlist" but channels.imessage.groups is empty for account "<id>"`
-    - một lần cho mỗi `chat_id` tại runtime: `imessage: dropping group message from chat_id=<id> ...`
+    - một lần cho mỗi tài khoản khi khởi động, khi danh sách cho phép người gửi trong nhóm có hiệu lực trống: `imessage: groupPolicy="allowlist" for account "<id>" but no group sender allowlist is configured ...` — khắc phục bằng cách đặt `channels.imessage.groupAllowFrom` (hoặc `allowFrom`); chỉ thêm các mục `groups` vẫn khiến cổng 1 chặn mọi người gửi.
+    - một lần cho mỗi `chat_id` khi chạy, khi người gửi đã vượt qua cổng 1 nhưng cuộc trò chuyện không có trong sổ đăng ký `groups` đã có dữ liệu: `imessage: dropping group message from chat_id=<id> ...` — khắc phục bằng cách thêm `chat_id` đó (hoặc `"*"`) dưới `channels.imessage.groups`.
 
-    DM tiếp tục hoạt động vì chúng đi theo một đường mã khác.
+    DM không bị ảnh hưởng — chúng đi theo một đường dẫn mã khác.
 
-    Cấu hình tối thiểu để giữ nhóm tiếp tục chảy dưới `groupPolicy: "allowlist"`:
+    Cấu hình được khuyến nghị cho luồng nhóm theo `groupPolicy: "allowlist"`:
 
     ```json5
     {
@@ -318,23 +326,22 @@ Nếu việc tắt SIP không phù hợp với mô hình đe dọa của bạn:
     }
     ```
 
-    Nếu các dòng `warn` đó xuất hiện trong nhật ký Gateway, cổng 2 đang loại bỏ — hãy thêm khối `groups`.
+    Chỉ `groupAllowFrom` đã cho phép những người gửi đó trong bất kỳ nhóm nào; thêm khối `groups` để giới hạn những cuộc trò chuyện được phép (và đặt các tùy chọn theo từng cuộc trò chuyện như `requireMention`).
     </Warning>
 
-    Cổng nhắc tên cho nhóm:
+    Kiểm soát lượt đề cập cho nhóm:
 
-    - iMessage không có siêu dữ liệu nhắc tên gốc
-    - phát hiện nhắc tên dùng các mẫu regex (`agents.list[].groupChat.mentionPatterns`, dự phòng `messages.groupChat.mentionPatterns`)
-    - khi không có mẫu được cấu hình, cổng nhắc tên không thể được thực thi
-
-    Các lệnh điều khiển từ người gửi được ủy quyền có thể bỏ qua cổng nhắc tên trong nhóm.
+    - iMessage không có siêu dữ liệu lượt đề cập gốc
+    - phát hiện lượt đề cập sử dụng các mẫu biểu thức chính quy (`agents.list[].groupChat.mentionPatterns`, dự phòng `messages.groupChat.mentionPatterns`)
+    - khi không có mẫu nào được cấu hình, không thể thực thi kiểm soát lượt đề cập
+    - các lệnh điều khiển từ người gửi được ủy quyền bỏ qua kiểm soát lượt đề cập
 
     `systemPrompt` theo từng nhóm:
 
-    Mỗi mục dưới `channels.imessage.groups.*` chấp nhận chuỗi `systemPrompt` tùy chọn. Giá trị được tiêm vào system prompt của agent ở mọi lượt xử lý tin nhắn trong nhóm đó. Cách phân giải phản chiếu phân giải prompt theo từng nhóm được `channels.whatsapp.groups` dùng:
+    Mỗi mục dưới `channels.imessage.groups.*` chấp nhận một chuỗi `systemPrompt` tùy chọn, được chèn vào lời nhắc hệ thống của tác nhân ở mỗi lượt xử lý tin nhắn trong nhóm đó. Cách phân giải tương tự `channels.whatsapp.groups`:
 
-    1. **System prompt dành riêng cho nhóm** (`groups["<chat_id>"].systemPrompt`): được dùng khi mục nhóm cụ thể tồn tại trong map **và** khóa `systemPrompt` của nó được định nghĩa. Nếu `systemPrompt` là chuỗi rỗng (`""`) thì wildcard bị chặn và không có system prompt nào được áp dụng cho nhóm đó.
-    2. **System prompt wildcard nhóm** (`groups["*"].systemPrompt`): được dùng khi mục nhóm cụ thể hoàn toàn vắng mặt khỏi map, hoặc khi nó tồn tại nhưng không định nghĩa khóa `systemPrompt`.
+    1. **Lời nhắc hệ thống riêng cho nhóm** (`groups["<chat_id>"].systemPrompt`): được dùng khi mục nhóm cụ thể tồn tại trong ánh xạ **và** khóa `systemPrompt` của mục đó đã được định nghĩa. Nếu `systemPrompt` là chuỗi rỗng (`""`), ký tự đại diện sẽ bị vô hiệu hóa và không áp dụng lời nhắc hệ thống nào cho nhóm đó.
+    2. **Lời nhắc hệ thống ký tự đại diện cho nhóm** (`groups["*"].systemPrompt`): được dùng khi mục nhóm cụ thể hoàn toàn không có trong ánh xạ hoặc khi mục đó tồn tại nhưng không định nghĩa khóa `systemPrompt`.
 
     ```json5
     {
@@ -358,41 +365,41 @@ Nếu việc tắt SIP không phù hợp với mô hình đe dọa của bạn:
     }
     ```
 
-    Prompt theo từng nhóm chỉ áp dụng cho tin nhắn nhóm — tin nhắn trực tiếp trong kênh này không bị ảnh hưởng.
+    Lời nhắc theo từng nhóm chỉ áp dụng cho tin nhắn nhóm — tin nhắn trực tiếp không bị ảnh hưởng.
 
   </Tab>
 
-  <Tab title="Sessions and deterministic replies">
+  <Tab title="Phiên và phản hồi xác định">
     - DM dùng định tuyến trực tiếp; nhóm dùng định tuyến nhóm.
-    - Với `session.dmScope=main` mặc định, DM iMessage được gộp vào phiên chính của agent.
-    - Phiên nhóm được cô lập (`agent:<agentId>:imessage:group:<chat_id>`).
-    - Trả lời được định tuyến ngược về iMessage bằng siêu dữ liệu kênh/mục tiêu gốc.
+    - Với `session.dmScope=main` mặc định, các DM iMessage được gộp vào phiên chính của tác nhân.
+    - Các phiên nhóm được cô lập (`agent:<agentId>:imessage:group:<chat_id>`).
+    - Phản hồi được định tuyến trở lại iMessage bằng siêu dữ liệu kênh/đích ban đầu.
 
-    Hành vi luồng kiểu nhóm:
+    Hành vi luồng gần giống nhóm:
 
-    Một số luồng iMessage nhiều người tham gia có thể đến với `is_group=false`.
-    Nếu `chat_id` đó được cấu hình rõ ràng dưới `channels.imessage.groups`, OpenClaw xử lý nó như lưu lượng nhóm (cổng nhóm + cô lập phiên nhóm).
+    Một số luồng iMessage có nhiều người tham gia có thể đến với `is_group=false`.
+    Nếu `chat_id` đó được cấu hình rõ ràng dưới `channels.imessage.groups`, OpenClaw coi đó là lưu lượng nhóm (kiểm soát nhóm + cô lập phiên nhóm).
 
   </Tab>
 </Tabs>
 
-## Liên kết hội thoại ACP
+## Liên kết cuộc hội thoại ACP
 
-Các chat iMessage cũ cũng có thể được liên kết với phiên ACP.
+Các cuộc trò chuyện iMessage có thể được liên kết với phiên ACP.
 
 Luồng thao tác nhanh:
 
-- Chạy `/acp spawn codex --bind here` bên trong DM hoặc chat nhóm được cho phép.
-- Các tin nhắn tương lai trong cùng hội thoại iMessage đó định tuyến tới phiên ACP đã spawn.
-- `/new` và `/reset` đặt lại cùng phiên ACP đã liên kết tại chỗ.
+- Chạy `/acp spawn codex --bind here` bên trong DM hoặc cuộc trò chuyện nhóm được phép.
+- Các tin nhắn sau đó trong cùng cuộc hội thoại iMessage sẽ được định tuyến đến phiên ACP vừa tạo.
+- `/new` và `/reset` đặt lại tại chỗ cùng phiên ACP đã liên kết.
 - `/acp close` đóng phiên ACP và xóa liên kết.
 
-Liên kết bền vững được cấu hình được hỗ trợ thông qua các mục `bindings[]` cấp cao nhất với `type: "acp"` và `match.channel: "imessage"`.
+Các liên kết bền vững được cấu hình sử dụng các mục `bindings[]` cấp cao nhất với `type: "acp"` và `match.channel: "imessage"`.
 
 `match.peer.id` có thể dùng:
 
 - handle DM đã chuẩn hóa như `+15555550123` hoặc `user@example.com`
-- `chat_id:<id>` (khuyến nghị cho liên kết nhóm ổn định)
+- `chat_id:<id>` (được khuyến nghị cho liên kết nhóm ổn định)
 - `chat_guid:<guid>`
 - `chat_identifier:<identifier>`
 
@@ -426,33 +433,33 @@ Ví dụ:
 }
 ```
 
-Xem [Agent ACP](/vi/tools/acp-agents) để biết hành vi liên kết ACP dùng chung.
+Xem [Tác nhân ACP](/vi/tools/acp-agents) để biết hành vi liên kết ACP dùng chung.
 
-## Mẫu triển khai
+## Mô hình triển khai
 
 <AccordionGroup>
-  <Accordion title="Dedicated bot macOS user (separate iMessage identity)">
-    Dùng một Apple ID và người dùng macOS chuyên dụng để lưu lượng bot được cô lập khỏi hồ sơ Messages cá nhân của bạn.
+  <Accordion title="Người dùng macOS dành riêng cho bot (danh tính iMessage riêng)">
+    Sử dụng Apple ID và người dùng macOS chuyên dụng để lưu lượng bot được tách biệt khỏi hồ sơ Messages cá nhân của bạn.
 
     Luồng điển hình:
 
-    1. Tạo/đăng nhập một người dùng macOS chuyên dụng.
+    1. Tạo/đăng nhập vào một người dùng macOS chuyên dụng.
     2. Đăng nhập vào Messages bằng Apple ID của bot trong người dùng đó.
     3. Cài đặt `imsg` trong người dùng đó.
-    4. Tạo wrapper SSH để OpenClaw có thể chạy `imsg` trong ngữ cảnh người dùng đó.
-    5. Trỏ `channels.imessage.accounts.<id>.cliPath` và `.dbPath` tới hồ sơ người dùng đó.
+    4. Tạo một trình bao bọc SSH để OpenClaw có thể chạy `imsg` trong ngữ cảnh người dùng đó.
+    5. Trỏ `channels.imessage.accounts.<id>.cliPath` và `.dbPath` đến hồ sơ người dùng đó.
 
-    Lần chạy đầu tiên có thể yêu cầu phê duyệt GUI (Automation + Full Disk Access) trong phiên người dùng bot đó.
+    Lần chạy đầu tiên có thể yêu cầu phê duyệt qua GUI (Automation + Full Disk Access) trong phiên của người dùng bot đó.
 
   </Accordion>
 
-  <Accordion title="Remote Mac over Tailscale (example)">
-    Topology phổ biến:
+  <Accordion title="Máy Mac từ xa qua Tailscale (ví dụ)">
+    Cấu trúc liên kết phổ biến:
 
     - Gateway chạy trên Linux/VM
     - iMessage + `imsg` chạy trên một máy Mac trong tailnet của bạn
-    - wrapper `cliPath` dùng SSH để chạy `imsg`
-    - `remoteHost` bật tìm nạp tệp đính kèm qua SCP
+    - Trình bao bọc `cliPath` sử dụng SSH để chạy `imsg`
+    - `remoteHost` cho phép tìm nạp tệp đính kèm qua SCP
 
     Ví dụ:
 
@@ -475,57 +482,59 @@ Xem [Agent ACP](/vi/tools/acp-agents) để biết hành vi liên kết ACP dùn
     exec ssh -T bot@mac-mini.tailnet-1234.ts.net imsg "$@"
     ```
 
-    Dùng khóa SSH để cả SSH và SCP đều không tương tác.
-    Trước tiên hãy bảo đảm host key đã được tin cậy (ví dụ `ssh bot@mac-mini.tailnet-1234.ts.net`) để `known_hosts` được điền.
+    Sử dụng khóa SSH để cả SSH và SCP đều không cần tương tác.
+    Trước tiên, hãy đảm bảo khóa máy chủ được tin cậy (ví dụ `ssh bot@mac-mini.tailnet-1234.ts.net`) để `known_hosts` được điền.
 
   </Accordion>
 
-  <Accordion title="Multi-account pattern">
-    iMessage hỗ trợ cấu hình theo từng tài khoản dưới `channels.imessage.accounts`.
+  <Accordion title="Mẫu nhiều tài khoản">
+    iMessage hỗ trợ cấu hình theo từng tài khoản trong `channels.imessage.accounts`.
 
-    Mỗi tài khoản có thể ghi đè các trường như `cliPath`, `dbPath`, `allowFrom`, `groupPolicy`, `mediaMaxMb`, thiết lập lịch sử, và danh sách cho phép gốc tệp đính kèm.
+    Mỗi tài khoản có thể ghi đè các trường như `cliPath`, `dbPath`, `allowFrom`, `groupPolicy`, `mediaMaxMb`, cài đặt lịch sử và danh sách cho phép gốc của tệp đính kèm.
 
   </Accordion>
 
-  <Accordion title="Direct-message history">
-    Đặt `channels.imessage.dmHistoryLimit` để khởi tạo phiên tin nhắn trực tiếp mới bằng lịch sử `imsg` đã giải mã gần đây cho hội thoại đó. Dùng `channels.imessage.dms["<sender>"].historyLimit` cho ghi đè theo từng người gửi, bao gồm `0` để tắt lịch sử cho một người gửi.
+  <Accordion title="Lịch sử tin nhắn trực tiếp">
+    Đặt `channels.imessage.dmHistoryLimit` để khởi tạo các phiên tin nhắn trực tiếp mới bằng lịch sử `imsg` gần đây đã giải mã của cuộc trò chuyện đó. Sử dụng `channels.imessage.dms["<sender>"].historyLimit` để ghi đè theo từng người gửi, bao gồm `0` để tắt lịch sử cho một người gửi.
 
-    Lịch sử DM iMessage được tìm nạp theo yêu cầu từ `imsg`. Không đặt `dmHistoryLimit` sẽ tắt khởi tạo lịch sử DM toàn cục, nhưng `channels.imessage.dms["<sender>"].historyLimit` dương theo từng người gửi vẫn bật khởi tạo cho người gửi đó.
+    Lịch sử tin nhắn trực tiếp iMessage được tìm nạp theo yêu cầu từ `imsg`. Việc không đặt `dmHistoryLimit` sẽ tắt khởi tạo lịch sử tin nhắn trực tiếp toàn cục, nhưng giá trị `channels.imessage.dms["<sender>"].historyLimit` dương theo từng người gửi vẫn bật khởi tạo cho người gửi đó.
 
   </Accordion>
 </AccordionGroup>
 
-## Media, chia nhỏ, và mục tiêu gửi
+## Phương tiện, phân đoạn và đích gửi
 
 <AccordionGroup>
   <Accordion title="Tệp đính kèm và phương tiện">
-    - nạp tệp đính kèm đầu vào **tắt theo mặc định** — đặt `channels.imessage.includeAttachments: true` để chuyển ảnh, bản ghi âm, video và các tệp đính kèm khác tới tác nhân. Khi tắt, iMessage chỉ có tệp đính kèm sẽ bị loại bỏ trước khi tới tác nhân và có thể hoàn toàn không tạo dòng log `Inbound message`.
-    - đường dẫn tệp đính kèm từ xa có thể được lấy qua SCP khi đặt `remoteHost`
-    - đường dẫn tệp đính kèm phải khớp với các gốc được phép:
+    - việc tiếp nhận tệp đính kèm đến **bị tắt theo mặc định** — đặt `channels.imessage.includeAttachments: true` để chuyển tiếp ảnh, bản ghi âm, video và các tệp đính kèm khác đến tác nhân. Khi tùy chọn này bị tắt, các iMessage chỉ chứa tệp đính kèm sẽ bị loại bỏ trước khi đến tác nhân và có thể hoàn toàn không tạo ra dòng nhật ký `Inbound message`.
+    - có thể tìm nạp đường dẫn tệp đính kèm từ xa qua SCP khi đặt `remoteHost`
+    - đường dẫn tệp đính kèm phải khớp với các gốc được cho phép:
       - `channels.imessage.attachmentRoots` (cục bộ)
       - `channels.imessage.remoteAttachmentRoots` (chế độ SCP từ xa)
-      - mẫu gốc mặc định: `/Users/*/Library/Messages/Attachments`
-    - SCP dùng kiểm tra khóa máy chủ nghiêm ngặt (`StrictHostKeyChecking=yes`)
-    - kích thước phương tiện gửi đi dùng `channels.imessage.mediaMaxMb` (mặc định 16 MB)
+      - các gốc đã cấu hình mở rộng mẫu gốc mặc định `/Users/*/Library/Messages/Attachments` (được hợp nhất, không bị thay thế)
+    - SCP sử dụng kiểm tra khóa máy chủ nghiêm ngặt (`StrictHostKeyChecking=yes`)
+    - kích thước phương tiện gửi đi sử dụng `channels.imessage.mediaMaxMb` (mặc định 16 MB)
 
   </Accordion>
 
-  <Accordion title="Chia đoạn gửi đi">
-    - giới hạn đoạn văn bản: `channels.imessage.textChunkLimit` (mặc định 4000)
-    - chế độ chia đoạn: `channels.imessage.chunkMode`
+  <Accordion title="Văn bản gửi đi và phân đoạn">
+    - giới hạn phân đoạn văn bản: `channels.imessage.textChunkLimit` (mặc định 4000)
+    - chế độ phân đoạn: `channels.imessage.streaming.chunkMode`
       - `length` (mặc định)
-      - `newline` (ưu tiên tách theo đoạn văn)
+      - `newline` (ưu tiên phân tách theo đoạn văn)
+    - chữ đậm/nghiêng/gạch chân/gạch ngang Markdown gửi đi được chuyển đổi thành văn bản có kiểu định dạng gốc (người nhận dùng macOS 15+ sẽ thấy định dạng; người nhận dùng phiên bản cũ hơn sẽ thấy văn bản thuần không có các dấu đánh dấu); bảng Markdown được chuyển đổi theo chế độ bảng Markdown của kênh
+    - `channels.imessage.sendTransport` (mặc định `auto`, `bridge`, `applescript`) chọn cách `imsg` thực hiện việc gửi
 
   </Accordion>
 
   <Accordion title="Định dạng địa chỉ">
-    Đích tường minh được ưu tiên:
+    Các đích tường minh được ưu tiên:
 
     - `chat_id:123` (khuyến nghị để định tuyến ổn định)
     - `chat_guid:...`
     - `chat_identifier:...`
 
-    Đích dạng handle cũng được hỗ trợ:
+    Các đích dạng định danh cũng được hỗ trợ:
 
     - `imessage:+1555...`
     - `sms:+1555...`
@@ -540,7 +549,9 @@ Xem [Agent ACP](/vi/tools/acp-agents) để biết hành vi liên kết ACP dùn
 
 ## Hành động API riêng tư
 
-Khi `imsg launch` đang chạy và `openclaw channels status --probe` báo cáo `privateApi.available: true`, công cụ tin nhắn có thể dùng các hành động gốc của iMessage ngoài thao tác gửi văn bản thông thường.
+Khi `imsg launch` đang chạy và `openclaw channels status --probe` báo cáo `privateApi.available: true`, công cụ tin nhắn có thể sử dụng các hành động gốc của iMessage bên cạnh việc gửi văn bản thông thường.
+
+Tất cả hành động được bật theo mặc định; sử dụng `channels.imessage.actions` để tắt từng hành động riêng lẻ:
 
 ```json5
 {
@@ -566,33 +577,33 @@ Khi `imsg launch` đang chạy và `openclaw channels status --probe` báo cáo 
 ```
 
 <AccordionGroup>
-  <Accordion title="Hành động có sẵn">
-    - **react**: Thêm/xóa tapback iMessage (`messageId`, `emoji`, `remove`). Các tapback được hỗ trợ ánh xạ tới love, like, dislike, laugh, emphasize và question.
-    - **reply**: Gửi trả lời theo luồng tới một tin nhắn hiện có (`messageId`, `text` hoặc `message`, cùng với `chatGuid`, `chatId`, `chatIdentifier`, hoặc `to`).
-    - **sendWithEffect**: Gửi văn bản kèm hiệu ứng iMessage (`text` hoặc `message`, `effect` hoặc `effectId`).
-    - **edit**: Sửa một tin nhắn đã gửi trên các phiên bản macOS/API riêng tư được hỗ trợ (`messageId`, `text` hoặc `newText`).
-    - **unsend**: Thu hồi một tin nhắn đã gửi trên các phiên bản macOS/API riêng tư được hỗ trợ (`messageId`).
-    - **upload-file**: Gửi phương tiện/tệp (`buffer` ở dạng base64 hoặc `media`/`path`/`filePath` đã được hydrate, `filename`, `asVoice` tùy chọn). Bí danh cũ: `sendAttachment`.
-    - **renameGroup**, **setGroupIcon**, **addParticipant**, **removeParticipant**, **leaveGroup**: Quản lý trò chuyện nhóm khi đích hiện tại là một cuộc trò chuyện nhóm.
-    - **poll**: Tạo một cuộc thăm dò Apple Messages gốc (`pollQuestion`, `pollOption` lặp lại 2 đến 12 lần, cùng với `chatGuid`, `chatId`, `chatIdentifier`, hoặc `to`). Người nhận trên iOS/iPadOS/macOS 26+ thấy và bỏ phiếu trực tiếp theo cách gốc; các phiên bản hệ điều hành cũ hơn nhận văn bản dự phòng "Sent a poll". Yêu cầu `selectors.pollPayloadMessage`.
-    - **poll-vote**: Bỏ phiếu cho một cuộc thăm dò hiện có (`pollId` hoặc `messageId`, cùng với đúng một trong `pollOptionIndex`, `pollOptionId`, hoặc `pollOptionText`). Yêu cầu `selectors.pollVoteMessage` và phương thức RPC `poll.vote`.
+  <Accordion title="Các hành động khả dụng">
+    - **react**: Thêm/xóa tapback iMessage (`messageId`, `emoji`, `remove`). Các tapback được hỗ trợ ánh xạ tới yêu thích, thích, không thích, cười, nhấn mạnh và thắc mắc. Việc xóa mà không có emoji sẽ xóa bất kỳ tapback nào đã được đặt.
+    - **reply**: Gửi câu trả lời theo luồng cho một tin nhắn hiện có (`messageId`, `text` hoặc `message`, cùng với `chatGuid`, `chatId`, `chatIdentifier` hoặc `to`). Trả lời kèm tệp đính kèm còn yêu cầu một bản dựng `imsg` có `send-rich` hỗ trợ `--file`.
+    - **sendWithEffect**: Gửi văn bản với hiệu ứng iMessage (`text` hoặc `message`, `effect` hoặc `effectId`). Tên ngắn: slam, loud, gentle, invisibleink, confetti, lasers, fireworks, balloon, heart, echo, happybirthday, shootingstar, sparkles, spotlight.
+    - **edit**: Chỉnh sửa tin nhắn đã gửi trên các phiên bản macOS/API riêng tư được hỗ trợ (`messageId`, `text` hoặc `newText`). Chỉ có thể chỉnh sửa các tin nhắn do chính Gateway gửi.
+    - **unsend**: Thu hồi tin nhắn đã gửi trên các phiên bản macOS/API riêng tư được hỗ trợ (`messageId`). Chỉ có thể thu hồi các tin nhắn do chính Gateway gửi.
+    - **upload-file**: Gửi phương tiện/tệp (`buffer` dưới dạng base64 hoặc một `media`/`path`/`filePath` đã được nạp đầy đủ, `filename`, `asVoice` không bắt buộc). Bí danh cũ: `sendAttachment`.
+    - **renameGroup**, **setGroupIcon**, **addParticipant**, **removeParticipant**, **leaveGroup**: Quản lý cuộc trò chuyện nhóm khi đích hiện tại là một cuộc trò chuyện nhóm. Các hành động này thay đổi danh tính Messages của máy chủ, vì vậy chúng yêu cầu người gửi là chủ sở hữu hoặc một máy khách Gateway `operator.admin`.
+    - **poll**: Tạo cuộc thăm dò Apple Messages gốc (`pollQuestion`, `pollOption` lặp lại từ 2 đến 12 lần, cùng với `chatGuid`, `chatId`, `chatIdentifier` hoặc `to`). Người nhận dùng iOS/iPadOS/macOS 26+ có thể xem và bỏ phiếu trực tiếp; các phiên bản hệ điều hành cũ hơn nhận được văn bản dự phòng "Đã gửi một cuộc thăm dò". Yêu cầu `selectors.pollPayloadMessage`.
+    - **poll-vote**: Bỏ phiếu trong một cuộc thăm dò hiện có (`pollId` hoặc `messageId`, cùng với chính xác một trong `pollOptionIndex`, `pollOptionId` hoặc `pollOptionText`). Yêu cầu `selectors.pollVoteMessage` và phương thức RPC `poll.vote`.
 
-    Các cuộc thăm dò đầu vào được chấp nhận được hiển thị cho tác nhân với câu hỏi, nhãn lựa chọn đánh số, số phiếu và ID tin nhắn thăm dò cần cho `poll-vote`.
+    Các cuộc thăm dò đến được chấp nhận sẽ được hiển thị cho tác nhân cùng với câu hỏi, nhãn tùy chọn được đánh số, số phiếu và ID tin nhắn của cuộc thăm dò mà `poll-vote` cần.
 
   </Accordion>
 
   <Accordion title="ID tin nhắn">
-    Ngữ cảnh iMessage đầu vào bao gồm cả giá trị `MessageSid` ngắn và GUID tin nhắn đầy đủ khi có. ID ngắn nằm trong phạm vi cache trả lời gần đây dựa trên SQLite và được kiểm tra theo cuộc trò chuyện hiện tại trước khi dùng. Nếu một ID ngắn đã hết hạn hoặc thuộc về cuộc trò chuyện khác, hãy thử lại với `MessageSidFull` đầy đủ.
+    Ngữ cảnh iMessage đến bao gồm cả các giá trị `MessageSid` ngắn và GUID đầy đủ của tin nhắn (`MessageSidFull`) khi có. ID ngắn chỉ có phạm vi trong bộ nhớ đệm trả lời gần đây dựa trên SQLite và được kiểm tra đối chiếu với cuộc trò chuyện hiện tại trước khi sử dụng. Nếu một ID ngắn hết hạn, hãy thử lại bằng `MessageSidFull` của nó trong khi nhắm đến cuộc trò chuyện đã cung cấp ID đó. ID đầy đủ không bỏ qua ràng buộc cuộc trò chuyện hoặc tài khoản, vì vậy hãy thay một ID từ cuộc trò chuyện khác bằng ID từ đích hiện tại. Các lệnh gọi được ủy quyền từ xa có thể từ chối ID đầy đủ đã cũ khi không có bằng chứng về cuộc trò chuyện hiện tại.
 
   </Accordion>
 
-  <Accordion title="Phát hiện năng lực">
-    OpenClaw chỉ ẩn các hành động API riêng tư khi trạng thái thăm dò được cache cho biết bridge không khả dụng. Nếu trạng thái chưa biết, các hành động vẫn hiển thị và sẽ thăm dò khi dispatch một cách lười biếng để hành động đầu tiên có thể thành công sau `imsg launch` mà không cần làm mới trạng thái thủ công riêng.
+  <Accordion title="Phát hiện khả năng">
+    OpenClaw chỉ ẩn các hành động API riêng tư khi trạng thái thăm dò đã lưu trong bộ nhớ đệm cho biết cầu nối không khả dụng. Nếu trạng thái chưa xác định, các hành động vẫn hiển thị và việc điều phối sẽ thăm dò một cách trì hoãn để hành động đầu tiên có thể thành công sau `imsg launch` mà không cần làm mới trạng thái thủ công riêng biệt.
 
   </Accordion>
 
-  <Accordion title="Thông báo đã đọc và đang nhập">
-    Khi bridge API riêng tư hoạt động, các cuộc trò chuyện đầu vào được chấp nhận được đánh dấu là đã đọc và trò chuyện trực tiếp hiển thị bong bóng đang nhập ngay khi lượt được chấp nhận, trong lúc tác nhân chuẩn bị ngữ cảnh và tạo phản hồi. Tắt đánh dấu đã đọc bằng:
+  <Accordion title="Biên nhận đã đọc và trạng thái đang nhập">
+    Khi cầu nối API riêng tư hoạt động, các cuộc trò chuyện đến được chấp nhận sẽ được đánh dấu là đã đọc và các cuộc trò chuyện trực tiếp sẽ hiển thị bong bóng đang nhập ngay khi lượt được chấp nhận, trong khi tác nhân chuẩn bị ngữ cảnh và tạo nội dung. Tắt đánh dấu đã đọc bằng:
 
     ```json5
     {
@@ -604,45 +615,53 @@ Khi `imsg launch` đang chạy và `openclaw channels status --probe` báo cáo 
     }
     ```
 
-    Các bản dựng `imsg` cũ hơn danh sách năng lực theo từng phương thức sẽ âm thầm chặn typing/read; OpenClaw ghi log cảnh báo một lần cho mỗi lần khởi động lại để việc thiếu thông báo đã đọc có thể được truy nguyên.
+    Các bản dựng `imsg` cũ hơn, có trước danh sách khả năng theo từng phương thức, sẽ âm thầm tắt trạng thái đang nhập/đã đọc; OpenClaw ghi lại cảnh báo một lần cho mỗi lần khởi động lại để có thể xác định nguyên nhân thiếu biên nhận.
 
   </Accordion>
 
-  <Accordion title="Tapback đầu vào">
-    OpenClaw đăng ký tapback iMessage và định tuyến các phản ứng được chấp nhận dưới dạng sự kiện hệ thống thay vì văn bản tin nhắn thông thường, nên tapback của người dùng không kích hoạt vòng lặp trả lời thông thường.
+  <Accordion title="Tapback đến">
+    OpenClaw đăng ký nhận tapback iMessage và định tuyến các phản ứng được chấp nhận dưới dạng sự kiện hệ thống thay vì văn bản tin nhắn thông thường, vì vậy tapback của người dùng không kích hoạt vòng lặp trả lời thông thường.
 
-    Chế độ thông báo được điều khiển bởi `channels.imessage.reactionNotifications`:
+    Chế độ thông báo được kiểm soát bởi `channels.imessage.reactionNotifications`:
 
-    - `"own"` (mặc định): chỉ thông báo khi người dùng phản ứng với tin nhắn do bot viết.
-    - `"all"`: thông báo cho tất cả tapback đầu vào từ người gửi được ủy quyền.
-    - `"off"`: bỏ qua tapback đầu vào.
+    - `"own"` (mặc định): chỉ thông báo khi người dùng phản ứng với tin nhắn do bot tạo.
+    - `"all"`: thông báo cho tất cả tapback đến từ những người gửi được ủy quyền.
+    - `"off"`: bỏ qua tapback đến.
 
-    Ghi đè theo tài khoản dùng `channels.imessage.accounts.<id>.reactionNotifications`.
+    Các ghi đè theo từng tài khoản sử dụng `channels.imessage.accounts.<id>.reactionNotifications`.
 
   </Accordion>
 
   <Accordion title="Phản ứng phê duyệt (👍 / 👎)">
-    Khi `approvals.exec.enabled` hoặc `approvals.plugin.enabled` là true và yêu cầu được định tuyến tới iMessage, gateway gửi lời nhắc phê duyệt theo cách gốc và chấp nhận tapback để xử lý:
+    Khi `approvals.exec.enabled` hoặc `approvals.plugin.enabled` là true và yêu cầu được định tuyến đến iMessage, Gateway gửi lời nhắc phê duyệt theo cách gốc và chấp nhận tapback để giải quyết yêu cầu:
 
-    - `👍` (Like tapback) → `allow-once`
-    - `👎` (Dislike tapback) → `deny`
-    - `allow-always` vẫn là phương án dự phòng thủ công: gửi `/approve <id> allow-always` như một trả lời thông thường.
+    - `👍` (tapback Thích) → `allow-once`
+    - `👎` (tapback Không thích) → `deny`
+    - `allow-always` vẫn là phương án dự phòng thủ công: gửi `/approve <id> allow-always` dưới dạng câu trả lời thông thường.
 
-    Xử lý phản ứng yêu cầu handle của người phản ứng phải là người phê duyệt tường minh. Danh sách người phê duyệt được đọc từ `channels.imessage.allowFrom` (hoặc `channels.imessage.accounts.<id>.allowFrom`); thêm số điện thoại của người dùng ở dạng E.164 hoặc email Apple ID của họ. Mục wildcard `"*"` được tôn trọng nhưng cho phép bất kỳ người gửi nào phê duyệt. Lối tắt phản ứng cố ý bỏ qua `reactionNotifications`, `dmPolicy` và `groupAllowFrom` vì allowlist người phê duyệt tường minh là cổng duy nhất quan trọng để xử lý phê duyệt.
+    Việc xử lý phản ứng yêu cầu định danh của người dùng phản ứng phải là người phê duyệt tường minh. Danh sách người phê duyệt được đọc từ `channels.imessage.allowFrom` (hoặc `channels.imessage.accounts.<id>.allowFrom`); thêm số điện thoại của người dùng ở định dạng E.164 hoặc email Apple ID của họ (các đích trò chuyện như `chat_id:*` không phải là mục người phê duyệt hợp lệ). Mục ký tự đại diện `"*"` được chấp nhận nhưng cho phép bất kỳ người gửi nào phê duyệt; danh sách người phê duyệt trống sẽ tắt hoàn toàn lối tắt bằng phản ứng. Lối tắt bằng phản ứng chủ ý bỏ qua `reactionNotifications`, `dmPolicy` và `groupAllowFrom` vì danh sách cho phép người phê duyệt tường minh là cổng kiểm soát duy nhất có ý nghĩa đối với việc giải quyết phê duyệt.
 
-    **Thay đổi hành vi trong bản phát hành này:** Khi `channels.imessage.allowFrom` không rỗng, lệnh văn bản `/approve <id> <decision>` giờ được ủy quyền theo danh sách người phê duyệt đó (không phải allowlist DM rộng hơn). Người gửi được phép trong allowlist DM nhưng không có trong `allowFrom` sẽ nhận thông báo từ chối tường minh. Thêm mọi operator cần có khả năng phê duyệt qua `/approve` (và qua phản ứng) vào `allowFrom` để giữ hành vi trước đó. Khi `allowFrom` rỗng, "same-chat fallback" cũ vẫn có hiệu lực và `/approve` tiếp tục ủy quyền bất kỳ ai mà allowlist DM cho phép.
+    Việc ủy quyền lệnh văn bản `/approve` tuân theo cùng danh sách: khi `channels.imessage.allowFrom` không trống, `/approve <id> <decision>` được ủy quyền dựa trên danh sách người phê duyệt đó (không phải danh sách cho phép tin nhắn trực tiếp rộng hơn), và những người gửi được phép trong danh sách cho phép tin nhắn trực tiếp nhưng không có trong `allowFrom` sẽ nhận được thông báo từ chối rõ ràng. Khi `allowFrom` trống, phương án dự phòng trong cùng cuộc trò chuyện vẫn có hiệu lực và `/approve` ủy quyền cho bất kỳ ai được danh sách cho phép tin nhắn trực tiếp chấp nhận. Thêm mọi người vận hành cần phê duyệt — qua `/approve` hoặc qua phản ứng — vào `allowFrom`.
 
-    Ghi chú cho operator:
-    - Liên kết phản ứng được lưu cả trong bộ nhớ (với TTL khớp với thời điểm hết hạn phê duyệt) và trong kho khóa bền vững của gateway, nên tapback đến ngay sau khi gateway khởi động lại vẫn xử lý được phê duyệt.
-    - Tapback liên thiết bị `is_from_me=true` (phản ứng của chính operator trên thiết bị Apple đã ghép đôi) bị cố ý bỏ qua để bot không thể tự phê duyệt.
-    - Tapback kiểu văn bản cũ (`Liked "…"` dạng văn bản thuần từ các client Apple rất cũ) không thể xử lý phê duyệt vì chúng không mang GUID tin nhắn; xử lý phản ứng yêu cầu metadata tapback có cấu trúc mà các client macOS / iOS hiện tại phát ra.
+    Ghi chú dành cho người vận hành:
+    - Liên kết phản ứng được lưu cả trong bộ nhớ lẫn kho khóa bền vững của Gateway (TTL khớp với thời điểm phê duyệt hết hạn), đồng thời Gateway cũng thăm dò các lời nhắc đang chờ để tìm tapback, vì vậy một tapback đến ngay sau khi Gateway khởi động lại vẫn xử lý được yêu cầu phê duyệt.
+    - Tapback `is_from_me=true` của chính người vận hành (ví dụ từ một thiết bị Apple đã ghép đôi) xử lý yêu cầu phê duyệt khi handle đó là người phê duyệt được chỉ định rõ ràng.
+    - Lời nhắc phê duyệt chỉ được định tuyến vào cuộc trò chuyện nhóm khi đã cấu hình người phê duyệt rõ ràng; nếu không, bất kỳ thành viên nào trong nhóm cũng có thể phê duyệt.
+    - Tapback kiểu văn bản cũ (`Liked "…"` văn bản thuần từ các ứng dụng Apple rất cũ) không thể xử lý yêu cầu phê duyệt vì chúng không mang GUID của tin nhắn; việc xử lý phản ứng yêu cầu siêu dữ liệu tapback có cấu trúc do các ứng dụng macOS / iOS hiện tại phát ra.
+
+  </Accordion>
+
+  <Accordion title="Phản ứng cho câu hỏi (1️⃣ / 2️⃣ / 3️⃣ / 4️⃣)">
+    Đối với lời nhắc `ask_user` có một câu hỏi không bí mật, chỉ chọn một và từ một đến bốn tùy chọn, OpenClaw thêm các lựa chọn emoji được đánh số. Hãy phản ứng với lời nhắc đã gửi bằng số tương ứng để trả lời. Phản ứng phải mang GUID ổn định của tin nhắn do bot soạn; sau đó OpenClaw ánh xạ số đó tới tùy chọn chuẩn thông qua Gateway. Các lần nhấn cũ hoặc trùng lặp sẽ bị bỏ qua.
+
+    Các lời nhắc có nhiều câu hỏi, cho phép chọn nhiều hoặc yêu cầu văn bản tự do vẫn chỉ có thể trả lời bằng văn bản. Phản ứng cho câu hỏi tuân theo các quy tắc tiếp nhận DM/nhóm thông thường của iMessage. Chúng vẫn được nhận diện ngay cả khi `reactionNotifications` chung là `"off"`, mà không biến các phản ứng không liên quan thành sự kiện của agent.
 
   </Accordion>
 </AccordionGroup>
 
 ## Ghi cấu hình
 
-iMessage cho phép các thao tác ghi cấu hình do kênh khởi tạo theo mặc định (cho `/config set|unset` khi `commands.config: true`).
+Theo mặc định, iMessage cho phép kênh khởi tạo thao tác ghi cấu hình (cho `/config set|unset` khi `commands.config: true`).
 
 Tắt:
 
@@ -658,29 +677,29 @@ Tắt:
 
 <a id="coalescing-split-send-dms-command--url-in-one-composition"></a>
 
-## Gộp DM gửi tách (lệnh + URL trong một lần soạn)
+## Gộp các DM bị tách khi gửi (lệnh + URL trong cùng một lần soạn)
 
-Khi người dùng nhập một lệnh và một URL cùng nhau — ví dụ `Dump https://example.com/article` — ứng dụng Messages của Apple tách lần gửi thành **hai hàng `chat.db` riêng biệt**:
+Khi người dùng nhập lệnh cùng với URL — ví dụ `Dump https://example.com/article` — ứng dụng Messages của Apple tách lần gửi thành **hai hàng `chat.db` riêng biệt**:
 
 1. Một tin nhắn văn bản (`"Dump"`).
-2. Một bong bóng xem trước URL (`"https://..."`) với ảnh xem trước OG dưới dạng tệp đính kèm.
+2. Một bong bóng xem trước URL (`"https://..."`) có các ảnh xem trước OG dưới dạng tệp đính kèm.
 
-Hai hàng này tới OpenClaw cách nhau khoảng 0,8-2,0 giây trên hầu hết thiết lập. Nếu không gộp, tác nhân nhận riêng lệnh ở lượt 1, trả lời (thường là "send me the URL"), và chỉ thấy URL ở lượt 2 — lúc đó ngữ cảnh lệnh đã mất. Đây là pipeline gửi của Apple, không phải thứ OpenClaw hay `imsg` đưa vào.
+Trên hầu hết hệ thống, hai hàng đến OpenClaw cách nhau khoảng 0.8-2.0 giây. Nếu không gộp, agent nhận riêng lệnh ở lượt 1 (và thường trả lời "hãy gửi URL cho tôi") trước khi URL đến ở lượt 2. Đây là pipeline gửi của Apple, không phải do OpenClaw hay `imsg` tạo ra.
 
-`channels.imessage.coalesceSameSenderDms` chọn đưa một DM vào bộ đệm các hàng liên tiếp từ cùng người gửi. Khi `imsg` cung cấp dấu hiệu xem trước URL có cấu trúc `balloon_bundle_id: "com.apple.messages.URLBalloonProvider"` trên một trong các hàng nguồn, OpenClaw chỉ gộp lần gửi tách thực sự đó và giữ mọi hàng được đệm khác thành các lượt riêng. Trên các bản dựng `imsg` cũ hơn hoàn toàn không phát metadata bong bóng, OpenClaw không thể phân biệt gửi tách với các lần gửi riêng, nên nó quay về gộp cả bucket. Điều đó giữ hành vi trước khi có metadata thay vì làm thụt lùi các lần gửi tách `Dump <url>` thành hai lượt. Trò chuyện nhóm tiếp tục dispatch theo từng tin nhắn để cấu trúc lượt nhiều người dùng được giữ nguyên.
+`channels.imessage.coalesceSameSenderDms` cho phép một DM tham gia cơ chế đệm các hàng liên tiếp từ cùng người gửi. Khi `imsg` cung cấp dấu hiệu cấu trúc của bản xem trước URL `balloon_bundle_id: "com.apple.messages.URLBalloonProvider"` trên một trong các hàng nguồn, OpenClaw chỉ gộp đúng lần gửi bị tách thực sự đó và giữ mọi hàng được đệm khác thành các lượt riêng biệt. Trên các bản dựng `imsg` cũ hoàn toàn không phát siêu dữ liệu bong bóng, OpenClaw không thể phân biệt lần gửi bị tách với các lần gửi riêng biệt, nên sẽ dự phòng bằng cách gộp nhóm. Cách này duy trì hành vi trước khi có siêu dữ liệu thay vì làm suy giảm các lần gửi bị tách `Dump <url>` thành hai lượt. Các cuộc trò chuyện nhóm tiếp tục gửi đi theo từng tin nhắn để duy trì cấu trúc lượt của nhiều người dùng.
 
 <Tabs>
-  <Tab title="Khi nào bật">
+  <Tab title="Khi nào nên bật">
     Bật khi:
 
-    - Bạn cung cấp skills cần `command + payload` trong một tin nhắn (dump, paste, save, queue, v.v.).
-    - Người dùng của bạn dán URL cùng với lệnh.
+    - Bạn cung cấp Skills yêu cầu `command + payload` trong một tin nhắn (dump, paste, save, queue, v.v.).
+    - Người dùng dán URL cùng với lệnh.
     - Bạn có thể chấp nhận độ trễ lượt DM tăng thêm (xem bên dưới).
 
     Để tắt khi:
 
-    - Bạn cần độ trễ lệnh tối thiểu cho các trigger DM một từ.
-    - Tất cả flow của bạn là lệnh một lần không có payload theo sau.
+    - Bạn cần độ trễ lệnh tối thiểu cho các trình kích hoạt DM gồm một từ.
+    - Mọi luồng của bạn đều là lệnh thực hiện một lần, không có payload tiếp nối.
 
   </Tab>
   <Tab title="Bật">
@@ -688,22 +707,22 @@ Hai hàng này tới OpenClaw cách nhau khoảng 0,8-2,0 giây trên hầu hế
     {
       channels: {
         imessage: {
-          coalesceSameSenderDms: true, // opt in (default: false)
+          coalesceSameSenderDms: true, // chọn tham gia (mặc định: false)
         },
       },
     }
     ```
 
-    Khi bật cờ này và không có `messages.inbound.byChannel.imessage` tường minh hoặc `messages.inbound.debounceMs` toàn cục, cửa sổ debounce mở rộng thành **7000 ms** (mặc định cũ là 0 ms — không debounce). Cửa sổ rộng hơn là bắt buộc vì nhịp gửi tách xem trước URL của Apple có thể kéo dài vài giây trong khi Messages.app phát hàng xem trước.
+    Khi cờ được bật và không có `messages.inbound.byChannel.imessage` rõ ràng hoặc `messages.inbound.debounceMs` toàn cục, cửa sổ chống dội được mở rộng thành **7000 ms** (giá trị mặc định cũ là 0 ms — không chống dội). Cần cửa sổ rộng hơn vì nhịp gửi tách bản xem trước URL của Apple có thể kéo dài vài giây trong lúc Messages.app phát hàng xem trước.
 
-    Để tự tinh chỉnh cửa sổ:
+    Để tự điều chỉnh cửa sổ:
 
     ```json5
     {
       messages: {
         inbound: {
           byChannel: {
-            // 7000 ms covers observed Messages.app URL-preview delays.
+            // 7000 ms bao phủ độ trễ xem trước URL quan sát được của Messages.app.
             imessage: 7000,
           },
         },
@@ -713,56 +732,56 @@ Hai hàng này tới OpenClaw cách nhau khoảng 0,8-2,0 giây trên hầu hế
 
   </Tab>
   <Tab title="Đánh đổi">
-    - **Hợp nhất chính xác cần siêu dữ liệu tải trọng `imsg` hiện tại.** Khi hàng URL có `balloon_bundle_id`, chỉ lần gửi tách thực sự đó được hợp nhất và các hàng đã đệm khác vẫn tách riêng. Trên các bản dựng `imsg` cũ không hiển thị siêu dữ liệu balloon, OpenClaw quay về hợp nhất bucket đã đệm để các lần gửi tách `Dump <url>` không bị hồi quy thành hai lượt (tương thích ngược tạm thời, sẽ gỡ bỏ khi `imsg` hợp nhất gửi tách ở upstream).
-    - **Tăng độ trễ cho tin nhắn DM.** Khi bật cờ, mọi DM (bao gồm lệnh điều khiển độc lập và phản hồi tiếp theo chỉ có một đoạn văn bản) chờ tối đa đến cửa sổ debounce trước khi gửi đi, phòng trường hợp một hàng xem trước URL sắp đến. Tin nhắn trò chuyện nhóm vẫn được gửi tức thì.
-    - **Đầu ra hợp nhất có giới hạn.** Văn bản hợp nhất giới hạn ở 4000 ký tự với dấu `…[truncated]` rõ ràng; tệp đính kèm giới hạn ở 20; mục nguồn giới hạn ở 10 (giữ mục đầu tiên cộng mục mới nhất nếu vượt quá). Mọi GUID nguồn được theo dõi trong `coalescedMessageGuids` cho telemetry downstream.
-    - **Chỉ DM.** Trò chuyện nhóm đi theo luồng gửi từng tin nhắn để bot vẫn phản hồi nhanh khi nhiều người đang nhập.
-    - **Chọn bật, theo từng kênh.** Các kênh khác (Telegram, WhatsApp, Slack, …) không bị ảnh hưởng. Cấu hình BlueBubbles cũ đặt `channels.bluebubbles.coalesceSameSenderDms` nên di chuyển giá trị đó sang `channels.imessage.coalesceSameSenderDms`.
+    - **Việc gộp chính xác cần siêu dữ liệu payload `imsg` hiện tại.** Khi có `balloon_bundle_id`, chỉ lần gửi bị tách thực sự được gộp; cơ chế gộp dự phòng không có siêu dữ liệu nêu trên là khả năng tương thích ngược tạm thời và sẽ bị loại bỏ sau khi `imsg` gộp các lần gửi bị tách ở thượng nguồn.
+    - **Độ trễ tăng thêm cho tin nhắn DM.** Khi cờ được bật, mọi DM (bao gồm lệnh điều khiển độc lập và phần văn bản tiếp nối đơn lẻ) sẽ chờ tối đa hết cửa sổ chống dội trước khi gửi đi, đề phòng một hàng xem trước URL sắp đến. Tin nhắn trò chuyện nhóm vẫn được gửi đi ngay lập tức.
+    - **Đầu ra đã gộp có giới hạn.** Văn bản đã gộp được giới hạn ở 4000 ký tự với dấu `…[truncated]` rõ ràng; tệp đính kèm được giới hạn ở 20; mục nguồn được giới hạn ở 10 (khi vượt quá, giữ lại mục đầu tiên và các mục mới nhất). Mọi GUID nguồn đều được theo dõi trong `coalescedMessageGuids` để phục vụ phép đo từ xa ở hạ nguồn.
+    - **Chỉ dành cho DM.** Các cuộc trò chuyện nhóm chuyển thẳng sang gửi đi theo từng tin nhắn để bot luôn phản hồi nhanh khi nhiều người đang nhập.
+    - **Chọn tham gia, theo từng kênh.** Các kênh khác (Discord, Slack, Telegram, WhatsApp, …) không bị ảnh hưởng. Các cấu hình BlueBubbles cũ đặt `channels.bluebubbles.coalesceSameSenderDms` nên di chuyển giá trị đó sang `channels.imessage.coalesceSameSenderDms`.
 
   </Tab>
 </Tabs>
 
-### Kịch bản và những gì tác tử thấy
+### Các tình huống và nội dung agent nhìn thấy
 
-Cột "Bật cờ" cho biết hành vi trên bản dựng `imsg` phát ra `balloon_bundle_id`. Trên các bản dựng `imsg` cũ hoàn toàn không phát ra siêu dữ liệu balloon, các hàng bên dưới được đánh dấu "Hai lượt" / "N lượt" sẽ quay về hợp nhất kiểu cũ (một lượt): OpenClaw không thể phân biệt về mặt cấu trúc giữa một lần gửi tách và các lần gửi riêng biệt, nên giữ hành vi hợp nhất trước khi có siêu dữ liệu. Tách chính xác được kích hoạt khi bản dựng phát ra siêu dữ liệu balloon.
+Cột "Bật cờ" thể hiện hành vi trên bản dựng `imsg` có phát `balloon_bundle_id`. Trên các bản dựng `imsg` cũ hoàn toàn không phát siêu dữ liệu bong bóng, các hàng bên dưới được đánh dấu "Hai lượt" / "N lượt" sẽ dự phòng bằng cơ chế gộp cũ (một lượt): OpenClaw không thể phân biệt về mặt cấu trúc giữa lần gửi bị tách và các lần gửi riêng biệt, nên duy trì hành vi gộp trước khi có siêu dữ liệu. Việc phân tách chính xác được kích hoạt sau khi bản dựng phát siêu dữ liệu bong bóng.
 
-| Người dùng soạn                                                   | `chat.db` tạo ra                     | Tắt cờ (mặc định)                          | Bật cờ + cửa sổ (imsg phát ra siêu dữ liệu balloon)                                                 |
-| ------------------------------------------------------------------ | ----------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `Dump https://example.com` (một lần gửi)                           | 2 hàng cách nhau ~1 giây            | Hai lượt tác tử: chỉ "Dump", rồi đến URL    | Một lượt: văn bản hợp nhất `Dump https://example.com`                                               |
-| `Save this 📎image.jpg caption` (tệp đính kèm + văn bản)           | 2 hàng không có siêu dữ liệu URL balloon | Hai lượt                               | Hai lượt sau khi quan sát thấy siêu dữ liệu; một lượt hợp nhất trên phiên cũ/trước latch không có siêu dữ liệu |
-| `/status` (lệnh độc lập)                                           | 1 hàng                              | Gửi tức thì                                 | **Chờ tối đa đến cửa sổ, rồi gửi**                                                                  |
-| URL được dán riêng                                                 | 1 hàng                              | Gửi tức thì                                 | Chờ tối đa đến cửa sổ, rồi gửi                                                                      |
-| Văn bản + URL được gửi thành hai tin nhắn riêng có chủ ý, cách nhau vài phút | 2 hàng ngoài cửa sổ        | Hai lượt                                    | Hai lượt (cửa sổ hết hạn giữa chúng)                                                               |
-| Lũ nhanh (>10 DM nhỏ trong cửa sổ)                                 | N hàng không có siêu dữ liệu URL balloon | N lượt                                | N lượt sau khi quan sát thấy siêu dữ liệu; một lượt hợp nhất có giới hạn trên phiên cũ/trước latch không có siêu dữ liệu |
-| Hai người đang nhập trong một trò chuyện nhóm                      | N hàng từ M người gửi               | M+ lượt (mỗi bucket người gửi một lượt)     | M+ lượt — trò chuyện nhóm không được hợp nhất                                                       |
+| Người dùng soạn                                                      | `chat.db` tạo ra                  | Tắt cờ (mặc định)                      | Bật cờ + cửa sổ (imsg phát siêu dữ liệu bong bóng)                                                      |
+| ------------------------------------------------------------------ | ----------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `Dump https://example.com` (một lần gửi)                              | 2 hàng cách nhau khoảng 1 giây                   | Hai lượt agent: riêng "Dump", sau đó là URL | Một lượt: văn bản đã gộp `Dump https://example.com`                                                    |
+| `Save this 📎image.jpg caption` (tệp đính kèm + văn bản)                | 2 hàng không có siêu dữ liệu bong bóng URL | Hai lượt                               | Hai lượt sau khi quan sát được siêu dữ liệu; một lượt đã gộp trên các phiên cũ/trước chốt không có siêu dữ liệu       |
+| `/status` (lệnh độc lập)                                     | 1 hàng                               | Gửi đi ngay lập tức                        | **Chờ tối đa hết cửa sổ, sau đó gửi đi**                                                                |
+| Chỉ dán URL                                                   | 1 hàng                               | Gửi đi ngay lập tức                        | Chờ tối đa hết cửa sổ, sau đó gửi đi                                                                    |
+| Văn bản + URL được gửi thành hai tin nhắn riêng biệt có chủ ý, cách nhau vài phút | 2 hàng nằm ngoài cửa sổ               | Hai lượt                               | Hai lượt (cửa sổ hết hạn giữa hai tin nhắn)                                                             |
+| Luồng gửi dồn dập (>10 DM nhỏ trong cửa sổ)                          | N hàng không có siêu dữ liệu bong bóng URL | N lượt                                 | N lượt sau khi quan sát được siêu dữ liệu; một lượt đã gộp có giới hạn trên các phiên cũ/trước chốt không có siêu dữ liệu |
+| Hai người đang nhập trong một cuộc trò chuyện nhóm                                  | N hàng từ M người gửi               | M+ lượt (mỗi nhóm người gửi một lượt)        | M+ lượt — các cuộc trò chuyện nhóm không được gộp                                                            |
 
-## Khôi phục inbound sau khi bridge hoặc gateway khởi động lại
+## Khôi phục dữ liệu đến sau khi bridge hoặc Gateway khởi động lại
 
-iMessage khôi phục các tin nhắn bị lỡ khi gateway ngừng hoạt động, đồng thời chặn "bom backlog" cũ mà Apple có thể xả sau một lần khôi phục Push. Hành vi mặc định luôn bật, được xây dựng trên cơ chế loại trùng inbound.
+iMessage khôi phục các tin nhắn bị bỏ lỡ trong khi Gateway ngừng hoạt động, đồng thời ngăn chặn "bom dữ liệu tồn đọng" cũ mà Apple có thể xả ra sau khi khôi phục Push. Hành vi mặc định luôn được bật, dựa trên cơ chế tiếp nhận bền vững và hàng rào tuổi.
 
-- **Loại trùng phát lại.** Mọi tin nhắn inbound đã gửi đi được ghi lại bằng Apple GUID của nó trong trạng thái Plugin bền vững (`imessage.inbound-dedupe`), được claim khi nạp vào và commit sau khi xử lý (được thả khi có lỗi tạm thời để có thể thử lại). Bất cứ thứ gì đã xử lý sẽ bị bỏ thay vì gửi đi hai lần. Đây là cơ chế cho phép khôi phục phát lại mạnh tay mà không cần ghi sổ từng tin nhắn.
-- **Khôi phục thời gian ngừng hoạt động.** Khi khởi động, bộ giám sát nhớ `chat.db` rowid cuối cùng đã gửi đi (con trỏ theo từng tài khoản được lưu bền vững) và truyền nó cho `imsg watch.subscribe` dưới dạng `since_rowid`, để imsg phát lại các hàng đã đến khi gateway ngừng hoạt động, rồi theo dõi trực tiếp. Phát lại được giới hạn ở các hàng gần nhất và các tin nhắn tối đa khoảng 2 giờ tuổi, và cơ chế loại trùng sẽ bỏ mọi thứ đã xử lý.
-- **Hàng rào tuổi backlog cũ.** Các hàng phía trên ranh giới khởi động thực sự là trực tiếp; hàng nào có ngày gửi cũ hơn thời điểm đến hơn khoảng 15 phút là backlog Push-flush và sẽ bị chặn. Các hàng được phát lại (ở hoặc dưới ranh giới) dùng cửa sổ khôi phục rộng hơn, nên tin nhắn mới bị lỡ gần đây vẫn được gửi trong khi lịch sử quá cũ thì không.
+- **Bảo vệ bền vững khỏi phát lại.** Trước khi nâng con trỏ khôi phục, OpenClaw ghi nhật ký từng hàng thô vào hàng đợi tiếp nhận SQLite dùng chung, sử dụng GUID Apple của hàng đó làm ID sự kiện. Một hàng đã hoàn tất để lại dấu vết xóa trong khoảng 4 giờ, giới hạn ở 10,000 mục, vì vậy lần phát lại có cùng GUID sẽ bị loại bỏ ngay cả sau khi khởi động lại. Một hàng đang chờ vẫn có thể được khôi phục cho đến khi quá trình gửi đi tiếp nhận hàng đó.
+- **Khôi phục thời gian ngừng hoạt động.** Khi khởi động, trình giám sát ghi nhớ rowid của hàng `chat.db` được tiếp nhận bền vững gần nhất (một con trỏ bền vững cho mỗi tài khoản) và truyền nó cho `imsg watch.subscribe` dưới dạng `since_rowid`, để imsg phát lại các hàng chưa được ghi nhật ký rồi theo dõi dữ liệu trực tiếp. Các hàng được ghi nhật ký trước khi xảy ra sự cố sẽ tiếp tục từ SQLite. Việc phát lại được giới hạn ở 500 hàng gần nhất và các tin nhắn có tuổi tối đa khoảng 2 giờ; dấu vết xóa GUID sẽ loại bỏ mọi nội dung đã được xử lý.
+- **Hàng rào tuổi cho dữ liệu tồn đọng cũ.** Các hàng phía trên ranh giới khởi động thực sự là dữ liệu trực tiếp; hàng có ngày gửi sớm hơn thời điểm đến quá khoảng 15 phút là dữ liệu tồn đọng do Push xả ra và sẽ bị ngăn chặn. Thay vào đó, các hàng được phát lại (tại hoặc bên dưới ranh giới) sử dụng cửa sổ khôi phục rộng hơn, để tin nhắn vừa bị bỏ lỡ được chuyển đến còn lịch sử quá cũ thì không.
 
-Khôi phục hoạt động trên cả thiết lập `cliPath` cục bộ và từ xa, vì phát lại `since_rowid` chạy qua cùng kết nối RPC `imsg`. Khác biệt nằm ở cửa sổ: khi gateway có thể đọc `chat.db` (cục bộ), nó neo ranh giới rowid lúc khởi động, giới hạn khoảng phát lại, và gửi các tin nhắn bị lỡ tối đa vài giờ tuổi. Qua `cliPath` SSH từ xa, nó không thể đọc cơ sở dữ liệu, nên phát lại không bị giới hạn và mọi hàng dùng hàng rào tuổi trực tiếp — vẫn khôi phục các tin nhắn mới bị lỡ gần đây và vẫn chặn backlog cũ, chỉ với cửa sổ trực tiếp hẹp hơn. Chạy gateway trên máy Mac có Messages để có cửa sổ khôi phục rộng hơn.
+Quá trình khôi phục hoạt động trên cả thiết lập `cliPath` cục bộ lẫn từ xa, vì việc phát lại `since_rowid` chạy qua cùng kết nối RPC `imsg`. Điểm khác biệt là cửa sổ: khi Gateway có thể đọc `chat.db` (cục bộ), nó neo ranh giới rowid khởi động, giới hạn khoảng phát lại và chuyển các tin nhắn bị bỏ lỡ có tuổi tối đa vài giờ. Qua `cliPath` SSH từ xa, nó không thể đọc cơ sở dữ liệu, nên việc phát lại không bị giới hạn và mọi hàng đều sử dụng hàng rào tuổi trực tiếp — cơ chế này vẫn khôi phục các tin nhắn vừa bị bỏ lỡ và vẫn ngăn dữ liệu tồn đọng cũ, chỉ với cửa sổ trực tiếp hẹp hơn. Hãy chạy Gateway trên máy Mac chạy Messages để có cửa sổ khôi phục rộng hơn.
 
 ### Tín hiệu hiển thị cho người vận hành
 
-Backlog bị chặn được ghi log ở mức mặc định, không bao giờ bị bỏ âm thầm (cờ `recovery` cho biết cửa sổ nào đã áp dụng):
+Dữ liệu tồn đọng bị ngăn chặn được ghi nhật ký ở cấp độ mặc định, không bao giờ bị loại bỏ âm thầm (cờ `recovery` cho biết cửa sổ nào đã được áp dụng):
 
-```
-imessage: suppressed stale inbound backlog account=<id> sent=<iso> recovery=<bool> (<N> suppressed since start)
+```text
+imessage: đã ngăn dữ liệu đến tồn đọng cũ account=<id> sent=<iso> recovery=<bool> (<N> mục bị ngăn kể từ khi khởi động)
 ```
 
 ### Di chuyển
 
-`channels.imessage.catchup.*` đã bị loại bỏ dần — khôi phục thời gian ngừng hoạt động nay tự động và không cần cấu hình cho thiết lập mới. Các cấu hình hiện có với `catchup.enabled: true` vẫn được tôn trọng như một hồ sơ tương thích cho cửa sổ phát lại khôi phục. Các khối catchup bị tắt (`enabled: false` hoặc không có `enabled: true`) đã bị loại bỏ; `openclaw doctor --fix` sẽ xóa chúng.
+`channels.imessage.catchup.*` đã lỗi thời — quá trình khôi phục thời gian ngừng hoạt động diễn ra tự động và không cần cấu hình cho các thiết lập mới. Các cấu hình hiện có với `catchup.enabled: true` vẫn được tôn trọng dưới dạng hồ sơ tương thích cho cửa sổ phát lại khôi phục. Các khối bắt kịp đã tắt (`enabled: false` hoặc không có `enabled: true`) đã bị loại bỏ; `openclaw doctor --fix` xóa chúng.
 
 ## Khắc phục sự cố
 
 <AccordionGroup>
   <Accordion title="Không tìm thấy imsg hoặc RPC không được hỗ trợ">
-    Xác thực binary và hỗ trợ RPC:
+    Xác thực tệp nhị phân và khả năng hỗ trợ RPC:
 
     ```bash
     imsg rpc --help
@@ -770,12 +789,12 @@ imessage: suppressed stale inbound backlog account=<id> sent=<iso> recovery=<boo
     openclaw channels status --probe
     ```
 
-    Nếu probe báo RPC không được hỗ trợ, hãy cập nhật `imsg`. Nếu hành động API riêng không khả dụng, chạy `imsg launch` trong phiên người dùng macOS đã đăng nhập và probe lại. Nếu Gateway không chạy trên macOS, dùng thiết lập máy Mac từ xa qua SSH ở trên thay cho đường dẫn `imsg` cục bộ mặc định.
+    Nếu phép thăm dò báo RPC không được hỗ trợ, hãy cập nhật `imsg`. Nếu các thao tác API riêng tư không khả dụng, hãy chạy `imsg launch` trong phiên người dùng macOS đã đăng nhập rồi thăm dò lại. Nếu Gateway không chạy trên macOS, hãy sử dụng thiết lập Mac từ xa qua SSH ở trên thay cho đường dẫn `imsg` cục bộ mặc định.
 
   </Accordion>
 
-  <Accordion title="Tin nhắn gửi được nhưng iMessage inbound không đến">
-    Trước tiên chứng minh tin nhắn có tới máy Mac cục bộ hay không. Nếu `chat.db` không thay đổi, OpenClaw không thể nhận tin nhắn ngay cả khi `imsg status --json` báo bridge khỏe mạnh.
+  <Accordion title="Tin nhắn gửi được nhưng iMessage đến không xuất hiện">
+    Trước tiên, hãy xác minh xem tin nhắn đã đến máy Mac cục bộ hay chưa. Nếu `chat.db` không thay đổi, OpenClaw không thể nhận tin nhắn ngay cả khi `imsg status --json` báo cầu nối hoạt động bình thường.
 
 ```bash
 imsg chats --limit 10 --json
@@ -784,7 +803,7 @@ sqlite3 ~/Library/Messages/chat.db \
   "select datetime(max(date)/1000000000 + 978307200, 'unixepoch', 'localtime'), max(ROWID) from message;"
 ```
 
-    Nếu tin nhắn gửi từ điện thoại không tạo hàng mới, hãy sửa lớp macOS Messages và Apple Push trước khi đổi cấu hình OpenClaw. Làm mới dịch vụ một lần thường là đủ:
+    Nếu các tin nhắn gửi từ điện thoại không tạo hàng mới, hãy sửa lớp Messages và Apple Push của macOS trước khi thay đổi cấu hình OpenClaw. Thường chỉ cần làm mới dịch vụ một lần:
 
 ```bash
 launchctl kickstart -k system/com.apple.apsd
@@ -795,12 +814,12 @@ imsg launch
 openclaw gateway restart
 ```
 
-    Gửi một iMessage mới từ điện thoại và xác nhận có hàng `chat.db` mới hoặc sự kiện `imsg watch` trước khi gỡ lỗi phiên OpenClaw. Đừng chạy việc này như một vòng lặp khởi chạy lại bridge định kỳ; `imsg launch` lặp lại cộng với khởi động lại gateway trong lúc đang làm việc có thể làm gián đoạn việc gửi và mắc kẹt các lượt chạy kênh đang diễn ra.
+    Gửi một iMessage mới từ điện thoại và xác nhận có hàng `chat.db` hoặc sự kiện `imsg watch` mới trước khi gỡ lỗi các phiên OpenClaw. Không chạy thao tác này dưới dạng vòng lặp khởi chạy lại cầu nối định kỳ; việc lặp lại `imsg launch` cùng với khởi động lại Gateway trong khi đang hoạt động có thể làm gián đoạn quá trình chuyển phát và khiến các lượt chạy kênh đang xử lý bị mắc kẹt.
 
   </Accordion>
 
   <Accordion title="Gateway không chạy trên macOS">
-    `cliPath: "imsg"` mặc định phải chạy trên máy Mac đã đăng nhập vào Messages. Trên Linux hoặc Windows, đặt `channels.imessage.cliPath` thành một script wrapper SSH vào máy Mac đó và chạy `imsg "$@"`.
+    `cliPath: "imsg"` mặc định phải chạy trên máy Mac đã đăng nhập vào Messages. Trên Linux hoặc Windows, hãy đặt `channels.imessage.cliPath` thành một tập lệnh bao bọc kết nối SSH đến máy Mac đó và chạy `imsg "$@"`.
 
 ```bash
 #!/usr/bin/env bash
@@ -815,12 +834,12 @@ openclaw channels status --probe --channel imessage
 
   </Accordion>
 
-  <Accordion title="DM bị bỏ qua">
+  <Accordion title="Tin nhắn trực tiếp bị bỏ qua">
     Kiểm tra:
 
     - `channels.imessage.dmPolicy`
     - `channels.imessage.allowFrom`
-    - phê duyệt ghép đôi (`openclaw pairing list imessage`)
+    - phê duyệt ghép nối (`openclaw pairing list imessage`)
 
   </Accordion>
 
@@ -829,47 +848,47 @@ openclaw channels status --probe --channel imessage
 
     - `channels.imessage.groupPolicy`
     - `channels.imessage.groupAllowFrom`
-    - hành vi allowlist của `channels.imessage.groups`
-    - cấu hình mẫu nhắc đến (`agents.list[].groupChat.mentionPatterns`)
+    - hành vi danh sách cho phép của `channels.imessage.groups`
+    - cấu hình mẫu đề cập (`agents.list[].groupChat.mentionPatterns`)
 
   </Accordion>
 
-  <Accordion title="Tệp đính kèm từ xa thất bại">
+  <Accordion title="Tệp đính kèm từ xa gặp lỗi">
     Kiểm tra:
 
     - `channels.imessage.remoteHost`
     - `channels.imessage.remoteAttachmentRoots`
-    - xác thực khóa SSH/SCP từ máy chủ gateway
-    - khóa máy chủ tồn tại trong `~/.ssh/known_hosts` trên máy chủ gateway
+    - xác thực bằng khóa SSH/SCP từ máy chủ Gateway
+    - khóa máy chủ tồn tại trong `~/.ssh/known_hosts` trên máy chủ Gateway
     - khả năng đọc đường dẫn từ xa trên máy Mac chạy Messages
 
   </Accordion>
 
-  <Accordion title="Đã bỏ lỡ lời nhắc quyền macOS">
-    Chạy lại trong terminal GUI tương tác trong cùng ngữ cảnh người dùng/phiên và phê duyệt lời nhắc:
+  <Accordion title="Đã bỏ lỡ lời nhắc cấp quyền của macOS">
+    Chạy lại trong terminal GUI tương tác trong cùng ngữ cảnh người dùng/phiên và phê duyệt các lời nhắc:
 
     ```bash
     imsg chats --limit 1
     imsg send <handle> "test"
     ```
 
-    Xác nhận Full Disk Access + Automation đã được cấp cho ngữ cảnh tiến trình chạy OpenClaw/`imsg`.
+    Xác nhận đã cấp quyền Full Disk Access + Automation cho ngữ cảnh tiến trình chạy OpenClaw/`imsg`.
 
   </Accordion>
 </AccordionGroup>
 
-## Con trỏ tham chiếu cấu hình
+## Tham chiếu cấu hình
 
 - [Tham chiếu cấu hình - iMessage](/vi/gateway/config-channels#imessage)
 - [Cấu hình Gateway](/vi/gateway/configuration)
-- [Ghép đôi](/vi/channels/pairing)
+- [Ghép nối](/vi/channels/pairing)
 
 ## Liên quan
 
-- [Tổng quan kênh](/vi/channels) — tất cả các kênh được hỗ trợ
-- [Gỡ bỏ BlueBubbles và đường dẫn imsg iMessage](/vi/announcements/bluebubbles-imessage) — thông báo và tóm tắt di chuyển
-- [Chuyển từ BlueBubbles](/vi/channels/imessage-from-bluebubbles) — bảng chuyển đổi cấu hình và từng bước chuyển đổi
-- [Ghép đôi](/vi/channels/pairing) — xác thực DM và luồng ghép đôi
-- [Nhóm](/vi/channels/groups) — hành vi trò chuyện nhóm và cổng nhắc đến
+- [Tổng quan về các kênh](/vi/channels) — tất cả các kênh được hỗ trợ
+- [Việc loại bỏ BlueBubbles và đường dẫn iMessage qua imsg](/vi/announcements/bluebubbles-imessage) — thông báo và tóm tắt quá trình di chuyển
+- [Chuyển từ BlueBubbles](/vi/channels/imessage-from-bluebubbles) — bảng chuyển đổi cấu hình và quy trình chuyển đổi từng bước
+- [Ghép nối](/vi/channels/pairing) — luồng xác thực tin nhắn trực tiếp và ghép nối
+- [Nhóm](/vi/channels/groups) — hành vi trò chuyện nhóm và cơ chế kiểm soát bằng đề cập
 - [Định tuyến kênh](/vi/channels/channel-routing) — định tuyến phiên cho tin nhắn
 - [Bảo mật](/vi/gateway/security) — mô hình truy cập và tăng cường bảo mật

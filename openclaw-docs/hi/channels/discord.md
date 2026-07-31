@@ -1,112 +1,108 @@
 ---
 read_when:
-    - Discord चैनल सुविधाओं पर काम करना
-summary: Discord बॉट समर्थन की स्थिति, क्षमताएँ, और कॉन्फ़िगरेशन
+    - Discord चैनल की सुविधाओं पर काम करना
+summary: Discord बॉट सेटअप, कॉन्फ़िगरेशन कुंजियाँ, घटक, वॉइस और समस्या निवारण
 title: Discord
 x-i18n:
-    generated_at: "2026-07-03T02:46:53Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:06:56Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b7e8724b02baa1a2dba1ac932e20533c9293b6021f30b1a79107349c34f195e5
+    source_hash: 52a2926217f3a8dfb9398551ddacb0bc6aae6de0a164b215c55256eda9b6245e
     source_path: channels/discord.md
     workflow: 16
 ---
 
-आधिकारिक Discord Gateway के माध्यम से DMs और guild चैनलों के लिए तैयार।
+OpenClaw आधिकारिक Discord gateway के माध्यम से एक बॉट के रूप में Discord से कनेक्ट होता है। DMs और गिल्ड चैनल समर्थित हैं।
 
 <CardGroup cols={3}>
   <Card title="पेयरिंग" icon="link" href="/hi/channels/pairing">
-    Discord DMs डिफ़ॉल्ट रूप से पेयरिंग मोड में होते हैं।
+    Discord DMs डिफ़ॉल्ट रूप से पेयरिंग मोड का उपयोग करते हैं।
   </Card>
-  <Card title="Slash commands" icon="terminal" href="/hi/tools/slash-commands">
+  <Card title="स्लैश कमांड" icon="terminal" href="/hi/tools/slash-commands">
     नेटिव कमांड व्यवहार और कमांड कैटलॉग।
   </Card>
   <Card title="चैनल समस्या निवारण" icon="wrench" href="/hi/channels/troubleshooting">
-    क्रॉस-चैनल डायग्नोस्टिक्स और रिपेयर फ़्लो।
+    क्रॉस-चैनल निदान और सुधार प्रवाह।
   </Card>
 </CardGroup>
 
 ## त्वरित सेटअप
 
-आपको बॉट के साथ एक नया ऐप्लिकेशन बनाना होगा, बॉट को अपने सर्वर में जोड़ना होगा, और उसे OpenClaw से पेयर करना होगा। हम आपके बॉट को अपने निजी सर्वर में जोड़ने की सलाह देते हैं। यदि आपके पास अभी तक कोई सर्वर नहीं है, तो [पहले एक बनाएँ](https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-server) (**Create My Own > For me and my friends** चुनें)।
+एक बॉट के साथ Discord एप्लिकेशन बनाएँ, बॉट को अपने सर्वर में जोड़ें और उसे OpenClaw के साथ पेयर करें। यदि संभव हो, तो निजी सर्वर का उपयोग करें; आवश्यकता होने पर पहले [एक सर्वर बनाएँ](https://support.discord.com/hc/en-us/articles/204849977-How-do-I-create-a-server) (**Create My Own > For me and my friends**)।
 
 <Steps>
-  <Step title="Discord ऐप्लिकेशन और बॉट बनाएँ">
-    [Discord Developer Portal](https://discord.com/developers/applications) पर जाएँ और **New Application** पर क्लिक करें। इसे "OpenClaw" जैसा कोई नाम दें।
+  <Step title="Discord एप्लिकेशन और बॉट बनाएँ">
+    [Discord Developer Portal](https://discord.com/developers/applications) में **New Application** पर क्लिक करें और उसे एक नाम दें (उदाहरण के लिए "OpenClaw")।
 
-    साइडबार में **Bot** पर क्लिक करें। **Username** को वही सेट करें जो आप अपने OpenClaw एजेंट को कहते हैं।
+    साइडबार में **Bot** खोलें और **Username** को अपने एजेंट के नाम पर सेट करें।
 
   </Step>
 
-  <Step title="विशेषाधिकार प्राप्त intents सक्षम करें">
-    अभी भी **Bot** पेज पर रहते हुए, नीचे **Privileged Gateway Intents** तक स्क्रॉल करें और सक्षम करें:
+  <Step title="विशेषाधिकार-प्राप्त इंटेंट सक्षम करें">
+    अभी भी **Bot** पेज पर, **Privileged Gateway Intents** के अंतर्गत इन्हें सक्षम करें:
 
     - **Message Content Intent** (आवश्यक)
-    - **Server Members Intent** (अनुशंसित; भूमिका allowlists और नाम-से-ID मिलान के लिए आवश्यक)
-    - **Presence Intent** (वैकल्पिक; केवल presence अपडेट के लिए आवश्यक)
+    - **Server Members Intent** (अनुशंसित; भूमिका अनुमति-सूचियों, नाम-से-ID मिलान और चैनल-ऑडियंस एक्सेस समूहों के लिए आवश्यक)
+    - **Presence Intent** (वैकल्पिक; केवल उपस्थिति अपडेट के लिए)
 
   </Step>
 
-  <Step title="अपना बॉट token कॉपी करें">
-    **Bot** पेज पर वापस ऊपर स्क्रॉल करें और **Reset Token** पर क्लिक करें।
+  <Step title="अपना बॉट टोकन कॉपी करें">
+    **Bot** पेज पर **Reset Token** पर क्लिक करें और टोकन कॉपी करें।
 
     <Note>
-    नाम के बावजूद, यह आपका पहला token जनरेट करता है — कुछ भी "reset" नहीं किया जा रहा है।
+    नाम के बावजूद, यह आपका पहला टोकन जनरेट करता है—कुछ भी वास्तव में "रीसेट" नहीं किया जा रहा है।
     </Note>
-
-    token कॉपी करें और उसे कहीं सहेजें। यह आपका **Bot Token** है और आपको जल्द ही इसकी आवश्यकता होगी।
 
   </Step>
 
-  <Step title="invite URL जनरेट करें और बॉट को अपने सर्वर में जोड़ें">
-    साइडबार में **OAuth2** पर क्लिक करें। आप अपने सर्वर में बॉट जोड़ने के लिए सही permissions वाला invite URL जनरेट करेंगे।
-
-    नीचे **OAuth2 URL Generator** तक स्क्रॉल करें और सक्षम करें:
+  <Step title="आमंत्रण URL जनरेट करें और बॉट को अपने सर्वर में जोड़ें">
+    साइडबार में **OAuth2** खोलें। **OAuth2 URL Generator** में ये स्कोप सक्षम करें:
 
     - `bot`
     - `applications.commands`
 
-    नीचे एक **Bot Permissions** सेक्शन दिखाई देगा। कम से कम इन्हें सक्षम करें:
+    दिखाई देने वाले **Bot Permissions** अनुभाग में कम से कम इन्हें सक्षम करें:
 
-    **सामान्य permissions**
-      - चैनल देखें
+    **General Permissions**
+      - View Channels
 
-    **टेक्स्ट permissions**
-      - संदेश भेजें
-      - संदेश इतिहास पढ़ें
-      - लिंक एम्बेड करें
-      - फ़ाइलें अटैच करें
-      - प्रतिक्रियाएँ जोड़ें (वैकल्पिक)
+    **Text Permissions**
+      - Send Messages
+      - Read Message History
+      - Embed Links
+      - Attach Files
+      - Add Reactions (वैकल्पिक)
 
-    यह सामान्य टेक्स्ट चैनलों के लिए बेसलाइन सेट है। यदि आप Discord थ्रेड्स में पोस्ट करने की योजना बना रहे हैं, जिसमें किसी थ्रेड को बनाने या जारी रखने वाले forum या media चैनल workflows शामिल हैं, तो **Send Messages in Threads** भी सक्षम करें।
-    नीचे जनरेट किया गया URL कॉपी करें, उसे अपने ब्राउज़र में पेस्ट करें, अपना सर्वर चुनें, और कनेक्ट करने के लिए **Continue** पर क्लिक करें। अब आपको Discord सर्वर में अपना बॉट दिखना चाहिए।
+    सामान्य टेक्स्ट चैनलों के लिए यह आधारभूत सेटअप है। यदि बॉट थ्रेड में पोस्ट करेगा—जिसमें थ्रेड बनाने या जारी रखने वाले फ़ोरम या मीडिया चैनल वर्कफ़्लो भी शामिल हैं—तो **Send Messages in Threads** भी सक्षम करें।
+
+    जनरेट किया गया URL कॉपी करें, उसे ब्राउज़र में खोलें, अपना सर्वर चुनें और **Continue** पर क्लिक करें। अब बॉट आपके सर्वर में दिखाई देना चाहिए।
 
   </Step>
 
-  <Step title="Developer Mode सक्षम करें और अपनी IDs इकट्ठा करें">
-    Discord ऐप में वापस जाकर, आपको Developer Mode सक्षम करना होगा ताकि आप आंतरिक IDs कॉपी कर सकें।
+  <Step title="Developer Mode सक्षम करें और अपनी IDs एकत्र करें">
+    Discord ऐप में Developer Mode सक्षम करें, ताकि आप IDs कॉपी कर सकें:
 
-    1. **User Settings** पर क्लिक करें (अपने avatar के पास gear icon) → साइडबार में **Developer** तक स्क्रॉल करें → **Developer Mode** चालू करें
+    1. **User Settings** (गियर आइकन) → **Developer** → **Developer Mode** चालू करें
+       *(मोबाइल पर: **App Settings** → **Advanced**)*
+    2. अपने **सर्वर आइकन** पर राइट-क्लिक करें → **Copy Server ID**
+    3. अपने **अवतार** पर राइट-क्लिक करें → **Copy User ID**
 
-        *(नोट: Discord मोबाइल ऐप में, Developer Mode **App Settings** → **Advanced** के अंतर्गत होता है)*
-
-    2. साइडबार में अपने **server icon** पर राइट-क्लिक करें → **Copy Server ID**
-    3. अपने **own avatar** पर राइट-क्लिक करें → **Copy User ID**
-
-    अपनी **Server ID** और **User ID** को अपने Bot Token के साथ सहेजें — अगले चरण में आप ये तीनों OpenClaw को भेजेंगे।
+    Server ID और User ID को अपने बॉट टोकन के साथ रखें; अगले चरण के लिए आपको इन तीनों की आवश्यकता होगी।
 
   </Step>
 
   <Step title="सर्वर सदस्यों से DMs की अनुमति दें">
-    पेयरिंग काम करने के लिए, Discord को आपके बॉट को आपको DM करने की अनुमति देनी होगी। अपने **server icon** पर राइट-क्लिक करें → **Privacy Settings** → **Direct Messages** चालू करें।
+    पेयरिंग के काम करने के लिए Discord को बॉट द्वारा आपको DM भेजने की अनुमति देनी होगी। अपने **सर्वर आइकन** पर राइट-क्लिक करें → **Privacy Settings** → **Direct Messages** चालू करें।
 
-    इससे सर्वर सदस्य (बॉट सहित) आपको DMs भेज सकते हैं। यदि आप OpenClaw के साथ Discord DMs का उपयोग करना चाहते हैं, तो इसे सक्षम रखें। यदि आप केवल guild चैनलों का उपयोग करने की योजना बना रहे हैं, तो पेयरिंग के बाद DMs अक्षम कर सकते हैं।
+    यदि आप OpenClaw के साथ Discord DMs का उपयोग करते हैं, तो इसे चालू रखें। यदि आप केवल गिल्ड चैनलों का उपयोग करते हैं, तो पेयरिंग के बाद इसे अक्षम कर सकते हैं।
 
   </Step>
 
-  <Step title="अपना बॉट token सुरक्षित रूप से सेट करें (इसे chat में न भेजें)">
-    आपका Discord बॉट token एक secret है (पासवर्ड जैसा)। अपने एजेंट को संदेश भेजने से पहले इसे उस मशीन पर सेट करें जो OpenClaw चला रही है।
+  <Step title="अपना बॉट टोकन सुरक्षित रूप से सेट करें (इसे चैट में न भेजें)">
+    बॉट टोकन एक सीक्रेट है। अपने एजेंट को संदेश भेजने से पहले इसे OpenClaw चलाने वाली मशीन पर सेट करें:
 
 ```bash
 export DISCORD_BOT_TOKEN="YOUR_BOT_TOKEN"
@@ -125,22 +121,22 @@ openclaw config patch --file ./discord.patch.json5
 openclaw gateway
 ```
 
-    यदि OpenClaw पहले से background service के रूप में चल रहा है, तो इसे OpenClaw Mac ऐप के माध्यम से या `openclaw gateway run` प्रक्रिया को रोककर और फिर से शुरू करके restart करें।
-    managed service installs के लिए, ऐसे shell से `openclaw gateway install` चलाएँ जहाँ `DISCORD_BOT_TOKEN` मौजूद हो, या variable को `~/.openclaw/.env` में स्टोर करें, ताकि restart के बाद service env SecretRef को resolve कर सके।
-    यदि आपका host Discord के startup application lookup से blocked या rate-limited है, तो Developer Portal से Discord application/client ID सेट करें ताकि startup उस REST call को छोड़ सके। default account के लिए `channels.discord.applicationId` का उपयोग करें, या जब आप कई Discord bots चलाते हैं तो `channels.discord.accounts.<accountId>.applicationId` का उपयोग करें।
+    यदि OpenClaw पहले से बैकग्राउंड सेवा के रूप में चल रहा है, तो उसे OpenClaw Mac ऐप के माध्यम से या `openclaw gateway run` प्रक्रिया को रोककर और फिर से शुरू करके रीस्टार्ट करें।
+    प्रबंधित सेवा इंस्टॉलेशन के लिए, ऐसे शेल से `openclaw gateway install` चलाएँ जहाँ `DISCORD_BOT_TOKEN` सेट हो, या वेरिएबल को `~/.openclaw/.env` में स्टोर करें ताकि सेवा रीस्टार्ट के बाद env SecretRef को रिज़ॉल्व कर सके।
+    यदि आपका होस्ट Discord के स्टार्टअप एप्लिकेशन लुकअप द्वारा ब्लॉक या रेट-लिमिट किया गया है, तो Developer Portal से एप्लिकेशन/क्लाइंट ID सेट करें, ताकि स्टार्टअप उस REST कॉल को छोड़ सके: डिफ़ॉल्ट अकाउंट के लिए `channels.discord.applicationId`, या प्रत्येक बॉट के लिए `channels.discord.accounts.<accountId>.applicationId`।
 
   </Step>
 
   <Step title="OpenClaw कॉन्फ़िगर करें और पेयर करें">
 
     <Tabs>
-      <Tab title="अपने एजेंट से पूछें">
-        किसी भी मौजूदा चैनल (जैसे Telegram) पर अपने OpenClaw एजेंट से chat करें और उसे बताएँ। यदि Discord आपका पहला चैनल है, तो इसके बजाय CLI / config tab का उपयोग करें।
+      <Tab title="अपने एजेंट से कहें">
+        किसी मौजूदा चैनल (उदाहरण के लिए Telegram) पर अपने OpenClaw एजेंट से चैट करें और उसे निर्देश दें। यदि Discord आपका पहला चैनल है, तो इसके बजाय CLI / कॉन्फ़िगरेशन टैब का उपयोग करें।
 
-        > "मैंने अपना Discord बॉट token पहले ही config में सेट कर दिया है। कृपया User ID `<user_id>` और Server ID `<server_id>` के साथ Discord setup पूरा करें।"
+        > "मैंने कॉन्फ़िगरेशन में अपना Discord बॉट टोकन पहले ही सेट कर दिया है। कृपया User ID `<user_id>` और Server ID `<server_id>` के साथ Discord सेटअप पूरा करें।"
       </Tab>
-      <Tab title="CLI / config">
-        यदि आप file-based config पसंद करते हैं, तो सेट करें:
+      <Tab title="CLI / कॉन्फ़िगरेशन">
+        फ़ाइल-आधारित कॉन्फ़िगरेशन:
 
 ```json5
 {
@@ -157,15 +153,15 @@ openclaw gateway
 }
 ```
 
-        default account के लिए env fallback:
+        डिफ़ॉल्ट अकाउंट के लिए env फ़ॉलबैक:
 
 ```bash
 DISCORD_BOT_TOKEN=...
 ```
 
-        scripted या remote setup के लिए, वही JSON5 block `openclaw config patch --file ./discord.patch.json5 --dry-run` के साथ लिखें और फिर `--dry-run` के बिना दोबारा चलाएँ। Plaintext `token` values समर्थित हैं। SecretRef values भी env/file/exec providers में `channels.discord.token` के लिए समर्थित हैं। [Secrets Management](/hi/gateway/secrets) देखें।
+        स्क्रिप्टेड या रिमोट सेटअप के लिए, `openclaw config patch --file ./discord.patch.json5 --dry-run` के साथ वही JSON5 ब्लॉक लिखें, फिर `--dry-run` के बिना दोबारा चलाएँ। प्लेनटेक्स्ट `token` स्ट्रिंग भी काम करती हैं और env/file/exec प्रोवाइडर में `channels.discord.token` के लिए SecretRef मान समर्थित हैं। [सीक्रेट प्रबंधन](/hi/gateway/secrets) देखें।
 
-        कई Discord bots के लिए, प्रत्येक bot token और application ID को उसके account के अंतर्गत रखें। top-level `channels.discord.applicationId` accounts द्वारा inherited होता है, इसलिए उसे वहाँ केवल तभी सेट करें जब हर account को वही application ID उपयोग करनी चाहिए।
+        कई Discord बॉट के लिए, प्रत्येक बॉट का टोकन और एप्लिकेशन ID उसके अकाउंट के अंतर्गत रखें। शीर्ष-स्तरीय `channels.discord.applicationId` अकाउंट द्वारा इनहेरिट किया जाता है, इसलिए उसे वहाँ केवल तभी सेट करें जब प्रत्येक अकाउंट समान एप्लिकेशन ID का उपयोग करता हो।
 
 ```json5
 {
@@ -192,14 +188,14 @@ DISCORD_BOT_TOKEN=...
 
   </Step>
 
-  <Step title="पहली DM पेयरिंग approve करें">
-    Gateway चलने तक प्रतीक्षा करें, फिर Discord में अपने बॉट को DM करें। यह pairing code के साथ उत्तर देगा।
+  <Step title="पहली DM पेयरिंग स्वीकृत करें">
+    gateway चलने के बाद Discord में अपने बॉट को DM भेजें। वह एक पेयरिंग कोड के साथ उत्तर देगा।
 
     <Tabs>
-      <Tab title="अपने एजेंट से पूछें">
-        pairing code को अपने मौजूदा चैनल पर अपने एजेंट को भेजें:
+      <Tab title="अपने एजेंट से कहें">
+        अपने मौजूदा चैनल पर पेयरिंग कोड अपने एजेंट को भेजें:
 
-        > "इस Discord pairing code को approve करें: `<CODE>`"
+        > "इस Discord पेयरिंग कोड को स्वीकृत करें: `<CODE>`"
       </Tab>
       <Tab title="CLI">
 
@@ -211,32 +207,30 @@ openclaw pairing approve discord <CODE>
       </Tab>
     </Tabs>
 
-    Pairing codes 1 घंटे के बाद expire हो जाते हैं।
-
-    अब आपको DM के माध्यम से Discord में अपने एजेंट से chat करने में सक्षम होना चाहिए।
+    पेयरिंग कोड 1 घंटे बाद समाप्त हो जाते हैं। स्वीकृति के बाद Discord DM में अपने एजेंट से चैट करें।
 
   </Step>
 </Steps>
 
 <Note>
-Token resolution account-aware है। Config token values env fallback पर प्राथमिकता पाते हैं। `DISCORD_BOT_TOKEN` केवल default account के लिए उपयोग होता है।
-यदि दो enabled Discord accounts उसी bot token पर resolve होते हैं, तो OpenClaw उस token के लिए केवल एक Gateway monitor शुरू करता है। config-sourced token default env fallback पर प्राथमिकता पाता है; अन्यथा पहला enabled account प्राथमिकता पाता है और duplicate account disabled के रूप में report होता है।
-advanced outbound calls (message tool/channel actions) के लिए, explicit per-call `token` उस call के लिए उपयोग होता है। यह send और read/probe-style actions (उदाहरण के लिए read/search/fetch/thread/pins/permissions) पर लागू होता है। Account policy/retry settings अब भी active runtime snapshot में selected account से आते हैं।
+टोकन रिज़ॉल्यूशन अकाउंट-सचेत है। कॉन्फ़िगरेशन टोकन मान env फ़ॉलबैक पर प्राथमिकता लेते हैं और `DISCORD_BOT_TOKEN` का उपयोग केवल डिफ़ॉल्ट अकाउंट के लिए होता है।
+यदि दो सक्षम Discord अकाउंट समान बॉट टोकन पर रिज़ॉल्व होते हैं, तो OpenClaw उस टोकन के लिए केवल एक gateway मॉनिटर शुरू करता है: कॉन्फ़िगरेशन-स्रोत टोकन env फ़ॉलबैक पर प्राथमिकता लेता है; अन्यथा पहला सक्षम अकाउंट प्राथमिकता लेता है और डुप्लिकेट अकाउंट को `duplicate bot token` कारण के साथ अक्षम बताया जाता है।
+उन्नत आउटबाउंड कॉल (मैसेज टूल/चैनल ऐक्शन) के लिए, प्रत्येक कॉल का स्पष्ट `token` उसी कॉल के लिए उपयोग किया जाता है। यह भेजने और पढ़ने/प्रोब-जैसे ऐक्शन (read/search/fetch/thread/pins/permissions) पर लागू होता है। अकाउंट नीति/पुनः प्रयास सेटिंग अभी भी सक्रिय रनटाइम स्नैपशॉट में चुने गए अकाउंट से आती हैं।
 </Note>
 
-## अनुशंसित: guild workspace सेट करें
+## अनुशंसित: गिल्ड वर्कस्पेस सेट अप करें
 
-DMs काम करने के बाद, आप अपने Discord सर्वर को full workspace के रूप में सेट कर सकते हैं जहाँ प्रत्येक चैनल को अपने context के साथ अपना एजेंट session मिलता है। यह उन private servers के लिए अनुशंसित है जहाँ सिर्फ आप और आपका बॉट हैं।
+DMs के काम करने के बाद आप अपने सर्वर को एक पूर्ण वर्कस्पेस में बदल सकते हैं, जहाँ प्रत्येक चैनल को अपने संदर्भ वाला अलग एजेंट सेशन मिलता है। उन निजी सर्वरों के लिए अनुशंसित है जहाँ केवल आप और आपका बॉट हों।
 
 <Steps>
-  <Step title="अपने सर्वर को guild allowlist में जोड़ें">
-    यह आपके एजेंट को आपके सर्वर के किसी भी चैनल में जवाब देने में सक्षम करता है, केवल DMs में नहीं।
+  <Step title="अपने सर्वर को गिल्ड अनुमति-सूची में जोड़ें">
+    इससे आपका एजेंट केवल DMs में ही नहीं, बल्कि आपके सर्वर के किसी भी चैनल में उत्तर दे सकता है।
 
     <Tabs>
-      <Tab title="अपने एजेंट से पूछें">
-        > "मेरी Discord Server ID `<server_id>` को guild allowlist में जोड़ें"
+      <Tab title="अपने एजेंट से कहें">
+        > "मेरी Discord Server ID `<server_id>` को गिल्ड अनुमति-सूची में जोड़ें"
       </Tab>
-      <Tab title="Config">
+      <Tab title="कॉन्फ़िगरेशन">
 
 ```json5
 {
@@ -259,19 +253,19 @@ DMs काम करने के बाद, आप अपने Discord सर�
 
   </Step>
 
-  <Step title="@mention के बिना responses की अनुमति दें">
-    डिफ़ॉल्ट रूप से, आपका एजेंट guild चैनलों में केवल @mentioned होने पर जवाब देता है। private server के लिए, आप शायद चाहेंगे कि यह हर message का जवाब दे।
+  <Step title="@mention के बिना उत्तरों की अनुमति दें">
+    डिफ़ॉल्ट रूप से एजेंट गिल्ड चैनलों में केवल तभी उत्तर देता है जब उसका @mention किया जाए। निजी सर्वर पर संभवतः आप चाहेंगे कि वह प्रत्येक संदेश का उत्तर दे।
 
-    guild चैनलों में, normal replies डिफ़ॉल्ट रूप से automatically post होते हैं। shared always-on rooms के लिए, `messages.groupChat.visibleReplies: "message_tool"` में opt in करें ताकि एजेंट चुपचाप मौजूद रह सके और केवल तब post करे जब वह तय करे कि channel reply उपयोगी है। यह GPT 5.5 जैसे latest-generation, tool-reliable models के साथ सबसे अच्छा काम करता है। Ambient room events शांत रहते हैं जब तक tool नहीं भेजता। पूरा lurk-mode config देखने के लिए [Ambient room events](/hi/channels/ambient-room-events) देखें।
+    गिल्ड चैनलों में सामान्य उत्तर डिफ़ॉल्ट रूप से अपने-आप पोस्ट होते हैं। साझा हमेशा-सक्रिय रूम के लिए `messages.groupChat.visibleReplies: "message_tool"` चुनें, ताकि एजेंट निष्क्रिय रूप से देखता रहे और केवल तभी पोस्ट करे जब उसे लगे कि चैनल में उत्तर उपयोगी होगा। यह GPT-5.6 Sol जैसे नवीनतम पीढ़ी के, विश्वसनीय टूल-उपयोग वाले मॉडल के साथ सबसे अच्छा काम करता है। जब तक टूल न भेजे, परिवेशी रूम इवेंट शांत रहते हैं। पूर्ण निष्क्रिय-अवलोकन मोड कॉन्फ़िगरेशन के लिए [परिवेशी रूम इवेंट](/hi/channels/ambient-room-events) देखें।
 
-    यदि Discord typing दिखाता है और logs token usage दिखाते हैं लेकिन कोई posted message नहीं है, तो जाँचें कि turn ambient room event के रूप में configured था या message-tool visible replies में opt in किया गया था।
+    यदि Discord टाइपिंग दिखाता है और लॉग टोकन उपयोग दिखाते हैं, लेकिन कोई संदेश पोस्ट नहीं होता, तो जाँचें कि टर्न को परिवेशी रूम इवेंट के रूप में कॉन्फ़िगर किया गया था या मैसेज-टूल के दृश्य उत्तरों का विकल्प चुना गया था।
 
     <Tabs>
-      <Tab title="अपने एजेंट से पूछें">
-        > "मेरे एजेंट को इस सर्वर पर @mentioned हुए बिना जवाब देने की अनुमति दें"
+      <Tab title="अपने एजेंट से कहें">
+        > "मेरे एजेंट को इस सर्वर पर @mention किए बिना उत्तर देने की अनुमति दें"
       </Tab>
-      <Tab title="Config">
-        अपने guild config में `requireMention: false` सेट करें:
+      <Tab title="कॉन्फ़िगरेशन">
+        अपने गिल्ड कॉन्फ़िगरेशन में `requireMention: false` सेट करें:
 
 ```json5
 {
@@ -287,98 +281,93 @@ DMs काम करने के बाद, आप अपने Discord सर�
 }
 ```
 
-        visible group/channel replies के लिए message-tool sends आवश्यक करने हेतु, `messages.groupChat.visibleReplies: "message_tool"` सेट करें।
+        दृश्यमान समूह/चैनल उत्तरों के लिए मैसेज-टूल से भेजना आवश्यक बनाने हेतु `messages.groupChat.visibleReplies: "message_tool"` सेट करें।
 
       </Tab>
     </Tabs>
 
   </Step>
 
-  <Step title="guild चैनलों में memory की योजना बनाएँ">
-    डिफ़ॉल्ट रूप से, long-term memory (MEMORY.md) केवल DM sessions में load होती है। Guild चैनल MEMORY.md को auto-load नहीं करते।
+  <Step title="गिल्ड चैनलों में मेमोरी की योजना बनाएँ">
+    दीर्घकालिक मेमोरी (MEMORY.md) केवल DM सेशन में स्वतः लोड होती है; गिल्ड चैनल इसे लोड नहीं करते।
 
     <Tabs>
-      <Tab title="अपने एजेंट से पूछें">
-        > "जब मैं Discord चैनलों में सवाल पूछूँ, तो यदि आपको MEMORY.md से long-term context की आवश्यकता हो तो memory_search या memory_get का उपयोग करें।"
+      <Tab title="अपने एजेंट से कहें">
+        > "जब मैं Discord चैनलों में प्रश्न पूछूँ, तो यदि आपको MEMORY.md से दीर्घकालिक संदर्भ चाहिए, memory_search या memory_get का उपयोग करें।"
       </Tab>
-      <Tab title="Manual">
-        यदि आपको हर चैनल में shared context चाहिए, तो stable instructions को `AGENTS.md` या `USER.md` में रखें (वे हर session के लिए injected होते हैं)। long-term notes को `MEMORY.md` में रखें और memory tools के साथ मांग पर उन्हें access करें।
+      <Tab title="मैन्युअल">
+        प्रत्येक चैनल में साझा संदर्भ के लिए स्थिर निर्देश `AGENTS.md` या `USER.md` में रखें (प्रत्येक सेशन में इंजेक्ट किए जाते हैं)। दीर्घकालिक नोट्स `MEMORY.md` में रखें और आवश्यकता होने पर मेमोरी टूल से उन तक पहुँचें।
       </Tab>
     </Tabs>
 
   </Step>
 </Steps>
 
-अब अपने Discord सर्वर पर कुछ चैनल बनाएँ और chat शुरू करें। आपका एजेंट channel name देख सकता है, और प्रत्येक चैनल को अपना isolated session मिलता है — इसलिए आप `#coding`, `#home`, `#research`, या अपने workflow के अनुरूप कोई भी channel सेट कर सकते हैं।
+अब चैनल बनाएँ और चैट करना शुरू करें। एजेंट चैनल का नाम देखता है और प्रत्येक चैनल एक पृथक सेशन होता है—अपने वर्कफ़्लो के अनुसार `#coding`, `#home`, `#research` या कोई अन्य उपयुक्त चैनल सेट अप करें।
 
-## Runtime model
+## रनटाइम मॉडल
 
 - Gateway Discord कनेक्शन का स्वामी है।
-- जवाब रूटिंग निर्धारक है: Discord से आने वाले जवाब वापस Discord पर जाते हैं।
-- Discord guild/channel मेटाडेटा मॉडल प्रॉम्प्ट में अविश्वसनीय
-  संदर्भ के रूप में जोड़ा जाता है, उपयोगकर्ता-दृश्यमान जवाब prefix के रूप में नहीं। अगर कोई मॉडल उस envelope को
-  वापस कॉपी करता है, तो OpenClaw outbound जवाबों और
-  भविष्य के replay संदर्भ से कॉपी किया गया मेटाडेटा हटा देता है।
-- डिफ़ॉल्ट रूप से (`session.dmScope=main`), direct chats agent main session (`agent:main:main`) साझा करती हैं।
-- Guild channels अलग-थलग session keys हैं (`agent:<agentId>:discord:channel:<channelId>`)।
-- Group DMs डिफ़ॉल्ट रूप से अनदेखे किए जाते हैं (`channels.discord.dm.groupEnabled=false`)।
-- Native slash commands अलग-थलग command sessions (`agent:<agentId>:discord:slash:<userId>`) में चलते हैं, जबकि routed conversation session तक `CommandTargetSessionKey` फिर भी ले जाते हैं।
-- Discord को text-only cron/heartbeat announce delivery अंतिम
-  assistant-visible answer को एक बार उपयोग करती है। Media और structured component payloads तब
-  multi-message रहते हैं जब agent कई deliverable payloads emits करता है।
+- उत्तर रूटिंग नियतात्मक है: Discord से आने वाले संदेशों के उत्तर Discord पर ही जाते हैं।
+- Discord गिल्ड/चैनल मेटाडेटा मॉडल प्रॉम्प्ट में अविश्वसनीय संदर्भ के रूप में जोड़ा जाता है, उपयोगकर्ता को दिखाई देने वाले उत्तर प्रीफ़िक्स के रूप में नहीं। यदि कोई मॉडल उस एनवेलप को वापस कॉपी करता है, तो OpenClaw आउटबाउंड उत्तरों और भविष्य के रीप्ले संदर्भ से कॉपी किया हुआ मेटाडेटा हटा देता है।
+- डिफ़ॉल्ट रूप से (`session.dmScope=main`), सीधे चैट एजेंट का मुख्य सेशन (`agent:main:main`) साझा करते हैं।
+- गिल्ड चैनल पृथक सेशन कुंजियाँ (`agent:<agentId>:discord:channel:<channelId>`) हैं।
+- समूह DMs को डिफ़ॉल्ट रूप से अनदेखा किया जाता है (`channels.discord.dm.groupEnabled=false`)।
+- नेटिव स्लैश कमांड पृथक कमांड सेशन (`agent:<agentId>:discord:slash:<userId>`) में चलते हैं, जबकि रूट किए गए वार्तालाप सेशन में `CommandTargetSessionKey` भी ले जाते हैं।
+- Discord पर केवल-टेक्स्ट cron/heartbeat घोषणा डिलीवरी अंतिम सहायक-दृश्य उत्तर तक सीमित हो जाती है और केवल एक बार भेजी जाती है। जब एजेंट कई डिलीवर किए जा सकने वाले पेलोड उत्सर्जित करता है, तो मीडिया और संरचित कंपोनेंट पेलोड बहु-संदेश बने रहते हैं।
 
-## Forum channels
+## फ़ोरम चैनल
 
-Discord forum और media channels केवल thread posts स्वीकार करते हैं। OpenClaw उन्हें बनाने के दो तरीके समर्थित करता है:
+Discord फ़ोरम और मीडिया चैनल केवल थ्रेड पोस्ट स्वीकार करते हैं। OpenClaw उन्हें बनाने के दो तरीके समर्थित करता है:
 
-- Thread अपने-आप बनाने के लिए forum parent (`channel:<forumId>`) को message भेजें। Thread title आपके message की पहली non-empty line का उपयोग करता है।
-- Thread सीधे बनाने के लिए `openclaw message thread create` का उपयोग करें। Forum channels के लिए `--message-id` पास न करें।
+- थ्रेड अपने-आप बनाने के लिए फ़ोरम पैरेंट (`channel:<forumId>`) को संदेश भेजें। थ्रेड का शीर्षक संदेश की पहली गैर-रिक्त पंक्ति होती है (Discord की 100-वर्ण वाली थ्रेड-नाम सीमा तक संक्षिप्त)।
+- सीधे थ्रेड बनाने के लिए `openclaw message thread create` का उपयोग करें। फ़ोरम चैनलों के लिए `--message-id` पास न करें।
 
-उदाहरण: thread बनाने के लिए forum parent को भेजें
+थ्रेड बनाने के लिए फ़ोरम पैरेंट को भेजें:
 
 ```bash
 openclaw message send --channel discord --target channel:<forumId> \
-  --message "Topic title\nBody of the post"
+  --message "विषय का शीर्षक\nपोस्ट का मुख्य भाग"
 ```
 
-उदाहरण: forum thread स्पष्ट रूप से बनाएं
+फ़ोरम थ्रेड स्पष्ट रूप से बनाएँ:
 
 ```bash
 openclaw message thread create --channel discord --target channel:<forumId> \
-  --thread-name "Topic title" --message "Body of the post"
+  --thread-name "विषय का शीर्षक" --message "पोस्ट का मुख्य भाग"
 ```
 
-Forum parents Discord components स्वीकार नहीं करते। अगर आपको components चाहिए, तो thread खुद (`channel:<threadId>`) को भेजें।
+फ़ोरम पैरेंट Discord कंपोनेंट स्वीकार नहीं करते। यदि आपको कंपोनेंट चाहिए, तो स्वयं थ्रेड (`channel:<threadId>`) को भेजें।
 
-## Interactive components
+## इंटरैक्टिव कंपोनेंट
 
-OpenClaw agent messages के लिए Discord components v2 containers समर्थित करता है। `components` payload के साथ message tool का उपयोग करें। Interaction results सामान्य inbound messages के रूप में agent को वापस routed होते हैं और मौजूदा Discord `replyToMode` settings का पालन करते हैं।
+OpenClaw एजेंट संदेशों के लिए Discord कंपोनेंट v2 कंटेनर समर्थित करता है। `components` पेलोड के साथ संदेश टूल का उपयोग करें। इंटरैक्शन के परिणाम सामान्य इनबाउंड संदेशों के रूप में एजेंट को वापस भेजे जाते हैं और मौजूदा Discord `replyToMode` सेटिंग्स का पालन करते हैं।
 
-समर्थित blocks:
+समर्थित ब्लॉक:
 
 - `text`, `section`, `separator`, `actions`, `media-gallery`, `file`
-- Action rows में अधिकतम 5 buttons या एक single select menu हो सकता है
-- Select types: `string`, `user`, `role`, `mentionable`, `channel`
+- एक्शन पंक्तियों में अधिकतम 5 बटन या एक चयन मेनू हो सकता है
+- चयन प्रकार: `string`, `user`, `role`, `mentionable`, `channel`
 
-डिफ़ॉल्ट रूप से, components single use हैं। Buttons, selects, और forms को expire होने तक कई बार उपयोग करने की अनुमति देने के लिए `components.reusable=true` सेट करें।
+डिफ़ॉल्ट रूप से, कंपोनेंट केवल एक बार उपयोग किए जा सकते हैं। बटन, चयन और फ़ॉर्म की समय-सीमा समाप्त होने तक उन्हें कई बार उपयोग करने की अनुमति देने के लिए `components.reusable=true` सेट करें।
 
-किसी button पर कौन click कर सकता है, इसे सीमित करने के लिए उस button पर `allowedUsers` सेट करें (Discord user IDs, tags, या `*`)। Configure होने पर, unmatched users को ephemeral denial मिलता है।
+किसी बटन पर क्लिक करने वाले लोगों को सीमित करने के लिए, उस बटन पर `allowedUsers` सेट करें (Discord उपयोगकर्ता ID, टैग या `*`)। मेल न खाने वाले उपयोगकर्ताओं को केवल उन्हें दिखाई देने वाला अस्वीकृति संदेश मिलता है।
 
-Component callbacks डिफ़ॉल्ट रूप से 30 मिनट बाद expire होते हैं। Default Discord account के लिए उस callback registry lifetime को बदलने के लिए `channels.discord.agentComponents.ttlMs` सेट करें, या multi-account setup में किसी एक account को override करने के लिए `channels.discord.accounts.<accountId>.agentComponents.ttlMs` सेट करें। Value milliseconds में है, positive integer होनी चाहिए, और `86400000` (24 घंटे) पर capped है। Longer TTLs review या approval workflows के लिए उपयोगी हैं जिनमें buttons usable रहने चाहिए, लेकिन वे वह window भी बढ़ाते हैं जहाँ कोई पुराना Discord message अब भी action trigger कर सकता है। Workflow में फिट होने वाला सबसे छोटा TTL prefer करें, और जब stale callbacks surprising होंगे तब default रखें।
+कंपोनेंट कॉलबैक की समय-सीमा डिफ़ॉल्ट रूप से 30 मिनट बाद समाप्त हो जाती है। डिफ़ॉल्ट खाते के लिए कॉलबैक रजिस्ट्री का जीवनकाल बदलने हेतु `channels.discord.agentComponents.ttlMs` या प्रत्येक खाते के लिए `channels.discord.accounts.<accountId>.agentComponents.ttlMs` सेट करें। मान मिलीसेकंड में होता है, धनात्मक पूर्णांक होना चाहिए और अधिकतम `86400000` (24 घंटे) तक सीमित है। लंबे TTL उन समीक्षा/अनुमोदन कार्यप्रवाहों के लिए उपयुक्त हैं जिनमें बटनों को उपयोग योग्य बनाए रखना आवश्यक है, लेकिन वे उस अवधि को बढ़ाते हैं जिसमें कोई पुराना Discord संदेश अब भी कार्रवाई ट्रिगर कर सकता है। आवश्यकता के अनुरूप सबसे छोटा TTL चुनें और यदि पुराने कॉलबैक आश्चर्यजनक होंगे, तो डिफ़ॉल्ट बनाए रखें।
 
-`/model` और `/models` slash commands provider, model, और compatible runtime dropdowns तथा Submit step के साथ interactive model picker खोलते हैं। `/models add` deprecated है और अब chat से models register करने के बजाय deprecation message लौटाता है। Picker reply ephemeral है और केवल invoking user इसका उपयोग कर सकता है। Discord select menus 25 options तक सीमित हैं, इसलिए जब आप चाहते हैं कि picker केवल selected providers जैसे `openai` या `vllm` के लिए dynamically discovered models दिखाए, तो `agents.defaults.models` में `provider/*` entries जोड़ें।
+`/model` और `/models` स्लैश कमांड प्रदाता, मॉडल और संगत रनटाइम ड्रॉपडाउन के साथ एक इंटरैक्टिव मॉडल चयनकर्ता तथा सबमिट चरण खोलते हैं। `/models add` अप्रचलित है और चैट से मॉडल पंजीकृत करने के बजाय अप्रचलन संदेश लौटाता है। चयनकर्ता का उत्तर केवल उसे शुरू करने वाले उपयोगकर्ता को दिखाई देता है और केवल वही उसका उपयोग कर सकता है। Discord चयन मेनू 25 विकल्पों तक सीमित हैं, इसलिए यदि आप चाहते हैं कि चयनकर्ता केवल `openai` या `vllm` जैसे चुने गए प्रदाताओं के लिए गतिशील रूप से खोजे गए मॉडल दिखाए, तो `agents.defaults.modelPolicy.allow` में `provider/*` प्रविष्टियाँ जोड़ें।
 
-File attachments:
+फ़ाइल अटैचमेंट:
 
-- `file` blocks को attachment reference (`attachment://<filename>`) की ओर point करना चाहिए
-- Attachment को `media`/`path`/`filePath` (single file) के माध्यम से दें; multiple files के लिए `media-gallery` उपयोग करें
-- Upload name को attachment reference से match कराना हो तो override करने के लिए `filename` का उपयोग करें
+- `file` ब्लॉक को किसी अटैचमेंट संदर्भ (`attachment://<filename>`) की ओर इंगित करना चाहिए
+- अटैचमेंट को `media`/`path`/`filePath` (एक फ़ाइल) के माध्यम से दें; एकाधिक फ़ाइलों के लिए `media-gallery` का उपयोग करें
+- यदि अपलोड नाम को अटैचमेंट संदर्भ से मेल खाना चाहिए, तो उसे ओवरराइड करने के लिए `filename` का उपयोग करें
 
-Modal forms:
+मोडल फ़ॉर्म:
 
-- अधिकतम 5 fields के साथ `components.modal` जोड़ें
-- Field types: `text`, `checkbox`, `radio`, `select`, `role-select`, `user-select`
-- OpenClaw trigger button automatically जोड़ता है
+- अधिकतम 5 फ़ील्ड के साथ `components.modal` जोड़ें
+- फ़ील्ड प्रकार: `text`, `checkbox`, `radio`, `select`, `role-select`, `user-select`
+- OpenClaw स्वचालित रूप से एक ट्रिगर बटन जोड़ता है
 
 उदाहरण:
 
@@ -387,45 +376,45 @@ Modal forms:
   channel: "discord",
   action: "send",
   to: "channel:123456789012345678",
-  message: "Optional fallback text",
+  message: "वैकल्पिक फ़ॉलबैक टेक्स्ट",
   components: {
     reusable: true,
-    text: "Choose a path",
+    text: "कोई मार्ग चुनें",
     blocks: [
       {
         type: "actions",
         buttons: [
           {
-            label: "Approve",
+            label: "अनुमोदित करें",
             style: "success",
             allowedUsers: ["123456789012345678"],
           },
-          { label: "Decline", style: "danger" },
+          { label: "अस्वीकार करें", style: "danger" },
         ],
       },
       {
         type: "actions",
         select: {
           type: "string",
-          placeholder: "Pick an option",
+          placeholder: "कोई विकल्प चुनें",
           options: [
-            { label: "Option A", value: "a" },
-            { label: "Option B", value: "b" },
+            { label: "विकल्प A", value: "a" },
+            { label: "विकल्प B", value: "b" },
           ],
         },
       },
     ],
     modal: {
-      title: "Details",
-      triggerLabel: "Open form",
+      title: "विवरण",
+      triggerLabel: "फ़ॉर्म खोलें",
       fields: [
-        { type: "text", label: "Requester" },
+        { type: "text", label: "अनुरोधकर्ता" },
         {
           type: "select",
-          label: "Priority",
+          label: "प्राथमिकता",
           options: [
-            { label: "Low", value: "low" },
-            { label: "High", value: "high" },
+            { label: "निम्न", value: "low" },
+            { label: "उच्च", value: "high" },
           ],
         },
       ],
@@ -434,41 +423,41 @@ Modal forms:
 }
 ```
 
-## Access control और routing
+## अभिगम नियंत्रण और रूटिंग
 
 <Tabs>
-  <Tab title="DM policy">
-    `channels.discord.dmPolicy` DM access नियंत्रित करता है। `channels.discord.allowFrom` canonical DM allowlist है।
+  <Tab title="DM नीति">
+    `channels.discord.dmPolicy` DM अभिगम को नियंत्रित करता है। `channels.discord.allowFrom` प्रामाणिक DM अनुमति-सूची है।
 
-    - `pairing` (default)
-    - `allowlist`
-    - `open` (`channels.discord.allowFrom` में `"*"` शामिल होना आवश्यक है)
+    - `pairing` (डिफ़ॉल्ट)
+    - `allowlist` (कम-से-कम एक `allowFrom` प्रेषक आवश्यक है)
+    - `open` (`channels.discord.allowFrom` में `"*"` का शामिल होना आवश्यक है)
     - `disabled`
 
-    अगर DM policy open नहीं है, तो unknown users blocked होते हैं (या `pairing` mode में pairing के लिए prompted होते हैं)।
+    यदि DM नीति खुली नहीं है, तो अज्ञात उपयोगकर्ताओं को अवरुद्ध कर दिया जाता है (या `pairing` मोड में पेयरिंग के लिए संकेत दिया जाता है)।
 
-    Multi-account precedence:
+    एकाधिक खातों की प्राथमिकता:
 
-    - `channels.discord.accounts.default.allowFrom` केवल `default` account पर लागू होता है।
-    - एक account के लिए, `allowFrom` legacy `dm.allowFrom` पर precedence लेता है।
-    - Named accounts `channels.discord.allowFrom` inherit करते हैं जब उनका अपना `allowFrom` और legacy `dm.allowFrom` unset हो।
-    - Named accounts `channels.discord.accounts.default.allowFrom` inherit नहीं करते।
+    - `channels.discord.accounts.default.allowFrom` केवल `default` खाते पर लागू होता है।
+    - एक खाते के लिए, `allowFrom` को विरासती `dm.allowFrom` पर प्राथमिकता मिलती है।
+    - नामित खाते `channels.discord.allowFrom` को इनहेरिट करते हैं, जब उनके अपने `allowFrom` और विरासती `dm.allowFrom` सेट न हों।
+    - नामित खाते `channels.discord.accounts.default.allowFrom` को इनहेरिट नहीं करते।
 
-    Legacy `channels.discord.dm.policy` और `channels.discord.dm.allowFrom` अभी भी compatibility के लिए read होते हैं। `openclaw doctor --fix` उन्हें `dmPolicy` और `allowFrom` में migrate करता है जब वह access बदले बिना ऐसा कर सकता है।
+    संगतता के लिए विरासती `channels.discord.dm.policy` और `channels.discord.dm.allowFrom` अब भी पढ़े जाते हैं। जब अभिगम बदले बिना ऐसा किया जा सकता है, तो `openclaw doctor --fix` उन्हें `dmPolicy` और `allowFrom` में माइग्रेट करता है।
 
-    Delivery के लिए DM target format:
+    डिलीवरी के लिए DM लक्ष्य प्रारूप:
 
     - `user:<id>`
-    - `<@id>` mention
+    - `<@id>` उल्लेख
 
-    Bare numeric IDs सामान्यतः channel IDs के रूप में resolve होते हैं जब channel default active हो, लेकिन account के effective DM `allowFrom` में listed IDs compatibility के लिए user DM targets की तरह treat होते हैं।
+    जब कोई चैनल डिफ़ॉल्ट सक्रिय होता है, तो केवल संख्यात्मक ID सामान्यतः चैनल ID के रूप में हल होते हैं, लेकिन खाते के प्रभावी DM `allowFrom` में सूचीबद्ध ID को संगतता के लिए उपयोगकर्ता DM लक्ष्य माना जाता है।
 
   </Tab>
 
-  <Tab title="Access groups">
-    Discord DMs और text command authorization `channels.discord.allowFrom` में dynamic `accessGroup:<name>` entries उपयोग कर सकते हैं।
+  <Tab title="अभिगम समूह">
+    Discord DM और टेक्स्ट कमांड प्राधिकरण, `channels.discord.allowFrom` में गतिशील `accessGroup:<name>` प्रविष्टियों का उपयोग कर सकते हैं।
 
-    Access group names message channels में shared होते हैं। Static group के लिए `type: "message.senders"` उपयोग करें जिसके members हर channel की normal `allowFrom` syntax में व्यक्त हों, या `type: "discord.channelAudience"` तब उपयोग करें जब Discord channel की current `ViewChannel` audience membership dynamically define करे। Shared access-group behavior यहाँ documented है: [Access groups](/hi/channels/access-groups).
+    अभिगम समूह के नाम सभी संदेश चैनलों में साझा होते हैं। ऐसे स्थिर समूह के लिए `type: "message.senders"` का उपयोग करें जिसके सदस्य प्रत्येक चैनल के सामान्य `allowFrom` सिंटैक्स में व्यक्त किए गए हों, या जब किसी Discord चैनल के वर्तमान `ViewChannel` दर्शक-समूह से सदस्यता गतिशील रूप से निर्धारित होनी चाहिए, तब `type: "discord.channelAudience"` का उपयोग करें। साझा अभिगम-समूह व्यवहार: [अभिगम समूह](/hi/channels/access-groups)।
 
 ```json5
 {
@@ -491,9 +480,9 @@ Modal forms:
 }
 ```
 
-    Discord text channel की कोई अलग member list नहीं होती। `type: "discord.channelAudience"` membership को इस तरह model करता है: DM sender configured guild का member है और role तथा channel overwrites लागू होने के बाद configured channel पर उसके पास currently effective `ViewChannel` permission है।
+    किसी Discord टेक्स्ट चैनल की अलग सदस्य सूची नहीं होती। `type: "discord.channelAudience"` सदस्यता को इस प्रकार मॉडल करता है: DM प्रेषक कॉन्फ़िगर किए गए गिल्ड का सदस्य है और भूमिका तथा चैनल ओवरराइड लागू होने के बाद वर्तमान में कॉन्फ़िगर किए गए चैनल पर उसके पास प्रभावी `ViewChannel` अनुमति है।
 
-    उदाहरण: DMs को बाकी सभी के लिए closed रखते हुए, जो भी `#maintainers` देख सकता है उसे bot को DM करने दें।
+    उदाहरण: बॉट को DM भेजने की अनुमति ऐसे किसी भी व्यक्ति को दें जो `#maintainers` देख सकता है, जबकि अन्य सभी के लिए DM बंद रखें।
 
 ```json5
 {
@@ -514,7 +503,7 @@ Modal forms:
 }
 ```
 
-    आप dynamic और static entries mix कर सकते हैं:
+    आप गतिशील और स्थिर प्रविष्टियों को मिला सकते हैं:
 
 ```json5
 {
@@ -534,29 +523,29 @@ Modal forms:
 }
 ```
 
-    Lookups fail closed होते हैं। अगर Discord `Missing Access` लौटाता है, member lookup fail होता है, या channel किसी अलग guild से संबंधित है, तो DM sender unauthorized माना जाता है।
+    लुकअप विफल होने पर अभिगम बंद रहता है। यदि Discord `Missing Access` लौटाता है, सदस्य लुकअप विफल होता है या चैनल किसी अलग गिल्ड से संबंधित है, तो DM प्रेषक को अनधिकृत माना जाता है।
 
-    Channel-audience access groups उपयोग करते समय bot के लिए Discord Developer Portal **Server Members Intent** enable करें। DMs में guild member state शामिल नहीं होती, इसलिए OpenClaw authorization time पर Discord REST के माध्यम से member resolve करता है।
+    चैनल-दर्शक अभिगम समूहों का उपयोग करते समय Discord Developer Portal में **Server Members Intent** सक्षम करें। DM में गिल्ड सदस्य स्थिति शामिल नहीं होती, इसलिए OpenClaw प्राधिकरण के समय Discord REST के माध्यम से सदस्य का समाधान करता है।
 
   </Tab>
 
-  <Tab title="Guild policy">
-    Guild handling `channels.discord.groupPolicy` द्वारा नियंत्रित होता है:
+  <Tab title="गिल्ड नीति">
+    गिल्ड प्रबंधन को `channels.discord.groupPolicy` नियंत्रित करता है:
 
     - `open`
     - `allowlist`
     - `disabled`
 
-    `channels.discord` मौजूद होने पर secure baseline `allowlist` है।
+    जब `channels.discord` मौजूद हो, तो सुरक्षित आधाररेखा `allowlist` होती है।
 
-    `allowlist` behavior:
+    `allowlist` व्यवहार:
 
-    - guild को `channels.discord.guilds` से match करना चाहिए (`id` preferred, slug accepted)
-    - optional sender allowlists: `users` (stable IDs recommended) और `roles` (केवल role IDs); अगर इनमें से कोई configured है, तो senders तब allowed होते हैं जब वे `users` OR `roles` से match करते हैं
-    - direct name/tag matching default रूप से disabled है; `channels.discord.dangerouslyAllowNameMatching: true` को केवल break-glass compatibility mode के रूप में enable करें
-    - `users` के लिए names/tags supported हैं, लेकिन IDs safer हैं; name/tag entries उपयोग होने पर `openclaw security audit` warning देता है
-    - अगर किसी guild में `channels` configured हैं, तो non-listed channels denied होते हैं
-    - अगर किसी guild में `channels` block नहीं है, तो उस allowlisted guild के सभी channels allowed हैं
+    - गिल्ड का `channels.discord.guilds` से मेल खाना आवश्यक है (`id` को प्राथमिकता दी जाती है, स्लग स्वीकार्य है)
+    - वैकल्पिक प्रेषक अनुमति-सूचियाँ: `users` (स्थिर ID अनुशंसित) और `roles` (केवल भूमिका ID); यदि इनमें से कोई भी कॉन्फ़िगर किया गया है, तो प्रेषकों को अनुमति तब मिलती है जब वे `users` या `roles` से मेल खाते हैं
+    - प्रत्यक्ष नाम/टैग मिलान डिफ़ॉल्ट रूप से अक्षम है; `channels.discord.dangerouslyAllowNameMatching: true` को केवल आपातकालीन संगतता मोड के रूप में सक्षम करें
+    - `users` के लिए नाम/टैग समर्थित हैं, लेकिन ID अधिक सुरक्षित हैं; नाम/टैग प्रविष्टियों का उपयोग होने पर `openclaw security audit` चेतावनी देता है
+    - यदि किसी गिल्ड के लिए `channels` कॉन्फ़िगर किया गया है, तो सूची में शामिल न किए गए चैनल अस्वीकृत किए जाते हैं
+    - यदि किसी गिल्ड में `channels` ब्लॉक नहीं है, तो उस अनुमति-सूचीबद्ध गिल्ड के सभी चैनलों को अनुमति होती है
 
     उदाहरण:
 
@@ -572,8 +561,8 @@ Modal forms:
           users: ["987654321098765432"],
           roles: ["123456789012345678"],
           channels: {
-            general: { allow: true },
-            help: { allow: true, requireMention: true },
+            general: { enabled: true },
+            help: { enabled: true, requireMention: true },
           },
         },
       },
@@ -582,35 +571,37 @@ Modal forms:
 }
 ```
 
-    अगर आप केवल `DISCORD_BOT_TOKEN` सेट करते हैं और `channels.discord` block नहीं बनाते, तो runtime fallback `groupPolicy="allowlist"` होता है (logs में warning के साथ), भले ही `channels.defaults.groupPolicy` `open` हो।
+    विरासती प्रति-चैनल `allow` कुंजी को `openclaw doctor --fix` द्वारा `enabled` में माइग्रेट किया जाता है।
+
+    यदि आप केवल `DISCORD_BOT_TOKEN` सेट करते हैं और `channels.discord` ब्लॉक नहीं बनाते, तो रनटाइम फ़ॉलबैक `groupPolicy="allowlist"` होता है (लॉग में चेतावनी के साथ), भले ही `channels.defaults.groupPolicy`, `open` हो।
 
   </Tab>
 
-  <Tab title="Mentions and group DMs">
-    Guild messages default रूप से mention-gated होते हैं।
+  <Tab title="उल्लेख और समूह DM">
+    गिल्ड संदेशों के लिए डिफ़ॉल्ट रूप से उल्लेख आवश्यक होता है।
 
-    Mention detection में शामिल है:
+    उल्लेख पहचान में शामिल हैं:
 
-    - explicit bot mention
-    - configured mention patterns (`agents.list[].groupChat.mentionPatterns`, fallback `messages.groupChat.mentionPatterns`)
-    - supported cases में implicit reply-to-bot behavior
+    - बॉट का स्पष्ट उल्लेख
+    - कॉन्फ़िगर किए गए उल्लेख पैटर्न (`agents.entries.*.groupChat.mentionPatterns`, फ़ॉलबैक `messages.groupChat.mentionPatterns`)
+    - समर्थित स्थितियों में बॉट को उत्तर देने का अंतर्निहित व्यवहार
 
-    Outbound Discord messages लिखते समय, canonical mention syntax उपयोग करें: users के लिए `<@USER_ID>`, channels के लिए `<#CHANNEL_ID>`, और roles के लिए `<@&ROLE_ID>`। Legacy `<@!USER_ID>` nickname mention form उपयोग न करें।
+    आउटबाउंड Discord संदेश लिखते समय प्रामाणिक उल्लेख सिंटैक्स का उपयोग करें: उपयोगकर्ताओं के लिए `<@USER_ID>`, चैनलों के लिए `<#CHANNEL_ID>` और भूमिकाओं के लिए `<@&ROLE_ID>`। विरासती `<@!USER_ID>` उपनाम उल्लेख प्रारूप का उपयोग न करें।
 
-    `requireMention` per guild/channel configured होता है (`channels.discord.guilds...`)।
-    `ignoreOtherMentions` optional रूप से उन messages को drop करता है जो दूसरे user/role को mention करते हैं लेकिन bot को नहीं (excluding @everyone/@here)।
+    `requireMention` को प्रत्येक गिल्ड/चैनल (`channels.discord.guilds...`) के लिए कॉन्फ़िगर किया जाता है।
+    `ignoreOtherMentions` वैकल्पिक रूप से उन संदेशों को हटा देता है जो किसी अन्य उपयोगकर्ता/भूमिका का उल्लेख करते हैं, लेकिन बॉट का नहीं (@everyone/@here को छोड़कर)।
 
-    Group DMs:
+    समूह DM:
 
-    - default: ignored (`dm.groupEnabled=false`)
-    - optional allowlist via `dm.groupChannels` (channel IDs या slugs)
+    - डिफ़ॉल्ट: अनदेखा किया जाता है (`dm.groupEnabled=false`)
+    - `dm.groupChannels` के माध्यम से वैकल्पिक अनुमति-सूची (चैनल ID या स्लग)
 
   </Tab>
 </Tabs>
 
-### Role-based agent routing
+### भूमिका-आधारित एजेंट रूटिंग
 
-Discord guild सदस्यों को role ID के आधार पर अलग-अलग agents पर route करने के लिए `bindings[].match.roles` का उपयोग करें। Role-आधारित bindings केवल role IDs स्वीकार करते हैं और peer या parent-peer bindings के बाद तथा guild-only bindings से पहले मूल्यांकित होते हैं। यदि कोई binding अन्य match fields भी सेट करती है (उदाहरण के लिए `peer` + `guildId` + `roles`), तो सभी configured fields match होने चाहिए।
+Discord गिल्ड सदस्यों को भूमिका ID के अनुसार अलग-अलग एजेंटों तक रूट करने के लिए `bindings[].match.roles` का उपयोग करें। भूमिका-आधारित बाइंडिंग केवल भूमिका ID स्वीकार करती हैं और उनका मूल्यांकन पीयर या पैरेंट-पीयर बाइंडिंग के बाद तथा केवल-गिल्ड बाइंडिंग से पहले किया जाता है। यदि कोई बाइंडिंग अन्य मिलान फ़ील्ड भी सेट करती है (उदाहरण के लिए `peer` + `guildId` + `roles`), तो सभी कॉन्फ़िगर किए गए फ़ील्ड का मेल खाना आवश्यक है।
 
 ```json5
 {
@@ -634,49 +625,39 @@ Discord guild सदस्यों को role ID के आधार पर �
 }
 ```
 
-## Native commands और command auth
+## नेटिव कमांड और कमांड प्रमाणीकरण
 
-- `commands.native` का default `"auto"` है और यह Discord के लिए enabled है।
-- Per-channel override: `channels.discord.commands.native`।
-- `commands.native=false` startup के दौरान Discord slash-command registration और cleanup को skip करता है। पहले से registered commands Discord में तब तक visible रह सकते हैं जब तक आप उन्हें Discord app से remove नहीं करते।
-- Native command auth वही Discord allowlists/policies उपयोग करता है जो normal message handling में उपयोग होती हैं।
-- Commands उन users के लिए भी Discord UI में visible रह सकते हैं जो authorized नहीं हैं; execution फिर भी OpenClaw auth enforce करता है और "not authorized" लौटाता है।
+- `commands.native` का डिफ़ॉल्ट मान `"auto"` है और यह Discord के लिए सक्षम है।
+- प्रति-चैनल ओवरराइड: `channels.discord.commands.native`।
+- `commands.native=false` स्टार्टअप के दौरान Discord स्लैश-कमांड पंजीकरण और क्लीनअप को छोड़ देता है। पहले पंजीकृत किए गए कमांड Discord में तब तक दिखाई दे सकते हैं, जब तक आप उन्हें Discord ऐप से नहीं हटाते।
+- नेटिव कमांड प्रमाणीकरण सामान्य संदेश प्रबंधन वाली ही Discord अनुमत-सूचियों/नीतियों का उपयोग करता है।
+- अनधिकृत उपयोगकर्ताओं को कमांड अब भी Discord UI में दिखाई दे सकते हैं; निष्पादन OpenClaw प्रमाणीकरण लागू करता है और "अधिकृत नहीं" उत्तर देता है।
+- डिफ़ॉल्ट स्लैश कमांड सेटिंग्स: `ephemeral: true` (`channels.discord.slashCommand.ephemeral`)।
 
-Command catalog और behavior के लिए [Slash commands](/hi/tools/slash-commands) देखें।
+कमांड कैटलॉग और व्यवहार के लिए [स्लैश कमांड](/hi/tools/slash-commands) देखें।
 
-Default slash command settings:
-
-- `ephemeral: true`
-
-## Feature details
+## सुविधा विवरण
 
 <AccordionGroup>
-  <Accordion title="Reply tags और native replies">
-    Discord agent output में reply tags support करता है:
+  <Accordion title="उत्तर टैग और नेटिव उत्तर">
+    Discord एजेंट आउटपुट में उत्तर टैग का समर्थन करता है:
 
     - `[[reply_to_current]]`
     - `[[reply_to:<id>]]`
 
-    `channels.discord.replyToMode` द्वारा नियंत्रित:
+    इसे `channels.discord.replyToMode` नियंत्रित करता है:
 
-    - `off` (default)
-    - `first`
-    - `all`
-    - `batched`
+    - `off` (डिफ़ॉल्ट): कोई अंतर्निहित उत्तर थ्रेडिंग नहीं; स्पष्ट `[[reply_to_*]]` टैग का अब भी पालन किया जाता है
+    - `first`: अंतर्निहित नेटिव उत्तर संदर्भ को इस टर्न के पहले आउटबाउंड Discord संदेश से जोड़ता है
+    - `all`: इसे प्रत्येक आउटबाउंड संदेश से जोड़ता है
+    - `batched`: इसे केवल तब जोड़ता है जब इनबाउंड इवेंट कई संदेशों का डिबाउंस किया गया बैच था — यह तब उपयोगी है जब आप नेटिव उत्तर मुख्यतः अस्पष्ट, तेज़ी से आने वाली चैट के लिए चाहते हैं, न कि प्रत्येक एकल-संदेश टर्न के लिए
 
-    Note: `off` implicit reply threading को disable करता है। Explicit `[[reply_to_*]]` tags फिर भी honored होते हैं।
-    `first` turn के लिए first outbound Discord message में हमेशा implicit native reply reference attach करता है।
-    `batched` Discord के implicit native reply reference को केवल तब attach करता है जब
-    inbound event multiple messages का debounced batch था। यह तब उपयोगी है
-    जब आप native replies मुख्य रूप से ambiguous bursty chats के लिए चाहते हैं, हर
-    single-message turn के लिए नहीं।
-
-    Message IDs context/history में surfaced होते हैं ताकि agents specific messages target कर सकें।
+    संदेश ID संदर्भ/इतिहास में उपलब्ध कराए जाते हैं, ताकि एजेंट विशिष्ट संदेशों को लक्षित कर सकें।
 
   </Accordion>
 
-  <Accordion title="Link previews">
-    Discord default रूप से URLs के लिए rich link embeds generate करता है। OpenClaw default रूप से outbound Discord messages पर वे generated embeds suppress करता है, इसलिए agent-sent URLs plain links के रूप में रहते हैं जब तक आप opt in नहीं करते:
+  <Accordion title="लिंक पूर्वावलोकन">
+    Discord डिफ़ॉल्ट रूप से URL के लिए समृद्ध लिंक एम्बेड बनाता है। OpenClaw डिफ़ॉल्ट रूप से आउटबाउंड Discord संदेशों पर उन जनरेट किए गए एम्बेड को रोकता है, इसलिए एजेंट द्वारा भेजे गए URL तब तक सामान्य लिंक बने रहते हैं, जब तक आप उन्हें स्पष्ट रूप से सक्षम नहीं करते:
 
 ```json5
 {
@@ -688,14 +669,12 @@ Default slash command settings:
 }
 ```
 
-    एक account override करने के लिए `channels.discord.accounts.<id>.suppressEmbeds` सेट करें। Agent message-tool sends single message के लिए `suppressEmbeds: false` भी pass कर सकते हैं। Explicit Discord `embeds` payloads default link-preview setting से suppressed नहीं होते।
+    किसी एक अकाउंट को ओवरराइड करने के लिए `channels.discord.accounts.<id>.suppressEmbeds` सेट करें। एजेंट संदेश-टूल से भेजे गए संदेश किसी एक संदेश के लिए `suppressEmbeds: false` भी पास कर सकते हैं। स्पष्ट Discord `embeds` पेलोड डिफ़ॉल्ट लिंक-पूर्वावलोकन सेटिंग द्वारा नहीं रोके जाते।
 
   </Accordion>
 
-  <Accordion title="Live stream preview">
-    OpenClaw temporary message भेजकर और text आने पर उसे edit करके draft replies stream कर सकता है। `channels.discord.streaming` `off` | `partial` | `block` | `progress` (default) लेता है। `progress` एक editable status draft बनाए रखता है और final delivery तक उसे tool progress के साथ update करता है; shared starter label एक rolling line है, इसलिए पर्याप्त work दिखने पर यह बाकी content की तरह scroll away हो जाता है। `streamMode` legacy runtime alias है। Persisted config को canonical key में rewrite करने के लिए `openclaw doctor --fix` चलाएँ।
-
-    Discord preview edits disable करने के लिए `channels.discord.streaming.mode` को `off` पर सेट करें। यदि Discord block streaming explicit रूप से enabled है, तो OpenClaw double-streaming से बचने के लिए preview stream skip करता है।
+  <Accordion title="लाइव स्ट्रीम पूर्वावलोकन">
+    OpenClaw एक अस्थायी संदेश भेजकर और टेक्स्ट आते ही उसे संपादित करके ड्राफ़्ट उत्तर स्ट्रीम कर सकता है। `channels.discord.streaming.mode`, `off` | `partial` | `block` | `progress` स्वीकार करता है (जब कोई `streaming`/पुरानी `streamMode` कुंजी सेट नहीं होती, तब डिफ़ॉल्ट)। `streamMode` एक पुराना उपनाम है; सहेजे गए कॉन्फ़िगरेशन को मानक नेस्टेड `streaming` आकार में फिर से लिखने के लिए `openclaw doctor --fix` चलाएँ।
 
 ```json5
 {
@@ -704,10 +683,9 @@ Default slash command settings:
       streaming: {
         mode: "progress",
         progress: {
-          label: "auto",
           maxLines: 8,
           maxLineChars: 120,
-          toolProgress: true,
+          toolProgress: false,
           commentary: false,
         },
       },
@@ -716,16 +694,18 @@ Default slash command settings:
 }
 ```
 
-    - `partial` tokens आने पर single preview message edit करता है।
-    - `block` draft-sized chunks emit करता है (size और breakpoints tune करने के लिए `draftChunk` उपयोग करें, `textChunkLimit` तक clamped)।
-    - Media, error, और explicit-reply finals pending preview edits cancel करते हैं।
-    - `streaming.preview.toolProgress` (default `true`) control करता है कि tool/progress updates preview message reuse करते हैं या नहीं।
-    - Tool/progress rows उपलब्ध होने पर compact emoji + title + detail के रूप में render होते हैं, उदाहरण के लिए `🛠️ Bash: run tests` या `🔎 Web Search: for "query"`।
-    - `streaming.progress.commentary` (default `false`) temporary progress draft में assistant commentary/preamble text के लिए opt in करता है। Commentary display से पहले clean की जाती है, transient रहती है, और final answer delivery नहीं बदलती।
-    - `streaming.progress.maxLineChars` per-line progress preview budget control करता है। Prose word boundaries पर short किया जाता है; command और path details useful suffixes रखते हैं।
-    - `streaming.preview.commandText` / `streaming.progress.commandText` compact progress lines में command/exec detail control करता है: `raw` (default) या `status` (tool label only)।
+    - `off` Discord पूर्वावलोकन संपादनों को अक्षम करता है।
+    - `partial` टोकन आते ही एकल पूर्वावलोकन संदेश को संपादित करता है।
+    - `block` ड्राफ़्ट-आकार के खंड उत्सर्जित करता है; `streaming.preview.chunk` (`minChars`, `maxChars`, `breakPreference`) से आकार और विराम-बिंदुओं को समायोजित करें, जिन्हें `textChunkLimit` तक सीमित किया जाता है। जब ब्लॉक स्ट्रीमिंग स्पष्ट रूप से सक्षम होती है, तो OpenClaw दोहरी स्ट्रीमिंग से बचने के लिए पूर्वावलोकन स्ट्रीम को छोड़ देता है।
+    - `progress` अंतिम डिलीवरी तक एक संपादन योग्य स्थिति ड्राफ़्ट बनाए रखता है। डिफ़ॉल्ट रूप से यह एजेंट की नवीनतम प्रस्तावना या वर्णन की एक पंक्ति दिखाता है, बिना किसी जनरेट किए गए लेबल, स्पेसर या टूल पंक्ति के।
+    - मीडिया, त्रुटि और स्पष्ट-उत्तर वाले अंतिम संदेश लंबित पूर्वावलोकन संपादनों को रद्द कर देते हैं।
+    - `streaming.preview.toolProgress` का डिफ़ॉल्ट मान `partial`/`block` मोड में `true` होता है। Discord प्रगति मोड में डिफ़ॉल्ट रूप से कोई टूल पंक्ति नहीं होती; इसे सक्षम करने के लिए `streaming.progress.toolProgress: true` सेट करें।
+    - `🛠️ Bash: run tests` या `🔎 Web Search: for "query"` जैसी संक्षिप्त टूल/प्रगति पंक्तियाँ जोड़ने के लिए `streaming.progress.toolProgress: true` सेट करें। संगतता के लिए, मौजूदा `progress.label` या `progress.labels` कॉन्फ़िगरेशन पहले वाले टूल-पंक्ति डिफ़ॉल्ट को बनाए रखता है; पंक्तियों के बिना कस्टम लेबल के लिए `toolProgress: false` सेट करें।
+    - `streaming.progress.commentary` (डिफ़ॉल्ट `false`) अस्थायी प्रगति ड्राफ़्ट में अपरिष्कृत सहायक टिप्पणी को सक्षम करता है। डिफ़ॉल्ट प्रस्तावना/वर्णन स्थिति पंक्ति इस विकल्प से स्वतंत्र है। टिप्पणी को प्रदर्शित करने से पहले साफ़ किया जाता है, यह अस्थायी रहती है और अंतिम उत्तर की डिलीवरी नहीं बदलती।
+    - `streaming.progress.maxLineChars` प्रति-पंक्ति प्रगति पूर्वावलोकन सीमा नियंत्रित करता है। गद्य को शब्द सीमाओं पर छोटा किया जाता है; कमांड और पथ विवरण उपयोगी प्रत्यय बनाए रखते हैं।
+    - `streaming.preview.commandText` / `streaming.progress.commandText` संक्षिप्त प्रगति पंक्तियों में कमांड/निष्पादन विवरण नियंत्रित करता है: `raw` (डिफ़ॉल्ट) या `status` (केवल टूल लेबल)।
 
-    Compact progress lines रखते हुए raw command/exec text छिपाएँ:
+    संक्षिप्त प्रगति पंक्तियाँ बनाए रखते हुए अपरिष्कृत कमांड/निष्पादन टेक्स्ट छिपाएँ:
 
     ```json
     {
@@ -743,46 +723,46 @@ Default slash command settings:
     }
     ```
 
-    Preview streaming text-only है; media replies normal delivery पर fall back करते हैं। जब `block` streaming explicit रूप से enabled होती है, OpenClaw double-streaming से बचने के लिए preview stream skip करता है।
+    पूर्वावलोकन स्ट्रीमिंग केवल टेक्स्ट के लिए है; मीडिया उत्तर सामान्य डिलीवरी पर वापस आ जाते हैं।
 
   </Accordion>
 
-  <Accordion title="History, context, और thread behavior">
-    Guild history context:
+  <Accordion title="इतिहास, संदर्भ और थ्रेड व्यवहार">
+    गिल्ड इतिहास संदर्भ:
 
-    - `channels.discord.historyLimit` default `20`
-    - fallback: `messages.groupChat.historyLimit`
-    - `0` disables
+    - `channels.discord.historyLimit` डिफ़ॉल्ट `20`
+    - फ़ॉलबैक: `messages.groupChat.historyLimit`
+    - `0` अक्षम करता है
 
-    DM history controls:
+    DM इतिहास नियंत्रण:
 
     - `channels.discord.dmHistoryLimit`
     - `channels.discord.dms["<user_id>"].historyLimit`
 
-    Thread behavior:
+    थ्रेड व्यवहार:
 
-    - Discord threads channel sessions के रूप में route होते हैं और override न होने पर parent channel config inherit करते हैं।
-    - Thread sessions parent channel के session-level `/model` selection को model-only fallback के रूप में inherit करते हैं; thread-local `/model` selections फिर भी precedence लेते हैं और transcript inheritance enabled न होने पर parent transcript history copy नहीं होती।
-    - `channels.discord.thread.inheritParent` (default `false`) new auto-threads को parent transcript से seed करने के लिए opt in करता है। Per-account overrides `channels.discord.accounts.<id>.thread.inheritParent` के अंतर्गत रहते हैं।
-    - Message-tool reactions `user:<id>` DM targets resolve कर सकते हैं।
-    - `guilds.<guild>.channels.<channel>.requireMention: false` reply-stage activation fallback के दौरान preserved रहता है।
+    - Discord थ्रेड चैनल सत्रों के रूप में रूट होते हैं और ओवरराइड न किए जाने पर पैरेंट चैनल का कॉन्फ़िगरेशन इनहेरिट करते हैं।
+    - थ्रेड सत्र पैरेंट चैनल के सत्र-स्तरीय `/model` चयन को केवल-मॉडल फ़ॉलबैक के रूप में इनहेरिट करते हैं; थ्रेड-स्थानीय `/model` चयन को प्राथमिकता मिलती है, और ट्रांसक्रिप्ट इनहेरिटेंस सक्षम न होने पर पैरेंट ट्रांसक्रिप्ट इतिहास कॉपी नहीं किया जाता।
+    - `channels.discord.thread.inheritParent` (डिफ़ॉल्ट `false`) नए स्वचालित थ्रेड को पैरेंट ट्रांसक्रिप्ट से आरंभिक सामग्री लेने में शामिल करता है। प्रति-अकाउंट ओवरराइड: `channels.discord.accounts.<id>.thread.inheritParent`।
+    - संदेश-टूल प्रतिक्रियाएँ `user:<id>` DM लक्ष्यों को हल कर सकती हैं।
+    - उत्तर-चरण सक्रियण फ़ॉलबैक के दौरान `guilds.<guild>.channels.<channel>.requireMention: false` संरक्षित रहता है।
 
-    Channel topics **untrusted** context के रूप में injected होते हैं। Allowlists gate करती हैं कि agent को कौन trigger कर सकता है, लेकिन वे full supplemental-context redaction boundary नहीं हैं।
+    चैनल विषयों को **अविश्वसनीय** संदर्भ के रूप में अंतःक्षेपित किया जाता है। अनुमत-सूचियाँ नियंत्रित करती हैं कि एजेंट को कौन ट्रिगर कर सकता है; वे पूर्ण पूरक-संदर्भ संशोधन सीमा नहीं हैं।
 
   </Accordion>
 
-  <Accordion title="Subagents के लिए thread-bound sessions">
-    Discord किसी thread को session target से bind कर सकता है ताकि उस thread में follow-up messages उसी session (subagent sessions सहित) पर route होते रहें।
+  <Accordion title="उप-एजेंट के लिए थ्रेड-बद्ध सत्र">
+    Discord किसी थ्रेड को सत्र लक्ष्य से बाँध सकता है, ताकि उस थ्रेड के अनुवर्ती संदेश उसी सत्र पर रूट होते रहें (उप-एजेंट सत्रों सहित)।
 
-    Commands:
+    कमांड:
 
-    - `/focus <target>` current/new thread को subagent/session target से bind करें
-    - `/unfocus` current thread binding remove करें
-    - `/agents` active runs और binding state दिखाएँ
-    - `/session idle <duration|off>` focused bindings के लिए inactivity auto-unfocus inspect/update करें
-    - `/session max-age <duration|off>` focused bindings के लिए hard max age inspect/update करें
+    - `/focus <target>` वर्तमान/नए थ्रेड को उप-एजेंट/सत्र लक्ष्य से बाँधता है
+    - `/unfocus` वर्तमान थ्रेड बाइंडिंग हटाता है
+    - `/agents` सक्रिय रन और बाइंडिंग स्थिति दिखाता है
+    - `/session idle <duration|off>` फ़ोकस की गई बाइंडिंग के लिए निष्क्रियता-आधारित स्वचालित अनफ़ोकस का निरीक्षण/अपडेट करता है
+    - `/session max-age <duration|off>` फ़ोकस की गई बाइंडिंग के लिए अधिकतम आयु का निरीक्षण/अपडेट करता है
 
-    Config:
+    कॉन्फ़िगरेशन:
 
 ```json5
 {
@@ -791,50 +771,54 @@ Default slash command settings:
       enabled: true,
       idleHours: 24,
       maxAgeHours: 0,
-    },
-  },
-  channels: {
-    discord: {
-      threadBindings: {
-        enabled: true,
-        idleHours: 24,
-        maxAgeHours: 0,
-        spawnSessions: true,
-        defaultSpawnContext: "fork",
-      },
+      spawnSessions: true,
+      defaultSpawnContext: "fork",
     },
   },
 }
 ```
 
-    Notes:
+    टिप्पणियाँ:
 
-    - `session.threadBindings.*` global defaults सेट करता है।
-    - `channels.discord.threadBindings.*` Discord behavior override करता है।
-    - `spawnSessions` `sessions_spawn({ thread: true })` और ACP thread spawns के लिए auto-create/bind threads control करता है। Default: `true`।
-    - `defaultSpawnContext` thread-bound spawns के लिए native subagent context control करता है। Default: `"fork"`।
-    - Deprecated `spawnSubagentSessions`/`spawnAcpSessions` keys `openclaw doctor --fix` द्वारा migrated होती हैं।
-    - यदि किसी account के लिए thread bindings disabled हैं, तो `/focus` और related thread binding operations unavailable हैं।
+    - `session.threadBindings.*` Discord और Telegram के लिए मानक नीति है।
+    - `spawnSessions`, `sessions_spawn({ thread: true })` और ACP थ्रेड स्पॉन के लिए थ्रेड का स्वचालित निर्माण/बाइंडिंग नियंत्रित करता है। डिफ़ॉल्ट: `true`।
+    - `defaultSpawnContext` थ्रेड-बद्ध स्पॉन के लिए नेटिव उप-एजेंट संदर्भ नियंत्रित करता है। डिफ़ॉल्ट: `"fork"`।
+    - अप्रचलित `spawnSubagentSessions`/`spawnAcpSessions` कुंजियों को `openclaw doctor --fix` द्वारा माइग्रेट किया जाता है।
+    - यदि थ्रेड बाइंडिंग अक्षम हैं, तो `/focus` और संबंधित संक्रियाएँ उपलब्ध नहीं होतीं।
 
-    [Sub-agents](/hi/tools/subagents), [ACP Agents](/hi/tools/acp-agents), और [Configuration Reference](/hi/gateway/configuration-reference) देखें।
+    [उप-एजेंट](/hi/tools/subagents), [ACP एजेंट](/hi/tools/acp-agents) और [कॉन्फ़िगरेशन संदर्भ](/hi/gateway/configuration-reference) देखें।
 
   </Accordion>
 
-  <Accordion title="Persistent ACP channel bindings">
-    Stable "always-on" ACP workspaces के लिए, Discord conversations target करने वाली top-level typed ACP bindings configure करें।
+  <Accordion title="स्रोत संदेश पर उप-एजेंट की प्रगति">
+    पैरेंट रन शुरू करने वाले Discord संदेश पर बैकग्राउंड चाइल्ड गतिविधि दिखाने के लिए `channels.discord.subagentProgress: true` सेट करें।
 
-    Config path:
+```json5
+{
+  channels: {
+    discord: {
+      subagentProgress: true,
+    },
+  },
+}
+```
 
-    - `bindings[]` with `type: "acp"` और `match.channel: "discord"`
+    चाइल्ड रन सक्रिय रहने के दौरान OpenClaw, Discord टाइपिंग को एक घंटे तक सक्रिय रखता है और समवर्ती संख्या बदलने पर एक गणना प्रतिक्रिया (`1️⃣` से `🔟`) को बदलता है; `🔟` का अर्थ 10 या अधिक भी है। अंतिम चाइल्ड समाप्त होने के बाद गणना प्रतिक्रिया हटा दी जाती है। विफल, समय-समाप्त या समाप्त किया गया चाइल्ड `🔴` प्रतिक्रिया छोड़ता है।
 
-    Example:
+    यह वैकल्पिक रूप से सक्षम होता है और निश्चित आंतरिक समय तथा इमोजी डिफ़ॉल्ट का उपयोग करता है। प्रतिक्रिया फ़ीडबैक के लिए बॉट को **Add Reactions** अनुमति चाहिए। अकाउंट-स्तरीय `channels.discord.accounts.<id>.subagentProgress` शीर्ष-स्तरीय मान को ओवरराइड करता है।
+
+  </Accordion>
+
+  <Accordion title="स्थायी ACP चैनल बाइंडिंग">
+    स्थिर "हमेशा सक्रिय" ACP कार्यस्थलों के लिए, Discord वार्तालापों को लक्षित करने वाली शीर्ष-स्तरीय टाइप की गई ACP बाइंडिंग कॉन्फ़िगर करें।
+
+    कॉन्फ़िगरेशन पथ: `bindings[]`, `type: "acp"` और `match.channel: "discord"` के साथ।
 
 ```json5
 {
   agents: {
-    list: [
-      {
-        id: "codex",
+    entries: {
+      codex: {
         runtime: {
           type: "acp",
           acp: {
@@ -845,7 +829,7 @@ Default slash command settings:
           },
         },
       },
-    ],
+    },
   },
   bindings: [
     {
@@ -875,51 +859,85 @@ Default slash command settings:
 }
 ```
 
-    Notes:
+    टिप्पणियाँ:
 
-    - `/acp spawn codex --bind here` current channel या thread को उसी स्थान पर bind करता है और future messages को same ACP session पर रखता है। Thread messages parent channel binding inherit करते हैं।
-    - Bound channel या thread में, `/new` और `/reset` same ACP session को उसी स्थान पर reset करते हैं। Temporary thread bindings active रहते हुए target resolution override कर सकते हैं।
-    - `spawnSessions` `--thread auto|here` के माध्यम से child thread creation/binding gate करता है।
+    - `/acp spawn codex --bind here` वर्तमान चैनल या थ्रेड को उसी स्थान पर बाँधता है और भविष्य के संदेशों को उसी ACP सत्र पर बनाए रखता है। थ्रेड संदेश पैरेंट चैनल की बाइंडिंग इनहेरिट करते हैं।
+    - किसी बँधे हुए चैनल या थ्रेड में, `/new` और `/reset` उसी ACP सत्र को उसी स्थान पर रीसेट करते हैं। अस्थायी थ्रेड बाइंडिंग सक्रिय रहते हुए लक्ष्य निर्धारण को ओवरराइड कर सकती हैं।
+    - `spawnSessions`, `--thread auto|here` के माध्यम से चाइल्ड थ्रेड निर्माण/बाइंडिंग को नियंत्रित करता है।
 
-    Binding behavior details के लिए [ACP Agents](/hi/tools/acp-agents) देखें।
+    बाइंडिंग व्यवहार के विवरण के लिए [ACP एजेंट](/hi/tools/acp-agents) देखें।
 
   </Accordion>
 
-  <Accordion title="Reaction notifications">
-    Per-guild reaction notification mode:
+  <Accordion title="प्रतिक्रिया सूचनाएँ">
+    प्रति-गिल्ड प्रतिक्रिया सूचना मोड (`guilds.<id>.reactionNotifications`):
 
     - `off`
-    - `own` (default)
+    - `own` (डिफ़ॉल्ट)
     - `all`
-    - `allowlist` (`guilds.<id>.users` उपयोग करता है)
+    - `allowlist` (`guilds.<id>.users` का उपयोग करता है)
 
-    Reaction events system events में बदले जाते हैं और routed Discord session से attached होते हैं।
+    प्रतिक्रिया इवेंट को सिस्टम इवेंट में बदलकर रूट किए गए Discord सत्र से जोड़ दिया जाता है।
 
   </Accordion>
 
-  <Accordion title="Ack reactions">
-    `ackReaction` OpenClaw द्वारा inbound message process करते समय acknowledgement emoji भेजता है।
+  <Accordion title="ऑनलाइन उपस्थिति इवेंट">
+    किसी मानव सदस्य के ऑफ़लाइन से ऑनलाइन होने पर रूट किए गए एजेंट को सक्रिय करने के लिए गिल्ड को सक्षम करें:
 
-    Resolution order:
+    ```json5
+    {
+      channels: {
+        discord: {
+          intents: { presence: true },
+          guilds: {
+            "111111111111111111": {
+              presenceEvents: {
+                channelId: "222222222222222222",
+                users: ["333333333333333333"], // वैकल्पिक; चैनल दर्शकों को और सीमित करें
+                reconnectSuppressSeconds: 300, // वैकल्पिक; नए सत्र की शांत अवधि (0 अक्षम करता है)
+                burstLimit: 8, // वैकल्पिक; प्रत्येक बर्स्ट विंडो में अधिकतम इवेंट
+                burstWindowSeconds: 60, // वैकल्पिक; स्लाइडिंग बर्स्ट-पहचान विंडो
+              },
+            },
+          },
+        },
+      },
+    }
+    ```
+
+    `presenceEvents` के लिए रूट किए गए एजेंट हेतु सक्षम Heartbeat और Discord Developer Portal में एप्लिकेशन के Bot पृष्ठ पर विशेषाधिकार-प्राप्त **Presence Intent** आवश्यक है। OpenClaw प्रत्येक पूर्ण `GUILD_CREATE` स्नैपशॉट से वर्तमान ऑनलाइन सदस्यों को आरंभिक रूप से दर्ज करता है, देखे गए ऑफ़लाइन-से-ऑनलाइन संक्रमणों को रूट करता है, और किसी अनदेखे सदस्य के लिए बाद में मिले पहले ऑनलाइन संकेत को भी नई उपलब्धता मानता है। हो सकता है कि वह सदस्य स्नैपशॉट के बाद ऑनलाइन आया या शामिल हुआ हो, इसलिए इवेंट किसी सटीक पूर्व स्थिति का दावा नहीं करता। केवल वे मनुष्य पात्र हैं जो `channelId` देख सकते हैं: चैनलों और सार्वजनिक थ्रेड के लिए चैनल या पैरेंट पर **View Channel** आवश्यक है, जबकि निजी थ्रेड के लिए अतिरिक्त रूप से सदस्यता या **Manage Threads** आवश्यक है। `users` उस समूह को और सीमित कर सकता है। OpenClaw बॉट और अपरिवर्तित ऑनलाइन स्थितियों को अनदेखा करता है तथा Gateway के पुनरारंभों के दौरान भी प्रति-उपयोगकर्ता आठ घंटे का कूलडाउन बनाए रखता है। जब Discord नया Gateway सत्र स्थापित करके `READY` भेजता है, तब गिल्ड की उपस्थिति स्थिति फिर से बनते समय OpenClaw `reconnectSuppressSeconds` तक (डिफ़ॉल्ट 300, `0` अक्षम करता है) उपस्थिति से प्राप्त इवेंट को रोकता है, ताकि दोबारा देखे गए सदस्य एजेंट को एक-एक करके सक्रिय न कर सकें। इसके अतिरिक्त, यह प्रत्येक गिल्ड के सफलतापूर्वक कतारबद्ध इवेंट को प्रत्येक `burstWindowSeconds` स्लाइडिंग विंडो (डिफ़ॉल्ट 60) में `burstLimit` इवेंट (डिफ़ॉल्ट 8) तक सीमित करता है और हर गिल्ड की रोक अवधि को एक बार लॉग करता है। पुनः आरंभ किया गया सत्र नया सत्र नहीं माना जाता। Discord 75,000 से अधिक सदस्यों वाले गिल्ड के स्नैपशॉट सीमित करता है; वहाँ अभिवादन से पहले OpenClaw को स्पष्ट ऑफ़लाइन अपडेट की आवश्यकता होती है। सिस्टम इवेंट में परिवर्तनशील प्रदर्शन नाम जोड़े बिना अपरिवर्तनीय उपयोगकर्ता, गिल्ड और चैनल ID होते हैं। एजेंट तय करता है कि अभिवादन करना है या नहीं और कैसे करना है।
+
+  </Accordion>
+
+  <Accordion title="पावती प्रतिक्रियाएँ">
+    किसी इनबाउंड संदेश को OpenClaw द्वारा संसाधित किए जाने के दौरान `ackReaction` एक पावती इमोजी भेजता है।
+
+    समाधान क्रम:
 
     - `channels.discord.accounts.<accountId>.ackReaction`
     - `channels.discord.ackReaction`
     - `messages.ackReaction`
-    - agent identity emoji fallback (`agents.list[].identity.emoji`, else "👀")
+    - एजेंट पहचान इमोजी फ़ॉलबैक (`agents.entries.*.identity.emoji`, अन्यथा "👀")
 
-    Notes:
+    टिप्पणियाँ:
 
-    - Discord unicode emoji या custom emoji names स्वीकार करता है।
-    - किसी channel या account के लिए reaction disable करने के लिए `""` उपयोग करें।
+    - Discord यूनिकोड इमोजी या कस्टम इमोजी नाम स्वीकार करता है।
+    - किसी चैनल या खाते के लिए प्रतिक्रिया अक्षम करने हेतु `""` का उपयोग करें।
+
+    **दायरा (`messages.ackReactionScope`):**
+
+    मान: `"all"` (DM + समूह, परिवेशी रूम इवेंट सहित), `"direct"` (केवल DM), `"group-all"` (परिवेशी रूम इवेंट के अतिरिक्त प्रत्येक समूह संदेश, कोई DM नहीं), `"group-mentions"` (जब बॉट का उल्लेख हो तब समूह; **कोई DM नहीं**, डिफ़ॉल्ट), `"off"` / `"none"` (अक्षम)।
+
+    <Note>
+    डिफ़ॉल्ट दायरा (`"group-mentions"`) सीधे संदेशों या परिवेशी रूम इवेंट में पावती प्रतिक्रियाएँ सक्रिय नहीं करता। इनबाउंड Discord DM और शांत रूम इवेंट पर पावती प्रतिक्रिया पाने के लिए, `messages.ackReactionScope` को `"all"` पर सेट करें।
+    </Note>
 
   </Accordion>
 
-  <Accordion title="Config writes">
-    Channel-initiated config writes default रूप से enabled हैं।
+  <Accordion title="कॉन्फ़िगरेशन लेखन">
+    चैनल द्वारा आरंभ किए गए कॉन्फ़िगरेशन लेखन डिफ़ॉल्ट रूप से सक्षम होते हैं। यह `/config set|unset` प्रवाहों को प्रभावित करता है (जब कमांड सुविधाएँ सक्षम हों)।
 
-    यह `/config set|unset` flows को प्रभावित करता है (जब command features enabled हों)।
-
-    Disable:
+    अक्षम करें:
 
 ```json5
 {
@@ -933,9 +951,9 @@ Default slash command settings:
 
   </Accordion>
 
-  <Accordion title="Gateway proxy">
-    Discord gateway WebSocket traffic और startup REST lookups (application ID + allowlist resolution) को `channels.discord.proxy` के साथ HTTP(S) proxy के माध्यम से route करें।
-    Discord Gateway WebSocket proxying explicit है; WebSocket connections Gateway process से ambient proxy environment variables inherit नहीं करते। Startup REST lookups इस proxy का उपयोग करते हैं जब `channels.discord.proxy` configured हो।
+  <Accordion title="Gateway प्रॉक्सी">
+    Discord Gateway WebSocket ट्रैफ़िक और स्टार्टअप REST लुकअप (एप्लिकेशन ID + अनुमतिसूची समाधान) को `channels.discord.proxy` के साथ HTTP(S) प्रॉक्सी से रूट करें।
+    Discord Gateway WebSocket प्रॉक्सी स्पष्ट होती है; WebSocket कनेक्शन Gateway प्रक्रिया के परिवेशी प्रॉक्सी एनवायरनमेंट वेरिएबल इनहेरिट नहीं करते। `channels.discord.proxy` कॉन्फ़िगर होने पर स्टार्टअप REST लुकअप इस प्रॉक्सी का उपयोग करते हैं।
 
 ```json5
 {
@@ -947,7 +965,7 @@ Default slash command settings:
 }
 ```
 
-    Per-account override:
+    प्रति-खाता ओवरराइड:
 
 ```json5
 {
@@ -966,7 +984,7 @@ Default slash command settings:
   </Accordion>
 
   <Accordion title="PluralKit समर्थन">
-    प्रॉक्सी किए गए संदेशों को सिस्टम सदस्य पहचान से मैप करने के लिए PluralKit रिज़ॉल्यूशन सक्षम करें:
+    प्रॉक्सी किए गए संदेशों को सिस्टम सदस्य पहचान से मैप करने के लिए PluralKit समाधान सक्षम करें:
 
 ```json5
 {
@@ -974,31 +992,31 @@ Default slash command settings:
     discord: {
       pluralkit: {
         enabled: true,
-        token: "pk_live_...", // optional; needed for private systems
+        token: "pk_live_...", // वैकल्पिक; निजी सिस्टम के लिए आवश्यक
       },
     },
   },
 }
 ```
 
-    नोट्स:
+    टिप्पणियाँ:
 
-    - allowlist में `pk:<memberId>` का उपयोग किया जा सकता है
-    - सदस्य प्रदर्शन नामों का मिलान नाम/स्लग से केवल तब किया जाता है जब `channels.discord.dangerouslyAllowNameMatching: true` हो
-    - lookup मूल संदेश ID का उपयोग करते हैं और समय-विंडो से सीमित होते हैं
-    - यदि lookup विफल होता है, तो प्रॉक्सी किए गए संदेशों को bot संदेश माना जाता है और `allowBots=true` न होने पर छोड़ दिया जाता है
+    - अनुमतिसूचियाँ `pk:<memberId>` का उपयोग कर सकती हैं
+    - सदस्य प्रदर्शन नाम केवल तभी नाम/स्लग द्वारा मिलाए जाते हैं जब `channels.discord.dangerouslyAllowNameMatching: true`
+    - लुकअप मूल संदेश ID के साथ PluralKit API को क्वेरी करते हैं
+    - यदि लुकअप विफल होता है, तो प्रॉक्सी किए गए संदेशों को बॉट संदेश मानकर हटा दिया जाता है, जब तक कि `allowBots` उन्हें आगे जाने की अनुमति न दे
 
   </Accordion>
 
-  <Accordion title="आउटबाउंड mention aliases">
-    जब एजेंटों को ज्ञात Discord उपयोगकर्ताओं के लिए नियतात्मक आउटबाउंड mentions चाहिए हों, तब `mentionAliases` का उपयोग करें। Keys अग्रणी `@` के बिना handles हैं; values Discord user IDs हैं। अज्ञात handles, `@everyone`, `@here`, और Markdown code spans के अंदर mentions अपरिवर्तित छोड़े जाते हैं।
+  <Accordion title="आउटबाउंड उल्लेख उपनाम">
+    जब एजेंटों को ज्ञात Discord उपयोगकर्ताओं के लिए नियतात्मक आउटबाउंड उल्लेखों की आवश्यकता हो, तब `mentionAliases` का उपयोग करें। कुंजियाँ आरंभिक `@` के बिना हैंडल होती हैं; मान Discord उपयोगकर्ता ID होते हैं। अज्ञात हैंडल, `@everyone`, `@here`, और Markdown कोड स्पैन के भीतर के उल्लेख अपरिवर्तित रहते हैं।
 
 ```json5
 {
   channels: {
     discord: {
       mentionAliases: {
-        Vladislava: "123456789012345678",
+        SupportLead: "123456789012345678",
       },
       accounts: {
         ops: {
@@ -1014,10 +1032,10 @@ Default slash command settings:
 
   </Accordion>
 
-  <Accordion title="Presence कॉन्फ़िगरेशन">
-    Presence अपडेट तब लागू होते हैं जब आप status या activity field सेट करते हैं, या जब आप auto presence सक्षम करते हैं।
+  <Accordion title="उपस्थिति कॉन्फ़िगरेशन">
+    जब आप कोई स्थिति या गतिविधि फ़ील्ड सेट करते हैं, या स्वचालित उपस्थिति सक्षम करते हैं, तब उपस्थिति अपडेट लागू किए जाते हैं।
 
-    केवल status का उदाहरण:
+    केवल स्थिति:
 
 ```json5
 {
@@ -1029,26 +1047,26 @@ Default slash command settings:
 }
 ```
 
-    Activity उदाहरण (custom status डिफ़ॉल्ट activity type है):
+    गतिविधि (`activity` सेट होने पर कस्टम स्थिति डिफ़ॉल्ट गतिविधि प्रकार होती है):
 
 ```json5
 {
   channels: {
     discord: {
-      activity: "Focus time",
+      activity: "केंद्रित समय",
       activityType: 4,
     },
   },
 }
 ```
 
-    Streaming उदाहरण:
+    स्ट्रीमिंग:
 
 ```json5
 {
   channels: {
     discord: {
-      activity: "Live coding",
+      activity: "लाइव कोडिंग",
       activityType: 1,
       activityUrl: "https://twitch.tv/openclaw",
     },
@@ -1056,16 +1074,16 @@ Default slash command settings:
 }
 ```
 
-    Activity type map:
+    गतिविधि प्रकार मैप:
 
-    - 0: Playing
-    - 1: Streaming (`activityUrl` आवश्यक)
-    - 2: Listening
-    - 3: Watching
-    - 4: Custom (activity text को status state के रूप में उपयोग करता है; emoji वैकल्पिक है)
-    - 5: Competing
+    - 0: खेल रहा है
+    - 1: स्ट्रीमिंग (`activityUrl` आवश्यक; इसके बदले `activityUrl` को `activityType: 1` आवश्यक है)
+    - 2: सुन रहा है
+    - 3: देख रहा है
+    - 4: कस्टम (गतिविधि टेक्स्ट को स्थिति स्टेट के रूप में उपयोग करता है; इमोजी वैकल्पिक है)
+    - 5: प्रतिस्पर्धा कर रहा है
 
-    Auto presence उदाहरण (runtime health signal):
+    स्वचालित उपस्थिति (रनटाइम स्वास्थ्य संकेत):
 
 ```json5
 {
@@ -1075,87 +1093,78 @@ Default slash command settings:
         enabled: true,
         intervalMs: 30000,
         minUpdateIntervalMs: 15000,
-        exhaustedText: "token exhausted",
+        exhaustedText: "टोकन समाप्त",
       },
     },
   },
 }
 ```
 
-    Auto presence runtime availability को Discord status से मैप करता है: healthy => online, degraded या unknown => idle, exhausted या unavailable => dnd. वैकल्पिक text overrides:
+    स्वचालित उपस्थिति रनटाइम उपलब्धता को Discord स्थिति से मैप करती है: स्वस्थ => ऑनलाइन, अवक्रमित या अज्ञात => निष्क्रिय, समाप्त या अनुपलब्ध => परेशान न करें। डिफ़ॉल्ट: `intervalMs` 30000, `minUpdateIntervalMs` 15000 (`intervalMs` से कम या उसके बराबर होना चाहिए)। वैकल्पिक टेक्स्ट ओवरराइड:
 
     - `autoPresence.healthyText`
     - `autoPresence.degradedText`
-    - `autoPresence.exhaustedText` (`{reason}` placeholder का समर्थन करता है)
+    - `autoPresence.exhaustedText` (`{reason}` प्लेसहोल्डर का समर्थन करता है)
 
   </Accordion>
 
   <Accordion title="Discord में अनुमोदन">
-    Discord DMs में button-आधारित approval handling का समर्थन करता है और वैकल्पिक रूप से originating channel में approval prompts पोस्ट कर सकता है।
+    Discord DM में बटन-आधारित अनुमोदन प्रबंधन का समर्थन करता है और वैकल्पिक रूप से मूल चैनल में अनुमोदन प्रॉम्प्ट पोस्ट कर सकता है।
 
-    Config path:
+    कॉन्फ़िगरेशन पथ:
 
     - `channels.discord.execApprovals.enabled`
-    - `channels.discord.execApprovals.approvers` (वैकल्पिक; संभव होने पर `commands.ownerAllowFrom` पर fallback करता है)
-    - `channels.discord.execApprovals.target` (`dm` | `channel` | `both`, default: `dm`)
+    - `channels.discord.execApprovals.approvers` (वैकल्पिक; संभव होने पर `commands.ownerAllowFrom` पर फ़ॉलबैक करता है)
+    - `channels.discord.execApprovals.target` (`dm` | `channel` | `both`, डिफ़ॉल्ट: `dm`)
     - `agentFilter`, `sessionFilter`, `cleanupAfterResolve`
 
-    Discord native exec approvals को auto-enable करता है जब `enabled` unset या `"auto"` हो और कम से कम एक approver resolve किया जा सके, या तो `execApprovals.approvers` से या `commands.ownerAllowFrom` से। Discord channel `allowFrom`, legacy `dm.allowFrom`, या direct-message `defaultTo` से exec approvers infer नहीं करता। Discord को native approval client के रूप में स्पष्ट रूप से अक्षम करने के लिए `enabled: false` सेट करें।
+    जब `enabled` सेट न हो या `"auto"` हो और कम-से-कम एक अनुमोदक को `execApprovals.approvers` या `commands.ownerAllowFrom` से हल किया जा सके, तब Discord मूल exec अनुमोदनों को स्वतः सक्षम करता है। Discord चैनल `allowFrom`, लेगेसी `dm.allowFrom`, या सीधे-संदेश `defaultTo` से exec अनुमोदकों का अनुमान नहीं लगाता। Discord को मूल अनुमोदन क्लाइंट के रूप में स्पष्टतः अक्षम करने के लिए `enabled: false` सेट करें।
 
-    `/diagnostics` और `/export-trajectory` जैसे संवेदनशील owner-only group commands के लिए, OpenClaw approval prompts और अंतिम results निजी रूप से भेजता है। जब invoking owner के पास Discord owner route होता है, तो यह पहले Discord DM आज़माता है; यदि वह उपलब्ध नहीं है, तो यह `commands.ownerAllowFrom` से पहले उपलब्ध owner route, जैसे Telegram, पर fallback करता है।
+    `/diagnostics` और `/export-trajectory` जैसे संवेदनशील, केवल-मालिक समूह कमांड के लिए OpenClaw अनुमोदन प्रॉम्प्ट और अंतिम परिणाम निजी रूप से भेजता है। जब आह्वान करने वाले मालिक के पास Discord मालिक रूट हो, तो यह पहले Discord DM का प्रयास करता है; अन्यथा यह `commands.ownerAllowFrom` से पहले उपलब्ध मालिक रूट, जैसे Telegram, पर फ़ॉलबैक करता है।
 
-    जब `target` `channel` या `both` हो, तो approval prompt channel में दिखाई देता है। केवल resolved approvers buttons का उपयोग कर सकते हैं; अन्य उपयोगकर्ताओं को ephemeral denial मिलता है। Approval prompts में command text शामिल होता है, इसलिए channel delivery केवल trusted channels में सक्षम करें। यदि channel ID को session key से derive नहीं किया जा सकता, तो OpenClaw DM delivery पर fallback करता है।
+    जब `target`, `channel` या `both` हो, तब अनुमोदन प्रॉम्प्ट चैनल में दिखाई देता है। केवल हल किए गए अनुमोदक बटनों का उपयोग कर सकते हैं; अन्य उपयोगकर्ताओं को अल्पकालिक अस्वीकृति मिलती है। अनुमोदन प्रॉम्प्ट में कमांड टेक्स्ट शामिल होता है, इसलिए चैनल डिलीवरी केवल विश्वसनीय चैनलों में सक्षम करें। यदि सत्र कुंजी से चैनल ID प्राप्त नहीं किया जा सकता, तो OpenClaw DM डिलीवरी पर फ़ॉलबैक करता है।
 
-    Discord अन्य chat channels द्वारा उपयोग किए जाने वाले साझा approval buttons भी render करता है। native Discord adapter मुख्य रूप से approver DM routing और channel fanout जोड़ता है।
-    जब वे buttons मौजूद हों, वे primary approval UX होते हैं; OpenClaw
-    को manual `/approve` command केवल तब शामिल करनी चाहिए जब tool result कहे कि
-    chat approvals अनुपलब्ध हैं या manual approval ही एकमात्र path है।
-    यदि Discord native approval runtime सक्रिय नहीं है, तो OpenClaw
-    local deterministic `/approve <id> <decision>` prompt दिखाई देता रखता है। यदि
-    runtime सक्रिय है लेकिन native card किसी target तक deliver नहीं किया जा सकता,
-    तो OpenClaw pending approval से exact `/approve`
-    command के साथ same-chat fallback notice भेजता है।
+    Discord अन्य चैट चैनलों द्वारा उपयोग किए जाने वाले साझा अनुमोदन बटन रेंडर करता है; मूल Discord अडैप्टर मुख्यतः अनुमोदक DM रूटिंग और चैनल फ़ैनआउट जोड़ता है। जब वे बटन मौजूद हों, तो वे प्राथमिक अनुमोदन UX होते हैं; OpenClaw को मैन्युअल `/approve` कमांड केवल तभी शामिल करना चाहिए जब टूल परिणाम बताए कि चैट अनुमोदन अनुपलब्ध हैं या मैन्युअल अनुमोदन ही एकमात्र मार्ग है। यदि Discord का मूल अनुमोदन रनटाइम सक्रिय नहीं है, तो OpenClaw स्थानीय नियतात्मक `/approve <id> <decision>` प्रॉम्प्ट दृश्यमान रखता है। यदि रनटाइम सक्रिय है लेकिन कोई मूल कार्ड किसी भी लक्ष्य तक नहीं पहुँचाया जा सकता, तो OpenClaw लंबित अनुमोदन से सटीक `/approve` कमांड सहित उसी चैट में फ़ॉलबैक सूचना भेजता है।
 
-    Gateway auth और approval resolution साझा Gateway client contract का पालन करते हैं (`plugin:` IDs `plugin.approval.resolve` के माध्यम से resolve होते हैं; अन्य IDs `exec.approval.resolve` के माध्यम से)। Approvals डिफ़ॉल्ट रूप से 30 मिनट के बाद expire हो जाते हैं।
+    Gateway प्रमाणीकरण और अनुमोदन समाधान साझा Gateway क्लाइंट अनुबंध का पालन करते हैं (`plugin:` ID, `plugin.approval.resolve` के माध्यम से हल होते हैं; अन्य ID, `exec.approval.resolve` के माध्यम से)। अनुमोदन डिफ़ॉल्ट रूप से 30 मिनट बाद समाप्त हो जाते हैं।
 
-    [Exec approvals](/hi/tools/exec-approvals) देखें।
+    [Exec अनुमोदन](/hi/tools/exec-approvals) देखें।
 
   </Accordion>
 </AccordionGroup>
 
-## Tools और action gates
+## टूल और कार्रवाई गेट
 
-Discord message actions में messaging, channel admin, moderation, presence, और metadata actions शामिल हैं।
+Discord संदेश कार्रवाइयों में संदेश-प्रेषण, चैनल प्रशासन, मॉडरेशन, उपस्थिति और मेटाडेटा शामिल हैं।
 
-Core उदाहरण:
+मुख्य उदाहरण:
 
-- messaging: `sendMessage`, `readMessages`, `editMessage`, `deleteMessage`, `threadReply`
-- reactions: `react`, `reactions`, `emojiList`
-- moderation: `timeout`, `kick`, `ban`
-- presence: `setPresence`
+- संदेश-प्रेषण: `sendMessage`, `readMessages`, `editMessage`, `deleteMessage`, `threadReply`
+- प्रतिक्रियाएँ: `react`, `reactions`, `emojiList`
+- मॉडरेशन: `timeout`, `kick`, `ban`
+- उपस्थिति: `setPresence`
 
-`event-create` action scheduled event cover image सेट करने के लिए वैकल्पिक `image` parameter (URL या local file path) स्वीकार करता है।
+`event-create` कार्रवाई अनुसूचित इवेंट की कवर छवि सेट करने के लिए वैकल्पिक `image` पैरामीटर (URL या स्थानीय फ़ाइल पथ) स्वीकार करती है।
 
-Action gates `channels.discord.actions.*` के अंतर्गत रहते हैं।
+कार्रवाई गेट `channels.discord.actions.*` के अंतर्गत होते हैं।
 
-Default gate behavior:
+डिफ़ॉल्ट गेट व्यवहार:
 
-| Action group                                                                                                                                                             | Default |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| reactions, messages, threads, pins, polls, search, memberInfo, roleInfo, channelInfo, channels, voiceStatus, events, stickers, emojiUploads, stickerUploads, permissions | enabled |
-| roles                                                                                                                                                                    | disabled |
-| moderation                                                                                                                                                               | disabled |
-| presence                                                                                                                                                                 | disabled |
+| क्रिया समूह                                                                                                                                                             | डिफ़ॉल्ट  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| प्रतिक्रियाएँ, संदेश, थ्रेड, पिन, पोल, खोज, सदस्य जानकारी, भूमिका जानकारी, चैनल जानकारी, चैनल, वॉइस स्थिति, ईवेंट, स्टिकर, इमोजी अपलोड, स्टिकर अपलोड, अनुमतियाँ | सक्षम  |
+| भूमिकाएँ                                                                                                                                                                    | अक्षम |
+| मॉडरेशन                                                                                                                                                               | अक्षम |
+| उपस्थिति                                                                                                                                                                 | अक्षम |
 
-## Components v2 UI
+## कंपोनेंट्स v2 UI
 
-OpenClaw exec approvals और cross-context markers के लिए Discord components v2 का उपयोग करता है। Discord message actions custom UI के लिए `components` भी स्वीकार कर सकते हैं (advanced; discord tool के माध्यम से component payload बनाने की आवश्यकता होती है), जबकि legacy `embeds` उपलब्ध रहते हैं लेकिन recommended नहीं हैं।
+OpenClaw निष्पादन अनुमोदनों और क्रॉस-कॉन्टेक्स्ट मार्कर के लिए Discord कंपोनेंट्स v2 का उपयोग करता है। Discord संदेश क्रियाएँ कस्टम UI के लिए `components` भी स्वीकार कर सकती हैं (उन्नत; इसके लिए discord टूल के माध्यम से कंपोनेंट पेलोड बनाना आवश्यक है), जबकि पुराने `embeds` अभी भी उपलब्ध हैं, लेकिन उनकी अनुशंसा नहीं की जाती।
 
-- `channels.discord.ui.components.accentColor` Discord component containers द्वारा उपयोग किया जाने वाला accent color सेट करता है (hex)।
-- प्रति account `channels.discord.accounts.<id>.ui.components.accentColor` से सेट करें।
-- `channels.discord.agentComponents.ttlMs` नियंत्रित करता है कि भेजे गए Discord component callbacks कितनी देर तक registered रहते हैं (default `1800000`, maximum `86400000`)। प्रति account `channels.discord.accounts.<id>.agentComponents.ttlMs` से सेट करें।
-- components v2 मौजूद होने पर `embeds` ignore किए जाते हैं।
-- Plain URL previews default रूप से suppress किए जाते हैं। जब single outbound link expand होना चाहिए, तो message action पर `suppressEmbeds: false` सेट करें।
+- `channels.discord.ui.components.accentColor` Discord कंपोनेंट कंटेनर द्वारा उपयोग किया जाने वाला एक्सेंट रंग (हेक्स) सेट करता है। प्रति अकाउंट: `channels.discord.accounts.<id>.ui.components.accentColor`।
+- `channels.discord.agentComponents.ttlMs` नियंत्रित करता है कि भेजे गए Discord कंपोनेंट कॉलबैक कितनी देर तक पंजीकृत रहें (डिफ़ॉल्ट `1800000`, अधिकतम `86400000`)। प्रति अकाउंट: `channels.discord.accounts.<id>.agentComponents.ttlMs`।
+- `embeds` को कंपोनेंट्स v2 मौजूद होने पर अनदेखा कर दिया जाता है।
+- सादे URL पूर्वावलोकन डिफ़ॉल्ट रूप से दबा दिए जाते हैं। जब किसी एक आउटबाउंड लिंक को विस्तृत करना हो, तो संदेश क्रिया पर `suppressEmbeds: false` सेट करें।
 
 उदाहरण:
 
@@ -1173,22 +1182,22 @@ OpenClaw exec approvals और cross-context markers के लिए Discord co
 }
 ```
 
-## Voice
+## वॉइस
 
-Discord में दो अलग-अलग voice surfaces हैं: realtime **voice channels** (continuous conversations) और **voice message attachments** (waveform preview format)। Gateway दोनों का समर्थन करता है।
+Discord में दो अलग-अलग वॉइस सतहें हैं: रीयलटाइम **वॉइस चैनल** (निरंतर बातचीत) और **वॉइस संदेश अटैचमेंट** (वेवफ़ॉर्म पूर्वावलोकन प्रारूप)। Gateway दोनों का समर्थन करता है।
 
-### Voice channels
+### वॉइस चैनल
 
-Setup checklist:
+सेटअप चेकलिस्ट:
 
 1. Discord Developer Portal में Message Content Intent सक्षम करें।
-2. role/user allowlists उपयोग होने पर Server Members Intent सक्षम करें।
-3. bot को `bot` और `applications.commands` scopes के साथ invite करें।
-4. target voice channel में Connect, Speak, Send Messages, और Read Message History प्रदान करें।
-5. native commands (`commands.native` या `channels.discord.commands.native`) सक्षम करें।
-6. `channels.discord.voice` configure करें।
+2. भूमिका/उपयोगकर्ता अनुमत-सूचियों का उपयोग होने पर Server Members Intent सक्षम करें।
+3. बॉट को `bot` और `applications.commands` स्कोप के साथ आमंत्रित करें।
+4. लक्ष्य वॉइस चैनल में Connect, Speak, Send Messages और Read Message History प्रदान करें।
+5. नेटिव कमांड (`commands.native` या `channels.discord.commands.native`) सक्षम करें।
+6. `channels.discord.voice` कॉन्फ़िगर करें।
 
-sessions को control करने के लिए `/vc join|leave|status` का उपयोग करें। command account default agent का उपयोग करता है और अन्य Discord commands जैसे ही allowlist और group policy rules का पालन करता है।
+सत्रों को नियंत्रित करने के लिए `/vc join|leave|status` का उपयोग करें। कमांड अकाउंट के डिफ़ॉल्ट एजेंट का उपयोग करता है और अन्य Discord कमांड की तरह समान अनुमत-सूची और समूह नीति नियमों का पालन करता है।
 
 ```bash
 /vc join channel:<voice-channel-id>
@@ -1196,13 +1205,13 @@ sessions को control करने के लिए `/vc join|leave|status` �
 /vc leave
 ```
 
-join करने से पहले bot की effective permissions inspect करने के लिए, चलाएँ:
+शामिल होने से पहले बॉट की प्रभावी अनुमतियों का निरीक्षण करने के लिए:
 
 ```bash
 openclaw channels capabilities --channel discord --target channel:<voice-channel-id>
 ```
 
-Auto-join उदाहरण:
+स्वतः शामिल होने का उदाहरण:
 
 ```json5
 {
@@ -1210,7 +1219,7 @@ Auto-join उदाहरण:
     discord: {
       voice: {
         enabled: true,
-        model: "openai/gpt-5.5",
+        model: "openai/gpt-5.6-sol",
         autoJoin: [
           {
             guildId: "123456789012345678",
@@ -1229,7 +1238,7 @@ Auto-join उदाहरण:
         reconnectGraceMs: 15000,
         realtime: {
           provider: "openai",
-          model: "gpt-realtime-2",
+          model: "gpt-realtime-2.1",
           speakerVoice: "cedar",
         },
       },
@@ -1238,46 +1247,44 @@ Auto-join उदाहरण:
 }
 ```
 
-नोट्स:
+टिप्पणियाँ:
 
-- `voice.tts` केवल `stt-tts` वॉइस प्लेबैक के लिए `messages.tts` को ओवरराइड करता है। रीयलटाइम मोड `voice.realtime.speakerVoice` का उपयोग करते हैं।
-- `voice.mode` बातचीत पथ को नियंत्रित करता है। डिफ़ॉल्ट `agent-proxy` है: एक रीयलटाइम वॉइस फ्रंट एंड टर्न टाइमिंग, इंटरप्शन, और प्लेबैक संभालता है, `openclaw_agent_consult` के ज़रिए रूट किए गए OpenClaw एजेंट को सार्थक काम सौंपता है, और परिणाम को उस स्पीकर से आए टाइप किए गए Discord प्रॉम्प्ट की तरह मानता है। `stt-tts` पुराना बैच STT प्लस TTS फ़्लो रखता है। `bidi` रीयलटाइम मॉडल को सीधे बातचीत करने देता है, जबकि OpenClaw ब्रेन के लिए `openclaw_agent_consult` उपलब्ध कराता है।
-- `voice.agentSession` नियंत्रित करता है कि कौन-सी OpenClaw बातचीत वॉइस टर्न प्राप्त करती है। वॉइस चैनल के अपने सेशन के लिए इसे सेट न करें, या वॉइस चैनल को `#maintainers` जैसे मौजूदा Discord टेक्स्ट चैनल सेशन के माइक्रोफ़ोन/स्पीकर एक्सटेंशन के रूप में काम कराने के लिए `{ mode: "target", target: "channel:<text-channel-id>" }` सेट करें।
-- `voice.model` Discord वॉइस जवाबों और रीयलटाइम कंसल्ट्स के लिए OpenClaw एजेंट ब्रेन को ओवरराइड करता है। रूट किए गए एजेंट मॉडल को इनहेरिट करने के लिए इसे सेट न करें। यह `voice.realtime.model` से अलग है।
-- `voice.followUsers` बॉट को चुने हुए उपयोगकर्ताओं के साथ Discord वॉइस में जुड़ने, मूव करने, और छोड़ने देता है। व्यवहार नियमों और उदाहरणों के लिए [वॉइस में उपयोगकर्ताओं का अनुसरण करें](#follow-users-in-voice) देखें।
-- `agent-proxy` स्पीच को `discord-voice` के माध्यम से रूट करता है, जो स्पीकर और टार्गेट सेशन के लिए सामान्य owner/tool ऑथराइज़ेशन बनाए रखता है, लेकिन एजेंट `tts` टूल छिपाता है क्योंकि Discord वॉइस प्लेबैक का मालिक है। डिफ़ॉल्ट रूप से, `agent-proxy` owner स्पीकर्स के लिए कंसल्ट को पूर्ण owner-समकक्ष टूल एक्सेस देता है (`voice.realtime.toolPolicy: "owner"`) और सार्थक उत्तरों से पहले OpenClaw एजेंट से कंसल्ट करने को बहुत प्राथमिकता देता है (`voice.realtime.consultPolicy: "always"`)। उस डिफ़ॉल्ट `always` मोड में, रीयलटाइम लेयर कंसल्ट उत्तर से पहले अपने-आप फ़िलर नहीं बोलती; यह स्पीच कैप्चर और ट्रांसक्राइब करती है, फिर रूट किया गया OpenClaw उत्तर बोलती है। यदि Discord पहले उत्तर को अभी भी चला रहा हो और कई मजबूर कंसल्ट उत्तर समाप्त हो जाएँ, तो बाद के exact-speech उत्तरों को बीच वाक्य में स्पीच बदलने के बजाय प्लेबैक निष्क्रिय होने तक क्यू में रखा जाता है।
+- केवल-टेक्स्ट कॉन्फ़िगरेशन के लिए Discord वॉइस ऑप्ट-इन है; `/vc` कमांड, वॉइस रनटाइम और `GuildVoiceStates` Gateway इंटेंट सक्षम करने के लिए `channels.discord.voice.enabled=true` सेट करें (या मौजूदा `channels.discord.voice` ब्लॉक बनाए रखें)। `channels.discord.intents.voiceStates` इंटेंट सब्सक्रिप्शन को स्पष्ट रूप से ओवरराइड कर सकता है; प्रभावी वॉइस सक्षमता का अनुसरण करने के लिए इसे सेट न करें।
+- `voice.mode` वार्तालाप पथ नियंत्रित करता है। डिफ़ॉल्ट `agent-proxy` है: एक रीयलटाइम वॉइस फ़्रंट एंड टर्न का समय, व्यवधान और प्लेबैक संभालता है, `openclaw_agent_consult` के माध्यम से रूट किए गए OpenClaw एजेंट को मूल कार्य सौंपता है और परिणाम को उस वक्ता से आए टाइप किए गए Discord प्रॉम्प्ट की तरह मानता है। `stt-tts` पुराने बैच STT और TTS प्रवाह को बनाए रखता है। `bidi` रीयलटाइम मॉडल को सीधे वार्तालाप करने देता है और साथ ही OpenClaw मस्तिष्क के लिए `openclaw_agent_consult` उपलब्ध कराता है।
+- `voice.agentSession` नियंत्रित करता है कि वॉइस टर्न किस OpenClaw वार्तालाप को प्राप्त होंगे। वॉइस चैनल के अपने सत्र के लिए इसे सेट न करें, या वॉइस चैनल को `#maintainers` जैसे किसी मौजूदा Discord टेक्स्ट चैनल सत्र के माइक्रोफ़ोन/स्पीकर विस्तार के रूप में काम करने देने के लिए `{ mode: "target", target: "channel:<text-channel-id>" }` सेट करें।
+- `voice.model` Discord वॉइस प्रतिक्रियाओं और रीयलटाइम परामर्शों के लिए OpenClaw एजेंट मस्तिष्क को ओवरराइड करता है। रूट किए गए एजेंट मॉडल को इनहेरिट करने के लिए इसे सेट न करें। यह `voice.realtime.model` से अलग है।
+- `voice.followUsers` बॉट को चुने गए उपयोगकर्ताओं के साथ Discord वॉइस में शामिल होने, स्थानांतरित होने और बाहर निकलने देता है। [वॉइस में उपयोगकर्ताओं का अनुसरण करें](#follow-users-in-voice) देखें।
+- `agent-proxy` वाक् को `discord-voice` के माध्यम से रूट करता है, जो वक्ता और लक्षित सत्र के लिए सामान्य स्वामी/टूल प्राधिकरण बनाए रखता है, लेकिन एजेंट का `tts` टूल छिपाता है क्योंकि प्लेबैक का स्वामित्व Discord वॉइस के पास है। डिफ़ॉल्ट रूप से, `agent-proxy` स्वामी वक्ताओं (`voice.realtime.toolPolicy: "owner"`) के परामर्श को स्वामी के समकक्ष पूर्ण टूल एक्सेस देता है और मूल उत्तर देने से पहले OpenClaw एजेंट से परामर्श करने को दृढ़ता से प्राथमिकता देता है (`voice.realtime.consultPolicy: "always"`)। उस डिफ़ॉल्ट `always` मोड में, रीयलटाइम परत परामर्श उत्तर से पहले पूरक वाक्यांश स्वचालित रूप से नहीं बोलती; यह वाक् को कैप्चर करके उसका ट्रांसक्रिप्शन करती है, फिर रूट किया गया OpenClaw उत्तर बोलती है। यदि Discord द्वारा पहला उत्तर चलाए जाते समय कई बलपूर्वक परामर्श उत्तर पूरे हो जाते हैं, तो बाद के सटीक-वाक् उत्तरों को वाक्य के बीच में वाक् बदलने के बजाय प्लेबैक निष्क्रिय होने तक कतार में रखा जाता है।
 - `stt-tts` मोड में, STT `tools.media.audio` का उपयोग करता है; `voice.model` ट्रांसक्रिप्शन को प्रभावित नहीं करता।
-- रीयलटाइम मोड में, `voice.realtime.provider`, `voice.realtime.model`, और `voice.realtime.speakerVoice` रीयलटाइम ऑडियो सेशन कॉन्फ़िगर करते हैं। OpenAI Realtime 2 प्लस Codex ब्रेन के लिए, `voice.realtime.model: "gpt-realtime-2"` और `voice.model: "openai/gpt-5.5"` उपयोग करें।
-- रीयलटाइम वॉइस मोड डिफ़ॉल्ट रूप से रीयलटाइम प्रदाता निर्देशों में छोटे `IDENTITY.md`, `USER.md`, और `SOUL.md` प्रोफ़ाइल फ़ाइलें शामिल करते हैं, ताकि तेज़ सीधे टर्न वही पहचान, उपयोगकर्ता आधार, और persona रखें जो रूट किए गए OpenClaw एजेंट में है। इसे कस्टमाइज़ करने के लिए `voice.realtime.bootstrapContextFiles` को किसी subset पर सेट करें, या इसे बंद करने के लिए `[]` सेट करें। समर्थित रीयलटाइम bootstrap फ़ाइलें केवल उन प्रोफ़ाइल फ़ाइलों तक सीमित हैं; `AGENTS.md` सामान्य एजेंट संदर्भ में रहता है। इंजेक्ट किया गया प्रोफ़ाइल संदर्भ workspace काम, मौजूदा तथ्यों, मेमोरी lookup, या टूल-समर्थित कार्रवाइयों के लिए `openclaw_agent_consult` को प्रतिस्थापित नहीं करता।
-- OpenAI `agent-proxy` रीयलटाइम मोड में, Discord रीयलटाइम वॉइस को तब तक मौन रखने के लिए `voice.realtime.requireWakeName: true` सेट करें जब तक कोई ट्रांसक्रिप्ट wake name से शुरू या समाप्त न हो। कॉन्फ़िगर किए गए wake names एक या दो शब्द होने चाहिए। यदि `voice.realtime.wakeNames` सेट नहीं है, तो OpenClaw रूट किए गए एजेंट `name` प्लस `OpenClaw` का उपयोग करता है, और fallback में एजेंट id प्लस `OpenClaw` का उपयोग करता है। Wake-name gating रीयलटाइम प्रदाता auto-response को बंद करती है, स्वीकार किए गए टर्न को OpenClaw एजेंट कंसल्ट पथ से रूट करती है, और अंतिम ट्रांसक्रिप्ट आने से पहले partial transcription से leading wake name पहचाने जाने पर एक छोटा बोला गया acknowledgement देती है।
-- OpenAI रीयलटाइम प्रदाता आउटपुट ऑडियो और ट्रांसक्रिप्ट इवेंट्स के लिए मौजूदा Realtime 2 इवेंट नाम और legacy Codex-compatible aliases स्वीकार करता है, ताकि compatible provider snapshots सहायक ऑडियो छोड़े बिना drift कर सकें।
-- `voice.realtime.bargeIn` नियंत्रित करता है कि Discord speaker-start events सक्रिय रीयलटाइम प्लेबैक को interrupt करते हैं या नहीं। यदि unset हो, तो यह रीयलटाइम प्रदाता की input-audio interruption setting का पालन करता है।
-- `voice.realtime.minBargeInAudioEndMs` OpenAI रीयलटाइम barge-in द्वारा ऑडियो truncate करने से पहले न्यूनतम assistant playback duration नियंत्रित करता है। डिफ़ॉल्ट: `250`। low-echo rooms में immediate interruption के लिए `0` सेट करें, या echo-heavy speaker setups के लिए इसे बढ़ाएँ।
-- Discord प्लेबैक पर OpenAI वॉइस के लिए, `voice.tts.provider: "openai"` सेट करें और `voice.tts.providers.openai.speakerVoice` के अंतर्गत Text-to-speech voice चुनें। मौजूदा OpenAI TTS मॉडल पर `cedar` एक अच्छा masculine-sounding विकल्प है।
-- Per-channel Discord `systemPrompt` overrides उस वॉइस चैनल के वॉइस ट्रांसक्रिप्ट टर्न पर लागू होते हैं।
-- वॉइस ट्रांसक्रिप्ट टर्न owner-gated commands और channel actions के लिए Discord `allowFrom` (या `dm.allowFrom`) से owner status प्राप्त करते हैं। एजेंट टूल visibility रूट किए गए सेशन के लिए कॉन्फ़िगर की गई tool policy का पालन करती है।
-- Discord वॉइस text-only configs के लिए opt-in है; `/vc` commands, वॉइस runtime, और `GuildVoiceStates` gateway intent सक्षम करने के लिए `channels.discord.voice.enabled=true` सेट करें (या मौजूदा `channels.discord.voice` block रखें)।
-- `channels.discord.intents.voiceStates` voice-state intent subscription को स्पष्ट रूप से override कर सकता है। intent को प्रभावी voice enablement का पालन कराने के लिए इसे unset छोड़ें।
-- यदि `voice.autoJoin` में एक ही guild के लिए कई entries हैं, तो OpenClaw उस guild के लिए आख़िरी configured channel में जुड़ता है।
-- `voice.allowedChannels` एक वैकल्पिक residency allowlist है। किसी भी authorized Discord voice channel में `/vc join` की अनुमति देने के लिए इसे unset छोड़ें। सेट होने पर, `/vc join`, startup auto-join, और bot voice-state moves सूचीबद्ध `{ guildId, channelId }` entries तक सीमित रहते हैं। सभी Discord voice joins deny करने के लिए इसे empty array पर सेट करें। यदि Discord बॉट को allowlist के बाहर move करता है, तो OpenClaw उस channel को छोड़ देता है और उपलब्ध होने पर configured auto-join target से फिर जुड़ता है।
-- `voice.daveEncryption` और `voice.decryptionFailureTolerance` `@discordjs/voice` join options तक pass through होते हैं।
-- यदि unset हों, तो `@discordjs/voice` defaults `daveEncryption=true` और `decryptionFailureTolerance=24` हैं।
-- OpenClaw Discord voice receive और realtime raw PCM playback के लिए bundled `libopus-wasm` codec का उपयोग करता है। यह pinned libopus WebAssembly build ship करता है और native opus addons की आवश्यकता नहीं होती।
-- `voice.connectTimeoutMs` `/vc join` और auto-join attempts के लिए शुरुआती `@discordjs/voice` Ready wait नियंत्रित करता है। डिफ़ॉल्ट: `30000`।
-- `voice.reconnectGraceMs` नियंत्रित करता है कि disconnected voice session को destroy करने से पहले OpenClaw उसके reconnecting शुरू होने का कितनी देर इंतज़ार करता है। डिफ़ॉल्ट: `15000`।
-- `stt-tts` मोड में, वॉइस प्लेबैक सिर्फ़ इसलिए नहीं रुकता क्योंकि कोई दूसरा उपयोगकर्ता बोलना शुरू कर देता है। feedback loops से बचने के लिए, TTS playing होने के दौरान OpenClaw नया voice capture ignore करता है; अगले turn के लिए playback समाप्त होने के बाद बोलें। रीयलटाइम मोड speaker starts को barge-in signals के रूप में realtime provider को forward करते हैं।
-- रीयलटाइम मोड में, speakers से open mic में आने वाली echo barge-in जैसी दिख सकती है और playback interrupt कर सकती है। echo-heavy Discord rooms के लिए, input audio पर OpenAI को auto-interrupt करने से रोकने के लिए `voice.realtime.providers.openai.interruptResponseOnInputAudio: false` सेट करें। यदि आप अभी भी चाहते हैं कि Discord speaker-start events सक्रिय playback interrupt करें, तो `voice.realtime.bargeIn: true` जोड़ें। OpenAI realtime bridge `voice.realtime.minBargeInAudioEndMs` से छोटी playback truncations को संभावित echo/noise मानकर ignore करता है और Discord playback clear करने के बजाय उन्हें skipped के रूप में log करता है।
-- `voice.captureSilenceGraceMs` नियंत्रित करता है कि Discord द्वारा किसी speaker के रुकने की रिपोर्ट के बाद OpenClaw उस audio segment को STT के लिए finalize करने से पहले कितनी देर इंतज़ार करता है। डिफ़ॉल्ट: `2000`; यदि Discord सामान्य pauses को choppy partial transcripts में बाँटता है, तो इसे बढ़ाएँ।
-- जब ElevenLabs चुना गया TTS provider हो, तो Discord voice playback streaming TTS का उपयोग करता है और provider response stream से शुरू होता है। Streaming support के बिना providers synthesized temp-file path पर fallback करते हैं।
-- OpenClaw receive decrypt failures को भी देखता है और कम समय में repeated failures के बाद voice channel छोड़कर/rejoin करके auto-recover करता है।
-- यदि update करने के बाद receive logs बार-बार `DecryptionFailed(UnencryptedWhenPassthroughDisabled)` दिखाएँ, तो dependency report और logs collect करें। bundled `@discordjs/voice` line में discord.js PR #11449 से upstream padding fix शामिल है, जिसने discord.js issue #11419 बंद किया।
-- `The operation was aborted` receive events अपेक्षित हैं जब OpenClaw captured speaker segment को finalize करता है; वे verbose diagnostics हैं, warnings नहीं।
-- Verbose Discord voice logs हर accepted speaker segment के लिए bounded one-line STT transcript preview शामिल करते हैं, ताकि debugging unbounded transcript text dump किए बिना user side और agent reply side दोनों दिखाए।
-- `agent-proxy` मोड में, forced consult fallback संभावित incomplete transcript fragments को skip करता है, जैसे `...` पर समाप्त text या `and` जैसा trailing connector, साथ ही “be right back” या “bye” जैसे obvious non-actionable closings। जब यह stale queued answer को रोकता है, logs `forced agent consult skipped reason=...` दिखाते हैं।
+- रीयलटाइम मोड में, `voice.realtime.provider`, `voice.realtime.model` और `voice.realtime.speakerVoice` रीयलटाइम ऑडियो सत्र कॉन्फ़िगर करते हैं। OpenAI Realtime 2.1 और Codex मस्तिष्क के लिए `voice.realtime.model: "gpt-realtime-2.1"` और `voice.model: "openai/gpt-5.6-sol"` का उपयोग करें।
+- रीयलटाइम वॉइस मोड डिफ़ॉल्ट रूप से रीयलटाइम प्रदाता निर्देशों में छोटी `IDENTITY.md`, `USER.md` और `SOUL.md` प्रोफ़ाइल फ़ाइलें शामिल करते हैं, ताकि तेज़ प्रत्यक्ष टर्न रूट किए गए OpenClaw एजेंट जैसी ही पहचान, उपयोगकर्ता-आधार और व्यक्तित्व बनाए रखें। इसे अनुकूलित करने के लिए `voice.realtime.bootstrapContextFiles` को किसी उपसमुच्चय पर सेट करें, या इसे अक्षम करने के लिए `[]` सेट करें। केवल वे प्रोफ़ाइल फ़ाइलें समर्थित हैं; `AGENTS.md` सामान्य एजेंट संदर्भ में बनी रहती है। इंजेक्ट किया गया प्रोफ़ाइल संदर्भ कार्यस्थान के कार्य, वर्तमान तथ्यों, मेमोरी खोज या टूल-समर्थित कार्रवाइयों के लिए `openclaw_agent_consult` को प्रतिस्थापित नहीं करता।
+- OpenAI `agent-proxy` रीयलटाइम मोड में, वेक-नाम गेटिंग डिफ़ॉल्ट रूप से कमरे के अनुरूप ढलती है: एक व्यक्ति बिना वेक नाम के स्वाभाविक रूप से बात कर सकता है, जबकि दो या अधिक व्यक्तियों को टर्न की शुरुआत या अंत वेक नाम से करना होगा। अन्य बॉट लोगों की संख्या में नहीं गिने जाते। हमेशा वेक नाम आवश्यक करने के लिए `voice.realtime.requireWakeName: true` या कभी भी आवश्यक न करने के लिए `false` सेट करें। कॉन्फ़िगर किए गए वेक नाम एक या दो शब्दों के होने चाहिए। यदि `voice.realtime.wakeNames` सेट नहीं है, तो OpenClaw रूट किए गए एजेंट के `name` के साथ `OpenClaw` का उपयोग करता है और अनुपलब्ध होने पर एजेंट आईडी के साथ `OpenClaw` का उपयोग करता है। सक्रिय वेक-नाम गेट रीयलटाइम प्रदाता की स्वचालित प्रतिक्रिया अक्षम करता है, स्वीकृत टर्न को OpenClaw एजेंट परामर्श पथ से रूट करता है और अंतिम ट्रांसक्रिप्ट आने से पहले आंशिक ट्रांसक्रिप्शन में आरंभिक वेक नाम पहचाने जाने पर संक्षिप्त मौखिक अभिस्वीकृति देता है। यह नीति वॉइस को दोबारा कनेक्ट किए बिना लाइव शामिल होने और बाहर निकलने की घटनाओं का अनुसरण करती है।
+- OpenAI रीयलटाइम प्रदाता आउटपुट ऑडियो और ट्रांसक्रिप्ट इवेंट के लिए वर्तमान Realtime 2 इवेंट नाम और पुराने Codex-संगत उपनाम स्वीकार करता है, ताकि संगत प्रदाता स्नैपशॉट में बदलाव होने पर भी सहायक का ऑडियो न छूटे।
+- `voice.realtime.bargeIn` नियंत्रित करता है कि Discord में वक्ता के बोलना शुरू करने की घटनाएँ सक्रिय रीयलटाइम प्लेबैक को बाधित करेंगी या नहीं। यदि सेट नहीं है, तो यह रीयलटाइम प्रदाता की इनपुट-ऑडियो व्यवधान सेटिंग का अनुसरण करता है।
+- `voice.realtime.minBargeInAudioEndMs` वह न्यूनतम सहायक प्लेबैक अवधि नियंत्रित करता है जिसके बाद OpenAI रीयलटाइम बार्ज-इन ऑडियो को काटता है। डिफ़ॉल्ट: `250`। कम प्रतिध्वनि वाले कमरों में तत्काल व्यवधान के लिए `0` सेट करें, या अधिक प्रतिध्वनि वाले स्पीकर सेटअप के लिए इसे बढ़ाएँ।
+- `voice.tts` केवल `stt-tts` वॉइस प्लेबैक के लिए `tts` को ओवरराइड करता है; रीयलटाइम मोड इसके बजाय `voice.realtime.speakerVoice` का उपयोग करते हैं। Discord प्लेबैक पर OpenAI वॉइस के लिए `voice.tts.provider: "openai"` सेट करें और `voice.tts.providers.openai.speakerVoice` के अंतर्गत टेक्स्ट-टू-स्पीच वॉइस चुनें। वर्तमान OpenAI TTS मॉडल पर `cedar` पुरुषोचित ध्वनि वाला एक अच्छा विकल्प है।
+- प्रति-चैनल Discord `systemPrompt` ओवरराइड उस वॉइस चैनल के वॉइस ट्रांसक्रिप्ट टर्न पर लागू होते हैं।
+- जब OpenClaw किसी वॉइस चैनल में शामिल होता है, तो रूट किए गए एजेंट सत्र को वर्तमान प्रतिभागी सूची वाला एक मौन सिस्टम इवेंट मिलता है। बाद में प्रतिभागियों के शामिल होने और बाहर निकलने पर उस सत्र को बिना किसी अनचाही मौखिक प्रतिक्रिया के अपडेट किया जाता है; Discord प्रदर्शन नामों को अविश्वसनीय लेबल माना जाता है। अधिकृत वॉइस टर्न को भी प्रतिभागियों की नई सूची का स्नैपशॉट मिलता है।
+- वॉइस ट्रांसक्रिप्ट टर्न और `/vc` कमांड स्वामी स्थिति के लिए `commands.ownerAllowFrom` में मौजूद Discord प्रविष्टियों का उपयोग करते हैं। जब कोई Discord कमांड स्वामी कॉन्फ़िगर नहीं होता, तो चुने गए Discord खाते का `allowFrom` (या पुराना `dm.allowFrom`) स्वामी स्थिति दिए बिना भी वॉइस एक्सेस अधिकृत कर सकता है। एजेंट टूल की दृश्यता रूट किए गए सत्र के लिए कॉन्फ़िगर की गई टूल नीति का अनुसरण करती है।
+- यदि `voice.autoJoin` में एक ही गिल्ड के लिए कई प्रविष्टियाँ हैं, तो OpenClaw उस गिल्ड के लिए अंतिम कॉन्फ़िगर किए गए चैनल में शामिल होता है।
+- `voice.allowedChannels` एक वैकल्पिक निवास अनुमति-सूची है। `/vc join` को किसी भी अधिकृत Discord वॉइस चैनल में जाने देने के लिए इसे सेट न करें। सेट होने पर `/vc join`, स्टार्टअप पर स्वचालित रूप से शामिल होना और बॉट की वॉइस-स्थिति में स्थानांतरण सूचीबद्ध `{ guildId, channelId }` प्रविष्टियों तक सीमित रहते हैं। Discord वॉइस में शामिल होने की सभी कार्रवाइयाँ अस्वीकार करने के लिए इसे रिक्त ऐरे पर सेट करें। यदि Discord बॉट को अनुमति-सूची से बाहर ले जाता है, तो OpenClaw उस चैनल से बाहर निकल जाता है और उपलब्ध होने पर कॉन्फ़िगर किए गए स्वतः-शामिल लक्ष्य में दोबारा शामिल होता है।
+- `voice.daveEncryption` और `voice.decryptionFailureTolerance`, `@discordjs/voice` के शामिल होने के विकल्पों को सीधे भेजे जाते हैं; अपस्ट्रीम डिफ़ॉल्ट `daveEncryption=true` और `decryptionFailureTolerance=24` हैं।
+- OpenClaw, Discord वॉइस प्राप्ति और रीयलटाइम रॉ PCM प्लेबैक के लिए बंडल किए गए `libopus-wasm` कोडेक का उपयोग करता है। इसके साथ पिन किया हुआ libopus WebAssembly बिल्ड आता है और इसे नेटिव opus ऐडऑन की आवश्यकता नहीं होती।
+- `voice.connectTimeoutMs`, `/vc join` और स्वतः-शामिल होने के प्रयासों के लिए आरंभिक `@discordjs/voice` Ready प्रतीक्षा नियंत्रित करता है। डिफ़ॉल्ट: `30000`।
+- `voice.reconnectGraceMs` नियंत्रित करता है कि OpenClaw डिस्कनेक्ट हुए वॉइस सत्र को नष्ट करने से पहले उसके पुनः कनेक्ट होना शुरू करने की कितनी देर प्रतीक्षा करता है। डिफ़ॉल्ट: `15000`।
+- `stt-tts` मोड में, केवल किसी अन्य उपयोगकर्ता के बोलना शुरू करने से वॉइस प्लेबैक बंद नहीं होता। फ़ीडबैक लूप से बचने के लिए, TTS चलते समय OpenClaw नए वॉइस कैप्चर को अनदेखा करता है; अगले टर्न के लिए प्लेबैक समाप्त होने के बाद बोलें। रीयलटाइम मोड वक्ता के बोलना शुरू करने की घटनाओं को बार्ज-इन संकेतों के रूप में रीयलटाइम प्रदाता को भेजते हैं।
+- रीयलटाइम मोड में, स्पीकर से खुले माइक में आने वाली प्रतिध्वनि बार्ज-इन जैसी लग सकती है और प्लेबैक बाधित कर सकती है। अधिक प्रतिध्वनि वाले Discord कमरों में, इनपुट ऑडियो पर OpenAI का स्वतः बाधित होना रोकने के लिए `voice.realtime.providers.openai.interruptResponseOnInputAudio: false` सेट करें। यदि आप अब भी चाहते हैं कि Discord में वक्ता के बोलना शुरू करने की घटनाएँ सक्रिय प्लेबैक बाधित करें, तो `voice.realtime.bargeIn: true` जोड़ें। OpenAI रीयलटाइम ब्रिज `voice.realtime.minBargeInAudioEndMs` से छोटी प्लेबैक कटौतियों को संभावित प्रतिध्वनि/शोर मानकर अनदेखा करता है और Discord प्लेबैक साफ़ करने के बजाय उन्हें छोड़ा गया दर्ज करता है।
+- `voice.captureSilenceGraceMs` नियंत्रित करता है कि Discord द्वारा वक्ता के रुकने की सूचना देने के बाद OpenClaw उस ऑडियो खंड को STT के लिए अंतिम रूप देने से पहले कितनी देर प्रतीक्षा करता है। डिफ़ॉल्ट: `2000`; यदि Discord सामान्य विरामों को असंबद्ध आंशिक ट्रांसक्रिप्ट में बाँटता है, तो इसे बढ़ाएँ।
+- जब ElevenLabs चुना गया TTS प्रदाता होता है, तो Discord वॉइस प्लेबैक स्ट्रीमिंग TTS का उपयोग करता है और प्रदाता की प्रतिक्रिया स्ट्रीम से शुरू होता है। स्ट्रीमिंग समर्थन के बिना प्रदाता संश्लेषित अस्थायी-फ़ाइल पथ पर वापस लौटते हैं।
+- OpenClaw प्राप्ति डिक्रिप्शन विफलताओं की निगरानी करता है और छोटी अवधि में बार-बार विफलता होने पर वॉइस चैनल से निकलकर फिर से शामिल होते हुए स्वचालित रूप से पुनर्प्राप्त करता है।
+- यदि अपडेट करने के बाद प्राप्ति लॉग बार-बार `DecryptionFailed(UnencryptedWhenPassthroughDisabled)` दिखाते हैं, तो निर्भरता रिपोर्ट और लॉग एकत्र करें। बंडल की गई `@discordjs/voice` लाइन में discord.js PR #11449 का अपस्ट्रीम पैडिंग सुधार शामिल है, जिसने discord.js समस्या #11419 को बंद किया था।
+- जब OpenClaw कैप्चर किए गए वक्ता खंड को अंतिम रूप देता है, तब `The operation was aborted` प्राप्ति इवेंट अपेक्षित होते हैं; वे विस्तृत निदान हैं, चेतावनियाँ नहीं।
+- विस्तृत Discord वॉइस लॉग में प्रत्येक स्वीकृत वक्ता खंड के लिए सीमित एक-पंक्ति STT ट्रांसक्रिप्ट पूर्वावलोकन शामिल होता है, ताकि डीबगिंग में असीमित ट्रांसक्रिप्ट टेक्स्ट डंप किए बिना उपयोगकर्ता पक्ष और एजेंट के उत्तर, दोनों पक्ष दिखाई दें।
+- `agent-proxy` मोड में, बलपूर्वक परामर्श फ़ॉलबैक संभावित रूप से अधूरे ट्रांसक्रिप्ट अंशों को छोड़ देता है, जैसे `...` पर समाप्त होने वाला टेक्स्ट या "and" जैसा अंतिम संयोजक, और "be right back" या "bye" जैसे स्पष्ट रूप से कार्रवाई योग्य न होने वाले समापन। जब यह किसी पुराने कतारबद्ध उत्तर को रोकता है, तो लॉग `forced agent consult skipped reason=...` दिखाते हैं।
 
 ### वॉइस में उपयोगकर्ताओं का अनुसरण करें
 
-जब आप चाहते हैं कि Discord voice bot startup पर किसी fixed channel में जुड़ने या `/vc join` की प्रतीक्षा करने के बजाय एक या अधिक ज्ञात Discord users के साथ रहे, तो `voice.followUsers` का उपयोग करें।
+जब आप चाहते हैं कि Discord वॉइस बॉट स्टार्टअप पर किसी निश्चित चैनल में शामिल होने या `/vc join` की प्रतीक्षा करने के बजाय एक या अधिक ज्ञात Discord उपयोगकर्ताओं के साथ बना रहे, तब `voice.followUsers` का उपयोग करें।
 
 ```json5
 {
@@ -1301,36 +1308,37 @@ Auto-join उदाहरण:
 
 व्यवहार:
 
-- `followUsers` raw Discord user IDs और `discord:<id>` values स्वीकार करता है। OpenClaw voice-state events match करने से पहले दोनों forms normalize करता है।
-- `followUsersEnabled` डिफ़ॉल्ट रूप से `true` होता है जब `followUsers` configured हो। saved list रखने लेकिन automatic voice following रोकने के लिए इसे `false` पर सेट करें।
-- जब followed user allowed voice channel में जुड़ता है, तो OpenClaw उस channel में जुड़ता है। जब user move करता है, OpenClaw उनके साथ move करता है। जब active followed user disconnect करता है, OpenClaw leave करता है।
-- यदि एक ही guild में कई followed users हैं और active followed user leave करता है, तो OpenClaw guild छोड़ने से पहले किसी दूसरे tracked followed user's channel में move करता है। यदि कई followed users एक साथ move करते हैं, तो latest observed voice-state event जीतता है।
-- `allowedChannels` अब भी लागू होता है। disallowed channel में followed user को ignore किया जाता है, और follow-owned session किसी दूसरे followed user पर move करता है या leave करता है।
-- OpenClaw startup पर और bounded interval पर missed voice-state events reconcile करता है। Reconciliation configured guilds sample करता है और प्रति run REST lookups cap करता है, इसलिए बहुत बड़ी `followUsers` lists को converge होने में एक से अधिक interval लग सकते हैं।
-- यदि Discord या कोई admin बॉट को user follow करते समय move करता है, तो OpenClaw voice session rebuild करता है और destination allowed होने पर follow ownership preserve करता है। यदि बॉट `allowedChannels` के बाहर move किया जाता है, तो OpenClaw leave करता है और कोई configured target मौजूद होने पर rejoin करता है।
-- DAVE receive recovery repeated decrypt failures के बाद वही channel छोड़कर फिर जुड़ सकती है। Follow-owned sessions उस recovery path के दौरान अपनी follow ownership बनाए रखते हैं, इसलिए बाद में followed-user disconnect होने पर channel अब भी leave होता है।
+- `followUsers` अपरिष्कृत Discord उपयोगकर्ता ID और `discord:<id>` मान स्वीकार करता है। OpenClaw वॉइस-स्टेट इवेंट का मिलान करने से पहले दोनों प्रारूपों को सामान्यीकृत करता है।
+- `followUsers` कॉन्फ़िगर होने पर `followUsersEnabled` का डिफ़ॉल्ट मान `true` होता है। सहेजी गई सूची बनाए रखते हुए स्वचालित वॉइस अनुसरण रोकने के लिए इसे `false` पर सेट करें।
+- `followUsers` केवल वॉइस उपस्थिति नियंत्रित करता है। यह वक्ता पहुँच या स्वामी अधिकार प्रदान नहीं करता; `commands.ownerAllowFrom` और गिल्ड या चैनल उपयोगकर्ताओं तथा भूमिकाओं को अलग से कॉन्फ़िगर करें।
+- जब अनुसरण किया जा रहा कोई उपयोगकर्ता किसी अनुमत वॉइस चैनल से जुड़ता है, तो OpenClaw उस चैनल से जुड़ जाता है। उपयोगकर्ता के स्थानांतरित होने पर OpenClaw भी उसके साथ स्थानांतरित होता है। सक्रिय अनुसरण किए जा रहे उपयोगकर्ता के डिस्कनेक्ट होने पर OpenClaw चैनल छोड़ देता है।
+- यदि एक ही गिल्ड में अनुसरण किए जा रहे कई उपयोगकर्ता हैं और सक्रिय अनुसरण किया जा रहा उपयोगकर्ता चला जाता है, तो OpenClaw गिल्ड छोड़ने से पहले किसी अन्य ट्रैक किए जा रहे उपयोगकर्ता के चैनल पर स्थानांतरित होता है। यदि अनुसरण किए जा रहे कई उपयोगकर्ता एक साथ स्थानांतरित होते हैं, तो सबसे हाल में देखा गया वॉइस-स्टेट इवेंट प्रभावी होता है।
+- `allowedChannels` अब भी लागू होता है। किसी अस्वीकृत चैनल में अनुसरण किए जा रहे उपयोगकर्ता को अनदेखा किया जाता है और अनुसरण-स्वामित्व वाला सत्र किसी अन्य अनुसरण किए जा रहे उपयोगकर्ता के पास चला जाता है या चैनल छोड़ देता है।
+- OpenClaw स्टार्टअप पर और एक सीमित अंतराल पर छूटे हुए वॉइस-स्टेट इवेंट का मिलान करता है। मिलान कॉन्फ़िगर किए गए गिल्ड का नमूना लेता है और प्रत्येक रन में REST लुकअप सीमित करता है, इसलिए बहुत बड़ी `followUsers` सूचियों को अभिसरित होने में एक से अधिक अंतराल लग सकते हैं।
+- यदि किसी उपयोगकर्ता का अनुसरण करते समय Discord या कोई एडमिन बॉट को स्थानांतरित करता है, तो गंतव्य अनुमत होने पर OpenClaw वॉइस सत्र को फिर से बनाता है और अनुसरण स्वामित्व बनाए रखता है। यदि बॉट को `allowedChannels` से बाहर स्थानांतरित किया जाता है, तो OpenClaw चैनल छोड़कर कॉन्फ़िगर किया गया लक्ष्य उपलब्ध होने पर उससे दोबारा जुड़ता है।
+- बार-बार डिक्रिप्शन विफल होने के बाद DAVE रिसीव रिकवरी उसी चैनल को छोड़कर दोबारा जुड़ सकती है। अनुसरण-स्वामित्व वाले सत्र उस रिकवरी पथ के दौरान अपना अनुसरण स्वामित्व बनाए रखते हैं, इसलिए बाद में अनुसरण किए जा रहे उपयोगकर्ता के डिस्कनेक्ट होने पर भी चैनल छोड़ दिया जाता है।
 
-join modes में से चुनें:
+जुड़ने के मोड में से चुनें:
 
-- personal या operator setups के लिए `followUsers` उपयोग करें जहाँ bot को आपके voice में होने पर अपने-आप voice में होना चाहिए।
-- fixed-room bots के लिए `autoJoin` उपयोग करें जिन्हें voice में कोई tracked user न होने पर भी present रहना चाहिए।
-- one-off joins या ऐसे rooms के लिए `/vc join` उपयोग करें जहाँ automatic voice presence अप्रत्याशित होगी।
+- व्यक्तिगत या ऑपरेटर सेटअप के लिए `followUsers` का उपयोग करें, जहाँ आपके वॉइस में होने पर बॉट को स्वचालित रूप से वॉइस में होना चाहिए।
+- निश्चित-कक्ष बॉट के लिए `autoJoin` का उपयोग करें, जिन्हें किसी ट्रैक किए गए उपयोगकर्ता के वॉइस में न होने पर भी उपस्थित रहना चाहिए।
+- एकबारगी जुड़ने या ऐसे कक्षों के लिए `/vc join` का उपयोग करें, जहाँ स्वचालित वॉइस उपस्थिति अप्रत्याशित होगी।
 
-Discord voice codec:
+Discord वॉइस कोडेक:
 
-- वॉइस प्राप्ति लॉग `discord voice: opus decoder: libopus-wasm` दिखाते हैं।
-- Realtime प्लेबैक पैकेटों को `@discordjs/voice` को सौंपने से पहले उसी बंडल किए गए `libopus-wasm` पैकेज के साथ कच्चे 48 kHz स्टीरियो PCM को Opus में एन्कोड करता है।
-- फ़ाइल और provider-stream प्लेबैक ffmpeg के साथ कच्चे 48 kHz स्टीरियो PCM में ट्रांसकोड करता है, फिर Discord को भेजी जाने वाली Opus पैकेट स्ट्रीम के लिए `libopus-wasm` का उपयोग करता है।
+- वॉइस रिसीव लॉग `discord voice: opus decoder: libopus-wasm` दिखाते हैं।
+- रीयलटाइम प्लेबैक, पैकेट को `@discordjs/voice` को सौंपने से पहले, उसी बंडल किए गए `libopus-wasm` पैकेज से अपरिष्कृत 48 kHz स्टीरियो PCM को Opus में एन्कोड करता है।
+- फ़ाइल और प्रदाता-स्ट्रीम प्लेबैक ffmpeg से अपरिष्कृत 48 kHz स्टीरियो PCM में ट्रांसकोड करता है, फिर Discord को भेजे जाने वाले Opus पैकेट स्ट्रीम के लिए `libopus-wasm` का उपयोग करता है।
 
 STT और TTS पाइपलाइन:
 
-- Discord PCM कैप्चर को WAV अस्थायी फ़ाइल में बदला जाता है।
+- Discord PCM कैप्चर को एक अस्थायी WAV फ़ाइल में बदला जाता है।
 - `tools.media.audio` STT संभालता है, उदाहरण के लिए `openai/gpt-4o-mini-transcribe`।
-- ट्रांसक्रिप्ट Discord ingress और रूटिंग से होकर भेजी जाती है, जबकि प्रतिक्रिया LLM एक voice-output नीति के साथ चलता है जो एजेंट `tts` टूल को छिपाती है और लौटाया गया टेक्स्ट मांगती है, क्योंकि अंतिम TTS प्लेबैक Discord voice के स्वामित्व में है।
-- `voice.model`, सेट होने पर, इस voice-channel turn के लिए केवल प्रतिक्रिया LLM को ओवरराइड करता है।
-- `voice.tts` को `messages.tts` पर मर्ज किया जाता है; स्ट्रीमिंग-सक्षम प्रदाता प्लेयर को सीधे फ़ीड करते हैं, अन्यथा परिणामी ऑडियो फ़ाइल जुड़े हुए चैनल में चलाई जाती है।
+- प्रतिलेख को Discord इनग्रेस और रूटिंग के माध्यम से भेजा जाता है, जबकि प्रतिक्रिया LLM ऐसी वॉइस-आउटपुट नीति के साथ चलता है जो एजेंट के `tts` टूल को छिपाती है और लौटाया गया टेक्स्ट माँगती है, क्योंकि अंतिम TTS प्लेबैक का स्वामित्व Discord वॉइस के पास होता है।
+- `voice.model` सेट होने पर केवल इस वॉइस-चैनल टर्न के प्रतिक्रिया LLM को ओवरराइड करता है।
+- `voice.tts` को `tts` के ऊपर मर्ज किया जाता है; स्ट्रीमिंग-सक्षम प्रदाता सीधे प्लेयर को फ़ीड करते हैं, अन्यथा परिणामी ऑडियो फ़ाइल जुड़े हुए चैनल में चलाई जाती है।
 
-डिफ़ॉल्ट agent-proxy voice-channel सत्र उदाहरण:
+डिफ़ॉल्ट एजेंट-प्रॉक्सी वॉइस-चैनल सत्र का उदाहरण:
 
 ```json5
 {
@@ -1338,12 +1346,12 @@ STT और TTS पाइपलाइन:
     discord: {
       voice: {
         enabled: true,
-        model: "openai/gpt-5.5",
+        model: "openai/gpt-5.6-sol",
         followUsersEnabled: true,
         followUsers: ["123456789012345678"],
         realtime: {
           provider: "openai",
-          model: "gpt-realtime-2",
+          model: "gpt-realtime-2.1",
           speakerVoice: "cedar",
         },
       },
@@ -1352,9 +1360,9 @@ STT और TTS पाइपलाइन:
 }
 ```
 
-`voice.agentSession` ब्लॉक न होने पर, प्रत्येक वॉइस चैनल को अपना रूटेड OpenClaw सत्र मिलता है। उदाहरण के लिए, `/vc join channel:234567890123456789` उस Discord वॉइस चैनल के सत्र से बात करता है। Realtime मॉडल केवल वॉइस फ्रंट एंड है; वास्तविक अनुरोध कॉन्फ़िगर किए गए OpenClaw एजेंट को सौंपे जाते हैं। यदि realtime मॉडल consult टूल को कॉल किए बिना अंतिम ट्रांसक्रिप्ट बनाता है, तो OpenClaw fallback के रूप में consult को बाध्य करता है ताकि डिफ़ॉल्ट अभी भी एजेंट से बात करने जैसा व्यवहार करे।
+`voice.agentSession` ब्लॉक न होने पर प्रत्येक वॉइस चैनल को अपना रूट किया गया OpenClaw सत्र मिलता है। उदाहरण के लिए, `/vc join channel:234567890123456789` उस Discord वॉइस चैनल के सत्र से बात करता है। रीयलटाइम मॉडल केवल वॉइस फ़्रंट एंड है; महत्वपूर्ण अनुरोध कॉन्फ़िगर किए गए OpenClaw एजेंट को सौंपे जाते हैं। यदि रीयलटाइम मॉडल कंसल्ट टूल को कॉल किए बिना अंतिम प्रतिलेख बनाता है, तो OpenClaw फ़ॉलबैक के रूप में कंसल्ट को बाध्य करता है, ताकि डिफ़ॉल्ट व्यवहार अब भी एजेंट से बात करने जैसा रहे।
 
-लेगेसी STT और TTS उदाहरण:
+लेगेसी STT और TTS का उदाहरण:
 
 ```json5
 {
@@ -1379,7 +1387,7 @@ STT और TTS पाइपलाइन:
 }
 ```
 
-Realtime bidi उदाहरण:
+रीयलटाइम द्विदिश उदाहरण:
 
 ```json5
 {
@@ -1388,10 +1396,10 @@ Realtime bidi उदाहरण:
       voice: {
         enabled: true,
         mode: "bidi",
-        model: "openai/gpt-5.5",
+        model: "openai/gpt-5.6-sol",
         realtime: {
           provider: "openai",
-          model: "gpt-realtime-2",
+          model: "gpt-realtime-2.1",
           speakerVoice: "cedar",
           toolPolicy: "safe-read-only",
           consultPolicy: "always",
@@ -1402,7 +1410,7 @@ Realtime bidi उदाहरण:
 }
 ```
 
-मौजूदा Discord चैनल सत्र के विस्तार के रूप में voice:
+किसी मौजूदा Discord चैनल सत्र के विस्तार के रूप में वॉइस:
 
 ```json5
 {
@@ -1411,14 +1419,14 @@ Realtime bidi उदाहरण:
       voice: {
         enabled: true,
         mode: "agent-proxy",
-        model: "openai/gpt-5.5",
+        model: "openai/gpt-5.6-sol",
         agentSession: {
           mode: "target",
           target: "channel:123456789012345678",
         },
         realtime: {
           provider: "openai",
-          model: "gpt-realtime-2",
+          model: "gpt-realtime-2.1",
           speakerVoice: "cedar",
         },
       },
@@ -1427,17 +1435,17 @@ Realtime bidi उदाहरण:
 }
 ```
 
-`agent-proxy` मोड में bot कॉन्फ़िगर किए गए वॉइस चैनल से जुड़ता है, लेकिन OpenClaw एजेंट turns लक्ष्य चैनल के सामान्य रूटेड सत्र और एजेंट का उपयोग करते हैं। Realtime वॉइस सत्र लौटाए गए परिणाम को वापस वॉइस चैनल में बोलता है। supervisor एजेंट अभी भी अपनी tool policy के अनुसार सामान्य message tools का उपयोग कर सकता है, जिसमें अलग Discord संदेश भेजना भी शामिल है यदि वही सही कार्रवाई हो।
+`agent-proxy` मोड में बॉट कॉन्फ़िगर किए गए वॉइस चैनल से जुड़ता है, लेकिन OpenClaw एजेंट टर्न लक्ष्य चैनल के सामान्य रूट किए गए सत्र और एजेंट का उपयोग करते हैं। रीयलटाइम वॉइस सत्र लौटाए गए परिणाम को वॉइस चैनल में बोलता है। सुपरवाइज़र एजेंट अपनी टूल नीति के अनुसार सामान्य संदेश टूल का उपयोग अब भी कर सकता है, जिसमें उचित कार्रवाई होने पर एक अलग Discord संदेश भेजना शामिल है।
 
-जब कोई delegated OpenClaw run सक्रिय होता है, नए Discord वॉइस ट्रांसक्रिप्ट को दूसरा एजेंट turn शुरू करने से पहले live run control माना जाता है। "status", "cancel that", "use the smaller fix", या "when you're done also check tests" जैसे वाक्यांशों को सक्रिय सत्र के लिए status, cancel, steering, या follow-up input के रूप में वर्गीकृत किया जाता है। Status, cancel, accepted steering, और follow-up परिणाम वॉइस चैनल में बोलकर लौटाए जाते हैं ताकि कॉलर को पता चले कि OpenClaw ने अनुरोध संभाला या नहीं।
+प्रत्यायोजित OpenClaw रन सक्रिय होने के दौरान, नया एजेंट टर्न शुरू करने से पहले नए Discord वॉइस प्रतिलेख को लाइव रन नियंत्रण माना जाता है। "स्थिति", "इसे रद्द करें", "छोटे सुधार का उपयोग करें", या "काम पूरा होने पर परीक्षण भी जाँचें" जैसे वाक्यांशों को सक्रिय सत्र के लिए स्थिति, रद्दीकरण, मार्गदर्शन या फ़ॉलो-अप इनपुट के रूप में वर्गीकृत किया जाता है। स्थिति, रद्दीकरण, स्वीकृत मार्गदर्शन और फ़ॉलो-अप परिणाम वॉइस चैनल में वापस बोले जाते हैं, ताकि कॉलर को पता रहे कि OpenClaw ने अनुरोध संभाला या नहीं।
 
-उपयोगी target रूप:
+उपयोगी लक्ष्य प्रारूप:
 
-- `target: "channel:123456789012345678"` Discord टेक्स्ट चैनल सत्र से होकर रूट करता है।
-- `target: "123456789012345678"` को चैनल target माना जाता है।
-- `target: "dm:123456789012345678"` या `target: "user:123456789012345678"` उस direct-message सत्र से होकर रूट करता है।
+- `target: "channel:123456789012345678"` किसी Discord टेक्स्ट चैनल सत्र के माध्यम से रूट करता है।
+- `target: "123456789012345678"` को चैनल लक्ष्य माना जाता है।
+- `target: "dm:123456789012345678"` या `target: "user:123456789012345678"` उस डायरेक्ट-मैसेज सत्र के माध्यम से रूट करता है।
 
-Echo-heavy OpenAI Realtime उदाहरण:
+अधिक प्रतिध्वनि वाला OpenAI Realtime उदाहरण:
 
 ```json5
 {
@@ -1446,10 +1454,10 @@ Echo-heavy OpenAI Realtime उदाहरण:
       voice: {
         enabled: true,
         mode: "bidi",
-        model: "openai/gpt-5.5",
+        model: "openai/gpt-5.6-sol",
         realtime: {
           provider: "openai",
-          model: "gpt-realtime-2",
+          model: "gpt-realtime-2.1",
           speakerVoice: "cedar",
           bargeIn: true,
           minBargeInAudioEndMs: 500,
@@ -1466,62 +1474,62 @@ Echo-heavy OpenAI Realtime उदाहरण:
 }
 ```
 
-इसका उपयोग तब करें जब मॉडल खुले mic के माध्यम से अपना ही Discord प्लेबैक सुनता है, लेकिन आप फिर भी बोलकर उसे बाधित करना चाहते हैं। OpenClaw OpenAI को raw input audio पर auto-interrupt करने से रोकता है, जबकि `bargeIn: true` Discord speaker-start events और पहले से सक्रिय speaker audio को अगला captured turn OpenAI तक पहुंचने से पहले सक्रिय realtime responses को cancel करने देता है। `minBargeInAudioEndMs` से कम `audioEndMs` वाले बहुत शुरुआती barge-in signals को संभावित echo/noise माना जाता है और अनदेखा किया जाता है ताकि मॉडल पहले playback frame पर कट ऑफ न हो।
+इसका उपयोग तब करें जब मॉडल खुले माइक से अपना ही Discord प्लेबैक सुनता हो, लेकिन आप फिर भी बोलकर उसे बाधित करना चाहते हों। OpenClaw अपरिष्कृत इनपुट ऑडियो पर OpenAI को स्वतः बाधित होने से रोकता है, जबकि `bargeIn: true` Discord स्पीकर-स्टार्ट इवेंट और पहले से सक्रिय स्पीकर ऑडियो को अगला कैप्चर किया गया टर्न OpenAI तक पहुँचने से पहले सक्रिय रीयलटाइम प्रतिक्रियाएँ रद्द करने देता है। `minBargeInAudioEndMs` से कम `audioEndMs` वाले बहुत शुरुआती बार्ज-इन संकेतों को संभावित प्रतिध्वनि/शोर मानकर अनदेखा किया जाता है, ताकि मॉडल पहले प्लेबैक फ़्रेम पर ही बोलना बंद न कर दे।
 
 अपेक्षित वॉइस लॉग:
 
-- join पर: `discord voice: joining ... voiceSession=... supervisorSession=... agentSessionMode=... voiceModel=... realtimeModel=...`
-- realtime start पर: `discord voice: realtime bridge starting ... autoRespond=false interruptResponse=false bargeIn=false minBargeInAudioEndMs=...`
-- speaker audio पर: `discord voice: realtime speaker turn opened ...`, `discord voice: realtime input audio started ... outputAudioMs=... outputActive=...`, और `discord voice: realtime speaker turn closed ... chunks=... discordBytes=... realtimeBytes=... interruptedPlayback=...`
-- छोड़ी गई stale speech पर: `discord voice: realtime forced agent consult skipped reason=incomplete-transcript ...` या `reason=non-actionable-closing ...`
-- realtime response completion पर: `discord voice: realtime audio playback finishing reason=response.done ... audioMs=... chunks=...`
-- playback stop/reset पर: `discord voice: realtime audio playback stopped reason=... audioMs=... elapsedMs=... chunks=...`
-- realtime consult पर: `discord voice: realtime consult requested ... voiceSession=... supervisorSession=... question=...`
-- agent answer पर: `discord voice: agent turn answer ...`
-- queued exact speech पर: `discord voice: realtime exact speech queued ... queued=... outputAudioMs=... outputActive=...`, इसके बाद `discord voice: realtime exact speech dequeued reason=player-idle ...`
-- barge-in detection पर: `discord voice: realtime barge-in detected source=speaker-start ...` या `discord voice: realtime barge-in detected source=active-speaker-audio ...`, इसके बाद `discord voice: realtime barge-in requested reason=... outputAudioMs=... outputActive=...`
-- realtime interruption पर: `discord voice: realtime model interrupt requested client:response.cancel reason=barge-in`, इसके बाद या तो `discord voice: realtime model audio truncated client:conversation.item.truncate reason=barge-in audioEndMs=...` या `discord voice: realtime model interrupt confirmed server:response.done status=cancelled ...`
-- अनदेखे echo/noise पर: `discord voice: realtime model interrupt ignored client:conversation.item.truncate.skipped reason=barge-in audioEndMs=0 minAudioEndMs=250`
-- disabled barge-in पर: `discord voice: realtime capture ignored during playback (barge-in disabled) ...`
-- idle playback पर: `discord voice: realtime barge-in ignored reason=... outputActive=false ... playbackChunks=0`
+- जुड़ने पर: `discord voice: joining ... voiceSession=... supervisorSession=... agentSessionMode=... voiceModel=... realtimeModel=...`
+- रीयलटाइम शुरू होने पर: `discord voice: realtime bridge starting ... autoRespond=false interruptResponse=false bargeIn=false minBargeInAudioEndMs=...`
+- स्पीकर ऑडियो पर: `discord voice: realtime speaker turn opened ...`, `discord voice: realtime input audio started ... outputAudioMs=... outputActive=...`, और `discord voice: realtime speaker turn closed ... chunks=... discordBytes=... realtimeBytes=... interruptedPlayback=...`
+- पुरानी स्पीच छोड़े जाने पर: `discord voice: realtime forced agent consult skipped reason=incomplete-transcript ...` या `reason=non-actionable-closing ...`
+- रीयलटाइम प्रतिक्रिया पूरी होने पर: `discord voice: realtime audio playback finishing reason=response.done ... audioMs=... chunks=...`
+- प्लेबैक रुकने/रीसेट होने पर: `discord voice: realtime audio playback stopped reason=... audioMs=... elapsedMs=... chunks=...`
+- रीयलटाइम कंसल्ट पर: `discord voice: realtime consult requested ... voiceSession=... supervisorSession=... question=...`
+- एजेंट के उत्तर पर: `discord voice: agent turn answer ...`
+- सटीक स्पीच कतारबद्ध होने पर: `discord voice: realtime exact speech queued ... queued=... outputAudioMs=... outputActive=...`, इसके बाद `discord voice: realtime exact speech dequeued reason=player-idle ...`
+- बार्ज-इन का पता लगने पर: `discord voice: realtime barge-in detected source=speaker-start ...` या `discord voice: realtime barge-in detected source=active-speaker-audio ...`, इसके बाद `discord voice: realtime barge-in requested reason=... outputAudioMs=... outputActive=...`
+- रीयलटाइम व्यवधान पर: `discord voice: realtime model interrupt requested client:response.cancel reason=barge-in`, इसके बाद `discord voice: realtime model audio truncated client:conversation.item.truncate reason=barge-in audioEndMs=...` या `discord voice: realtime model interrupt confirmed server:response.done status=cancelled ...`
+- अनदेखी की गई प्रतिध्वनि/शोर पर: `discord voice: realtime model interrupt ignored client:conversation.item.truncate.skipped reason=barge-in audioEndMs=0 minAudioEndMs=250`
+- बार्ज-इन अक्षम होने पर: `discord voice: realtime capture ignored during playback (barge-in disabled) ...`
+- निष्क्रिय प्लेबैक पर: `discord voice: realtime barge-in ignored reason=... outputActive=false ... playbackChunks=0`
 
-कटे हुए ऑडियो को debug करने के लिए, realtime वॉइस लॉग को timeline की तरह पढ़ें:
+कटे हुए ऑडियो को डीबग करने के लिए रीयलटाइम वॉइस लॉग को समयरेखा के रूप में पढ़ें:
 
-1. `realtime audio playback started` का अर्थ है कि Discord ने assistant audio चलाना शुरू कर दिया है। Bridge इस बिंदु से assistant output chunks, Discord PCM bytes, provider realtime bytes, और synthesized audio duration गिनना शुरू करता है।
-2. `realtime speaker turn opened` किसी Discord speaker के active होने को चिह्नित करता है। यदि playback पहले से active है और `bargeIn` enabled है, तो इसके बाद `barge-in detected source=speaker-start` आ सकता है।
-3. `realtime input audio started` उस speaker turn के लिए प्राप्त पहले वास्तविक audio frame को चिह्नित करता है। यहां `outputActive=true` या nonzero `outputAudioMs` का अर्थ है कि mic input भेज रहा है जबकि assistant playback अभी भी active है।
-4. `barge-in detected source=active-speaker-audio` का अर्थ है कि OpenClaw ने assistant playback active रहने के दौरान live speaker audio देखा। यह वास्तविक interruption को बिना उपयोगी audio वाले Discord speaker-start event से अलग पहचानने में उपयोगी है।
-5. `barge-in requested reason=...` का अर्थ है कि OpenClaw ने realtime provider से active response को cancel या truncate करने को कहा। इसमें `outputAudioMs`, `outputActive`, और `playbackChunks` शामिल हैं ताकि आप देख सकें कि interruption से पहले assistant audio वास्तव में कितना चला था।
-6. `realtime audio playback stopped reason=...` स्थानीय Discord playback reset point है। Reason बताता है कि playback किसने रोका: `barge-in`, `player-idle`, `provider-clear-audio`, `forced-agent-consult`, `stream-close`, या `session-close`।
-7. `realtime speaker turn closed` captured input turn का सारांश देता है। `chunks=0` या `hasAudio=false` का अर्थ है कि speaker turn खुला लेकिन कोई usable audio realtime bridge तक नहीं पहुंचा। `interruptedPlayback=true` का अर्थ है कि वह input turn assistant output के साथ overlap हुआ और barge-in logic trigger किया।
+1. `realtime audio playback started` का अर्थ है कि Discord ने सहायक ऑडियो चलाना शुरू कर दिया है। इस बिंदु से ब्रिज सहायक आउटपुट चंक, Discord PCM बाइट, प्रदाता रीयलटाइम बाइट और संश्लेषित ऑडियो अवधि गिनना शुरू करता है।
+2. `realtime speaker turn opened` किसी Discord स्पीकर के सक्रिय होने को चिह्नित करता है। यदि प्लेबैक पहले से सक्रिय है और `bargeIn` सक्षम है, तो इसके बाद `barge-in detected source=speaker-start` आ सकता है।
+3. `realtime input audio started` उस स्पीकर टर्न के लिए प्राप्त पहले वास्तविक ऑडियो फ़्रेम को चिह्नित करता है। यहाँ `outputActive=true` या शून्य से अधिक `outputAudioMs` का अर्थ है कि सहायक प्लेबैक सक्रिय रहने के दौरान माइक इनपुट भेज रहा है।
+4. `barge-in detected source=active-speaker-audio` का अर्थ है कि सहायक प्लेबैक सक्रिय रहने के दौरान OpenClaw ने लाइव स्पीकर ऑडियो देखा। यह वास्तविक व्यवधान को ऐसे Discord स्पीकर-स्टार्ट इवेंट से अलग करने में उपयोगी है जिसमें कोई उपयोगी ऑडियो नहीं है।
+5. `barge-in requested reason=...` का अर्थ है कि OpenClaw ने रीयलटाइम प्रदाता से सक्रिय प्रतिक्रिया को रद्द या छोटा करने के लिए कहा। इसमें `outputAudioMs`, `outputActive`, और `playbackChunks` शामिल हैं, ताकि आप देख सकें कि व्यवधान से पहले सहायक का कितना ऑडियो वास्तव में चल चुका था।
+6. `realtime audio playback stopped reason=...` स्थानीय Discord प्लेबैक रीसेट बिंदु है। कारण बताता है कि प्लेबैक किसने रोका: `barge-in`, `player-idle`, `provider-clear-audio`, `forced-agent-consult`, `stream-close`, या `session-close`।
+7. `realtime speaker turn closed` कैप्चर किए गए इनपुट टर्न का सारांश देता है। `chunks=0` या `hasAudio=false` का अर्थ है कि स्पीकर टर्न खुला, लेकिन कोई उपयोग योग्य ऑडियो रीयलटाइम ब्रिज तक नहीं पहुँचा। `interruptedPlayback=true` का अर्थ है कि वह इनपुट टर्न सहायक आउटपुट के साथ ओवरलैप हुआ और उसने बार्ज-इन लॉजिक ट्रिगर किया।
 
 उपयोगी फ़ील्ड:
 
-- `outputAudioMs`: log line से पहले realtime provider द्वारा generated assistant audio duration।
-- `audioMs`: playback रुकने से पहले OpenClaw द्वारा गिनी गई assistant audio duration।
-- `elapsedMs`: playback stream या speaker turn खोलने और बंद करने के बीच wall-clock time।
-- `discordBytes`: Discord voice को भेजे गए या उससे प्राप्त 48 kHz stereo PCM bytes।
-- `realtimeBytes`: realtime provider को भेजे गए या उससे प्राप्त provider-format PCM bytes।
-- `playbackChunks`: active response के लिए Discord को forward किए गए assistant audio chunks।
-- `sinceLastAudioMs`: आखिरी captured speaker audio frame और speaker turn closing के बीच gap।
+- `outputAudioMs`: लॉग पंक्ति से पहले रीयलटाइम प्रदाता द्वारा जनरेट की गई सहायक ऑडियो अवधि।
+- `audioMs`: प्लेबैक रुकने से पहले OpenClaw द्वारा गिनी गई सहायक ऑडियो अवधि।
+- `elapsedMs`: प्लेबैक स्ट्रीम या स्पीकर टर्न खोलने और बंद करने के बीच का वास्तविक समय।
+- `discordBytes`: Discord वॉइस को भेजे गए या उससे प्राप्त 48 kHz स्टीरियो PCM बाइट।
+- `realtimeBytes`: रीयलटाइम प्रदाता को भेजे गए या उससे प्राप्त प्रदाता-प्रारूप PCM बाइट।
+- `playbackChunks`: सक्रिय प्रतिक्रिया के लिए Discord को अग्रेषित किए गए सहायक ऑडियो चंक।
+- `sinceLastAudioMs`: कैप्चर किए गए अंतिम स्पीकर ऑडियो फ़्रेम और स्पीकर टर्न बंद होने के बीच का अंतराल।
 
 सामान्य पैटर्न:
 
-- `source=active-speaker-audio`, छोटे `outputAudioMs`, और वही user पास में होने के साथ तत्काल cut-off आमतौर पर speaker echo के mic में आने की ओर संकेत करता है। `voice.realtime.minBargeInAudioEndMs` बढ़ाएं, speaker volume कम करें, headphones उपयोग करें, या `voice.realtime.providers.openai.interruptResponseOnInputAudio: false` सेट करें।
-- `source=speaker-start` के बाद `speaker turn closed ... hasAudio=false` का अर्थ है कि Discord ने speaker start report किया, लेकिन कोई audio OpenClaw तक नहीं पहुंचा। यह transient Discord voice event, noise gate behavior, या किसी client द्वारा mic को थोड़ी देर के लिए key करना हो सकता है।
-- पास के barge-in या `provider-clear-audio` के बिना `audio playback stopped reason=stream-close` का अर्थ है कि स्थानीय Discord playback stream अप्रत्याशित रूप से समाप्त हो गई। पिछले provider और Discord player logs जांचें।
-- `capture ignored during playback (barge-in disabled)` का अर्थ है कि assistant audio active रहते हुए OpenClaw ने जानबूझकर input drop किया। यदि आप चाहते हैं कि speech playback को interrupt करे, तो `voice.realtime.bargeIn` enable करें।
-- `barge-in ignored ... outputActive=false` का अर्थ है कि Discord या provider VAD ने speech report की, लेकिन OpenClaw के पास interrupt करने के लिए कोई active playback नहीं था। इससे audio cut off नहीं होना चाहिए।
+- `source=active-speaker-audio` के साथ तुरंत कट-ऑफ, छोटा `outputAudioMs`, और पास में वही उपयोगकर्ता आमतौर पर संकेत देते हैं कि स्पीकर की प्रतिध्वनि माइक में प्रवेश कर रही है। `voice.realtime.minBargeInAudioEndMs` बढ़ाएँ, स्पीकर का वॉल्यूम घटाएँ, हेडफ़ोन का उपयोग करें, या `voice.realtime.providers.openai.interruptResponseOnInputAudio: false` सेट करें।
+- `source=speaker-start` के बाद `speaker turn closed ... hasAudio=false` आने का अर्थ है कि Discord ने स्पीकर का बोलना शुरू होना रिपोर्ट किया, लेकिन कोई ऑडियो OpenClaw तक नहीं पहुँचा। यह कोई अस्थायी Discord वॉइस इवेंट, नॉइज़ गेट व्यवहार, या क्लाइंट द्वारा थोड़ी देर के लिए माइक सक्रिय करना हो सकता है।
+- पास में बार्ज-इन या `provider-clear-audio` के बिना `audio playback stopped reason=stream-close` का अर्थ है कि स्थानीय Discord प्लेबैक स्ट्रीम अप्रत्याशित रूप से समाप्त हो गई। इससे पहले के प्रदाता और Discord प्लेयर लॉग जाँचें।
+- `capture ignored during playback (barge-in disabled)` का अर्थ है कि सहायक का ऑडियो सक्रिय रहने के दौरान OpenClaw ने जानबूझकर इनपुट छोड़ दिया। यदि आप चाहते हैं कि बोलने पर प्लेबैक बाधित हो, तो `voice.realtime.bargeIn` सक्षम करें।
+- `barge-in ignored ... outputActive=false` का अर्थ है कि Discord या प्रदाता VAD ने बोलना रिपोर्ट किया, लेकिन बाधित करने के लिए OpenClaw में कोई सक्रिय प्लेबैक नहीं था। इससे ऑडियो कटना नहीं चाहिए।
 
-Credentials प्रत्येक component के अनुसार resolve होते हैं: `voice.model` के लिए LLM route auth, `tools.media.audio` के लिए STT auth, `messages.tts`/`voice.tts` के लिए TTS auth, और `voice.realtime.providers` या provider के सामान्य auth config के लिए realtime provider auth।
+क्रेडेंशियल प्रत्येक घटक के अनुसार हल किए जाते हैं: `voice.model` के लिए LLM रूट प्रमाणीकरण, `tools.media.audio` के लिए STT प्रमाणीकरण, `tts`/`voice.tts` के लिए TTS प्रमाणीकरण, और `voice.realtime.providers` या प्रदाता के सामान्य प्रमाणीकरण कॉन्फ़िगरेशन के लिए रियलटाइम प्रदाता प्रमाणीकरण।
 
 ### वॉइस संदेश
 
-Discord voice messages waveform preview दिखाते हैं और OGG/Opus audio की आवश्यकता होती है। OpenClaw waveform अपने आप generate करता है, लेकिन inspect और convert करने के लिए gateway host पर `ffmpeg` और `ffprobe` चाहिए।
+Discord वॉइस संदेश वेवफ़ॉर्म पूर्वावलोकन दिखाते हैं और उनके लिए OGG/Opus ऑडियो आवश्यक है। OpenClaw वेवफ़ॉर्म स्वचालित रूप से बनाता है, लेकिन निरीक्षण और रूपांतरण के लिए Gateway होस्ट पर `ffmpeg` और `ffprobe` आवश्यक हैं।
 
-- एक **स्थानीय फ़ाइल पथ** दें (URLs अस्वीकार किए जाते हैं).
-- टेक्स्ट सामग्री छोड़ दें (Discord एक ही payload में टेक्स्ट + वॉइस संदेश अस्वीकार करता है).
-- कोई भी ऑडियो फ़ॉर्मैट स्वीकार है; OpenClaw ज़रूरत के अनुसार OGG/Opus में बदलता है.
+- एक **स्थानीय फ़ाइल पथ** दें (URL अस्वीकार किए जाते हैं)।
+- टेक्स्ट सामग्री न दें (Discord एक ही पेलोड में टेक्स्ट + वॉइस संदेश अस्वीकार करता है)।
+- कोई भी ऑडियो प्रारूप स्वीकार किया जाता है; OpenClaw आवश्यकतानुसार उसे OGG/Opus में बदलता है।
 
 ```bash
 message(action="send", channel="discord", target="channel:123", path="/path/to/audio.mp3", asVoice=true)
@@ -1530,22 +1538,22 @@ message(action="send", channel="discord", target="channel:123", path="/path/to/a
 ## समस्या निवारण
 
 <AccordionGroup>
-  <Accordion title="अस्वीकृत intents उपयोग किए गए या बॉट को कोई गिल्ड संदेश नहीं दिखता">
+  <Accordion title="अस्वीकृत इंटेंट का उपयोग हुआ या बॉट को कोई गिल्ड संदेश नहीं दिख रहा">
 
     - Message Content Intent सक्षम करें
-    - जब आप उपयोगकर्ता/सदस्य resolution पर निर्भर हों, Server Members Intent सक्षम करें
-    - intents बदलने के बाद gateway पुनः प्रारंभ करें
+    - जब आप उपयोगकर्ता/सदस्य रिज़ॉल्यूशन पर निर्भर हों, तब Server Members Intent सक्षम करें
+    - इंटेंट बदलने के बाद Gateway पुनः आरंभ करें
 
   </Accordion>
 
-  <Accordion title="गिल्ड संदेश अनपेक्षित रूप से ब्लॉक हुए">
+  <Accordion title="गिल्ड संदेश अप्रत्याशित रूप से अवरुद्ध हैं">
 
     - `groupPolicy` सत्यापित करें
-    - `channels.discord.guilds` के अंतर्गत गिल्ड allowlist सत्यापित करें
-    - यदि गिल्ड `channels` map मौजूद है, तो केवल सूचीबद्ध चैनलों की अनुमति है
-    - `requireMention` व्यवहार और mention पैटर्न सत्यापित करें
+    - `channels.discord.guilds` के अंतर्गत गिल्ड अनुमतिसूची सत्यापित करें
+    - यदि गिल्ड का `channels` मैप मौजूद है, तो केवल सूचीबद्ध चैनलों की अनुमति होती है
+    - `requireMention` का व्यवहार और उल्लेख पैटर्न सत्यापित करें
 
-    उपयोगी जांचें:
+    उपयोगी जाँचें:
 
 ```bash
 openclaw doctor
@@ -1555,113 +1563,77 @@ openclaw logs --follow
 
   </Accordion>
 
-  <Accordion title="Require mention false है, लेकिन फिर भी ब्लॉक हो रहा है">
+  <Accordion title="उल्लेख की आवश्यकता बंद है, फिर भी अवरुद्ध है">
     सामान्य कारण:
 
-    - मिलती-जुलती गिल्ड/चैनल allowlist के बिना `groupPolicy="allowlist"`
-    - `requireMention` गलत स्थान पर कॉन्फ़िगर किया गया है (`channels.discord.guilds` या चैनल entry के अंतर्गत होना चाहिए)
-    - प्रेषक गिल्ड/चैनल `users` allowlist से ब्लॉक है
+    - मेल खाती गिल्ड/चैनल अनुमतिसूची के बिना `groupPolicy="allowlist"`
+    - `requireMention` गलत स्थान पर कॉन्फ़िगर किया गया है (`channels.discord.guilds` या किसी चैनल प्रविष्टि के अंतर्गत होना आवश्यक है)
+    - गिल्ड/चैनल की `users` अनुमतिसूची द्वारा प्रेषक अवरुद्ध है
 
   </Accordion>
 
-  <Accordion title="लंबे समय तक चलने वाले Discord turns या duplicate replies">
+  <Accordion title="लंबे समय तक चलने वाले Discord टर्न या डुप्लिकेट उत्तर">
 
-    सामान्य logs:
+    सामान्य लॉग:
 
     - `Slow listener detected ...`
     - `stuck session: sessionKey=agent:...:discord:... state=processing ...`
 
-    Discord gateway queue knobs:
-
-    - एकल-खाता: `channels.discord.eventQueue.listenerTimeout`
-    - बहु-खाता: `channels.discord.accounts.<accountId>.eventQueue.listenerTimeout`
-    - यह केवल Discord gateway listener कार्य को नियंत्रित करता है, agent turn lifetime को नहीं
-
-    Discord queued agent turns पर चैनल-स्वामित्व वाला timeout लागू नहीं करता. Message listeners तुरंत hand off करते हैं, और queued Discord runs per-session ordering को तब तक बनाए रखते हैं जब तक session/tool/runtime lifecycle कार्य को पूरा या abort नहीं कर देता.
-
-```json5
-{
-  channels: {
-    discord: {
-      accounts: {
-        default: {
-          eventQueue: {
-            listenerTimeout: 120000,
-          },
-        },
-      },
-    },
-  },
-}
-```
+    Discord कतारबद्ध एजेंट टर्न पर चैनल-स्वामित्व वाला टाइमआउट लागू नहीं करता। संदेश लिसनर तुरंत हैंडऑफ़ करते हैं, और कतारबद्ध Discord रन सत्र/टूल/रनटाइम जीवनचक्र द्वारा काम पूरा या निरस्त किए जाने तक प्रति-सत्र क्रम बनाए रखते हैं।
 
   </Accordion>
 
-  <Accordion title="Gateway metadata lookup timeout चेतावनियां">
-    OpenClaw कनेक्ट करने से पहले Discord `/gateway/bot` metadata fetch करता है. अस्थायी विफलताएं Discord के default gateway URL पर fallback करती हैं और logs में rate-limited होती हैं.
+  <Accordion title="Gateway मेटाडेटा लुकअप टाइमआउट चेतावनियाँ">
+    OpenClaw कनेक्ट होने से पहले Discord का `/gateway/bot` मेटाडेटा प्राप्त करता है। अस्थायी विफलताओं पर Discord के डिफ़ॉल्ट Gateway URL का फ़ॉलबैक उपयोग होता है और लॉग में दर-सीमा लागू होती है।
 
-    Metadata timeout knobs:
-
-    - एकल-खाता: `channels.discord.gatewayInfoTimeoutMs`
-    - बहु-खाता: `channels.discord.accounts.<accountId>.gatewayInfoTimeoutMs`
-    - config unset होने पर env fallback: `OPENCLAW_DISCORD_GATEWAY_INFO_TIMEOUT_MS`
-    - default: `30000` (30 सेकंड), अधिकतम: `120000`
+    मेटाडेटा टाइमआउट का डिफ़ॉल्ट 30 सेकंड है। असामान्य होस्ट परिवेशों के लिए `OPENCLAW_DISCORD_GATEWAY_INFO_TIMEOUT_MS` इसे ओवरराइड कर सकता है।
 
   </Accordion>
 
-  <Accordion title="Gateway READY timeout restarts">
-    OpenClaw startup के दौरान और runtime reconnects के बाद Discord के gateway `READY` event की प्रतीक्षा करता है. Startup staggering वाले बहु-खाता setups को default से लंबी startup READY window की आवश्यकता हो सकती है.
+  <Accordion title="Gateway READY टाइमआउट के कारण पुनः आरंभ">
+    OpenClaw स्टार्टअप के दौरान और रनटाइम पुनः कनेक्शन के बाद Discord के Gateway `READY` इवेंट की प्रतीक्षा करता है। चरणबद्ध स्टार्टअप वाले बहु-खाता सेटअप के लिए डिफ़ॉल्ट से अधिक लंबी स्टार्टअप READY अवधि की आवश्यकता हो सकती है।
 
-    READY timeout knobs:
-
-    - startup एकल-खाता: `channels.discord.gatewayReadyTimeoutMs`
-    - startup बहु-खाता: `channels.discord.accounts.<accountId>.gatewayReadyTimeoutMs`
-    - config unset होने पर startup env fallback: `OPENCLAW_DISCORD_READY_TIMEOUT_MS`
-    - startup default: `15000` (15 सेकंड), अधिकतम: `120000`
-    - runtime एकल-खाता: `channels.discord.gatewayRuntimeReadyTimeoutMs`
-    - runtime बहु-खाता: `channels.discord.accounts.<accountId>.gatewayRuntimeReadyTimeoutMs`
-    - config unset होने पर runtime env fallback: `OPENCLAW_DISCORD_RUNTIME_READY_TIMEOUT_MS`
-    - runtime default: `30000` (30 सेकंड), अधिकतम: `120000`
+    स्टार्टअप 15 सेकंड और रनटाइम पुनः कनेक्शन 30 सेकंड प्रतीक्षा करते हैं। असामान्य होस्ट परिवेशों के लिए `OPENCLAW_DISCORD_READY_TIMEOUT_MS` और `OPENCLAW_DISCORD_RUNTIME_READY_TIMEOUT_MS` उपलब्ध रहते हैं।
 
   </Accordion>
 
-  <Accordion title="Permissions audit mismatches">
-    `channels status --probe` permission checks केवल numeric channel IDs के लिए काम करते हैं.
+  <Accordion title="अनुमति ऑडिट में बेमेल">
+    `channels status --probe` अनुमति जाँच केवल संख्यात्मक चैनल ID के लिए काम करती है।
 
-    यदि आप slug keys का उपयोग करते हैं, तो runtime matching फिर भी काम कर सकती है, लेकिन probe permissions को पूरी तरह verify नहीं कर सकता.
-
-  </Accordion>
-
-  <Accordion title="DM और pairing समस्याएं">
-
-    - DM disabled: `channels.discord.dm.enabled=false`
-    - DM policy disabled: `channels.discord.dmPolicy="disabled"` (legacy: `channels.discord.dm.policy`)
-    - `pairing` mode में pairing approval की प्रतीक्षा
+    यदि आप स्लग कुंजियों का उपयोग करते हैं, तो रनटाइम मिलान फिर भी काम कर सकता है, लेकिन प्रोब अनुमतियों को पूरी तरह सत्यापित नहीं कर सकता।
 
   </Accordion>
 
-  <Accordion title="बॉट-से-बॉट loops">
-    default रूप से बॉट-द्वारा-लिखे संदेश ignore किए जाते हैं.
+  <Accordion title="DM और पेयरिंग संबंधी समस्याएँ">
 
-    यदि आप `channels.discord.allowBots=true` सेट करते हैं, तो loop behavior से बचने के लिए strict mention और allowlist rules का उपयोग करें.
-    केवल उन bot messages को स्वीकार करने के लिए जो bot को mention करते हैं, `channels.discord.allowBots="mentions"` को प्राथमिकता दें.
+    - DM अक्षम: `channels.discord.dm.enabled=false`
+    - DM नीति अक्षम: `channels.discord.dmPolicy="disabled"` (पुराना: `channels.discord.dm.policy`)
+    - `pairing` मोड में पेयरिंग स्वीकृति की प्रतीक्षा है
 
-    OpenClaw shared [बॉट loop protection](/hi/channels/bot-loop-protection) भी ship करता है. जब भी `allowBots` bot-authored messages को dispatch तक पहुंचने देता है, Discord inbound event को `(account, channel, bot pair)` facts में map करता है और generic pair guard configured event budget पार होने के बाद pair को suppress करता है. Guard runaway दो-बॉट loops को रोकता है जिन्हें पहले Discord rate limits से रोकना पड़ता था; यह single-bot deployments या budget के अंतर्गत रहने वाले one-shot bot replies को प्रभावित नहीं करता.
+  </Accordion>
 
-    Default settings (`allowBots` सेट होने पर active):
+  <Accordion title="बॉट-से-बॉट लूप">
+    डिफ़ॉल्ट रूप से बॉट द्वारा लिखे गए संदेशों को अनदेखा किया जाता है।
 
-    - `maxEventsPerWindow: 20` -- bot pair sliding window के भीतर 20 messages exchange कर सकता है
-    - `windowSeconds: 60` -- sliding window की लंबाई
-    - `cooldownSeconds: 60` -- budget trip होने के बाद, किसी भी दिशा में हर अतिरिक्त bot-to-bot message एक मिनट के लिए drop किया जाता है
+    यदि आप `channels.discord.allowBots=true` सेट करते हैं, तो लूप व्यवहार से बचने के लिए सख्त उल्लेख और अनुमतिसूची नियमों का उपयोग करें।
+    केवल बॉट का उल्लेख करने वाले बॉट संदेशों को स्वीकार करने के लिए `channels.discord.allowBots="mentions"` को प्राथमिकता दें।
 
-    Shared default को एक बार `channels.defaults.botLoopProtection` के अंतर्गत configure करें, फिर जब किसी legitimate workflow को अधिक headroom चाहिए तब Discord override करें. Precedence है:
+    OpenClaw में साझा [बॉट लूप सुरक्षा](/hi/channels/bot-loop-protection) भी शामिल है। जब भी `allowBots` बॉट द्वारा लिखे गए संदेशों को डिस्पैच तक पहुँचने देता है, Discord इनबाउंड इवेंट को `(account, channel, bot pair)` तथ्यों में मैप करता है और कॉन्फ़िगर की गई इवेंट सीमा पार होने के बाद सामान्य पेयर गार्ड उस जोड़ी को दबा देता है। यह गार्ड अनियंत्रित दो-बॉट लूप रोकता है, जिन्हें पहले Discord की दर-सीमाओं द्वारा रोकना पड़ता था; यह एकल-बॉट परिनियोजनों या सीमा के भीतर रहने वाले एकबारगी बॉट उत्तरों को प्रभावित नहीं करता।
+
+    डिफ़ॉल्ट सेटिंग्स (`allowBots` सेट होने पर सक्रिय):
+
+    - `maxEventsPerWindow: 20` -- बॉट जोड़ी स्लाइडिंग विंडो में 20 संदेशों का आदान-प्रदान कर सकती है
+    - `windowSeconds: 60` -- स्लाइडिंग विंडो की अवधि
+    - `cooldownSeconds: 60` -- सीमा सक्रिय होने के बाद, दोनों में से किसी भी दिशा में हर अतिरिक्त बॉट-से-बॉट संदेश एक मिनट तक छोड़ दिया जाता है
+
+    साझा डिफ़ॉल्ट को `channels.defaults.botLoopProtection` के अंतर्गत एक बार कॉन्फ़िगर करें, फिर जब किसी वैध कार्यप्रवाह को अधिक गुंजाइश चाहिए तो Discord के लिए उसे ओवरराइड करें। प्राथमिकता क्रम है:
 
     - `channels.discord.accounts.<account>.botLoopProtection`
     - `channels.discord.botLoopProtection`
     - `channels.defaults.botLoopProtection`
-    - built-in defaults
+    - अंतर्निहित डिफ़ॉल्ट
 
-    Discord generic `maxEventsPerWindow`, `windowSeconds`, और `cooldownSeconds` keys का उपयोग करता है.
+    Discord सामान्य `maxEventsPerWindow`, `windowSeconds`, और `cooldownSeconds` कुंजियों का उपयोग करता है।
 
 ```json5
 {
@@ -1674,25 +1646,25 @@ openclaw logs --follow
       },
     },
     discord: {
-      // Optional Discord-wide override. Account blocks override individual
-      // fields and inherit omitted fields from here.
+      // वैकल्पिक Discord-व्यापी ओवरराइड। खाता ब्लॉक अलग-अलग
+      // फ़ील्ड ओवरराइड करते हैं और यहाँ से छोड़े गए फ़ील्ड इनहेरिट करते हैं।
       botLoopProtection: {
         maxEventsPerWindow: 4,
       },
       accounts: {
-        mantis: {
-          // Mantis listens to other bots only when they mention her.
+        alpha: {
+          // Alpha अन्य बॉट को केवल तभी सुनता है, जब वे उसका उल्लेख करते हैं।
           allowBots: "mentions",
         },
-        molty: {
-          // Molty listens to all bot-authored Discord messages.
+        bravo: {
+          // Bravo बॉट द्वारा लिखे गए सभी Discord संदेशों को सुनता है।
           allowBots: true,
           mentionAliases: {
-            // Lets Molty write a Mantis Discord mention with the configured user id.
-            Mantis: "MANTIS_DISCORD_USER_ID",
+            // कॉन्फ़िगर की गई उपयोगकर्ता ID के साथ Bravo को Alpha का Discord उल्लेख लिखने देता है।
+            Alpha: "ALPHA_DISCORD_USER_ID",
           },
           botLoopProtection: {
-            // Allow up to five messages per minute before suppressing the pair.
+            // जोड़ी को दबाने से पहले प्रति मिनट अधिकतम पाँच संदेशों की अनुमति दें।
             maxEventsPerWindow: 5,
             windowSeconds: 60,
             cooldownSeconds: 90,
@@ -1706,66 +1678,75 @@ openclaw logs --follow
 
   </Accordion>
 
-  <Accordion title="Voice STT DecryptionFailed(...) के साथ drop होता है">
+  <Accordion title="DecryptionFailed(...) के साथ वॉइस STT छूटना">
 
-    - OpenClaw को current रखें (`openclaw update`) ताकि Discord voice receive recovery logic मौजूद रहे
-    - पुष्टि करें कि `channels.discord.voice.daveEncryption=true` (default)
-    - `channels.discord.voice.decryptionFailureTolerance=24` (upstream default) से शुरू करें और केवल ज़रूरत होने पर tune करें
-    - logs देखें:
+    - OpenClaw को अद्यतित रखें (`openclaw update`), ताकि Discord वॉइस रिसीव पुनर्प्राप्ति लॉजिक मौजूद रहे
+    - `channels.discord.voice.daveEncryption=true` (डिफ़ॉल्ट) की पुष्टि करें
+    - `channels.discord.voice.decryptionFailureTolerance=24` (अपस्ट्रीम डिफ़ॉल्ट) से शुरू करें और आवश्यकता होने पर ही समायोजित करें
+    - इनके लिए लॉग देखें:
       - `discord voice: DAVE decrypt failures detected`
       - `discord voice: repeated decrypt failures; attempting rejoin`
-    - यदि automatic rejoin के बाद failures जारी रहें, तो logs collect करें और [discord.js #11419](https://github.com/discordjs/discord.js/issues/11419) और [discord.js #11449](https://github.com/discordjs/discord.js/pull/11449) में upstream DAVE receive history से तुलना करें
+    - यदि स्वचालित रूप से पुनः जुड़ने के बाद भी विफलताएँ जारी रहें, तो लॉग एकत्र करें और उनकी तुलना [discord.js #11419](https://github.com/discordjs/discord.js/issues/11419) तथा [discord.js #11449](https://github.com/discordjs/discord.js/pull/11449) में अपस्ट्रीम DAVE रिसीव इतिहास से करें
 
   </Accordion>
 </AccordionGroup>
 
 ## कॉन्फ़िगरेशन संदर्भ
 
-Primary reference: [कॉन्फ़िगरेशन संदर्भ - Discord](/hi/gateway/config-channels#discord).
+प्राथमिक संदर्भ: [कॉन्फ़िगरेशन संदर्भ - Discord](/hi/gateway/config-channels#discord)।
 
-<Accordion title="High-signal Discord fields">
+<Accordion title="उच्च-संकेत वाले Discord फ़ील्ड">
 
-- startup/auth: `enabled`, `token`, `accounts.*`, `allowBots`
-- policy: `groupPolicy`, `dm.*`, `guilds.*`, `guilds.*.channels.*`
-- command: `commands.native`, `commands.useAccessGroups`, `configWrites`, `slashCommand.*`
-- event queue: `eventQueue.listenerTimeout` (listener budget), `eventQueue.maxQueueSize`, `eventQueue.maxConcurrency`
-- gateway: `gatewayInfoTimeoutMs`, `gatewayReadyTimeoutMs`, `gatewayRuntimeReadyTimeoutMs`
-- reply/history: `replyToMode`, `historyLimit`, `dmHistoryLimit`, `dms.*.historyLimit`
-- delivery: `textChunkLimit`, `chunkMode`, `maxLinesPerMessage`
-- streaming: `streaming` (legacy alias: `streamMode`), `streaming.preview.toolProgress`, `draftChunk`, `blockStreaming`, `blockStreamingCoalesce`
-- media/retry: `mediaMaxMb` (outbound Discord uploads को cap करता है, default `100MB`), `retry`
-- actions: `actions.*`
-- presence: `activity`, `status`, `activityType`, `activityUrl`
+- स्टार्टअप/प्रमाणीकरण: `enabled`, `token`, `applicationId`, `accounts.*`, `allowBots`
+- नीति: `groupPolicy`, `dmPolicy`, `allowFrom`, `dm.*`, `guilds.*`, `guilds.*.channels.*`
+- कमांड: `commands.native`, `commands.useAccessGroups` (वैश्विक), `configWrites`, `slashCommand.ephemeral`
+- Gateway: `proxy`
+- उत्तर/इतिहास: `replyToMode`, `historyLimit`, `dmHistoryLimit`, `dms.*.historyLimit`
+- डिलीवरी: `textChunkLimit` (डिफ़ॉल्ट `2000`), `maxLinesPerMessage` (डिफ़ॉल्ट `17`)
+- स्ट्रीमिंग: `streaming.mode`, `streaming.chunkMode`, `streaming.preview.*`, `streaming.progress.*`, `streaming.block.*` (पुरानी फ़्लैट कुंजियाँ `streamMode`, `draftChunk`, `blockStreaming`, `blockStreamingCoalesce`, `chunkMode`, `openclaw doctor --fix` द्वारा `streaming.*` में माइग्रेट की जाती हैं)
+- मीडिया: `mediaMaxMb` (आउटबाउंड Discord अपलोड सीमित करता है, डिफ़ॉल्ट `100`)
+- क्रियाएँ: `actions.*`
+- उपस्थिति: `activity`, `status`, `activityType`, `activityUrl`, `autoPresence.*`
 - UI: `ui.components.accentColor`
-- features: `threadBindings`, top-level `bindings[]` (`type: "acp"`), `pluralkit`, `execApprovals`, `intents`, `agentComponents.enabled`, `agentComponents.ttlMs`, `heartbeat`, `responsePrefix`
+- सुविधाएँ: `threadBindings`, शीर्ष-स्तरीय `bindings[]` (`type: "acp"`), `pluralkit`, `execApprovals`, `intents`, `agentComponents.enabled`, `agentComponents.ttlMs`, `activities`, `heartbeat`, `responsePrefix`
 
 </Accordion>
 
+### Discord Activities
+
+एजेंटों को Discord के भीतर खुलने वाले स्व-निहित HTML विजेट पोस्ट करने देने के लिए `channels.discord.activities` सेट करें। यह ब्लॉक वैकल्पिक है; इसके अनुपस्थित होने पर OpenClaw कोई Activity रूट, टूल या इंटरैक्शन हैंडलर पंजीकृत नहीं करता। Developer Portal, टनल, सुरक्षा और समस्या निवारण सेटअप के लिए [Discord Activities](/hi/channels/discord-activities) देखें।
+
+- `activities.clientSecret`: Discord एप्लिकेशन के लिए OAuth2 क्लाइंट सीक्रेट; `DISCORD_CLIENT_SECRET` पर फ़ॉलबैक करता है
+- `activities.applicationId`: वैकल्पिक Activity एप्लिकेशन ID; डिफ़ॉल्ट रूप से Gateway स्टार्टअप पर प्राप्त बॉट एप्लिकेशन ID का उपयोग करता है
+
 ## सुरक्षा और संचालन
 
-- bot tokens को secrets मानें (supervised environments में `DISCORD_BOT_TOKEN` preferred).
-- least-privilege Discord permissions दें.
-- यदि command deploy/state stale है, तो gateway restart करें और `openclaw channels status --probe` से फिर जांचें.
+- बॉट टोकन को सीक्रेट मानें (पर्यवेक्षित परिवेशों में `DISCORD_BOT_TOKEN` को प्राथमिकता दें)।
+- Discord को न्यूनतम-विशेषाधिकार अनुमतियाँ प्रदान करें।
+- यदि कमांड परिनियोजन/स्थिति पुरानी है, तो Gateway पुनः आरंभ करें और `openclaw channels status --probe` से दोबारा जाँचें।
 
 ## संबंधित
 
 <CardGroup cols={2}>
-  <Card title="Pairing" icon="link" href="/hi/channels/pairing">
-    Discord user को gateway से pair करें.
+  <Card title="Discord Activities" icon="window" href="/hi/channels/discord-activities">
+    Discord के भीतर इंटरैक्टिव HTML विजेट लॉन्च करें।
   </Card>
-  <Card title="Groups" icon="users" href="/hi/channels/groups">
-    Group chat और allowlist behavior.
+  <Card title="पेयरिंग" icon="link" href="/hi/channels/pairing">
+    किसी Discord उपयोगकर्ता को Gateway से पेयर करें।
   </Card>
-  <Card title="Channel routing" icon="route" href="/hi/channels/channel-routing">
-    Inbound messages को agents तक route करें.
+  <Card title="समूह" icon="users" href="/hi/channels/groups">
+    समूह चैट और अनुमतिसूची व्यवहार।
   </Card>
-  <Card title="Security" icon="shield" href="/hi/gateway/security">
-    Threat model और hardening.
+  <Card title="चैनल रूटिंग" icon="route" href="/hi/channels/channel-routing">
+    इनबाउंड संदेशों को एजेंटों तक रूट करें।
   </Card>
-  <Card title="Multi-agent routing" icon="sitemap" href="/hi/concepts/multi-agent">
-    Guilds और channels को agents से map करें.
+  <Card title="सुरक्षा" icon="shield" href="/hi/gateway/security">
+    खतरा मॉडल और सुदृढ़ीकरण।
   </Card>
-  <Card title="Slash commands" icon="terminal" href="/hi/tools/slash-commands">
-    Native command behavior.
+  <Card title="बहु-एजेंट रूटिंग" icon="sitemap" href="/hi/concepts/multi-agent">
+    गिल्ड और चैनलों को एजेंटों से मैप करें।
+  </Card>
+  <Card title="स्लैश कमांड" icon="terminal" href="/hi/tools/slash-commands">
+    मूल कमांड व्यवहार।
   </Card>
 </CardGroup>

@@ -2,32 +2,33 @@
 read_when:
     - Bir Plugin'e kurulum sihirbazı ekliyorsunuz
     - setup-entry.ts ile index.ts arasındaki farkı anlamanız gerekir
-    - Plugin yapılandırma şemalarını veya package.json içindeki openclaw meta verilerini tanımlıyorsunuz
+    - Plugin yapılandırma şemalarını veya package.json openclaw meta verilerini tanımlıyorsunuz
 sidebarTitle: Setup and config
 summary: Kurulum sihirbazları, setup-entry.ts, yapılandırma şemaları ve package.json meta verileri
 title: Plugin kurulumu ve yapılandırması
 x-i18n:
-    generated_at: "2026-07-12T12:39:52Z"
+    generated_at: "2026-07-26T23:54:25Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 3b47e1f18a92871c442980168e302c82d7aa9a38b38bbbeed4add9dd6479365b
+    source_hash: b07e3fa365939fa9c0885b31b7894f5e734313a7deef2297e316956063d97e45
     source_path: plugins/sdk-setup.md
     workflow: 16
 ---
 
-Plugin paketleme (`package.json` meta verileri), manifestler (`openclaw.plugin.json`), kurulum girdileri ve yapılandırma şemaları için başvuru kaynağı.
+Plugin paketleme (`package.json` meta verileri), manifestler (`openclaw.plugin.json`), kurulum girişleri ve yapılandırma şemaları için başvuru kaynağı.
 
 <Tip>
-**Adım adım rehber mi arıyorsunuz?** Nasıl yapılır kılavuzları, paketlemeyi bağlamı içinde ele alır: [Kanal Pluginleri](/tr/plugins/sdk-channel-plugins#step-1-package-and-manifest) ve [Sağlayıcı Pluginleri](/tr/plugins/sdk-provider-plugins#step-1-package-and-manifest).
+**Adım adım açıklama mı arıyorsunuz?** Nasıl yapılır kılavuzları, paketlemeyi bağlam içinde ele alır: [Kanal pluginleri](/plugins/sdk-channel-plugins#step-1-package-and-manifest) ve [Sağlayıcı pluginleri](/tr/plugins/sdk-provider-plugins#step-1-package-and-manifest).
 </Tip>
 
 ## Paket meta verileri
 
-`package.json` dosyanızda, Plugin sistemine Plugininizin ne sunduğunu bildiren bir `openclaw` alanı bulunmalıdır:
+`package.json` dosyanız, plugin sistemine plugininizin ne sağladığını bildiren bir `openclaw` alanına ihtiyaç duyar:
 
 <Tabs>
-  <Tab title="Kanal Plugini">
+  <Tab title="Kanal plugini">
     ```json
     {
       "name": "@myorg/openclaw-my-channel",
@@ -38,14 +39,14 @@ Plugin paketleme (`package.json` meta verileri), manifestler (`openclaw.plugin.j
         "setupEntry": "./setup-entry.ts",
         "channel": {
           "id": "my-channel",
-          "label": "My Channel",
-          "blurb": "Short description of the channel."
+          "label": "Kanalım",
+          "blurb": "Kanalın kısa açıklaması."
         }
       }
     }
     ```
   </Tab>
-  <Tab title="Sağlayıcı Plugini / ClawHub temel yapılandırması">
+  <Tab title="Sağlayıcı plugini / ClawHub temel yapılandırması">
     ```json openclaw-clawhub-package.json
     {
       "name": "@myorg/openclaw-my-plugin",
@@ -74,68 +75,126 @@ Plugin paketleme (`package.json` meta verileri), manifestler (`openclaw.plugin.j
 </Tabs>
 
 <Note>
-ClawHub üzerinde harici olarak yayımlama için `compat` ve `build` gereklidir. Standart yayımlama parçacıkları `docs/snippets/plugin-publish/` içinde bulunur.
+ClawHub'da harici olarak yayımlamak için `compat` ve `build` gereklidir. Standart yayımlama kod parçacıkları `docs/snippets/plugin-publish/` içinde bulunur.
 </Note>
 
 ### `openclaw` alanları
 
 <ParamField path="extensions" type="string[]">
-  Giriş noktası dosyaları (paket köküne göre). Çalışma alanı ve git checkout geliştirmesi için geçerli kaynak girdileridir.
+  Giriş noktası dosyaları (paket köküne göre). Çalışma alanı ve git çalışma kopyası geliştirmesi için geçerli kaynak girişleridir.
 </ParamField>
 <ParamField path="runtimeExtensions" type="string[]">
-  OpenClaw kurulu bir npm paketini yüklediğinde tercih edilen, `extensions` için derlenmiş JavaScript eş dosyaları. Kaynak/derlenmiş çözümleme sırası için [SDK giriş noktaları](/tr/plugins/sdk-entrypoints) bölümüne bakın.
+  `extensions` için derlenmiş JavaScript eş dosyaları; OpenClaw yüklü bir npm paketini yüklediğinde tercih edilir. Kaynak/derlenmiş çözümleme sırası için [SDK giriş noktaları](/tr/plugins/sdk-entrypoints) bölümüne bakın.
 </ParamField>
 <ParamField path="setupEntry" type="string">
   Yalnızca kurulum için kullanılan hafif giriş (isteğe bağlı).
 </ParamField>
 <ParamField path="runtimeSetupEntry" type="string">
-  `setupEntry` için derlenmiş JavaScript eş dosyası. `setupEntry` alanının da ayarlanmasını gerektirir.
+  `setupEntry` için derlenmiş JavaScript eş dosyası. `setupEntry` değerinin de ayarlanmasını gerektirir.
 </ParamField>
 <ParamField path="plugin" type="object">
-  Bir Pluginin kimlik veya etiket türetilebilecek kanal/sağlayıcı meta verileri olmadığında kullanılan yedek `{ id, label }` Plugin kimliği.
+  Bir pluginin kimlik veya etiket türetilebilecek kanal/sağlayıcı meta verileri olmadığında kullanılan `{ id, label }` yedek plugin kimliği.
 </ParamField>
 <ParamField path="channel" type="object">
   Kurulum, seçici, hızlı başlangıç ve durum yüzeyleri için kanal kataloğu meta verileri.
 </ParamField>
 <ParamField path="install" type="object">
-  Kurulum ipuçları: `npmSpec`, `localPath`, `defaultChoice`, `minHostVersion`, `expectedIntegrity`, `allowInvalidConfigRecovery`, `requiredPlatformPackages`.
+  Yükleme ipuçları: `npmSpec`, `localPath`, `defaultChoice`, `minHostVersion`, `expectedIntegrity`, `allowInvalidConfigRecovery`, `requiredPlatformPackages`.
 </ParamField>
 <ParamField path="startup" type="object">
-  Başlatma davranışı bayrakları.
+  Başlangıç davranışı bayrakları.
 </ParamField>
 <ParamField path="compat" type="object">
-  Bu Pluginin desteklediği `pluginApi` sürüm aralığı. Harici ClawHub yayımları için gereklidir.
+  Bu pluginin desteklediği `pluginApi` sürüm aralığı. Harici ClawHub yayımları için gereklidir.
 </ParamField>
 
 <Note>
-Sağlayıcı kimlikleri (`providers: string[]`) paket meta verileri değil, manifest meta verileridir. Bunları burada değil, `openclaw.plugin.json` içinde bildirin — bkz. [Plugin manifesti](/tr/plugins/manifest).
+Sağlayıcı kimlikleri (`providers: string[]`) paket meta verileri değil, manifest meta verileridir. Bunları burada değil, `openclaw.plugin.json` içinde bildirin — [Plugin manifesti](/tr/plugins/manifest) bölümüne bakın.
 </Note>
 
 ### `openclaw.channel`
 
-`openclaw.channel`, çalışma zamanı yüklenmeden önce kanal keşfi ve kurulum yüzeyleri için kullanılan düşük maliyetli paket meta verileridir.
+`openclaw.channel`, çalışma zamanı yüklenmeden önce kanal keşfi ve kurulum yüzeyleri için düşük maliyetli paket meta verileridir.
 
-| Alan                                   | Tür        | Anlamı                                                                         |
-| -------------------------------------- | ---------- | ------------------------------------------------------------------------------ |
-| `id`                                   | `string`   | Standart kanal kimliği.                                                        |
-| `label`                                | `string`   | Birincil kanal etiketi.                                                        |
-| `selectionLabel`                       | `string`   | `label` değerinden farklı olması gerektiğinde seçici/kurulum etiketi.          |
-| `detailLabel`                          | `string`   | Daha zengin kanal katalogları ve durum yüzeyleri için ikincil ayrıntı etiketi. |
-| `docsPath`                             | `string`   | Kurulum ve seçim bağlantıları için dokümantasyon yolu.                         |
-| `docsLabel`                            | `string`   | Kanal kimliğinden farklı olması gerektiğinde dokümantasyon bağlantılarında kullanılan geçersiz kılma etiketi. |
-| `blurb`                                | `string`   | Kısa ilk kullanım/katalog açıklaması.                                          |
-| `order`                                | `number`   | Kanal kataloglarındaki sıralama düzeni.                                        |
-| `aliases`                              | `string[]` | Kanal seçimi için ek arama takma adları.                                       |
-| `preferOver`                           | `string[]` | Bu kanalın önüne geçmesi gereken daha düşük öncelikli Plugin/kanal kimlikleri. |
-| `systemImage`                          | `string`   | Kanal kullanıcı arayüzü katalogları için isteğe bağlı simge/sistem görüntüsü adı. |
-| `selectionDocsPrefix`                  | `string`   | Seçim yüzeylerindeki dokümantasyon bağlantılarından önce gelen ön ek metni.    |
-| `selectionDocsOmitLabel`               | `boolean`  | Seçim metninde etiketli bir dokümantasyon bağlantısı yerine dokümantasyon yolunu doğrudan gösterir. |
-| `selectionExtras`                      | `string[]` | Seçim metnine eklenen kısa metinler.                                           |
-| `markdownCapable`                      | `boolean`  | Giden biçimlendirme kararları için kanalı Markdown destekli olarak işaretler.  |
-| `exposure`                             | `object`   | Kurulum, yapılandırılmış listeler ve dokümantasyon yüzeyleri için kanal görünürlüğü denetimleri. |
-| `quickstartAllowFrom`                  | `boolean`  | Bu kanalı standart hızlı başlangıç `allowFrom` kurulum akışına dahil eder.     |
-| `forceAccountBinding`                  | `boolean`  | Yalnızca bir hesap bulunsa bile açık hesap bağlamayı zorunlu kılar.            |
-| `preferSessionLookupForAnnounceTarget` | `boolean`  | Bu kanalın duyuru hedefleri çözümlenirken oturum aramasını tercih eder.         |
+### Kanalın sahip olduğu kurulum alanları
+
+Kanal pluginleri, kurulum alanlarını çalışma zamanı kodunda `defineChannelSetupContract(...)` ile bir kez tanımlamalı ve eşleşen serileştirilebilir izdüşümü `openclaw.channel.setup.fields` altında yayımlamalıdır. Çalışma zamanı tanımı, plugine özgü yerel girdi türünü çıkarır, hem yönlendirmeli hem de etkileşimsiz değerleri ayrıştırır ve kanala özgü anahtarları çekirdek türlerin dışında tutar. Paket meta verileri, `openclaw channels add <channel-id> --help` ve `openclaw channels add --channel <channel-id> --help` bileşenlerinin plugini yüklemeden yalnızca seçilen kanalın seçeneklerini keşfetmesini sağlar.
+
+```ts
+import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+
+export const setupContract = defineChannelSetupContract({
+  fields: {
+    endpoint: {
+      kind: "string",
+      cli: { flags: "--endpoint <url>", description: "Hizmet uç noktası" },
+    },
+    transport: {
+      kind: "choice",
+      choices: ["native", "container"],
+      cli: { flags: "--transport <kind>", description: "Aktarım sahibi" },
+    },
+  },
+  adapter: {
+    applyAccountConfig: ({ cfg, input }) => ({
+      ...cfg,
+      channels: { ...cfg.channels, example: input },
+    }),
+  },
+});
+```
+
+```json
+{
+  "openclaw": {
+    "channel": {
+      "id": "example",
+      "setup": {
+        "fields": [
+          {
+            "key": "endpoint",
+            "kind": "string",
+            "cli": { "flags": "--endpoint <url>", "description": "Hizmet uç noktası" }
+          },
+          {
+            "key": "transport",
+            "kind": "choice",
+            "choices": ["native", "container"],
+            "cli": { "flags": "--transport <kind>", "description": "Aktarım sahibi" }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+Desteklenen alan türleri `string`, `boolean`, `integer`, `string-list` ve `choice` şeklindedir. Kimlik bilgileri için `sensitive: true` kullanın. Her alan anahtarı, olumsuz biçimler dâhil olmak üzere uzun CLI bayrağının camelCase biçimli öznitelik adına eşit olmalıdır; örneğin `--api-token` için `apiToken`. Hem olumlu hem de `--no-*` biçimleri gerektiğinde Boolean alanları `cli.negatedFlags` ekleyebilir. `channel`, `account` ve hesap görüntüleme `name` ortak denetim zarfı olarak kalır.
+
+Yayımlanmış `setup`/`ChannelSetupInput` bağdaştırıcısı, mevcut harici pluginler için kullanılabilir olmaya devam eder. Yeni pluginler `setupContract` sunmalıdır; her ikisi de mevcut olduğunda OpenClaw her zaman bunu tercih eder.
+
+| Alan                                   | Tür        | Anlamı                                                                        |
+| -------------------------------------- | ---------- | ----------------------------------------------------------------------------- |
+| `id`                    | `string` | Standart kanal kimliği.                                                       |
+| `label`                    | `string` | Birincil kanal etiketi.                                                       |
+| `selectionLabel`                    | `string` | `label` değerinden farklı olması gerektiğinde seçici/kurulum etiketi. |
+| `detailLabel`                    | `string` | Daha zengin kanal katalogları ve durum yüzeyleri için ikincil ayrıntı etiketi. |
+| `docsPath`                    | `string` | Kurulum ve seçim bağlantıları için doküman yolu.                              |
+| `docsLabel`                    | `string` | Kanal kimliğinden farklı olması gerektiğinde doküman bağlantıları için kullanılan geçersiz kılma etiketi. |
+| `blurb`                    | `string` | Kısa ilk kullanım/katalog açıklaması.                                        |
+| `order`                    | `number` | Kanal kataloglarındaki sıralama düzeni.                                       |
+| `aliases`                    | `string[]` | Kanal seçimi için ek arama diğer adları.                                      |
+| `preferOver`                    | `string[]` | Bu kanalın önüne geçmesi gereken, daha düşük öncelikli plugin/kanal kimlikleri. |
+| `systemImage`                    | `string` | Kanal kullanıcı arayüzü katalogları için isteğe bağlı simge/sistem görüntüsü adı. |
+| `selectionDocsPrefix`                    | `string` | Seçim yüzeylerindeki doküman bağlantılarından önce gelen önek metni.          |
+| `selectionDocsOmitLabel`                    | `boolean` | Seçim metninde etiketli bir doküman bağlantısı yerine doküman yolunu doğrudan gösterir. |
+| `selectionExtras`                    | `string[]` | Seçim metnine eklenen kısa ek dizeler.                                        |
+| `markdownCapable`                    | `boolean` | Giden biçimlendirme kararları için kanalı Markdown özellikli olarak işaretler. |
+| `exposure`                    | `object` | Kurulum, yapılandırılmış listeler ve doküman yüzeyleri için kanal görünürlük denetimleri. |
+| `quickstartAllowFrom`                    | `boolean` | Bu kanalı standart hızlı başlangıç `allowFrom` kurulum akışına dâhil eder. |
+| `forceAccountBinding`                    | `boolean` | Yalnızca bir hesap bulunsa bile açık hesap bağlama işlemini zorunlu kılar.     |
+| `preferSessionLookupForAnnounceTarget`                    | `boolean` | Bu kanal için duyuru hedeflerini çözümlerken oturum aramasını tercih eder.     |
+| `setup`                    | `object` | Gecikmeli CLI seçeneği keşfi için kullanılan, kanalın sahip olduğu serileştirilebilir kurulum alanları. |
 
 Örnek:
 
@@ -144,16 +203,16 @@ Sağlayıcı kimlikleri (`providers: string[]`) paket meta verileri değil, mani
   "openclaw": {
     "channel": {
       "id": "my-channel",
-      "label": "My Channel",
-      "selectionLabel": "My Channel (self-hosted)",
-      "detailLabel": "My Channel Bot",
+      "label": "Kanalım",
+      "selectionLabel": "Kanalım (kendi sunucunuzda barındırılan)",
+      "detailLabel": "Kanalım Botu",
       "docsPath": "/channels/my-channel",
       "docsLabel": "my-channel",
-      "blurb": "Webhook-based self-hosted chat integration.",
+      "blurb": "Webhook tabanlı, kendi sunucunuzda barındırılan sohbet entegrasyonu.",
       "order": 80,
       "aliases": ["mc"],
       "preferOver": ["my-channel-legacy"],
-      "selectionDocsPrefix": "Guide:",
+      "selectionDocsPrefix": "Kılavuz:",
       "selectionExtras": ["Markdown"],
       "markdownCapable": true,
       "exposure": {
@@ -169,35 +228,31 @@ Sağlayıcı kimlikleri (`providers: string[]`) paket meta verileri değil, mani
 
 `exposure` şunları destekler:
 
-- `configured`: kanalı yapılandırılmış/durum tarzı listeleme yüzeylerine dahil eder
-- `setup`: kanalı etkileşimli kurulum/yapılandırma seçicilerine dahil eder
-- `docs`: kanalı dokümantasyon/gezinme yüzeylerinde herkese açık olarak işaretler
-
-<Note>
-`showConfigured` ve `showInSetup`, eski takma adlar olarak desteklenmeye devam eder. `exposure` kullanmayı tercih edin.
-</Note>
+- `configured`: kanalı yapılandırılmış/durum tarzı listeleme yüzeylerine dâhil eder
+- `setup`: kanalı etkileşimli kurulum/yapılandırma seçicilerine dâhil eder
+- `docs`: kanalı doküman/gezinme yüzeylerinde herkese açık olarak işaretler
 
 ### `openclaw.install`
 
-`openclaw.install`, manifest meta verileri değil, paket meta verileridir.
+`openclaw.install`, manifest meta verisi değil, paket meta verisidir.
 
 | Alan                         | Tür                                 | Anlamı                                                                            |
 | ---------------------------- | ----------------------------------- | --------------------------------------------------------------------------------- |
-| `clawhubSpec`                | `string`                            | Kurulum/güncelleme ve ilk kullanım sırasında isteğe bağlı kurulum akışları için standart ClawHub belirtimi. |
+| `clawhubSpec`                | `string`                            | Kurulum/güncelleme ve ilk katılım sırasında isteğe bağlı kurulum akışları için standart ClawHub belirtimi. |
 | `npmSpec`                    | `string`                            | Kurulum/güncelleme yedek akışları için standart npm belirtimi.                    |
-| `localPath`                  | `string`                            | Yerel geliştirme veya paketlenmiş kurulum yolu.                                   |
-| `defaultChoice`              | `"clawhub"` \| `"npm"` \| `"local"` | Birden fazla kaynak kullanılabildiğinde tercih edilen kurulum kaynağı.            |
-| `minHostVersion`             | `string`                            | Desteklenen en düşük OpenClaw sürümü: `>=x.y.z` veya `>=x.y.z-prerelease`.        |
-| `expectedIntegrity`          | `string`                            | Sabitlenmiş kurulumlar için genellikle `sha512-...` biçimindeki beklenen npm dağıtım bütünlüğü dizesi. |
-| `allowInvalidConfigRecovery` | `boolean`                           | Paketlenmiş Plugin yeniden kurulum akışlarının belirli eski yapılandırma hatalarından kurtulmasını sağlar. |
+| `localPath`                  | `string`                            | Yerel geliştirme veya paketle birlikte gelen kurulum yolu.                        |
+| `defaultChoice`              | `"clawhub"` \| `"npm"` \| `"local"` | Birden fazla kaynak kullanılabilir olduğunda tercih edilen kurulum kaynağı.       |
+| `minHostVersion`             | `string`                            | Desteklenen minimum OpenClaw sürümü; `>=x.y.z` veya `>=x.y.z-prerelease`.         |
+| `expectedIntegrity`          | `string`                            | Sabitlenmiş kurulumlar için genellikle `sha512-...` olan, beklenen npm dağıtım bütünlüğü dizesi. |
+| `allowInvalidConfigRecovery` | `boolean`                           | Paketle birlikte gelen Plugin yeniden kurulum akışlarının belirli eski yapılandırma hatalarından kurtulmasını sağlar. |
 | `requiredPlatformPackages`   | `string[]`                          | npm kurulumu sırasında doğrulanan, platforma özgü gerekli npm takma adları.       |
 
 <AccordionGroup>
-  <Accordion title="İlk kullanım davranışı">
-    Etkileşimli ilk kullanım akışı, isteğe bağlı kurulum yüzeyleri için `openclaw.install` kullanır: Plugininiz çalışma zamanı yüklenmeden önce sağlayıcı kimlik doğrulama seçeneklerini veya kanal kurulum/katalog meta verilerini sunuyorsa ilk kullanım akışı ClawHub, npm ya da yerel kurulum seçeneğini sorabilir, Plugini kurabilir veya etkinleştirebilir ve ardından seçilen akışı sürdürebilir. ClawHub seçenekleri `clawhubSpec` kullanır ve mevcut olduğunda tercih edilir; npm seçenekleri, kayıt defterinde bir `npmSpec` bulunan güvenilir katalog meta verileri gerektirir (tam sürümler ve `expectedIntegrity`, ayarlandıklarında kurulum/güncelleme sırasında uygulanan isteğe bağlı sabitlemelerdir). "Neyin gösterileceğini" `openclaw.plugin.json` içinde, "nasıl kurulacağını" ise `package.json` içinde tutun.
+  <Accordion title="İlk katılım davranışı">
+    Etkileşimli ilk katılım, isteğe bağlı kurulum yüzeyleri için `openclaw.install` kullanır: Plugin'iniz çalışma zamanı yüklenmeden önce sağlayıcı kimlik doğrulama seçeneklerini veya kanal kurulumu/katalog meta verilerini sunuyorsa ilk katılım, ClawHub, npm veya yerel kurulum seçimini isteyebilir; Plugin'i kurabilir ya da etkinleştirebilir ve ardından seçilen akışa devam edebilir. ClawHub seçenekleri `clawhubSpec` kullanır ve mevcut olduklarında tercih edilir; npm seçenekleri, kayıt defteri `npmSpec` içeren güvenilir katalog meta verileri gerektirir (tam sürümler ve `expectedIntegrity` isteğe bağlı sabitlemelerdir; ayarlandıklarında kurulum/güncelleme sırasında zorunlu tutulurlar). “Neyin gösterileceğini” `openclaw.plugin.json` içinde, “nasıl kurulacağını” ise `package.json` içinde tutun.
   </Accordion>
-  <Accordion title="minHostVersion uygulaması">
-    `minHostVersion` ayarlanmışsa hem kurulum hem de paketlenmemiş manifest kayıt defteri yüklemesi bunu uygular. Eski ana makineler harici Pluginleri atlar; geçersiz sürüm dizeleri reddedilir. Paketlenmiş kaynak Pluginlerinin ana makine checkout'uyla aynı sürüme sahip olduğu varsayılır.
+  <Accordion title="minHostVersion zorunluluğu">
+    `minHostVersion` ayarlanmışsa hem kurulum hem de paketle birlikte gelmeyen bildirim-kayıt defteri yüklemesi bunu zorunlu tutar. Daha eski ana makineler harici Plugin'leri atlar; geçersiz sürüm dizeleri reddedilir. Paketle birlikte gelen kaynak Plugin'lerin, ana makine kaynak kodu teslimiyle aynı sürümde olduğu varsayılır.
   </Accordion>
   <Accordion title="Sabitlenmiş npm kurulumları">
     Sabitlenmiş npm kurulumlarında tam sürümü `npmSpec` içinde tutun ve beklenen yapıt bütünlüğünü ekleyin:
@@ -216,13 +271,13 @@ Sağlayıcı kimlikleri (`providers: string[]`) paket meta verileri değil, mani
 
   </Accordion>
   <Accordion title="allowInvalidConfigRecovery kapsamı">
-    `allowInvalidConfigRecovery`, bozuk yapılandırmalar için genel bir atlatma mekanizması değildir. Yalnızca paketlenmiş Plugin kurtarmasına yönelik dar kapsamlı bir seçenektir; yeniden kurulumun/kurulumun, eksik paketlenmiş Plugin yolu veya aynı Plugine ait eski bir `channels.<id>` girdisi gibi bilinen yükseltme kalıntılarını onarmasına olanak tanır. Yapılandırma ilgisiz nedenlerle bozuksa kurulum yine güvenli biçimde başarısız olur ve operatöre `openclaw doctor --fix` komutunu çalıştırmasını bildirir.
+    `allowInvalidConfigRecovery`, bozuk yapılandırmalar için genel bir atlatma yöntemi değildir. Yalnızca paketle birlikte gelen Plugin'lere yönelik dar kapsamlı bir kurtarma özelliğidir ve yeniden kurulumun/kurulumun, eksik bir paketle birlikte gelen Plugin yolu veya aynı Plugin'e ait eski bir `channels.<id>` girdisi gibi bilinen yükseltme kalıntılarını onarmasını sağlar. Yapılandırma ilgisiz nedenlerle bozuksa kurulum yine kapalı biçimde başarısız olur ve operatöre `openclaw doctor --fix` çalıştırmasını söyler.
   </Accordion>
 </AccordionGroup>
 
 ### Ertelenmiş tam yükleme
 
-Kanal Pluginleri aşağıdaki ayarla ertelenmiş yüklemeyi etkinleştirebilir:
+Kanal Plugin'leri, aşağıdaki yapılandırmayla ertelenmiş yüklemeyi seçebilir:
 
 ```json
 {
@@ -236,37 +291,37 @@ Kanal Pluginleri aşağıdaki ayarla ertelenmiş yüklemeyi etkinleştirebilir:
 }
 ```
 
-Etkinleştirildiğinde OpenClaw, ön dinleme başlatma aşamasında önceden yapılandırılmış kanallar için bile yalnızca `setupEntry` girdisini yükler. Tam giriş, Gateway dinlemeye başladıktan sonra yüklenir.
+Etkinleştirildiğinde OpenClaw, ön dinleme başlangıç aşamasında önceden yapılandırılmış kanallar için bile yalnızca `setupEntry` yükler. Tam giriş, Gateway dinlemeye başladıktan sonra yüklenir.
 
 <Warning>
-Ertelenmiş yüklemeyi yalnızca `setupEntry` girdiniz Gateway dinlemeye başlamadan önce ihtiyaç duyduğu her şeyi (kanal kaydı, HTTP rotaları, Gateway yöntemleri) kaydediyorsa etkinleştirin. Gerekli başlatma yetenekleri tam girişe aitse varsayılan davranışı koruyun.
+Ertelenmiş yüklemeyi yalnızca `setupEntry`, Gateway'in dinlemeye başlamadan önce ihtiyaç duyduğu her şeyi (kanal kaydı, HTTP yolları, Gateway yöntemleri) kaydediyorsa etkinleştirin. Gerekli başlangıç yetenekleri tam girişe aitse varsayılan davranışı koruyun.
 </Warning>
 
-Kurulum/tam girişiniz Gateway RPC yöntemlerini kaydediyorsa bunları Plugine özgü bir ön ek altında tutun. Ayrılmış temel yönetici ad alanları (`config.*`, `exec.approvals.*`, `wizard.*`, `update.*`) temel sisteme ait kalır ve her zaman `operator.admin` olarak normalleştirilir.
+Kurulum/tam girişiniz Gateway RPC yöntemlerini kaydediyorsa bunları Plugin'e özgü bir ön ek altında tutun. Ayrılmış temel yönetici ad alanları (`config.*`, `exec.approvals.*`, `wizard.*`, `update.*`) temel bileşenin mülkiyetinde kalır ve her zaman `operator.admin` olarak normalleştirilir.
 
-## Plugin manifesti
+## Plugin bildirimi
 
-Her yerel plugin, paket kökünde bir `openclaw.plugin.json` dosyasıyla birlikte sunulmalıdır. OpenClaw, plugin kodunu çalıştırmadan yapılandırmayı doğrulamak için bunu kullanır.
+Her yerel Plugin, paket kökünde bir `openclaw.plugin.json` sunmalıdır. OpenClaw bunu, Plugin kodunu çalıştırmadan yapılandırmayı doğrulamak için kullanır.
 
 ```json
 {
   "id": "my-plugin",
   "name": "My Plugin",
-  "description": "Adds My Plugin capabilities to OpenClaw",
+  "description": "OpenClaw'a My Plugin yetenekleri ekler",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
     "properties": {
       "webhookSecret": {
         "type": "string",
-        "description": "Webhook verification secret"
+        "description": "Webhook doğrulama gizli anahtarı"
       }
     }
   }
 }
 ```
 
-Kanal pluginleri için `channels` ekleyin (sağlayıcı pluginleri ise `providers` ekler):
+Kanal Plugin'leri için `channels` ekleyin (sağlayıcı Plugin'leri de `providers` ekler):
 
 ```json
 {
@@ -280,7 +335,7 @@ Kanal pluginleri için `channels` ekleyin (sağlayıcı pluginleri ise `provider
 }
 ```
 
-Yapılandırması olmayan pluginler bile bir şemayla birlikte sunulmalıdır. Boş bir şema geçerlidir:
+Yapılandırması olmayan Plugin'ler bile bir şema sunmalıdır. Boş bir şema geçerlidir:
 
 ```json
 {
@@ -292,11 +347,11 @@ Yapılandırması olmayan pluginler bile bir şemayla birlikte sunulmalıdır. B
 }
 ```
 
-Tam şema başvurusu için [Plugin bildirimi](/tr/plugins/manifest) bölümüne bakın.
+Şema başvurusunun tamamı için [Plugin bildirimi](/tr/plugins/manifest) bölümüne bakın.
 
 ## ClawHub'da yayımlama
 
-Skills ve plugin paketleri ayrı ClawHub yayımlama komutları kullanır. Plugin paketleri için pakete özgü komutu kullanın:
+Skills ve Plugin paketleri ayrı ClawHub yayımlama komutları kullanır. Plugin paketleri için pakete özgü komutu kullanın:
 
 ```bash
 clawhub package publish your-org/your-plugin --dry-run
@@ -304,12 +359,12 @@ clawhub package publish your-org/your-plugin
 ```
 
 <Note>
-`clawhub skill publish <path>`, bir plugin paketini değil, bir Skills klasörünü yayımlamaya yönelik farklı bir komuttur. Bkz. [ClawHub'da yayımlama](/tr/clawhub/publishing).
+`clawhub skill publish <path>`, bir Plugin paketini değil bir beceri klasörünü yayımlamak için kullanılan farklı bir komuttur. Bkz. [ClawHub'da Yayımlama](/tr/clawhub/publishing).
 </Note>
 
-## Kurulum giriş noktası
+## Kurulum girişi
 
-`setup-entry.ts`, OpenClaw yalnızca kurulum yüzeylerine (ilk katılım, yapılandırma onarımı, devre dışı bırakılmış kanal incelemesi) ihtiyaç duyduğunda yüklediği, `index.ts` dosyasına göre daha hafif bir alternatiftir:
+`setup-entry.ts`, OpenClaw'ın yalnızca kurulum yüzeylerine (ilk katılım, yapılandırma onarımı, devre dışı bırakılmış kanal incelemesi) ihtiyaç duyduğunda yüklediği, `index.ts` için hafif bir alternatiftir:
 
 ```typescript
 // setup-entry.ts
@@ -319,67 +374,115 @@ import { myChannelPlugin } from "./src/channel.js";
 export default defineSetupPluginEntry(myChannelPlugin);
 ```
 
-Bu, kurulum akışları sırasında ağır çalışma zamanı kodlarının (kriptografi kitaplıkları, CLI kayıtları, arka plan hizmetleri) yüklenmesini önler.
+Bu, kurulum akışları sırasında ağır çalışma zamanı kodunun (kriptografi kitaplıkları, CLI kayıtları, arka plan hizmetleri) yüklenmesini önler.
 
-Kuruluma uygun dışa aktarımları yardımcı modüllerde tutan paketle birlikte sunulan çalışma alanı kanalları, `defineSetupPluginEntry(...)` yerine `openclaw/plugin-sdk/channel-entry-contract` içindeki `defineBundledChannelSetupEntry(...)` işlevini kullanabilir. Paketle birlikte sunulan bu sözleşme, kurulum zamanı çalışma bağlantılarının hafif ve açık kalabilmesi için isteğe bağlı bir `runtime` dışa aktarımını da destekler.
+Kurulum için güvenli dışa aktarımları yardımcı modüllerde tutan, çalışma alanıyla birlikte paketlenmiş kanallar, `defineSetupPluginEntry(...)` yerine `openclaw/plugin-sdk/channel-entry-contract` kaynağındaki `defineBundledChannelSetupEntry(...)` öğesini kullanabilir. Paketle birlikte gelen bu sözleşme, kurulum zamanı çalışma ortamı bağlantılarının hafif ve açık kalabilmesi için isteğe bağlı bir `runtime` dışa aktarımını da destekler.
 
 <AccordionGroup>
-  <Accordion title="OpenClaw tam giriş noktası yerine setupEntry'yi ne zaman kullanır?">
+  <Accordion title="OpenClaw'ın tam giriş yerine setupEntry kullandığı durumlar">
     - Kanal devre dışıdır ancak kurulum/ilk katılım yüzeylerine ihtiyaç duyar.
     - Kanal etkindir ancak yapılandırılmamıştır.
     - Ertelenmiş yükleme etkindir (`deferConfiguredChannelFullLoadUntilAfterListen`).
 
   </Accordion>
-  <Accordion title="setupEntry neleri kaydetmelidir?">
-    - Kanal plugin nesnesi (`defineSetupPluginEntry` aracılığıyla).
-    - Gateway dinlemeye başlamadan önce gereken tüm HTTP yolları.
-    - Başlatma sırasında gereken tüm Gateway yöntemleri.
+  <Accordion title="setupEntry'nin kaydetmesi gerekenler">
+    - Kanal Plugin nesnesi (`defineSetupPluginEntry` aracılığıyla).
+    - Gateway dinlemeden önce gerekli olan tüm HTTP yolları.
+    - Başlangıç sırasında gereken tüm Gateway yöntemleri.
 
-    Bu başlatma Gateway yöntemleri yine de `config.*` veya `update.*` gibi ayrılmış çekirdek yönetici ad alanlarından kaçınmalıdır.
+    Bu başlangıç Gateway yöntemleri yine de `config.*` veya `update.*` gibi ayrılmış temel yönetici ad alanlarından kaçınmalıdır.
 
   </Accordion>
-  <Accordion title="setupEntry neleri İÇERMEMELİDİR?">
+  <Accordion title="setupEntry'nin İÇERMEMESİ gerekenler">
     - CLI kayıtları.
     - Arka plan hizmetleri.
     - Ağır çalışma zamanı içe aktarımları (kriptografi, SDK'lar).
-    - Yalnızca başlatmadan sonra gereken Gateway yöntemleri.
+    - Yalnızca başlangıçtan sonra gereken Gateway yöntemleri.
 
   </Accordion>
 </AccordionGroup>
 
 ### Dar kapsamlı kurulum yardımcısı içe aktarımları
 
-Yalnızca kurulum için kullanılan yoğun yollarda, kurulum yüzeyinin yalnızca bir bölümüne ihtiyacınız olduğunda daha geniş `plugin-sdk/setup` şemsiyesi yerine dar kapsamlı kurulum yardımcısı bağlantılarını tercih edin:
+Yalnızca kurulum amaçlı sıcak yollar için, kurulum yüzeyinin yalnızca bir kısmına ihtiyacınız olduğunda daha geniş kapsamlı `plugin-sdk/setup` çatı öğesi yerine dar kapsamlı kurulum yardımcısı bağlantılarını tercih edin:
 
-| İçe aktarma yolu                    | Kullanım amacı                                                                              | Temel dışa aktarımlar                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `plugin-sdk/setup-runtime`         | `setupEntry` / ertelenmiş kanal başlatmasında kullanılabilir kalan kurulum zamanı çalışma yardımcıları | `createSetupTranslator`, `createPatchedAccountSetupAdapter`, `createEnvPatchedAccountSetupAdapter`, `createSetupInputPresenceValidator`, `noteChannelLookupFailure`, `noteChannelLookupSummary`, `promptResolvedAllowFrom`, `splitSetupEntries`, `createAllowlistSetupWizardProxy`, `createDelegatedSetupWizardProxy` |
-| `plugin-sdk/setup-adapter-runtime` | kullanımdan kaldırılmış uyumluluk takma adı; `plugin-sdk/setup-runtime` kullanın             | `createEnvPatchedAccountSetupAdapter`                                                                                                                                                                                                                                                                                 |
-| `plugin-sdk/setup-tools`           | kurulum/yükleme CLI/arşiv/belge yardımcıları                                                | `formatCliCommand`, `detectBinary`, `extractArchive`, `resolveBrewExecutable`, `formatDocsLink`, `CONFIG_DIR`                                                                                                                                                                                                         |
+| İçe aktarma yolu           | Kullanım amacı                                                                            | Temel dışa aktarımlar                                                                                                                                                                                                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plugin-sdk/setup-runtime` | `setupEntry` / ertelenmiş kanal başlangıcında kullanılabilir durumda kalan kurulum zamanı çalışma ortamı yardımcıları | `createSetupTranslator`, `createPatchedAccountSetupAdapter`, `createEnvPatchedAccountSetupAdapter`, `createSetupInputPresenceValidator`, `noteChannelLookupFailure`, `noteChannelLookupSummary`, `promptResolvedAllowFrom`, `splitSetupEntries`, `createAllowlistSetupWizardProxy`, `createDelegatedSetupWizardProxy` |
+| `plugin-sdk/setup-tools`   | kurulum/yükleme CLI/arşiv/belge yardımcıları                                              | `formatCliCommand`, `detectBinary`, `extractArchive`, `resolveBrewExecutable`, `formatDocsLink`, `CONFIG_DIR`                                                                                                                                                                                                         |
 
-`moveSingleAccountChannelSectionToDefaultAccount(...)` gibi yapılandırma yaması yardımcılarını da içeren paylaşılan kurulum araçlarının tamamını istediğinizde daha geniş `plugin-sdk/setup` bağlantısını kullanın.
+`moveSingleAccountChannelSectionToDefaultAccount(...)` gibi yapılandırma yaması yardımcılarını da içeren paylaşımlı kurulum araç kutusunun tamamını istediğinizde daha geniş kapsamlı `plugin-sdk/setup` bağlantısını kullanın.
 
-Sabit kurulum sihirbazı metinleri için `createSetupTranslator(...)` kullanın. CLI sihirbazının yerel ayarını izler (`OPENCLAW_LOCALE`, ardından sistem yerel ayar değişkenleri) ve İngilizceye geri döner. Plugine özgü kurulum metinlerini Pluginin sahip olduğu kodda tutun; paylaşılan katalog anahtarlarını yalnızca ortak kurulum etiketleri, durum metinleri ve resmi paketlenmiş Plugin kurulum metinleri için kullanın.
+Sabit kurulum sihirbazı metni için `createSetupTranslator(...)` kullanın. Sırasıyla `OPENCLAW_LOCALE`, `LC_ALL`, `LC_MESSAGES` ve `LANG` içindeki ilk boş olmayan değeri kullanır, ardından İngilizceye geri döner. Açık bir İngilizce geçersiz kılma değeri için `OPENCLAW_LOCALE=en` ayarlayın. Plugin'e özgü kurulum metnini Plugin'e ait kodda tutun ve paylaşımlı katalog anahtarlarını yalnızca ortak kurulum etiketleri, durum metni ve resmi paketle birlikte gelen Plugin kurulum metni için kullanın.
 
-Kurulum yama bağdaştırıcıları, içe aktarma sırasında yoğun yol açısından güvenli kalır. Paketlenmiş tek hesap yükseltme sözleşme yüzeyi araması tembeldir; bu nedenle `plugin-sdk/setup-runtime` içe aktarıldığında, bağdaştırıcı gerçekten kullanılmadan önce paketlenmiş sözleşme yüzeyi keşfi istekli olarak yüklenmez.
+Kurulum yaması bağdaştırıcıları içe aktarma sırasında sıcak yol açısından güvenli kalır. Paketle birlikte gelen tek hesap yükseltme sözleşme yüzeyi araması tembel yürütülür; bu nedenle `plugin-sdk/setup-runtime` öğesini içe aktarmak, bağdaştırıcı gerçekten kullanılmadan önce paketle birlikte gelen sözleşme yüzeyi keşfini istekli biçimde yüklemez.
 
-### Kanalın sahip olduğu tek hesap yükseltme
+### Kanalın sahip olduğu kurulum giriş alanları
 
-Bir kanal, tek hesaplı üst düzey yapılandırmadan `channels.<id>.accounts.*` yapısına yükseltildiğinde, varsayılan paylaşılan davranış yükseltilen hesap kapsamındaki değerleri `accounts.default` içine taşır.
+`ChannelSetupInput`, kurulum çağıranları ve kanal
+Plugin'leri tarafından paylaşılan genel bir zarftır. Kalıcı olarak türü belirtilmiş alanları `name`, `token`, `tokenFile`,
+`useEnv`, `allowFrom` ve `defaultTo` öğeleridir. Plugin'e ait ek anahtarlar çalışma zamanı giriş nesnesinde yine
+bulunabilir, ancak paylaşılan tür bir dizin imzası bildirmez.
+Her Plugin kendi kurulum alanlarını bildirmeli ve daraltmalı veya
+bağdaştırıcı sınırında Plugin'e ait bir şemayla doğrulamalıdır:
 
-Paketlenmiş kanallar, kurulum sözleşme yüzeyleri aracılığıyla bu yükseltmeyi daraltabilir veya geçersiz kılabilir:
+```typescript
+import type { ChannelSetupAdapter, ChannelSetupInput } from "openclaw/plugin-sdk/channel-setup";
+
+type AcmeSetupInput = ChannelSetupInput & {
+  workspaceId?: string;
+  webhookUrl?: string;
+};
+
+export const acmeSetupAdapter: ChannelSetupAdapter = {
+  applyAccountConfig: ({ cfg, input }) => {
+    const setupInput = input as AcmeSetupInput;
+    return {
+      ...cfg,
+      channels: {
+        ...cfg.channels,
+        acme: {
+          token: setupInput.token,
+          workspaceId: setupInput.workspaceId,
+          webhookUrl: setupInput.webhookUrl,
+        },
+      },
+    };
+  },
+};
+```
+
+Daha önce doğrudan
+`ChannelSetupInput` üzerinde bildirilen kanala özgü alanlar, harici kaynak uyumluluğu için geçici olarak türlendirilmiş durumda kalır.
+Bunlar kullanımdan kaldırılmıştır. Ağaç dışı yayımlanmış 426
+kanal Plugin'ini kapsayan 2026-07-22 tarihli kayıt defteri taraması, okuyucusu olmayan 21 alanı kaldırdı ve bilinen
+okuyucuları olan 22 alanı korudu. Korunan her alan, yayımlanmış hiçbir Plugin artık onu okumadığı anda silinir;
+sürüm sınırı gerekmez. Yeni ve paketle birlikte gelen Plugin'ler bu
+katmana dayanmamalıdır; sahip oldukları alanları yerel olarak bildirmelidir.
+
+### Kanalın sahip olduğu tek hesaplı yapılandırmanın yükseltilmesi
+
+Bir kanal, tek hesaplı üst düzey yapılandırmadan `channels.<id>.accounts.*` yapısına yükseltildiğinde, varsayılan paylaşılan davranış, yükseltilen hesap kapsamındaki değerleri `accounts.default` içine taşır.
+
+Her kanal Plugin'i, kurulum bağdaştırıcısı aracılığıyla bu yükseltmeyi genişletebilir veya daraltabilir:
 
 - `singleAccountKeysToMove`: yükseltilen hesaba taşınması gereken ek üst düzey anahtarlar
-- `namedAccountPromotionKeys`: adlandırılmış hesaplar zaten mevcutsa yalnızca bu anahtarlar yükseltilen hesaba taşınır; paylaşılan ilke/teslim anahtarları kanal kökünde kalır
+- `namedAccountPromotionKeys`: adlandırılmış hesaplar zaten mevcutsa yalnızca bu anahtarlar yükseltilen hesaba taşınır; paylaşılan politika/teslimat anahtarları kanal kökünde kalır
 - `resolveSingleAccountPromotionTarget(...)`: yükseltilen değerleri hangi mevcut hesabın alacağını seçer
 
+`singleAccountKeysToMove` alanının bulunması, yükseltme sözleşmesinin tamamlandığını belirtir. Eski anahtar yükseltmesini devre dışı bırakmak için alanı boş bir dizi olsa bile bildirin. Alanı atlayan bağdaştırıcılar, önceden yayımlanmış Plugin'ler için okuyucu destekli bildirim öncesi yükseltme katmanını korur. 2026-07-22 tarihli kayıt defteri taraması, yayımlanmış bağımlısı olmayan 23 anahtarı kaldırdı ve altı ortak anahtar ile yalnızca kurulumda kullanılan `rooms` anahtarını korudu. Korunan her anahtar, yayımlanmış okuyucuları bildirimlere geçirildiği anda silinir; sürüm sınırı gerekmez.
+
+Doctor'ın bu bildirimleri hafif, paketle birlikte gelen kurulum yapısından yüklemesi gerektiğinde Plugin paket bildiriminde `openclaw.setupFeatures.configPromotion: true` bildirin. Yalnızca kuruluma yönelik Plugin yüzeyi ile tam kanal Plugin'i aynı bildirimleri sunmalıdır.
+
+Önceden çözümlenmiş bir Plugin ile `moveSingleAccountChannelSectionToDefaultAccount(...)` çağrılırken kurulum bağdaştırıcısını `setupSurface` olarak iletin. Çağıranın sağladığı kurulum yüzeyleri, yüklenen ve paketle birlikte gelen aramalara göre önceliklidir; böylece kapsamlı veya yalnızca kuruluma yönelik Plugin'ler genel kayıttan bağımsız kalır.
+
 <Note>
-Matrix, güncel paketlenmiş örnektir. Tam olarak bir adlandırılmış Matrix hesabı zaten mevcutsa veya `defaultAccount`, `Ops` gibi mevcut ancak kurallı olmayan bir anahtarı gösteriyorsa yükseltme, yeni bir `accounts.default` girdisi oluşturmak yerine bu hesabı korur.
+Matrix, paketle birlikte gelen güncel örnektir. Tam olarak bir adlandırılmış Matrix hesabı zaten mevcutsa veya `defaultAccount`, `Ops` gibi standart olmayan mevcut bir anahtarı gösteriyorsa yükseltme, yeni bir `accounts.default` girdisi oluşturmak yerine bu hesabı korur.
 </Note>
 
 ## Yapılandırma şeması
 
-Plugin yapılandırması, manifestinizdeki JSON Schema'ya göre doğrulanır. Kullanıcılar Pluginleri şu şekilde yapılandırır:
+Plugin yapılandırması, bildirim dosyanızdaki JSON Schema'ya göre doğrulanır. Kullanıcılar Plugin'leri şu şekilde yapılandırır:
 
 ```json5
 {
@@ -395,9 +498,9 @@ Plugin yapılandırması, manifestinizdeki JSON Schema'ya göre doğrulanır. Ku
 }
 ```
 
-Plugininiz, kayıt sırasında bu yapılandırmayı `api.pluginConfig` olarak alır.
+Plugin'iniz kayıt sırasında bu yapılandırmayı `api.pluginConfig` olarak alır.
 
-Kanala özgü yapılandırma için bunun yerine kanal yapılandırma bölümünü kullanın:
+Kanala özgü yapılandırma için bunun yerine kanal yapılandırması bölümünü kullanın:
 
 ```json5
 {
@@ -412,7 +515,7 @@ Kanala özgü yapılandırma için bunun yerine kanal yapılandırma bölümün�
 
 ### Kanal yapılandırma şemaları oluşturma
 
-Bir Zod şemasını, Pluginin sahip olduğu yapılandırma yapıtlarının kullandığı `ChannelConfigSchema` sarmalayıcısına dönüştürmek için `buildChannelConfigSchema` kullanın:
+Bir Zod şemasını Plugin'in sahip olduğu yapılandırma yapılarında kullanılan `ChannelConfigSchema` sarmalayıcısına dönüştürmek için `buildChannelConfigSchema` kullanın:
 
 ```typescript
 import { z } from "zod";
@@ -428,7 +531,7 @@ const accountSchema = z.object({
 const configSchema = buildChannelConfigSchema(accountSchema);
 ```
 
-Sözleşmeyi zaten JSON Schema veya TypeBox olarak yazıyorsanız OpenClaw'ın meta veri yollarında Zod'dan JSON Schema'ya dönüştürmeyi atlayabilmesi için doğrudan yardımcıyı kullanın:
+Sözleşmeyi zaten JSON Schema veya TypeBox biçiminde yazıyorsanız OpenClaw'ın meta veri yollarında Zod'dan JSON Schema'ya dönüştürmeyi atlayabilmesi için doğrudan yardımcıyı kullanın:
 
 ```typescript
 import { Type } from "typebox";
@@ -442,11 +545,11 @@ const configSchema = buildJsonChannelConfigSchema(
 );
 ```
 
-Üçüncü taraf Pluginler için soğuk yol sözleşmesi hâlâ Plugin manifestidir: yapılandırma şeması, kurulum ve kullanıcı arayüzü yüzeylerinin çalışma zamanı kodunu yüklemeden `channels.<id>` öğesini inceleyebilmesi için oluşturulan JSON Schema'yı `openclaw.plugin.json#channelConfigs` içine yansıtın.
+Üçüncü taraf Plugin'ler için soğuk yol sözleşmesi yine Plugin bildirimidir: yapılandırma şeması, kurulum ve kullanıcı arayüzü yüzeylerinin çalışma zamanı kodunu yüklemeden `channels.<id>` öğesini inceleyebilmesi için oluşturulan JSON Schema'yı `openclaw.plugin.json#channelConfigs` içine yansıtın.
 
 ## Kurulum sihirbazları
 
-Kanal Pluginleri, `openclaw onboard` için etkileşimli kurulum sihirbazları sağlayabilir. Sihirbaz, `ChannelPlugin` üzerindeki bir `ChannelSetupWizard` nesnesidir:
+Kanal Plugin'leri, `openclaw onboard` için etkileşimli kurulum sihirbazları sağlayabilir. Sihirbaz, `ChannelPlugin` üzerindeki bir `ChannelSetupWizard` nesnesidir:
 
 ```typescript
 import type { ChannelSetupWizard } from "openclaw/plugin-sdk/channel-setup";
@@ -479,17 +582,17 @@ const setupWizard: ChannelSetupWizard = {
 };
 ```
 
-`ChannelSetupWizard` ayrıca `textInputs`, `dmPolicy`, `allowFrom`, `groupAccess`, `prepare`, `finalize` ve daha fazlasını destekler. Tam bir paketlenmiş örnek için Discord Plugininin `src/setup-core.ts` dosyasına bakın.
+`ChannelSetupWizard`; `textInputs`, `dmPolicy`, `allowFrom`, `groupAccess`, `prepare`, `finalize` ve daha fazlasını da destekler. Paketle birlikte gelen tam bir örnek için Discord Plugin'inin `src/setup-core.ts` öğesine bakın.
 
 <AccordionGroup>
   <Accordion title="Paylaşılan allowFrom istemleri">
-    Yalnızca standart `note -> prompt -> parse -> merge -> patch` akışına ihtiyaç duyan doğrudan mesaj izin listesi istemleri için `openclaw/plugin-sdk/setup` içindeki paylaşılan kurulum yardımcılarını tercih edin: `createPromptParsedAllowFromForAccount(...)`, `createTopLevelChannelParsedAllowFromPrompt(...)` ve `createNestedChannelParsedAllowFromPrompt(...)`.
+    Yalnızca standart `note -> prompt -> parse -> merge -> patch` akışına ihtiyaç duyan DM izin listesi istemleri için `openclaw/plugin-sdk/setup` içindeki paylaşılan kurulum yardımcılarını tercih edin: `createPromptParsedAllowFromForAccount(...)` ve `createTopLevelChannelParsedAllowFromPrompt(...)`.
   </Accordion>
   <Accordion title="Standart kanal kurulum durumu">
-    Yalnızca etiketler, puanlar ve isteğe bağlı ek satırlara göre değişen kanal kurulum durum blokları için her Pluginde aynı `status` nesnesini elle oluşturmak yerine `openclaw/plugin-sdk/setup` içindeki `createStandardChannelSetupStatus(...)` işlevini tercih edin.
+    Yalnızca etiketler, puanlar ve isteğe bağlı ek satırlara göre değişen kanal kurulum durumu blokları için her Plugin'de aynı `status` nesnesini elle oluşturmak yerine `openclaw/plugin-sdk/setup` içindeki `createStandardChannelSetupStatus(...)` öğesini tercih edin.
   </Accordion>
   <Accordion title="İsteğe bağlı kanal kurulum yüzeyi">
-    Yalnızca belirli bağlamlarda görünmesi gereken isteğe bağlı kurulum yüzeyleri için `openclaw/plugin-sdk/channel-setup` içindeki `createOptionalChannelSetupSurface` işlevini kullanın:
+    Yalnızca belirli bağlamlarda görünmesi gereken isteğe bağlı kurulum yüzeyleri için `openclaw/plugin-sdk/channel-setup` içindeki `createOptionalChannelSetupSurface` öğesini kullanın:
 
     ```typescript
     import { createOptionalChannelSetupSurface } from "openclaw/plugin-sdk/channel-setup";
@@ -503,25 +606,25 @@ const setupWizard: ChannelSetupWizard = {
     // Returns { setupAdapter, setupWizard }
     ```
 
-    İsteğe bağlı kurulum yüzeyinin yalnızca bir yarısına ihtiyacınız olduğunda `plugin-sdk/channel-setup`, daha alt düzey `createOptionalChannelSetupAdapter(...)` ve `createOptionalChannelSetupWizard(...)` oluşturucularını da sunar.
+    İsteğe bağlı kurulum yüzeyinin yalnızca bir yarısına ihtiyaç duyduğunuzda `plugin-sdk/channel-setup`, daha düşük seviyeli `createOptionalChannelSetupAdapter(...)` ve `createOptionalChannelSetupWizard(...)` oluşturucularını da sunar.
 
-    Oluşturulan isteğe bağlı bağdaştırıcı/sihirbaz, gerçek yapılandırma yazma işlemlerinde güvenli biçimde başarısız olur. `validateInput`, `applyAccountConfig` ve `finalize` genelinde kurulum gerekliliğini belirten tek bir iletiyi yeniden kullanır ve `docsPath` ayarlandığında bir dokümantasyon bağlantısı ekler.
+    Oluşturulan isteğe bağlı bağdaştırıcı/sihirbaz, gerçek yapılandırma yazımlarında kapalı biçimde başarısız olur. `validateInput`, `applyAccountConfig` ve `finalize` genelinde tek bir kurulum gerekli iletisini yeniden kullanır ve `docsPath` ayarlandığında bir dokümantasyon bağlantısı ekler.
 
   </Accordion>
   <Accordion title="İkili dosya destekli kurulum yardımcıları">
-    İkili dosya destekli kurulum kullanıcı arayüzlerinde, aynı ikili dosya/durum bağlantı kodunu her kanala kopyalamak yerine paylaşılan yönlendirmeli yardımcıları tercih edin:
+    İkili dosya destekli kurulum kullanıcı arayüzleri için aynı ikili dosya/durum bağlantı kodunu her kanala kopyalamak yerine paylaşılan temsilci yardımcılarını tercih edin:
 
-    - Yalnızca etiketlere, ipuçlarına, puanlara ve ikili dosya algılamaya göre değişen durum blokları için `createDetectedBinaryStatus(...)`
-    - Yol destekli metin girişleri için `createCliPathTextInput(...)`
-    - `setupEntry` öğesinin daha kapsamlı bir tam sihirbaza tembel olarak yönlendirme yapması gerektiğinde `createDelegatedSetupWizardStatusResolvers(...)`, `createDelegatedPrepare(...)`, `createDelegatedFinalize(...)` ve `createDelegatedResolveConfigured(...)`
-    - `setupEntry` öğesinin yalnızca bir `textInputs[*].shouldPrompt` kararını yönlendirmesi gerektiğinde `createDelegatedTextInputShouldPrompt(...)`
+    - `createDetectedBinaryStatus(...)`: yalnızca etiketler, ipuçları, puanlar ve ikili dosya algılamasına göre değişen durum blokları için
+    - `createCliPathTextInput(...)`: yol destekli metin girişleri için
+    - `createDelegatedSetupWizardProxy(...)`: `setupEntry` durum, hazırlama veya sonlandırma davranışını daha ağır bir tam sihirbaza tembel olarak iletmek zorunda olduğunda
+    - `createDelegatedTextInputShouldPrompt(...)`: `setupEntry` yalnızca bir `textInputs[*].shouldPrompt` kararını temsilciye aktarmak zorunda olduğunda
 
   </Accordion>
 </AccordionGroup>
 
 ## Yayımlama ve yükleme
 
-**Harici Plugin'ler:** [ClawHub](/tr/clawhub) üzerinde yayımlayın, ardından yükleyin:
+**Harici Plugin'ler:** [ClawHub](/clawhub) üzerinde yayımlayın, ardından yükleyin:
 
 <Tabs>
   <Tab title="npm">
@@ -529,7 +632,7 @@ const setupWizard: ChannelSetupWizard = {
     openclaw plugins install @myorg/openclaw-my-plugin
     ```
 
-    Yalın paket belirtimleri, başlatma geçişi sırasında npm'den yüklenir; ancak ad, paketle birlikte gelen veya resmî bir Plugin kimliğiyle eşleşiyorsa OpenClaw bunun yerine ilgili yerel/resmî kopyayı kullanır. Belirlenimci kaynak seçimi için `clawhub:`, `npm:`, `git:` veya `npm-pack:` kullanın — bkz. [Plugin'leri yönetme](/tr/plugins/manage-plugins).
+    Yalın paket belirtimleri, ad paketle birlikte gelen veya resmî bir Plugin kimliğiyle eşleşmediği sürece başlatma geçişi sırasında npm'den yüklenir; eşleşirse OpenClaw bunun yerine ilgili yerel/resmî kopyayı kullanır. Belirlenimci kaynak seçimi için `clawhub:`, `npm:`, `git:` veya `npm-pack:` kullanın — bkz. [Plugin'leri yönetme](/tr/plugins/manage-plugins).
 
   </Tab>
   <Tab title="Yalnızca ClawHub">
@@ -538,7 +641,8 @@ const setupWizard: ChannelSetupWizard = {
     ```
   </Tab>
   <Tab title="npm paket belirtimi">
-    Bir paket henüz ClawHub'a taşınmadığında veya geçiş sırasında doğrudan bir npm yükleme yoluna ihtiyaç duyduğunuzda npm kullanın:
+    Bir paket henüz ClawHub'a taşınmadığında veya geçiş sırasında doğrudan
+    npm yükleme yoluna ihtiyaç duyduğunuzda npm kullanın:
 
     ```bash
     openclaw plugins install npm:@myorg/openclaw-my-plugin
@@ -550,14 +654,14 @@ const setupWizard: ChannelSetupWizard = {
 **Depo içi Plugin'ler:** paketle birlikte gelen Plugin çalışma alanı ağacının altına yerleştirin; derleme sırasında otomatik olarak keşfedilirler.
 
 <Info>
-npm kaynaklı yüklemelerde `openclaw plugins install`, paketi yaşam döngüsü betikleri devre dışı bırakılmış (`--ignore-scripts`) şekilde `~/.openclaw/npm/projects` altında Plugin başına bir projeye yükler. Plugin bağımlılık ağaçlarını yalnızca JS/TS içerecek şekilde tutun ve `postinstall` derlemeleri gerektiren paketlerden kaçının.
+npm kaynaklı yüklemelerde `openclaw plugins install`, paketi yaşam döngüsü betikleri devre dışı bırakılmış (`--ignore-scripts`) şekilde `~/.openclaw/npm/projects` altında Plugin başına bir projeye yükler. Plugin bağımlılık ağaçlarını saf JS/TS olarak tutun ve `postinstall` derlemeleri gerektiren paketlerden kaçının.
 </Info>
 
 <Note>
-Gateway başlatılırken Plugin bağımlılıkları yüklenmez. Bağımlılıkların uyumlu hâle getirilmesinden npm/git/ClawHub yükleme akışları sorumludur; yerel Plugin'lerin bağımlılıkları önceden yüklenmiş olmalıdır.
+Gateway başlangıcı Plugin bağımlılıklarını yüklemez. npm/git/ClawHub yükleme akışları bağımlılık yakınsamasının sahibidir; yerel Plugin'lerin bağımlılıkları önceden yüklenmiş olmalıdır.
 </Note>
 
-Paketle birlikte gelen paket meta verileri açıktır; Gateway başlatılırken derlenmiş JavaScript'ten çıkarılmaz. Çalışma zamanı bağımlılıkları, bunların sahibi olan Plugin paketinde bulunmalıdır; paketlenmiş OpenClaw başlatma işlemi Plugin bağımlılıklarını hiçbir zaman onarmaz veya yansıtmaz.
+Paketle birlikte gelen paket meta verileri açıkça belirtilir; Gateway başlangıcında derlenmiş JavaScript'ten çıkarılmaz. Çalışma zamanı bağımlılıkları, bunların sahibi olan Plugin paketine aittir; paketlenmiş OpenClaw başlangıcı Plugin bağımlılıklarını hiçbir zaman onarmaz veya yansıtmaz.
 
 ## İlgili
 

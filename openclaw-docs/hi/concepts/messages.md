@@ -1,49 +1,47 @@
 ---
 read_when:
-    - यह समझाना कि इनबाउंड संदेश जवाब कैसे बनते हैं
-    - सत्रों, कतारबद्ध करने के मोड, या स्ट्रीमिंग व्यवहार को स्पष्ट करना
-    - रीज़निंग दृश्यता और उपयोग संबंधी निहितार्थों का दस्तावेज़ीकरण
-summary: संदेश प्रवाह, सत्र, कतारबद्धता, और तर्क की दृश्यता
+    - इनबाउंड संदेशों के उत्तरों में बदलने की प्रक्रिया की व्याख्या करना
+    - सत्रों, कतारबद्ध करने के मोड या स्ट्रीमिंग व्यवहार को स्पष्ट करना
+    - रीज़निंग की दृश्यता और उपयोग संबंधी प्रभावों का दस्तावेज़ीकरण
+summary: संदेश प्रवाह, सत्र, कतारबद्धता और तर्क की दृश्यता
 title: संदेश
 x-i18n:
-    generated_at: "2026-06-28T22:59:41Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T17:49:06Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: d5585ae95fc65cb64240e4bf5d0bbe2eb54f55461b9fa4ee331d4d703d62e76f
+    source_hash: e42bed834e9a57fb8a248c8654b75ea9977928582f68a83859cf6c16ed0b6bf5
     source_path: concepts/messages.md
     workflow: 16
 ---
 
-OpenClaw इनबाउंड संदेशों को सेशन समाधान, क्यूइंग, स्ट्रीमिंग, टूल निष्पादन, और रीजनिंग दृश्यता की पाइपलाइन के ज़रिए संभालता है। यह पेज इनबाउंड संदेश से जवाब तक का पथ दिखाता है।
+इनबाउंड संदेश रूटिंग, डीडुप्लिकेशन/डीबाउंस, एजेंट रन और आउटबाउंड डिलीवरी से होकर गुजरते हैं:
 
-## संदेश प्रवाह (उच्च स्तर)
-
+```text
+इनबाउंड संदेश
+  -> रूटिंग/बाइंडिंग -> सेशन कुंजी
+  -> डीडुप्लिकेशन + डीबाउंस
+  -> कतार (यदि कोई रन पहले से सक्रिय है)
+  -> एजेंट रन (स्ट्रीमिंग + टूल)
+  -> आउटबाउंड उत्तर (चैनल सीमाएँ + खंडन)
 ```
-Inbound message
-  -> routing/bindings -> session key
-  -> queue (if a run is active)
-  -> agent run (streaming + tools)
-  -> outbound replies (channel limits + chunking)
-```
 
-मुख्य नियंत्रण कॉन्फ़िगरेशन में होते हैं:
+मुख्य कॉन्फ़िगरेशन सतहें:
 
-- `messages.*` प्रीफ़िक्स, क्यूइंग, और समूह व्यवहार के लिए।
-- `agents.defaults.*` ब्लॉक स्ट्रीमिंग और चंकिंग डिफ़ॉल्ट्स के लिए।
-- चैनल ओवरराइड (`channels.whatsapp.*`, `channels.telegram.*`, आदि) कैप्स और स्ट्रीमिंग टॉगल के लिए।
+- `messages.*` प्रीफ़िक्स, कतारबद्ध करने, इनबाउंड डीबाउंस और समूह व्यवहार के लिए।
+- `agents.defaults.*` ब्लॉक स्ट्रीमिंग, खंडन और मौन-उत्तर डिफ़ॉल्ट के लिए।
+- प्रति-चैनल सीमाओं और स्ट्रीमिंग टॉगल के लिए चैनल ओवरराइड (`channels.telegram.*`, `channels.whatsapp.*`, आदि)।
 
-पूरे स्कीमा के लिए [कॉन्फ़िगरेशन](/hi/gateway/configuration) देखें।
+पूरी स्कीमा के लिए [कॉन्फ़िगरेशन](/hi/gateway/configuration) देखें।
 
-## इनबाउंड डीडुप्लीकेशन
+## इनबाउंड डीडुप्लिकेशन
 
-रीकनेक्ट के बाद चैनल वही संदेश दोबारा डिलीवर कर सकते हैं। OpenClaw चैनल/अकाउंट/पीयर/सेशन/मैसेज id से keyed एक कम अवधि वाला कैश रखता है ताकि डुप्लिकेट डिलीवरी कोई दूसरा एजेंट रन शुरू न करें।
+दोबारा कनेक्ट होने के बाद चैनल उसी संदेश को फिर से डिलीवर कर सकते हैं। OpenClaw एजेंट स्कोप, चैनल रूट (चैनल + पीयर + खाता + थ्रेड) और संदेश आईडी के आधार पर कुंजीकृत इन-मेमोरी कैश रखता है, ताकि दोबारा डिलीवर किया गया संदेश दूसरा एजेंट रन ट्रिगर न करे। कैश प्रविष्टि 20 मिनट बाद या 5000 प्रविष्टियाँ ट्रैक होते ही, जो भी पहले हो, समाप्त हो जाती है।
 
-## इनबाउंड डिबाउंसिंग
+## इनबाउंड डीबाउंसिंग
 
-**उसी भेजने वाले** से तेज़ी से आए लगातार संदेशों को `messages.inbound` के ज़रिए एक ही एजेंट टर्न में बैच किया जा सकता है। डिबाउंसिंग प्रति चैनल + बातचीत के दायरे में होती है और reply threading/IDs के लिए सबसे हालिया संदेश का उपयोग करती है।
-
-कॉन्फ़िगरेशन (ग्लोबल डिफ़ॉल्ट + प्रति-चैनल ओवरराइड):
+एक ही प्रेषक के लगातार तेज़ी से आने वाले टेक्स्ट संदेशों को `messages.inbound` के माध्यम से एक एजेंट टर्न में बैच किया जा सकता है। डीबाउंसिंग का स्कोप प्रति चैनल + वार्तालाप होता है और उत्तर थ्रेडिंग/आईडी के लिए सबसे हाल के संदेश का उपयोग होता है।
 
 ```json5
 {
@@ -51,133 +49,130 @@ Inbound message
     inbound: {
       debounceMs: 2000,
       byChannel: {
-        whatsapp: 5000,
-        slack: 1500,
         discord: 1500,
+        slack: 1500,
+        whatsapp: 5000,
       },
     },
   },
 }
 ```
 
-नोट्स:
-
-- डिबाउंस केवल **टेक्स्ट-ओनली** संदेशों पर लागू होता है; मीडिया/अटैचमेंट तुरंत फ्लश हो जाते हैं।
-- कंट्रोल कमांड डिबाउंसिंग को बायपास करते हैं ताकि वे अलग रहें। जो चैनल same-sender DM coalescing में स्पष्ट रूप से opt in करते हैं, वे DM कमांड को debounce window के अंदर रख सकते हैं ताकि split-send payload उसी एजेंट टर्न में जुड़ सके।
+- डीबाउंस केवल टेक्स्ट संदेशों पर लागू होता है; मीडिया/अटैचमेंट तुरंत फ़्लश होते हैं।
+- नियंत्रण कमांड (स्टॉप/अबॉर्ट/स्टेटस, आदि) डीबाउंसिंग को बायपास करते हैं, इसलिए वे तुरंत डिस्पैच होते हैं।
+- डिफ़ॉल्ट रूप से अक्षम: `messages.inbound.debounceMs` का कोई अंतर्निहित डिफ़ॉल्ट नहीं है, इसलिए डीबाउंसिंग आपके इसे सेट करने के बाद ही सक्रिय होती है (वैश्विक रूप से या प्रति चैनल)।
+- iMessage भी इसी सामान्य डीबाउंस नीति का पालन करता है। `imsg` 0.13.1 और उसके बाद के संस्करण Apple URL-प्रीव्यू के विभाजित प्रेषणों को OpenClaw द्वारा प्राप्त किए जाने से पहले एकत्रित कर देते हैं, इसलिए iMessage-विशिष्ट डीबाउंस सेटिंग की आवश्यकता नहीं है।
 
 ## सेशन और डिवाइस
 
-सेशन Gateway के स्वामित्व में होते हैं, क्लाइंट के नहीं।
+सेशन का स्वामित्व Gateway के पास होता है, क्लाइंट के पास नहीं।
 
-- डायरेक्ट चैट एजेंट मुख्य सेशन key में सिमट जाते हैं।
-- समूह/चैनल को अपनी सेशन keys मिलती हैं।
-- सेशन store और transcripts Gateway host पर रहते हैं।
+- प्रत्यक्ष चैट एजेंट की मुख्य सेशन कुंजी में समाहित हो जाती हैं।
+- समूहों/चैनलों को अपनी अलग सेशन कुंजियाँ मिलती हैं।
+- सेशन स्टोर और ट्रांसक्रिप्ट Gateway होस्ट पर रहते हैं।
 
-कई डिवाइस/चैनल एक ही सेशन पर मैप हो सकते हैं, लेकिन history हर क्लाइंट पर पूरी तरह सिंक नहीं होती। सुझाव: लंबे संवादों के लिए एक primary device का उपयोग करें ताकि context अलग-अलग न हो। Control UI और TUI हमेशा Gateway-backed session transcript दिखाते हैं, इसलिए वे source of truth हैं।
+कई डिवाइस/चैनल एक ही सेशन से मैप हो सकते हैं, लेकिन इतिहास प्रत्येक क्लाइंट पर पूरी तरह वापस सिंक नहीं होता। अलग-अलग संदर्भ बनने से बचने के लिए लंबी बातचीत हेतु एक प्राथमिक डिवाइस का उपयोग करें। Control UI और TUI हमेशा Gateway-समर्थित सेशन ट्रांसक्रिप्ट दिखाते हैं, इसलिए वही सत्य का स्रोत हैं।
 
 विवरण: [सेशन प्रबंधन](/hi/concepts/session)।
 
-## टूल परिणाम metadata
+## प्रॉम्प्ट बॉडी और इतिहास संदर्भ
 
-टूल परिणाम `content` मॉडल-दृश्य परिणाम है। टूल परिणाम `details` UI rendering, diagnostics, media delivery, और Plugins के लिए runtime metadata है।
+चैनल Plugin इनबाउंड संदर्भ में प्राथमिकता के उच्चतम से न्यूनतम क्रम में कई टेक्स्ट फ़ील्ड भरते हैं:
 
-OpenClaw इस सीमा को स्पष्ट रखता है:
+| फ़ील्ड             | उद्देश्य                                                                                                     |
+| ----------------- | ----------------------------------------------------------------------------------------------------------- |
+| `BodyForAgent`    | वर्तमान टर्न के लिए मॉडल-सामना करने वाला टेक्स्ट। सेट न होने पर `CommandBody` / `RawBody` / `Body` पर फ़ॉलबैक करता है।        |
+| `BodyForCommands` | डायरेक्टिव/कमांड पार्सिंग के लिए उपयोग होने वाला साफ़ टेक्स्ट। सेट न होने पर `CommandBody` / `RawBody` / `Body` पर फ़ॉलबैक करता है। |
+| `CommandBody`     | पुरानी मध्यवर्ती बॉडी; `BodyForCommands` को प्राथमिकता दें।                                                         |
+| `RawBody`         | `CommandBody` के लिए अप्रचलित उपनाम।                                                                         |
+| `Body`            | पुरानी प्रॉम्प्ट बॉडी; इसमें चैनल एनवेलप और इतिहास रैपर शामिल हो सकते हैं।                                     |
 
-- `toolResult.details` को provider replay और compaction input से पहले हटा दिया जाता है।
-- Persisted session transcripts केवल bounded `details` रखते हैं; बहुत बड़े metadata को `persistedDetailsTruncated: true` चिह्नित compact summary से बदल दिया जाता है।
-- Plugins और tools को वह text जिसे model को पढ़ना चाहिए `content` में रखना चाहिए, केवल `details` में नहीं।
-
-## इनबाउंड bodies और history context
-
-OpenClaw **prompt body** को **command body** से अलग करता है:
-
-- `BodyForAgent`: वर्तमान संदेश के लिए primary model-facing text। चैनल Plugins को इसे भेजने वाले के वर्तमान prompt-bearing text पर केंद्रित रखना चाहिए।
-- `Body`: legacy prompt fallback। इसमें channel envelopes और optional history wrappers शामिल हो सकते हैं, लेकिन current channels को `BodyForAgent` उपलब्ध होने पर primary model input के रूप में इस पर निर्भर नहीं रहना चाहिए।
-- `CommandBody`: directive/command parsing के लिए raw user text।
-- `RawBody`: `CommandBody` का legacy alias (compatibility के लिए रखा गया)।
-
-जब कोई चैनल history देता है, तो वह shared wrapper का उपयोग करता है:
+जब कोई चैनल इतिहास प्रदान करता है, तो वह उसे इनके साथ रैप करता है:
 
 - `[Chat messages since your last reply - for context]`
 - `[Current message - respond to this]`
 
-**non-direct chats** (groups/channels/rooms) के लिए, **current message body** में sender label prefix किया जाता है (history entries के लिए इस्तेमाल होने वाली same style)। इससे real-time और queued/history messages एजेंट prompt में consistent रहते हैं।
+गैर-प्रत्यक्ष चैट (समूह/चैनल/रूम) के लिए वर्तमान संदेश बॉडी के आगे प्रेषक लेबल लगाया जाता है, जो इतिहास प्रविष्टियों में प्रयुक्त शैली से मेल खाता है। डायरेक्टिव हटाना केवल वर्तमान-संदेश अनुभाग पर लागू होता है, इसलिए इतिहास अक्षुण्ण रहता है। इतिहास को रैप करने वाले चैनलों को मूल संदेश टेक्स्ट पर `BodyForCommands` (या पुराना `CommandBody` / `RawBody`) सेट करना चाहिए और संयुक्त प्रॉम्प्ट के रूप में `Body` रखना चाहिए।
 
-History buffers **pending-only** होते हैं: इनमें वे group messages शामिल होते हैं जिन्होंने run trigger _नहीं_ किया (उदाहरण के लिए, mention-gated messages) और session transcript में पहले से मौजूद messages **exclude** होते हैं।
+इतिहास बफ़र केवल लंबित संदेशों के लिए होते हैं: उनमें वे समूह संदेश शामिल होते हैं जिन्होंने रन ट्रिगर नहीं किया (उदाहरण के लिए, उल्लेख-प्रतिबंधित संदेश), और सेशन ट्रांसक्रिप्ट में पहले से मौजूद संदेश शामिल नहीं होते। संरचित इतिहास, उत्तर, अग्रेषित और चैनल मेटाडेटा प्रॉम्प्ट संयोजन के दौरान अविश्वसनीय उपयोगकर्ता-भूमिका संदर्भ ब्लॉक के रूप में रेंडर होते हैं।
 
-Directive stripping केवल **current message** section पर लागू होती है ताकि history intact रहे। History wrap करने वाले channels को `CommandBody` (या `RawBody`) को original message text पर set करना चाहिए और `Body` को combined prompt के रूप में रखना चाहिए। Structured history, reply, forwarded, और channel metadata prompt assembly के दौरान user-role untrusted context blocks के रूप में render किए जाते हैं।
-History buffers `messages.groupChat.historyLimit` (global default) और per-channel overrides जैसे `channels.slack.historyLimit` या `channels.telegram.accounts.<id>.historyLimit` (`0` set करने पर disable) के ज़रिए configurable हैं।
+इतिहास का आकार `messages.groupChat.historyLimit` (वैश्विक डिफ़ॉल्ट) या `channels.slack.historyLimit` और `channels.telegram.accounts.<id>.historyLimit` जैसे प्रति-चैनल ओवरराइड से कॉन्फ़िगर करें (अक्षम करने के लिए `0` सेट करें)।
 
-## क्यूइंग और followups
+## टूल परिणाम मेटाडेटा
 
-अगर कोई run पहले से active है, तो inbound messages default रूप से current run में steer किए जाते हैं। `messages.queue` चुनता है कि active-run messages steer हों, बाद के लिए queue हों, एक later turn में collect हों, या active run को interrupt करें।
+टूल परिणाम का `content` मॉडल को दिखाई देने वाला परिणाम है; `details` UI रेंडरिंग, निदान, मीडिया डिलीवरी और Plugin के लिए रनटाइम मेटाडेटा है।
 
-- `messages.queue` (और `messages.queue.byChannel`) के ज़रिए configure करें।
-- Default mode `steer` है, Codex steering batches और followup/collect queues के लिए 500ms debounce के साथ।
-- Modes: `steer`, `followup`, `collect`, और `interrupt`।
+- `toolResult.details` को प्रोवाइडर रीप्ले और Compaction इनपुट से पहले हटा दिया जाता है।
+- स्थायी सेशन ट्रांसक्रिप्ट केवल सीमित `details` रखते हैं; बहुत बड़े मेटाडेटा को `persistedDetailsTruncated: true` चिह्नित संक्षिप्त सारांश से बदल दिया जाता है।
+- Plugin और टूल को मॉडल द्वारा पढ़े जाने के लिए आवश्यक टेक्स्ट `content` में रखना चाहिए, केवल `details` में नहीं।
 
-विवरण: [Command queue](/hi/concepts/queue) और [Steering queue](/hi/concepts/queue-steering)।
+## कतारबद्ध करना और फ़ॉलोअप
 
-## चैनल run ownership
+जब कोई रन पहले से सक्रिय होता है, तो इनबाउंड संदेश डिफ़ॉल्ट रूप से उसी में निर्देशित किए जाते हैं। `messages.queue` मोड नियंत्रित करता है:
 
-चैनल Plugins session queue में message enter होने से पहले ordering preserve कर सकते हैं, input debounce कर सकते हैं, और transport backpressure apply कर सकते हैं। उन्हें agent turn के चारों ओर अलग timeout impose नहीं करना चाहिए। जब message किसी session पर route हो जाता है, तो long-running work session, tool, और runtime lifecycle से governed होता है ताकि सभी channels slow turns को consistently report और recover करें।
+| मोड              | व्यवहार                                            |
+| ----------------- | --------------------------------------------------- |
+| `steer` (डिफ़ॉल्ट) | सक्रिय रन में नया प्रॉम्प्ट इंजेक्ट करें।          |
+| `followup`        | सक्रिय रन समाप्त होने के बाद संदेश चलाएँ।      |
+| `collect`         | संगत संदेशों को बाद के एक टर्न में बैच करें।      |
+| `interrupt`       | सक्रिय रन को अबॉर्ट करें, फिर सबसे नया प्रॉम्प्ट शुरू करें। |
 
-## स्ट्रीमिंग, चंकिंग, और बैचिंग
+कतार स्टीयर, फ़ॉलोअप और कलेक्ट बैचिंग के लिए अंतर्निहित 500ms डीबाउंस का उपयोग करती है। `messages.queue.cap` का डिफ़ॉल्ट 20 कतारबद्ध संदेश है और `messages.queue.drop` का डिफ़ॉल्ट `summarize` है (`old` और `new` भी उपलब्ध हैं)। `messages.queue.byChannel` और `messages.queue.debounceMsByChannel` के माध्यम से प्रति-चैनल ओवरराइड कॉन्फ़िगर करें।
 
-Block streaming partial replies भेजती है जैसे-जैसे model text blocks produce करता है।
-Chunking channel text limits का सम्मान करती है और fenced code को split करने से बचती है।
+विवरण: [कमांड कतार](/hi/concepts/queue) और [स्टीयरिंग कतार](/hi/concepts/queue-steering)।
 
-मुख्य settings:
+## चैनल रन स्वामित्व
 
-- `agents.defaults.blockStreamingDefault` (`on|off`, default off)
+चैनल Plugin क्रम बनाए रख सकते हैं, इनपुट डीबाउंस कर सकते हैं और संदेश के सेशन कतार में प्रवेश करने से पहले ट्रांसपोर्ट बैकप्रेशर लागू कर सकते हैं। उन्हें एजेंट टर्न के चारों ओर अलग टाइमआउट लागू नहीं करना चाहिए। संदेश को किसी सेशन पर रूट किए जाने के बाद, सेशन, टूल और रनटाइम जीवनचक्र लंबे समय तक चलने वाले कार्य को नियंत्रित करते हैं, ताकि सभी चैनल धीमे टर्न की रिपोर्टिंग और उनसे पुनर्प्राप्ति एकसमान ढंग से करें।
+
+## स्ट्रीमिंग, खंडन और बैचिंग
+
+ब्लॉक स्ट्रीमिंग मॉडल द्वारा टेक्स्ट ब्लॉक उत्पन्न करते समय आंशिक उत्तर भेजती है; खंडन चैनल की टेक्स्ट सीमाओं का पालन करता है और फ़ेंस किए गए कोड को विभाजित करने से बचता है।
+
+- `agents.defaults.blockStreamingDefault` (`on|off`, डिफ़ॉल्ट `off`)
 - `agents.defaults.blockStreamingBreak` (`text_end|message_end`)
 - `agents.defaults.blockStreamingChunk` (`minChars|maxChars|breakPreference`)
-- `agents.defaults.blockStreamingCoalesce` (idle-based batching)
-- `agents.defaults.humanDelay` (block replies के बीच human-like pause)
-- चैनल overrides: `*.blockStreaming` और `*.blockStreamingCoalesce` (non-Telegram channels को explicit `*.blockStreaming: true` चाहिए)
+- `agents.defaults.blockStreamingCoalesce` (निष्क्रियता-आधारित बैचिंग)
+- `agents.defaults.humanDelay` (ब्लॉक उत्तरों के बीच मानव-जैसा विराम)
+- चैनल ओवरराइड: बंडल किए गए चैनलों पर `*.streaming.block.enabled` और `*.streaming.block.coalesce`; पुराने फ़्लैट कुंजियों को `openclaw doctor --fix` द्वारा माइग्रेट किया जाता है। Telegram सहित प्रत्येक चैनल पर ब्लॉक स्ट्रीमिंग तब तक बंद रहती है, जब तक उसे स्पष्ट रूप से सक्षम न किया जाए। QQ Bot अपवाद है: इसमें `streaming.block` कुंजियाँ नहीं होतीं और यह ब्लॉक उत्तरों को स्ट्रीम करता है, जब तक `channels.qqbot.streaming.mode` का मान `"off"` न हो।
 
-विवरण: [स्ट्रीमिंग + चंकिंग](/hi/concepts/streaming)।
+विवरण: [स्ट्रीमिंग + खंडन](/hi/concepts/streaming)।
 
-## रीजनिंग दृश्यता और tokens
-
-OpenClaw model reasoning को expose या hide कर सकता है:
+## रीजनिंग की दृश्यता और टोकन
 
 - `/reasoning on|off|stream` दृश्यता नियंत्रित करता है।
-- Reasoning content, model द्वारा produce होने पर, token usage में फिर भी count होता है।
-- Telegram transient draft bubble में reasoning stream support करता है जिसे final delivery के बाद delete कर दिया जाता है; persistent reasoning output के लिए `/reasoning on` का उपयोग करें।
+- जब मॉडल रीजनिंग सामग्री उत्पन्न करता है, तब भी वह टोकन उपयोग में गिनी जाती है।
+- Telegram रीजनिंग को एक अस्थायी ड्राफ़्ट बबल में स्ट्रीम करने का समर्थन करता है, जिसे अंतिम डिलीवरी के बाद हटा दिया जाता है; स्थायी रीजनिंग आउटपुट के लिए `/reasoning on` का उपयोग करें।
 
-विवरण: [Thinking + reasoning directives](/hi/tools/thinking) और [Token use](/hi/reference/token-use)।
+विवरण: [थिंकिंग + रीजनिंग डायरेक्टिव](/hi/tools/thinking) और [टोकन उपयोग](/hi/reference/token-use)।
 
-## प्रीफ़िक्स, threading, और replies
+## प्रीफ़िक्स, थ्रेडिंग और उत्तर
 
-Outbound message formatting `messages` में centralized है:
+- आउटबाउंड प्रीफ़िक्स `channels.<channel>.responsePrefix` और `channels.<channel>.accounts.<id>.responsePrefix` पर रहते हैं। खाता मानों को प्राथमिकता मिलती है। जब वे कैनोनिकल फ़ील्ड सेट नहीं होते, तब Doctor वैश्विक फ़ॉलबैक को कॉन्फ़िगर किए गए चैनल ब्लॉक में कॉपी करता है; `messages.responsePrefix` अंतर्निहित और कस्टम चैनलों के लिए फ़ॉलबैक बना रहता है।
+- `replyToMode` और प्रति-चैनल डिफ़ॉल्ट के माध्यम से उत्तर थ्रेडिंग।
 
-- `messages.responsePrefix`, `channels.<channel>.responsePrefix`, और `channels.<channel>.accounts.<id>.responsePrefix` (outbound prefix cascade), साथ ही `channels.whatsapp.messagePrefix` (WhatsApp inbound prefix)
-- `replyToMode` और per-channel defaults के ज़रिए reply threading
+विवरण: [कॉन्फ़िगरेशन](/hi/gateway/config-agents#messages) और चैनल दस्तावेज़।
 
-विवरण: [कॉन्फ़िगरेशन](/hi/gateway/config-agents#messages) और channel docs।
+## मौन उत्तर
 
-## silent replies
+मौन टोकन `NO_REPLY` (केस-असंवेदी, इसलिए `no_reply` भी मेल खाता है) का अर्थ है "उपयोगकर्ता को दिखाई देने वाला उत्तर डिलीवर न करें।" जब किसी टर्न में लंबित टूल मीडिया भी होता है, जैसे उत्पन्न TTS ऑडियो, तब OpenClaw मौन टेक्स्ट हटा देता है लेकिन मीडिया अटैचमेंट फिर भी डिलीवर करता है।
 
-सटीक silent token `NO_REPLY` / `no_reply` का अर्थ है "user-visible reply deliver न करें"।
-जब किसी turn में pending tool media भी हो, जैसे generated TTS audio, OpenClaw silent text को strip करता है लेकिन media attachment फिर भी deliver करता है।
-OpenClaw इस behavior को conversation type के आधार पर resolve करता है:
+मौन नीति वार्तालाप प्रकार के अनुसार निर्धारित होती है:
 
-- Direct conversations को कभी `NO_REPLY` prompt guidance नहीं मिलती। अगर कोई direct run गलती से bare silent token return करता है, तो OpenClaw उसे rewrite या deliver करने के बजाय suppress करता है।
-- Groups/channels default रूप से केवल automatic group replies के लिए silence allow करते हैं। `message_tool` visible-reply mode में, silence का अर्थ है कि model `message(action=send)` call नहीं करता।
-- Internal orchestration default रूप से silence allow करता है।
+- प्रत्यक्ष वार्तालापों को कभी भी `NO_REPLY` प्रॉम्प्ट मार्गदर्शन नहीं मिलता। यदि कोई प्रत्यक्ष रन गलती से केवल मौन टोकन लौटाता है, तो OpenClaw उसे फिर से लिखने या डिलीवर करने के बजाय दबा देता है।
+- समूहों/चैनलों में डिफ़ॉल्ट रूप से मौन की अनुमति होती है। `message_tool` दृश्य-उत्तर मोड में मौन का अर्थ है कि मॉडल `message(action=send)` को कॉल नहीं करता।
+- आंतरिक ऑर्केस्ट्रेशन में डिफ़ॉल्ट रूप से मौन की अनुमति होती है।
 
-OpenClaw non-direct chats में generic internal runner failures के लिए भी silent replies का उपयोग करता है, ताकि groups/channels को gateway error boilerplate न दिखे।
-Missing auth, rate-limit, या overload notices जैसी user-facing recovery copy वाली classified failures फिर भी deliver की जा सकती हैं। Direct chats default रूप से compact failure copy दिखाते हैं; raw runner details केवल `/verbose full` enabled होने पर दिखते हैं।
+डिफ़ॉल्ट `agents.defaults.silentReply` के अंतर्गत रहते हैं; `surfaces.<id>.silentReply` प्रति सतह समूह/आंतरिक नीति को ओवरराइड कर सकता है।
 
-Defaults `agents.defaults.silentReply` के अंतर्गत रहते हैं; `surfaces.<id>.silentReply` प्रति surface group/internal policy को override कर सकता है।
+OpenClaw गैर-प्रत्यक्ष चैट में सामान्य आंतरिक रनर विफलताओं के लिए भी मौन उत्तरों का उपयोग करता है, ताकि समूहों/चैनलों को Gateway त्रुटि का मानक टेक्स्ट न दिखे। उपयोगकर्ता-सामना करने वाली पुनर्प्राप्ति सूचना वाली वर्गीकृत विफलताएँ, जैसे अनुपलब्ध प्रमाणीकरण, दर-सीमा या ओवरलोड सूचनाएँ, फिर भी डिलीवर की जा सकती हैं। प्रत्यक्ष चैट डिफ़ॉल्ट रूप से संक्षिप्त विफलता टेक्स्ट दिखाती हैं; कच्चे रनर विवरण केवल `/verbose full` सक्षम होने पर दिखाई देते हैं।
 
-Bare silent replies सभी surfaces पर drop कर दी जाती हैं, ताकि parent sessions fallback chatter में sentinel text rewrite करने के बजाय शांत रहें।
+केवल मौन उत्तर सभी सतहों पर हटा दिए जाते हैं, इसलिए पैरेंट सेशन सेंटिनल टेक्स्ट को फ़ॉलबैक बातचीत में फिर से लिखने के बजाय शांत रहते हैं।
 
 ## संबंधित
 
-- [Message lifecycle refactor](/hi/concepts/message-lifecycle-refactor) - टिकाऊ send और receive design का लक्ष्य
-- [स्ट्रीमिंग](/hi/concepts/streaming) — real-time message delivery
-- [Retry](/hi/concepts/retry) — message delivery retry behavior
-- [Queue](/hi/concepts/queue) — message processing queue
-- [Channels](/hi/channels) — messaging platform integrations
+- [संदेश जीवनचक्र रीफ़ैक्टर](/hi/concepts/message-lifecycle-refactor) - टिकाऊ प्रेषण और प्राप्ति डिज़ाइन का लक्ष्य
+- [स्ट्रीमिंग](/hi/concepts/streaming) - रीयल-टाइम संदेश डिलीवरी
+- [पुनः प्रयास](/hi/concepts/retry) - संदेश डिलीवरी के पुनः प्रयास का व्यवहार
+- [कतार](/hi/concepts/queue) - संदेश प्रसंस्करण कतार
+- [चैनल](/hi/channels) - संदेश प्लेटफ़ॉर्म एकीकरण

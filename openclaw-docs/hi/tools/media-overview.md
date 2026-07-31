@@ -1,155 +1,175 @@
 ---
 read_when:
-    - OpenClaw की मीडिया क्षमताओं का अवलोकन ढूंढ रहे हैं
+    - OpenClaw की मीडिया क्षमताओं का अवलोकन खोज रहे हैं
     - कौन-सा मीडिया प्रदाता कॉन्फ़िगर करना है, यह तय करना
-    - एसिंक मीडिया जनरेशन कैसे काम करता है, यह समझना
+    - असिंक्रोनस मीडिया जनरेशन के काम करने के तरीके को समझना
 sidebarTitle: Media overview
-summary: छवि, वीडियो, संगीत, वाक् और मीडिया-समझ क्षमताएँ एक नज़र में
-title: मीडिया अवलोकन
+summary: चित्र, वीडियो, संगीत, वाणी और मीडिया-समझ क्षमताएँ एक नज़र में
+title: मीडिया का अवलोकन
 x-i18n:
-    generated_at: "2026-06-29T00:21:07Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T21:48:06Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c04beb60abbd06d1503302be144e633b526ae55435f061fbb94f6fef85ca9d66
+    source_hash: 18eb79e6915c5dc8d705bf5cadfcdddecaf7d21a037f102696d4f2bcd41e5bea
     source_path: tools/media-overview.md
     workflow: 16
 ---
 
-OpenClaw छवियां, वीडियो, और संगीत जनरेट करता है, आने वाले मीडिया
-(छवियां, ऑडियो, वीडियो) को समझता है, और text-to-speech के साथ उत्तरों को बोलकर सुनाता है। सभी
-मीडिया क्षमताएं tool-driven हैं: agent बातचीत के आधार पर तय करता है
-कि उन्हें कब उपयोग करना है, और हर tool तभी दिखाई देता है जब कम से कम एक backing
-provider configured हो।
+OpenClaw छवियाँ, वीडियो और संगीत जनरेट करता है, आने वाले मीडिया
+(छवियाँ, ऑडियो, वीडियो) को समझता है और टेक्स्ट-टू-स्पीच से उत्तरों को बोलकर सुनाता है। सभी
+मीडिया क्षमताएँ टूल-संचालित हैं: एजेंट बातचीत के आधार पर तय करता है कि उनका उपयोग
+कब करना है, और प्रत्येक टूल केवल तभी दिखाई देता है जब कम-से-कम एक सहायक
+प्रदाता कॉन्फ़िगर हो।
 
-Live speech, one-shot media tool
-path के बजाय Talk session contract का उपयोग करता है। Talk के तीन मोड हैं: provider-native `realtime`, local या streaming
-`stt-tts`, और observe-only speech capture के लिए `transcription`। ये मोड
-telephony, meetings, browser realtime, और native push-to-talk clients के साथ
-provider catalogs, event envelopes, और cancellation semantics साझा करते हैं।
+लाइव वाणी वन-शॉट मीडिया टूल
+पथ के बजाय Talk सत्र अनुबंध का उपयोग करती है। Talk के तीन मोड हैं: प्रदाता-नेटिव `realtime`, स्थानीय या स्ट्रीमिंग
+`stt-tts`, और केवल-अवलोकन वाणी कैप्चर के लिए `transcription`। ये मोड
+टेलीफ़ोनी, मीटिंग, ब्राउज़र रियलटाइम और नेटिव पुश-टू-टॉक क्लाइंट के साथ
+प्रदाता कैटलॉग, इवेंट एनवेलप और रद्दीकरण सिमैंटिक्स साझा करते हैं।
 
-## क्षमताएं
+## क्षमताएँ
 
 <CardGroup cols={2}>
   <Card title="छवि जनरेशन" href="/hi/tools/image-generation" icon="image">
-    text prompts या reference images से
-    `image_generate` के माध्यम से छवियां बनाएं और edit करें। chat sessions में async — background में चलता है और
-    ready होने पर result post करता है।
+    `image_generate` के माध्यम से टेक्स्ट प्रॉम्प्ट या संदर्भ छवियों से
+    छवियाँ बनाएँ और संपादित करें। चैट सत्रों में एसिंक्रोनस — पृष्ठभूमि में चलता है और
+    तैयार होने पर परिणाम पोस्ट करता है।
   </Card>
   <Card title="वीडियो जनरेशन" href="/hi/tools/video-generation" icon="video">
-    `video_generate` के माध्यम से text-to-video, image-to-video, और video-to-video।
-    Async — background में चलता है और ready होने पर result post करता है।
+    `video_generate` के माध्यम से टेक्स्ट-टू-वीडियो, इमेज-टू-वीडियो और वीडियो-टू-वीडियो।
+    एसिंक्रोनस — पृष्ठभूमि में चलता है और तैयार होने पर परिणाम पोस्ट करता है।
   </Card>
   <Card title="संगीत जनरेशन" href="/hi/tools/music-generation" icon="music">
-    `music_generate` के माध्यम से music या audio tracks जनरेट करें। chat
-    sessions में shared media-generation task lifecycle पर async।
+    `music_generate` के माध्यम से संगीत या ऑडियो ट्रैक जनरेट करें। साझा मीडिया-जनरेशन
+    कार्य जीवनचक्र पर चैट सत्रों में एसिंक्रोनस।
   </Card>
-  <Card title="Text-to-speech" href="/hi/tools/tts" icon="microphone">
-    `tts` tool और
-    `messages.tts` config के माध्यम से outbound replies को spoken audio में बदलें। Synchronous।
+  <Card title="टेक्स्ट-टू-स्पीच" href="/hi/tools/tts" icon="microphone">
+    `tts` टूल और `tts` कॉन्फ़िगरेशन के माध्यम से
+    आउटबाउंड उत्तरों को बोले गए ऑडियो में बदलें। सिंक्रोनस।
   </Card>
   <Card title="मीडिया समझ" href="/hi/nodes/media-understanding" icon="eye">
-    vision-capable model
-    providers और dedicated media-understanding plugins का उपयोग करके inbound images, audio, और video को summarize करें।
+    विज़न-सक्षम मॉडल प्रदाताओं और समर्पित मीडिया-समझ Plugin का उपयोग करके
+    आने वाली छवियों, ऑडियो और वीडियो का सारांश बनाएँ।
   </Card>
-  <Card title="Speech-to-text" href="/hi/nodes/audio" icon="ear-listen">
-    batch STT या Voice Call
-    streaming STT providers के माध्यम से inbound voice messages को transcribe करें।
+  <Card title="स्पीच-टू-टेक्स्ट" href="/hi/nodes/audio" icon="ear-listen">
+    बैच STT या Voice Call स्ट्रीमिंग STT प्रदाताओं के माध्यम से
+    आने वाले वॉइस संदेशों को ट्रांसक्राइब करें।
   </Card>
 </CardGroup>
 
-## Provider क्षमता मैट्रिक्स
+## प्रदाता क्षमता मैट्रिक्स
 
-| Provider          | Image | Video | Music | TTS | STT | Realtime voice | Media understanding |
+<Note>
+यह तालिका समर्पित मीडिया-जनरेशन, TTS और STT Plugin को शामिल करती है। कई
+चैट-मॉडल प्रदाता (Anthropic, Google, OpenAI और अन्य) अपने उत्तर मॉडल के माध्यम से
+आने वाले मीडिया को भी समझते हैं; पूरी प्रदाता सूची
+[मीडिया समझ](/hi/nodes/media-understanding#provider-support-matrix) में देखें।
+</Note>
+
+| प्रदाता          | छवि | वीडियो | संगीत | TTS | STT | रियलटाइम वॉइस | मीडिया समझ |
 | ----------------- | :---: | :---: | :---: | :-: | :-: | :------------: | :-----------------: |
 | Alibaba           |       |   ✓   |       |     |     |                |                     |
+| Azure Speech      |       |       |       |  ✓  |     |                |                     |
 | BytePlus          |       |   ✓   |       |     |     |                |                     |
 | ComfyUI           |   ✓   |   ✓   |   ✓   |     |     |                |                     |
+| Deepgram          |       |       |       |     |  ✓  |                |                     |
 | DeepInfra         |   ✓   |   ✓   |       |  ✓  |  ✓  |                |          ✓          |
-| Deepgram          |       |       |       |     |  ✓  |       ✓        |                     |
 | ElevenLabs        |       |       |       |  ✓  |  ✓  |                |                     |
 | fal               |   ✓   |   ✓   |   ✓   |     |     |                |                     |
-| Google            |   ✓   |   ✓   |   ✓   |  ✓  |     |       ✓        |          ✓          |
+| Google            |   ✓   |   ✓   |   ✓   |  ✓  |  ✓  |       ✓        |          ✓          |
 | Gradium           |       |       |       |  ✓  |     |                |                     |
-| Local CLI         |       |       |       |  ✓  |     |                |                     |
+| Inworld           |       |       |       |  ✓  |     |                |                     |
+| LiteLLM           |   ✓   |       |       |     |     |                |                     |
+| स्थानीय CLI      |       |       |       |  ✓  |     |                |                     |
 | Microsoft         |       |       |       |  ✓  |     |                |                     |
 | Microsoft Foundry |   ✓   |       |       |     |     |                |                     |
 | MiniMax           |   ✓   |   ✓   |   ✓   |  ✓  |     |                |                     |
 | Mistral           |       |       |       |     |  ✓  |                |                     |
 | OpenAI            |   ✓   |   ✓   |       |  ✓  |  ✓  |       ✓        |          ✓          |
 | OpenRouter        |   ✓   |   ✓   |   ✓   |  ✓  |  ✓  |                |          ✓          |
-| Qwen              |       |   ✓   |       |     |     |                |                     |
+| PixVerse          |       |   ✓   |       |     |     |                |                     |
+| Qwen              |       |   ✓   |       |     |     |                |          ✓          |
 | Runway            |       |   ✓   |       |     |     |                |                     |
 | SenseAudio        |       |       |       |     |  ✓  |                |                     |
 | Together          |       |   ✓   |       |     |     |                |                     |
+| Volcengine        |       |       |       |  ✓  |     |                |                     |
 | Vydra             |   ✓   |   ✓   |       |  ✓  |     |                |                     |
 | xAI               |   ✓   |   ✓   |       |  ✓  |  ✓  |                |          ✓          |
-| Xiaomi MiMo       |   ✓   |       |       |  ✓  |     |                |          ✓          |
+| Xiaomi MiMo       |       |       |       |  ✓  |     |                |                     |
 
 <Note>
-Media understanding आपके provider config में registered किसी भी vision-capable या audio-capable model का उपयोग करता है। ऊपर दिया गया matrix dedicated
-media-understanding support वाले providers को सूचीबद्ध करता है; अधिकतर multimodal LLM providers (Anthropic, Google,
-OpenAI, आदि) configured होने पर active
-reply model के रूप में inbound media को भी समझ सकते हैं।
+यहाँ **रियलटाइम वॉइस** का अर्थ प्रदाता-नेटिव द्विदिश रियलटाइम (Talk
+`realtime` मोड, जैसे Gemini Live या OpenAI Realtime API) है — आज केवल Google
+और OpenAI इसे पंजीकृत करते हैं। Deepgram, ElevenLabs, Mistral, OpenAI और xAI
+Voice Call स्ट्रीमिंग STT (एकतरफ़ा ऑडियो-टू-टेक्स्ट) को अलग से पंजीकृत करते हैं; नीचे
+[स्पीच-टू-टेक्स्ट और Voice Call](#speech-to-text-and-voice-call) देखें।
+xAI Realtime वॉइस एक अपस्ट्रीम क्षमता है, लेकिन जब तक साझा रियलटाइम-वॉइस अनुबंध
+इसे निरूपित नहीं कर सकता, तब तक यह OpenClaw में पंजीकृत नहीं होती।
 </Note>
 
-## Async बनाम synchronous
+## एसिंक्रोनस बनाम सिंक्रोनस
 
-| Capability     | Mode         | Why                                                                                                  |
+| क्षमता     | मोड         | कारण                                                                                                  |
 | -------------- | ------------ | ---------------------------------------------------------------------------------------------------- |
-| Image          | Asynchronous | Provider processing chat turn से अधिक समय तक चल सकती है; generated attachments shared completion path का उपयोग करते हैं।   |
-| Text-to-speech | Synchronous  | Provider responses कुछ seconds में return होते हैं; reply audio से attached होते हैं।                                   |
-| Video          | Asynchronous | Provider processing में 30 s से कई minutes तक लगते हैं; slow queues configured timeout तक चल सकती हैं। |
-| Music          | Asynchronous | video जैसी ही provider-processing characteristic।                                                    |
+| छवि          | एसिंक्रोनस | प्रदाता प्रोसेसिंग चैट टर्न से अधिक समय तक चल सकती है; जनरेट किए गए अटैचमेंट साझा पूर्णता पथ का उपयोग करते हैं।   |
+| टेक्स्ट-टू-स्पीच | सिंक्रोनस  | प्रदाता के उत्तर कुछ सेकंड में लौटते हैं; उत्तर ऑडियो से संलग्न किए जाते हैं।                                   |
+| वीडियो          | एसिंक्रोनस | प्रदाता प्रोसेसिंग में 30 s से लेकर कई मिनट लगते हैं; धीमी कतारें कॉन्फ़िगर किए गए टाइमआउट तक चल सकती हैं। |
+| संगीत          | एसिंक्रोनस | वीडियो के समान प्रदाता-प्रोसेसिंग विशेषता।                                                    |
 
-Async tools के लिए, OpenClaw request को provider को submit करता है, तुरंत task
-id return करता है, और task ledger में job track करता है। job चलते समय agent अन्य messages का जवाब देना जारी रखता है। जब provider finish करता है,
-OpenClaw generated media paths के साथ agent को wake करता है ताकि वह session के normal visible-reply mode के माध्यम से user को बता सके: configured होने पर automatic final reply
-delivery, या जब session को message tool की आवश्यकता हो तो `message(action="send")`। यदि requester session inactive है या उसकी active wake
-fail होती है, और कुछ generated media अभी भी completion reply से missing है,
-OpenClaw केवल missing media के साथ idempotent direct fallback भेजता है। completion reply द्वारा पहले से delivered media दोबारा post नहीं किया जाता।
+एसिंक्रोनस टूल के लिए, OpenClaw अनुरोध को प्रदाता के पास सबमिट करता है, तुरंत एक कार्य
+आईडी लौटाता है और कार्य लेज़र में जॉब को ट्रैक करता है। जॉब चलने के दौरान एजेंट
+अन्य संदेशों का उत्तर देना जारी रखता है। प्रदाता का काम पूरा होने पर,
+OpenClaw जनरेट किए गए मीडिया पथों के साथ एजेंट को जगाता है, ताकि वह सत्र के सामान्य
+दृश्य-उत्तर मोड के माध्यम से उपयोगकर्ता को बता सके: कॉन्फ़िगर होने पर स्वचालित अंतिम उत्तर
+डिलीवरी, या जब सत्र को संदेश टूल की आवश्यकता हो तब `message(action="send")`।
+यदि अनुरोधकर्ता सत्र निष्क्रिय है या उसका सक्रिय वेक विफल हो जाता है,
+और कुछ जनरेट किया गया मीडिया अभी भी पूर्णता उत्तर से अनुपस्थित है, तो
+OpenClaw केवल अनुपस्थित मीडिया के साथ एक आइडेम्पोटेंट प्रत्यक्ष फ़ॉलबैक भेजता है। पूर्णता
+उत्तर द्वारा पहले ही डिलीवर किया गया मीडिया दोबारा पोस्ट नहीं किया जाता।
 
-## Speech-to-text और Voice Call
+## स्पीच-टू-टेक्स्ट और Voice Call
 
-Deepgram, DeepInfra, ElevenLabs, Mistral, OpenAI, OpenRouter, SenseAudio, और xAI configured होने पर batch `tools.media.audio` path के माध्यम से सभी
-inbound audio को transcribe कर सकते हैं।
-Voice note को mention gating या command
-parsing के लिए preflight करने वाले channel plugins inbound context पर transcribed attachment mark करते हैं, ताकि shared
-media-understanding pass उसी audio के लिए दूसरी
-STT call करने के बजाय उस transcript को reuse करे।
+कॉन्फ़िगर होने पर Deepgram, DeepInfra, ElevenLabs, Google, Groq, Mistral, OpenAI, OpenRouter,
+SenseAudio और xAI सभी बैच `tools.media.audio` पथ के माध्यम से आने वाले ऑडियो को
+ट्रांसक्राइब कर सकते हैं। मेंशन गेटिंग या कमांड पार्सिंग के लिए किसी
+वॉइस नोट की पूर्व-जाँच करने वाले चैनल Plugin आने वाले संदर्भ पर ट्रांसक्राइब किए गए
+अटैचमेंट को चिह्नित करते हैं, ताकि साझा मीडिया-समझ चरण उसी ऑडियो के लिए
+दूसरी STT कॉल करने के बजाय उस ट्रांसक्रिप्ट का पुनः उपयोग करे।
 
-Deepgram, ElevenLabs, Mistral, OpenAI, और xAI Voice Call
-streaming STT providers भी register करते हैं, ताकि live phone audio को completed recording की प्रतीक्षा किए बिना selected
-vendor को forward किया जा सके।
+Deepgram, ElevenLabs, Mistral, OpenAI और xAI Voice Call
+स्ट्रीमिंग STT प्रदाताओं को भी पंजीकृत करते हैं, ताकि पूर्ण रिकॉर्डिंग की प्रतीक्षा किए बिना
+लाइव फ़ोन ऑडियो को चयनित विक्रेता को अग्रेषित किया जा सके।
 
-Live user conversations के लिए, [Talk mode](/hi/nodes/talk) को प्राथमिकता दें। Batch audio
-attachments media path पर रहते हैं; browser realtime, native push-to-talk,
-telephony, और meeting audio को Talk events और Gateway द्वारा लौटाए गए session-scoped
-catalogs का उपयोग करना चाहिए।
+लाइव उपयोगकर्ता वार्तालापों के लिए, [Talk मोड](/hi/nodes/talk) को प्राथमिकता दें। बैच ऑडियो
+अटैचमेंट मीडिया पथ पर बने रहते हैं; ब्राउज़र रियलटाइम, नेटिव पुश-टू-टॉक,
+टेलीफ़ोनी और मीटिंग ऑडियो को Talk इवेंट तथा Gateway द्वारा लौटाए गए
+सत्र-स्कोप्ड कैटलॉग का उपयोग करना चाहिए।
 
-## Provider mappings (vendors surfaces में कैसे split होते हैं)
+## प्रदाता मैपिंग (विक्रेता विभिन्न सतहों में कैसे विभाजित होते हैं)
 
 <AccordionGroup>
   <Accordion title="Google">
-    Image, video, music, batch TTS, backend realtime voice, और
-    media-understanding surfaces।
+    छवि, वीडियो, संगीत, बैच TTS, बैच STT, बैकएंड रियलटाइम वॉइस और
+    मीडिया-समझ सतहें।
   </Accordion>
   <Accordion title="OpenAI">
-    Image, video, batch TTS, batch STT, Voice Call streaming STT, backend
-    realtime voice, और memory-embedding surfaces।
+    छवि, वीडियो, बैच TTS, बैच STT, Voice Call स्ट्रीमिंग STT, बैकएंड
+    रियलटाइम वॉइस और मेमोरी-एम्बेडिंग सतहें।
   </Accordion>
   <Accordion title="DeepInfra">
-    Chat/model routing, image generation/editing, text-to-video, batch TTS,
-    batch STT, image media understanding, और memory-embedding surfaces।
-    DeepInfra-native rerank/classification/object-detection models
-    तब तक registered नहीं होते जब तक OpenClaw के पास उन
-    categories के लिए dedicated provider contracts न हों।
+    चैट/मॉडल रूटिंग, छवि जनरेशन/संपादन, टेक्स्ट-टू-वीडियो, बैच TTS,
+    बैच STT, छवि मीडिया समझ और मेमोरी-एम्बेडिंग सतहें।
+    DeepInfra पुनःरैंकिंग, वर्गीकरण, ऑब्जेक्ट-डिटेक्शन और
+    अन्य नेटिव मॉडल प्रकार भी उपलब्ध कराता है; OpenClaw के पास अभी उन
+    श्रेणियों के लिए कोई प्रदाता अनुबंध नहीं है, इसलिए यह Plugin उन्हें पंजीकृत नहीं करता।
   </Accordion>
   <Accordion title="xAI">
-    Image, video, search, code-execution, batch TTS, batch STT, और Voice
-    Call streaming STT। xAI Realtime voice एक upstream capability है लेकिन
-    OpenClaw में तब तक registered नहीं है जब तक shared realtime-voice contract उसे
-    represent नहीं कर सकता।
+    छवि, वीडियो, खोज, कोड-निष्पादन, बैच TTS, बैच STT और Voice
+    Call स्ट्रीमिंग STT। xAI Realtime वॉइस एक अपस्ट्रीम क्षमता है, लेकिन जब तक
+    साझा रियलटाइम-वॉइस अनुबंध इसे निरूपित नहीं कर सकता, तब तक यह
+    OpenClaw में पंजीकृत नहीं होती।
   </Accordion>
 </AccordionGroup>
 
@@ -158,7 +178,7 @@ catalogs का उपयोग करना चाहिए।
 - [छवि जनरेशन](/hi/tools/image-generation)
 - [वीडियो जनरेशन](/hi/tools/video-generation)
 - [संगीत जनरेशन](/hi/tools/music-generation)
-- [Text-to-speech](/hi/tools/tts)
+- [टेक्स्ट-टू-स्पीच](/hi/tools/tts)
 - [मीडिया समझ](/hi/nodes/media-understanding)
-- [Audio nodes](/hi/nodes/audio)
-- [Talk mode](/hi/nodes/talk)
+- [ऑडियो Node](/hi/nodes/audio)
+- [Talk मोड](/hi/nodes/talk)

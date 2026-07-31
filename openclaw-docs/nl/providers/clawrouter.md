@@ -1,79 +1,92 @@
 ---
 read_when:
-    - U wilt één beheerde sleutel voor meerdere modelproviders
+    - Je wilt één beheerde sleutel voor meerdere modelproviders
     - Je hebt ClawRouter-modeldetectie of quotarapportage in OpenClaw nodig
-summary: Leid modellen met referentiegegevensbereik via ClawRouter en toon beheerde quota
+summary: Routeer modellen met een specifieke referentie door ClawRouter en toon beheerde quota's
 title: ClawRouter
 x-i18n:
-    generated_at: "2026-07-12T09:12:46Z"
+    generated_at: "2026-07-27T06:07:18Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b9a83253b5de3022bb3d3113427e5183f4ac537161ed75723fec0dafc33ebb00
+    source_hash: 929a93e8d1d003e21f792d0fdab9542553ffab374f59d4d0505819b0f719591f
     source_path: providers/clawrouter.md
     workflow: 16
 ---
 
-ClawRouter geeft OpenClaw één beleidsgebonden sleutel voor meerdere bovenliggende modelproviders. De meegeleverde Plugin `clawrouter` detecteert alleen de modellen die voor die sleutel zijn toegestaan, routeert elk model via het opgegeven protocol en rapporteert het budget en het totale gebruik van de sleutel op de gebruiksoverzichten van OpenClaw.
+ClawRouter geeft OpenClaw één beleidsspecifieke sleutel voor meerdere upstreammodelproviders. De gebundelde Plugin `clawrouter` detecteert alleen de modellen die voor die sleutel zijn toegestaan, routeert elk model via het opgegeven protocol en rapporteert het budget en het totale gebruik van de sleutel in de gebruiksoverzichten van OpenClaw.
 
-Bovenliggende aanmeldgegevens en providerspecifieke doorsturing blijven in ClawRouter, zodat u nooit elke bovenliggende provider-Plugin op de OpenClaw-host hoeft te installeren of authenticeren. De Plugin wordt meegeleverd met OpenClaw (`enabledByDefault: true`); u hebt alleen uitgegeven ClawRouter-aanmeldgegevens nodig.
+Upstreamreferenties en providerspecifieke doorsturing blijven in ClawRouter, zodat je nooit elke upstreamprovider-Plugin op de OpenClaw-host hoeft te installeren of te authenticeren. De Plugin wordt gebundeld met OpenClaw geleverd (`enabledByDefault: true`); je hebt alleen een uitgegeven ClawRouter-referentie nodig.
 
-| Eigenschap     | Waarde                                               |
-| -------------- | ---------------------------------------------------- |
-| Provider       | `clawrouter`                                         |
-| Plugin         | meegeleverd (opgenomen in OpenClaw)                  |
-| Authenticatie  | `CLAWROUTER_API_KEY`                                 |
-| Standaard-URL  | `https://clawrouter.openclaw.ai`                     |
-| Modelcatalogus | Gebonden aan aanmeldgegevens via `/v1/catalog`       |
-| Quota          | Maandbudget en gebruik via `/v1/usage`               |
+| Eigenschap    | Waarde                                   |
+| ------------- | ---------------------------------------- |
+| Provider      | `clawrouter`                       |
+| Plugin        | gebundeld (opgenomen in OpenClaw)        |
+| Authenticatie | `CLAWROUTER_API_KEY`                       |
+| Standaard-URL | `https://clawrouter.openclaw.ai`                       |
+| Modelcatalogus | Referentiespecifiek via `/v1/catalog` |
+| Quota's       | Maandbudget en gebruik via `/v1/usage` |
 
 ## Aan de slag
 
 <Steps>
-  <Step title="Verkrijg gebonden aanmeldgegevens">
-    Vraag uw ClawRouter-beheerder om aanmeldgegevens waarvan het beleid de providers, modellen en het maandbudget omvat die u moet gebruiken. Aanmeldgegevens worden bij uitgifte één keer weergegeven.
+  <Step title="Een specifieke referentie verkrijgen">
+    Vraag je ClawRouter-beheerder om een referentie waarvan het beleid de
+    providers, modellen en het maandbudget omvat die je moet gebruiken. Referenties
+    worden bij uitgifte één keer weergegeven.
   </Step>
-  <Step title="Configureer OpenClaw">
+  <Step title="OpenClaw configureren">
     ```bash
     export CLAWROUTER_API_KEY="..."
     openclaw onboard --auth-choice clawrouter-api-key
     openclaw plugins enable clawrouter
     ```
 
-    `clawrouter` wordt meegeleverd en is standaard ingeschakeld. Als in uw configuratie `plugins.allow` is ingesteld, voegt u `clawrouter` aan die lijst toe voordat u de Plugin inschakelt. Stel voor een aangepaste implementatie `models.providers.clawrouter.baseUrl` in op de oorsprong van ClawRouter; de standaardwaarde is `https://clawrouter.openclaw.ai`.
+    `clawrouter` is gebundeld en standaard ingeschakeld. Als je configuratie
+    `plugins.allow` instelt, voeg je `clawrouter` aan die lijst toe voordat
+    je de Plugin inschakelt. Stel voor een aangepaste implementatie
+    `models.providers.clawrouter.baseUrl` in op de ClawRouter-origin; de standaardwaarde is
+    `https://clawrouter.openclaw.ai`.
 
   </Step>
-  <Step title="Toegestane modellen weergeven">
+  <Step title="Toegekende modellen weergeven">
     ```bash
     openclaw models list --all --provider clawrouter
     ```
 
-    Gebruik de geretourneerde modelverwijzingen exact zoals weergegeven. Ze behouden de bovenliggende naamruimte, zoals `clawrouter/openai/gpt-5.5`, `clawrouter/anthropic/claude-sonnet-4-6` of `clawrouter/google/gemini-3.5-flash`. Als `agents.defaults.models` in uw configuratie een toelatingslijst is, voegt u elke geselecteerde ClawRouter-verwijzing daaraan toe.
+    Gebruik de geretourneerde modelreferenties exact zoals weergegeven. Ze behouden
+    de upstreamnaamruimte, zoals `clawrouter/openai/gpt-5.5`,
+    `clawrouter/anthropic/claude-sonnet-4-6` of
+    `clawrouter/google/gemini-3.5-flash`. Als `agents.defaults.modelPolicy.allow`
+    is geconfigureerd, voeg je elke geselecteerde ClawRouter-referentie eraan toe.
 
   </Step>
-  <Step title="Selecteer een model">
+  <Step title="Een model selecteren">
     ```bash
     openclaw models set clawrouter/<provider>/<model>
     ```
 
-    U kunt ook voor één uitvoering een geretourneerd model selecteren met `openclaw agent --model clawrouter/<provider>/<model> --message "..."`.
+    Je kunt voor één uitvoering ook een geretourneerd model selecteren met
+    `openclaw agent --model clawrouter/<provider>/<model> --message "..."`.
 
   </Step>
 </Steps>
 
 ## Beheerde niet-interactieve implementatie
 
-Bewaar de proxysleutel in de geheimeninvoer van de werklast en sla in `openclaw.json` alleen een SecretRef op. De canonieke beheerde velden zijn:
+Bewaar de proxysleutel in de geheime-injectie van de workload en sla in
+`openclaw.json` alleen een SecretRef op. De canonieke beheerde velden zijn:
 
-| Doel            | Configuratie- of omgevingsveld                                           |
-| --------------- | ------------------------------------------------------------------------ |
-| Routeroorsprong | `models.providers.clawrouter.baseUrl`                                    |
-| Aanmeldgegevens | `models.providers.clawrouter.apiKey` -> SecretRef uit omgeving           |
-| Geheime waarde  | `CLAWROUTER_API_KEY` in de procesomgeving van de Gateway                 |
-| Standaardmodel  | `agents.defaults.model.primary` -> `clawrouter/<provider>/<model>`       |
-| Werklastlabel   | `models.providers.clawrouter.headers.X-ClawRouter-Project-Id` (optioneel) |
+| Doel          | Configuratie- of omgevingsveld                                            |
+| ------------- | ------------------------------------------------------------------------- |
+| Router-origin | `models.providers.clawrouter.baseUrl`                                                        |
+| Referentie    | `models.providers.clawrouter.apiKey` -> SecretRef uit omgeving                             |
+| Geheime waarde | `CLAWROUTER_API_KEY` in de procesomgeving van de Gateway                   |
+| Standaardmodel | `agents.defaults.model.primary` -> `clawrouter/<provider>/<model>`                                 |
+| Workloadtag   | `models.providers.clawrouter.headers.X-ClawRouter-Project-Id` (optioneel)                                           |
 
-Een implementatiecontroller kan bijvoorbeeld eigenaar zijn van deze JSON5-patch:
+Een implementatiecontroller kan bijvoorbeeld deze JSON5-patch beheren:
 
 ```json5
 {
@@ -103,81 +116,143 @@ Een implementatiecontroller kan bijvoorbeeld eigenaar zijn van deze JSON5-patch:
 }
 ```
 
-Als de implementatie `plugins.allow` instelt, behoudt u de bestaande vermeldingen en voegt u `clawrouter` toe. Valideer en pas toe zonder interactieve wizard:
+Als de implementatie `plugins.allow` instelt, behoud je de bestaande vermeldingen
+en voeg je `clawrouter` toe. Valideer en pas toe zonder interactieve wizard:
 
 ```bash
 openclaw config patch --file ./clawrouter.patch.json5 --dry-run --json
 openclaw config patch --file ./clawrouter.patch.json5
 ```
 
-De proefuitvoering verwerkt de SecretRef, maar drukt de waarde nooit af. Als u de aanmeldgegevens wilt roteren, werkt u het externe Secret bij dat `CLAWROUTER_API_KEY` levert en start u de Gateway-werklast opnieuw, zodat de nieuwe procesomgeving wordt geladen. Het configuratiebestand en de modelverwijzing veranderen niet.
+De proefuitvoering lost de SecretRef op, maar drukt de waarde nooit af. Om de
+referentie te roteren, werk je de externe Secret bij die `CLAWROUTER_API_KEY`
+levert en start je de Gateway-workload opnieuw, zodat de nieuwe procesomgeving
+wordt geladen. Het configuratiebestand en de modelreferentie veranderen niet.
 
-Voor een zelfstandig uit broncode gebouwde Docker-Gateway is ClawRouter al opgenomen in de hoofdruntime. Selecteer alleen de kanaal-Plugin die afzonderlijk moet worden verpakt, zoals `OPENCLAW_EXTENSIONS=clickclack`, `slack` of `msteams`; zie [uit broncode gebouwde images met geselecteerde Plugins](/nl/install/docker#source-built-images-with-selected-plugins). Archief-/appliance-implementaties moeten dezelfde opgenomen broncode via hun eigen artifactpipeline verpakken in plaats van de OCI-image te gebruiken.
+Voor een zelfstandig vanuit broncode gebouwde Docker-Gateway is ClawRouter al
+opgenomen in de root-runtime. Selecteer alleen de kanaal-Plugin waarvoor aparte
+verpakking nodig is, zoals `OPENCLAW_EXTENSIONS=clickclack`, `slack` of
+`msteams`; zie
+[vanuit broncode gebouwde images met geselecteerde Plugins](/nl/install/docker#source-built-images-with-selected-plugins).
+Archief-/appliance-implementaties moeten dezelfde opgenomen broncode via hun
+eigen artefactpijplijn verpakken in plaats van de OCI-image te gebruiken.
 
 ## Gereedheid en live bewijs
 
 Deze controles bewijzen verschillende grenzen; vervang de ene niet door de andere:
 
 ```bash
-# Alleen de processtatus van ClawRouter; er worden geen aanmeldgegevens of bovenliggend model gebruikt.
+# Alleen de status van het ClawRouter-proces; er wordt geen referentie of upstreammodel gebruikt.
 curl -fsS https://clawrouter.internal.example/v1/health
 
 # Alleen de opstartgereedheid van de OpenClaw-Gateway; er wordt geen modelaanroep uitgevoerd.
 curl -fsS http://127.0.0.1:18789/readyz
 
-# Catalogusdetectie gebonden aan aanmeldgegevens.
+# Referentiespecifieke catalogusdetectie.
 openclaw models list --all --provider clawrouter --json
 
 # Minimale echte inferentieprobe via de geconfigureerde ClawRouter-provider.
 openclaw models status --probe --probe-provider clawrouter --probe-max-tokens 8 --json
 
-# Werklastcanary met een exacte toegestane modelverwijzing.
+# Workload-canary met een exacte toegekende modelreferentie.
 openclaw agent --agent main \
   --model clawrouter/openai/gpt-5.5 \
-  --message "Reply exactly: CLAWROUTER_CANARY_OK" \
+  --message "Antwoord exact: CLAWROUTER_CANARY_OK" \
   --json
 ```
 
-Gebruik een model dat door de gebonden catalogus wordt geretourneerd in plaats van het voorbeeldmodel klakkeloos te kopiëren. Een geslaagd antwoord van `/readyz` betekent dat de Gateway verzoeken kan verwerken; het betekent niet dat ClawRouter, de bijbehorende aanmeldgegevens of een bovenliggende provider gereed is. De modelprobe en agentcanary vormen het inferentiebewijs.
+Gebruik een model dat door de specifieke catalogus wordt geretourneerd in plaats
+van het voorbeeldmodel klakkeloos te kopiëren. Een geslaagd
+`/readyz`-antwoord betekent dat de Gateway aanvragen kan verwerken;
+het bewijst niet dat ClawRouter, de bijbehorende referentie of een
+upstreamprovider gereed is. De modelprobe en agent-canary vormen het
+inferentiebewijs.
 
-Voer voor live diagnose de canary uit en controleer de standaardlogboeken van de Gateway. De bestaande modeltransportdiagnostiek met alleen metagegevens genereert regels met deze vorm:
+Voer voor live diagnostiek de canary uit en inspecteer de standaardlogs van de
+Gateway. De bestaande diagnostiek voor modeltransport met alleen metadata
+produceert regels met de volgende vorm:
 
 ```text
 [model-fetch] start provider=clawrouter api=openai-responses model=openai/gpt-5.5 method=POST url=https://clawrouter.internal.example/v1/responses
 [model-fetch] response provider=clawrouter api=openai-responses model=openai/gpt-5.5 status=200
 ```
 
-De Plugin verzendt begrensde headers `X-ClawRouter-Client`, `X-ClawRouter-Agent-Id` en `X-ClawRouter-Session-Id` wanneer die identificatoren beschikbaar zijn. De Plugin koppelt ook de diagnostische `callId` (`<run-id>:model:<n>`) van de modelaanroep aan `X-Request-ID`, zodat een modelaanroepgebeurtenis van OpenClaw kan worden gekoppeld aan het auditspoor met alleen metagegevens van ClawRouter. Waarden binnen het budget van 128 tekens voor de aanvraag-id zijn identiek. Langere waarden behouden het achtervoegsel `:model:<n>` en een deterministische hash, zodat afzonderlijke aanroepen begrensd en koppelbaar blijven. Statische implementatiemetagegevens, zoals `X-ClawRouter-Project-Id`, kunnen worden ingesteld in de `headers`-map van de provider. Headers voor toeschrijving aan agent en sessie behouden hun afzonderlijke limiet van 256 tekens. Automatische aanvraag-id's met tekens buiten de ASCII-identificatorenset van ClawRouter gebruiken dezelfde deterministische begrensde vorm.
-Expliciet geconfigureerde headers, met inbegrip van elke schrijfwijzevariant van `X-Request-ID`, hebben voorrang op automatische waarden. De transportdiagnostiek registreert routerings- en antwoordmetagegevens; deze registreert geen aanmeldgegevens, aanvraag-id's, prompts of voltooiingen. De eigen auditgebeurtenis van ClawRouter bevat de geselecteerde bovenliggende provider en de status van inhoudsbewaring.
+De Plugin verzendt begrensde headers `X-ClawRouter-Client`,
+`X-ClawRouter-Agent-Id` en `X-ClawRouter-Session-Id` wanneer die identificatoren
+beschikbaar zijn. De Plugin koppelt ook de diagnostische
+`callId` (`<run-id>:model:<n>`) van de modelaanroep aan
+`X-Request-ID`, zodat een modelaanroepgebeurtenis van OpenClaw kan worden
+gekoppeld aan het auditspoor van ClawRouter dat alleen metadata bevat. Waarden
+binnen het budget van 128 tekens voor de aanvraag-ID zijn identiek. Langere
+waarden behouden het achtervoegsel `:model:<n>` en een deterministische
+hash, zodat afzonderlijke aanroepen begrensd en koppelbaar blijven. Statische
+implementatiemetadata zoals `X-ClawRouter-Project-Id` kunnen worden ingesteld in de
+provider-map `headers`. Headers voor agent- en sessietoeschrijving
+behouden hun afzonderlijke limiet van 256 tekens. Automatische aanvraag-ID's
+met tekens buiten de ASCII-identificatorenset van ClawRouter gebruiken dezelfde
+deterministische begrensde vorm.
+Expliciet geconfigureerde headers, inclusief elke variant in hoofdlettergebruik
+van `X-Request-ID`, hebben voorrang op automatische waarden. De
+transportdiagnostiek registreert routerings- en antwoordmetadata; deze logt
+geen referenties, aanvraag-ID's, prompts of voltooiingen. De eigen
+auditgebeurtenis van ClawRouter bevat de geselecteerde upstreamprovider en de
+status voor het bewaren van inhoud.
 
 ## Modeldetectie
 
-`GET /v1/catalog` retourneert `{ providers: [...] }`, waarbij elke providervermelding de eigen `models[]` vermeldt (met bovenliggende id, mogelijkheden en prijzen) en de ondersteunde aanvraagroutes. OpenClaw levert geen tweede, vaste lijst met ClawRouter-modellen. Een catalogusmodel wordt als OpenClaw-model aangeboden wanneer:
+`GET /v1/catalog` retourneert `{ providers: [...] }`, waarbij elke
+providervermelding de eigen `models[]` vermeldt (met upstream-ID,
+mogelijkheden en prijzen) en de ondersteunde aanvraagroutes. OpenClaw levert
+geen tweede, vaste lijst met ClawRouter-modellen. Een catalogusmodel wordt als
+OpenClaw-model aangeboden wanneer:
 
-- het beleid van de aanmeldgegevens de bijbehorende provider toestaat;
-- het catalogusmodel een ondersteunde LLM-mogelijkheid aanbiedt (`llm.responses`, `llm.chat`, `llm.messages` of `llm.stream` met een overeenkomende streamingroute); en
-- de provider een overeenkomende route voor een van de onderstaande transporten aanbiedt.
+- het beleid van de referentie de provider ervan toestaat;
+- het catalogusmodel een ondersteunde LLM-mogelijkheid aankondigt
+  (`llm.responses`, `llm.chat`, `llm.messages` of
+  `llm.stream` met een overeenkomende streamingroute); en
+- de provider een overeenkomende route beschikbaar stelt voor
+  een van de onderstaande transporten.
 
-Voor het toevoegen van een model aan een ondersteunde ClawRouter-provider is geen OpenClaw-release nodig: bij de volgende catalogusvernieuwing (60 seconden gecachet per bereik van aanmeldgegevens) wordt het gedetecteerd. Een model waarvoor een nieuw overdrachtsprotocol nodig is, vereist eerst ondersteuning door de Plugin.
+Voor het toevoegen van een model aan een ondersteunde ClawRouter-provider is
+geen OpenClaw-release nodig: de volgende catalogusvernieuwing (60 seconden per
+referentiebereik in de cache) detecteert het. Voor een model waarvoor een nieuw
+wire-protocol nodig is, moet eerst ondersteuning aan de Plugin worden toegevoegd.
 
 ## Protocol- en provider-Plugins
 
-ClawRouter beheert de bovenliggende aanmeldgegevens; de catalogus vertelt OpenClaw welk transport moet worden gebruikt, zodat u nooit de authenticatie-Plugin van elk bovenliggend bedrijf hoeft te installeren.
+ClawRouter beheert upstreamreferenties; de catalogus vertelt OpenClaw welk
+transport moet worden gebruikt, zodat je nooit de authenticatie-Plugin van elk
+upstreambedrijf hoeft te installeren.
 
 | Catalogusmogelijkheid/-route                            | OpenClaw-transport     |
-| ------------------------------------------------------- | ---------------------- |
-| `llm.responses` (OpenAI-compatibele provider)           | `openai-responses`     |
-| `llm.chat` (OpenAI-compatibele provider)                | `openai-completions`   |
-| `llm.messages` + route `anthropic.messages`             | `anthropic-messages`   |
-| `llm.stream` + streamingroute `google.generate_content` | `google-generative-ai` |
+| ------------------------------------------------------ | ---------------------- |
+| `llm.responses` (OpenAI-compatibele provider)       | `openai-responses`     |
+| `llm.chat` (OpenAI-compatibele provider)       | `openai-completions`     |
+| `llm.messages` + route `anthropic.messages`          | `anthropic-messages`     |
+| `llm.stream` + streamingroute `google.generate_content` | `google-generative-ai`     |
 
-De Plugin past ook het bijbehorende beleid voor herhaling en toolschema's toe op die families (compatibiliteit van toolschema's voor OpenAI/DeepSeek/Gemini; systeemeigen herhalingsbeleid van Anthropic en Google Gemini). Een catalogusprovider die alleen een niet-ondersteunde aanvraagindeling aanbiedt, wordt bewust niet als OpenClaw-tekstmodel aangeboden. Normaliseer zulke providers in ClawRouter naar een van de ondersteunde contracten in plaats van een incompatibele payload te verzenden.
+De Plugin past ook het bijbehorende beleid voor opnieuw afspelen en
+toolschema's toe op die families (compatibiliteit van toolschema's voor
+OpenAI/DeepSeek/Gemini/Perplexity; native beleid voor opnieuw afspelen van
+Anthropic en Google Gemini). Perplexity-modellen krijgen een strikte
+schemaherschrijving: `patternProperties` en `additionalProperties` worden
+verwijderd en elk objectschema declareert `properties`, omdat Perplexity
+toolschema's zonder deze declaraties afwijst. Een catalogusprovider die alleen
+een niet-ondersteunde aanvraagindeling beschikbaar stelt, wordt bewust niet
+aangeboden als OpenClaw-tekstmodel. Normaliseer die providers in ClawRouter
+naar een van de ondersteunde contracten in plaats van een incompatibele
+payload te verzenden.
 
-## Quota en gebruik
+## Quota's en gebruik
 
-Het antwoord van `/v1/usage` van ClawRouter levert gegevens aan de gebruikelijke overzichten voor providergebruik van OpenClaw: totalen voor aanvragen, tokens en uitgaven, plus een maandbudgetvenster wanneer de sleutel een limiet heeft. Sleutels zonder meting tonen nog steeds het totale gebruik, maar zonder percentagevenster.
+Het antwoord `/v1/usage` van ClawRouter voedt de normale
+providergebruiksweergaven van OpenClaw: totalen voor aanvragen, tokens en
+uitgaven, plus een maandbudgetvenster wanneer de sleutel een limiet heeft.
+Sleutels zonder meting tonen nog steeds het totale gebruik, maar zonder
+percentagevenster.
 
-Voor het opzoeken van quota wordt dezelfde gebonden sleutel gebruikt als voor modeldetectie. Een mislukte quotaopvraag blokkeert de modeluitvoering niet.
+Bij het opzoeken van quota's wordt dezelfde specifieke sleutel gebruikt als bij
+modeldetectie. Een mislukte quotaopzoeking blokkeert de modeluitvoering niet.
 
 Controleer de live momentopname met:
 
@@ -186,26 +261,29 @@ openclaw status --usage
 openclaw models status
 ```
 
-Dezelfde providermomentopname is beschikbaar voor `/status` in de chat en de gebruiksinterface van OpenClaw. Het budget geldt voor het volledige beleid, zodat aanvragen van een andere client die hetzelfde ClawRouter-beleid gebruikt het resterende percentage kunnen wijzigen.
+Dezelfde providermomentopname is beschikbaar voor `/status` in de chat
+en in de gebruiksinterface van OpenClaw. Het budget geldt voor het hele beleid,
+dus aanvragen van een andere client die hetzelfde ClawRouter-beleid gebruikt,
+kunnen het resterende percentage veranderen.
 
 ## Probleemoplossing
 
-| Symptoom                                   | Controle                                                                                                                                                                                      |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Geen ClawRouter-modellen                   | Controleer of de Plugin is ingeschakeld en door `plugins.allow` wordt toegestaan. Controleer vervolgens of de aanmeldgegevens actief zijn en ten minste één gereedstaande provider toestaan. |
-| Een geconfigureerd ClawRouter-model ontbreekt | Controleer de mogelijkheden en routeondersteuning in `/v1/catalog`. Niet-ondersteunde transportcontracten worden bewust uitgefilterd.                                                       |
-| `Unknown model: clawrouter/...`            | Voeg de exacte catalogusverwijzing toe aan `agents.defaults.models` wanneer die configuratiemap als toelatingslijst wordt gebruikt.                                                           |
-| `401` of `403` van catalogus of gebruik    | Geef de ClawRouter-aanmeldgegevens opnieuw uit of pas het bereik ervan aan; OpenClaw valt niet terug op sleutels van bovenliggende providers.                                                 |
-| Modelaanroep mislukt na detectie            | Controleer in ClawRouter de providerverbinding en de status van de bovenliggende service en probeer het opnieuw nadat de gereedheidsstatus is hersteld.                                      |
-| Gebruik bevat totalen maar geen percentage | Het beleid heeft geen meting; voeg in ClawRouter een maandbudget toe om een percentagevenster beschikbaar te maken.                                                                          |
+| Symptoom                                 | Controle                                                                                                                                       |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Geen ClawRouter-modellen                 | Controleer of de Plugin is ingeschakeld en toegestaan door `plugins.allow` en controleer vervolgens of de referentie actief is en toegang geeft tot ten minste één gereedstaande provider. |
+| Een geconfigureerd ClawRouter-model ontbreekt | Inspecteer de mogelijkheid `/v1/catalog` en de routeondersteuning. Niet-ondersteunde transportcontracten worden bewust uitgefilterd. |
+| Modeloverschrijving geweigerd door beleid | Voeg de exacte catalogusreferentie of `clawrouter/*` toe aan `agents.defaults.modelPolicy.allow`. |
+| `401` of `403` uit catalogus of gebruik | Geef de ClawRouter-referentie opnieuw uit of pas het bereik aan; OpenClaw valt niet terug op upstreamprovidersleutels. |
+| Modelaanroep mislukt na detectie         | Controleer in ClawRouter de providerverbinding en de status van de upstreamprovider en probeer het opnieuw nadat de gereedheidsstatus is hersteld. |
+| Gebruik bevat totalen maar geen percentage | Het beleid heeft geen meting; voeg in ClawRouter een maandbudget toe om een percentagevenster beschikbaar te maken. |
 
 ## Beveiligingsgedrag
 
-- Catalogusdetectie is beperkt tot de geconfigureerde proxysleutel en wordt per referentiebereik gecachet (agentmap, werkruimtemap, authenticatieprofiel-id en basis-URL).
-- De proxysleutel wordt alleen bij het verzenden van de aanvraag toegevoegd; deze wordt niet opgeslagen in modelmetadata.
-- Waarden voor automatische toeschrijving en aanvraagcorrelatie worden vóór verzending ontdaan van witruimte aan de randen en geweigerd als ze besturingstekens bevatten. Toeschrijvingswaarden zijn beperkt tot 256 tekens; aanvraag-id's tot 128.
-- Diagnostiek voor modeltransport bevat alleen metadata en bevat nooit de proxysleutel of modelinhoud.
-- Systeemeigen Anthropic- en Gemini-model-id's worden alleen bij verzending herschreven naar hun upstream-id's.
+- Catalogusdetectie is beperkt tot de geconfigureerde proxysleutel en wordt per referentiebereik in de cache opgeslagen (agentmap, werkruimtemap, authenticatieprofiel-id en basis-URL).
+- De proxysleutel wordt alleen bij het verzenden van de aanvraag toegevoegd; deze wordt niet opgeslagen in de modelmetadata.
+- Waarden voor automatische toeschrijving en aanvraagcorrelatie worden vóór verzending ontdaan van witruimte en bij controletekens geweigerd. Toeschrijvingswaarden zijn beperkt tot 256 tekens; aanvraag-id's tot 128.
+- Diagnostische gegevens over het modeltransport bevatten alleen metadata en nooit de proxysleutel of modelinhoud.
+- Model-id's van native Anthropic- en Gemini-modellen worden alleen bij verzending herschreven naar hun upstream-id's.
 - Niet-ondersteunde catalogusrijen of catalogusrijen waarvoor geen toestemming is verleend, worden standaard geweigerd en kunnen niet worden geselecteerd.
 
 ## Gerelateerd
@@ -215,6 +293,6 @@ Dezelfde providermomentopname is beschikbaar voor `/status` in de chat en de geb
     Providerconfiguratie en modelselectie.
   </Card>
   <Card title="Gebruiksregistratie" href="/nl/concepts/usage-tracking" icon="chart-line">
-    OpenClaw-oppervlakken voor gebruik en status.
+    Gebruiks- en statusoverzichten van OpenClaw.
   </Card>
 </CardGroup>

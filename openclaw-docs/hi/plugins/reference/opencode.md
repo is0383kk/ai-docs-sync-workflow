@@ -1,21 +1,22 @@
 ---
 read_when:
-    - आप opencode Plugin इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
+    - आप opencode Plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
 summary: OpenClaw में OpenCode मॉडल प्रदाता समर्थन जोड़ता है।
 title: OpenCode Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:47:45Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:15:40Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 8c1c1264da52e8f362e83b2733390ccc3b2fc1dd62f14f8e5211bbb8fa47e95f
+    source_hash: aecf396cfc645e4a036b8130ed7f33db9081dffda120c6d06ebe863dd3be3730
     source_path: plugins/reference/opencode.md
     workflow: 16
 ---
 
 # OpenCode Plugin
 
-OpenClaw में OpenCode मॉडल प्रदाता समर्थन जोड़ता है।
+OpenClaw में OpenCode मॉडल प्रदाता का समर्थन जोड़ता है।
 
 ## वितरण
 
@@ -24,7 +25,23 @@ OpenClaw में OpenCode मॉडल प्रदाता समर्थ�
 
 ## सतह
 
-प्रदाता: opencode; अनुबंध: mediaUnderstandingProviders
+प्रदाता: `opencode`; अनुबंध: `mediaUnderstandingProviders`
+
+<!-- openclaw-plugin-reference:manual-start -->
+
+## नेटिव सत्र
+
+OpenClaw, Gateway और युग्मित Node पर `opencode` CLI का स्वतः पता लगाता है। इसके बाद संग्रहीत
+सत्र, **OpenCode** सत्र-साइडबार समूह में दिखाई देते हैं, जहाँ आधिकारिक `opencode --pure db ... --format json`
+और `opencode --pure export` कमांड के माध्यम से केवल-पढ़ने योग्य
+ट्रांसक्रिप्ट ब्राउज़िंग उपलब्ध होती है। प्रतिबंधित परिवेश और `--pure`
+मोड, कैटलॉग ब्राउज़िंग को प्रोजेक्ट Plugin लोड करने या असंबंधित
+Gateway क्रेडेंशियल इनहेरिट करने से रोकते हैं।
+
+डिस्कवरी अक्षम करने के लिए **Config > Plugins > OpenCode** के अंतर्गत
+**OpenCode Session Catalog** को बंद करें। यह डिफ़ॉल्ट रूप से सक्षम है।
+
+<!-- openclaw-plugin-reference:manual-end -->
 
 ## संबंधित दस्तावेज़
 

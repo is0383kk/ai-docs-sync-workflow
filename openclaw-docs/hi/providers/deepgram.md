@@ -3,47 +3,44 @@ read_when:
     - आप ऑडियो अटैचमेंट के लिए Deepgram स्पीच-टू-टेक्स्ट चाहते हैं
     - आप Voice Call के लिए Deepgram स्ट्रीमिंग ट्रांसक्रिप्शन चाहते हैं
     - आपको Deepgram कॉन्फ़िगरेशन का एक त्वरित उदाहरण चाहिए
-summary: आने वाले वॉइस नोट्स के लिए Deepgram ट्रांसक्रिप्शन
+summary: इनबाउंड वॉइस नोट्स के लिए Deepgram ट्रांसक्रिप्शन
 title: Deepgram
 x-i18n:
-    generated_at: "2026-06-28T23:57:51Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:53:09Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 9d591aa24a5477fd9fe69b7a0dc44b204d28ea0c2f89e6dfef66f9ceb76da34d
+    source_hash: c00473762c3bede1f6de9230043827d90daefd68d05e67ed4b3e3026b9d6ba4f
     source_path: providers/deepgram.md
     workflow: 16
 ---
 
-Deepgram एक speech-to-text API है। OpenClaw में इसका उपयोग `tools.media.audio` के माध्यम से आने वाले
-ऑडियो/voice-note ट्रांसक्रिप्शन और `plugins.entries.voice-call.config.streaming` के माध्यम से Voice Call
-स्ट्रीमिंग STT के लिए किया जाता है।
+Deepgram एक स्पीच-टू-टेक्स्ट API है। OpenClaw इसका उपयोग `tools.media.audio` के माध्यम से आने वाले ऑडियो/वॉइस-नोट
+ट्रांसक्रिप्शन के लिए और `plugins.entries.voice-call.config.streaming` के माध्यम से Voice Call स्ट्रीमिंग STT
+के लिए करता है।
 
-बैच ट्रांसक्रिप्शन के लिए, OpenClaw पूरी ऑडियो फ़ाइल को Deepgram पर अपलोड करता है
-और ट्रांसक्रिप्ट को उत्तर पाइपलाइन (`{{Transcript}}` +
-`[Audio]` ब्लॉक) में इंजेक्ट करता है। Voice Call स्ट्रीमिंग के लिए, OpenClaw लाइव G.711
-u-law फ़्रेम को Deepgram के WebSocket `listen` endpoint पर फ़ॉरवर्ड करता है और Deepgram द्वारा लौटाए जाने पर आंशिक या
-अंतिम ट्रांसक्रिप्ट उत्सर्जित करता है।
+बैच ट्रांसक्रिप्शन पूरी ऑडियो फ़ाइल को Deepgram पर अपलोड करता है और
+ट्रांसक्रिप्ट को उत्तर पाइपलाइन (`{{Transcript}}` + `[Audio]` ब्लॉक) में सम्मिलित करता है।
+Voice Call स्ट्रीमिंग, Deepgram के WebSocket `listen` एंडपॉइंट पर लाइव G.711 u-law फ़्रेम अग्रेषित करती है और Deepgram द्वारा
+उन्हें लौटाए जाने पर आंशिक/अंतिम ट्रांसक्रिप्ट उत्सर्जित करती है।
 
-| विवरण        | मान                                                        |
+| विवरण        | मान                                                      |
 | ------------- | ---------------------------------------------------------- |
 | वेबसाइट       | [deepgram.com](https://deepgram.com)                       |
 | दस्तावेज़          | [developers.deepgram.com](https://developers.deepgram.com) |
 | प्रमाणीकरण          | `DEEPGRAM_API_KEY`                                         |
 | डिफ़ॉल्ट मॉडल | `nova-3`                                                   |
 
-## शुरू करना
+## आरंभ करना
 
 <Steps>
-  <Step title="Set your API key">
-    अपनी Deepgram API key को environment में जोड़ें:
-
-    ```
+  <Step title="अपनी API कुंजी सेट करें">
+    ```bash
     DEEPGRAM_API_KEY=dg_...
     ```
-
   </Step>
-  <Step title="Enable the audio provider">
+  <Step title="ऑडियो प्रदाता सक्षम करें">
     ```json5
     {
       tools: {
@@ -57,24 +54,25 @@ u-law फ़्रेम को Deepgram के WebSocket `listen` endpoint प�
     }
     ```
   </Step>
-  <Step title="Send a voice note">
-    किसी भी जुड़े हुए channel के माध्यम से एक ऑडियो संदेश भेजें। OpenClaw इसे
-    Deepgram के माध्यम से ट्रांसक्राइब करता है और ट्रांसक्रिप्ट को उत्तर पाइपलाइन में इंजेक्ट करता है।
+  <Step title="वॉइस नोट भेजें">
+    किसी भी कनेक्ट किए गए चैनल के माध्यम से एक ऑडियो संदेश भेजें। OpenClaw, Deepgram
+    के माध्यम से उसका ट्रांसक्रिप्शन करता है और ट्रांसक्रिप्ट को उत्तर पाइपलाइन में सम्मिलित करता है।
   </Step>
 </Steps>
 
 ## कॉन्फ़िगरेशन विकल्प
 
-| विकल्प            | पथ                                                         | विवरण                           |
-| ----------------- | ------------------------------------------------------------ | ------------------------------------- |
-| `model`           | `tools.media.audio.models[].model`                           | Deepgram model id (डिफ़ॉल्ट: `nova-3`) |
-| `language`        | `tools.media.audio.models[].language`                        | भाषा संकेत (वैकल्पिक)              |
-| `detect_language` | `tools.media.audio.providerOptions.deepgram.detect_language` | भाषा पहचान सक्षम करें (वैकल्पिक)  |
-| `punctuate`       | `tools.media.audio.providerOptions.deepgram.punctuate`       | विराम चिह्न सक्षम करें (वैकल्पिक)         |
-| `smart_format`    | `tools.media.audio.providerOptions.deepgram.smart_format`    | smart formatting सक्षम करें (वैकल्पिक)    |
+| विकल्प     | पथ                            | विवरण                           |
+| ---------- | ------------------------------- | ------------------------------------- |
+| `model`    | `tools.media.models[].model`    | Deepgram मॉडल आईडी (डिफ़ॉल्ट: `nova-3`) |
+| `language` | `tools.media.models[].language` | भाषा संकेत (वैकल्पिक)              |
+
+`providerOptions.deepgram` अतिरिक्त क्वेरी पैरामीटर को सीधे
+Deepgram `/listen` अनुरोध में मर्ज करता है, इसलिए Deepgram द्वारा समर्थित कोई भी पैरामीटर नाम काम करता है
+(उदाहरण के लिए `detect_language`, `punctuate`, `smart_format`):
 
 <Tabs>
-  <Tab title="With language hint">
+  <Tab title="भाषा संकेत के साथ">
     ```json5
     {
       tools: {
@@ -88,7 +86,7 @@ u-law फ़्रेम को Deepgram के WebSocket `listen` endpoint प�
     }
     ```
   </Tab>
-  <Tab title="With Deepgram options">
+  <Tab title="Deepgram विकल्पों के साथ">
     ```json5
     {
       tools: {
@@ -113,17 +111,19 @@ u-law फ़्रेम को Deepgram के WebSocket `listen` endpoint प�
 
 ## Voice Call स्ट्रीमिंग STT
 
-बंडल किया गया `deepgram` Plugin, Voice Call Plugin के लिए एक realtime transcription provider भी पंजीकृत करता है।
+बंडल किया गया `deepgram` Plugin, Voice Call Plugin के लिए
+एक रीयल-टाइम ट्रांसक्रिप्शन प्रदाता भी पंजीकृत करता है।
 
-| सेटिंग         | कॉन्फ़िग पथ                                                             | डिफ़ॉल्ट                          |
-| --------------- | ----------------------------------------------------------------------- | -------------------------------- |
-| API key         | `plugins.entries.voice-call.config.streaming.providers.deepgram.apiKey` | `DEEPGRAM_API_KEY` पर fallback करता है |
-| मॉडल           | `...deepgram.model`                                                     | `nova-3`                         |
-| भाषा        | `...deepgram.language`                                                  | (सेट नहीं)                          |
-| एन्कोडिंग        | `...deepgram.encoding`                                                  | `mulaw`                          |
-| सैंपल दर     | `...deepgram.sampleRate`                                                | `8000`                           |
-| Endpointing     | `...deepgram.endpointingMs`                                             | `800`                            |
-| Interim results | `...deepgram.interimResults`                                            | `true`                           |
+| सेटिंग         | कॉन्फ़िगरेशन पथ                                                             | डिफ़ॉल्ट                                      |
+| --------------- | ----------------------------------------------------------------------- | -------------------------------------------- |
+| API कुंजी         | `plugins.entries.voice-call.config.streaming.providers.deepgram.apiKey` | `DEEPGRAM_API_KEY` का फ़ॉलबैक उपयोग करता है             |
+| आधार URL        | `...deepgram.baseUrl`                                                   | `DEEPGRAM_BASE_URL` या Deepgram का सार्वजनिक API |
+| मॉडल           | `...deepgram.model`                                                     | `nova-3`                                     |
+| भाषा        | `...deepgram.language`                                                  | (सेट नहीं)                                      |
+| एन्कोडिंग        | `...deepgram.encoding`                                                  | `mulaw`                                      |
+| सैंपल दर     | `...deepgram.sampleRate`                                                | `8000`                                       |
+| एंडपॉइंटिंग     | `...deepgram.endpointingMs`                                             | `800`                                        |
+| अंतरिम परिणाम | `...deepgram.interimResults`                                            | `true`                                       |
 
 ```json5
 {
@@ -150,42 +150,47 @@ u-law फ़्रेम को Deepgram के WebSocket `listen` endpoint प�
 }
 ```
 
+[Deepgram कस्टम एंडपॉइंट](https://developers.deepgram.com/reference/custom-endpoints) के लिए,
+`baseUrl` को एंडपॉइंट रूट पर सेट करें, जिसमें कोई भी आधार पथ शामिल हो लेकिन `/listen` नहीं।
+रीयल-टाइम एंडपॉइंट `http://`, `https://`, `ws://`, और `wss://` स्वीकार करते हैं। HTTP
+को WS पर मैप किया जाता है, HTTPS को WSS पर मैप किया जाता है और स्पष्ट WebSocket स्कीम अपरिवर्तित रहती हैं।
+विकृत URL और अन्य स्कीम के कारण सत्र सेटअप के दौरान विफलता होती है।
+
 <Note>
-Voice Call को telephony audio 8 kHz G.711 u-law के रूप में प्राप्त होता है। Deepgram
-streaming provider डिफ़ॉल्ट रूप से `encoding: "mulaw"` और `sampleRate: 8000` का उपयोग करता है, इसलिए
-Twilio media frames सीधे फ़ॉरवर्ड किए जा सकते हैं।
+Voice Call को टेलीफ़ोनी ऑडियो 8 kHz G.711 u-law के रूप में प्राप्त होता है। Deepgram
+स्ट्रीमिंग प्रदाता का डिफ़ॉल्ट `encoding: "mulaw"` और `sampleRate: 8000` है, इसलिए
+Twilio मीडिया फ़्रेम सीधे अग्रेषित किए जा सकते हैं।
 </Note>
 
-## नोट्स
+## टिप्पणियाँ
 
 <AccordionGroup>
-  <Accordion title="Authentication">
-    प्रमाणीकरण मानक provider auth order का पालन करता है। `DEEPGRAM_API_KEY`
-    सबसे सरल path है।
+  <Accordion title="प्रमाणीकरण">
+    प्रमाणीकरण मानक प्रदाता प्रमाणीकरण क्रम का पालन करता है। `DEEPGRAM_API_KEY`
+    सबसे सरल पथ है।
   </Accordion>
-  <Accordion title="Proxy and custom endpoints">
-    proxy का उपयोग करते समय `tools.media.audio.baseUrl` और
-    `tools.media.audio.headers` के साथ endpoints या headers को override करें।
+  <Accordion title="प्रॉक्सी और कस्टम एंडपॉइंट">
+    प्रॉक्सी का उपयोग करते समय Deepgram `tools.media.models[]` प्रविष्टि पर एंडपॉइंट या हेडर ओवरराइड करें।
   </Accordion>
-  <Accordion title="Output behavior">
-    आउटपुट अन्य providers जैसे ही audio rules का पालन करता है (size caps, timeouts,
-    transcript injection)।
+  <Accordion title="आउटपुट व्यवहार">
+    आउटपुट अन्य प्रदाताओं के समान ऑडियो नियमों (आकार सीमाएँ, टाइमआउट,
+    ट्रांसक्रिप्ट सम्मिलन) का पालन करता है।
   </Accordion>
 </AccordionGroup>
 
 ## संबंधित
 
 <CardGroup cols={2}>
-  <Card title="Media tools" href="/hi/tools/media-overview" icon="photo-film">
-    ऑडियो, इमेज, और वीडियो प्रोसेसिंग पाइपलाइन का अवलोकन।
+  <Card title="मीडिया टूल" href="/hi/tools/media-overview" icon="photo-film">
+    ऑडियो, इमेज और वीडियो प्रोसेसिंग पाइपलाइन का अवलोकन।
   </Card>
-  <Card title="Configuration" href="/hi/gateway/configuration" icon="gear">
-    media tool settings सहित पूरा config reference।
+  <Card title="कॉन्फ़िगरेशन" href="/hi/gateway/configuration" icon="gear">
+    मीडिया टूल सेटिंग सहित पूर्ण कॉन्फ़िगरेशन संदर्भ।
   </Card>
-  <Card title="Troubleshooting" href="/hi/help/troubleshooting" icon="wrench">
-    सामान्य समस्याएँ और debugging steps।
+  <Card title="समस्या निवारण" href="/hi/help/troubleshooting" icon="wrench">
+    सामान्य समस्याएँ और डीबगिंग चरण।
   </Card>
-  <Card title="FAQ" href="/hi/help/faq" icon="circle-question">
-    OpenClaw setup के बारे में अक्सर पूछे जाने वाले प्रश्न।
+  <Card title="अक्सर पूछे जाने वाले प्रश्न" href="/hi/help/faq" icon="circle-question">
+    OpenClaw सेटअप के बारे में अक्सर पूछे जाने वाले प्रश्न।
   </Card>
 </CardGroup>

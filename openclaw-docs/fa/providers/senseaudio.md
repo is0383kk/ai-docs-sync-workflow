@@ -1,30 +1,31 @@
 ---
 read_when:
-    - شما تبدیل گفتار به متن SenseAudio را برای پیوست‌های صوتی می‌خواهید
-    - به متغیر محیطی کلید API سرویس SenseAudio یا مسیر پیکربندی صدا نیاز دارید
-summary: تبدیل دسته‌ای گفتار به متن با SenseAudio برای پیام‌های صوتی ورودی
+    - برای پیوست‌های صوتی، تبدیل گفتار به متن SenseAudio را می‌خواهید
+    - به متغیر محیطی کلید API مربوط به SenseAudio یا مسیر پیکربندی صوتی نیاز دارید
+summary: تبدیل دسته‌ای گفتار به متن با SenseAudio برای یادداشت‌های صوتی ورودی
 title: SenseAudio
 x-i18n:
-    generated_at: "2026-07-12T10:46:55Z"
+    generated_at: "2026-07-27T17:04:44Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2d2b310982a9e0f1afe2f95ae92d1516d490314f40b4b0e4eded25c72dfca586
+    source_hash: c0ca4a31a32eed85c1d9dcd13ebc2eaea94be370d2b1013ae8b4677949bea91d
     source_path: providers/senseaudio.md
     workflow: 16
 ---
 
-SenseAudio پیوست‌های صوتی و یادداشت‌های صوتی ورودی را از طریق خط لولهٔ مشترک `tools.media.audio` در OpenClaw رونویسی می‌کند. OpenClaw فایل صوتی چندبخشی را به نقطهٔ پایانی رونویسی سازگار با OpenAI ارسال می‌کند و متن بازگشتی را به‌صورت `{{Transcript}}` به‌همراه یک بلوک `[Audio]` درج می‌کند.
+SenseAudio پیوست‌های صوتی و یادداشت‌های صوتی ورودی را از طریق پایپ‌لاین مشترک `tools.media.audio` در OpenClaw رونویسی می‌کند. OpenClaw فایل صوتی چندبخشی را به نقطه پایانی رونویسی سازگار با OpenAI ارسال می‌کند و متن بازگشتی را به‌صورت `{{Transcript}}` به‌همراه یک بلوک `[Audio]` درج می‌کند.
 
-| ویژگی            | مقدار                                            |
-| ---------------- | ------------------------------------------------ |
-| شناسهٔ ارائه‌دهنده | `senseaudio`                                     |
-| Plugin           | همراه، `enabledByDefault: true`                  |
-| قرارداد          | `mediaUnderstandingProviders` (صوت)              |
-| متغیر محیطی احراز هویت | `SENSEAUDIO_API_KEY`                        |
-| مدل پیش‌فرض      | `senseaudio-asr-pro-1.5-260319`                  |
-| نشانی پیش‌فرض    | `https://api.senseaudio.cn/v1`                   |
-| وب‌سایت          | [senseaudio.cn](https://senseaudio.cn)           |
+| ویژگی      | مقدار                                            |
+| ------------- | ------------------------------------------------ |
+| شناسه ارائه‌دهنده   | `senseaudio`                                     |
+| Plugin        | داخلی، `enabledByDefault: true`                |
+| قرارداد      | `mediaUnderstandingProviders` (صوت)            |
+| متغیر محیطی احراز هویت  | `SENSEAUDIO_API_KEY`                             |
+| مدل پیش‌فرض | `senseaudio-asr-pro-1.5-260319`                  |
+| URL پیش‌فرض   | `https://api.senseaudio.cn/v1`                   |
+| وب‌سایت       | [senseaudio.cn](https://senseaudio.cn)           |
 | مستندات          | [senseaudio.cn/docs](https://senseaudio.cn/docs) |
 
 ## شروع به کار
@@ -35,7 +36,7 @@ SenseAudio پیوست‌های صوتی و یادداشت‌های صوتی ور
     export SENSEAUDIO_API_KEY="..."
     ```
   </Step>
-  <Step title="ارائه‌دهندهٔ صوت را فعال کنید">
+  <Step title="ارائه‌دهنده صوت را فعال کنید">
     ```json5
     {
       tools: {
@@ -51,23 +52,23 @@ SenseAudio پیوست‌های صوتی و یادداشت‌های صوتی ور
   </Step>
   <Step title="یک یادداشت صوتی ارسال کنید">
     یک پیام صوتی را از طریق هر کانال متصل ارسال کنید. OpenClaw فایل
-    صوتی را در SenseAudio بارگذاری می‌کند و از متن رونویسی‌شده در خط لولهٔ پاسخ استفاده می‌کند.
+    صوتی را در SenseAudio بارگذاری می‌کند و از متن رونویسی‌شده در پایپ‌لاین پاسخ استفاده می‌کند.
   </Step>
 </Steps>
 
 ## گزینه‌ها
 
-| گزینه     | مسیر                                  | توضیح                                      |
-| ---------- | ------------------------------------- | ------------------------------------------ |
-| `model`    | `tools.media.audio.models[].model`    | شناسهٔ مدل ASR در SenseAudio               |
-| `language` | `tools.media.audio.models[].language` | راهنمای اختیاری زبان                       |
-| `prompt`   | `tools.media.audio.prompt`            | دستور اختیاری رونویسی                      |
-| `baseUrl`  | `tools.media.audio.baseUrl` یا مدل    | بازنویسی نشانی پایهٔ سازگار با OpenAI      |
-| `headers`  | `tools.media.audio.request.headers`   | سرآیندهای اضافی درخواست                    |
+| گزینه     | مسیر                            | توضیحات                         |
+| ---------- | ------------------------------- | ----------------------------------- |
+| `model`    | `tools.media.models[].model`    | شناسه مدل ASR در SenseAudio             |
+| `language` | `tools.media.models[].language` | راهنمای اختیاری زبان              |
+| `prompt`   | `tools.media.models[].prompt`   | پرامپت اختیاری رونویسی       |
+| `baseUrl`  | `tools.media.models[].baseUrl`  | بازنویسی نشانی پایه سازگار با OpenAI |
+| `headers`  | `tools.media.models[].headers`  | سرآیندهای اضافی درخواست               |
 
 <Note>
-SenseAudio در OpenClaw فقط از تبدیل گفتار به متن دسته‌ای پشتیبانی می‌کند. رونویسی بلادرنگ تماس صوتی
-همچنان از ارائه‌دهندگانی استفاده می‌کند که از تبدیل گفتار به متن جریانی پشتیبانی می‌کنند.
+SenseAudio در OpenClaw فقط از STT دسته‌ای پشتیبانی می‌کند. رونویسی بلادرنگ تماس صوتی
+همچنان از ارائه‌دهندگانی استفاده می‌کند که از STT جریانی پشتیبانی می‌کنند.
 </Note>
 
 ## مرتبط

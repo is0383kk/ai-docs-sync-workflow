@@ -1,12 +1,13 @@
 ---
 read_when:
     - Creación de clientes de API
-    - Agregar endpoints o esquemas
-summary: Información general y convenciones de la API REST pública (v1).
+    - Añadir endpoints o esquemas
+summary: Descripción general y convenciones de la API REST pública (v1).
 x-i18n:
-    generated_at: "2026-07-04T20:23:32Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T04:32:38Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 31b0051506912d2aa0d724ed7b6542e09ef16dc92998ddbdd3e379f783954436
     source_path: clawhub/api.md
@@ -21,29 +22,29 @@ OpenAPI: `/api/v1/openapi.json`
 
 ## Reutilización del catálogo público
 
-Puedes crear un catálogo, directorio o superficie de búsqueda de terceros sobre las API públicas de lectura de ClawHub. Los metadatos públicos de habilidades y los archivos de habilidades se publican bajo las reglas de licencia de habilidades de ClawHub, mientras que la API en sí tiene límites de tasa y debe consumirse de forma responsable.
+Se puede crear un catálogo, directorio o sistema de búsqueda de terceros sobre las API públicas de lectura de ClawHub. Los metadatos y archivos públicos de Skills se publican conforme a las reglas de licencia de Skills de ClawHub, mientras que la propia API está sujeta a límites de frecuencia y debe utilizarse de forma responsable.
 
 Directrices:
 
-- Usa endpoints públicos de lectura como `GET /api/v1/skills`, `GET /api/v1/search` y `GET /api/v1/skills/{slug}` para listados de catálogo.
-- Almacena las respuestas en caché y respeta `429`, `Retry-After` y los encabezados de límite de tasa en lugar de hacer sondeos agresivos.
-- Enlaza de vuelta a la URL canónica de la habilidad en ClawHub al mostrar listados para que los usuarios puedan inspeccionar el registro de origen del registro.
-- Usa URL de página canónicas con la forma `https://clawhub.ai/<owner>/skills/<slug>`.
-- No des a entender que ClawHub respalda, verifica u opera el sitio de terceros.
-- No repliques contenido oculto, privado o bloqueado por moderación eludiendo los filtros de la API pública o los límites de autenticación.
+- Utilice endpoints públicos de lectura como `GET /api/v1/skills`, `GET /api/v1/search` y `GET /api/v1/skills/{slug}` para los listados del catálogo.
+- Almacene las respuestas en caché y respete `429`, `Retry-After` y los encabezados de límite de frecuencia en lugar de realizar consultas frecuentes de forma agresiva.
+- Incluya un enlace a la URL canónica de la Skill de ClawHub al mostrar los listados para que los usuarios puedan inspeccionar el registro de origen.
+- Utilice URL de páginas canónicas con el formato `https://clawhub.ai/<owner>/skills/<slug>`.
+- No dé a entender que ClawHub respalda, verifica u opera el sitio de terceros.
+- No replique contenido oculto, privado o bloqueado por moderación eludiendo los filtros de la API pública o los límites de autenticación.
 
 ## Autenticación
 
 - Lectura pública: no se requiere token.
-- Escritura + cuenta: `Authorization: Bearer clh_...`.
+- Escritura y cuenta: `Authorization: Bearer clh_...`.
 
-## Límites de tasa
+## Límites de frecuencia
 
-Aplicación consciente de la autenticación:
+Aplicación según la autenticación:
 
 - Solicitudes anónimas: por IP.
-- Solicitudes autenticadas (token Bearer válido): por depósito de usuario.
-- Un token ausente o no válido vuelve a la aplicación por IP.
+- Solicitudes autenticadas (token Bearer válido): por cuota de usuario.
+- Si falta el token o no es válido, se aplica el límite por IP.
 
 - Lectura: 3000/min por IP, 12000/min por clave
 - Escritura: 300/min por IP, 3000/min por clave
@@ -54,12 +55,12 @@ Encabezados: `X-RateLimit-Limit`, `X-RateLimit-Reset`, `RateLimit-Limit`, `RateL
 
 Semántica:
 
-- `X-RateLimit-Reset`: segundos de época Unix (hora absoluta de reinicio)
-- `RateLimit-Reset`: segundos de espera hasta el reinicio
+- `X-RateLimit-Reset`: segundos desde la época Unix (hora absoluta de restablecimiento)
+- `RateLimit-Reset`: segundos de espera hasta el restablecimiento
 - `X-RateLimit-Remaining` / `RateLimit-Remaining`: presupuesto restante exacto cuando
-  está presente; las solicitudes correctas fragmentadas lo omiten en lugar de devolver un valor
+  está presente; las solicitudes distribuidas que se realizan correctamente lo omiten en lugar de devolver un valor
   global aproximado
-- `Retry-After`: segundos de espera en `429`
+- `Retry-After`: segundos que se deben esperar en `429`
 
 Ejemplo de `429`:
 
@@ -74,11 +75,11 @@ ratelimit-reset: 34
 retry-after: 34
 ```
 
-Manejo del cliente:
+Gestión del cliente:
 
-- Prefiere `Retry-After` cuando esté presente.
-- De lo contrario, usa `RateLimit-Reset` o deriva la espera de `X-RateLimit-Reset`.
-- Añade jitter a los reintentos.
+- Dé preferencia a `Retry-After` cuando esté presente.
+- En caso contrario, utilice `RateLimit-Reset` o calcule la espera a partir de `X-RateLimit-Reset`.
+- Añada una variación aleatoria a los reintentos.
 
 ## Errores
 
@@ -96,12 +97,12 @@ Lectura pública:
   - Alias heredado: `nonSuspicious=true`
 - `GET /api/v1/skills?limit=&cursor=&sort=`
   - `sort`: `updated` (predeterminado), `recommended` (`default`), `createdAt` (`newest`), `downloads`, `stars` (`rating`), los alias heredados de instalación `installsCurrent`/`installs`/`installsAllTime` se asignan a `downloads`, `trending`
-  - Los valores de `sort` no válidos devuelven `400`
-  - `cursor` se aplica a ordenaciones que no son `trending`
+  - Los valores no válidos de `sort` devuelven `400`
+  - `cursor` se aplica a las ordenaciones distintas de `trending`
   - Filtro opcional: `nonSuspiciousOnly=true`
   - Alias heredado: `nonSuspicious=true`
-  - Con `nonSuspiciousOnly=true`, las páginas basadas en cursor pueden contener menos elementos que `limit`; usa `nextCursor` para continuar.
-  - `recommended` usa señales de interacción y actualidad.
+  - Con `nonSuspiciousOnly=true`, las páginas basadas en cursor pueden contener menos de `limit` elementos; utilice `nextCursor` para continuar.
+  - `recommended` utiliza señales de interacción y actualidad.
 - `GET /api/v1/skills/{slug}`
 - `GET /api/v1/skills/{slug}/moderation`
 - `GET /api/v1/skills/{slug}/versions?limit=&cursor=`
@@ -110,16 +111,16 @@ Lectura pública:
 - `GET /api/v1/skills/{slug}/file?path=&version=&tag=`
 - `GET /api/v1/resolve?slug=&hash=`
 - `GET /api/v1/download?slug=&version=&tag=`
-  - Las habilidades alojadas devuelven bytes ZIP deterministas.
-  - Las habilidades actuales respaldadas por GitHub con un escaneo `clean` o `suspicious` devuelven un
-    descriptor de transferencia JSON `public-github` en lugar de bytes de ClawHub.
+  - Las Skills alojadas devuelven bytes ZIP deterministas.
+  - Las Skills actuales respaldadas por GitHub con un análisis `clean` o `suspicious` devuelven un
+    descriptor JSON de transferencia `public-github` en lugar de bytes de ClawHub.
 - `GET /api/v1/skills/export?startDate=&endDate=&limit=&cursor=`
-  - Las habilidades alojadas se exportan como archivos almacenados.
-  - Las habilidades actuales respaldadas por GitHub con un escaneo `clean` o `suspicious` se exportan
+  - Las Skills alojadas se exportan como archivos almacenados.
+  - Las Skills actuales respaldadas por GitHub con un análisis `clean` o `suspicious` se exportan
     como descriptores de transferencia `public-github`.
 - `GET /api/v1/packages?limit=&cursor=&sort=`
   - `sort`: `updated` (predeterminado), `recommended`, `downloads`, alias heredado `installs`
-  - Los valores de `sort` no válidos devuelven `400`
+  - Los valores no válidos de `sort` devuelven `400`
 - `GET /api/v1/plugins?limit=&cursor=&sort=`
   - `sort`: `recommended` (predeterminado), `downloads`, `updated`, alias heredado `installs`
 - `GET /api/v1/plugins/search?q=...`
@@ -129,9 +130,9 @@ Lectura pública:
 - `GET /api/npm/{package}`
 - `GET /api/npm/{package}/-/{tarball}.tgz`
 
-Autenticación requerida:
+Se requiere autenticación:
 
-- `POST /api/v1/skills` (publicación, multipart preferido)
+- `POST /api/v1/skills` (publicación; se prefiere multipart)
 - `DELETE /api/v1/skills/{slug}`
 - `DELETE /api/v1/packages/{name}`
 - `POST /api/v1/skills/{slug}/undelete`
@@ -149,10 +150,10 @@ Autenticación requerida:
 - `GET /api/v1/transfers/outgoing`
 - `GET /api/v1/whoami`
 
-Solo administradores:
+Solo para administradores:
 
-- `POST /api/v1/users/reserve` reserva slugs raíz y marcadores de posición privados de paquetes sin lanzamiento para un identificador de propietario.
+- `POST /api/v1/users/reserve` reserva slugs raíz y marcadores de posición privados de paquetes sin versión para el identificador de un propietario.
 
 ## Heredado
 
-Los `/api/*` y `/api/cli/*` heredados siguen disponibles. Consulta `DEPRECATIONS.md`.
+Los antiguos `/api/*` y `/api/cli/*` siguen disponibles. Consulte `DEPRECATIONS.md`.

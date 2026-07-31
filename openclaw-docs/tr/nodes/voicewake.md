@@ -1,59 +1,47 @@
 ---
 read_when:
-    - Sesli uyandırma sözcüklerinin davranışını veya varsayılanlarını değiştirme
-    - Yeni node platformları ekleme; bunlar uyandırma sözcüğü eşitlemesi gerektirir
-summary: Küresel sesli uyandırma sözcükleri (Gateway tarafından yönetilir) ve düğümler arasında nasıl eşitlendikleri
+    - Sesle uyandırma sözcüklerinin davranışını veya varsayılanlarını değiştirme
+    - Uyandırma sözcüğü eşitlemesi gerektiren yeni Node platformları ekleme
+summary: Genel sesli uyandırma sözcükleri (Gateway tarafından yönetilen) ve bunların Node'lar arasında nasıl eşitlendiği
 title: Sesle uyandırma
 x-i18n:
-    generated_at: "2026-06-28T00:47:00Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T23:24:38Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 3c57955e8061eca2f9fec83500e829f183cd3ef9f794bf385823a28f9c89b0a4
+    source_hash: aef2a5bba664ce10fb6ab457bb6d202639dcc6c0a9df61567e7cb402c290bbec
     source_path: nodes/voicewake.md
     workflow: 16
 ---
 
-OpenClaw, **uyandırma sözcüklerini Gateway'in sahip olduğu tek bir genel liste** olarak ele alır.
+Uyandırma sözcükleri, **Gateway'in sahip olduğu tek bir genel listedir** — düğüm başına özel listeler yoktur. Herhangi bir düğüm veya uygulama kullanıcı arayüzü listeyi düzenleyebilir; Gateway değişikliği kalıcı hâle getirir ve bağlı tüm istemcilere yayınlar.
 
-- **Düğüm başına özel uyandırma sözcüğü yoktur**.
-- **Herhangi bir düğüm/uygulama kullanıcı arayüzü** listeyi düzenleyebilir; değişiklikler Gateway tarafından kalıcı hale getirilir ve herkese yayınlanır.
-- macOS ve iOS yerel **Voice Wake etkin/devre dışı** anahtarlarını korur (yerel kullanıcı deneyimi + izinler farklıdır).
-- Android şu anda Voice Wake özelliğini kapalı tutar ve Voice sekmesinde manuel mikrofon akışı kullanır.
+- **macOS**: yerel Sesle Uyandırma etkinleştirme/devre dışı bırakma anahtarı. macOS 26+ gerektirir; çalışma zamanı/PTT ayrıntıları için [Sesle uyandırma (macOS)](/tr/platforms/mac/voicewake) bölümüne bakın.
+- **iOS**: Ayarlar'da yerel Sesle Uyandırma etkinleştirme/devre dışı bırakma anahtarı.
+- **Android**: Ayarlar → Ses bölümünde yerel Sesle Uyandırma etkinleştirme/devre dışı bırakma anahtarı ve uyandırma sözcüğü düzenleyicisi. Android'in cihaz üzerindeki konuşma tanıma özelliğini gerektirir.
 
-## Depolama (Gateway ana makinesi)
+## Depolama
 
-Uyandırma sözcükleri ve yönlendirme kuralları Gateway durum veritabanında saklanır:
-
-- `~/.openclaw/state/openclaw.sqlite`
-
-Etkin tablolar şunlardır:
-
-- `voicewake_triggers`
-- `voicewake_routing_config`
-- `voicewake_routing_routes`
-
-Eski `settings/voicewake.json` ve `settings/voicewake-routing.json` dosyaları
-yalnızca doctor geçiş girdileridir; çalışma zamanı SQLite tablolarını okur ve yazar.
+Uyandırma sözcükleri ve yönlendirme kuralları Gateway durum veritabanında, varsayılan olarak `~/.openclaw/state/openclaw.sqlite` konumunda (geçersiz kılmak için `OPENCLAW_STATE_DIR`), `voicewake_triggers`, `voicewake_routing_config`, `voicewake_routing_routes` tablolarında bulunur. Eski `settings/voicewake.json` ve `settings/voicewake-routing.json` yalnızca `openclaw doctor --fix` geçiş girdileridir — çalışma zamanı bunları hiçbir zaman okumaz.
 
 ## Protokol
 
-### Yöntemler
+### Tetikleyici listesi
 
-- `voicewake.get` → `{ triggers: string[] }`
-- `{ triggers: string[] }` parametreleriyle `voicewake.set` → `{ triggers: string[] }`
+| Yöntem          | Parametreler                   | Sonuç                   |
+| --------------- | ------------------------ | ------------------------ |
+| `voicewake.get` | yok                     | `{ triggers: string[] }` |
+| `voicewake.set` | `{ triggers: string[] }` | `{ triggers: string[] }` |
 
-Notlar:
+`voicewake.set` girdiyi normalleştirir: boşlukları kırpar, boş girdileri kaldırır, en fazla 32 tetikleyiciyi tutar ve vekil çiftleri bölmeden her birini 64 UTF-16 kod birimine kısaltır. Boş bir sonuç, yerleşik varsayılanlara (`openclaw`, `claude`, `computer`) geri döner.
 
-- Tetikleyiciler normalleştirilir (kırpılır, boş olanlar atılır). Boş listeler varsayılanlara geri döner.
-- Güvenlik için sınırlar uygulanır (sayı/uzunluk üst sınırları).
+### Yönlendirme (tetikleyiciden hedefe)
 
-### Yönlendirme yöntemleri (tetikleyici → hedef)
-
-- `voicewake.routing.get` → `{ config: VoiceWakeRoutingConfig }`
-- `{ config: VoiceWakeRoutingConfig }` parametreleriyle `voicewake.routing.set` → `{ config: VoiceWakeRoutingConfig }`
-
-`VoiceWakeRoutingConfig` biçimi:
+| Yöntem                  | Parametreler                               | Sonuç                               |
+| ----------------------- | ------------------------------------ | ------------------------------------ |
+| `voicewake.routing.get` | yok                                 | `{ config: VoiceWakeRoutingConfig }` |
+| `voicewake.routing.set` | `{ config: VoiceWakeRoutingConfig }` | `{ config: VoiceWakeRoutingConfig }` |
 
 ```json
 {
@@ -64,41 +52,31 @@ Notlar:
 }
 ```
 
-Rota hedefleri tam olarak şunlardan birini destekler:
+Her yönlendirme `target` aşağıdakilerden tam olarak birini destekler:
 
 - `{ "mode": "current" }`
 - `{ "agentId": "main" }`
 - `{ "sessionKey": "agent:main:main" }`
 
+Sınırlar: en fazla 32 yönlendirme, tetikleyici metni en fazla 64 karakter. Yönlendirme tetikleyicileri; küçük harfe dönüştürülerek, her sözcüğün başındaki/sonundaki noktalama işaretleri kaldırılarak ve boşluklar birleştirilerek eşleştirme ve yinelenen öğe algılama amacıyla normalleştirilir (`"Hey, Bot!!"` ve `"hey bot"` eşleşir ve yinelenen öğeler olarak sayılır) — bu, yukarıdaki genel tetikleyici listesi için kullanılan basit kırpma işleminden daha katı bir normalleştirmedir.
+
 ### Olaylar
 
-- `voicewake.changed` yükü `{ triggers: string[] }`
-- `voicewake.routing.changed` yükü `{ config: VoiceWakeRoutingConfig }`
+| Olay                       | Yük                              |
+| --------------------------- | ------------------------------------ |
+| `voicewake.changed`         | `{ triggers: string[] }`             |
+| `voicewake.routing.changed` | `{ config: VoiceWakeRoutingConfig }` |
 
-Bunu kim alır:
-
-- Tüm WebSocket istemcileri (macOS uygulaması, WebChat vb.)
-- Tüm bağlı düğümler (iOS/Android) ve ayrıca düğüm bağlandığında ilk "geçerli durum" gönderimi olarak.
+Her ikisi de okuma kapsamına sahip tüm WebSocket istemcilerine (macOS uygulaması, WebChat ve benzerleri) ve bağlı tüm düğümlere yayınlanır. Bir düğüm ayrıca bağlandıktan hemen sonra başlangıç anlık görüntüsü gönderimi olarak her ikisini de alır.
 
 ## İstemci davranışı
 
-### macOS uygulaması
-
-- `VoiceWakeRuntime` tetikleyicilerini denetlemek için genel listeyi kullanır.
-- Voice Wake ayarlarındaki "Tetikleyici sözcükler" düzenlemesi `voicewake.set` çağrısı yapar ve ardından diğer istemcileri eşitlenmiş tutmak için yayına dayanır.
-
-### iOS düğümü
-
-- `VoiceWakeManager` tetikleyici algılaması için genel listeyi kullanır.
-- Ayarlar'da Uyandırma Sözcükleri düzenlemesi `voicewake.set` çağrısı yapar (Gateway WS üzerinden) ve yerel uyandırma sözcüğü algılamasını da duyarlı tutar.
-
-### Android düğümü
-
-- Voice Wake şu anda Android çalışma zamanında/Ayarlar'da devre dışıdır.
-- Android ses işlevi, uyandırma sözcüğü tetikleyicileri yerine Voice sekmesinde manuel mikrofon yakalama kullanır.
+- **macOS**: `voicewake.set`/`voicewake.get` çağrılarını yapar ve diğer istemcilerle eşzamanlı kalmak için `voicewake.changed` olayını dinler.
+- **iOS**: `voicewake.set`/`voicewake.get` çağrılarını yapar ve yerel uyandırma sözcüğü algılamasının duyarlı kalması için `voicewake.changed` olayını dinler.
+- **Android**: `voicewake.set`/`voicewake.get` çağrılarını yapar, `voicewake.changed` olayını dinler ve etkinken `voiceWake` özelliğini duyurur. Tanıma cihaz üzerinde ve yalnızca ön planda kalır; Talk, manuel dikte, sesli not kaydı veya mesaj seslendirme sesi kullandığında duraklatılır.
 
 ## İlgili
 
-- [Konuşma modu](/tr/nodes/talk)
+- [Talk modu](/tr/nodes/talk)
 - [Ses ve sesli notlar](/tr/nodes/audio)
 - [Medya anlama](/tr/nodes/media-understanding)

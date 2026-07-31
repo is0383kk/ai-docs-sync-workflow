@@ -1,21 +1,22 @@
 ---
 read_when:
-    - आप workboard Plugin इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
-summary: एजेंट-स्वामित्व वाले मुद्दों और सत्रों के लिए Dashboard वर्कबोर्ड।
+    - आप workboard Plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
+summary: एजेंट-स्वामित्व वाले मुद्दों और सत्रों के लिए डैशबोर्ड कार्य-पट्ट।
 title: वर्कबोर्ड Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:50:41Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:14:39Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 1e5a48a52d45dbe87b73020103c2bc3f0bd46305b4c0d26b3010864af65fa99c
+    source_hash: 4be96893d46c009a127ed3dca5047f8ee4c33fe3c243f8e6867d64976b50b783
     source_path: plugins/reference/workboard.md
     workflow: 16
 ---
 
-# Workboard Plugin
+# वर्कबोर्ड Plugin
 
-एजेंट-स्वामित्व वाले issues और sessions के लिए डैशबोर्ड workboard.
+एजेंट के स्वामित्व वाले मुद्दों और सत्रों के लिए डैशबोर्ड वर्कबोर्ड।
 
 ## वितरण
 
@@ -24,8 +25,8 @@ x-i18n:
 
 ## सतह
 
-contracts: tools
+अनुबंध: `tools`; डैशबोर्ड डेटा बाइंडिंग: `workboard.cards.list`, `workboard.stats`, `workboard.boards.list`; डैशबोर्ड कार्रवाई क्रियाएँ: `workboard.dispatch`
 
 ## संबंधित दस्तावेज़
 
-- [workboard](/hi/plugins/workboard)
+- [वर्कबोर्ड](/hi/plugins/workboard)

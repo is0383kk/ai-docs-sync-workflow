@@ -1,387 +1,405 @@
 ---
 read_when:
     - Plugin इम्पोर्ट के लिए सही plugin-sdk सबपाथ चुनना
-    - बंडल किए गए Plugin सबपाथ और सहायक सतहों का ऑडिट करना
-summary: 'Plugin SDK उपपथ कैटलॉग: कौन से आयात कहाँ स्थित हैं, क्षेत्र के अनुसार समूहित'
+    - बंडल किए गए Plugin के उप-पथों और सहायक सतहों का ऑडिट करना
+summary: 'Plugin SDK उपपथ कैटलॉग: क्षेत्र के अनुसार समूहीकृत, कौन-से इम्पोर्ट कहाँ स्थित हैं'
 title: Plugin SDK उपपथ
 x-i18n:
-    generated_at: "2026-07-04T10:41:06Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:14:59Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2a77f70197aca279d44d2b9db62bf9f936594311bb46c3da682413c3fa1378e5
+    source_hash: 58df43436d0e26f1ffa1383be47fd108655e57d61cf5534d650a4fa2fb7b364c
     source_path: plugins/sdk-subpaths.md
     workflow: 16
 ---
 
-OpenClaw_docs_i18n_input>
-Plugin SDK को `openclaw/plugin-sdk/` के अंतर्गत संकरे सार्वजनिक उप-पथों के एक सेट के रूप में प्रदर्शित किया जाता है। यह पृष्ठ उद्देश्य के अनुसार समूहित आम तौर पर उपयोग किए जाने वाले उप-पथों को सूचीबद्ध करता है। जेनरेट की गई कंपाइलर प्रवेश-बिंदु इन्वेंटरी `scripts/lib/plugin-sdk-entrypoints.json` में रहती है; पैकेज निर्यात वह सार्वजनिक उपसमुच्चय हैं जो `scripts/lib/plugin-sdk-private-local-only-subpaths.json` में सूचीबद्ध रेपो-स्थानीय परीक्षण/आंतरिक उप-पथ घटाने के बाद बचता है। अनुरक्षक `pnpm plugin-sdk:surface` से सार्वजनिक निर्यात संख्या और `pnpm plugins:boundary-report:summary` से सक्रिय आरक्षित सहायक उप-पथों का ऑडिट कर सकते हैं; अप्रयुक्त आरक्षित सहायक निर्यात निष्क्रिय संगतता ऋण के रूप में सार्वजनिक SDK में बने रहने के बजाय CI रिपोर्ट को विफल कर देते हैं।
+Plugin SDK में संकीर्ण सार्वजनिक सबपाथ और केवल रिपॉज़िटरी के लिए बंडल किए गए
+सहायक `openclaw/plugin-sdk/` के अंतर्गत हैं। यह पृष्ठ दोनों को सूचीबद्ध करता है और
+निजी-स्थानीय प्रविष्टियों को स्पष्ट रूप से चिह्नित करता है। तीन फ़ाइलें सीमा निर्धारित करती हैं:
 
-Plugin लेखन गाइड के लिए, [Plugin SDK अवलोकन](/hi/plugins/sdk-overview) देखें।
+- `scripts/lib/plugin-sdk-entrypoints.json`: अनुरक्षित एंट्रीपॉइंट सूची
+  जिसे बिल्ड कंपाइल करता है।
+- `scripts/lib/plugin-sdk-private-local-only-subpaths.json`: टाइप किए गए, प्रलेखित SDK से
+  बाहर रखे गए आंतरिक सबपाथ। अलग से प्रकाशित आधिकारिक
+  plugins के लिए उत्पादन प्रविष्टियाँ केवल JavaScript होस्ट रनटाइम एक्सपोर्ट के रूप में उपलब्ध रहती हैं;
+  केवल-परीक्षण प्रविष्टियाँ एक्सपोर्ट नहीं की जातीं।
+- `src/plugin-sdk/entrypoints.ts`: अप्रचलित
+  सबपाथ, आरक्षित बंडल सहायक, समर्थित बंडल फ़साड और
+  Plugin-स्वामित्व वाली सार्वजनिक सतहों के लिए वर्गीकरण मेटाडेटा।
 
-## Plugin प्रवेश
+अनुरक्षक सार्वजनिक एक्सपोर्ट की संख्या का ऑडिट `pnpm plugin-sdk:surface` से और
+सक्रिय आरक्षित सहायक सबपाथ का ऑडिट `pnpm plugins:boundary-report:summary` से करते हैं;
+अप्रयुक्त आरक्षित सहायक एक्सपोर्ट निष्क्रिय संगतता ऋण के रूप में
+सार्वजनिक SDK में बने रहने के बजाय CI रिपोर्ट को विफल कर देते हैं।
 
-| उप-पथ                         | मुख्य निर्यात                                                                                                                                                            |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `plugin-sdk/plugin-entry`      | `definePluginEntry`                                                                                                                                                    |
-| `plugin-sdk/core`              | `defineChannelPluginEntry`, `createChatChannelPlugin`, `createChannelPluginBase`, `defineSetupPluginEntry`, `buildChannelConfigSchema`, `buildJsonChannelConfigSchema` |
-| `plugin-sdk/config-schema`     | `OpenClawSchema`                                                                                                                                                       |
-| `plugin-sdk/provider-entry`    | `defineSingleProviderPluginEntry`                                                                                                                                      |
-| `plugin-sdk/migration`         | माइग्रेशन प्रदाता आइटम सहायक जैसे `createMigrationItem`, कारण स्थिरांक, आइटम स्थिति मार्कर, रिडैक्शन सहायक, और `summarizeMigrationItems`                 |
-| `plugin-sdk/migration-runtime` | रनटाइम माइग्रेशन सहायक जैसे `copyMigrationFileItem`, `resolvePlannedMigrationTargets`, `withCachedMigrationConfigRuntime`, और `writeMigrationReport`            |
-| `plugin-sdk/health`            | बंडल किए गए स्वास्थ्य उपभोक्ताओं के लिए Doctor स्वास्थ्य-जांच पंजीकरण, पहचान, मरम्मत, चयन, गंभीरता, और निष्कर्ष प्रकार                                               |
+Plugin लेखन मार्गदर्शिका के लिए, [Plugin SDK अवलोकन](/hi/plugins/sdk-overview) देखें।
 
-### पदावनत संगतता और परीक्षण सहायक
+## Plugin प्रविष्टि
 
-पदावनत उप-पथ पुराने plugins के लिए निर्यातित बने रहते हैं, लेकिन नए कोड को नीचे दिए गए केंद्रित SDK उप-पथों का उपयोग करना चाहिए। अनुरक्षित सूची `scripts/lib/plugin-sdk-deprecated-public-subpaths.json` है; CI इससे बंडल किए गए उत्पादन आयातों को अस्वीकार करता है। `compat`, `config-types`, `infra-runtime`, `text-runtime`, और `zod` जैसे व्यापक बैरल केवल संगतता के लिए हैं। `zod` को सीधे `zod` से आयात करें।
+| सबपाथ                        | प्रमुख एक्सपोर्ट                                                                                                                                                                                             |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plugin-sdk/plugin-entry`      | `definePluginEntry`                                                                                                                                                                                     |
+| `plugin-sdk/core`              | `defineChannelPluginEntry`, `createChatChannelPlugin`, `createChannelPluginBase`, `defineSetupPluginEntry`, `buildChannelConfigSchema`, `buildJsonChannelConfigSchema`, `resolveTailscalePublishedHost` |
+| `plugin-sdk/provider-entry`    | जुलाई 2026 के बाद निजी-स्थानीय; `defineSingleProviderPluginEntry`                                                                                                                                        |
+| `plugin-sdk/migration`         | जुलाई 2026 के बाद निजी-स्थानीय; माइग्रेशन प्रदाता आइटम सहायक, जैसे `createMigrationItem`, कारण स्थिरांक, आइटम स्थिति चिह्नक, संशोधन सहायक और `summarizeMigrationItems`                   |
+| `plugin-sdk/migration-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; रनटाइम माइग्रेशन सहायक, जैसे `copyMigrationFileItem`, `resolvePlannedMigrationTargets`, `withCachedMigrationConfigRuntime` और `writeMigrationReport`              |
+| `plugin-sdk/health`            | बंडल स्वास्थ्य उपभोक्ताओं के लिए Doctor स्वास्थ्य-जाँच पंजीकरण, पहचान, सुधार, चयन, गंभीरता और निष्कर्ष प्रकार                                                                                |
 
-OpenClaw के Vitest-समर्थित परीक्षण-सहायक उप-पथ केवल रेपो-स्थानीय हैं और अब पैकेज निर्यात नहीं हैं: `agent-runtime-test-contracts`, `channel-contract-testing`, `channel-target-testing`, `channel-test-helpers`, `plugin-test-api`, `plugin-test-contracts`, `plugin-test-runtime`, `provider-http-test-mocks`, `provider-test-contracts`, `test-env`, `test-fixtures`, `test-node-mocks`, और `testing`।
+### संगतता और निजी-स्थानीय सहायक
 
-### आरक्षित बंडल किए गए Plugin सहायक उप-पथ
+केवल बाद की अवधि में अप्रचलित किए गए सबपाथ एक्सपोर्ट बने हुए हैं। जुलाई 2026 के उपनाम और
+अप्रयुक्त सबपाथ हटा दिए गए, जबकि केवल-बंडल सहायक सार्वजनिक पैकेज से हटा दिए गए
+और नीचे निजी-स्थानीय चिह्नित हैं। अनुरक्षित सूची
+`scripts/lib/plugin-sdk-deprecated-public-subpaths.json` है; CI बंडल किए गए
+`plugin-sdk/text-runtime` को अस्वीकार करता है, जो केवल संगतता के लिए हैं, और `plugin-sdk/zod` एक
+संगतता पुनः-एक्सपोर्ट है: `zod` को सीधे `zod` से आयात करें। व्यापक डोमेन
+बैरल `plugin-sdk/agent-runtime`, `plugin-sdk/channel-lifecycle`,
+`plugin-sdk/conversation-runtime`, `plugin-sdk/hook-runtime`,
+`plugin-sdk/media-runtime`, `plugin-sdk/plugin-runtime` और
+`plugin-sdk/security-runtime` भी केंद्रित
+सबपाथ के पक्ष में अप्रचलित हैं।
 
-ये उप-पथ अपने स्वामी बंडल किए गए Plugin के लिए Plugin-स्वामित्व वाली संगतता सतहें हैं, सामान्य SDK API नहीं: `plugin-sdk/codex-mcp-projection` और `plugin-sdk/codex-native-task-runtime`। पैकेज अनुबंध सुरक्षा-रेलिंग द्वारा क्रॉस-ओनर एक्सटेंशन आयातों को अवरुद्ध किया जाता है।
+OpenClaw के Vitest-समर्थित परीक्षण-सहायक सबपाथ केवल रिपॉज़िटरी-स्थानीय हैं और अब
+पैकेज एक्सपोर्ट नहीं हैं: `agent-runtime-test-contracts`,
+`channel-contract-testing`, `channel-target-testing`, `channel-test-helpers`,
+`plugin-state-test-runtime`, `plugin-test-api`, `plugin-test-contracts`,
+`plugin-test-runtime`, `provider-http-test-mocks`, `provider-test-contracts`,
+`reply-payload-testing`, `sqlite-runtime-testing`, `test-env`, `test-fixtures`,
+`test-live`, `test-live-auth`, `test-media-generation`,
+`test-media-understanding`, `test-node-mocks` और `testing`। निजी बंडल सहायक सतहें
+`ssrf-runtime-internal` और `codex-native-task-runtime` भी केवल रिपॉज़िटरी-स्थानीय
+हैं।
+
+### बंडल किए गए Plugin सहायक सबपाथ
+
+केवल-बंडल सहायक मॉड्यूल जुलाई 2026 की समीक्षा के बाद निजी-स्थानीय हैं। विभिन्न स्वामियों के बीच आयात पैकेज अनुबंध सुरक्षा-सीमाओं द्वारा अवरुद्ध हैं। `src/plugin-sdk/entrypoints.ts` उन समर्थित बंडल फ़साड को अलग से ट्रैक करता है जो सार्वजनिक बने हुए हैं—वे SDK
+एंट्रीपॉइंट जिन्हें सामान्य अनुबंधों द्वारा प्रतिस्थापित किए जाने तक उनके बंडल किए गए Plugin का समर्थन प्राप्त है।
+`plugin-sdk/qa-runner-runtime`, `plugin-sdk/telegram-account`,
+नए कोड के लिए अप्रचलित हैं; नीचे प्रत्येक पंक्ति के नोट देखें।
 
 <AccordionGroup>
-  <Accordion title="Channel subpaths">
-    | उपपथ | प्रमुख निर्यात |
+  <Accordion title="चैनल सबपाथ">
+    | सबपाथ | प्रमुख एक्सपोर्ट |
     | --- | --- |
-    | `plugin-sdk/channel-core` | `defineChannelPluginEntry`, `defineSetupPluginEntry`, `createChatChannelPlugin`, `createChannelPluginBase` |
-    | `plugin-sdk/config-schema` | रूट `openclaw.json` Zod स्कीमा निर्यात (`OpenClawSchema`) |
-    | `plugin-sdk/json-schema-runtime` | Plugin-स्वामित्व वाले स्कीमा के लिए कैश किया गया JSON Schema वैलिडेशन सहायक |
-    | `plugin-sdk/channel-setup` | `createOptionalChannelSetupSurface`, `createOptionalChannelSetupAdapter`, `createOptionalChannelSetupWizard`, साथ में `DEFAULT_ACCOUNT_ID`, `createTopLevelChannelDmPolicy`, `setSetupChannelEnabled`, `splitSetupEntries` |
-    | `plugin-sdk/setup` | साझा सेटअप विज़ार्ड सहायक, सेटअप अनुवादक, allowlist प्रॉम्प्ट, सेटअप स्थिति बिल्डर |
-    | `plugin-sdk/setup-runtime` | `createSetupTranslator`, `createPatchedAccountSetupAdapter`, `createEnvPatchedAccountSetupAdapter`, `createSetupInputPresenceValidator`, `noteChannelLookupFailure`, `noteChannelLookupSummary`, `promptResolvedAllowFrom`, `splitSetupEntries`, `createAllowlistSetupWizardProxy`, `createDelegatedSetupWizardProxy` |
-    | `plugin-sdk/setup-adapter-runtime` | अप्रचलित संगतता alias; `plugin-sdk/setup-runtime` का उपयोग करें |
+    | `plugin-sdk/channel-core` | `defineChannelPluginEntry`, `defineSetupPluginEntry`, `createChatChannelPlugin`, `createChannelPluginBase`, `createChannelConfigUiHints` |
+    | `plugin-sdk/json-schema-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; Plugin-स्वामित्व वाली स्कीमा के लिए कैश किया हुआ JSON Schema सत्यापन सहायक |
+    | `plugin-sdk/channel-setup` | `defineChannelSetupContract`, चैनल-स्वामित्व वाले सेटअप फ़ील्ड/इनपुट प्रकार, `createOptionalChannelSetupSurface`, `createOptionalChannelSetupAdapter`, `createOptionalChannelSetupWizard`, साथ ही `DEFAULT_ACCOUNT_ID`, `createTopLevelChannelDmPolicy`, `setSetupChannelEnabled`, `splitSetupEntries` |
+    | `plugin-sdk/setup` | साझा सेटअप विज़ार्ड सहायक, सेटअप अनुवादक, अनुमति-सूची प्रॉम्प्ट, सेटअप स्थिति बिल्डर |
+    | `plugin-sdk/setup-runtime` | `defineChannelSetupContract`, `createSetupTranslator`, `createPatchedAccountSetupAdapter`, `createEnvPatchedAccountSetupAdapter`, `createSetupInputPresenceValidator`, `noteChannelLookupFailure`, `noteChannelLookupSummary`, `promptResolvedAllowFrom`, `splitSetupEntries`, `createAllowlistSetupWizardProxy`, `createDelegatedSetupWizardProxy` |
     | `plugin-sdk/setup-tools` | `formatCliCommand`, `detectBinary`, `extractArchive`, `resolveBrewExecutable`, `formatDocsLink`, `CONFIG_DIR` |
-    | `plugin-sdk/account-core` | मल्टी-अकाउंट कॉन्फ़िग/action-gate सहायक, default-account fallback सहायक |
-    | `plugin-sdk/account-id` | `DEFAULT_ACCOUNT_ID`, account-id सामान्यीकरण सहायक |
-    | `plugin-sdk/account-resolution` | अकाउंट lookup + default-fallback सहायक |
-    | `plugin-sdk/account-helpers` | संकीर्ण account-list/account-action सहायक |
-    | `plugin-sdk/access-groups` | Access-group allowlist पार्सिंग और redacted group diagnostics सहायक |
+    | `plugin-sdk/account-core` | बहु-खाता कॉन्फ़िगरेशन/क्रिया-गेट सहायक, डिफ़ॉल्ट-खाता फ़ॉलबैक सहायक |
+    | `plugin-sdk/account-id` | `DEFAULT_ACCOUNT_ID`, खाता-ID सामान्यीकरण सहायक |
+    | `plugin-sdk/account-resolution` | खाता लुकअप + डिफ़ॉल्ट-फ़ॉलबैक सहायक |
+    | `plugin-sdk/account-helpers` | संकीर्ण खाता-सूची/खाता-क्रिया सहायक |
+    | `plugin-sdk/access-groups` | जुलाई 2026 के बाद निजी-स्थानीय; पहुँच-समूह अनुमति-सूची पार्सिंग और संशोधित समूह निदान सहायक |
     | `plugin-sdk/channel-pairing` | `createChannelPairingController` |
-    | `plugin-sdk/channel-reply-pipeline` | अप्रचलित संगतता facade। `plugin-sdk/channel-outbound` का उपयोग करें। |
+    | `plugin-sdk/channel-reply-pipeline` | अप्रचलित संगतता फ़साड। `plugin-sdk/channel-outbound` का उपयोग करें। |
     | `plugin-sdk/channel-config-helpers` | `createHybridChannelConfigAdapter`, `resolveChannelDmAccess`, `resolveChannelDmAllowFrom`, `resolveChannelDmPolicy`, `normalizeChannelDmPolicy`, `normalizeLegacyDmAliases` |
-    | `plugin-sdk/channel-config-schema` | साझा चैनल कॉन्फ़िग स्कीमा primitives, साथ में Zod और सीधे JSON/TypeBox बिल्डर |
-    | `plugin-sdk/bundled-channel-config-schema` | केवल अनुरक्षित bundled Plugin के लिए bundled OpenClaw चैनल कॉन्फ़िग स्कीमा |
-    | `plugin-sdk/chat-channel-ids` | `BUNDLED_CHAT_CHANNEL_IDS`, `BUNDLED_CHAT_CHANNEL_ENVELOPE_PREFIXES`, `ChatChannelId`। Canonical bundled/official चैट चैनल ids, साथ में उन Plugin के लिए formatter labels/aliases जिन्हें अपनी तालिका hardcode किए बिना envelope-prefixed टेक्स्ट पहचानना होता है। |
-    | `plugin-sdk/channel-config-schema-legacy` | bundled-channel कॉन्फ़िग स्कीमा के लिए अप्रचलित संगतता alias |
-    | `plugin-sdk/telegram-command-config` | bundled-contract fallback के साथ Telegram custom-command सामान्यीकरण/वैलिडेशन सहायक |
-    | `plugin-sdk/command-gating` | संकीर्ण command authorization gate सहायक |
+    | `plugin-sdk/channel-config-schema` | साझा चैनल कॉन्फ़िगरेशन स्कीमा प्रिमिटिव, साथ ही Zod और प्रत्यक्ष JSON/TypeBox बिल्डर |
+    | `plugin-sdk/bundled-channel-config-schema` | जुलाई 2026 के बाद निजी-स्थानीय; केवल अनुरक्षित बंडल plugins के लिए बंडल किए गए OpenClaw चैनल कॉन्फ़िगरेशन स्कीमा |
+    | `plugin-sdk/chat-channel-ids` | जुलाई 2026 के बाद निजी-स्थानीय; `BUNDLED_CHAT_CHANNEL_IDS`, `BUNDLED_CHAT_CHANNEL_ENVELOPE_PREFIXES`, `ChatChannelId`। उन plugins के लिए प्रामाणिक बंडल/आधिकारिक चैट चैनल ID तथा फ़ॉर्मैटर लेबल/उपनाम, जिन्हें अपनी तालिका हार्डकोड किए बिना एनवलप-प्रीफ़िक्स वाले टेक्स्ट को पहचानना आवश्यक है। |
     | `plugin-sdk/channel-policy` | `resolveChannelGroupRequireMention` |
-    | `plugin-sdk/channel-ingress` | अप्रचलित निम्न-स्तरीय चैनल ingress संगतता facade। नए receive पथों को `plugin-sdk/channel-ingress-runtime` का उपयोग करना चाहिए। |
-    | `plugin-sdk/channel-ingress-runtime` | माइग्रेट किए गए चैनल receive पथों के लिए प्रयोगात्मक उच्च-स्तरीय चैनल ingress runtime resolver और route fact बिल्डर। प्रत्येक Plugin में effective allowlists, command allowlists, और legacy projections असेंबल करने के बजाय इसे प्राथमिकता दें। [Channel ingress API](/hi/plugins/sdk-channel-ingress) देखें। |
-    | `plugin-sdk/channel-lifecycle` | अप्रचलित संगतता facade। `plugin-sdk/channel-outbound` का उपयोग करें। |
-    | `plugin-sdk/channel-outbound` | संदेश lifecycle contracts, साथ में reply pipeline options, receipts, live preview/streaming, lifecycle helpers, outbound identity, payload planning, durable sends, और message-send context helpers। [Channel outbound API](/hi/plugins/sdk-channel-outbound) देखें। |
-    | `plugin-sdk/channel-message` | `plugin-sdk/channel-outbound` के लिए अप्रचलित संगतता alias, साथ में legacy reply-dispatch facades। |
-    | `plugin-sdk/channel-message-runtime` | `plugin-sdk/channel-outbound` के लिए अप्रचलित संगतता alias, साथ में legacy reply-dispatch facades। |
-    | `plugin-sdk/inbound-envelope` | साझा inbound route + envelope builder सहायक |
-    | `plugin-sdk/inbound-reply-dispatch` | अप्रचलित संगतता facade। inbound runners और dispatch predicates के लिए `plugin-sdk/channel-inbound`, और message delivery helpers के लिए `plugin-sdk/channel-outbound` का उपयोग करें। |
-    | `plugin-sdk/messaging-targets` | अप्रचलित target parsing alias; `plugin-sdk/channel-targets` का उपयोग करें |
-    | `plugin-sdk/outbound-media` | साझा outbound media loading और hosted-media state सहायक |
-    | `plugin-sdk/outbound-send-deps` | अप्रचलित संगतता facade। `plugin-sdk/channel-outbound` का उपयोग करें। |
-    | `plugin-sdk/outbound-runtime` | अप्रचलित संगतता facade। `plugin-sdk/channel-outbound` का उपयोग करें। |
-    | `plugin-sdk/poll-runtime` | संकीर्ण poll सामान्यीकरण सहायक |
-    | `plugin-sdk/thread-bindings-runtime` | Thread-binding lifecycle और adapter सहायक |
-    | `plugin-sdk/agent-media-payload` | Legacy agent media payload builder |
-    | `plugin-sdk/conversation-runtime` | Conversation/thread binding, pairing, और configured-binding सहायक |
-    | `plugin-sdk/runtime-config-snapshot` | Runtime config snapshot सहायक |
-    | `plugin-sdk/runtime-group-policy` | Runtime group-policy resolution सहायक |
-    | `plugin-sdk/channel-status` | साझा channel status snapshot/summary सहायक |
-    | `plugin-sdk/channel-config-primitives` | संकीर्ण चैनल config-schema primitives |
-    | `plugin-sdk/channel-config-writes` | चैनल config-write authorization सहायक |
-    | `plugin-sdk/channel-plugin-common` | साझा channel Plugin prelude निर्यात |
-    | `plugin-sdk/allowlist-config-edit` | Allowlist config edit/read सहायक |
-    | `plugin-sdk/group-access` | साझा group-access decision सहायक |
-    | `plugin-sdk/direct-dm`, `plugin-sdk/direct-dm-access` | अप्रचलित संगतता facades। `plugin-sdk/channel-inbound` का उपयोग करें। |
-    | `plugin-sdk/direct-dm-guard-policy` | संकीर्ण direct-DM pre-crypto guard policy सहायक |
-    | `plugin-sdk/discord` | प्रकाशित `@openclaw/discord@2026.3.13` और tracked owner compatibility के लिए अप्रचलित Discord संगतता facade; नए Plugin को generic channel SDK subpaths का उपयोग करना चाहिए |
-    | `plugin-sdk/telegram-account` | tracked owner compatibility के लिए अप्रचलित Telegram account-resolution संगतता facade; नए Plugin को injected runtime helpers या generic channel SDK subpaths का उपयोग करना चाहिए |
-    | `plugin-sdk/zalouser` | प्रकाशित Lark/Zalo packages के लिए अप्रचलित Zalo Personal संगतता facade जो अभी भी sender command authorization import करते हैं; नए Plugin को `plugin-sdk/command-auth` का उपयोग करना चाहिए |
-    | `plugin-sdk/interactive-runtime` | Semantic message presentation, delivery, और legacy interactive reply helpers। [Message Presentation](/hi/plugins/message-presentation) देखें |
-    | `plugin-sdk/channel-inbound` | event classification, context building, formatting, roots, debounce, mention matching, mention-policy, और inbound logging के लिए साझा inbound सहायक |
-    | `plugin-sdk/channel-inbound-debounce` | संकीर्ण inbound debounce सहायक |
-    | `plugin-sdk/channel-mention-gating` | व्यापक inbound runtime surface के बिना संकीर्ण mention-policy, mention marker, और mention text सहायक |
-    | `plugin-sdk/channel-envelope`, `plugin-sdk/channel-inbound-roots`, `plugin-sdk/channel-location`, `plugin-sdk/channel-logging` | अप्रचलित संगतता facades। `plugin-sdk/channel-inbound` या `plugin-sdk/channel-outbound` का उपयोग करें। |
-    | `plugin-sdk/channel-pairing-paths` | अप्रचलित संगतता facade। `plugin-sdk/channel-pairing` का उपयोग करें। |
-    | `plugin-sdk/channel-reply-options-runtime` | अप्रचलित संगतता facade। `plugin-sdk/channel-outbound` का उपयोग करें। |
-    | `plugin-sdk/channel-streaming` | अप्रचलित संगतता facade। `plugin-sdk/channel-outbound` का उपयोग करें। |
-    | `plugin-sdk/channel-send-result` | Reply result types |
-    | `plugin-sdk/channel-actions` | Channel message-action helpers, साथ में Plugin compatibility के लिए रखे गए अप्रचलित native schema helpers |
-    | `plugin-sdk/channel-route` | साझा route normalization, parser-driven target resolution, thread-id stringification, dedupe/compact route keys, parsed-target types, और route/target comparison helpers |
-    | `plugin-sdk/channel-targets` | Target parsing helpers; route comparison callers को `plugin-sdk/channel-route` का उपयोग करना चाहिए |
-    | `plugin-sdk/channel-contract` | Channel contract types |
-    | `plugin-sdk/channel-feedback` | Feedback/reaction wiring |
-    | `plugin-sdk/channel-secret-runtime` | संकीर्ण secret-contract helpers जैसे `collectSimpleChannelFieldAssignments`, `getChannelSurface`, `pushAssignment`, और secret target types |
+    | `plugin-sdk/channel-ingress-runtime` | माइग्रेट किए गए चैनल प्राप्ति पाथ के लिए प्रयोगात्मक उच्च-स्तरीय चैनल प्रवेश रनटाइम रिज़ॉल्वर, अंतर्निहित-उल्लेख नीति रिज़ॉल्वर और रूट तथ्य बिल्डर। प्रत्येक Plugin में प्रभावी अनुमति-सूचियाँ, कमांड अनुमति-सूचियाँ और लेगेसी प्रोजेक्शन संयोजित करने के बजाय इसे प्राथमिकता दें। [चैनल प्रवेश API](/hi/plugins/sdk-channel-ingress) देखें। |
+    | `plugin-sdk/channel-lifecycle` | अप्रचलित संगतता फ़साड। `plugin-sdk/channel-outbound` का उपयोग करें। |
+    | `plugin-sdk/channel-outbound` | संदेश जीवनचक्र अनुबंध, साथ ही उत्तर पाइपलाइन विकल्प, प्राप्ति-पुष्टियाँ, लाइव पूर्वावलोकन/स्ट्रीमिंग, जीवनचक्र सहायक, आउटबाउंड पहचान, पेलोड नियोजन, टिकाऊ प्रेषण और संदेश-प्रेषण संदर्भ सहायक। [चैनल आउटबाउंड API](/hi/plugins/sdk-channel-outbound) देखें। |
+    | `plugin-sdk/channel-message` | `plugin-sdk/channel-outbound` का अप्रचलित संगतता उपनाम। |
+    | `plugin-sdk/inbound-envelope` | साझा इनबाउंड रूट + एनवलप बिल्डर सहायक |
+    | `plugin-sdk/inbound-reply-dispatch` | अप्रचलित संगतता फ़साड। इनबाउंड रनर और डिस्पैच प्रेडिकेट के लिए `plugin-sdk/channel-inbound` तथा संदेश वितरण सहायकों के लिए `plugin-sdk/channel-outbound` का उपयोग करें। |
+    | `plugin-sdk/messaging-targets` | अप्रचलित लक्ष्य पार्सिंग उपनाम; `plugin-sdk/channel-targets` का उपयोग करें |
+    | `plugin-sdk/outbound-media` | जुलाई 2026 के बाद निजी-स्थानीय; साझा आउटबाउंड मीडिया लोडिंग और होस्टेड-मीडिया स्थिति सहायक |
+    | `plugin-sdk/poll-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; संकीर्ण पोल सामान्यीकरण सहायक |
+    | `plugin-sdk/thread-bindings-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; थ्रेड-बाइंडिंग जीवनचक्र और अडैप्टर सहायक |
+    | `plugin-sdk/agent-media-payload` | लेगेसी `Media*` पेलोड प्रोजेक्शन के लिए अप्रचलित संगतता फ़साड। क्रमबद्ध तथ्यों को `MsgContext.media` / `toInboundMediaFacts(...)` से पास करें; स्थानीय-रूट नीति को `plugin-sdk/media-local-roots` से आयात करें। |
+    | `plugin-sdk/conversation-runtime` | वार्तालाप/थ्रेड बाइंडिंग, पेयरिंग और कॉन्फ़िगर किए गए बाइंडिंग सहायकों के लिए अप्रचलित व्यापक बैरल; `plugin-sdk/thread-bindings-runtime` और `plugin-sdk/session-binding-runtime` जैसे केंद्रित बाइंडिंग सबपाथ को प्राथमिकता दें |
+    | `plugin-sdk/runtime-group-policy` | रनटाइम समूह-नीति समाधान सहायक |
+    | `plugin-sdk/channel-status` | साझा चैनल स्थिति स्नैपशॉट/सारांश सहायक |
+    | `plugin-sdk/channel-config-primitives` | संकीर्ण चैनल कॉन्फ़िगरेशन-स्कीमा प्रिमिटिव |
+    | `plugin-sdk/channel-config-writes` | जुलाई 2026 के बाद निजी-स्थानीय; चैनल कॉन्फ़िगरेशन-लेखन प्राधिकरण सहायक |
+    | `plugin-sdk/channel-plugin-common` | साझा चैनल Plugin प्रील्यूड एक्सपोर्ट |
+    | `plugin-sdk/allowlist-config-edit` | अनुमति-सूची कॉन्फ़िगरेशन संपादन/पठन सहायक |
+    | `plugin-sdk/group-access` | अप्रचलित समूह-पहुँच निर्णय सहायक; `plugin-sdk/channel-ingress-runtime` से `resolveChannelMessageIngress` का उपयोग करें |
+    | `plugin-sdk/direct-dm-guard-policy` | जुलाई 2026 के बाद निजी-स्थानीय; संकीर्ण प्रत्यक्ष-DM पूर्व-क्रिप्टो गार्ड नीति सहायक |
+    | `plugin-sdk/discord` | प्रकाशित `@openclaw/discord@2026.3.13` और ट्रैक की गई स्वामी संगतता के लिए अप्रचलित Discord संगतता फ़साड; नए plugins को सामान्य चैनल SDK सबपाथ का उपयोग करना चाहिए |
+    | `plugin-sdk/telegram-account` | ट्रैक की गई स्वामी संगतता के लिए अप्रचलित Telegram खाता-समाधान संगतता फ़साड; नए plugins को इंजेक्ट किए गए रनटाइम सहायक या सामान्य चैनल SDK सबपाथ का उपयोग करना चाहिए |
+    | `plugin-sdk/interactive-runtime` | अर्थगत संदेश प्रस्तुति, वितरण और लेगेसी इंटरैक्टिव उत्तर सहायक। [संदेश प्रस्तुति](/hi/plugins/message-presentation) देखें |
+    | `plugin-sdk/question-gateway-runtime` | चैनल इंटरैक्शन हैंडलर से Gateway के माध्यम से रनटाइम-निर्मित `ask_user` विकल्पों का समाधान करें |
+    | `plugin-sdk/channel-inbound` | इवेंट वर्गीकरण, संदर्भ निर्माण, फ़ॉर्मैटिंग, रूट, डिबाउंस, उल्लेख मिलान, उल्लेख-नीति और इनबाउंड लॉगिंग के लिए साझा इनबाउंड सहायक |
+    | `plugin-sdk/channel-inbound-debounce` | संकीर्ण इनबाउंड डिबाउंस सहायक |
+    | `plugin-sdk/channel-mention-gating` | जुलाई 2026 के बाद निजी-स्थानीय; व्यापक इनबाउंड रनटाइम सतह के बिना संकीर्ण उल्लेख-नीति, उल्लेख चिह्नक और उल्लेख टेक्स्ट सहायक |
+    | `plugin-sdk/channel-streaming` | अप्रचलित संगतता फ़साड। `plugin-sdk/channel-outbound` का उपयोग करें। |
+    | `plugin-sdk/channel-send-result` | उत्तर परिणाम प्रकार |
+    | `plugin-sdk/channel-actions` | चैनल संदेश-क्रिया सहायक, साथ ही Plugin संगतता के लिए रखे गए अप्रचलित नेटिव स्कीमा सहायक |
+    | `plugin-sdk/channel-route` | जुलाई 2026 के बाद निजी-स्थानीय; साझा रूट सामान्यीकरण, पार्सर-संचालित लक्ष्य समाधान, थ्रेड-ID स्ट्रिंगीकरण, डीडुप्लिकेट/संक्षिप्त रूट कुंजियाँ, पार्स किए गए लक्ष्य प्रकार और रूट/लक्ष्य तुलना सहायक |
+    | `plugin-sdk/channel-targets` | जुलाई 2026 के बाद निजी-स्थानीय; लक्ष्य पार्सिंग सहायक; रूट तुलना कॉलर को `plugin-sdk/channel-route` का उपयोग करना चाहिए |
+    | `plugin-sdk/channel-contract` | चैनल अनुबंध प्रकार |
+    | `plugin-sdk/channel-feedback` | फ़ीडबैक/प्रतिक्रिया वायरिंग |
   </Accordion>
 
-अप्रचलित channel helper families केवल published-plugin संगतता के लिए उपलब्ध रहती हैं। हटाने की योजना यह है: उन्हें external plugin migration window तक रखें, repo/bundled Plugin को `channel-inbound` और `channel-outbound` पर रखें, फिर अगले major SDK cleanup में compatibility subpaths हटा दें। यह पुराने channel message/runtime, channel streaming, direct-DM access, inbound helper splinter, reply-options, और pairing-path families पर लागू होता है।
+बाद की अवधि वाले चैनल संगतता सबपाथ केवल अपनी
+रजिस्ट्री तिथियों तक सार्वजनिक रहते हैं। प्रत्यक्ष-DM पहुँच, उत्तर-विकल्प, पेयरिंग
+पाथ और चैनल रनटाइम खंडों जैसे जुलाई उपनाम हटा दिए गए हैं; केवल-बंडल सहायक
+निजी-स्थानीय हैं।
 
-  <Accordion title="प्रदाता उप-पथ">
-    | उप-पथ | मुख्य निर्यात |
+  <Accordion title="प्रदाता उपपथ">
+    | उपपथ | प्रमुख एक्सपोर्ट |
     | --- | --- |
-    | `plugin-sdk/provider-entry` | `defineSingleProviderPluginEntry` |
-    | `plugin-sdk/lmstudio` | सेटअप, कैटलॉग खोज, और रनटाइम मॉडल तैयारी के लिए समर्थित LM Studio प्रदाता फसाड |
-    | `plugin-sdk/lmstudio-runtime` | स्थानीय सर्वर डिफ़ॉल्ट, मॉडल खोज, अनुरोध हेडर, और लोडेड-मॉडल हेल्पर के लिए समर्थित LM Studio रनटाइम फसाड |
-    | `plugin-sdk/provider-setup` | क्यूरेट किए गए स्थानीय/स्वयं-होस्टेड प्रदाता सेटअप हेल्पर |
-    | `plugin-sdk/self-hosted-provider-setup` | केंद्रित OpenAI-संगत स्वयं-होस्टेड प्रदाता सेटअप हेल्पर |
-    | `plugin-sdk/cli-backend` | CLI बैकएंड डिफ़ॉल्ट + वॉचडॉग कॉन्स्टेंट |
-    | `plugin-sdk/provider-auth-runtime` | प्रदाता plugins के लिए रनटाइम API-key समाधान हेल्पर |
-    | `plugin-sdk/provider-oauth-runtime` | सामान्य प्रदाता OAuth कॉलबैक प्रकार, कॉलबैक-पेज रेंडरिंग, PKCE/state हेल्पर, authorization-input पार्सिंग, token-expiry हेल्पर, और abort हेल्पर |
-    | `plugin-sdk/provider-auth-api-key` | API-key ऑनबोर्डिंग/profile-write हेल्पर जैसे `upsertApiKeyProfile` |
-    | `plugin-sdk/provider-auth-result` | मानक OAuth auth-result बिल्डर |
-    | `plugin-sdk/provider-env-vars` | प्रदाता auth env-var lookup हेल्पर |
-    | `plugin-sdk/provider-auth` | `createProviderApiKeyAuthMethod`, `ensureApiKeyFromOptionEnvOrPrompt`, `upsertAuthProfile`, `upsertApiKeyProfile`, `writeOAuthCredentials`, OpenAI Codex auth-import हेल्पर, अप्रचलित `resolveOpenClawAgentDir` संगतता निर्यात |
-    | `plugin-sdk/provider-model-shared` | `ProviderReplayFamily`, `buildProviderReplayFamilyHooks`, `normalizeModelCompat`, साझा replay-policy बिल्डर, provider-endpoint हेल्पर, और साझा model-id normalization हेल्पर |
-    | `plugin-sdk/provider-catalog-live-runtime` | संरक्षित `/models`-शैली खोज के लिए लाइव प्रदाता मॉडल कैटलॉग हेल्पर: `buildLiveModelProviderConfig`, `fetchLiveProviderModelRows`, `getCachedLiveProviderModelRows`, `fetchLiveProviderModelIds`, `LiveModelCatalogHttpError`, `clearLiveCatalogCacheForTests`, model-id फ़िल्टरिंग, TTL cache, और स्थिर fallback |
-    | `plugin-sdk/provider-catalog-runtime` | अनुबंध परीक्षणों के लिए प्रदाता कैटलॉग augmentation रनटाइम hook और plugin-provider registry seams |
-    | `plugin-sdk/provider-catalog-shared` | `findCatalogTemplate`, `buildSingleProviderApiKeyCatalog`, `buildManifestModelProviderConfig`, `supportsNativeStreamingUsageCompat`, `applyProviderNativeStreamingUsageCompat` |
-    | `plugin-sdk/provider-http` | सामान्य प्रदाता HTTP/endpoint capability हेल्पर, प्रदाता HTTP त्रुटियां, और ऑडियो transcription multipart form हेल्पर |
-    | `plugin-sdk/provider-web-fetch-contract` | संकुचित web-fetch config/selection अनुबंध हेल्पर जैसे `enablePluginInConfig` और `WebFetchProviderPlugin` |
-    | `plugin-sdk/provider-web-fetch` | Web-fetch प्रदाता registration/cache हेल्पर |
-    | `plugin-sdk/provider-web-search-config-contract` | उन प्रदाताओं के लिए संकुचित web-search config/credential हेल्पर जिन्हें plugin-enable wiring की आवश्यकता नहीं है |
-    | `plugin-sdk/provider-web-search-contract` | संकुचित web-search config/credential अनुबंध हेल्पर जैसे `createWebSearchProviderContractFields`, `enablePluginInConfig`, `resolveProviderWebSearchPluginConfig`, और scoped credential setters/getters |
-    | `plugin-sdk/provider-web-search` | Web-search प्रदाता registration/cache/runtime हेल्पर |
-    | `plugin-sdk/embedding-providers` | सामान्य embedding प्रदाता प्रकार और read हेल्पर, जिनमें `EmbeddingProviderAdapter`, `getEmbeddingProvider(...)`, और `listEmbeddingProviders(...)` शामिल हैं; plugins `api.registerEmbeddingProvider(...)` के माध्यम से प्रदाता register करते हैं ताकि manifest ownership लागू रहे |
-    | `plugin-sdk/provider-tools` | `ProviderToolCompatFamily`, `buildProviderToolCompatFamilyHooks`, और DeepSeek/Gemini/OpenAI schema cleanup + diagnostics |
-    | `plugin-sdk/provider-usage` | प्रदाता usage snapshot प्रकार, साझा usage fetch हेल्पर, और `fetchClaudeUsage` जैसे प्रदाता fetchers |
-    | `plugin-sdk/provider-stream` | `ProviderStreamFamily`, `buildProviderStreamFamilyHooks`, `composeProviderStreamWrappers`, stream wrapper प्रकार, plain-text tool-call compat, और साझा Anthropic/Bedrock/DeepSeek V4/Google/Kilocode/Moonshot/OpenAI/OpenRouter/Z.A.I/MiniMax/Copilot wrapper हेल्पर |
-    | `plugin-sdk/provider-stream-shared` | सार्वजनिक साझा प्रदाता stream wrapper हेल्पर, जिनमें `composeProviderStreamWrappers`, `createOpenAICompatibleCompletionsThinkingOffWrapper`, `createPlainTextToolCallCompatWrapper`, `createPayloadPatchStreamWrapper`, `createToolStreamWrapper`, `normalizeOpenAICompatibleReasoningPayload`, `setQwenChatTemplateThinking`, और Anthropic/DeepSeek/OpenAI-संगत stream utilities शामिल हैं |
-    | `plugin-sdk/provider-transport-runtime` | नेटिव प्रदाता transport हेल्पर जैसे guarded fetch, tool-result text extraction, transport message transforms, और writable transport event streams |
-    | `plugin-sdk/provider-onboard` | ऑनबोर्डिंग config patch हेल्पर |
-    | `plugin-sdk/global-singleton` | Process-local singleton/map/cache हेल्पर |
-    | `plugin-sdk/group-activation` | संकुचित group activation mode और command parsing हेल्पर |
+    | `plugin-sdk/provider-entry` | जुलाई 2026 के बाद निजी-स्थानीय; `defineSingleProviderPluginEntry` |
+    | `plugin-sdk/provider-setup` | जुलाई 2026 के बाद निजी-स्थानीय; चुने हुए स्थानीय/स्व-होस्टेड प्रदाता सेटअप सहायक |
+    | `plugin-sdk/cli-backend` | जुलाई 2026 के बाद निजी-स्थानीय; CLI बैकएंड डिफ़ॉल्ट + वॉचडॉग नियतांक |
+    | `plugin-sdk/provider-auth-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; प्रदाता प्रमाणीकरण रनटाइम सहायक: OAuth लूपबैक प्रवाह, टोकन विनिमय, प्रमाणीकरण स्थायित्व और API-कुंजी समाधान |
+    | `plugin-sdk/provider-oauth-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; सामान्य प्रदाता OAuth कॉलबैक प्रकार, कॉलबैक-पृष्ठ रेंडरिंग, PKCE/स्थिति सहायक, प्राधिकरण-इनपुट पार्सिंग, टोकन-समाप्ति सहायक और निरस्तीकरण सहायक |
+    | `plugin-sdk/provider-auth-api-key` | जुलाई 2026 के बाद निजी-स्थानीय; API-कुंजी ऑनबोर्डिंग/प्रोफ़ाइल-लेखन सहायक, जैसे `upsertApiKeyProfile` |
+    | `plugin-sdk/provider-auth-result` | जुलाई 2026 के बाद निजी-स्थानीय; मानक OAuth प्रमाणीकरण-परिणाम बिल्डर |
+    | `plugin-sdk/provider-env-vars` | जुलाई 2026 के बाद निजी-स्थानीय; प्रदाता प्रमाणीकरण पर्यावरण-चर लुकअप सहायक |
+    | `plugin-sdk/provider-auth` | `createProviderApiKeyAuthMethod`, `ensureApiKeyFromOptionEnvOrPrompt`, `upsertAuthProfile`, `upsertApiKeyProfile`, `writeOAuthCredentials`, OpenAI Codex प्रमाणीकरण-आयात सहायक, अप्रचलित `resolveOpenClawAgentDir` संगतता एक्सपोर्ट |
+    | `plugin-sdk/provider-model-shared` | जुलाई 2026 के बाद निजी-स्थानीय; `ProviderReplayFamily`, `buildProviderReplayFamilyHooks`, `selectPreferredLocalModelId`, `normalizeModelCompat`, साझा रीप्ले-नीति बिल्डर, प्रदाता-एंडपॉइंट सहायक और साझा मॉडल-ID सामान्यीकरण सहायक |
+    | `plugin-sdk/provider-catalog-live-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; संरक्षित `/models`-शैली खोज के लिए लाइव प्रदाता मॉडल कैटलॉग सहायक: `buildLiveModelProviderConfig`, `fetchLiveProviderModelRows`, `getCachedLiveProviderModelRows`, `fetchLiveProviderModelIds`, `LiveModelCatalogHttpError`, `clearLiveCatalogCacheForTests`, मॉडल-ID फ़िल्टरिंग, TTL कैश और स्थिर फ़ॉलबैक |
+    | `plugin-sdk/provider-catalog-runtime` | अनुबंध परीक्षणों के लिए प्रदाता कैटलॉग संवर्धन रनटाइम हुक और Plugin-प्रदाता रजिस्ट्री सीमाएँ |
+    | `plugin-sdk/provider-catalog-shared` | जुलाई 2026 के बाद निजी-स्थानीय; `findCatalogTemplate`, `buildSingleProviderApiKeyCatalog`, `buildManifestModelProviderConfig`, `supportsNativeStreamingUsageCompat`, `applyProviderNativeStreamingUsageCompat` |
+    | `plugin-sdk/provider-http` | जुलाई 2026 के बाद निजी-स्थानीय; सामान्य प्रदाता HTTP/एंडपॉइंट क्षमता सहायक, प्रदाता HTTP त्रुटियाँ और ऑडियो ट्रांसक्रिप्शन मल्टीपार्ट फ़ॉर्म सहायक |
+    | `plugin-sdk/provider-web-fetch-contract` | जुलाई 2026 के बाद निजी-स्थानीय; सीमित वेब-फ़ेच कॉन्फ़िगरेशन/चयन अनुबंध सहायक, जैसे `enablePluginInConfig` और `WebFetchProviderPlugin` |
+    | `plugin-sdk/provider-web-fetch` | जुलाई 2026 के बाद निजी-स्थानीय; वेब-फ़ेच प्रदाता पंजीकरण/कैश सहायक |
+    | `plugin-sdk/provider-web-search-config-contract` | जुलाई 2026 के बाद निजी-स्थानीय; उन प्रदाताओं के लिए सीमित वेब-खोज कॉन्फ़िगरेशन/क्रेडेंशियल सहायक जिन्हें Plugin-सक्षमकरण वायरिंग की आवश्यकता नहीं है |
+    | `plugin-sdk/provider-web-search-contract` | जुलाई 2026 के बाद निजी-स्थानीय; सीमित वेब-खोज कॉन्फ़िगरेशन/क्रेडेंशियल अनुबंध सहायक, जैसे `createWebSearchProviderContractFields`, `enablePluginInConfig`, `resolveProviderWebSearchPluginConfig`, और सीमित-क्षेत्र क्रेडेंशियल सेटर/गेटर |
+    | `plugin-sdk/provider-web-search` | जुलाई 2026 के बाद निजी-स्थानीय; वेब-खोज प्रदाता पंजीकरण/कैश/रनटाइम सहायक |
+    | `plugin-sdk/embedding-providers` | जुलाई 2026 के बाद निजी-स्थानीय; सामान्य एम्बेडिंग प्रदाता प्रकार और पठन सहायक, जिनमें `EmbeddingProviderAdapter`, `getEmbeddingProvider(...)`, और `listEmbeddingProviders(...)` शामिल हैं; Plugin, प्रदाताओं को `api.registerEmbeddingProvider(...)` के माध्यम से पंजीकृत करते हैं ताकि मैनिफ़ेस्ट स्वामित्व लागू रहे |
+    | `plugin-sdk/provider-tools` | जुलाई 2026 के बाद निजी-स्थानीय; `ProviderToolCompatFamily`, `buildProviderToolCompatFamilyHooks`, और DeepSeek/Gemini/OpenAI स्कीमा क्लीनअप + निदान |
+    | `plugin-sdk/provider-usage` | जुलाई 2026 के बाद निजी-स्थानीय; प्रदाता उपयोग स्नैपशॉट प्रकार, साझा उपयोग फ़ेच सहायक और प्रदाता फ़ेचर, जैसे `fetchClaudeUsage` |
+    | `plugin-sdk/provider-stream` | जुलाई 2026 के बाद निजी-स्थानीय; `ProviderStreamFamily`, `buildProviderStreamFamilyHooks`, `composeProviderStreamWrappers`, स्ट्रीम रैपर प्रकार, सादा-पाठ टूल-कॉल संगतता और साझा Anthropic/Google/Kilocode/MiniMax/Moonshot/OpenAI/OpenRouter/Z.AI रैपर सहायक |
+    | `plugin-sdk/provider-stream-shared` | जुलाई 2026 के बाद निजी-स्थानीय; सार्वजनिक साझा प्रदाता स्ट्रीम रैपर सहायक, जिनमें `composeProviderStreamWrappers`, `createOpenAICompatibleCompletionsThinkingOffWrapper`, `createPlainTextToolCallCompatWrapper`, `createPayloadPatchStreamWrapper`, `createToolStreamWrapper`, `normalizeOpenAICompatibleReasoningPayload`, `setQwenChatTemplateThinking`, और Anthropic/DeepSeek/OpenAI-संगत स्ट्रीम उपयोगिताएँ शामिल हैं |
+    | `plugin-sdk/provider-transport-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; नेटिव प्रदाता ट्रांसपोर्ट सहायक, जैसे संरक्षित फ़ेच, टूल-परिणाम पाठ निष्कर्षण, ट्रांसपोर्ट संदेश रूपांतरण और लेखनयोग्य ट्रांसपोर्ट इवेंट स्ट्रीम |
+    | `plugin-sdk/provider-onboard` | जुलाई 2026 के बाद निजी-स्थानीय; ऑनबोर्डिंग कॉन्फ़िगरेशन पैच सहायक |
+    | `plugin-sdk/global-singleton` | जुलाई 2026 के बाद निजी-स्थानीय; प्रक्रिया-स्थानीय सिंगलटन/मैप/कैश सहायक |
+    | `plugin-sdk/group-activation` | जुलाई 2026 के बाद निजी-स्थानीय; सीमित समूह सक्रियण मोड और कमांड पार्सिंग सहायक |
   </Accordion>
 
-प्रदाता usage snapshots सामान्यतः एक या अधिक quota `windows` रिपोर्ट करते हैं, प्रत्येक में
-एक label, उपयोग किया गया प्रतिशत, और वैकल्पिक reset time होता है। जो प्रदाता resettable quota
-windows के बजाय balance या account-state text उजागर करते हैं, उन्हें प्रतिशत गढ़ने के बजाय
-खाली `windows` array के साथ `summary` लौटाना चाहिए।
-OpenClaw उस summary text को status output में दिखाता है; `error` का उपयोग केवल तब करें जब
-usage endpoint विफल हो गया हो या उसने कोई उपयोगी usage data न लौटाया हो।
+प्रदाता उपयोग स्नैपशॉट सामान्यतः एक या अधिक कोटा `windows` रिपोर्ट करते हैं, जिनमें प्रत्येक के साथ
+एक लेबल, उपयोग किया गया प्रतिशत और वैकल्पिक रीसेट समय होता है। जो प्रदाता रीसेट किए जा सकने वाले कोटा
+विंडो के बजाय शेषराशि या खाता-स्थिति पाठ प्रदर्शित करते हैं, उन्हें काल्पनिक प्रतिशत बनाने के बजाय
+रिक्त `windows` सरणी के साथ `summary` लौटाना चाहिए।
+OpenClaw उस सारांश पाठ को स्थिति आउटपुट में प्रदर्शित करता है; `error` का उपयोग केवल तब करें जब
+उपयोग एंडपॉइंट विफल हो गया हो या उसने कोई उपयोगी उपयोग डेटा न लौटाया हो।
 
-  <Accordion title="Auth और security उप-पथ">
-    | उप-पथ | मुख्य निर्यात |
+  <Accordion title="प्रमाणीकरण और सुरक्षा उपपथ">
+    | उपपथ | प्रमुख एक्सपोर्ट |
     | --- | --- |
-    | `plugin-sdk/command-auth` | `resolveControlCommandGate`, command registry हेल्पर जिनमें dynamic argument menu formatting, sender-authorization हेल्पर शामिल हैं |
-    | `plugin-sdk/command-status` | Command/help message बिल्डर जैसे `buildCommandsMessagePaginated` और `buildHelpMessage` |
-    | `plugin-sdk/approval-auth-runtime` | Approver resolution और same-chat action-auth हेल्पर |
-    | `plugin-sdk/approval-client-runtime` | Native exec approval profile/filter हेल्पर |
-    | `plugin-sdk/approval-delivery-runtime` | Native approval capability/delivery adapters |
-    | `plugin-sdk/approval-gateway-runtime` | साझा approval gateway-resolution हेल्पर |
-    | `plugin-sdk/approval-handler-adapter-runtime` | hot channel entrypoints के लिए हल्के native approval adapter loading हेल्पर |
-    | `plugin-sdk/approval-handler-runtime` | व्यापक approval handler runtime हेल्पर; जब वे पर्याप्त हों तो संकुचित adapter/gateway seams को प्राथमिकता दें |
-    | `plugin-sdk/approval-native-runtime` | Native approval target, account-binding, route-gate, forwarding fallback, और local native exec prompt suppression हेल्पर |
-    | `plugin-sdk/approval-reaction-runtime` | Hardcoded approval reaction bindings, reaction prompt payloads, reaction target stores, reaction hint text हेल्पर, और local native exec prompt suppression के लिए compatibility export |
-    | `plugin-sdk/approval-reply-runtime` | Exec/plugin approval reply payload हेल्पर |
-    | `plugin-sdk/approval-runtime` | Exec/plugin approval payload हेल्पर, native approval routing/runtime हेल्पर, और structured approval display हेल्पर जैसे `formatApprovalDisplayPath` |
-    | `plugin-sdk/reply-dedupe` | संकुचित inbound reply dedupe reset हेल्पर |
-    | `plugin-sdk/channel-contract-testing` | व्यापक testing barrel के बिना संकुचित channel contract test हेल्पर |
-    | `plugin-sdk/command-auth-native` | Native command auth, dynamic argument menu formatting, और native session-target हेल्पर |
-    | `plugin-sdk/command-detection` | साझा command detection हेल्पर |
-    | `plugin-sdk/command-primitives-runtime` | hot channel paths के लिए हल्के command text predicates |
-    | `plugin-sdk/command-surface` | Command-body normalization और command-surface हेल्पर |
+    | `plugin-sdk/command-auth` | अप्रचलित व्यापक कमांड प्राधिकरण सतह (`resolveControlCommandGate`, डायनेमिक आर्ग्युमेंट मेनू फ़ॉर्मेटिंग सहित कमांड रजिस्ट्री सहायक, प्रेषक-प्राधिकरण सहायक); चैनल इनग्रेस/रनटाइम प्राधिकरण या कमांड-स्थिति सहायकों का उपयोग करें |
+    | `plugin-sdk/command-status` | कमांड/सहायता संदेश बिल्डर, जैसे `buildCommandsMessagePaginated` और `buildHelpMessage` |
+    | `plugin-sdk/approval-auth-runtime` | अनुमोदक समाधान और समान-चैट क्रिया-प्रमाणीकरण सहायक |
+    | `plugin-sdk/approval-client-runtime` | नेटिव exec अनुमोदन प्रोफ़ाइल/फ़िल्टर सहायक |
+    | `plugin-sdk/approval-delivery-runtime` | नेटिव अनुमोदन क्षमता/डिलीवरी अडैप्टर |
+    | `plugin-sdk/approval-gateway-runtime` | साझा अनुमोदन Gateway रिज़ॉल्वर |
+    | `plugin-sdk/approval-reference-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; ट्रांसपोर्ट-सीमित अनुमोदन कॉलबैक के लिए नियतात्मक टिकाऊ-लोकेटर सहायक |
+    | `plugin-sdk/approval-handler-adapter-runtime` | हॉट चैनल एंट्रीपॉइंट के लिए हल्के नेटिव अनुमोदन अडैप्टर लोडिंग सहायक |
+    | `plugin-sdk/approval-handler-runtime` | व्यापक अनुमोदन हैंडलर रनटाइम सहायक; जब सीमित अडैप्टर/Gateway सीमाएँ पर्याप्त हों, तो उन्हें प्राथमिकता दें |
+    | `plugin-sdk/approval-native-runtime` | नेटिव अनुमोदन लक्ष्य, खाता-बाइंडिंग, रूट-गेट, फ़ॉरवर्डिंग फ़ॉलबैक और स्थानीय नेटिव exec प्रॉम्प्ट दमन सहायक |
+    | `plugin-sdk/approval-reaction-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; हार्डकोडेड अनुमोदन प्रतिक्रिया बाइंडिंग, प्रतिक्रिया प्रॉम्प्ट पेलोड, प्रतिक्रिया लक्ष्य स्टोर, प्रतिक्रिया संकेत पाठ सहायक और स्थानीय नेटिव exec प्रॉम्प्ट दमन के लिए संगतता एक्सपोर्ट |
+    | `plugin-sdk/approval-reply-runtime` | exec/Plugin अनुमोदन उत्तर पेलोड सहायक |
+    | `plugin-sdk/approval-runtime` | exec/Plugin अनुमोदन पेलोड सहायक, अनुमोदन-क्षमता बिल्डर, अनुमोदन प्रमाणीकरण/प्रोफ़ाइल सहायक, नेटिव अनुमोदन रूटिंग/रनटाइम सहायक और संरचित अनुमोदन प्रदर्शन सहायक, जैसे `formatApprovalDisplayPath` |
+    | `plugin-sdk/command-auth-native` | नेटिव कमांड प्रमाणीकरण, डायनेमिक आर्ग्युमेंट मेनू फ़ॉर्मेटिंग और नेटिव सत्र-लक्ष्य सहायक |
+    | `plugin-sdk/command-detection` | साझा कमांड पहचान सहायक |
+    | `plugin-sdk/command-primitives-runtime` | हॉट चैनल पथों के लिए हल्के कमांड पाठ प्रेडिकेट |
+    | `plugin-sdk/command-surface` | जुलाई 2026 के बाद निजी-स्थानीय; कमांड-बॉडी सामान्यीकरण और कमांड-सतह सहायक |
     | `plugin-sdk/allow-from` | `formatAllowFromLowercase` |
-    | `plugin-sdk/provider-auth-login-flow-runtime` | private channel और Web UI device-code pairing के लिए lazy provider auth login flow हेल्पर |
-    | `plugin-sdk/channel-secret-runtime` | channel/plugin secret surfaces के लिए संकुचित secret-contract collection हेल्पर |
-    | `plugin-sdk/secret-ref-runtime` | secret-contract/config parsing के लिए संकुचित `coerceSecretRef` और SecretRef typing हेल्पर |
-    | `plugin-sdk/secret-provider-integration` | बाहरी secret provider presets प्रकाशित करने वाले plugins के लिए केवल-प्रकार SecretRef provider integration manifest और preset contracts |
-    | `plugin-sdk/security-runtime` | साझा trust, DM gating, root-bounded file/path हेल्पर जिनमें create-only writes, sync/async atomic file replacement, sibling temp writes, cross-device move fallback, private file-store हेल्पर, symlink-parent guards, external-content, sensitive text redaction, constant-time secret comparison, और secret-collection हेल्पर शामिल हैं |
-    | `plugin-sdk/ssrf-policy` | Host allowlist और private-network SSRF policy हेल्पर |
-    | `plugin-sdk/ssrf-dispatcher` | व्यापक infra runtime surface के बिना संकुचित pinned-dispatcher हेल्पर |
-    | `plugin-sdk/ssrf-runtime` | Pinned-dispatcher, SSRF-guarded fetch, SSRF error, और SSRF policy हेल्पर |
-    | `plugin-sdk/secret-input` | Secret input parsing हेल्पर |
-    | `plugin-sdk/webhook-ingress` | Webhook request/target हेल्पर और raw websocket/body coercion |
-    | `plugin-sdk/webhook-request-guards` | Request body size/timeout हेल्पर |
+    | `plugin-sdk/provider-auth-login-flow-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; निजी चैनल और Web UI डिवाइस-कोड पेयरिंग के लिए आलसी प्रदाता प्रमाणीकरण लॉगिन प्रवाह सहायक |
+    | `plugin-sdk/channel-secret-runtime` | अप्रचलित व्यापक सीक्रेट-अनुबंध सतह (`collectSimpleChannelFieldAssignments`, `getChannelSurface`, `pushAssignment`, सीक्रेट लक्ष्य प्रकार); नीचे दिए गए केंद्रित उपपथों को प्राथमिकता दें |
+    | `plugin-sdk/channel-secret-basic-runtime` | गैर-TTS चैनल/Plugin सीक्रेट सतहों के लिए सीमित सीक्रेट-अनुबंध एक्सपोर्ट और लक्ष्य-रजिस्ट्री बिल्डर |
+    | `plugin-sdk/channel-secret-tts-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; सीमित नेस्टेड चैनल TTS सीक्रेट असाइनमेंट सहायक |
+    | `plugin-sdk/secret-ref-runtime` | सीक्रेट-अनुबंध/कॉन्फ़िगरेशन पार्सिंग के लिए सीमित SecretRef टाइपिंग, समाधान और योजना-लक्ष्य पथ लुकअप |
+    | `plugin-sdk/security-runtime` | विश्वास, DM गेटिंग, केवल-सृजन लेखन सहित रूट-सीमित फ़ाइल/पथ सहायक, सिंक/एसिंक परमाणु फ़ाइल प्रतिस्थापन, सिबलिंग अस्थायी लेखन, क्रॉस-डिवाइस मूव फ़ॉलबैक, निजी फ़ाइल-स्टोर सहायक, सिमलिंक-पैरेंट गार्ड, बाहरी-सामग्री, संवेदनशील पाठ रिडैक्शन, नियत-समय सीक्रेट तुलना और सीक्रेट-संग्रह सहायकों के लिए अप्रचलित व्यापक बैरल; केंद्रित सुरक्षा/SSRF/सीक्रेट उपपथों को प्राथमिकता दें |
+    | `plugin-sdk/ssrf-policy` | होस्ट अनुमति-सूची और निजी-नेटवर्क SSRF नीति सहायक |
+    | `plugin-sdk/ssrf-dispatcher` | जुलाई 2026 के बाद निजी-स्थानीय; व्यापक इंफ़्रा रनटाइम सतह के बिना सीमित पिन्ड-डिस्पैचर सहायक |
+    | `plugin-sdk/ssrf-runtime` | पिन्ड-डिस्पैचर, SSRF-संरक्षित फ़ेच, SSRF त्रुटि और SSRF नीति सहायक |
+    | `plugin-sdk/secret-input` | सीक्रेट इनपुट पार्सिंग सहायक |
+    | `plugin-sdk/webhook-ingress` | Webhook अनुरोध/लक्ष्य सहायक और रॉ वेबसॉकेट/बॉडी कोअर्शन |
+    | `plugin-sdk/webhook-request-guards` | अनुरोध बॉडी आकार/टाइमआउट सहायक और ट्रैक किए गए पोस्ट-ऐक प्रसंस्करण के लिए `runDetachedWebhookWork` |
   </Accordion>
 
   <Accordion title="Runtime and storage subpaths">
-    | उपपथ | मुख्य निर्यात |
+    | उपपथ | प्रमुख एक्सपोर्ट |
     | --- | --- |
-    | `plugin-sdk/runtime` | व्यापक रनटाइम/लॉगिंग/बैकअप/Plugin-इंस्टॉल हेल्पर |
-    | `plugin-sdk/runtime-env` | संकीर्ण रनटाइम env, logger, timeout, retry, और backoff हेल्पर |
-    | `plugin-sdk/browser-config` | सामान्यीकृत प्रोफ़ाइल/डिफ़ॉल्ट, CDP URL पार्सिंग, और ब्राउज़र-कंट्रोल auth हेल्पर के लिए समर्थित ब्राउज़र config facade |
-    | `plugin-sdk/agent-harness-task-runtime` | होस्ट-द्वारा जारी task scope का उपयोग करने वाले harness-backed agents के लिए सामान्य task lifecycle और completion delivery हेल्पर |
-    | `plugin-sdk/codex-mcp-projection` | उपयोगकर्ता MCP server config को Codex thread config में प्रोजेक्ट करने के लिए आरक्षित bundled Codex हेल्पर; third-party plugins के लिए नहीं |
-    | `plugin-sdk/codex-native-task-runtime` | native task mirror/runtime wiring के लिए निजी bundled Codex हेल्पर; third-party plugins के लिए नहीं |
-    | `plugin-sdk/channel-runtime-context` | सामान्य channel runtime-context registration और lookup हेल्पर |
-    | `plugin-sdk/matrix` | पुराने third-party channel packages के लिए deprecated Matrix compatibility facade; नए plugins को सीधे `plugin-sdk/run-command` import करना चाहिए |
-    | `plugin-sdk/mattermost` | पुराने third-party channel packages के लिए deprecated Mattermost compatibility facade; नए plugins को सीधे generic SDK subpaths import करना चाहिए |
+    | `plugin-sdk/runtime` | रनटाइम/लॉगिंग/बैकअप सहायक, Plugin इंस्टॉल-पथ चेतावनियाँ और प्रोसेस सहायक |
+    | `plugin-sdk/runtime-env` | सीमित रनटाइम परिवेश, लॉगर, टाइमआउट, पुनः प्रयास और बैकऑफ़ सहायक |
+    | `plugin-sdk/browser-config` | जुलाई 2026 के बाद निजी-स्थानीय; सामान्यीकृत प्रोफ़ाइल/डिफ़ॉल्ट, CDP URL पार्सिंग और ब्राउज़र-नियंत्रण प्रमाणीकरण सहायकों के लिए समर्थित ब्राउज़र कॉन्फ़िगरेशन फ़साड |
+    | `plugin-sdk/agent-harness-task-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; होस्ट द्वारा जारी कार्य स्कोप का उपयोग करने वाले हार्नेस-समर्थित एजेंटों के लिए सामान्य कार्य जीवनचक्र और पूर्णता डिलीवरी सहायक |
+    | `plugin-sdk/codex-mcp-projection` | जुलाई 2026 के बाद निजी-स्थानीय; उपयोगकर्ता MCP सर्वर कॉन्फ़िगरेशन को Codex थ्रेड कॉन्फ़िगरेशन में प्रक्षेपित करने के लिए आरक्षित बंडल किया गया Codex सहायक; तृतीय-पक्ष plugins के लिए नहीं |
+    | `plugin-sdk/codex-native-task-runtime` | मूल कार्य मिरर/रनटाइम वायरिंग के लिए रिपॉज़िटरी-स्थानीय बंडल किया गया Codex सहायक; पैकेज एक्सपोर्ट नहीं |
+    | `plugin-sdk/channel-runtime-context` | सामान्य चैनल रनटाइम-संदर्भ पंजीकरण और लुकअप सहायक |
+    | `plugin-sdk/matrix` | पुराने तृतीय-पक्ष चैनल पैकेजों के लिए अप्रचलित Matrix संगतता फ़साड; नए plugins को सीधे `plugin-sdk/run-command` इम्पोर्ट करना चाहिए |
     | `plugin-sdk/runtime-store` | `createPluginRuntimeStore` |
-    | `plugin-sdk/plugin-runtime` | साझा plugin command/hook/http/interactive हेल्पर |
-    | `plugin-sdk/hook-runtime` | साझा webhook/internal hook pipeline हेल्पर |
-    | `plugin-sdk/lazy-runtime` | `createLazyRuntimeModule`, `createLazyRuntimeMethod`, और `createLazyRuntimeSurface` जैसे lazy runtime import/binding हेल्पर |
-    | `plugin-sdk/process-runtime` | Process exec हेल्पर |
-    | `plugin-sdk/cli-runtime` | CLI formatting, wait, version, argument-invocation, और lazy command-group हेल्पर |
-    | `plugin-sdk/qa-live-transport-scenarios` | साझा live transport QA scenario ids, baseline coverage हेल्पर, और scenario-selection हेल्पर |
-    | `plugin-sdk/gateway-method-runtime` | `contracts.gatewayMethodDispatch: ["authenticated-request"]` घोषित करने वाले plugin HTTP routes के लिए आरक्षित Gateway method dispatch हेल्पर |
-    | `plugin-sdk/gateway-runtime` | Gateway client, event-loop-ready client start हेल्पर, gateway CLI RPC, gateway protocol errors, advertised LAN host resolution, और channel-status patch हेल्पर |
-    | `plugin-sdk/config-contracts` | `OpenClawConfig` जैसे plugin config shapes और channel/provider config types के लिए केंद्रित type-only config surface |
-    | `plugin-sdk/plugin-config-runtime` | `requireRuntimeConfig`, `resolvePluginConfigObject`, और `resolveLivePluginConfigObject` जैसे runtime plugin-config lookup हेल्पर |
-    | `plugin-sdk/config-mutation` | `mutateConfigFile`, `replaceConfigFile`, और `logConfigUpdated` जैसे transactional config mutation हेल्पर |
-    | `plugin-sdk/message-tool-delivery-hints` | साझा message-tool delivery metadata hint strings |
-    | `plugin-sdk/runtime-config-snapshot` | `getRuntimeConfig`, `getRuntimeConfigSnapshot`, और test snapshot setters जैसे current process config snapshot हेल्पर |
-    | `plugin-sdk/telegram-command-config` | Telegram command-name/description normalization और duplicate/conflict checks, तब भी जब bundled Telegram contract surface उपलब्ध न हो |
-    | `plugin-sdk/text-autolink-runtime` | broad text barrel के बिना file-reference autolink detection |
-    | `plugin-sdk/approval-reaction-runtime` | Hardcoded approval reaction bindings, reaction prompt payloads, reaction target stores, reaction hint text हेल्पर, और local native exec prompt suppression के लिए compatibility export |
-    | `plugin-sdk/approval-runtime` | Exec/plugin approval हेल्पर, approval-capability builders, auth/profile हेल्पर, native routing/runtime हेल्पर, और structured approval display path formatting |
-    | `plugin-sdk/reply-runtime` | साझा inbound/reply runtime हेल्पर, chunking, dispatch, Heartbeat, reply planner |
-    | `plugin-sdk/reply-dispatch-runtime` | संकीर्ण reply dispatch/finalize और conversation-label हेल्पर |
-    | `plugin-sdk/reply-history` | साझा short-window reply-history हेल्पर। नए message-turn code को `createChannelHistoryWindow` का उपयोग करना चाहिए; lower-level map हेल्पर केवल deprecated compatibility exports बने रहते हैं |
-    | `plugin-sdk/reply-reference` | `createReplyReferencePlanner` |
-    | `plugin-sdk/reply-chunking` | संकीर्ण text/markdown chunking हेल्पर |
-    | `plugin-sdk/session-store-runtime` | Session workflow हेल्पर (`getSessionEntry`, `listSessionEntries`, `patchSessionEntry`, `upsertSessionEntry`), session identity के आधार पर bounded recent user/assistant transcript text reads, legacy session store path/session-key हेल्पर, updated-at reads, और transition-only whole-store/file-path compatibility हेल्पर |
-    | `plugin-sdk/session-transcript-runtime` | Transcript identity, scoped target/read/write हेल्पर, update publishing, write locks, और transcript memory hit keys |
-    | `plugin-sdk/sqlite-runtime` | first-party runtime के लिए केंद्रित SQLite agent-schema, path, और transaction हेल्पर |
-    | `plugin-sdk/cron-store-runtime` | Cron store path/load/save हेल्पर |
-    | `plugin-sdk/state-paths` | State/OAuth dir path हेल्पर |
-    | `plugin-sdk/plugin-state-runtime` | Plugin sidecar SQLite keyed-state types और plugin-owned databases के लिए centralized connection pragma और WAL maintenance setup |
-    | `plugin-sdk/routing` | `resolveAgentRoute`, `buildAgentSessionKey`, और `resolveDefaultAgentBoundAccountId` जैसे route/session-key/account binding हेल्पर |
-    | `plugin-sdk/status-helpers` | साझा channel/account status summary हेल्पर, runtime-state defaults, और issue metadata हेल्पर |
-    | `plugin-sdk/target-resolver-runtime` | साझा target resolver हेल्पर |
-    | `plugin-sdk/string-normalization-runtime` | Slug/string normalization हेल्पर |
-    | `plugin-sdk/request-url` | fetch/request-like inputs से string URLs निकालें |
-    | `plugin-sdk/run-command` | normalized stdout/stderr results के साथ timed command runner |
-    | `plugin-sdk/param-readers` | सामान्य tool/CLI param readers |
-    | `plugin-sdk/tool-plugin` | एक simple typed agent-tool plugin define करें और manifest generation के लिए static metadata expose करें |
-    | `plugin-sdk/tool-payload` | tool result objects से normalized payloads निकालें |
-    | `plugin-sdk/tool-send` | tool args से canonical send target fields निकालें |
-    | `plugin-sdk/sandbox` | Sandbox backend types और SSH/OpenShell command हेल्पर, जिनमें fail-fast exec command preflight शामिल है |
-    | `plugin-sdk/temp-path` | साझा temp-download path हेल्पर और private secure temp workspaces |
-    | `plugin-sdk/logging-core` | Subsystem logger और redaction हेल्पर |
-    | `plugin-sdk/markdown-table-runtime` | Markdown table mode और conversion हेल्पर |
-    | `plugin-sdk/model-session-runtime` | `applyModelOverrideToSessionEntry` और `resolveAgentMaxConcurrent` जैसे model/session override हेल्पर |
-    | `plugin-sdk/talk-config-runtime` | Talk provider config resolution हेल्पर |
-    | `plugin-sdk/json-store` | छोटे JSON state read/write हेल्पर |
-    | `plugin-sdk/json-unsafe-integers` | JSON parsing हेल्पर जो unsafe integer literals को strings के रूप में सुरक्षित रखते हैं |
-    | `plugin-sdk/file-lock` | Re-entrant file-lock हेल्पर |
-    | `plugin-sdk/persistent-dedupe` | Disk-backed dedupe cache हेल्पर |
-    | `plugin-sdk/acp-runtime` | ACP runtime/session और reply-dispatch हेल्पर |
-    | `plugin-sdk/acp-runtime-backend` | startup-loaded plugins के लिए lightweight ACP backend registration और reply-dispatch हेल्पर |
-    | `plugin-sdk/acp-binding-resolve-runtime` | lifecycle startup imports के बिना read-only ACP binding resolution |
-    | `plugin-sdk/agent-config-primitives` | संकीर्ण agent runtime config-schema primitives |
-    | `plugin-sdk/boolean-param` | Loose boolean param reader |
-    | `plugin-sdk/dangerous-name-runtime` | Dangerous-name matching resolution हेल्पर |
-    | `plugin-sdk/device-bootstrap` | Device bootstrap और pairing token हेल्पर |
-    | `plugin-sdk/extension-shared` | साझा passive-channel, status, और ambient proxy helper primitives |
-    | `plugin-sdk/models-provider-runtime` | `/models` command/provider reply हेल्पर |
-    | `plugin-sdk/skill-commands-runtime` | Skill command listing हेल्पर |
-    | `plugin-sdk/native-command-registry` | Native command registry/build/serialize हेल्पर |
-    | `plugin-sdk/agent-harness` | low-level agent harnesses के लिए experimental trusted-plugin surface: harness types, active-run steer/abort हेल्पर, OpenClaw tool bridge हेल्पर, runtime-plan tool policy हेल्पर, terminal outcome classification, tool progress formatting/detail हेल्पर, और attempt result utilities |
-    | `plugin-sdk/provider-zai-endpoint` | Deprecated Z.AI provider-owned endpoint detection facade; Z.AI plugin public API का उपयोग करें |
-    | `plugin-sdk/async-lock-runtime` | छोटे runtime state files के लिए process-local async lock हेल्पर |
-    | `plugin-sdk/channel-activity-runtime` | Channel activity telemetry हेल्पर |
-    | `plugin-sdk/concurrency-runtime` | Bounded async task concurrency हेल्पर |
-    | `plugin-sdk/dedupe-runtime` | In-memory और persistent-backed dedupe cache हेल्पर |
-    | `plugin-sdk/delivery-queue-runtime` | Outbound pending-delivery drain हेल्पर |
-    | `plugin-sdk/file-access-runtime` | Safe local-file और media-source path हेल्पर |
-    | `plugin-sdk/heartbeat-runtime` | Heartbeat wake, event, और visibility हेल्पर |
-    | `plugin-sdk/number-runtime` | Numeric coercion हेल्पर |
-    | `plugin-sdk/secure-random-runtime` | Secure token/UUID हेल्पर |
-    | `plugin-sdk/system-event-runtime` | System event queue हेल्पर |
-    | `plugin-sdk/transport-ready-runtime` | Transport readiness wait हेल्पर |
-    | `plugin-sdk/exec-approvals-runtime` | broad infra-runtime barrel के बिना exec approval policy file हेल्पर |
-    | `plugin-sdk/infra-runtime` | Deprecated compatibility shim; ऊपर दिए गए focused runtime subpaths का उपयोग करें |
-    | `plugin-sdk/collection-runtime` | छोटे bounded cache हेल्पर |
-    | `plugin-sdk/diagnostic-runtime` | Diagnostic flag, event, और trace-context हेल्पर |
-    | `plugin-sdk/error-runtime` | Error graph, formatting, shared error classification हेल्पर, `isApprovalNotFoundError` |
-    | `plugin-sdk/fetch-runtime` | Wrapped fetch, proxy, EnvHttpProxyAgent option, और pinned lookup हेल्पर |
-    | `plugin-sdk/runtime-fetch` | proxy/guarded-fetch imports के बिना dispatcher-aware runtime fetch |
-    | `plugin-sdk/inline-image-data-url-runtime` | broad media runtime surface के बिना inline image data URL sanitizer और signature sniffing हेल्पर |
-    | `plugin-sdk/response-limit-runtime` | broad media runtime surface के बिना bounded response-body reader |
-    | `plugin-sdk/session-binding-runtime` | configured binding routing या pairing stores के बिना current conversation binding state |
-    | `plugin-sdk/session-store-runtime` | broad config writes/maintenance imports के बिना session-store हेल्पर |
-    | `plugin-sdk/sqlite-runtime` | database lifecycle controls के बिना focused SQLite agent-schema, path, और transaction हेल्पर |
-    | `plugin-sdk/context-visibility-runtime` | broad config/security imports के बिना context visibility resolution और supplemental context filtering |
-    | `plugin-sdk/string-coerce-runtime` | markdown/logging imports के बिना narrow primitive record/string coercion और normalization हेल्पर |
-    | `plugin-sdk/host-runtime` | Hostname और SCP host normalization हेल्पर |
-    | `plugin-sdk/retry-runtime` | Retry config और retry runner हेल्पर |
-    | `plugin-sdk/agent-runtime` | Agent dir/identity/workspace हेल्पर, जिनमें `resolveAgentDir`, `resolveDefaultAgentDir`, और deprecated `resolveOpenClawAgentDir` compatibility export शामिल हैं |
-    | `plugin-sdk/directory-runtime` | Config-backed directory query/dedup |
-    | `plugin-sdk/keyed-async-queue` | `KeyedAsyncQueue` |
+    | `plugin-sdk/plugin-runtime` | Plugin कमांड/हुक/http/इंटरैक्टिव सहायकों के लिए अप्रचलित व्यापक बैरल; केंद्रित Plugin रनटाइम उपपथों को प्राथमिकता दें |
+    | `plugin-sdk/hook-runtime` | Webhook/आंतरिक हुक पाइपलाइन सहायकों के लिए अप्रचलित व्यापक बैरल; केंद्रित हुक/Plugin रनटाइम उपपथों को प्राथमिकता दें |
+    | `plugin-sdk/lazy-runtime` | `createLazyRuntimeModule`, `createLazyRuntimeMethod` और `createLazyRuntimeSurface` जैसे आलसी रनटाइम इम्पोर्ट/बाइंडिंग सहायक |
+    | `plugin-sdk/process-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; प्रोसेस exec सहायक |
+    | `plugin-sdk/node-host` | जुलाई 2026 के बाद निजी-स्थानीय; Node-होस्ट निष्पादन योग्य फ़ाइल समाधान और PTY पुनरारंभ सहायक |
+    | `plugin-sdk/cli-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; CLI फ़ॉर्मैटिंग, प्रतीक्षा, संस्करण, तर्क-आह्वान और आलसी कमांड-समूह सहायकों के लिए अप्रचलित व्यापक बैरल; केंद्रित CLI/रनटाइम उपपथों को प्राथमिकता दें |
+    | `plugin-sdk/qa-runner-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; CLI कमांड सतह के माध्यम से Plugin QA परिदृश्य उजागर करने वाला समर्थित फ़साड |
+    | `plugin-sdk/tts-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; टेक्स्ट-टू-स्पीच कॉन्फ़िगरेशन स्कीमा और रनटाइम सहायकों के लिए समर्थित फ़साड |
+    | `plugin-sdk/gateway-method-runtime` | `contracts.gatewayMethodDispatch: ["authenticated-request"]` घोषित करने वाले Plugin HTTP रूटों के लिए आरक्षित Gateway विधि डिस्पैच सहायक |
+    | `plugin-sdk/gateway-runtime` | Gateway क्लाइंट, इवेंट-लूप-तैयार क्लाइंट आरंभ सहायक, Gateway CLI RPC, Gateway प्रोटोकॉल त्रुटियाँ, विज्ञापित LAN होस्ट समाधान और चैनल-स्थिति पैच सहायक |
+    | `plugin-sdk/config-contracts` | `OpenClawConfig` जैसी Plugin कॉन्फ़िगरेशन आकृतियों और चैनल/प्रदाता कॉन्फ़िगरेशन प्रकारों के लिए केंद्रित केवल-प्रकार कॉन्फ़िगरेशन सतह |
+    | `plugin-sdk/plugin-config-runtime` | रनटाइम Plugin-कॉन्फ़िगरेशन सहायकों के लिए अप्रचलित संगतता फ़साड; नए plugins केंद्रित कॉन्फ़िगरेशन अनुबंधों, स्नैपशॉट और परिवर्तन सहायकों के साथ `api.pluginConfig` का उपयोग करते हैं |
+    | `plugin-sdk/config-mutation` | `mutateConfigFile`, `replaceConfigFile` और `logConfigUpdated` जैसे ट्रांज़ैक्शनल कॉन्फ़िगरेशन परिवर्तन सहायक |
+    | `plugin-sdk/message-tool-delivery-hints` | जुलाई 2026 के बाद निजी-स्थानीय; साझा संदेश-टूल डिलीवरी मेटाडेटा संकेत स्ट्रिंग |
+    | `plugin-sdk/runtime-config-snapshot` | `getRuntimeConfig`, `getRuntimeConfigSnapshot` और परीक्षण स्नैपशॉट सेटर जैसे वर्तमान प्रोसेस कॉन्फ़िगरेशन स्नैपशॉट सहायक |
+    | `plugin-sdk/text-autolink-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; व्यापक टेक्स्ट बैरल के बिना फ़ाइल-संदर्भ ऑटोलिंक पहचान |
+    | `plugin-sdk/reply-runtime` | साझा इनबाउंड/उत्तर रनटाइम सहायक, खंडन, डिस्पैच, Heartbeat, उत्तर योजनाकार |
+    | `plugin-sdk/reply-dispatch-runtime` | सीमित उत्तर डिस्पैच/अंतिमीकरण और वार्तालाप-लेबल सहायक |
+    | `plugin-sdk/reply-history` | साझा लघु-अवधि उत्तर-इतिहास सहायक। नए संदेश-टर्न कोड को `createChannelHistoryWindow` का उपयोग करना चाहिए; निम्न-स्तरीय मैप सहायक केवल अप्रचलित संगतता एक्सपोर्ट बने रहेंगे |
+    | `plugin-sdk/reply-reference` | जुलाई 2026 के बाद निजी-स्थानीय; `createReplyReferencePlanner` |
+    | `plugin-sdk/reply-chunking` | सीमित टेक्स्ट/मार्कडाउन खंडन सहायक |
+    | `plugin-sdk/session-store-runtime` | सत्र कार्यप्रवाह सहायक (`getSessionEntry`, `listSessionEntries`, `patchSessionEntry`, `upsertSessionEntry`), मरम्मत/जीवनचक्र सहायक (`deleteSessionEntry`, `cleanupSessionLifecycleArtifacts`, `resolveSessionStoreBackupPaths`), संक्रमणकालीन `sessionFile` मानों के लिए मार्कर सहायक, सत्र पहचान के अनुसार सीमित हालिया उपयोगकर्ता/सहायक ट्रांसक्रिप्ट टेक्स्ट पठन, सत्र स्टोर पथ/सत्र-कुंजी सहायक और अद्यतन-समय पठन, व्यापक कॉन्फ़िगरेशन लेखन/रखरखाव इम्पोर्ट के बिना |
+    | `plugin-sdk/session-transcript-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; ट्रांसक्रिप्ट पहचान, सीमित रॉ और दृश्यमान कर्सर, स्कोप किए गए लक्ष्य/पठन/लेखन सहायक, दृश्यमान संदेश-प्रविष्टि प्रक्षेपण, अपडेट प्रकाशन, लेखन लॉक और ट्रांसक्रिप्ट मेमोरी हिट कुंजियाँ |
+    | `plugin-sdk/sqlite-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; डेटाबेस जीवनचक्र नियंत्रणों के बिना प्रथम-पक्ष रनटाइम के लिए केंद्रित SQLite एजेंट-स्कीमा, पथ और ट्रांज़ैक्शन सहायक |
+    | `plugin-sdk/cron-store-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; Cron स्टोर पथ/लोड/सेव सहायक |
+    | `plugin-sdk/state-paths` | स्थिति/OAuth डायरेक्टरी पथ सहायक |
+    | `plugin-sdk/plugin-state-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; Plugin-स्कोप वाली कुंजीबद्ध-स्थिति, BLOB और सहयोगात्मक SQLite लीज़ अनुबंधों के साथ कनेक्शन प्रैग्मा, सत्यापित WAL रखरखाव और परमाणु STRICT-स्कीमा माइग्रेशन सहायक। लीज़ कॉलबैक को निरस्तीकरण संकेत मिलता है और टाइप की गई त्रुटियाँ टाइमआउट, रद्दीकरण, स्वामित्व खोने, अमान्य इनपुट और संग्रहण विफलता में अंतर करती हैं |
+    | `plugin-sdk/routing` | `resolveAgentRoute`, `buildAgentSessionKey` और `resolveDefaultAgentBoundAccountId` जैसे रूट/सत्र-कुंजी/खाता बाइंडिंग सहायक |
+    | `plugin-sdk/status-helpers` | साझा चैनल/खाता स्थिति सारांश सहायक, रनटाइम-स्थिति डिफ़ॉल्ट और समस्या मेटाडेटा सहायक |
+    | `plugin-sdk/target-resolver-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; साझा लक्ष्य रिज़ॉल्वर सहायक |
+    | `plugin-sdk/string-normalization-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; स्लग/स्ट्रिंग सामान्यीकरण सहायक |
+    | `plugin-sdk/request-url` | जुलाई 2026 के बाद निजी-स्थानीय; फ़ेच/अनुरोध-जैसे इनपुट से स्ट्रिंग URL निकालें |
+    | `plugin-sdk/run-command` | सामान्यीकृत stdout/stderr परिणामों वाला समयबद्ध कमांड रनर |
+    | `plugin-sdk/param-readers` | सामान्य टूल/CLI पैरामीटर रीडर |
+    | `plugin-sdk/tool-plugin` | एक सरल टाइप किया गया एजेंट-टूल Plugin परिभाषित करें और मैनिफ़ेस्ट निर्माण के लिए स्थिर मेटाडेटा उजागर करें |
+    | `plugin-sdk/tool-payload` | जुलाई 2026 के बाद निजी-स्थानीय; टूल परिणाम ऑब्जेक्ट से सामान्यीकृत पेलोड निकालें |
+    | `plugin-sdk/tool-send` | टूल तर्कों से प्रामाणिक प्रेषण लक्ष्य फ़ील्ड निकालें |
+    | `plugin-sdk/sandbox` | जुलाई 2026 के बाद निजी-स्थानीय; सैंडबॉक्स बैकएंड प्रकार और SSH/OpenShell कमांड सहायक, जिनमें त्वरित-विफलता exec कमांड पूर्व-जाँच शामिल है |
+    | `plugin-sdk/temp-path` | साझा अस्थायी-डाउनलोड पथ सहायक और निजी सुरक्षित अस्थायी कार्यस्थान |
+    | `plugin-sdk/logging-core` | उपप्रणाली लॉगर और संपादन सहायक |
+    | `plugin-sdk/markdown-table-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; मार्कडाउन तालिका मोड और रूपांतरण सहायक |
+    | `plugin-sdk/model-session-runtime` | `applyModelOverrideToSessionEntry` और `resolveAgentMaxConcurrent` जैसे मॉडल/सत्र ओवरराइड सहायक |
+    | `plugin-sdk/talk-config-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; Talk प्रदाता कॉन्फ़िगरेशन समाधान सहायक |
+    | `plugin-sdk/json-store` | छोटे JSON स्थिति पठन/लेखन सहायक |
+    | `plugin-sdk/json-unsafe-integers` | जुलाई 2026 के बाद निजी-स्थानीय; असुरक्षित पूर्णांक लिटरल को स्ट्रिंग के रूप में संरक्षित रखने वाले JSON पार्सिंग सहायक |
+    | `plugin-sdk/file-lock` | जुलाई 2026 के बाद निजी-स्थानीय; पुनः-प्रवेश योग्य फ़ाइल-लॉक सहायक और निश्चित रूप से पुराने, अपरिवर्तित, सेवानिवृत्त लॉक साइडकार का Doctor-सुरक्षित पुनः दावा |
+    | `plugin-sdk/persistent-dedupe` | डिस्क-समर्थित डीडुप कैश सहायक |
+    | `plugin-sdk/ingress-effect-once` | गैर-आइडेम्पोटेंट प्रवेश दुष्प्रभावों के लिए टिकाऊ दावा/कमिट गार्ड |
+    | `plugin-sdk/acp-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; ACP रनटाइम/सत्र और उत्तर-डिस्पैच सहायक |
+    | `plugin-sdk/acp-runtime-backend` | जुलाई 2026 के बाद निजी-स्थानीय; स्टार्टअप पर लोड किए गए plugins के लिए हल्के ACP बैकएंड पंजीकरण और उत्तर-डिस्पैच सहायक |
+    | `plugin-sdk/acp-binding-resolve-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; जीवनचक्र स्टार्टअप इम्पोर्ट के बिना केवल-पठन ACP बाइंडिंग समाधान |
+    | `plugin-sdk/agent-config-primitives` | अप्रचलित एजेंट रनटाइम कॉन्फ़िगरेशन-स्कीमा प्रिमिटिव; अनुरक्षित Plugin-स्वामित्व वाली सतह से स्कीमा प्रिमिटिव इम्पोर्ट करें |
+    | `plugin-sdk/boolean-param` | शिथिल बूलियन पैरामीटर रीडर |
+    | `plugin-sdk/dangerous-name-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; खतरनाक-नाम मिलान समाधान सहायक |
+    | `plugin-sdk/device-bootstrap` | डिवाइस बूटस्ट्रैप और पेयरिंग टोकन सहायक, जिनमें `BOOTSTRAP_HANDOFF_OPERATOR_SCOPES` शामिल है |
+    | `plugin-sdk/extension-shared` | साझा निष्क्रिय-चैनल, स्थिति और परिवेशी प्रॉक्सी सहायक प्रिमिटिव |
+    | `plugin-sdk/models-provider-runtime` | `/models` कमांड/प्रदाता उत्तर सहायक |
+    | `plugin-sdk/skill-commands-runtime` | Skill कमांड सूचीकरण सहायक |
+    | `plugin-sdk/native-command-registry` | मूल कमांड रजिस्ट्री/निर्माण/क्रमबद्धकरण सहायक |
+    | `plugin-sdk/agent-harness` | निम्न-स्तरीय एजेंट हार्नेसों के लिए प्रायोगिक विश्वसनीय-Plugin सतह: हार्नेस प्रकार, सक्रिय-रन संचालन/निरस्तीकरण सहायक, OpenClaw टूल ब्रिज सहायक, रनटाइम-योजना टूल नीति सहायक, टर्मिनल परिणाम वर्गीकरण, टूल प्रगति फ़ॉर्मैटिंग/विवरण सहायक और प्रयास परिणाम उपयोगिताएँ |
+    | `plugin-sdk/async-lock-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; छोटी रनटाइम स्थिति फ़ाइलों के लिए प्रोसेस-स्थानीय एसिंक लॉक सहायक |
+    | `plugin-sdk/channel-activity-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; चैनल गतिविधि टेलीमेट्री सहायक |
+    | `plugin-sdk/concurrency-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; सीमित एसिंक कार्य समवर्तीता सहायक |
+    | `plugin-sdk/dedupe-runtime` | इन-मेमोरी और स्थायी-समर्थित डीडुप कैश सहायक |
+    | `plugin-sdk/delivery-queue-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; आउटबाउंड लंबित-डिलीवरी निकासी सहायक |
+    | `plugin-sdk/file-access-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; सुरक्षित स्थानीय-फ़ाइल और मीडिया-स्रोत पथ सहायक |
+    | `plugin-sdk/heartbeat-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; Heartbeat जगाने, इवेंट और दृश्यता सहायक |
+    | `plugin-sdk/expect-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; सिद्ध किए जा सकने वाले रनटाइम अपरिवर्तनीयों के लिए आवश्यक-मान अभिकथन सहायक |
+    | `plugin-sdk/number-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; संख्यात्मक रूपांतरण सहायक |
+    | `plugin-sdk/secure-random-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; सुरक्षित टोकन/UUID सहायक |
+    | `plugin-sdk/system-event-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; सिस्टम इवेंट कतार सहायक |
+    | `plugin-sdk/transport-ready-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; ट्रांसपोर्ट तत्परता प्रतीक्षा सहायक |
+    | `plugin-sdk/exec-approvals-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; व्यापक इन्फ़्रा-रनटाइम बैरल के बिना exec अनुमोदन नीति फ़ाइल सहायक |
+    | `plugin-sdk/infra-runtime` | अप्रचलित संगतता शिम; ऊपर दिए गए केंद्रित रनटाइम उपपथों का उपयोग करें |
+    | `plugin-sdk/collection-runtime` | छोटे सीमित कैश सहायक |
+    | `plugin-sdk/diagnostic-runtime` | निदान फ़्लैग, इवेंट और ट्रेस-संदर्भ सहायक |
+    | `plugin-sdk/error-runtime` | त्रुटि ग्राफ़, फ़ॉर्मैटिंग, अज्ञात-मान रूपांतरण, साझा त्रुटि वर्गीकरण सहायक, `PlatformMessageNotDispatchedError`, `isApprovalNotFoundError` |
+    | `plugin-sdk/fetch-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; रैप किया गया फ़ेच, प्रॉक्सी, EnvHttpProxyAgent विकल्प और पिन किए गए लुकअप सहायक |
+    | `plugin-sdk/runtime-fetch` | जुलाई 2026 के बाद निजी-स्थानीय; प्रॉक्सी/गार्डेड-फ़ेच इम्पोर्ट के बिना डिस्पैचर-जागरूक रनटाइम फ़ेच |
+    | `plugin-sdk/inline-image-data-url-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; व्यापक मीडिया रनटाइम सतह के बिना इनलाइन छवि डेटा URL सैनिटाइज़र और हस्ताक्षर पहचान सहायक |
+    | `plugin-sdk/response-limit-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; व्यापक मीडिया रनटाइम सतह के बिना बाइट-, निष्क्रियता- और समय-सीमा-सीमित प्रतिक्रिया-बॉडी रीडर |
+    | `plugin-sdk/session-binding-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; कॉन्फ़िगर किए गए बाइंडिंग रूटिंग या पेयरिंग स्टोर के बिना वर्तमान वार्तालाप बाइंडिंग स्थिति |
+    | `plugin-sdk/context-visibility-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; व्यापक कॉन्फ़िगरेशन/सुरक्षा इम्पोर्ट के बिना संदर्भ दृश्यता समाधान और पूरक संदर्भ फ़िल्टरिंग |
+    | `plugin-sdk/string-coerce-runtime` | मार्कडाउन/लॉगिंग इम्पोर्ट के बिना सीमित प्रिमिटिव रिकॉर्ड/स्ट्रिंग रूपांतरण और सामान्यीकरण सहायक |
+    | `plugin-sdk/html-entity-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; व्यापक टेक्स्ट उपयोगिताओं के बिना एकल-पास सेमीकोलन-समाप्त HTML5 एंटिटी डिकोडिंग |
+    | `plugin-sdk/text-utility-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; निम्न-स्तरीय टेक्स्ट और पथ सहायक, जिनमें पाँच-एंटिटी HTML एस्केपिंग शामिल है |
+    | `plugin-sdk/widget-html` | स्व-निहित HTML विजेट के लिए पूर्ण-दस्तावेज़ पहचान, आकार सत्यापन और टूल इनपुट त्रुटियाँ |
+    | `plugin-sdk/host-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; होस्टनेम और SCP होस्ट सामान्यीकरण सहायक |
+    | `plugin-sdk/retry-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; पुनः प्रयास कॉन्फ़िगरेशन और पुनः प्रयास रनर सहायक |
+    | `plugin-sdk/agent-runtime` | एजेंट डायरेक्टरी/पहचान/वर्कस्पेस सहायकों के लिए अप्रचलित व्यापक बैरल, जिसमें `resolveAgentDir`, `resolveDefaultAgentDir` और अप्रचलित `resolveOpenClawAgentDir` संगतता एक्सपोर्ट शामिल हैं; केंद्रित एजेंट/रनटाइम उपपथों को प्राथमिकता दें |
+    | `plugin-sdk/directory-runtime` | कॉन्फ़िगरेशन-समर्थित डायरेक्टरी क्वेरी/डुप्लिकेट हटाना |
+    | `plugin-sdk/keyed-async-queue` | जुलाई 2026 के बाद निजी-स्थानीय; `KeyedAsyncQueue` |
   </Accordion>
 
   <Accordion title="क्षमता और परीक्षण उपपथ">
-    | उपपथ | मुख्य निर्यात |
+    | उपपथ | प्रमुख निर्यात |
     | --- | --- |
-    | `plugin-sdk/media-runtime` | साझा मीडिया fetch/transform/store सहायक, जिनमें `saveRemoteMedia`, `saveResponseMedia`, `readRemoteMediaBuffer`, और अप्रचलित `fetchRemoteMedia` शामिल हैं; जब किसी URL को OpenClaw मीडिया बनना चाहिए, तो buffer reads से पहले store helpers को प्राथमिकता दें |
-    | `plugin-sdk/media-mime` | संकीर्ण MIME सामान्यीकरण, file-extension mapping, MIME detection, और media-kind helpers |
-    | `plugin-sdk/media-store` | संकीर्ण media store helpers जैसे `saveMediaBuffer` और `saveMediaStream` |
-    | `plugin-sdk/media-generation-runtime` | साझा media-generation failover helpers, candidate selection, और missing-model messaging |
-    | `plugin-sdk/media-understanding` | Media understanding provider types और provider-facing image/audio/structured-extraction helper exports |
-    | `plugin-sdk/text-chunking` | Text और markdown chunking/render helpers, markdown table conversion, directive-tag stripping, और safe-text utilities |
-    | `plugin-sdk/text-chunking` | Outbound text chunking helper |
-    | `plugin-sdk/speech` | Speech provider types और provider-facing directive, registry, validation, OpenAI-compatible TTS builder, और speech helper exports |
-    | `plugin-sdk/speech-core` | साझा speech provider types, registry, directive, normalization, और speech helper exports |
-    | `plugin-sdk/realtime-transcription` | Realtime transcription provider types, registry helpers, और साझा WebSocket session helper |
-    | `plugin-sdk/realtime-bootstrap-context` | सीमित `IDENTITY.md`, `USER.md`, और `SOUL.md` context injection के लिए realtime profile bootstrap helper |
-    | `plugin-sdk/realtime-voice` | Realtime voice provider types, registry helpers, और साझा realtime voice behavior helpers, जिनमें output activity tracking शामिल है |
-    | `plugin-sdk/image-generation` | Image generation provider types और image asset/data URL helpers तथा OpenAI-compatible image provider builder |
-    | `plugin-sdk/image-generation-core` | साझा image-generation types, failover, auth, और registry helpers |
-    | `plugin-sdk/music-generation` | Music generation provider/request/result types |
-    | `plugin-sdk/music-generation-core` | साझा music-generation types, failover helpers, provider lookup, और model-ref parsing |
-    | `plugin-sdk/video-generation` | Video generation provider/request/result types |
-    | `plugin-sdk/video-generation-core` | साझा video-generation types, failover helpers, provider lookup, और model-ref parsing |
-    | `plugin-sdk/transcripts` | साझा transcripts source provider types, registry helpers, session descriptors, और utterance metadata |
-    | `plugin-sdk/webhook-targets` | Webhook target registry और route-install helpers |
-    | `plugin-sdk/webhook-path` | अप्रचलित compatibility alias; `plugin-sdk/webhook-ingress` का उपयोग करें |
-    | `plugin-sdk/web-media` | साझा remote/local media loading helpers |
-    | `plugin-sdk/zod` | अप्रचलित compatibility re-export; `zod` को सीधे `zod` से import करें |
-    | `plugin-sdk/testing` | legacy OpenClaw tests के लिए repo-local अप्रचलित compatibility barrel. नए repo tests को इसके बजाय focused local test subpaths जैसे `plugin-sdk/agent-runtime-test-contracts`, `plugin-sdk/plugin-test-runtime`, `plugin-sdk/channel-test-helpers`, `plugin-sdk/test-env`, या `plugin-sdk/test-fixtures` import करने चाहिए |
-    | `plugin-sdk/plugin-test-api` | repo test helper bridges import किए बिना direct plugin registration unit tests के लिए repo-local न्यूनतम `createTestPluginApi` helper |
-    | `plugin-sdk/agent-runtime-test-contracts` | auth, delivery, fallback, tool-hook, prompt-overlay, schema, और transcript projection tests के लिए repo-local native agent-runtime adapter contract fixtures |
-    | `plugin-sdk/channel-test-helpers` | generic actions/setup/status contracts, directory assertions, account startup lifecycle, send-config threading, runtime mocks, status issues, outbound delivery, और hook registration के लिए repo-local channel-oriented test helpers |
-    | `plugin-sdk/channel-target-testing` | channel tests के लिए repo-local साझा target-resolution error-case suite |
-    | `plugin-sdk/plugin-test-contracts` | repo-local plugin package, registration, public artifact, direct import, runtime API, और import side-effect contract helpers |
-    | `plugin-sdk/provider-test-contracts` | repo-local provider runtime, auth, discovery, onboard, catalog, wizard, media capability, replay policy, realtime STT live-audio, web-search/fetch, और stream contract helpers |
-    | `plugin-sdk/provider-http-test-mocks` | `plugin-sdk/provider-http` exercise करने वाले provider tests के लिए repo-local opt-in Vitest HTTP/auth mocks |
-    | `plugin-sdk/test-fixtures` | repo-local generic CLI runtime capture, sandbox context, skill writer, agent-message, system-event, module reload, bundled plugin path, terminal-text, chunking, auth-token, और typed-case fixtures |
-    | `plugin-sdk/test-node-mocks` | Vitest `vi.mock("node:*")` factories के भीतर उपयोग के लिए repo-local focused Node builtin mock helpers |
+    | `plugin-sdk/media-runtime` | अप्रचलित व्यापक मीडिया बैरल, जिसमें `saveRemoteMedia`, `saveResponseMedia`, `readRemoteMediaBuffer`, और अप्रचलित `fetchRemoteMedia` शामिल हैं; `plugin-sdk/media-store`, `plugin-sdk/media-mime`, `plugin-sdk/outbound-media`, और क्षमता रनटाइम उपपथों को प्राथमिकता दें, तथा जब किसी URL को OpenClaw मीडिया बनना हो, तब बफ़र रीड से पहले स्टोर हेल्पर को प्राथमिकता दें |
+    | `plugin-sdk/media-local-roots` | Plugin-स्वामित्व वाले स्थानीय मीडिया रीड के लिए केंद्रित `getAgentScopedMediaLocalRoots(...)` और नीति-जागरूक `getAgentScopedMediaLocalRootsForSources(...)` हेल्पर |
+    | `plugin-sdk/media-mime` | सीमित MIME सामान्यीकरण, फ़ाइल-एक्सटेंशन मैपिंग, MIME पहचान, और मीडिया-प्रकार हेल्पर |
+    | `plugin-sdk/media-store` | सीमित मीडिया स्टोर हेल्पर, जैसे `saveMediaBuffer` और `saveMediaStream` |
+    | `plugin-sdk/media-generation-runtime` | जुलाई 2026 के बाद निजी-स्थानीय; साझा मीडिया-जनरेशन फ़ेलओवर हेल्पर, उम्मीदवार चयन, और अनुपलब्ध-मॉडल संदेश |
+    | `plugin-sdk/media-understanding` | मीडिया-अंडरस्टैंडिंग प्रदाता प्रकारों और हेल्पर के लिए अप्रचलित संगतता फ़साड; नए प्रदाता इंजेक्ट किए गए Plugin API के माध्यम से पंजीकृत होते हैं और अनुरोध हेल्पर को Plugin-स्वामित्व में रखते हैं |
+    | `plugin-sdk/text-chunking` | आउटबाउंड टेक्स्ट और ऑफ़सेट-संरक्षण करने वाली रेंज चंकिंग, मार्कडाउन चंकिंग/रेंडर हेल्पर, उद्धरण-जागरूक HTML टैग टोकनाइज़ेशन, मार्कडाउन तालिका रूपांतरण, डायरेक्टिव-टैग हटाना, और सुरक्षित-टेक्स्ट यूटिलिटीज़ |
+    | `plugin-sdk/speech` | जुलाई 2026 के बाद निजी-स्थानीय; स्पीच प्रदाता प्रकारों के साथ प्रदाता-सामना करने वाले डायरेक्टिव, रजिस्ट्री, सत्यापन, OpenAI-संगत TTS बिल्डर, और स्पीच हेल्पर निर्यात |
+    | `plugin-sdk/speech-core` | जुलाई 2026 के बाद निजी-स्थानीय; साझा स्पीच प्रदाता प्रकार, रजिस्ट्री, डायरेक्टिव, सामान्यीकरण, और स्पीच हेल्पर निर्यात |
+    | `plugin-sdk/speech-settings` | प्रदाता रजिस्ट्री या सिंथेसिस रनटाइम के बिना हल्के TTS कॉन्फ़िग समाधान और सामान्यीकरण प्रिमिटिव |
+    | `plugin-sdk/realtime-transcription` | जुलाई 2026 के बाद निजी-स्थानीय; रीयलटाइम ट्रांसक्रिप्शन प्रदाता प्रकार, रजिस्ट्री हेल्पर, और साझा WebSocket सत्र हेल्पर |
+    | `plugin-sdk/realtime-bootstrap-context` | जुलाई 2026 के बाद निजी-स्थानीय; सीमित `IDENTITY.md`, `USER.md`, और `SOUL.md` संदर्भ इंजेक्शन के लिए रीयलटाइम प्रोफ़ाइल बूटस्ट्रैप हेल्पर |
+    | `plugin-sdk/realtime-voice` | जुलाई 2026 के बाद निजी-स्थानीय; रीयलटाइम वॉइस प्रदाता प्रकार, रजिस्ट्री हेल्पर, साझा ऑडियो-ऊर्जा/स्पीच-आरंभ गेट, और रीयलटाइम वॉइस व्यवहार हेल्पर, जिनमें ट्रांसपोर्ट-स्वतंत्र सत्र हार्नेस और आउटपुट गतिविधि ट्रैकिंग शामिल हैं |
+    | `plugin-sdk/meeting-runtime` | ब्राउज़र-मीटिंग सत्र रनटाइम, रीयलटाइम ऑडियो इंजन/ट्रांसपोर्ट, `MeetingPlatformAdapter`, ब्राउज़र/Node नियंत्रण, एजेंट-परामर्श, वॉइस-कॉल प्रत्यायोजन, सेटअप जाँच, और SoX कमांड हेल्पर |
+    | `plugin-sdk/image-generation` | जुलाई 2026 के बाद निजी-स्थानीय; इमेज जनरेशन प्रदाता प्रकारों के साथ इमेज एसेट/डेटा URL हेल्पर और OpenAI-संगत इमेज प्रदाता बिल्डर |
+    | `plugin-sdk/image-generation-core` | जुलाई 2026 के बाद निजी-स्थानीय; साझा इमेज-जनरेशन प्रकार, फ़ेलओवर, प्रमाणीकरण, और रजिस्ट्री हेल्पर |
+    | `plugin-sdk/music-generation` | जुलाई 2026 के बाद निजी-स्थानीय; संगीत जनरेशन प्रदाता/अनुरोध/परिणाम प्रकार |
+    | `plugin-sdk/video-generation` | जुलाई 2026 के बाद निजी-स्थानीय; वीडियो जनरेशन प्रदाता/अनुरोध/परिणाम प्रकार |
+    | `plugin-sdk/video-generation-core` | जुलाई 2026 के बाद निजी-स्थानीय; साझा वीडियो-जनरेशन प्रकार, फ़ेलओवर हेल्पर, प्रदाता लुकअप, और मॉडल-रेफ़ पार्सिंग |
+    | `plugin-sdk/transcripts` | जुलाई 2026 के बाद निजी-स्थानीय; साझा ट्रांसक्रिप्ट स्रोत प्रदाता प्रकार, रजिस्ट्री हेल्पर, मीटिंग-प्रदाता ब्रिज फ़ैक्टरी, सत्र डिस्क्रिप्टर, और कथन मेटाडेटा |
+    | `plugin-sdk/webhook-targets` | जुलाई 2026 के बाद निजी-स्थानीय; Webhook लक्ष्य रजिस्ट्री और रूट-इंस्टॉल हेल्पर |
+    | `plugin-sdk/web-media` | साझा रिमोट/स्थानीय मीडिया लोडिंग हेल्पर |
+    | `plugin-sdk/zod` | अप्रचलित संगतता पुनः-निर्यात; `zod` को सीधे `zod` से आयात करें |
+    | `plugin-sdk/plugin-test-api` | रिपॉज़िटरी परीक्षण हेल्पर ब्रिज आयात किए बिना प्रत्यक्ष Plugin पंजीकरण यूनिट परीक्षणों के लिए रिपॉज़िटरी-स्थानीय न्यूनतम `createTestPluginApi` हेल्पर |
+    | `plugin-sdk/agent-runtime-test-contracts` | प्रमाणीकरण, डिलीवरी, फ़ॉलबैक, टूल-हुक, प्रॉम्प्ट-ओवरले, स्कीमा, और ट्रांसक्रिप्ट प्रोजेक्शन परीक्षणों के लिए रिपॉज़िटरी-स्थानीय नेटिव एजेंट-रनटाइम अडैप्टर अनुबंध फ़िक्स्चर |
+    | `plugin-sdk/channel-test-helpers` | सामान्य क्रियाओं/सेटअप/स्थिति अनुबंधों, डायरेक्टरी अभिकथनों, खाता स्टार्टअप जीवनचक्र, सेंड-कॉन्फ़िग थ्रेडिंग, रनटाइम मॉक, स्थिति समस्याओं, आउटबाउंड डिलीवरी, और हुक पंजीकरण के लिए रिपॉज़िटरी-स्थानीय चैनल-उन्मुख परीक्षण हेल्पर |
+    | `plugin-sdk/channel-target-testing` | चैनल परीक्षणों के लिए रिपॉज़िटरी-स्थानीय साझा लक्ष्य-समाधान त्रुटि-स्थिति सुइट |
+    | `plugin-sdk/channel-contract-testing` | व्यापक परीक्षण बैरल के बिना रिपॉज़िटरी-स्थानीय सीमित चैनल अनुबंध परीक्षण हेल्पर |
+    | `plugin-sdk/plugin-test-contracts` | रिपॉज़िटरी-स्थानीय Plugin पैकेज, पंजीकरण, सार्वजनिक आर्टिफ़ैक्ट, प्रत्यक्ष आयात, रनटाइम API, और आयात साइड-इफ़ेक्ट अनुबंध हेल्पर |
+    | `plugin-sdk/plugin-state-test-runtime` | रिपॉज़िटरी-स्थानीय Plugin स्टेट स्टोर, इनग्रेस क्यू, और स्टेट DB परीक्षण हेल्पर |
+    | `plugin-sdk/provider-test-contracts` | रिपॉज़िटरी-स्थानीय प्रदाता रनटाइम, प्रमाणीकरण, खोज, ऑनबोर्डिंग, कैटलॉग, विज़ार्ड, मीडिया क्षमता, रीप्ले नीति, रीयलटाइम STT लाइव-ऑडियो, वेब-सर्च/फ़ेच, और स्ट्रीम अनुबंध हेल्पर |
+    | `plugin-sdk/provider-http-test-mocks` | जुलाई 2026 के बाद निजी-स्थानीय; `plugin-sdk/provider-http` का उपयोग करने वाले प्रदाता परीक्षणों के लिए रिपॉज़िटरी-स्थानीय वैकल्पिक Vitest HTTP/प्रमाणीकरण मॉक |
+    | `plugin-sdk/reply-payload-testing` | उत्तर पेलोड फ़िक्स्चर से मेटाडेटा जोड़ने के लिए रिपॉज़िटरी-स्थानीय हेल्पर |
+    | `plugin-sdk/sqlite-runtime-testing` | प्रथम-पक्ष परीक्षणों के लिए रिपॉज़िटरी-स्थानीय SQLite जीवनचक्र हेल्पर |
+    | `plugin-sdk/test-fixtures` | रिपॉज़िटरी-स्थानीय सामान्य CLI रनटाइम कैप्चर, सैंडबॉक्स संदर्भ, कौशल लेखक, एजेंट-संदेश, सिस्टम-इवेंट, मॉड्यूल रीलोड, बंडल किया गया Plugin पथ, टर्मिनल-टेक्स्ट, चंकिंग, प्रमाणीकरण-टोकन, और टाइप किए गए केस फ़िक्स्चर |
+    | `plugin-sdk/test-node-mocks` | Vitest `vi.mock("node:*")` फ़ैक्टरियों के भीतर उपयोग के लिए रिपॉज़िटरी-स्थानीय केंद्रित Node बिल्टइन मॉक हेल्पर |
   </Accordion>
 
-  <Accordion title="Memory उपपथ">
-    | उपपथ | मुख्य निर्यात |
+  <Accordion title="मेमोरी उपपथ">
+    | उपपथ | प्रमुख निर्यात |
     | --- | --- |
-    | `plugin-sdk/memory-core` | manager/config/file/CLI helpers के लिए bundled memory-core helper surface |
-    | `plugin-sdk/memory-core-engine-runtime` | Memory index/search runtime facade |
-    | `plugin-sdk/memory-core-host-embedding-registry` | हल्के memory embedding provider registry helpers |
-    | `plugin-sdk/memory-core-host-engine-foundation` | Memory host foundation engine exports |
-    | `plugin-sdk/memory-core-host-engine-embeddings` | Memory host embedding contracts, registry access, local provider, और generic batch/remote helpers. इस surface पर `registerMemoryEmbeddingProvider` अप्रचलित है; नए providers के लिए generic embedding provider API का उपयोग करें. |
-    | `plugin-sdk/memory-core-host-engine-qmd` | Memory host QMD engine exports |
-    | `plugin-sdk/memory-core-host-engine-storage` | Memory host storage engine exports |
-    | `plugin-sdk/memory-core-host-multimodal` | Memory host multimodal helpers |
-    | `plugin-sdk/memory-core-host-query` | Memory host query helpers |
-    | `plugin-sdk/memory-core-host-secret` | Memory host secret helpers |
-    | `plugin-sdk/memory-core-host-events` | अप्रचलित compatibility alias; `plugin-sdk/memory-host-events` का उपयोग करें |
-    | `plugin-sdk/memory-core-host-status` | Memory host status helpers |
-    | `plugin-sdk/memory-core-host-runtime-cli` | Memory host CLI runtime helpers |
-    | `plugin-sdk/memory-core-host-runtime-core` | Memory host core runtime helpers |
-    | `plugin-sdk/memory-core-host-runtime-files` | Memory host file/runtime helpers |
-    | `plugin-sdk/memory-host-core` | memory host core runtime helpers के लिए vendor-neutral alias |
-    | `plugin-sdk/memory-host-events` | memory host event journal helpers के लिए vendor-neutral alias |
-    | `plugin-sdk/memory-host-files` | अप्रचलित compatibility alias; `plugin-sdk/memory-core-host-runtime-files` का उपयोग करें |
-    | `plugin-sdk/memory-host-markdown` | memory-adjacent plugins के लिए साझा managed-markdown helpers |
-    | `plugin-sdk/memory-host-search` | search-manager access के लिए Active Memory runtime facade |
-    | `plugin-sdk/memory-host-status` | अप्रचलित compatibility alias; `plugin-sdk/memory-core-host-status` का उपयोग करें |
+    | `plugin-sdk/memory-core-host-embedding-registry` | जुलाई 2026 के बाद निजी-स्थानीय; हल्के मेमोरी एम्बेडिंग प्रदाता रजिस्ट्री हेल्पर |
+    | `plugin-sdk/memory-core-host-engine-foundation` | मेमोरी होस्ट आधार इंजन निर्यात |
+    | `plugin-sdk/memory-core-host-engine-embeddings` | जुलाई 2026 के बाद निजी-स्थानीय; मेमोरी होस्ट एम्बेडिंग अनुबंध, रजिस्ट्री अभिगम, स्थानीय प्रदाता, और सामान्य बैच/रिमोट हेल्पर। इस सतह पर `registerMemoryEmbeddingProvider` अप्रचलित है; नए प्रदाताओं के लिए सामान्य एम्बेडिंग प्रदाता API का उपयोग करें। |
+    | `plugin-sdk/memory-core-host-engine-qmd` | जुलाई 2026 के बाद निजी-स्थानीय; मेमोरी होस्ट QMD इंजन निर्यात |
+    | `plugin-sdk/memory-core-host-engine-storage` | जुलाई 2026 के बाद निजी-स्थानीय; मेमोरी होस्ट स्टोरेज इंजन निर्यात |
+    | `plugin-sdk/memory-core-host-secret` | जुलाई 2026 के बाद निजी-स्थानीय; मेमोरी होस्ट सीक्रेट हेल्पर |
+    | `plugin-sdk/memory-core-host-status` | जुलाई 2026 के बाद निजी-स्थानीय; मेमोरी होस्ट स्थिति हेल्पर |
+    | `plugin-sdk/memory-core-host-runtime-cli` | जुलाई 2026 के बाद निजी-स्थानीय; मेमोरी होस्ट CLI रनटाइम हेल्पर |
+    | `plugin-sdk/memory-core-host-runtime-core` | जुलाई 2026 के बाद निजी-स्थानीय; मेमोरी होस्ट कोर रनटाइम हेल्पर |
+    | `plugin-sdk/memory-core-host-runtime-files` | जुलाई 2026 के बाद निजी-स्थानीय; मेमोरी होस्ट फ़ाइल/रनटाइम हेल्पर |
+    | `plugin-sdk/memory-host-core` | विक्रेता-निरपेक्ष मेमोरी होस्ट हेल्पर के लिए अप्रचलित संगतता फ़साड। नए मेमोरी Plugin इंजेक्ट की गई मेमोरी क्षमताओं और होस्ट-द्वारा-तैयार प्रॉम्प्ट का उपयोग करते हैं; केंद्रित रीड सीम उपलब्ध होने तक सहयोगी Plugin सार्वजनिक-आर्टिफ़ैक्ट खोज के लिए बनाए रखे गए फ़साड का उपयोग करते रहते हैं। |
+    | `plugin-sdk/memory-host-events` | जुलाई 2026 के बाद निजी-स्थानीय; मेमोरी होस्ट इवेंट जर्नल हेल्पर के लिए विक्रेता-निरपेक्ष उपनाम |
+    | `plugin-sdk/memory-host-markdown` | जुलाई 2026 के बाद निजी-स्थानीय; मेमोरी-सन्निकट Plugin के लिए साझा प्रबंधित-मार्कडाउन हेल्पर |
+    | `plugin-sdk/memory-host-search` | जुलाई 2026 के बाद निजी-स्थानीय; सर्च-मैनेजर अभिगम के लिए Active Memory रनटाइम फ़साड |
   </Accordion>
 
-  <Accordion title="आरक्षित bundled-helper उपपथ">
-    आरक्षित bundled-helper SDK उपपथ bundled plugin code के लिए संकीर्ण owner-specific surfaces हैं।
-    उन्हें SDK inventory में track किया जाता है ताकि package
-    builds और aliasing deterministic रहें, लेकिन वे सामान्य plugin
-    authoring APIs नहीं हैं। नए reusable host contracts को generic SDK subpaths
-    जैसे `plugin-sdk/gateway-runtime`, `plugin-sdk/security-runtime`, और
-    `plugin-sdk/plugin-config-runtime` का उपयोग करना चाहिए।
+  <Accordion title="आरक्षित बंडल-हेल्पर उपपथ">
+    आरक्षित बंडल-हेल्पर SDK उपपथ बंडल किए गए Plugin कोड के लिए सीमित
+    स्वामी-विशिष्ट सतहें हैं। इन्हें SDK इन्वेंट्री में ट्रैक किया जाता है ताकि पैकेज
+    बिल्ड और एलियासिंग नियतात्मक रहें, लेकिन ये सामान्य Plugin
+    लेखन API नहीं हैं। नए पुन: प्रयोज्य होस्ट अनुबंधों को सामान्य SDK उपपथों का उपयोग करना चाहिए,
+    जैसे `plugin-sdk/gateway-runtime` और `plugin-sdk/ssrf-runtime`।
 
-    | उपपथ | owner और उद्देश्य |
+    | उपपथ | स्वामी और उद्देश्य |
     | --- | --- |
-    | `plugin-sdk/codex-mcp-projection` | user MCP server config को Codex app-server thread config में project करने के लिए bundled Codex plugin helper |
-    | `plugin-sdk/codex-native-task-runtime` | Codex app-server native subagents को OpenClaw task state में mirror करने के लिए bundled Codex plugin helper |
+    | `plugin-sdk/codex-mcp-projection` | जुलाई 2026 के बाद निजी-स्थानीय; उपयोगकर्ता MCP सर्वर कॉन्फ़िग को Codex ऐप-सर्वर थ्रेड कॉन्फ़िग में प्रोजेक्ट करने के लिए बंडल किया गया Codex Plugin हेल्पर (आरक्षित पैकेज निर्यात) |
+    | `plugin-sdk/codex-native-task-runtime` | Codex ऐप-सर्वर नेटिव उप-एजेंटों को OpenClaw कार्य स्थिति में प्रतिबिंबित करने के लिए बंडल किया गया Codex Plugin हेल्पर (केवल रिपॉज़िटरी-स्थानीय, पैकेज निर्यात नहीं) |
 
   </Accordion>
 </AccordionGroup>
 
 ## संबंधित
 
-- [Plugin SDK अवलोकन](/hi/plugins/sdk-overview)
+- [Plugin SDK का अवलोकन](/hi/plugins/sdk-overview)
 - [Plugin SDK सेटअप](/hi/plugins/sdk-setup)
-- [plugins बनाना](/hi/plugins/building-plugins)
+- [Plugin बनाना](/hi/plugins/building-plugins)

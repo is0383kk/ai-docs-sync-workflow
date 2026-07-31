@@ -1,22 +1,23 @@
 ---
 read_when:
-    - Bir Yuanbao botu bağlamak istiyorsunuz
+    - Bir Yuanbao botuna bağlanmak istiyorsunuz
     - Yuanbao kanalını yapılandırıyorsunuz
 summary: Yuanbao botuna genel bakış, özellikler ve yapılandırma
 title: Yuanbao
 x-i18n:
-    generated_at: "2026-07-12T12:07:08Z"
+    generated_at: "2026-07-26T23:13:15Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 43488834f588530206b290cb0fb185fd1fe2e1f214ab4a4ccccc49b9b549b6ac
     source_path: channels/yuanbao.md
     workflow: 16
 ---
 
-Tencent Yuanbao, Tencent'in yapay zekâ asistanı platformudur. Topluluk tarafından sürdürülen `openclaw-plugin-yuanbao` Plugin'i, Yuanbao botlarını doğrudan mesajlar ve grup sohbetleri için WebSocket üzerinden OpenClaw'a bağlar.
+Tencent Yuanbao, Tencent'in yapay zekâ asistan platformudur. Topluluk tarafından bakımı yapılan `openclaw-plugin-yuanbao` plugini, doğrudan mesajlar ve grup sohbetleri için Yuanbao botlarını WebSocket üzerinden OpenClaw'a bağlar.
 
-**Durum:** Bot doğrudan mesajları ve grup sohbetleri için üretime hazırdır. Desteklenen tek bağlantı modu WebSocket'tir. Bu Plugin, çekirdek OpenClaw tarafından değil, harici bir katalog girdisi olarak Tencent Yuanbao ekibi tarafından sürdürülür; aşağıdaki yapılandırma/davranış ayrıntıları (kurulum ve genel CLI yüzeyi dışındakiler) Plugin'in kendi belgelerinden alınmıştır ve OpenClaw çekirdek kaynak koduyla doğrulanmamıştır.
+**Durum:** bot DM'leri ve grup sohbetleri için üretime hazırdır. Desteklenen tek bağlantı modu WebSocket'tir. Bu plugin, çekirdek OpenClaw tarafından değil, harici bir katalog girdisi olarak Tencent Yuanbao ekibi tarafından yönetilir; aşağıdaki yapılandırma/davranış ayrıntıları (kurulum ve genel CLI yüzeyi dışındakiler) pluginin kendi belgelerinden alınmıştır ve OpenClaw çekirdek kaynağına göre doğrulanmamıştır.
 
 ## Hızlı başlangıç
 
@@ -27,7 +28,7 @@ OpenClaw 2026.4.10 veya üzerini gerektirir. `openclaw --version` ile denetleyin
   ```bash
   openclaw channels add --channel yuanbao --token "appKey:appSecret"
   ```
-  `--token`, iki nokta üst üste ile ayrılmış `appKey:appSecret` biçimini kullanır. Bunları, uygulama ayarlarınızda bir bot oluşturarak Yuanbao uygulamasından edinin.
+  `--token`, iki nokta üst üste ile ayrılmış `appKey:appSecret` kullanır. Bunları, uygulama ayarlarınızda bir bot oluşturarak Yuanbao uygulamasından edinin.
   </Step>
 
   <Step title="Değişikliği uygulamak için Gateway'i yeniden başlatın">
@@ -51,12 +52,12 @@ App ID ve App Secret bilgilerinizi girmek için istemleri izleyin.
 
 `channels.yuanbao.dm.policy`:
 
-| Değer            | Davranış                                                               |
-| ---------------- | ---------------------------------------------------------------------- |
-| `open` (varsayılan) | Tüm kullanıcılara izin ver                                          |
+| Değer            | Davranış                                          |
+| ---------------- | ------------------------------------------------- |
+| `open` (varsayılan) | Tüm kullanıcılara izin ver                                   |
 | `pairing`        | Bilinmeyen kullanıcılar bir eşleştirme kodu alır; CLI üzerinden onaylayın |
-| `allowlist`      | Yalnızca `allowFrom` içindeki kullanıcılar sohbet edebilir              |
-| `disabled`       | Tüm doğrudan mesajları devre dışı bırak                                 |
+| `allowlist`      | Yalnızca `allowFrom` içindeki kullanıcılar sohbet edebilir                |
+| `disabled`       | Tüm DM'leri devre dışı bırak                                   |
 
 Bir eşleştirme isteğini onaylayın:
 
@@ -67,11 +68,11 @@ openclaw pairing approve yuanbao <CODE>
 
 ### Grup sohbetleri
 
-`channels.yuanbao.requireMention` (varsayılan `true`): Botun bir grupta yanıt vermesinden önce bir @bahsetme gerektirir. Botun kendi mesajına yanıt vermek, örtük bir bahsetme olarak kabul edilir.
+`channels.yuanbao.requireMention` (varsayılan `true`): botun bir grupta yanıt vermesinden önce @bahsetme gerektirir. Botun kendi mesajına verilen yanıt, örtük bir bahsetme olarak değerlendirilir.
 
 ## Yapılandırma örnekleri
 
-Temel kurulum, açık doğrudan mesaj politikası:
+Temel kurulum, açık DM politikası:
 
 ```json5
 {
@@ -87,7 +88,7 @@ Temel kurulum, açık doğrudan mesaj politikası:
 }
 ```
 
-Doğrudan mesajları belirli kullanıcılarla sınırlayın:
+DM'leri belirli kullanıcılarla sınırlandırın:
 
 ```json5
 {
@@ -123,35 +124,35 @@ Giden teslimatı ayarlama:
   channels: {
     yuanbao: {
       outboundQueueStrategy: "merge-text",
-      minChars: 2800, // bu kadar karaktere ulaşana kadar arabelleğe al
-      maxChars: 3000, // bu sınırın üzerinde zorunlu olarak böl
-      idleMs: 5000, // boşta kalma zaman aşımından sonra otomatik olarak gönder (ms)
+      minChars: 2800, // bu karakter sayısına ulaşana kadar arabelleğe al
+      maxChars: 3000, // bu sınırın üzerinde bölmeyi zorunlu kıl
+      idleMs: 5000, // boşta kalma zaman aşımından (ms) sonra otomatik gönder
     },
   },
 }
 ```
 
-Her parçayı arabelleğe almadan göndermek için `outboundQueueStrategy: "immediate"` ayarlayın.
+Her parçayı arabelleğe almadan göndermek için `outboundQueueStrategy: "immediate"` olarak ayarlayın.
 
 ## Yaygın komutlar
 
-| Komut      | Açıklama                           |
-| ---------- | ---------------------------------- |
-| `/help`    | Kullanılabilir komutları göster    |
-| `/status`  | Bot durumunu göster                |
-| `/new`     | Yeni bir oturum başlat             |
+| Komut    | Açıklama                 |
+| ---------- | --------------------------- |
+| `/help`    | Kullanılabilir komutları göster     |
+| `/status`  | Bot durumunu göster             |
+| `/new`     | Yeni bir oturum başlat         |
 | `/stop`    | Geçerli çalıştırmayı durdur        |
-| `/restart` | OpenClaw'ı yeniden başlat          |
-| `/compact` | Oturum bağlamını sıkıştır          |
+| `/restart` | OpenClaw'ı yeniden başlat            |
+| `/compact` | Oturum bağlamını sıkıştır |
 
-Yuanbao, yerel eğik çizgi komutu menülerini destekler; Gateway başlatıldığında komutlar platformla otomatik olarak eşitlenir.
+Yuanbao yerel eğik çizgi komutu menülerini destekler; komutlar Gateway başlatıldığında platformla otomatik olarak eşitlenir.
 
 ## Sorun giderme
 
 **Bot grup sohbetlerinde yanıt vermiyor:**
 
 1. Botun gruba eklendiğini doğrulayın
-2. Bottan @bahsettiğinizi doğrulayın (varsayılan olarak gereklidir)
+2. Bottan @bahsedildiğini doğrulayın (varsayılan olarak gereklidir)
 3. Günlükleri denetleyin: `openclaw logs --follow`
 
 **Bot mesajları almıyor:**
@@ -161,10 +162,10 @@ Yuanbao, yerel eğik çizgi komutu menülerini destekler; Gateway başlatıldı�
 3. Gateway'in çalıştığını doğrulayın: `openclaw gateway status`
 4. Günlükleri denetleyin: `openclaw logs --follow`
 
-**Bot boş veya yedek yanıtlar gönderiyor:**
+**Bot boş yanıtlar veya yedek yanıtlar gönderiyor:**
 
 1. Yapay zekâ modelinin geçerli içerik döndürüp döndürmediğini denetleyin
-2. Varsayılan yedek yanıt: "暫時無法解答，你可以換個問題問問我哦"
+2. Varsayılan yedek yanıt: "暂时无法解答，你可以换个问题问问我哦"
 3. `channels.yuanbao.fallbackReply` ile özelleştirin
 
 **App Secret sızdırıldı:**
@@ -186,12 +187,12 @@ Yuanbao, yerel eğik çizgi komutu menülerini destekler; Gateway başlatıldı�
         main: {
           appKey: "key_xxx",
           appSecret: "secret_xxx",
-          name: "Primary bot",
+          name: "Birincil bot",
         },
         backup: {
           appKey: "key_yyy",
           appSecret: "secret_yyy",
-          name: "Backup bot",
+          name: "Yedek bot",
           enabled: false,
         },
       },
@@ -204,13 +205,13 @@ Yuanbao, yerel eğik çizgi komutu menülerini destekler; Gateway başlatıldı�
 
 ### Mesaj sınırları
 
-- `maxChars`: tek bir mesajın azami karakter sayısı (varsayılan `3000`)
+- `maxChars`: tek mesaj için en fazla karakter sayısı (varsayılan `3000`)
 - `mediaMaxMb`: medya yükleme/indirme sınırı (varsayılan `20` MB)
-- `overflowPolicy`: bir mesaj sınırı aştığındaki davranış; `"split"` (varsayılan) veya `"stop"`
+- `overflowPolicy`: bir mesaj sınırı aştığındaki davranış, `"split"` (varsayılan) veya `"stop"`
 
 ### Akış
 
-Yuanbao, blok düzeyinde akış çıktısını destekler; bot, metni oluşturdukça parçalar hâlinde gönderir.
+Yuanbao blok düzeyinde akış çıktısını destekler; bot metni oluştururken parçalar hâlinde gönderir.
 
 ```json5
 {
@@ -222,7 +223,7 @@ Yuanbao, blok düzeyinde akış çıktısını destekler; bot, metni oluşturduk
 }
 ```
 
-Yanıtın tamamını tek mesajda göndermek için `disableBlockStreaming: true` ayarlayın.
+Yanıtın tamamını tek bir mesajda göndermek için `disableBlockStreaming: true` olarak ayarlayın.
 
 ### Grup sohbeti geçmişi bağlamı
 
@@ -230,13 +231,13 @@ Yanıtın tamamını tek mesajda göndermek için `disableBlockStreaming: true` 
 {
   channels: {
     yuanbao: {
-      historyLimit: 100, // varsayılan: 100, devre dışı bırakmak için 0 ayarlayın
+      historyLimit: 100, // varsayılan: 100, devre dışı bırakmak için 0 olarak ayarlayın
     },
   },
 }
 ```
 
-Grup sohbetleri için yapay zekâ bağlamına kaç geçmiş mesajın dahil edileceğini denetler.
+Grup sohbetleri için yapay zekâ bağlamına kaç geçmiş mesajın ekleneceğini denetler.
 
 ### Yanıtlama modu
 
@@ -250,11 +251,11 @@ Grup sohbetleri için yapay zekâ bağlamına kaç geçmiş mesajın dahil edile
 }
 ```
 
-| Değer   | Davranış                                                         |
-| ------- | ---------------------------------------------------------------- |
-| `off`   | Alıntılı yanıt yok                                                |
-| `first` | Gelen her mesaj için yalnızca ilk yanıtı alıntıla (varsayılan)    |
-| `all`   | Her yanıtı alıntıla                                               |
+| Değer   | Davranış                                                 |
+| ------- | -------------------------------------------------------- |
+| `off`   | Alıntılı yanıt yok                                           |
+| `first` | Her gelen mesaj için yalnızca ilk yanıtı alıntıla (varsayılan) |
+| `all`   | Her yanıtı alıntıla                                        |
 
 ### Markdown ipucu ekleme
 
@@ -284,9 +285,9 @@ Bot, varsayılan olarak modelin yanıtın tamamını bir markdown kod bloğuna s
 
 Listelenen bot kimlikleri için temizlenmemiş günlük çıktısını etkinleştirir.
 
-### Çoklu ajan yönlendirmesi
+### Çok aracılı yönlendirme
 
-Yuanbao doğrudan mesajlarını veya gruplarını farklı ajanlara yönlendirmek için `bindings` kullanın:
+Yuanbao DM'lerini veya gruplarını farklı aracılara yönlendirmek için `bindings` kullanın:
 
 ```json5
 {
@@ -317,37 +318,37 @@ Yuanbao doğrudan mesajlarını veya gruplarını farklı ajanlara yönlendirmek
 ```
 
 - `match.channel`: `"yuanbao"`
-- `match.peer.kind`: `"direct"` (doğrudan mesaj) veya `"group"` (grup sohbeti)
+- `match.peer.kind`: `"direct"` (DM) veya `"group"` (grup sohbeti)
 - `match.peer.id`: kullanıcı kimliği veya grup kodu
 
 ## Yapılandırma başvurusu
 
 Tam yapılandırma: [Gateway yapılandırması](/tr/gateway/configuration)
 
-| Ayar                                       | Açıklama                                                  | Varsayılan                             |
-| ------------------------------------------ | --------------------------------------------------------- | -------------------------------------- |
-| `channels.yuanbao.enabled`                 | Kanalı etkinleştir/devre dışı bırak                       | `true`                                 |
-| `channels.yuanbao.defaultAccount`          | Giden yönlendirme için varsayılan hesap                   | `default`                              |
-| `channels.yuanbao.accounts.<id>.appKey`    | App Key (imzalama + bilet oluşturma)                      | -                                      |
-| `channels.yuanbao.accounts.<id>.appSecret` | App Secret (imzalama)                                     | -                                      |
-| `channels.yuanbao.accounts.<id>.token`     | Önceden imzalanmış belirteç (otomatik bilet imzalamayı atlar) | -                                   |
-| `channels.yuanbao.accounts.<id>.name`      | Hesabın görünen adı                                       | -                                      |
-| `channels.yuanbao.accounts.<id>.enabled`   | Belirli bir hesabı etkinleştir/devre dışı bırak           | `true`                                 |
-| `channels.yuanbao.dm.policy`               | Doğrudan mesaj politikası                                 | `open`                                 |
-| `channels.yuanbao.dm.allowFrom`            | Doğrudan mesaj izin listesi (kullanıcı kimliği listesi)   | -                                      |
-| `channels.yuanbao.requireMention`          | Gruplarda @bahsetme gerektir                              | `true`                                 |
-| `channels.yuanbao.overflowPolicy`          | Uzun mesaj işleme (`split` veya `stop`)                   | `split`                                |
-| `channels.yuanbao.replyToMode`             | Grup yanıt stratejisi (`off`, `first`, `all`)             | `first`                                |
-| `channels.yuanbao.outboundQueueStrategy`   | Giden stratejisi (`merge-text` veya `immediate`)          | `merge-text`                           |
-| `channels.yuanbao.minChars`                | Metin birleştirme: göndermeyi tetikleyen asgari karakter sayısı | `2800`                          |
-| `channels.yuanbao.maxChars`                | Metin birleştirme: mesaj başına azami karakter sayısı     | `3000`                                 |
-| `channels.yuanbao.idleMs`                  | Metin birleştirme: otomatik göndermeden önce boşta kalma zaman aşımı (ms) | `5000`                 |
-| `channels.yuanbao.mediaMaxMb`              | Medya boyutu sınırı (MB)                                  | `20`                                   |
-| `channels.yuanbao.historyLimit`            | Grup sohbeti geçmiş bağlamı girdileri                     | `100`                                  |
-| `channels.yuanbao.disableBlockStreaming`   | Blok düzeyinde akış çıktısını devre dışı bırak            | `false`                                |
-| `channels.yuanbao.fallbackReply`           | Model içerik döndürmediğinde kullanılacak yedek yanıt     | `暂时无法解答，你可以换个问题问问我哦` |
-| `channels.yuanbao.markdownHintEnabled`     | Markdown sarmalamayı önleyen talimatlar ekle              | `true`                                 |
-| `channels.yuanbao.debugBotIds`             | Hata ayıklama izin listesindeki bot kimlikleri (temizlenmemiş günlükler) | `[]`                    |
+| Ayar                                    | Açıklama                                       | Varsayılan                                |
+| ------------------------------------------ | ------------------------------------------------- | -------------------------------------- |
+| `channels.yuanbao.enabled`                 | Kanalı etkinleştir/devre dışı bırak                        | `true`                                 |
+| `channels.yuanbao.defaultAccount`          | Giden yönlendirme için varsayılan hesap              | `default`                              |
+| `channels.yuanbao.accounts.<id>.appKey`    | App Key (imzalama + bilet oluşturma)             | -                                      |
+| `channels.yuanbao.accounts.<id>.appSecret` | App Secret (imzalama)                              | -                                      |
+| `channels.yuanbao.accounts.<id>.token`     | Önceden imzalanmış belirteç (otomatik bilet imzalamayı atlar) | -                                      |
+| `channels.yuanbao.accounts.<id>.name`      | Hesabın görünen adı                              | -                                      |
+| `channels.yuanbao.accounts.<id>.enabled`   | Belirli bir hesabı etkinleştir/devre dışı bırak                 | `true`                                 |
+| `channels.yuanbao.dm.policy`               | DM politikası                                         | `open`                                 |
+| `channels.yuanbao.dm.allowFrom`            | DM izin listesi (kullanıcı kimliği listesi)                       | -                                      |
+| `channels.yuanbao.requireMention`          | Gruplarda @bahsetme gerektir                        | `true`                                 |
+| `channels.yuanbao.overflowPolicy`          | Uzun mesaj işleme (`split` veya `stop`)         | `split`                                |
+| `channels.yuanbao.replyToMode`             | Grup yanıtlama stratejisi (`off`, `first`, `all`)   | `first`                                |
+| `channels.yuanbao.outboundQueueStrategy`   | Giden strateji (`merge-text` veya `immediate`)   | `merge-text`                           |
+| `channels.yuanbao.minChars`                | Metin birleştirme: göndermeyi tetikleyecek en az karakter sayısı             | `2800`                                 |
+| `channels.yuanbao.maxChars`                | Metin birleştirme: mesaj başına en fazla karakter sayısı                 | `3000`                                 |
+| `channels.yuanbao.idleMs`                  | Metin birleştirme: otomatik göndermeden önce boşta kalma zaman aşımı (ms)   | `5000`                                 |
+| `channels.yuanbao.mediaMaxMb`              | Medya boyutu sınırı (MB)                             | `20`                                   |
+| `channels.yuanbao.historyLimit`            | Grup sohbeti geçmiş bağlamı girdileri                | `100`                                  |
+| `channels.yuanbao.disableBlockStreaming`   | Blok düzeyinde akış çıktısını devre dışı bırak              | `false`                                |
+| `channels.yuanbao.fallbackReply`           | Model içerik döndürmediğinde kullanılacak yedek yanıt  | `暂时无法解答，你可以换个问题问问我哦` |
+| `channels.yuanbao.markdownHintEnabled`     | Markdown sarmalamayı önleme talimatları ekle        | `true`                                 |
+| `channels.yuanbao.debugBotIds`             | Hata ayıklama izin listesindeki bot kimlikleri (temizlenmemiş günlükler)        | `[]`                                   |
 
 ## Desteklenen mesaj türleri
 
@@ -355,12 +356,12 @@ Tam yapılandırma: [Gateway yapılandırması](/tr/gateway/configuration)
 
 **Gönderme:** metin (markdown), görseller, dosyalar, ses, video, çıkartmalar.
 
-**İleti dizileri ve yanıtlar:** alıntılı yanıtlar (`replyToMode` aracılığıyla yapılandırılabilir); ileti dizisi yanıtları platform tarafından desteklenmez.
+**İş parçacıkları ve yanıtlar:** alıntılı yanıtlar (`replyToMode` aracılığıyla yapılandırılabilir); iş parçacığı yanıtları platform tarafından desteklenmez.
 
-## İlgili konular
+## İlgili
 
-- [Kanallara genel bakış](/tr/channels) - desteklenen tüm kanallar
-- [Eşleştirme](/tr/channels/pairing) - doğrudan mesaj kimlik doğrulaması ve eşleştirme akışı
+- [Kanallara Genel Bakış](/tr/channels) - desteklenen tüm kanallar
+- [Eşleştirme](/tr/channels/pairing) - DM kimlik doğrulaması ve eşleştirme akışı
 - [Gruplar](/tr/channels/groups) - grup sohbeti davranışı ve bahsetme denetimi
-- [Kanal yönlendirmesi](/tr/channels/channel-routing) - mesajlar için oturum yönlendirmesi
+- [Kanal Yönlendirme](/tr/channels/channel-routing) - iletiler için oturum yönlendirmesi
 - [Güvenlik](/tr/gateway/security) - erişim modeli ve sağlamlaştırma

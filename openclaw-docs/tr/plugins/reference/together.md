@@ -1,14 +1,15 @@
 ---
 read_when:
-    - together Plugin'ini kuruyor, yapılandırıyor veya denetliyorsunuz
+    - together pluginini yüklüyor, yapılandırıyor veya denetliyorsunuz
 summary: OpenClaw'a Together model sağlayıcısı desteği ekler.
-title: Together eklentisi
+title: Together plugin’i
 x-i18n:
-    generated_at: "2026-07-12T12:35:10Z"
+    generated_at: "2026-07-26T23:53:50Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c6d9c45bb128e18cbb931c6e6f429a3f60b25a1f1faeb83676989da2a12b5866
+    source_hash: 96d2a19fb8a9ab445d826b0b238f565d606fc9150e5dd45a9d2323e6b3048396
     source_path: plugins/reference/together.md
     workflow: 16
 ---
@@ -24,7 +25,7 @@ OpenClaw'a Together model sağlayıcısı desteği ekler.
 
 ## Yüzey
 
-sağlayıcılar: together; sözleşmeler: videoGenerationProviders
+sağlayıcılar: `together`; sözleşmeler: `videoGenerationProviders`
 
 ## İlgili belgeler
 

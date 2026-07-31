@@ -5,44 +5,45 @@ read_when:
 summary: Cohere のセットアップ（認証 + モデル選択）
 title: Cohere
 x-i18n:
-    generated_at: "2026-07-11T22:36:34Z"
+    generated_at: "2026-07-26T09:15:53Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: fee46bf80609bd5e8211d6be507713f4de178653941effb81ebae48d8bb6528a
     source_path: providers/cohere.md
     workflow: 16
 ---
 
-[Cohere](https://cohere.com) は、Compatibility API を通じて OpenAI 互換の推論を提供します。OpenClaw は、Cohere プロバイダーの外部化移行期間中、このプロバイダーを同梱するとともに、公式の外部 Plugin としても公開しています。
+[Cohere](https://cohere.com) は、Compatibility API を通じて OpenAI 互換の推論を提供します。OpenClaw は、Cohere プロバイダーの外部化移行中はこれを同梱し、公式の外部 Plugin としても公開しています。
 
-| プロパティ           | 値                                           |
-| -------------------- | -------------------------------------------- |
-| プロバイダー ID      | `cohere`                                     |
-| Plugin               | 移行期間中は同梱、公式の外部パッケージ       |
-| 認証環境変数         | `COHERE_API_KEY`                             |
-| オンボーディングフラグ | `--auth-choice cohere-api-key`               |
-| 直接指定する CLI フラグ | `--cohere-api-key <key>`                     |
-| API                  | OpenAI 互換（`openai-completions`）          |
-| ベース URL           | `https://api.cohere.ai/compatibility/v1`     |
-| デフォルトモデル     | `cohere/command-a-plus-05-2026`              |
-| コンテキストウィンドウ | 128,000 トークン                             |
+| プロパティ        | 値                                                |
+| --------------- | ---------------------------------------------------- |
+| プロバイダー ID     | `cohere`                                             |
+| Plugin          | 移行中は同梱、公式外部パッケージ |
+| 認証環境変数    | `COHERE_API_KEY`                                     |
+| オンボーディングフラグ | `--auth-choice cohere-api-key`                       |
+| 直接指定する CLI フラグ | `--cohere-api-key <key>`                             |
+| API             | OpenAI 互換（`openai-completions`）             |
+| ベース URL        | `https://api.cohere.ai/compatibility/v1`             |
+| デフォルトモデル   | `cohere/command-a-plus-05-2026`                      |
+| コンテキストウィンドウ  | 128,000 トークン                                       |
 
 ## 組み込みカタログ
 
-| モデル参照                           | 入力               | コンテキスト | 最大出力 | 備考                                             |
-| ------------------------------------ | ------------------ | ------------ | -------- | ------------------------------------------------ |
-| `cohere/command-a-plus-05-2026`      | テキスト、画像     | 128,000      | 64,000   | デフォルト。主力のエージェント型・推論モデル     |
-| `cohere/command-a-03-2025`           | テキスト           | 256,000      | 8,000    | 以前の Command A モデル                          |
-| `cohere/command-a-reasoning-08-2025` | テキスト           | 256,000      | 32,000   | エージェント型推論とツール使用                   |
-| `cohere/command-a-vision-07-2025`    | テキスト、画像     | 128,000      | 8,000    | 画像・文書分析。ツール使用には非対応             |
-| `cohere/north-mini-code-1-0`         | テキスト、画像     | 256,000      | 64,000   | エージェント型コーディング、推論、無料枠あり     |
+| モデル参照                            | 入力       | コンテキスト | 最大出力 | 備考                                         |
+| ------------------------------------ | ----------- | ------- | ---------- | --------------------------------------------- |
+| `cohere/command-a-plus-05-2026`      | テキスト、画像 | 128,000 | 64,000     | デフォルト。フラッグシップのエージェント型推論モデル |
+| `cohere/command-a-03-2025`           | テキスト        | 256,000 | 8,000      | 以前の Command A モデル                      |
+| `cohere/command-a-reasoning-08-2025` | テキスト        | 256,000 | 32,000     | エージェント型推論とツール使用                |
+| `cohere/command-a-vision-07-2025`    | テキスト、画像 | 128,000 | 8,000      | 画像および文書分析。ツール使用なし     |
+| `cohere/north-mini-code-1-0`         | テキスト、画像 | 256,000 | 64,000     | エージェント型コーディング、推論、無料枠        |
 
-推論対応の Cohere モデルは、2 つの Compatibility API 推論モードをサポートしています。OpenClaw は **無効** を `none` に、すべての有効な思考レベルを `high` に対応付けます。Command A Vision はツール使用をサポートしていないため、OpenClaw はこのモデルでエージェントツールを無効のままにします。
+推論対応の Cohere モデルは、2 つの Compatibility API 推論モードをサポートします。OpenClaw は **off** を `none` に、思考が有効なすべてのレベルを `high` にマッピングします。Command A Vision はツール使用をサポートしないため、OpenClaw はこのモデルでエージェントツールを無効のままにします。
 
 ## はじめに
 
-1. 現在の OpenClaw パッケージには Cohere が同梱されています。存在しない場合は、外部パッケージをインストールして Gateway を再起動します。
+1. Cohere は現在の OpenClaw パッケージに同梱されています。含まれていない場合は、外部パッケージをインストールして Gateway を再起動します。
 
 ```bash
 openclaw plugins install @openclaw/cohere-provider
@@ -66,9 +67,9 @@ openclaw models list --provider cohere
 
 プライマリモデルがまだ設定されていない場合に限り、オンボーディングによって Cohere がプライマリモデルとして設定されます。
 
-## 環境変数のみを使用したセットアップ
+## 環境変数のみを使用した設定
 
-`COHERE_API_KEY` を Gateway プロセスから利用可能にしてから、Cohere モデルを選択します。
+`COHERE_API_KEY` を Gateway プロセスから利用できるようにしてから、Cohere モデルを選択します。
 
 ```json5
 {
@@ -81,7 +82,7 @@ openclaw models list --provider cohere
 ```
 
 <Note>
-Gateway をデーモンまたは Docker で実行する場合は、そのサービスに `COHERE_API_KEY` を設定してください。対話型シェルでエクスポートするだけでは、すでに実行中の Gateway からは利用できません。
+Gateway をデーモンまたは Docker で実行している場合、そのサービスに `COHERE_API_KEY` を設定してください。対話型シェルでのみエクスポートしても、すでに実行中の Gateway では利用できません。
 </Note>
 
 ## 関連項目

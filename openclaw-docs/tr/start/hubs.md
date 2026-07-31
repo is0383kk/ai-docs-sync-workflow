@@ -1,12 +1,13 @@
 ---
 read_when:
-    - Belgelerin eksiksiz bir haritasını istiyorsunuz
-summary: Tüm OpenClaw belgelerine bağlantı veren merkezler
+    - Dokümantasyonun eksiksiz bir haritasını istiyorsunuz
+summary: Her OpenClaw belgesine bağlantı veren merkezler
 title: Dokümantasyon merkezleri
 x-i18n:
-    generated_at: "2026-07-12T12:15:24Z"
+    generated_at: "2026-07-26T23:02:18Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 9b51fc77155b2e7ed6cb6e36d375585ebd457c3d89f97c4151877d1aae20717f
     source_path: start/hubs.md
@@ -17,7 +18,7 @@ x-i18n:
 OpenClaw'ı ilk kez kullanıyorsanız [Başlarken](/tr/start/getting-started) ile başlayın.
 </Note>
 
-Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve başvuru belgeleri dâhil tüm sayfaları keşfetmek için bu merkezleri kullanın.
+Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve referans belgeleri dâhil tüm sayfaları keşfetmek için bu merkezleri kullanın.
 
 ## Buradan başlayın
 
@@ -28,14 +29,14 @@ Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve başvuru belgel
 - [Kurulum](/tr/start/setup)
 - [Gösterge paneli (yerel Gateway)](http://127.0.0.1:18789/)
 - [Yardım](/tr/help)
-- [Belge dizini](/tr/start/docs-directory)
+- [Belgeler dizini](/tr/start/docs-directory)
 - [Yapılandırma](/tr/gateway/configuration)
 - [Yapılandırma örnekleri](/tr/gateway/configuration-examples)
 - [OpenClaw asistanı](/tr/start/openclaw)
 - [Vitrin](/tr/start/showcase)
-- [Arka plan hikâyesi](/tr/start/lore)
+- [Hikâye](/tr/start/lore)
 
-## Yükleme ve güncellemeler
+## Yükleme + güncellemeler
 
 - [Docker](/tr/install/docker)
 - [Nix](/tr/install/nix)
@@ -47,12 +48,12 @@ Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve başvuru belgel
 - [Mimari](/tr/concepts/architecture)
 - [Özellikler](/tr/concepts/features)
 - [Ağ merkezi](/tr/network)
-- [Aracı çalışma zamanı](/tr/concepts/agent)
-- [Aracı çalışma alanı](/tr/concepts/agent-workspace)
+- [Ajan çalışma zamanı](/tr/concepts/agent)
+- [Ajan çalışma alanı](/tr/concepts/agent-workspace)
 - [Bellek](/tr/concepts/memory)
-- [Aracı döngüsü](/tr/concepts/agent-loop)
-- [Akış ve parçalara ayırma](/tr/concepts/streaming)
-- [Çok aracılı yönlendirme](/tr/concepts/multi-agent)
+- [Ajan döngüsü](/tr/concepts/agent-loop)
+- [Akış + parçalara ayırma](/tr/concepts/streaming)
+- [Çoklu ajan yönlendirmesi](/tr/concepts/multi-agent)
 - [Compaction](/tr/concepts/compaction)
 - [Oturumlar](/tr/concepts/session)
 - [Oturum budama](/tr/concepts/session-pruning)
@@ -61,17 +62,17 @@ Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve başvuru belgel
 - [Eğik çizgi komutları](/tr/tools/slash-commands)
 - [RPC bağdaştırıcıları](/tr/reference/rpc)
 - [TypeBox şemaları](/tr/concepts/typebox)
-- [Saat dilimi yönetimi](/tr/concepts/timezone)
+- [Saat dilimi işleme](/tr/concepts/timezone)
 - [Mevcudiyet](/tr/concepts/presence)
-- [Keşif ve aktarımlar](/tr/gateway/discovery)
+- [Keşif + aktarımlar](/tr/gateway/discovery)
 - [Bonjour](/tr/gateway/bonjour)
-- [Kanal yönlendirme](/tr/channels/channel-routing)
+- [Kanal yönlendirmesi](/tr/channels/channel-routing)
 - [Gruplar](/tr/channels/groups)
 - [Grup mesajları](/tr/channels/group-messages)
 - [Model yük devri](/tr/concepts/model-failover)
 - [OAuth](/tr/concepts/oauth)
 
-## Sağlayıcılar ve giriş
+## Sağlayıcılar + giriş
 
 - [Sohbet kanalları merkezi](/tr/channels)
 - [Model sağlayıcıları merkezi](/tr/providers/models)
@@ -88,7 +89,7 @@ Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve başvuru belgel
 - [Webhook'lar](/tr/automation/cron-jobs#webhooks)
 - [Gmail Pub/Sub](/tr/automation/cron-jobs#gmail-pubsub-integration)
 
-## Gateway ve operasyonlar
+## Gateway + operasyonlar
 
 - [Gateway işletim kılavuzu](/tr/gateway)
 - [Ağ modeli](/tr/network#core-model)
@@ -99,7 +100,7 @@ Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve başvuru belgel
 - [Heartbeat](/tr/gateway/heartbeat)
 - [Tanılama](/tr/gateway/doctor)
 - [Günlük kaydı](/tr/gateway/logging)
-- [Korumalı alan kullanımı](/tr/gateway/sandboxing)
+- [Korumalı alan](/tr/gateway/sandboxing)
 - [Gösterge paneli](/tr/web/dashboard)
 - [Denetim arayüzü](/tr/web/control-ui)
 - [Uzaktan erişim](/tr/gateway/remote)
@@ -108,26 +109,26 @@ Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve başvuru belgel
 - [Güvenlik](/tr/gateway/security)
 - [Sorun giderme](/tr/gateway/troubleshooting)
 
-## Araçlar ve otomasyon
+## Araçlar + otomasyon
 
 - [Araçlar yüzeyi](/tr/tools)
 - [OpenProse](/tr/prose)
-- [CLI başvurusu](/tr/cli)
+- [CLI referansı](/tr/cli)
 - [Çalıştırma aracı](/tr/tools/exec)
 - [PDF aracı](/tr/tools/pdf)
 - [Yükseltilmiş mod](/tr/tools/elevated)
-- [Cron görevleri](/tr/automation/cron-jobs)
+- [Cron işleri](/tr/automation/cron-jobs)
 - [Otomasyon](/tr/automation)
-- [Düşünme ve ayrıntılı çıktı](/tr/tools/thinking)
+- [Düşünme + ayrıntılı çıktı](/tr/tools/thinking)
 - [Modeller](/tr/concepts/models)
-- [Alt aracılar](/tr/tools/subagents)
-- [Aracı gönderme CLI'si](/tr/tools/agent-send)
+- [Alt ajanlar](/tr/tools/subagents)
+- [Ajan gönderme CLI'sı](/tr/tools/agent-send)
 - [Terminal kullanıcı arayüzü](/tr/web/tui)
 - [Tarayıcı denetimi](/tr/tools/browser)
 - [Tarayıcı (Linux sorun giderme)](/tr/tools/browser-linux-troubleshooting)
 - [Anketler](/tr/cli/message)
 
-## Node'lar, medya ve ses
+## Node'lar, medya, ses
 
 - [Node'lara genel bakış](/tr/nodes)
 - [Kamera](/tr/nodes/camera)
@@ -143,7 +144,7 @@ Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve başvuru belgel
 - [macOS](/tr/platforms/macos)
 - [iOS](/tr/platforms/ios)
 - [Android](/tr/platforms/android)
-- [Windows merkezi](/tr/platforms/windows)
+- [Windows Merkezi](/tr/platforms/windows)
 - [Linux](/tr/platforms/linux)
 - [Web yüzeyleri](/tr/web)
 
@@ -154,7 +155,7 @@ Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve başvuru belgel
 - [macOS sesle uyandırma](/tr/platforms/mac/voicewake)
 - [macOS ses katmanı](/tr/platforms/mac/voice-overlay)
 - [macOS WebChat](/tr/platforms/mac/webchat)
-- [macOS tuvali](/tr/platforms/mac/canvas)
+- [macOS Tuvali](/tr/platforms/mac/canvas)
 - [macOS alt işlemi](/tr/platforms/mac/child-process)
 - [macOS sistem durumu](/tr/platforms/mac/health)
 - [macOS simgesi](/tr/platforms/mac/icon)
@@ -167,23 +168,23 @@ Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve başvuru belgel
 - [macOS Skills](/tr/platforms/mac/skills)
 - [macOS Peekaboo](/tr/platforms/mac/peekaboo)
 
-## Plugin'ler
+## Pluginler
 
-- [Plugin'lere genel bakış](/tr/tools/plugin)
+- [Pluginlere genel bakış](/tr/tools/plugin)
 - [Plugin oluşturma](/tr/plugins/building-plugins)
 - [Plugin kancaları](/tr/plugins/hooks)
 - [Plugin manifestosu](/tr/plugins/manifest)
-- [Aracı araçları](/tr/plugins/building-plugins#registering-agent-tools)
+- [Ajan araçları](/tr/plugins/building-plugins#registering-agent-tools)
 - [Plugin paketleri](/tr/plugins/bundles)
-- [ClawHub](/clawhub)
+- [ClawHub](/tr/clawhub)
 - [Yetenek tarifleri](/tr/plugins/adding-capabilities)
-- [Sesli arama Plugin'i](/tr/plugins/voice-call)
-- [Zalo kullanıcı Plugin'i](/tr/plugins/zalouser)
+- [Sesli arama plugini](/tr/plugins/voice-call)
+- [Zalo kullanıcı plugini](/tr/plugins/zalouser)
 
-## Çalışma alanı ve şablonlar
+## Çalışma alanı + şablonlar
 
 - [Skills](/tr/tools/skills)
-- [ClawHub](/clawhub)
+- [ClawHub](/tr/clawhub)
 - [Skills yapılandırması](/tr/tools/skills-config)
 - [Varsayılan AGENTS](/tr/reference/AGENTS.default)
 - [Şablonlar: AGENTS](/tr/reference/templates/AGENTS)
@@ -198,7 +199,7 @@ Sol gezinme menüsünde görünmeyen ayrıntılı incelemeler ve başvuru belgel
 
 - [Katkıda bulunanlar](/tr/reference/credits)
 
-## Test ve sürüm
+## Test + sürüm
 
 - [Test](/tr/reference/test)
 - [Sürüm politikası](/tr/reference/RELEASING)

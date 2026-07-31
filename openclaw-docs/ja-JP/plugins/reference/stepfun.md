@@ -1,30 +1,31 @@
 ---
 read_when:
-    - stepfun Pluginをインストール、設定、または監査しています
-summary: OpenClaw に StepFun および StepFun Plan モデルプロバイダーのサポートを追加。
+    - stepfun Plugin をインストール、設定、または監査しています
+summary: OpenClaw に StepFun および StepFun Plan モデルプロバイダーのサポートを追加します。
 title: StepFun Plugin
 x-i18n:
-    generated_at: "2026-07-11T22:33:56Z"
+    generated_at: "2026-07-26T09:44:43Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 02e2b7fbfb03a348a8a5d368e6fd039cf834ab7d2a9bf82f79729f360660b5de
+    source_hash: f7eec327cc70524383af493c7f2c7a988877dca0108edd9061a8b5a38c6f4c7e
     source_path: plugins/reference/stepfun.md
     workflow: 16
 ---
 
-# StepFun Plugin
+# StepFun plugin
 
-OpenClaw に StepFun、StepFun Plan モデルプロバイダーのサポートを追加します。
+OpenClaw に StepFun および StepFun Plan モデルプロバイダーのサポートを追加します。
 
 ## 配布
 
 - パッケージ: `@openclaw/stepfun-provider`
 - インストール経路: npm、ClawHub: `clawhub:@openclaw/stepfun-provider`
 
-## 提供機能
+## サーフェス
 
-プロバイダー: stepfun、stepfun-plan
+プロバイダー: `stepfun`、`stepfun-plan`
 
 ## 関連ドキュメント
 

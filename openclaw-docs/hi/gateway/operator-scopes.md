@@ -2,124 +2,147 @@
 read_when:
     - अनुपस्थित ऑपरेटर स्कोप त्रुटियों की डीबगिंग
     - डिवाइस या Node पेयरिंग अनुमोदनों की समीक्षा करना
-    - Gateway RPC विधियाँ जोड़ना या वर्गीकृत करना
-summary: Gateway क्लाइंट्स के लिए ऑपरेटर भूमिकाएँ, स्कोप, और approval-time जाँचें
-title: ऑपरेटर स्कोप
+    - Gateway RPC विधियों को जोड़ना या वर्गीकृत करना
+summary: Gateway क्लाइंट के लिए ऑपरेटर भूमिकाएँ, दायरे और अनुमोदन-समय जाँचें
+title: ऑपरेटर के दायरे
 x-i18n:
-    generated_at: "2026-06-28T23:11:34Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:12:54Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: dc59453ae1a73b52276185de2cedd1ed4da027111168eda8107d6ba0b74aec2f
+    source_hash: 40053793bb5a80afab28fdfcdcac6565abde6bca988389b03a407272c70043e2
     source_path: gateway/operator-scopes.md
     workflow: 16
 ---
 
-ऑपरेटर स्कोप यह परिभाषित करते हैं कि प्रमाणीकरण के बाद कोई Gateway क्लाइंट क्या कर सकता है।
-वे एक विश्वसनीय Gateway ऑपरेटर डोमेन के भीतर control-plane guardrail हैं,
-hostile multi-tenant isolation नहीं। यदि आपको लोगों, टीमों या मशीनों के बीच मजबूत अलगाव चाहिए, तो अलग OS users या hosts के अंतर्गत अलग-अलग Gateways चलाएं।
+ऑपरेटर स्कोप यह नियंत्रित करते हैं कि प्रमाणीकरण के बाद कोई Gateway क्लाइंट क्या कर सकता है।
+वे एक विश्वसनीय Gateway ऑपरेटर डोमेन के भीतर नियंत्रण-प्लेन सुरक्षा-सीमा हैं,
+शत्रुतापूर्ण बहु-टेनेंट पृथक्करण नहीं। लोगों, टीमों या मशीनों के बीच मजबूत पृथक्करण के लिए,
+अलग-अलग OS उपयोगकर्ताओं या होस्ट के अंतर्गत अलग-अलग Gateway चलाएँ।
 
-संबंधित: [सुरक्षा](/hi/gateway/security), [Gateway protocol](/hi/gateway/protocol),
-[Gateway pairing](/hi/gateway/pairing), [डिवाइस CLI](/hi/cli/devices).
+संबंधित: [सुरक्षा](/hi/gateway/security), [Gateway प्रोटोकॉल](/hi/gateway/protocol),
+[Gateway पेयरिंग](/hi/gateway/pairing), [डिवाइस CLI](/hi/cli/devices)।
 
-## भूमिकाएं
+## भूमिकाएँ
 
-Gateway WebSocket क्लाइंट एक भूमिका के साथ कनेक्ट करते हैं:
+हर Gateway WebSocket क्लाइंट एक भूमिका के साथ कनेक्ट होता है:
 
-- `operator`: control-plane क्लाइंट जैसे CLI, Control UI, automation, और
-  विश्वसनीय helper processes.
-- `node`: capability hosts जैसे macOS, iOS, Android, या headless nodes जो
-  `node.invoke` के माध्यम से commands उजागर करते हैं।
+- `operator`: नियंत्रण-प्लेन क्लाइंट, जैसे CLI, नियंत्रण UI, स्वचालन और
+  विश्वसनीय सहायक प्रक्रियाएँ।
+- `node`: क्षमता होस्ट (macOS, iOS, Android, हेडलेस), जो
+  `node.invoke` के माध्यम से कमांड उपलब्ध कराते हैं।
 
-Operator RPC methods के लिए `operator` भूमिका आवश्यक है। Node-originated methods के लिए
+ऑपरेटर RPC विधियों के लिए `operator` भूमिका आवश्यक है; Node से आरंभ होने वाली विधियों के लिए
 `node` भूमिका आवश्यक है।
 
 ## स्कोप स्तर
 
-| स्कोप                   | अर्थ                                                                                                                                                                               |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `operator.read`         | केवल-पठन status, lists, catalog, logs, session reads, और अन्य non-mutating control-plane calls.                                                                                    |
-| `operator.write`        | सामान्य mutating operator actions जैसे messages भेजना, tools invoke करना, talk/voice settings अपडेट करना, और node command relay. `operator.read` को भी संतुष्ट करता है।                      |
-| `operator.admin`        | प्रशासनिक control-plane access. हर `operator.*` scope को संतुष्ट करता है। config mutation, updates, native hooks, sensitive reserved namespaces, और high-risk approvals के लिए आवश्यक। |
-| `operator.pairing`      | Device और node pairing management, जिसमें pairing records या device tokens को list करना, approve करना, reject करना, remove करना, rotate करना, और revoke करना शामिल है।                                       |
-| `operator.approvals`    | Exec और plugin approval APIs.                                                                                                                                                        |
-| `operator.talk.secrets` | secrets सहित Talk configuration पढ़ना।                                                                                                                                     |
+| स्कोप                   | अर्थ                                                                                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `operator.read`         | केवल-पढ़ने योग्य स्थिति, सूचियाँ, कैटलॉग, लॉग, सत्र रीड और अन्य गैर-परिवर्तनकारी कॉल।                                                                          |
+| `operator.write`        | परिवर्तनकारी ऑपरेटर कार्रवाइयाँ: संदेश भेजना, टूल चलाना, बातचीत/वॉइस सेटिंग अपडेट करना, Node कमांड रिले। यह `operator.read` को भी पूरा करता है।                |
+| `operator.admin`        | प्रशासनिक पहुँच। प्रत्येक `operator.*` स्कोप को पूरा करता है। कॉन्फ़िगरेशन परिवर्तन, अपडेट, नेटिव हुक, आरक्षित नेमस्पेस और उच्च-जोखिम अनुमोदनों के लिए आवश्यक। |
+| `operator.pairing`      | डिवाइस और Node पेयरिंग प्रबंधन: सूची बनाना, अनुमोदित करना, अस्वीकार करना, हटाना, रोटेट करना, निरस्त करना।                                                                            |
+| `operator.approvals`    | Exec और Plugin अनुमोदन API।                                                                                                                                |
+| `operator.questions`    | इंटरैक्टिव प्रश्नों को सूचीबद्ध करना, पढ़ना, उत्तर देना और समाधान करना।                                                                                             |
+| `operator.talk.secrets` | रहस्यों सहित बातचीत कॉन्फ़िगरेशन पढ़ना।                                                                                                             |
 
-अज्ञात भविष्य के `operator.*` scopes के लिए exact match आवश्यक है, जब तक caller के पास
-`operator.admin` न हो।
+अज्ञात भावी `operator.*` स्कोप के लिए सटीक मिलान आवश्यक है, जब तक कि कॉलर के पास
+पहले से `operator.admin` न हो।
 
-## Method scope केवल पहला gate है
+## विधि स्कोप केवल पहला नियंत्रण-बिंदु है
 
-हर Gateway RPC का एक least-privilege method scope होता है। वह method scope तय करता है
-कि request handler तक पहुंच सकती है या नहीं। कुछ handlers फिर approve या mutate की जा रही
-ठोस चीज़ के आधार पर अधिक कठोर approval-time checks लागू करते हैं।
+प्रत्येक Gateway RPC में न्यूनतम-विशेषाधिकार वाला विधि स्कोप होता है, जो तय करता है कि कोई
+अनुरोध उसके हैंडलर तक पहुँचेगा या नहीं। पैरामीटर-संवेदी विधियाँ डिस्पैच से पहले वह स्कोप
+निर्धारित करती हैं, ताकि प्राधिकरण विफलताओं के लिए एक ही मानक संरचित प्रतिक्रिया हो:
 
-उदाहरण:
+- `agent` को सामान्य टर्न के लिए `operator.write` और
+  `/new` या `/reset` सत्र जीवनचक्र कमांड के लिए `operator.admin` चाहिए।
+- `node.invoke` को सामान्य रिले कमांड के लिए `operator.write` और
+  `browser.proxy`, `fs.listDir` तथा `terminal.upload` के लिए `operator.admin` चाहिए।
+- `talk.config` को `operator.read` चाहिए; `includeSecrets: true` को
+  `operator.talk.secrets` भी चाहिए।
 
-- `device.pair.approve` `operator.pairing` के साथ reachable है, लेकिन किसी
-  operator device को approve करना केवल वही scopes mint या preserve कर सकता है जो caller के पास पहले से हैं।
-- `node.pair.approve` `operator.pairing` के साथ reachable है, फिर pending node command list से
-  अतिरिक्त approval scopes derive करता है।
-- `chat.send` सामान्यतः write-scoped method है, लेकिन persistent `/config set`
-  और `/config unset` के लिए command level पर `operator.admin` आवश्यक है।
+कुछ हैंडलर अनुमोदित या परिवर्तित की जा रही ठोस वस्तु के आधार पर इसके बाद
+और कड़े जाँच लागू करते हैं:
 
-यह lower-scope operators को सभी pairing approval को admin-only बनाए बिना
-low-risk pairing actions करने देता है।
+- `device.pair.approve` तक `operator.pairing` के साथ पहुँचा जा सकता है, लेकिन किसी
+  ऑपरेटर डिवाइस को अनुमोदित करने पर केवल वही स्कोप जारी या बनाए रखे जा सकते हैं, जो कॉलर के पास पहले से हैं।
+- `node.pair.approve` तक `operator.pairing` के साथ पहुँचा जा सकता है, फिर यह लंबित
+  Node की घोषित कमांड सूची से अतिरिक्त अनुमोदन स्कोप निर्धारित करता है।
+- `chat.send` एक लेखन-स्कोप वाली विधि है, लेकिन `/config set` और
+  `/config unset` चैट कमांड के लिए उसके अतिरिक्त `operator.admin` आवश्यक है,
+  चाहे कॉलर का चैट-भेजने का स्कोप कुछ भी हो।
 
-## Device pairing approvals
+इससे निम्न-स्कोप वाले ऑपरेटर कम-जोखिम पेयरिंग कार्रवाइयाँ कर सकते हैं और
+सभी पेयरिंग अनुमोदनों को केवल-एडमिन बनाने की आवश्यकता नहीं पड़ती।
 
-Device pairing records approved roles और scopes का durable source हैं।
-पहले से paired devices को चुपचाप व्यापक access नहीं मिलता: reconnects जो
-broader role या broader scopes मांगते हैं, एक नई pending upgrade request बनाते हैं।
+सत्र परिवर्तन RPC को उनके समझौता किए गए ऑपरेटर स्कोप द्वारा प्राधिकृत किया जाता है,
+चाहे कनेक्ट होने वाले क्लाइंट का `client.id` या `client.mode` कुछ भी हो। क्लाइंट
+पहचान अब भी कनेक्शन और डिवाइस-प्रमाणीकरण नीति को प्रभावित कर सकती है, लेकिन वह सत्र
+परिवर्तन प्राधिकार न तो प्रदान करती है और न हटाती है।
 
-Device request approve करते समय:
+## डिवाइस पेयरिंग अनुमोदन
 
-- बिना operator role वाली request को operator token scope approval की आवश्यकता नहीं होती।
-- किसी non-operator device role, जैसे `node`, के लिए request को
-  `operator.admin` चाहिए, भले ही `device.pair.approve`
-  `operator.pairing` के साथ reachable हो।
+डिवाइस पेयरिंग रिकॉर्ड अनुमोदित भूमिकाओं और स्कोप का स्थायी स्रोत हैं।
+पहले से पेयर किए गए डिवाइस को बिना सूचना के अधिक व्यापक पहुँच नहीं मिलती: अधिक व्यापक
+भूमिका या स्कोप माँगने वाला पुनः कनेक्शन एक नया लंबित अपग्रेड अनुरोध बनाता है।
+
+डिवाइस अनुरोध का अनुमोदन:
+
+- ऑपरेटर भूमिका के बिना अनुरोध को ऑपरेटर स्कोप अनुमोदन की आवश्यकता नहीं होती।
+- गैर-ऑपरेटर डिवाइस भूमिका (उदाहरण के लिए `node`) के अनुरोध के लिए
+  `operator.admin` आवश्यक है, भले ही `device.pair.approve` को स्वयं केवल
+  `operator.pairing` की आवश्यकता हो।
 - `operator.read`, `operator.write`, `operator.approvals`,
-  `operator.pairing`, या `operator.talk.secrets` के लिए request में caller के पास
-  वे scopes, या `operator.admin`, होना आवश्यक है।
-- `operator.admin` के लिए request को `operator.admin` चाहिए।
-- बिना explicit scopes वाली repair request मौजूदा operator
-  token scopes inherit कर सकती है। यदि वह मौजूदा token admin-scoped है, तो approval के लिए फिर भी
+  `operator.questions`, `operator.pairing` या `operator.talk.secrets` के अनुरोध के लिए
+  कॉलर के पास वह स्कोप या `operator.admin` पहले से होना आवश्यक है।
+- `operator.admin` के अनुरोध के लिए `operator.admin` आवश्यक है।
+- स्पष्ट स्कोप के बिना सुधार अनुरोध मौजूदा ऑपरेटर
+  टोकन के स्कोप प्राप्त कर सकता है; यदि उस टोकन में एडमिन स्कोप है, तो अनुमोदन के लिए फिर भी
   `operator.admin` आवश्यक है।
 
-Non-admin shared-secret और trusted-proxy sessions operator-device
-requests को केवल अपने घोषित operator scopes के भीतर approve कर सकते हैं। Non-operator
-roles approve करना admin-only है, भले ही वे sessions अन्यथा
+गैर-एडमिन साझा-रहस्य और विश्वसनीय-प्रॉक्सी सत्र केवल अपने घोषित
+ऑपरेटर स्कोप के भीतर ऑपरेटर-डिवाइस अनुरोध अनुमोदित कर सकते हैं; गैर-ऑपरेटर
+भूमिकाओं का अनुमोदन केवल एडमिन कर सकता है, भले ही वे सत्र अन्यथा
 `operator.pairing` का उपयोग कर सकते हों।
 
-Paired-device token sessions के लिए, management भी self-scoped है जब तक
-caller के पास `operator.admin` न हो: non-admin callers केवल अपनी pairing
-entries देखते हैं, केवल अपनी pending request approve या reject कर सकते हैं, और केवल अपनी device entry
-rotate, revoke, या remove कर सकते हैं।
+पेयर किए गए डिवाइस टोकन सत्रों के लिए, प्रबंधन स्वयं तक सीमित होता है, जब तक कि कॉलर
+के पास `operator.admin` न हो: गैर-एडमिन कॉलर केवल अपनी पेयरिंग प्रविष्टियाँ देखता है और
+केवल अपनी डिवाइस प्रविष्टि को अनुमोदित, अस्वीकार, रोटेट, निरस्त या हटा सकता है।
 
-## Node pairing approvals
+## Node पेयरिंग अनुमोदन
 
-Legacy `node.pair.*` एक अलग Gateway-owned node pairing store का उपयोग करता है। WS nodes
-`role: node` के साथ device pairing का उपयोग करते हैं, लेकिन वही approval-level vocabulary
-लागू होती है।
+पुरानी `node.pair.*` विधियाँ Gateway के स्वामित्व वाले एक अलग Node पेयरिंग स्टोर का उपयोग करती हैं।
+WS Node इसके बजाय डिवाइस पेयरिंग (`role: node`) का उपयोग करते हैं, लेकिन वही अनुमोदन
+शब्दावली लागू होती है। दोनों स्टोर के संबंध के लिए [Gateway पेयरिंग](/hi/gateway/pairing) देखें।
 
-`node.pair.approve` pending request command list का उपयोग करके अतिरिक्त
-required scopes derive करता है:
+`node.pair.approve` लंबित अनुरोध की कमांड सूची से अतिरिक्त आवश्यक स्कोप
+निर्धारित करता है:
 
-- Commandless request: `operator.pairing`
-- Non-exec node commands: `operator.pairing` + `operator.write`
-- `system.run`, `system.run.prepare`, या `system.which`:
-  `operator.pairing` + `operator.admin`
+| घोषित कमांड                                                                                                    | आवश्यक स्कोप                       |
+| -------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| कोई नहीं                                                                                                                 | `operator.pairing`                    |
+| सामान्य Node कमांड                                                                                               | `operator.pairing` + `operator.write` |
+| `system.run`, `system.run.prepare`, `system.which`, `browser.proxy`, `fs.listDir` या `system.execApprovals.get/set` | `operator.pairing` + `operator.admin` |
 
-Node pairing identity और trust स्थापित करता है। यह node की
-अपनी `system.run` exec approval policy को replace नहीं करता।
+किसी Node घोषणा को अनुमोदित करने से वे कमांड सक्षम नहीं होते जिनका अलग
+रनटाइम अनुमति-सूची नियंत्रण-बिंदु है। उदाहरण के लिए, `computer.act` घोषित करने वाले
+Node को अनुमोदित करने के लिए पेयरिंग और लेखन स्कोप आवश्यक हैं, लेकिन यह केवल सतह को दर्ज करता है।
+किसी एडमिनिस्ट्रेटर या स्वामी को अब भी `computer.act` को सक्रिय करना होगा। इसके सक्रिय रहने के दौरान,
+`node.invoke` के माध्यम से इसे चलाने के लिए लेखन स्कोप आवश्यक है, लेकिन प्रत्येक कार्रवाई के लिए
+एडमिन स्कोप आवश्यक नहीं है।
 
-## Shared-secret auth
+Node पेयरिंग पहचान और विश्वास स्थापित करती है; यह किसी Node की अपनी
+`system.run` Exec अनुमोदन नीति को प्रतिस्थापित नहीं करती।
 
-Shared gateway token/password auth को उस Gateway के लिए trusted operator access माना जाता है।
-OpenAI-compatible HTTP surfaces, `/tools/invoke`, और HTTP session
-history endpoints shared-secret bearer auth के लिए सामान्य full operator default scope set को restore करते हैं,
-भले ही caller narrower declared scopes भेजे।
+## साझा-रहस्य प्रमाणीकरण
 
-Identity-bearing modes, जैसे trusted proxy auth या private-ingress `none`,
-फिर भी explicit declared scopes का सम्मान कर सकते हैं। वास्तविक trust
-boundary separation के लिए अलग Gateways का उपयोग करें।
+साझा Gateway टोकन/पासवर्ड प्रमाणीकरण को उस Gateway के लिए विश्वसनीय ऑपरेटर पहुँच माना जाता है।
+OpenAI-संगत HTTP सतहें, `/tools/invoke` और HTTP
+सत्र-इतिहास एंडपॉइंट साझा-रहस्य बेयरर प्रमाणीकरण के लिए पूर्ण डिफ़ॉल्ट ऑपरेटर स्कोप समूह
+पुनर्स्थापित करते हैं, भले ही कॉलर अधिक सीमित घोषित स्कोप भेजे।
+
+पहचान-युक्त मोड, जैसे विश्वसनीय प्रॉक्सी प्रमाणीकरण या निजी-इनग्रेस `none`,
+अब भी स्पष्ट घोषित स्कोप का पालन कर सकते हैं। वास्तविक विश्वास-सीमा पृथक्करण के लिए अलग-अलग Gateway का उपयोग करें।

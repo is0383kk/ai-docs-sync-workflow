@@ -1,113 +1,149 @@
 ---
 read_when:
     - memory_search'ün nasıl çalıştığını anlamak istiyorsunuz
-    - Bir embedding sağlayıcısı seçmek istiyorsunuz
+    - Bir gömme sağlayıcısı seçmek istiyorsunuz
     - Arama kalitesini ayarlamak istiyorsunuz
-summary: Bellek aramasının ilgili notları gömmeler ve hibrit getirme kullanarak nasıl bulduğu
+summary: Bellek aramasının gömmeler ve hibrit erişim kullanarak ilgili notları nasıl bulduğu
 title: Bellek araması
 x-i18n:
-    generated_at: "2026-06-28T22:33:49Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T23:38:08Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 32ffb9d996851566eb92b7812c5425f545ecbb5387a0a445686df35a6c8ae143
+    source_hash: b2bd28b63ac55a2a890ed70a3015f76f1c7fbaa792b17a6ead51f4c8712fbd2d
     source_path: concepts/memory-search.md
     workflow: 16
 ---
 
-`memory_search`, ifade özgün metinden farklı olsa bile bellek dosyalarınızdan ilgili notları bulur. Bunu belleği küçük parçalara indeksleyerek ve bunları gömmeler, anahtar sözcükler veya her ikisiyle arayarak yapar.
+`memory_search`, ifadeler özgün metinden farklı olsa bile bellek dosyalarınızdaki ilgili notları bulur. Belleği küçük parçalara böler ve
+bunları gömmelerle, anahtar kelimelerle veya her ikisiyle arar.
 
 ## Hızlı başlangıç
 
-Bellek araması varsayılan olarak OpenAI gömmelerini kullanır. Başka bir gömme arka ucu kullanmak için açıkça bir sağlayıcı ayarlayın:
+OpenClaw varsayılan olarak OpenAI gömmelerini kullanır. Başka bir sağlayıcı kullanmak için bunu
+açıkça ayarlayın:
 
 ```json5
 {
-  agents: {
-    defaults: {
-      memorySearch: {
-        provider: "openai", // or "gemini", "local", "ollama", "openai-compatible", etc.
-      },
+  memory: {
+    search: {
+      provider: "openai", // veya "gemini", "voyage", "mistral", "bedrock", "local", "ollama", "lmstudio", "github-copilot", "openai-compatible"
     },
   },
 }
 ```
 
-Belleğe özel sağlayıcıları olan çok uç noktalı kurulumlarda, `provider` ayrıca söz konusu sağlayıcı `api: "ollama"` veya başka bir bellek gömme adaptörü sahibi ayarladığında `ollama-5080` gibi özel bir `models.providers.<id>` girdisi olabilir.
+`provider`, özel bir `models.providers.<id>` girdisine de başvurabilir (örneğin
+`ollama-5080`); bunun için söz konusu girdinin `api` değerini `"ollama"` veya
+bellek gömme bağdaştırıcısı bulunan başka bir sağlayıcı kimliği olarak ayarlaması gerekir.
 
-API anahtarı gerektirmeyen yerel gömmeler için `@openclaw/llama-cpp-provider` kurun ve `provider: "local"` ayarlayın. Kaynak checkout'ları yine de yerel derleme onayı gerektirebilir: `pnpm approve-builds`, ardından `pnpm rebuild node-llama-cpp`.
+API anahtarı olmadan yerel gömmeler kullanmak için resmî llama.cpp sağlayıcı
+Plugin'ini yükleyin ve `provider: "local"` değerini ayarlayın:
 
-Bazı OpenAI uyumlu gömme uç noktaları, aramalar için `input_type: "query"` ve indekslenen parçalar için `input_type: "document"` veya `"passage"` gibi asimetrik etiketler gerektirir. Bunları `memorySearch.queryInputType` ve `memorySearch.documentInputType` ile yapılandırın; [Bellek yapılandırma başvurusu](/tr/reference/memory-config#provider-specific-config) sayfasına bakın.
+```bash
+openclaw plugins install @openclaw/llama-cpp-provider
+```
+
+Kaynak kod çalışma kopyalarında yine de yerel derleme onayı gerekir: `pnpm approve-builds`, ardından
+`pnpm rebuild node-llama-cpp`.
+
+Bazı OpenAI uyumlu gömme uç noktaları, aramalar için `"query"` ve dizine alınmış
+parçalar için `"document"`/`"passage"` gibi asimetrik `input_type`
+etiketleri gerektirir. Bunları `queryInputType` ve `documentInputType` ile ayarlayın; bkz.
+[Bellek yapılandırma başvurusu](/tr/reference/memory-config#provider-specific-config).
 
 ## Desteklenen sağlayıcılar
 
-| Sağlayıcı         | ID                  | API anahtarı gerekir | Notlar                          |
-| ----------------- | ------------------- | -------------------- | ------------------------------- |
+| Sağlayıcı         | Kimlik              | API anahtarı gerekli | Notlar                              |
+| ----------------- | ------------------- | -------------------- | ----------------------------------- |
 | Bedrock           | `bedrock`           | Hayır                | AWS kimlik bilgisi zincirini kullanır |
-| DeepInfra         | `deepinfra`         | Evet                 | Varsayılan: `BAAI/bge-m3`       |
-| Gemini            | `gemini`            | Evet                 | Görsel/ses indekslemeyi destekler |
-| GitHub Copilot    | `github-copilot`    | Hayır                | Copilot aboneliğini kullanır    |
-| Local             | `local`             | Hayır                | GGUF modeli, ~0.6 GB indirme    |
-| Mistral           | `mistral`           | Evet                 |                                 |
-| Ollama            | `ollama`            | Hayır                | Yerel/kendi barındırdığınız     |
-| OpenAI            | `openai`            | Evet                 | Varsayılan                      |
-| OpenAI-compatible | `openai-compatible` | Genellikle           | Genel `/v1/embeddings`          |
-| Voyage            | `voyage`            | Evet                 |                                 |
+| DeepInfra         | `deepinfra`         | Evet                 | Varsayılan model `BAAI/bge-m3` |
+| Gemini            | `gemini`            | Evet                 | Görüntü/ses dizinlemeyi destekler   |
+| GitHub Copilot    | `github-copilot`    | Hayır                | Copilot aboneliğinizi kullanır      |
+| Yerel             | `local`             | Hayır                | GGUF modeli, ~0.6 GB otomatik indirme |
+| LM Studio         | `lmstudio`          | Hayır                | Yerel/kendi barındırdığınız sunucu  |
+| Mistral           | `mistral`           | Evet                 |                                     |
+| Ollama            | `ollama`            | Hayır                | Yerel/kendi barındırdığınız sunucu  |
+| OpenAI            | `openai`            | Evet                 | Varsayılan                          |
+| OpenAI uyumlu     | `openai-compatible` | Genellikle           | Genel `/v1/embeddings` uç noktası |
+| Voyage            | `voyage`            | Evet                 |                                     |
 
-## Arama nasıl çalışır
+## Arama nasıl çalışır?
 
-OpenClaw iki alma yolunu paralel çalıştırır ve sonuçları birleştirir:
+OpenClaw iki getirme yolunu paralel olarak çalıştırır ve sonuçları birleştirir:
 
 ```mermaid
 flowchart LR
-    Q["Query"] --> E["Embedding"]
-    Q --> T["Tokenize"]
-    E --> VS["Vector Search"]
-    T --> BM["BM25 Search"]
-    VS --> M["Weighted Merge"]
+    Q["Sorgu"] --> E["Gömme"]
+    Q --> T["Tokenlere ayırma"]
+    E --> VS["Vektör araması"]
+    T --> BM["BM25 araması"]
+    VS --> M["Ağırlıklı birleştirme"]
     BM --> M
-    M --> R["Top Results"]
+    M --> R["En iyi sonuçlar"]
 ```
 
-- **Vektör araması**, benzer anlama sahip notları bulur ("gateway host", "OpenClaw çalıştıran makine" ile eşleşir).
-- **BM25 anahtar sözcük araması**, tam eşleşmeleri bulur (ID'ler, hata dizeleri, yapılandırma anahtarları).
+- **Vektör araması** benzer anlamları eşleştirir ("gateway ana makinesi", "OpenClaw'ı
+  çalıştıran makine" ile eşleşir).
+- **BM25 anahtar kelime araması** tam terimleri eşleştirir (kimlikler, hata dizeleri, yapılandırma
+  anahtarları).
+- **Dosya adı araması**, yolları not gövdelerinden ayrı olarak dizine alır. Tam
+  yollar, temel dosya adları ve dosya adı kökleri kısmi yol eşleşmelerinden daha üstte sıralanırken,
+  parçacıklar ve gövde anahtar kelime puanları yine not içeriğinden gelir.
 
-Yalnızca bir yol kullanılabiliyorsa diğeri tek başına çalışır. Bilerek kullanılan yalnızca FTS modu (`provider: "none"`) ve otomatik/varsayılan sağlayıcı seçimi, gömmeler kullanılamadığında yine de sözcüksel sıralamayı kullanabilir.
+Yollardan yalnızca biri kullanılabiliyorsa diğeri tek başına çalışır.
 
-Açıkça ayarlanmış yerel olmayan gömme sağlayıcıları farklıdır. `memorySearch.provider` değerini somut bir uzak destekli sağlayıcıya ayarlarsanız ve bu sağlayıcı çalışma zamanında kullanılamazsa, `memory_search` sessizce yalnızca FTS sonuçlarını kullanmak yerine belleği kullanılamaz olarak bildirir. Bu, bozuk yapılandırılmış semantik sağlayıcıyı görünür tutar. Bilerek yalnızca FTS geri çağırma için `provider: "none"` ayarlayın veya semantik sıralamayı geri yüklemek için sağlayıcı/kimlik doğrulama yapılandırmasını düzeltin.
+**Yalnızca FTS modu.** Gömmeleri kasıtlı olarak devre dışı bırakmak ve yalnızca
+anahtar kelimelerle arama yapmak için `provider: "none"` değerini ayarlayın. `provider` değerini ayarlamamak veya `"auto"`
+olarak ayarlamak da gömme kimlik doğrulaması yapılandırılmamışsa hata vermeden
+yalnızca anahtar kelime sıralamasına geri döner; `provider: "local"` (GGUF/llama.cpp
+sağlayıcısı) başarısız olduğunda da aynı davranış geçerlidir.
+
+**Açıkça belirtilen sağlayıcı kullanılamıyor.** Başka herhangi bir sağlayıcıyı açıkça
+belirtirseniz (örneğin `openai`, `ollama`, `gemini`) ve istek sırasında kullanılamaz
+duruma gelirse (hatalı kimlik doğrulaması, ağ arızası), `memory_search` sessizce yalnızca FTS
+sonuçlarına geçmek yerine belleğin kullanılamadığını bildirir. Böylece yapılandırılmış
+bozuk bir sağlayıcı görünür kalır. Bilinçli olarak yalnızca FTS ile hatırlama için
+`provider: "none"` değerini ayarlayın veya anlamsal sıralamayı geri yüklemek için sağlayıcı/kimlik doğrulama
+yapılandırmasını düzeltin.
 
 ## Arama kalitesini iyileştirme
 
-Büyük bir not geçmişiniz olduğunda iki isteğe bağlı özellik yardımcı olur:
+İki isteğe bağlı özellik, geniş bir not geçmişinde yardımcı olur.
 
 ### Zamansal azalma
 
-Eski notlar sıralama ağırlığını kademeli olarak kaybeder, böylece güncel bilgiler önce öne çıkar. Varsayılan 30 günlük yarı ömürle, geçen aydan bir not özgün ağırlığının %50'siyle puanlanır. `MEMORY.md` gibi her zaman geçerli dosyalar asla azaltılmaz.
+Eski notların sıralama ağırlığı zamanla azalır; böylece güncel bilgiler önce gösterilir.
+Varsayılan 30 günlük yarı ömürle geçen aya ait bir not, özgün ağırlığının %50'si kadar
+puan alır. `MEMORY.md` ve `memory/` altındaki diğer tarihsiz dosyalar
+kalıcıdır ve ağırlıkları hiçbir zaman azalmaz; yalnızca tarihli `memory/YYYY-MM-DD.md` dosyalarının ağırlığı azalır.
 
 <Tip>
-Ajanınızın aylarca günlük notu varsa ve bayat bilgiler güncel bağlamın önüne geçmeye devam ediyorsa zamansal azalmayı etkinleştirin.
+Aracınızda aylarca birikmiş günlük notlar varsa ve eski bilgiler
+güncel bağlamdan daha üstte sıralanmaya devam ediyorsa bunu etkinleştirin.
 </Tip>
 
 ### MMR (çeşitlilik)
 
-Yinelenen sonuçları azaltır. Beş notun tamamı aynı yönlendirici yapılandırmasından bahsediyorsa MMR, en üst sonuçların tekrarlamak yerine farklı konuları kapsamasını sağlar.
+Yinelenen sonuçları azaltır. Beş notun tümü aynı yönlendirici yapılandırmasından söz ediyorsa
+MMR, en iyi sonuçların tekrar etmek yerine farklı konuları kapsamasını sağlar.
 
 <Tip>
-`memory_search` farklı günlük notlardan neredeyse yinelenen parçalar döndürmeye devam ediyorsa MMR'yi etkinleştirin.
+`memory_search`, farklı günlük notlardan birbirine çok benzeyen parçacıklar
+döndürmeye devam ediyorsa bunu etkinleştirin.
 </Tip>
 
-### İkisini de etkinleştirin
+### İkisini de etkinleştirme
 
 ```json5
 {
-  agents: {
-    defaults: {
-      memorySearch: {
-        query: {
-          hybrid: {
-            mmr: { enabled: true },
-            temporalDecay: { enabled: true },
-          },
+  memory: {
+    search: {
+      query: {
+        hybrid: {
+          mmr: { enabled: true },
+          temporalDecay: { enabled: true },
         },
       },
     },
@@ -117,34 +153,54 @@ Yinelenen sonuçları azaltır. Beş notun tamamı aynı yönlendirici yapıland
 
 ## Çok modlu bellek
 
-Gemini Embedding 2 ile Markdown'un yanında görselleri ve ses dosyalarını indeksleyebilirsiniz. Arama sorguları metin olarak kalır, ancak görsel ve ses içerikleriyle eşleşir. Kurulum için [Bellek yapılandırma başvurusu](/tr/reference/memory-config) sayfasına bakın.
+`gemini-embedding-2-preview` ile Markdown'ın yanı sıra görüntüleri ve sesleri de
+dizine alabilirsiniz. Bu yalnızca `memory.search.extraPaths` altındaki dosyalar için geçerlidir; varsayılan
+bellek kökleri (`MEMORY.md`, `memory/*.md`) yalnızca Markdown olarak kalır. Arama sorguları
+metin olarak kalır ancak görsel ve sesli içerikle eşleşir. Kurulum için
+[Bellek yapılandırma başvurusuna](/tr/reference/memory-config#multimodal-memory-gemini)
+bakın.
 
 ## Oturum belleği araması
 
-İsteğe bağlı olarak oturum dökümlerini indeksleyebilirsiniz; böylece `memory_search` önceki konuşmaları hatırlayabilir. Bu, `memorySearch.experimental.sessionMemory` ve `sources: ["sessions"]` üzerinden isteğe bağlıdır; varsayılan kaynak listesi yalnızca bellektir. Deneysel bayrak oturum dökümü indekslemeyi etkinleştirirken, `sources` oturum parçalarının aranıp aranmayacağını denetler.
+Oturum dökümlerinden tam metni bire bir hatırlamak için [`sessions_search`](/tr/concepts/session-search)
+kullanın ve ardından `sessions_history` ile bir sonucu açın. Oturum belleği araması, anlamsal ve
+deneysel tamamlayıcı olmaya devam eder.
 
-Oturum isabetleri `tools.sessions.visibility` değerine uyar: varsayılan `tree` ayarı yalnızca geçerli oturumu ve onun başlattığı oturumları açığa çıkarır. Ayrı bir DM oturumundan ilgisiz, aynı ajana ait gateway tarafından gönderilmiş bir oturumu hatırlamak için görünürlüğü bilerek `agent` değerine genişletin.
+İsteğe bağlı olarak oturum dökümlerini dizine alarak `memory_search` öğesinin önceki
+konuşmaları hatırlamasını sağlayabilirsiniz. Bu özellik tercihe bağlıdır: `experimental.sessionMemory: true` değerini ayarlayın ve
+`sources` içine `"sessions"` ekleyin (varsayılan `sources`, `["memory"]` değeridir).
 
-QMD kullanırken, dökümlerin bir QMD koleksiyonuna dışa aktarılması için `memory.qmd.sessions.enabled: true` değerini de ayarlayın. Ayrıntılar için [yapılandırma başvurusuna](/tr/reference/memory-config) bakın.
+Oturum eşleşmeleri `tools.sessions.visibility` ayarına uyar: varsayılan `"tree"`, mevcut
+oturumu, onun başlattığı oturumları ve ortamdaki grup farkındalığı aracılığıyla izlenen
+aynı araca ait grup oturumlarını erişilebilir kılar. `session.dmScope: "main"` kullanıldığında çok kullanıcılı
+bir DM kurulumu bu ana oturumu paylaşır; dolayısıyla buraya yönlendirilen kullanıcılar, onun izlediği
+gruplardaki içeriği hatırlayabilir. DM yalıtımı için eş başına bir `dmScope` kullanın veya
+ortamda izlenen oturumların okunmasını devre dışı bırakmak için görünürlüğü `"self"` olarak ayarlayın. İlişkisiz
+diğer aynı araç oturumları için yine `"agent"` görünürlüğü gerekir.
+
+QMD arka ucunu kullanırken dökümlerin QMD koleksiyonuna aktarılması için
+`memory.qmd.sessions.enabled: true` değerini de ayarlayın; yalnızca `experimental.sessionMemory`
+ve `sources`, dökümleri QMD'ye aktarmaz. Bkz.
+[yapılandırma başvurusu](/tr/reference/memory-config#session-memory-search-experimental).
 
 ## Sorun giderme
 
-**Sonuç yok mu?** İndeksi kontrol etmek için `openclaw memory status` çalıştırın. Boşsa `openclaw memory index --force` çalıştırın.
+**Sonuç yok mu?** Dizini denetlemek için `openclaw memory status` komutunu çalıştırın. Boşsa
+`openclaw memory index --force` komutunu çalıştırın.
 
-**Yalnızca anahtar sözcük eşleşmeleri mi var?** Gömme sağlayıcınız yapılandırılmamış olabilir. `openclaw memory status --deep` ile kontrol edin.
+**Yalnızca anahtar kelime eşleşmeleri mi var?** Gömme sağlayıcınız yapılandırılmamış olabilir.
+`openclaw memory status --deep` değerini denetleyin.
 
-**Yerel gömmeler zaman aşımına mı uğruyor?** `ollama`, `lmstudio` ve `local` varsayılan olarak daha uzun bir satır içi toplu iş zaman aşımı kullanır. Ana makine yalnızca yavaşsa `agents.defaults.memorySearch.sync.embeddingBatchTimeoutSeconds` ayarlayın ve `openclaw memory index --force` komutunu yeniden çalıştırın.
+**Yerel gömmeler zaman aşımına mı uğruyor?** `ollama`, `lmstudio` ve `local`, sağlayıcının
+sahip olduğu daha uzun toplu işlem zaman sınırlarını kullanır. Sağlayıcının durumunu denetleyin ve
+`openclaw memory index --force` komutunu yeniden çalıştırın.
 
-**CJK metni bulunamıyor mu?** FTS indeksini `openclaw memory index --force` ile yeniden oluşturun.
+**CJK metni bulunamıyor mu?** FTS dizinini
+`openclaw memory index --force` ile yeniden oluşturun.
 
-## Daha fazla okuma
-
-- [Active Memory](/tr/concepts/active-memory) -- etkileşimli sohbet oturumları için alt ajan belleği
-- [Bellek](/tr/concepts/memory) -- dosya düzeni, arka uçlar, araçlar
-- [Bellek yapılandırma başvurusu](/tr/reference/memory-config) -- tüm yapılandırma ayarları
-
-## İlgili
+## İlgili konular
 
 - [Belleğe genel bakış](/tr/concepts/memory)
 - [Active Memory](/tr/concepts/active-memory)
 - [Yerleşik bellek motoru](/tr/concepts/memory-builtin)
+- [Bellek yapılandırma başvurusu](/tr/reference/memory-config)

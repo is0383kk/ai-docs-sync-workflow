@@ -1,15 +1,16 @@
 ---
 read_when:
     - Je wilt agenthooks beheren
-    - U wilt de beschikbaarheid van hooks controleren of werkruimtehooks inschakelen
+    - Je wilt de beschikbaarheid van hooks controleren of workspace-hooks inschakelen
 summary: CLI-referentie voor `openclaw hooks` (agenthooks)
 title: Hooks
 x-i18n:
-    generated_at: "2026-07-12T08:43:16Z"
+    generated_at: "2026-07-27T05:46:18Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f33d1e343771971bdc17dcafdabc6c4fc893b3080897862475a148e5f3957796
+    source_hash: d4d58ea2270cf5122018f7be2943401229929f48f448b15fdd126d1cc99e1e56
     source_path: cli/hooks.md
     workflow: 16
 ---
@@ -26,7 +27,7 @@ Gerelateerd: [Hooks](/nl/automation/hooks) - [Pluginhooks](/nl/plugins/hooks)
 openclaw hooks list [--eligible] [--json] [-v|--verbose]
 ```
 
-Geeft hooks weer die zijn gevonden in werkruimte-, beheerde, extra en meegeleverde mappen.
+Geeft hooks weer die zijn gevonden in werkruimte-, beheerde, extra en gebundelde mappen.
 
 - `--eligible`: alleen hooks waarvan aan de vereisten is voldaan.
 - `--json`: gestructureerde uitvoer.
@@ -36,10 +37,10 @@ Geeft hooks weer die zijn gevonden in werkruimte-, beheerde, extra en meegelever
 Hooks (4/5 gereed)
 
 Gereed:
-  🚀 boot-md ✓ - Voer BOOT.md uit wanneer de Gateway start
-  📎 bootstrap-extra-files ✓ - Voeg aanvullende bootstrapbestanden voor de werkruimte in tijdens de bootstrap van de agent
+  🚀 boot-md ✓ - Voer BOOT.md uit wanneer de Gateway wordt gestart
+  📎 bootstrap-extra-files ✓ - Voeg tijdens het initialiseren van de agent aanvullende bootstrapbestanden uit de werkruimte in
   📝 command-logger ✓ - Registreer alle opdrachtgebeurtenissen in een centraal auditbestand
-  💾 session-memory ✓ - Sla de sessiecontext op in het geheugen wanneer de opdracht /new of /reset wordt uitgevoerd
+  💾 session-memory ✓ - Sla de sessiecontext op in het geheugen wanneer de opdracht /new of /reset wordt gegeven
 ```
 
 ## Hookinformatie ophalen
@@ -48,7 +49,7 @@ Gereed:
 openclaw hooks info <name> [--json]
 ```
 
-`<name>` is de hooknaam of hooksleutel (bijvoorbeeld `session-memory`). Toont de bron, paden van bestanden/handlers, homepage, gebeurtenissen en de status per vereiste (binaire bestanden, omgeving, configuratie, besturingssysteem).
+`<name>` is de hooknaam of hooksleutel (bijvoorbeeld `session-memory`). Toont de bron, bestands-/handlerpaden, homepage, gebeurtenissen en de status per vereiste (binaire bestanden, omgeving, configuratie, besturingssysteem).
 
 ## Geschiktheid controleren
 
@@ -56,7 +57,7 @@ openclaw hooks info <name> [--json]
 openclaw hooks check [--json]
 ```
 
-Toont een samenvatting met aantallen gereed/niet gereed; als hooks niet gereed zijn, worden ze elk met de blokkerende reden weergegeven.
+Toont een samenvatting met het aantal gereed/niet gereed; als hooks niet gereed zijn, wordt elke hook met de blokkerende reden weergegeven.
 
 ## Een hook inschakelen
 
@@ -64,11 +65,11 @@ Toont een samenvatting met aantallen gereed/niet gereed; als hooks niet gereed z
 openclaw hooks enable <name>
 ```
 
-Voegt `hooks.internal.entries.<name>.enabled = true` toe aan de configuratie of werkt dit bij en schakelt ook de hoofdschakelaar `hooks.internal.enabled` in (de Gateway laadt geen interne hookhandler totdat er ten minste één is geconfigureerd). Mislukt als de hook niet bestaat, door een Plugin wordt beheerd of niet geschikt is (ontbrekende vereisten).
+Voegt `hooks.internal.entries.<name>.enabled = true` toe aan de configuratie of werkt deze bij en zet ook de hoofdschakelaar `hooks.internal.enabled` aan (de Gateway laadt geen enkele interne hookhandler totdat er ten minste één is geconfigureerd). Mislukt als de hook niet bestaat, door een Plugin wordt beheerd of niet geschikt is (ontbrekende vereisten).
 
-Door Plugins beheerde hooks tonen `plugin:<id>` in `hooks list` en kunnen hier niet worden in- of uitgeschakeld; schakel in plaats daarvan de beherende Plugin in of uit.
+Door Plugins beheerde hooks tonen `plugin:<id>` in `hooks list` en kunnen hier niet worden in- of uitgeschakeld; schakel in plaats daarvan de verantwoordelijke Plugin in of uit.
 
-Start de Gateway opnieuw na het inschakelen (start de macOS-menubalkapp opnieuw of start tijdens ontwikkeling uw Gateway-proces opnieuw), zodat de hooks opnieuw worden geladen.
+Start de Gateway opnieuw na het inschakelen (herstart de macOS-menubalkapp of herstart je Gateway-proces tijdens de ontwikkeling), zodat de hooks opnieuw worden geladen.
 
 ## Een hook uitschakelen
 
@@ -92,33 +93,33 @@ openclaw plugins update --all
 openclaw plugins update --dry-run
 ```
 
-Hookpakketten worden geïnstalleerd via het uniforme installatie- en bijwerkprogramma voor Plugins; `openclaw hooks install` / `openclaw hooks update` werken nog als verouderde aliassen die een waarschuwing tonen en doorsturen naar de `plugins`-opdrachten.
+Hookpakketten worden geïnstalleerd en bijgewerkt via het uniforme installatie- en updateprogramma voor Plugins; `openclaw hooks install` / `openclaw hooks update` werken nog steeds als verouderde aliassen die een waarschuwing tonen en doorsturen naar de opdrachten van `plugins`.
 
 - Npm-specificaties zijn uitsluitend voor het register: een pakketnaam plus een optionele exacte versie of dist-tag. Git-/URL-/bestandsspecificaties en semver-bereiken worden geweigerd. Afhankelijkheden worden projectlokaal geïnstalleerd met `--ignore-scripts`.
-- Kale specificaties en `@latest` blijven op het stabiele kanaal; als npm een voorlopige versie oplevert, stopt OpenClaw en wordt u gevraagd expliciet toestemming te geven (`@beta`, `@rc` of een exacte voorlopige versie).
+- Kale specificaties en `@latest` blijven op het stabiele kanaal; als npm een prerelease oplevert, stopt OpenClaw en wordt je gevraagd je expliciet aan te melden (`@beta`, `@rc` of een exacte prereleaseversie).
 - Ondersteunde archieven: `.zip`, `.tgz`, `.tar.gz`, `.tar`.
-- `-l, --link` koppelt een lokale map in plaats van deze te kopiëren (voegt deze toe aan `hooks.internal.load.extraDirs`); gekoppelde hookpakketten zijn beheerde hooks uit een door een beheerder geconfigureerde map, geen werkruimtehooks.
-- `--pin` registreert npm-installaties als een exact opgeloste `name@version` in `hooks.internal.installs`.
-- De installatie kopieert het pakket naar `~/.openclaw/hooks/<id>`, schakelt de bijbehorende hooks in onder `hooks.internal.entries.*` en registreert de installatie onder `hooks.internal.installs`.
-- Als een opgeslagen integriteitshash niet meer overeenkomt met het opgehaalde artefact, waarschuwt OpenClaw en vraagt het om bevestiging voordat het doorgaat; geef de globale optie `--yes` door om de vraag over te slaan (bijvoorbeeld in CI).
+- `-l, --link` koppelt een lokale map in plaats van deze te kopiëren (voegt deze toe aan `hooks.internal.load.extraDirs`); gekoppelde hookpakketten zijn beheerde hooks uit een door de beheerder geconfigureerde map, geen werkruimtehooks.
+- `--pin` registreert npm-installaties als een exact opgeloste `name@version` in de gedeelde SQLite-status.
+- De installatie kopieert het pakket naar `~/.openclaw/hooks/<id>`, schakelt de hooks ervan in onder `hooks.internal.entries.*` en registreert de herkomst van de installatie in de gedeelde SQLite-status.
+- Als een opgeslagen integriteitshash niet meer overeenkomt met het opgehaalde artefact, waarschuwt OpenClaw en vraagt het om bevestiging voordat het doorgaat; geef de globale optie `--yes` door om deze vraag over te slaan (bijvoorbeeld in CI).
 
-## Meegeleverde hooks
+## Gebundelde hooks
 
-| Hook                  | Gebeurtenissen                                    | Wat deze doet                                                                                              |
-| --------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| boot-md               | `gateway:startup`                                 | Voert `BOOT.md` uit bij het starten van de Gateway voor elk geconfigureerd agentbereik                     |
-| bootstrap-extra-files | `agent:bootstrap`                                 | Voegt extra bootstrapbestanden toe (bijvoorbeeld `AGENTS.md`/`TOOLS.md` uit een monorepo) tijdens de bootstrap van de agent |
-| command-logger        | `command`                                         | Registreert opdrachtgebeurtenissen in `~/.openclaw/logs/commands.log`                                      |
-| compaction-notifier   | `session:compact:before`, `session:compact:after` | Stuurt zichtbare chatmeldingen wanneer sessiecompactie begint en eindigt                                  |
-| session-memory        | `command:new`, `command:reset`                    | Slaat de sessiecontext op in het geheugen bij `/new` of `/reset`                                           |
+| Hook                  | Gebeurtenissen                                    | Functie                                                                                             |
+| --------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| boot-md               | `gateway:startup`                                 | Voert `BOOT.md` uit wanneer de Gateway wordt gestart voor elk geconfigureerd agentbereik                                  |
+| bootstrap-extra-files | `agent:bootstrap`                                 | Voegt tijdens het initialiseren van de agent extra bootstrapbestanden in (bijvoorbeeld `AGENTS.md`/`TOOLS.md` van een monorepo) |
+| command-logger        | `command`                                         | Registreert opdrachtgebeurtenissen in `~/.openclaw/logs/commands.log`                                             |
+| compaction-notifier   | `session:compact:before`, `session:compact:after` | Stuurt zichtbare chatmeldingen wanneer de Compaction van de sessie begint en eindigt                             |
+| session-memory        | `command:new`, `command:reset`                    | Slaat de sessiecontext op in het geheugen bij `/new` of `/reset`                                              |
 
-Schakel een meegeleverde hook in met `openclaw hooks enable <hook-name>`. Volledige details, configuratiesleutels en standaardwaarden: [Meegeleverde hooks](/nl/automation/hooks#bundled-hooks).
+Schakel een gebundelde hook in met `openclaw hooks enable <hook-name>`. Volledige details, configuratiesleutels en standaardwaarden: [Gebundelde hooks](/nl/automation/hooks#bundled-hooks).
 
 ### Logbestand van command-logger
 
 ```bash
 tail -n 20 ~/.openclaw/logs/commands.log        # recente opdrachten
-cat ~/.openclaw/logs/commands.log | jq .          # leesbaar opmaken
+cat ~/.openclaw/logs/commands.log | jq .          # netjes weergeven
 grep '"action":"new"' ~/.openclaw/logs/commands.log | jq .   # filteren op actie
 ```
 

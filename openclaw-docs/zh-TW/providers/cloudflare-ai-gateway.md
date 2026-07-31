@@ -1,34 +1,38 @@
 ---
 read_when:
-    - 你想要搭配 OpenClaw 使用 Cloudflare AI Gateway
-    - 你需要帳號 ID、閘道 ID 或 API 金鑰環境變數
-summary: Cloudflare AI Gateway 設定（驗證 + 模型選擇）
+    - 你想搭配 OpenClaw 使用 Cloudflare AI Gateway
+    - 你需要帳戶 ID、閘道 ID 或 API 金鑰環境變數
+summary: Cloudflare AI 閘道設定（驗證 + 模型選擇）
 title: Cloudflare AI 閘道
 x-i18n:
-    generated_at: "2026-07-11T21:41:25Z"
+    generated_at: "2026-07-26T08:45:49Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 02c7785616e7aee645bb3fc41ef6a3585e1f2f9d886fab1a06231e497effd045
     source_path: providers/cloudflare-ai-gateway.md
     workflow: 16
 ---
 
-[Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/) 位於供應商 API 前方，提供分析、快取與控制功能。針對 Anthropic，OpenClaw 會透過您的閘道端點使用 Anthropic Messages API。
+[Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/) 位於供應商 API 前方，並提供分析、快取與控制功能。對於 Anthropic，OpenClaw 會透過你的閘道端點使用 Anthropic Messages API。
 
-| 屬性       | 值                                                                                       |
-| ---------- | ---------------------------------------------------------------------------------------- |
-| 供應商     | `cloudflare-ai-gateway`                                                                  |
-| 外掛       | 官方外部套件（`@openclaw/cloudflare-ai-gateway-provider`）                               |
-| 基底 URL   | `https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/anthropic`               |
-| 預設模型   | `cloudflare-ai-gateway/claude-sonnet-4-6`                                                |
-| API 金鑰   | `CLOUDFLARE_AI_GATEWAY_API_KEY`（透過閘道發出請求時使用的供應商 API 金鑰）                |
+| 屬性          | 值                                                                                       |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| 供應商        | `cloudflare-ai-gateway`                                                                       |
+| 外掛          | 官方外部套件（`@openclaw/cloudflare-ai-gateway-provider`）                                                       |
+| 基礎 URL      | `https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/anthropic`                                                                       |
+| 預設模型      | `cloudflare-ai-gateway/claude-sonnet-4-6`                                                                       |
+| API 金鑰      | `CLOUDFLARE_AI_GATEWAY_API_KEY`（用於透過閘道提出請求的供應商 API 金鑰）                              |
 
 <Note>
-對於透過 Cloudflare AI Gateway 路由的 Anthropic 模型，請使用您的 **Anthropic API 金鑰**作為供應商金鑰。
+對於透過 Cloudflare AI Gateway 路由的 Anthropic 模型，請使用你的 **Anthropic API 金鑰**作為供應商金鑰。
 </Note>
 
-為 Anthropic Messages 模型啟用思考功能時，OpenClaw 會先移除尾端的助理預填輪次，再透過 Cloudflare AI Gateway 傳送承載資料。Anthropic 不允許在延伸思考模式下預填回應，但一般非思考模式仍可使用預填功能。
+為 Anthropic Messages 模型啟用思考功能時，OpenClaw 會先移除結尾的
+助理預填輪次，再透過 Cloudflare AI Gateway 傳送承載資料。
+Anthropic 會拒絕搭配延伸思考的回應預填，但一般的
+非思考預填仍可使用。
 
 ## 安裝外掛
 
@@ -43,17 +47,17 @@ openclaw gateway restart
 
 <Steps>
   <Step title="設定供應商 API 金鑰與閘道詳細資料">
-    執行初始設定並選擇 Cloudflare AI Gateway 驗證選項：
+    執行新手設定，並選擇 Cloudflare AI Gateway 驗證選項：
 
     ```bash
     openclaw onboard --auth-choice cloudflare-ai-gateway-api-key
     ```
 
-    系統會提示您輸入帳戶 ID、閘道 ID 與 API 金鑰。
+    系統會提示你輸入帳戶 ID、閘道 ID 與 API 金鑰。
 
   </Step>
   <Step title="設定預設模型">
-    將模型新增至您的 OpenClaw 設定：
+    將模型新增至你的 OpenClaw 設定：
 
     ```json5
     {
@@ -75,7 +79,7 @@ openclaw gateway restart
 
 ## 非互動式範例
 
-若要用於指令碼或 CI 設定，請透過命令列傳入所有值：
+對於指令碼或 CI 設定，請在命令列中傳入所有值：
 
 ```bash
 openclaw onboard --non-interactive \
@@ -90,7 +94,7 @@ openclaw onboard --non-interactive \
 
 <AccordionGroup>
   <Accordion title="已驗證的閘道">
-    若您已在 Cloudflare 中啟用閘道驗證，請新增 `cf-aig-authorization` 標頭。這是對供應商 API 金鑰的**額外要求**。
+    如果你已在 Cloudflare 中啟用閘道驗證，請新增 `cf-aig-authorization` 標頭。此標頭是**額外搭配**你的供應商 API 金鑰使用。
 
     ```json5
     {
@@ -107,16 +111,16 @@ openclaw onboard --non-interactive \
     ```
 
     <Tip>
-    `cf-aig-authorization` 標頭用於向 Cloudflare Gateway 本身進行驗證，而供應商 API 金鑰（例如您的 Anthropic 金鑰）則用於向上游供應商進行驗證。
+    `cf-aig-authorization` 標頭用於向 Cloudflare Gateway 本身進行驗證，而供應商 API 金鑰（例如你的 Anthropic 金鑰）則用於向上游供應商進行驗證。
     </Tip>
 
   </Accordion>
 
   <Accordion title="環境注意事項">
-    若閘道以背景服務（launchd/systemd）執行，請確保該程序可存取 `CLOUDFLARE_AI_GATEWAY_API_KEY`。
+    如果閘道以常駐程式（launchd/systemd）形式執行，請確認該程序可使用 `CLOUDFLARE_AI_GATEWAY_API_KEY`。
 
     <Warning>
-    僅在互動式 shell 中匯出的金鑰不會對 launchd/systemd 背景服務生效，除非該環境也匯入至背景服務中。請在 `~/.openclaw/.env` 中設定金鑰，或透過 `env.shellEnv` 設定，以確保閘道程序可以讀取該金鑰。
+    僅在互動式 Shell 中匯出的金鑰，對 launchd/systemd 常駐程式沒有幫助，除非該環境也已匯入其中。請在 `~/.openclaw/.env` 中設定金鑰，或透過 `env.shellEnv` 設定，以確保閘道程序能讀取金鑰。
     </Warning>
 
   </Accordion>

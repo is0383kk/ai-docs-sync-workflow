@@ -4,21 +4,22 @@ read_when:
     - Anahtar gerektirmeyen bir web_search sağlayıcısı istiyorsunuz
     - OLLAMA_API_KEY ile barındırılan Ollama Web Search'ü kullanmak istiyorsunuz
     - Ollama Web Search kurulum rehberine ihtiyacınız var
-summary: Yerel bir Ollama sunucusu veya barındırılan Ollama API'si üzerinden Ollama Web Araması
+summary: Yerel bir Ollama ana bilgisayarı veya barındırılan Ollama API'si üzerinden Ollama Web Araması
 title: Ollama web araması
 x-i18n:
-    generated_at: "2026-07-12T12:19:08Z"
+    generated_at: "2026-07-26T23:39:15Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: edbbd887841339ab4c0c62ab7682a22fe99434a788957a91989fce6942187e9a
     source_path: tools/ollama-search.md
     workflow: 16
 ---
 
-OpenClaw, paketle birlikte gelen bir `web_search` sağlayıcısı olarak **Ollama Web Search** desteği sunar ve Ollama'nın web arama API'sinden başlıkları, URL'leri ve metin parçacıklarını döndürür.
+OpenClaw, paketle birlikte sunulan bir `web_search` sağlayıcısı olarak **Ollama Web Search**'ü destekler ve Ollama'nın web arama API'sinden başlıkları, URL'leri ve parçacıkları döndürür.
 
-Yerel/kendi barındırdığınız Ollama için varsayılan olarak API anahtarı gerekmez; erişilebilir bir Ollama ana makinesinin yanı sıra `ollama signin` komutu gerekir. Doğrudan barındırılan arama (yerel Ollama olmadan) için `baseUrl: "https://ollama.com"` ve gerçek bir `OLLAMA_API_KEY` gerekir.
+Yerel/kendi barındırdığınız Ollama için varsayılan olarak API anahtarı gerekmez; erişilebilir bir Ollama ana bilgisayarı ve `ollama signin` gerekir. Doğrudan barındırılan arama (yerel Ollama olmadan) için `baseUrl: "https://ollama.com"` ve gerçek bir `OLLAMA_API_KEY` gerekir.
 
 ## Kurulum
 
@@ -41,10 +42,10 @@ Yerel/kendi barındırdığınız Ollama için varsayılan olarak API anahtarı 
   </Step>
 </Steps>
 
-Ollama'yı modeller için zaten kullanıyorsanız Ollama Web Search, yapılandırılmış aynı ana makineyi yeniden kullanır.
+Ollama'yı modeller için zaten kullanıyorsanız Ollama Web Search, yapılandırılmış aynı ana bilgisayarı yeniden kullanır.
 
 <Note>
-  OpenClaw, Ollama Web Search'ü kimlik bilgileriyle yapılandırılmış daha yüksek öncelikli bir sağlayıcıya karşı hiçbir zaman otomatik olarak seçmez; `tools.web.search.provider: "ollama"` ile açıkça seçmeniz gerekir.
+  OpenClaw, Ollama Web Search'ü daha yüksek öncelikli, kimlik bilgileriyle yapılandırılmış bir sağlayıcıya tercih ederek hiçbir zaman otomatik olarak seçmez; `tools.web.search.provider: "ollama"` ile açıkça seçmeniz gerekir.
 </Note>
 
 ## Yapılandırma
@@ -61,7 +62,7 @@ Ollama'yı modeller için zaten kullanıyorsanız Ollama Web Search, yapılandı
 }
 ```
 
-Yalnızca web araması kapsamında geçerli isteğe bağlı ana makine geçersiz kılması:
+Yalnızca web aramasıyla sınırlı isteğe bağlı ana bilgisayar geçersiz kılma ayarı:
 
 ```json5
 {
@@ -79,7 +80,7 @@ Yalnızca web araması kapsamında geçerli isteğe bağlı ana makine geçersiz
 }
 ```
 
-Alternatif olarak Ollama model sağlayıcısı için zaten yapılandırılmış ana makineyi yeniden kullanın:
+Ya da Ollama model sağlayıcısı için zaten yapılandırılmış ana bilgisayarı yeniden kullanın:
 
 ```json5
 {
@@ -93,7 +94,7 @@ Alternatif olarak Ollama model sağlayıcısı için zaten yapılandırılmış 
 }
 ```
 
-`models.providers.ollama.baseUrl` standart anahtardır; web arama sağlayıcısı, OpenAI SDK tarzı yapılandırma örnekleriyle uyumluluk için burada `baseURL` değerini de kabul eder. Hiçbir değer ayarlanmazsa OpenClaw varsayılan olarak `http://127.0.0.1:11434` kullanır.
+`models.providers.ollama.baseUrl` kurallı anahtardır; web arama sağlayıcısı, OpenAI SDK tarzı yapılandırma örnekleriyle uyumluluk için burada `baseURL` değerini de kabul eder. Hiçbir şey ayarlanmazsa OpenClaw varsayılan olarak `http://127.0.0.1:11434` değerini kullanır.
 
 Doğrudan barındırılan Ollama Web Search (yerel Ollama olmadan):
 
@@ -119,14 +120,14 @@ Doğrudan barındırılan Ollama Web Search (yerel Ollama olmadan):
 
 ## Kimlik doğrulama ve istek yönlendirme
 
-- Web aramasına özel bir API anahtarı alanı yoktur; yapılandırılan ana makine kimlik doğrulama ile korunuyorsa sağlayıcı `models.providers.ollama.apiKey` değerini (veya ortam değişkeni destekli eşleşen sağlayıcı kimlik doğrulamasını) yeniden kullanır.
-- Ana makine çözümleme sırası: `plugins.entries.ollama.config.webSearch.baseUrl` →
+- Web aramasına özel bir API anahtarı alanı yoktur; yapılandırılmış ana bilgisayar kimlik doğrulama ile korunuyorsa sağlayıcı, `models.providers.ollama.apiKey` değerini (veya ortam değişkeni destekli eşleşen sağlayıcı kimlik doğrulamasını) yeniden kullanır.
+- Ana bilgisayar çözümleme sırası: `plugins.entries.ollama.config.webSearch.baseUrl` →
   `models.providers.ollama.baseUrl` (veya `baseURL`) → `http://127.0.0.1:11434`.
-- Çözümlenen ana makine `https://ollama.com` ise OpenClaw, taşıyıcı kimlik doğrulaması olarak API anahtarını kullanarak doğrudan `https://ollama.com/api/web_search` adresini çağırır.
-- Aksi takdirde OpenClaw önce yerel proxy uç noktası olan `/api/experimental/web_search` adresini çağırır (bu uç nokta isteği imzalayıp Ollama Cloud'a iletir), ardından aynı ana makinedeki `/api/web_search` adresine geri döner. Her ikisi de başarısız olur ve `OLLAMA_API_KEY` ayarlanmışsa bu anahtarı yerel ana makineye göndermeden, anahtarla birlikte `https://ollama.com/api/web_search` adresine yönelik isteği bir kez yeniden dener.
-- Ollama'ya erişilemiyorsa veya oturum açılmamışsa OpenClaw kurulum sırasında uyarı verir ancak sağlayıcının seçilmesini engellemez.
+- Çözümlenen ana bilgisayar `https://ollama.com` ise OpenClaw, API anahtarını taşıyıcı kimlik doğrulaması olarak kullanarak doğrudan `https://ollama.com/api/web_search` çağrısı yapar.
+- Aksi takdirde OpenClaw önce yerel proxy uç noktası `/api/experimental/web_search` değerini çağırır (bu uç nokta isteği imzalayıp Ollama Cloud'a iletir), ardından aynı ana bilgisayardaki `/api/web_search` değerine geri döner. Her ikisi de başarısız olursa ve `OLLAMA_API_KEY` ayarlanmışsa bu anahtarı yerel ana bilgisayara göndermeden `https://ollama.com/api/web_search` üzerinde bir kez daha dener.
+- Ollama'ya erişilemiyorsa veya oturum açılmamışsa OpenClaw kurulum sırasında uyarır ancak sağlayıcının seçilmesini engellemez.
 
-## İlgili konular
+## İlgili
 
-- [Web aramasına genel bakış](/tr/tools/web) -- tüm sağlayıcılar ve otomatik algılama
-- [Ollama](/tr/providers/ollama) -- Ollama model kurulumu ile bulut/yerel modlar
+- [Web Aramasına genel bakış](/tr/tools/web) -- tüm sağlayıcılar ve otomatik algılama
+- [Ollama](/tr/providers/ollama) -- Ollama model kurulumu ve bulut/yerel modlar

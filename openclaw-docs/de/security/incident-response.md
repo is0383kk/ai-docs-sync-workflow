@@ -1,14 +1,15 @@
 ---
 read_when:
     - Reaktion auf eine Sicherheitsmeldung oder einen vermuteten Sicherheitsvorfall
-    - Vorbereitung einer koordinierten Offenlegung oder eines Sicherheitsupdates mit Fehlerbehebung
+    - Vorbereitung einer koordinierten Offenlegung oder einer Sicherheitsversion mit Fehlerbehebung
     - Überprüfung der Erwartungen an die Nachbereitung nach einem Vorfall
-summary: Wie OpenClaw Sicherheitsvorfälle einstuft, darauf reagiert und sie nachbereitet
-title: Reaktion auf Vorfälle
+summary: Wie OpenClaw Sicherheitsvorfälle bewertet, darauf reagiert und nachverfolgt
+title: Reaktion auf Sicherheitsvorfälle
 x-i18n:
-    generated_at: "2026-07-12T02:10:59Z"
+    generated_at: "2026-07-26T18:11:16Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 30f2d754408e95133ee86254ce193c0d8aab293040df55e0c1cec0c4d7644c56
     source_path: security/incident-response.md
@@ -21,45 +22,45 @@ Sicherheitssignale stammen aus:
 
 - GitHub Security Advisories (GHSA) und privaten Schwachstellenmeldungen.
 - Öffentlichen GitHub-Issues/-Diskussionen, wenn Meldungen nicht vertraulich sind.
-- Automatisierten Signalen: Dependabot, CodeQL, npm-Sicherheitshinweise, Secret-Scanning.
+- Automatisierten Signalen: Dependabot, CodeQL, npm-Advisories und Secret Scanning.
 
-Erste Triage:
+Ersttriage:
 
-1. Bestätigen Sie die betroffene Komponente, Version und Auswirkung auf die Vertrauensgrenze.
-2. Klassifizieren Sie den Fall anhand der Regeln zu Geltungsbereich und Ausschlüssen in `SECURITY.md` als Sicherheitsproblem oder als Härtungsmaßnahme/ohne Handlungsbedarf.
+1. Betroffene Komponente, Version und Auswirkungen auf die Vertrauensgrenze bestätigen.
+2. Anhand der Regeln von `SECURITY.md` zum Geltungsbereich und zu ausgeschlossenen Bereichen als Sicherheitsproblem oder als Härtungsmaßnahme/kein Handlungsbedarf klassifizieren.
 3. Eine für den Vorfall verantwortliche Person reagiert entsprechend.
 
 ## 2. Schweregrad
 
 | Schweregrad | Definition                                                                                                                                                                                                 |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kritisch     | Kompromittierung von Paket, Release oder Repository, aktive Ausnutzung oder nicht authentifizierte Umgehung einer Vertrauensgrenze mit weitreichender Kontrolle oder Offenlegung von Daten.                 |
-| Hoch         | Bestätigte Umgehung einer Vertrauensgrenze mit begrenzten Voraussetzungen (beispielsweise eine authentifizierte, aber nicht autorisierte Aktion mit schwerwiegenden Auswirkungen) oder Offenlegung sensibler, von OpenClaw verwalteter Zugangsdaten. |
-| Mittel       | Erhebliche Sicherheitsschwäche mit praktischen Auswirkungen, aber eingeschränkter Ausnutzbarkeit oder erheblichen Voraussetzungen.                                                                          |
-| Niedrig      | Maßnahmen zur mehrschichtigen Absicherung, eng begrenzte Denial-of-Service-Schwachstellen oder Lücken bei Härtung bzw. Funktionsgleichheit ohne nachgewiesene Umgehung einer Vertrauensgrenze.               |
+| Kritisch     | Kompromittierung eines Pakets, Releases oder Repositorys, aktive Ausnutzung oder nicht authentifizierte Umgehung einer Vertrauensgrenze mit weitreichender Kontrolle oder Offenlegung von Daten.             |
+| Hoch         | Bestätigte Umgehung einer Vertrauensgrenze mit begrenzten Voraussetzungen (beispielsweise eine authentifizierte, aber nicht autorisierte Aktion mit weitreichenden Auswirkungen) oder Offenlegung vertraulicher, von OpenClaw verwalteter Anmeldedaten. |
+| Mittel       | Erhebliche Sicherheitsschwäche mit praktischen Auswirkungen, aber eingeschränkter Ausnutzbarkeit oder beträchtlichen Voraussetzungen.                                                                        |
+| Niedrig      | Maßnahmen zur mehrschichtigen Absicherung, eng begrenzte Denial-of-Service-Schwachstellen oder Lücken bei Härtung bzw. Funktionsgleichheit ohne nachgewiesene Umgehung einer Vertrauensgrenze.                 |
 
 ## 3. Reaktion
 
-1. Bestätigen Sie der meldenden Person den Eingang der Meldung (bei vertraulichen Inhalten nicht öffentlich).
-2. Reproduzieren Sie das Problem in unterstützten Releases und im neuesten Stand von `main`; implementieren und validieren Sie anschließend einen Patch mit Regressionstests.
-3. Kritisch/hoch: Bereiten Sie korrigierte Releases so schnell wie praktisch möglich vor.
-4. Mittel/niedrig: Spielen Sie den Patch im regulären Release-Ablauf ein und dokumentieren Sie Maßnahmen zur Risikominderung.
+1. Eingang gegenüber der meldenden Person bestätigen (bei vertraulichen Inhalten auf privatem Weg).
+2. Auf unterstützten Releases und dem neuesten `main` reproduzieren, anschließend einen Patch mit Abdeckung durch Regressionstests implementieren und validieren.
+3. Kritisch/hoch: korrigierte Releases so schnell wie praktisch möglich vorbereiten.
+4. Mittel/niedrig: Patch im regulären Release-Ablauf veröffentlichen und Hinweise zu Gegenmaßnahmen dokumentieren.
 
 ## 4. Kommunikation und Offenlegung
 
-Kommunizieren Sie über GitHub Security Advisories im betroffenen Repository, Release Notes/Changelog-Einträge für korrigierte Versionen und direkte Status- und Abschlussmeldungen an die meldende Person.
+Die Kommunikation erfolgt über GitHub Security Advisories im betroffenen Repository, Release Notes/Changelog-Einträge für korrigierte Versionen sowie direkte Status- und Abschlussmeldungen an die meldende Person.
 
-Bei kritischen und schwerwiegenden Vorfällen erfolgt eine koordinierte Offenlegung, gegebenenfalls einschließlich der Vergabe einer CVE. Härtungsbefunde mit geringem Risiko können abhängig von den Auswirkungen und der Betroffenheit der Benutzer ohne CVE in Release Notes oder Sicherheitshinweisen dokumentiert werden.
+Bei kritischen und hoch eingestuften Vorfällen erfolgt eine koordinierte Offenlegung und gegebenenfalls die Vergabe einer CVE. Härtungsbefunde mit geringem Risiko können abhängig von den Auswirkungen und der Gefährdung der Benutzer ohne CVE in Release Notes oder Advisories dokumentiert werden.
 
 ## 5. Wiederherstellung und Nachbereitung
 
 Nach der Veröffentlichung der Korrektur:
 
-1. Überprüfen Sie die Behebungsmaßnahmen in CI und den Release-Artefakten.
-2. Führen Sie eine kurze Nachbesprechung des Vorfalls durch: Zeitablauf, Grundursache, Erkennungslücke, Präventionsplan.
-3. Erstellen Sie Folgeaufgaben für Härtungsmaßnahmen, Tests und Dokumentation und verfolgen Sie diese bis zum Abschluss.
+1. Behebungsmaßnahmen in CI und Release-Artefakten verifizieren.
+2. Eine kurze Nachbesprechung des Vorfalls durchführen: zeitlicher Ablauf, Grundursache, Erkennungslücke, Präventionsplan.
+3. Folgeaufgaben für Härtung, Tests und Dokumentation hinzufügen und bis zum Abschluss nachverfolgen.
 
 ## Verwandte Themen
 
-- [Sicherheitsrichtlinie](https://github.com/openclaw/openclaw/blob/main/SECURITY.md) — Geltungsbereich für Meldungen und Vertrauensmodell.
+- [Sicherheitsrichtlinie](https://github.com/openclaw/openclaw/blob/main/SECURITY.md) — Meldeumfang und Vertrauensmodell.
 - [Bedrohungsmodell](/de/security/THREAT-MODEL-ATLAS)

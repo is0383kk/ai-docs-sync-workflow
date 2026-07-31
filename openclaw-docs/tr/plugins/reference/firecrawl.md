@@ -1,14 +1,15 @@
 ---
 read_when:
     - firecrawl pluginini kuruyor, yapılandırıyor veya denetliyorsunuz
-summary: Aracı tarafından çağrılabilen araçlar ekler. Web içeriği getirme sağlayıcısı desteği ekler. Web arama sağlayıcısı desteği ekler.
-title: Firecrawl Plugin'i
+summary: Aracı tarafından çağrılabilen araçlar ekler. Web getirme sağlayıcısı desteği ekler. Web arama sağlayıcısı desteği ekler.
+title: Firecrawl plugini
 x-i18n:
-    generated_at: "2026-07-12T12:37:15Z"
+    generated_at: "2026-07-26T23:28:13Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: ca5577e6e850d947a3714e3dc62c7756faae8471e150d3cdb320a85efe3fe4f5
+    source_hash: 058bd8b3fabe5646f198789c0454a61d459efcdc9f9bb47f9b07d3eaf7396097
     source_path: plugins/reference/firecrawl.md
     workflow: 16
 ---
@@ -24,7 +25,7 @@ Aracı tarafından çağrılabilen araçlar ekler. Web getirme sağlayıcısı d
 
 ## Yüzey
 
-sözleşmeler: araçlar, web getirme sağlayıcıları, web arama sağlayıcıları
+sözleşmeler: `tools`, `webFetchProviders`, `webSearchProviders`
 
 ## İlgili belgeler
 

@@ -1,83 +1,84 @@
 ---
 read_when:
-    - 设置无需针对每个任务进行提示即可运行的自主智能体工作流
-    - 定义智能体可以独立执行的操作，以及需要人工审批的操作
-    - 通过清晰的边界和升级规则构建多程序智能体架构
-summary: 为自主智能体程序定义永久操作权限
-title: 常设指令
+    - 设置无需逐项任务提示即可运行的自主智能体工作流
+    - 定义智能体可以独立执行的操作，以及哪些操作需要人工审批
+    - 通过明确的边界和升级规则构建多程序智能体架构
+summary: 为自主智能体程序定义永久运行权限
+title: 长期指令
 x-i18n:
-    generated_at: "2026-07-11T20:18:46Z"
+    generated_at: "2026-07-26T06:37:41Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 9e7ad622efe734facc9dc3716f5ee7f57ed3923499db78730bda234a5c62ad80
     source_path: automation/standing-orders.md
     workflow: 16
 ---
 
-常设指令为你的智能体授予针对已定义程序的**永久操作权限**。你无需针对每项任务提示智能体，而是定义具有明确范围、触发条件和升级规则的程序，由智能体在这些边界内自主执行：“每周报告由你负责。每周五汇总并发送，仅在发现异常时升级处理。”
+长期指令授予你的智能体对指定程序的**永久操作权限**。你无需为每项任务提示智能体，而是定义具有明确范围、触发条件和升级规则的程序，智能体便会在这些边界内自主执行：“每周报告由你负责。每周五编制并发送报告，仅在发现异常时升级处理。”
 
-## 为什么使用常设指令
+## 为什么使用长期指令
 
-**没有常设指令时：**你需要针对每项任务提示智能体，例行工作容易被遗忘或延误，而你会成为瓶颈。
+**没有长期指令：**你需要针对每项任务提示智能体，例行工作容易被遗忘或延误，而你会成为瓶颈。
 
-**使用常设指令后：**智能体会在定义的边界内自主执行，例行工作按计划完成，而你只需介入异常情况和审批事项。
+**使用长期指令：**智能体在定义的边界内自主执行，例行工作按计划完成，你只需介入异常情况和审批。
 
 ## 工作原理
 
-常设指令定义在你的 [Agent 工作区](/zh-CN/concepts/agent-workspace)文件中。推荐直接将其写入 `AGENTS.md`（每个会话都会自动注入），确保智能体始终能在上下文中获得这些指令。对于规模较大的配置，也可以将其放在 `standing-orders.md` 等专用文件中，并从 `AGENTS.md` 引用。
+长期指令在你的 [Agent 工作区](/zh-CN/concepts/agent-workspace)文件中定义。建议直接将其包含在 `AGENTS.md` 中（每个会话都会自动注入），确保智能体始终在上下文中获得这些指令。对于较大的配置，也可以将其放在 `standing-orders.md` 等专用文件中，并从 `AGENTS.md` 引用该文件。
 
 每个程序需指定：
 
-1. **范围**——智能体获准执行哪些操作
-2. **触发条件**——何时执行（计划、事件或条件）
-3. **审批关卡**——哪些操作必须先获得人工批准
-4. **升级规则**——何时停止并请求帮助
+1. **范围** - 授权智能体执行的操作
+2. **触发条件** - 何时执行（时间安排、事件或条件）
+3. **审批关卡** - 执行前哪些操作需要人工签字批准
+4. **升级规则** - 何时停止并寻求帮助
 
-智能体会在每个会话中通过工作区引导文件加载这些指令（有关自动注入文件的完整列表，请参阅 [Agent 工作区](/zh-CN/concepts/agent-workspace)），并依照这些指令执行，同时结合 [cron 作业](/zh-CN/automation/cron-jobs)强制落实基于时间的执行要求。
+智能体每次会话都会通过工作区引导文件加载这些指令（有关自动注入文件的完整列表，请参阅 [Agent 工作区](/zh-CN/concepts/agent-workspace)），并依据这些指令执行，同时结合[定时任务](/zh-CN/automation/cron-jobs)实施基于时间的强制执行。
 
 <Tip>
-将常设指令放入 `AGENTS.md`，以确保每个会话都会加载它们。工作区引导机制会自动注入 `AGENTS.md`、`SOUL.md`、`TOOLS.md`、`IDENTITY.md`、`USER.md`、`HEARTBEAT.md`、`BOOTSTRAP.md` 和 `MEMORY.md`，但不会注入子目录中的任意文件。
+将长期指令放入 `AGENTS.md`，确保每次会话都会加载。工作区引导会自动注入 `AGENTS.md`、`SOUL.md`、`TOOLS.md`、`IDENTITY.md`、`USER.md`、`HEARTBEAT.md`、`BOOTSTRAP.md` 和 `MEMORY.md`，但不会注入子目录中的任意文件。
 </Tip>
 
-## 常设指令的结构
+## 长期指令的结构
 
 ```markdown
-## Program: Weekly Status Report
+## 程序：每周状态报告
 
-**Authority:** Compile data, generate report, deliver to stakeholders
-**Trigger:** Every Friday at 4 PM (enforced via cron job)
-**Approval gate:** None for standard reports. Flag anomalies for human review.
-**Escalation:** If data source is unavailable or metrics look unusual (>2σ from norm)
+**权限：**汇总数据、生成报告并发送给利益相关者
+**触发条件：**每周五下午 4 点（通过定时任务强制执行）
+**审批关卡：**标准报告无需审批。标记异常情况以供人工审查。
+**升级条件：**数据源不可用或指标看起来异常（偏离正常值 >2σ）
 
-### Execution steps
+### 执行步骤
 
-1. Pull metrics from configured sources
-2. Compare to prior week and targets
-3. Generate report in Reports/weekly/YYYY-MM-DD.md
-4. Deliver summary via configured channel
-5. Log completion to Agent/Logs/
+1. 从已配置的来源提取指标
+2. 与前一周的数据和目标进行比较
+3. 在 Reports/weekly/YYYY-MM-DD.md 中生成报告
+4. 通过已配置的渠道发送摘要
+5. 将完成记录写入 Agent/Logs/
 
-### What NOT to do
+### 禁止事项
 
-- Do not send reports to external parties
-- Do not modify source data
-- Do not skip delivery if metrics look bad - report accurately
+- 不得将报告发送给外部人员
+- 不得修改源数据
+- 不得因指标表现不佳而跳过发送——必须如实报告
 ```
 
-## 常设指令与 cron 作业
+## 长期指令与定时任务
 
-常设指令定义智能体获准执行**什么**。[Cron 作业](/zh-CN/automation/cron-jobs)定义任务在**何时**发生。两者协同工作：
+长期指令定义智能体获准执行**什么**操作。[定时任务](/zh-CN/automation/cron-jobs)定义操作在**何时**发生。二者协同工作：
 
 ```text
-Standing Order: "You own the daily inbox triage"
+长期指令：“每日收件箱分类由你负责”
     ↓
-Cron Job (8 AM daily): "Execute inbox triage per standing orders"
+定时任务（每天上午 8 点）：“按照长期指令执行收件箱分类”
     ↓
-Agent: Reads standing orders → executes steps → reports results
+智能体：读取长期指令 → 执行步骤 → 报告结果
 ```
 
-cron 作业提示应引用常设指令，而不是重复其内容：
+定时任务提示应引用长期指令，而不是重复其内容：
 
 ```bash
 openclaw cron add \
@@ -88,159 +89,159 @@ openclaw cron add \
   --announce \
   --channel imessage \
   --to "+1XXXXXXXXXX" \
-  --message "Execute daily inbox triage per standing orders. Check mail for new alerts. Parse, categorize, and persist each item. Report summary to owner. Escalate unknowns."
+  --message "按照长期指令执行每日收件箱分类。检查邮件中是否有新警报。解析、分类并持久化每个项目。向所有者报告摘要。升级处理未知项目。"
 ```
 
 ## 示例
 
-### 示例 1：内容与社交媒体（每周周期）
+### 示例 1：内容和社交媒体（每周周期）
 
 ```markdown
-## Program: Content & Social Media
+## 程序：内容与社交媒体
 
-**Authority:** Draft content, schedule posts, compile engagement reports
-**Approval gate:** All posts require owner review for first 30 days, then standing approval
-**Trigger:** Weekly cycle (Monday review → mid-week drafts → Friday brief)
+**权限：**起草内容、安排帖子发布时间、编制互动报告
+**审批关卡：**前 30 天所有帖子均需所有者审查，之后转为长期批准
+**触发条件：**每周周期（周一审查 → 周中起草 → 周五简报）
 
-### Weekly cycle
+### 每周周期
 
-- **Monday:** Review platform metrics and audience engagement
-- **Tuesday-Thursday:** Draft social posts, create blog content
-- **Friday:** Compile weekly marketing brief → deliver to owner
+- **周一：**审查平台指标和受众互动情况
+- **周二至周四：**起草社交媒体帖子，创作博客内容
+- **周五：**编制每周营销简报 → 发送给所有者
 
-### Content rules
+### 内容规则
 
-- Voice must match the brand (see SOUL.md or brand voice guide)
-- Never identify as AI in public-facing content
-- Include metrics when available
-- Focus on value to audience, not self-promotion
+- 语气必须符合品牌风格（参阅 SOUL.md 或品牌语气指南）
+- 在面向公众的内容中绝不表明自己是 AI
+- 有可用指标时应将其包含在内
+- 重点关注为受众提供价值，而非自我宣传
 ```
 
-### 示例 2：财务运营（事件触发）
+### 示例 2：财务操作（事件触发）
 
 ```markdown
-## Program: Financial Processing
+## 程序：财务处理
 
-**Authority:** Process transaction data, generate reports, send summaries
-**Approval gate:** None for analysis. Recommendations require owner approval.
-**Trigger:** New data file detected OR scheduled monthly cycle
+**权限：**处理交易数据、生成报告、发送摘要
+**审批关卡：**分析无需审批。建议需要所有者批准。
+**触发条件：**检测到新数据文件，或进入计划的每月周期
 
-### When new data arrives
+### 新数据到达时
 
-1. Detect new file in designated input directory
-2. Parse and categorize all transactions
-3. Compare against budget targets
-4. Flag: unusual items, threshold breaches, new recurring charges
-5. Generate report in designated output directory
-6. Deliver summary to owner via configured channel
+1. 检测指定输入目录中的新文件
+2. 解析并分类所有交易
+3. 与预算目标进行比较
+4. 标记：异常项目、超出阈值的项目、新增周期性费用
+5. 在指定输出目录中生成报告
+6. 通过已配置的渠道向所有者发送摘要
 
-### Escalation rules
+### 升级规则
 
-- Single item > $500: immediate alert
-- Category > budget by 20%: flag in report
-- Unrecognizable transaction: ask owner for categorization
-- Failed processing after 2 retries: report failure, do not guess
+- 单个项目 > $500：立即发出警报
+- 类别超出预算 20%：在报告中标记
+- 无法识别的交易：请所有者进行分类
+- 重试 2 次后仍处理失败：报告失败，不得猜测
 ```
 
-### 示例 3：监控与警报（持续运行）
+### 示例 3：监控和警报（持续执行）
 
 ```markdown
-## Program: System Monitoring
+## 程序：系统监控
 
-**Authority:** Check system health, restart services, send alerts
-**Approval gate:** Restart services automatically. Escalate if restart fails twice.
-**Trigger:** Every heartbeat cycle
+**权限：**检查系统健康状况、重启服务、发送警报
+**审批关卡：**自动重启服务。如果重启失败两次，则升级处理。
+**触发条件：**每个 Heartbeat 周期
 
-### Checks
+### 检查项
 
-- Service health endpoints responding
-- Disk space above threshold
-- Pending tasks not stale (>24 hours)
-- Delivery channels operational
+- 服务健康端点正常响应
+- 磁盘空间高于阈值
+- 待处理任务未过期（>24 小时）
+- 发送渠道运行正常
 
-### Response matrix
+### 响应矩阵
 
-| Condition        | Action                   | Escalate?                |
-| ---------------- | ------------------------ | ------------------------ |
-| Service down     | Restart automatically    | Only if restart fails 2x |
-| Disk space < 10% | Alert owner              | Yes                      |
-| Stale task > 24h | Remind owner             | No                       |
-| Channel offline  | Log and retry next cycle | If offline > 2 hours     |
+| 条件             | 操作                       | 是否升级？                 |
+| ---------------- | -------------------------- | -------------------------- |
+| 服务中断         | 自动重启                   | 仅在重启失败 2 次时        |
+| 磁盘空间 < 10%   | 向所有者发出警报           | 是                         |
+| 任务过期 > 24h   | 提醒所有者                 | 否                         |
+| 渠道离线         | 记录并在下个周期重试       | 离线时间 > 2 小时时        |
 ```
 
 ## 执行—验证—报告模式
 
-常设指令与严格的执行纪律结合使用时效果最佳。常设指令中的每项任务都应遵循以下循环：
+长期指令与严格的执行纪律结合使用时效果最佳。长期指令中的每项任务都应遵循以下循环：
 
-1. **执行**——完成实际工作（不要只是确认收到指令）
-2. **验证**——确认结果正确（文件存在、消息已送达、数据已解析）
-3. **报告**——告知所有者完成了什么以及验证了什么
+1. **执行** - 完成实际工作（不要只确认收到指令）
+2. **验证** - 确认结果正确（文件存在、消息已发送、数据已解析）
+3. **报告** - 告知所有者完成了哪些工作以及验证了哪些结果
 
 ```markdown
-### Execution rules
+### 执行规则
 
-- Every task follows Execute-Verify-Report. No exceptions.
-- "I'll do that" is not execution. Do it, then report.
-- "Done" without verification is not acceptable. Prove it.
-- If execution fails: retry once with adjusted approach.
-- If still fails: report failure with diagnosis. Never silently fail.
-- Never retry indefinitely - 3 attempts max, then escalate.
+- 每项任务都遵循“执行—验证—报告”流程，无一例外。
+- “我会去做”不等于执行。先完成，再报告。
+- 未经验证就声称“已完成”不可接受。必须提供证明。
+- 如果执行失败：调整方法后重试一次。
+- 如果仍然失败：报告失败及诊断结果。绝不静默失败。
+- 绝不无限重试——最多尝试 3 次，然后升级处理。
 ```
 
-此模式可防止智能体最常见的失败方式：确认收到任务，却没有完成任务。
+此模式可以防止智能体最常见的失败情况：确认任务，却没有完成任务。
 
 ## 多程序架构
 
-对于需要管理多个事项的智能体，应将常设指令组织成边界清晰的独立程序：
+对于管理多个关注领域的智能体，应将长期指令组织为边界清晰的独立程序：
 
 ```markdown
-## Program 1: [Domain A] (Weekly)
+## 程序 1：[领域 A]（每周）
 
 ...
 
-## Program 2: [Domain B] (Monthly + On-Demand)
+## 程序 2：[领域 B]（每月 + 按需）
 
 ...
 
-## Program 3: [Domain C] (As-Needed)
+## 程序 3：[领域 C]（需要时）
 
 ...
 
-## Escalation Rules (All Programs)
+## 升级规则（所有程序）
 
-- [Common escalation criteria]
-- [Approval gates that apply across programs]
+- [通用升级条件]
+- [适用于所有程序的审批关卡]
 ```
 
-每个程序都应具备：
+每个程序都应具有：
 
-- 自己的**触发频率**（每周、每月、事件驱动或持续运行）
-- 自己的**审批关卡**（某些程序需要比其他程序更严格的监督）
+- 自己的**触发频率**（每周、每月、事件驱动、持续执行）
+- 自己的**审批关卡**（某些程序比其他程序需要更多监督）
 - 清晰的**边界**（智能体应知道一个程序在哪里结束，另一个程序从哪里开始）
 
 ## 最佳实践
 
-### 建议
+### 应当
 
-- 从较窄的权限范围开始，并随着信任建立逐步扩大
+- 从有限权限开始，并随着信任的建立逐步扩大权限
 - 为高风险操作定义明确的审批关卡
-- 加入“禁止执行的操作”部分——边界与权限同样重要
-- 与 cron 作业结合，确保基于时间的任务可靠执行
-- 每周查看智能体日志，验证常设指令是否得到遵循
-- 随着需求变化更新常设指令——它们是持续演进的文档
+- 包含“禁止事项”部分——边界与权限同等重要
+- 与定时任务结合，实现可靠的定时执行
+- 每周审查智能体日志，验证是否遵循长期指令
+- 随着需求变化更新长期指令——它们是持续演进的文档
 
 ### 避免
 
-- 第一天就授予宽泛权限（“执行你认为最合适的任何操作”）
-- 省略升级规则——每个程序都需要说明“何时停止并询问”
+- 第一天就授予广泛权限（“做你认为最合适的任何事情”）
+- 省略升级规则——每个程序都需要“何时停止并询问”的条款
 - 假设智能体会记住口头指令——将所有内容写入文件
-- 在单个程序中混合多个事项——不同领域应使用不同程序
-- 忘记使用 cron 作业强制执行——没有触发条件的常设指令只会成为建议
+- 在单个程序中混合不同关注领域——为不同领域设置独立程序
+- 忘记使用定时任务强制执行——没有触发条件的长期指令只会成为建议
 
 ## 相关内容
 
 - [自动化](/zh-CN/automation)：快速了解所有自动化机制。
-- [Cron 作业](/zh-CN/automation/cron-jobs)：为常设指令强制执行计划。
+- [定时任务](/zh-CN/automation/cron-jobs)：为长期指令强制执行时间安排。
 - [Hooks](/zh-CN/automation/hooks)：用于智能体生命周期事件的事件驱动脚本。
 - [Webhooks](/zh-CN/automation/cron-jobs#webhooks)：入站 HTTP 事件触发器。
-- [Agent 工作区](/zh-CN/concepts/agent-workspace)：常设指令的存放位置，包括自动注入的完整引导文件列表（`AGENTS.md`、`SOUL.md` 等）。
+- [Agent 工作区](/zh-CN/concepts/agent-workspace)：长期指令的存放位置，包括自动注入的引导文件完整列表（`AGENTS.md`、`SOUL.md` 等）。

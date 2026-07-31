@@ -4,9 +4,10 @@ read_when:
 summary: 注册 GitHub Copilot agent runtime。
 title: Copilot plugin
 x-i18n:
-    generated_at: "2026-07-11T20:47:42Z"
+    generated_at: "2026-07-26T06:53:07Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 38deb5a5898d9b9a9ea5584baec4b749339a6178838542f1905a8a12bfa78090
     source_path: plugins/reference/copilot.md
@@ -19,10 +20,10 @@ x-i18n:
 
 ## 分发
 
-- 软件包：`@openclaw/copilot`
-- 安装方式：npm；ClawHub：`clawhub:@openclaw/copilot`
+- 包：`@openclaw/copilot`
+- 安装途径：npm；ClawHub：`clawhub:@openclaw/copilot`
 
-## 适用范围
+## 接口
 
 插件
 

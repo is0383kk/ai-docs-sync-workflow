@@ -1,21 +1,22 @@
 ---
 read_when:
     - googlechat pluginini kuruyor, yapılandırıyor veya denetliyorsunuz
-summary: Alanlar ve doğrudan mesajlar için OpenClaw Google Chat kanal Plugin'i.
+summary: Alanlar ve doğrudan mesajlar için OpenClaw Google Chat kanal plugini.
 title: Google Chat Plugin'i
 x-i18n:
-    generated_at: "2026-07-12T12:37:25Z"
+    generated_at: "2026-07-26T23:32:45Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 04febb1ead7d63e9ef79ecc52ce69f38a7c4eb404c90019717363f57477cd37d
+    source_hash: d800ec6b317e15fd14e3990d84a9ca2f29026607921629198f5032be2b0a3281
     source_path: plugins/reference/googlechat.md
     workflow: 16
 ---
 
-# Google Chat Plugin'i
+# Google Chat plugin'i
 
-Alanlar ve doğrudan mesajlar için OpenClaw Google Chat kanal Plugin'i.
+Alanlar ve doğrudan mesajlar için OpenClaw Google Chat kanal plugin'i.
 
 ## Dağıtım
 
@@ -24,8 +25,8 @@ Alanlar ve doğrudan mesajlar için OpenClaw Google Chat kanal Plugin'i.
 
 ## Yüzey
 
-kanallar: googlechat
+kanallar: `googlechat`
 
 ## İlgili belgeler
 
-- [googlechat](/tr/channels/googlechat)
+- [Google Chat](/tr/channels/googlechat)

@@ -1,188 +1,81 @@
 ---
 read_when:
-    - ऐसी सुविधाएँ जोड़ना जो पहुँच या स्वचालन को विस्तृत करती हैं
-summary: शेल एक्सेस वाले एआई Gateway को चलाने के लिए सुरक्षा संबंधी विचार और खतरा मॉडल
+    - पहुँच या स्वचालन का विस्तार करने वाली सुविधाएँ जोड़ना
+summary: शेल एक्सेस वाले AI गेटवे को चलाने के लिए सुरक्षा संबंधी विचार और खतरा मॉडल
 title: सुरक्षा
 x-i18n:
-    generated_at: "2026-07-04T10:42:17Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T17:49:41Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 42a398a347f04414c443277c8ab3632953bce73e957c8439883846813f882dd5
+    source_hash: 8cdf1b1455ecb35a3cf5b9ab968a55c89b7b7c283231b99d4d740bb75fa11700
     source_path: gateway/security/index.md
     workflow: 16
 ---
 
 <Warning>
-  **व्यक्तिगत सहायक trust model.** यह मार्गदर्शन प्रति Gateway एक विश्वसनीय
-  ऑपरेटर सीमा मानता है (एकल-उपयोगकर्ता, व्यक्तिगत-सहायक मॉडल)।
-  OpenClaw एक Agent या Gateway साझा करने वाले कई
-  प्रतिकूल उपयोगकर्ताओं के लिए **hostile multi-tenant** सुरक्षा सीमा
-  **नहीं** है। यदि आपको मिश्रित-विश्वास या प्रतिकूल-उपयोगकर्ता संचालन चाहिए,
-  तो trust boundaries विभाजित करें (अलग Gateway +
-  credentials, आदर्श रूप से अलग OS users या hosts)।
+  **व्यक्तिगत सहायक विश्वास मॉडल।** यह मार्गदर्शन प्रत्येक Gateway के लिए एक विश्वसनीय
+  ऑपरेटर सीमा (एकल-उपयोगकर्ता, व्यक्तिगत-सहायक मॉडल) मानता है।
+  OpenClaw एक एजेंट या Gateway साझा करने वाले कई विरोधी
+  उपयोगकर्ताओं के लिए शत्रुतापूर्ण बहु-किरायेदार सुरक्षा सीमा **नहीं** है। मिश्रित-विश्वास या
+  विरोधी-उपयोगकर्ता संचालन के लिए, विश्वास सीमाएँ अलग करें: अलग Gateway +
+  क्रेडेंशियल, और आदर्श रूप से अलग OS उपयोगकर्ता या होस्ट।
 </Warning>
 
-## पहले दायरा: व्यक्तिगत सहायक सुरक्षा मॉडल
+## दायरा: व्यक्तिगत सहायक सुरक्षा मॉडल
 
-OpenClaw सुरक्षा मार्गदर्शन **व्यक्तिगत सहायक** deployment मानता है: एक विश्वसनीय ऑपरेटर सीमा, संभावित रूप से कई agents.
+- समर्थित: प्रति Gateway एक उपयोगकर्ता/विश्वास सीमा (प्रति सीमा एक OS उपयोगकर्ता/होस्ट/VPS को प्राथमिकता दें)।
+- समर्थित नहीं: परस्पर अविश्वसनीय या विरोधी उपयोगकर्ताओं द्वारा इस्तेमाल किया जाने वाला एक साझा Gateway/एजेंट।
+- विरोधी-उपयोगकर्ता पृथक्करण के लिए अलग-अलग Gateway (और आदर्श रूप से अलग OS उपयोगकर्ता/होस्ट) आवश्यक हैं।
+- यदि कई अविश्वसनीय उपयोगकर्ता एक टूल-सक्षम एजेंट को संदेश भेज सकते हैं, तो वे उस एजेंट के प्रत्यायोजित टूल प्राधिकार को साझा करते हैं।
+- यदि कोई Gateway होस्ट की स्थिति/कॉन्फ़िगरेशन (`~/.openclaw`, जिसमें `openclaw.json` शामिल है) बदल सकता है, तो उसे विश्वसनीय ऑपरेटर मानें।
+- एक Gateway के भीतर, प्रमाणित ऑपरेटर पहुँच एक विश्वसनीय नियंत्रण-पटल भूमिका है, न कि प्रति-उपयोगकर्ता किरायेदार भूमिका।
+- `sessionKey` (सत्र ID, लेबल) एक रूटिंग चयनकर्ता है, प्राधिकरण टोकन नहीं।
 
-- समर्थित सुरक्षा मुद्रा: प्रति Gateway एक user/trust boundary (प्राथमिकता से प्रति boundary एक OS user/host/VPS).
-- समर्थित सुरक्षा सीमा नहीं: परस्पर अविश्वसनीय या प्रतिकूल उपयोगकर्ताओं द्वारा उपयोग किया गया एक साझा Gateway/agent.
-- यदि प्रतिकूल-उपयोगकर्ता अलगाव आवश्यक है, तो trust boundary के अनुसार विभाजित करें (अलग Gateway + credentials, और आदर्श रूप से अलग OS users/hosts).
-- यदि कई अविश्वसनीय उपयोगकर्ता एक tool-enabled agent को message कर सकते हैं, तो मानें कि वे उस agent के लिए समान delegated tool authority साझा कर रहे हैं।
+कई उपयोगकर्ताओं या संगठनों को होस्ट कर रहे हैं? एक Gateway साझा करने के बजाय प्रत्येक किरायेदार के लिए एक पृथक Gateway सेल चलाएँ। [बहु-किरायेदार होस्टिंग](/hi/gateway/multi-tenant-hosting) देखें।
 
-यह पृष्ठ **उस मॉडल के भीतर** hardening समझाता है। यह एक साझा Gateway पर hostile multi-tenant isolation का दावा नहीं करता।
+दूरस्थ पहुँच, DM नीति, रिवर्स प्रॉक्सी या सार्वजनिक एक्सपोज़र बदलने से पहले, पूर्व-उड़ान/रोलबैक चेकलिस्ट के रूप में [Gateway एक्सपोज़र रनबुक](/hi/gateway/security/exposure-runbook) पूरी करें।
 
-Remote access, DM policy, reverse proxy, या public exposure बदलने से पहले,
-[Gateway exposure runbook](/hi/gateway/security/exposure-runbook) को
-pre-flight और rollback checklist की तरह उपयोग करें।
+## `openclaw security audit`
 
-## त्वरित जांच: `openclaw security audit`
-
-यह भी देखें: [औपचारिक सत्यापन (सुरक्षा मॉडल)](/hi/security/formal-verification)
-
-इसे नियमित रूप से चलाएं (विशेष रूप से config बदलने या network surfaces expose करने के बाद):
+इसे किसी भी कॉन्फ़िगरेशन परिवर्तन के बाद या नेटवर्क सतहों को उजागर करने से पहले चलाएँ:
 
 ```bash
 openclaw security audit
-openclaw security audit --deep
-openclaw security audit --fix
+openclaw security audit --deep    # लाइव Gateway जाँच का प्रयास करता है
+openclaw security audit --fix     # सुरक्षित सुधार लागू करें
 openclaw security audit --json
 ```
 
-`security audit --fix` जानबूझकर सीमित रहता है: यह सामान्य open group
-policies को allowlists में बदलता है, `logging.redactSensitive: "tools"` बहाल करता है,
-state/config/include-file permissions कसता है, और Windows पर चलते समय
-POSIX `chmod` के बजाय Windows ACL resets का उपयोग करता है।
+`--fix` जानबूझकर सीमित है: यह खुली समूह नीतियों को अनुमति-सूचियों में बदलता है, `logging.redactSensitive: "tools"` को पुनर्स्थापित करता है, स्थिति/कॉन्फ़िगरेशन/सम्मिलित फ़ाइल की अनुमतियों को सख्त करता है (`600` फ़ाइलें, `700` निर्देशिकाएँ), और Windows पर POSIX `chmod` के बजाय ACL रीसेट का उपयोग करता है।
 
-यह सामान्य footguns को flag करता है (Gateway auth exposure, browser control exposure, elevated allowlists, filesystem permissions, permissive exec approvals, और open-channel tool exposure).
+### ऑडिट क्या जाँचता है (उच्च स्तर पर)
 
-OpenClaw एक product और एक experiment दोनों है: आप frontier-model behavior को वास्तविक messaging surfaces और वास्तविक tools से जोड़ रहे हैं। **कोई "पूरी तरह सुरक्षित" setup नहीं है।** लक्ष्य इन बातों पर सोच-समझकर निर्णय लेना है:
+- **इनबाउंड पहुँच** - DM/समूह नीतियाँ, अनुमति-सूचियाँ: क्या अजनबी बॉट को सक्रिय कर सकते हैं?
+- **टूल प्रभाव-क्षेत्र** - उन्नत टूल + खुले कक्ष: क्या प्रॉम्प्ट इंजेक्शन शेल/फ़ाइल/नेटवर्क कार्रवाइयों में बदल सकता है?
+- **Exec फ़ाइल-सिस्टम विचलन** - फ़ाइल-सिस्टम बदलने वाले टूल अस्वीकृत हैं, जबकि `exec`/`process` सैंडबॉक्स प्रतिबंधों के बिना उपलब्ध रहते हैं।
+- **Exec अनुमोदन विचलन** - `security="full"`, `autoAllowSkills`, `strictInlineEval` के बिना इंटरप्रेटर अनुमति-सूचियाँ। अकेला `security="full"` व्यापक सुरक्षा-मुद्रा चेतावनी है, किसी बग का प्रमाण नहीं—विश्वसनीय व्यक्तिगत-सहायक सेटअप के लिए यही चुना गया डिफ़ॉल्ट है; इसे केवल तभी सख्त करें जब आपके खतरा मॉडल को अनुमोदन या अनुमति-सूची सुरक्षा-सीमाओं की आवश्यकता हो।
+- **नेटवर्क एक्सपोज़र** - Gateway बाइंड/प्रमाणीकरण, Tailscale Serve/Funnel, कमज़ोर/छोटे प्रमाणीकरण टोकन।
+- **ब्राउज़र नियंत्रण एक्सपोज़र** - दूरस्थ Node, रिले पोर्ट, दूरस्थ CDP एंडपॉइंट।
+- **स्थानीय डिस्क स्वच्छता** - अनुमतियाँ, सिमलिंक, कॉन्फ़िगरेशन सम्मिलन, सिंक किए गए फ़ोल्डर के पथ।
+- **Plugins** - स्पष्ट अनुमति-सूची के बिना लोड होना।
+- **नीति विचलन** - सैंडबॉक्स Docker सेटिंग्स कॉन्फ़िगर हैं लेकिन सैंडबॉक्स मोड बंद है; `gateway.nodes.commands.deny` प्रविष्टियाँ जो प्रभावी दिखती हैं लेकिन केवल सटीक कमांड ID (उदाहरण के लिए `system.run`) से मेल खाती हैं, पेलोड के भीतर के शेल टेक्स्ट से नहीं; खतरनाक `gateway.nodes.commands.allow` प्रविष्टियाँ; वैश्विक `tools.profile="minimal"` को प्रति एजेंट ओवरराइड किया गया है; अनुमति देने वाली नीति के अंतर्गत Plugin-स्वामित्व वाले टूल सुलभ हैं।
+- **रनटाइम अपेक्षा विचलन** - यह मानना कि अंतर्निहित exec का अर्थ अभी भी `sandbox` है, जबकि `tools.exec.host` अब डिफ़ॉल्ट रूप से `auto` है, या सैंडबॉक्स मोड बंद रहते हुए `tools.exec.host="sandbox"` सेट करना।
+- **मॉडल स्वच्छता** - पुराने कॉन्फ़िगर किए गए मॉडल पर चेतावनी देता है (हल्की चेतावनी, कठोर अवरोध नहीं)।
 
-- कौन आपके bot से बात कर सकता है
-- bot को कहां act करने की अनुमति है
-- bot क्या touch कर सकता है
+प्रत्येक निष्कर्ष में एक संरचित `checkId` होता है (उदाहरण के लिए `gateway.bind_no_auth`, `tools.exec.security_full_configured`)। उपसर्ग: `fs.*` (अनुमतियाँ), `gateway.*` (बाइंड/प्रमाणीकरण/Tailscale/Control UI/विश्वसनीय-प्रॉक्सी), `hooks.*`/`browser.*`/`sandbox.*`/`tools.exec.*` (प्रति-सतह सुदृढ़ीकरण), `plugins.*`/`skills.*` (आपूर्ति शृंखला), `security.exposure.*` (पहुँच नीति x टूल प्रभाव-क्षेत्र)। गंभीरता और स्वतः-सुधार समर्थन सहित पूर्ण सूची: [सुरक्षा ऑडिट जाँचें](/hi/gateway/security/audit-checks)। [औपचारिक सत्यापन](/hi/security/formal-verification) भी देखें।
 
-सबसे छोटे access से शुरू करें जो अभी भी काम करता है, फिर confidence बढ़ने पर उसे widen करें।
+### निष्कर्षों की प्राथमिकता तय करने का क्रम
 
-### Published package dependency lock
+1. टूल सक्षम होने के साथ कुछ भी "खुला" हो: पहले DM/समूहों को प्रतिबंधित करें (पेयरिंग/अनुमति-सूचियाँ), फिर टूल नीति/सैंडबॉक्सिंग को सख्त करें।
+2. सार्वजनिक नेटवर्क एक्सपोज़र (LAN बाइंड, Funnel, प्रमाणीकरण अनुपस्थित): तुरंत ठीक करें।
+3. ब्राउज़र नियंत्रण का दूरस्थ एक्सपोज़र: इसे ऑपरेटर पहुँच जैसा मानें (केवल टेलनेट, Node को सोच-समझकर पेयर करें, कोई सार्वजनिक एक्सपोज़र नहीं)।
+4. अनुमतियाँ: स्थिति/कॉन्फ़िगरेशन/क्रेडेंशियल/प्रमाणीकरण समूह या सभी उपयोगकर्ताओं द्वारा पठनीय नहीं होने चाहिए।
+5. Plugins: केवल वही लोड करें जिन पर आप स्पष्ट रूप से विश्वास करते हैं।
+6. मॉडल चयन: टूल वाले किसी भी बॉट के लिए आधुनिक, निर्देश-सुदृढ़ मॉडल को प्राथमिकता दें।
 
-OpenClaw source checkouts `pnpm-lock.yaml` उपयोग करते हैं। प्रकाशित `openclaw` npm
-package और OpenClaw-owned npm plugin packages में `npm-shrinkwrap.json`,
-npm का publishable dependency lockfile, शामिल होता है, ताकि package installs install time पर fresh graph resolve करने के बजाय release से reviewed
-transitive dependency graph का उपयोग करें।
-
-Shrinkwrap supply-chain hardening और release reproducibility boundary है,
-sandbox नहीं। Plain-English model, maintainer commands, और package
-inspection checks के लिए, [npm shrinkwrap](/hi/gateway/security/shrinkwrap) देखें।
-
-### Deployment और host trust
-
-OpenClaw मानता है कि host और config boundary trusted हैं:
-
-- यदि कोई Gateway host state/config (`~/.openclaw`, जिसमें `openclaw.json` शामिल है) modify कर सकता है, तो उसे trusted operator मानें।
-- कई परस्पर अविश्वसनीय/प्रतिकूल operators के लिए एक Gateway चलाना **recommended setup नहीं है**।
-- Mixed-trust teams के लिए, अलग gateways के साथ trust boundaries विभाजित करें (या कम से कम अलग OS users/hosts).
-- Recommended default: प्रति machine/host (या VPS) एक user, उस user के लिए एक Gateway, और उस Gateway में एक या अधिक agents.
-- एक Gateway instance के भीतर, authenticated operator access एक trusted control-plane role है, per-user tenant role नहीं।
-- Session identifiers (`sessionKey`, session IDs, labels) routing selectors हैं, authorization tokens नहीं।
-- यदि कई लोग एक tool-enabled agent को message कर सकते हैं, तो उनमें से हर कोई उसी permission set को steer कर सकता है। Per-user session/memory isolation privacy में मदद करता है, लेकिन साझा agent को per-user host authorization में परिवर्तित नहीं करता।
-
-### Secure file operations
-
-OpenClaw root-bounded file access, atomic writes, archive extraction, temp workspaces, और secret-file helpers के लिए `@openclaw/fs-safe` उपयोग करता है। OpenClaw fs-safe के optional POSIX Python helper को default रूप से **off** रखता है; `OPENCLAW_FS_SAFE_PYTHON_MODE=auto` या `require` केवल तब set करें जब आप extra fd-relative mutation hardening चाहते हों और Python runtime support कर सकते हों।
-
-विवरण: [Secure file operations](/hi/gateway/security/secure-file-operations).
-
-### Shared Slack workspace: वास्तविक जोखिम
-
-यदि "Slack में हर कोई bot को message कर सकता है," तो मुख्य जोखिम delegated tool authority है:
-
-- कोई भी allowed sender agent की policy के भीतर tool calls (`exec`, browser, network/file tools) induce कर सकता है;
-- एक sender से prompt/content injection shared state, devices, या outputs को प्रभावित करने वाली actions करवा सकता है;
-- यदि एक shared agent के पास sensitive credentials/files हैं, तो कोई भी allowed sender संभावित रूप से tool usage के माध्यम से exfiltration drive कर सकता है।
-
-Team workflows के लिए minimal tools वाले अलग agents/gateways उपयोग करें; personal-data agents को private रखें।
-
-### Company-shared agent: स्वीकार्य pattern
-
-यह तब स्वीकार्य है जब उस agent का उपयोग करने वाला हर व्यक्ति समान trust boundary में हो (उदाहरण के लिए एक company team) और agent strictly business-scoped हो।
-
-- उसे dedicated machine/VM/container पर चलाएं;
-- उस runtime के लिए dedicated OS user + dedicated browser/profile/accounts उपयोग करें;
-- उस runtime को personal Apple/Google accounts या personal password-manager/browser profiles में sign in न करें।
-
-यदि आप एक ही runtime पर personal और company identities मिलाते हैं, तो separation collapse हो जाता है और personal-data exposure risk बढ़ जाता है।
-
-## Gateway और Node trust concept
-
-Gateway और Node को अलग roles के साथ एक operator trust domain मानें:
-
-- **Gateway** control plane और policy surface है (`gateway.auth`, tool policy, routing).
-- **Node** उस Gateway से paired remote execution surface है (commands, device actions, host-local capabilities).
-- Gateway पर authenticated caller Gateway scope पर trusted होता है। Pairing के बाद, Node actions उस Node पर trusted operator actions होती हैं।
-- Operator scope levels और approval-time checks का सार
-  [Operator scopes](/hi/gateway/operator-scopes) में दिया गया है।
-- Shared gateway token/password से authenticated direct loopback backend clients
-  user device identity प्रस्तुत किए बिना internal control-plane RPCs कर सकते हैं।
-  यह remote या browser pairing bypass नहीं है: network
-  clients, Node clients, device-token clients, और explicit device identities
-  अभी भी pairing और scope-upgrade enforcement से गुजरते हैं।
-- `sessionKey` routing/context selection है, per-user auth नहीं।
-- Exec approvals (allowlist + ask) operator intent के लिए guardrails हैं, hostile multi-tenant isolation नहीं।
-- Trusted single-operator setups के लिए OpenClaw का product default यह है कि `gateway`/`node` पर host exec approval prompts के बिना allowed है (`security="full"`, `ask="off"` जब तक आप इसे tighten न करें). वह default intentional UX है, अपने-आप में vulnerability नहीं।
-- Exec approvals exact request context और best-effort direct local file operands से bind होते हैं; वे हर runtime/interpreter loader path को semantically model नहीं करते। Strong boundaries के लिए sandboxing और host isolation उपयोग करें।
-
-यदि आपको hostile-user isolation चाहिए, तो OS user/host के अनुसार trust boundaries विभाजित करें और अलग gateways चलाएं।
-
-## Trust boundary matrix
-
-Risk triage करते समय इसे quick model की तरह उपयोग करें:
-
-| Boundary या control                                       | इसका अर्थ                                     | सामान्य गलत पढ़ना                                                                |
-| --------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `gateway.auth` (token/password/trusted-proxy/device auth) | Callers को Gateway APIs पर authenticate करता है             | "Secure होने के लिए हर frame पर per-message signatures चाहिए"                    |
-| `sessionKey`                                              | Context/session selection के लिए routing key         | "Session key एक user auth boundary है"                                         |
-| Prompt/content guardrails                                 | Model abuse risk घटाते हैं                           | "Prompt injection अकेले auth bypass साबित करता है"                                   |
-| `canvas.eval` / browser evaluate                          | Enabled होने पर intentional operator capability      | "कोई भी JS eval primitive इस trust model में अपने-आप vuln है"           |
-| Local TUI `!` shell                                       | Explicit operator-triggered local execution       | "Local shell convenience command remote injection है"                         |
-| Node pairing और Node commands                            | Paired devices पर operator-level remote execution | "Remote device control को default रूप से untrusted user access माना जाना चाहिए" |
-| `gateway.nodes.pairing.autoApproveCidrs`                  | Opt-in trusted-network Node enrollment policy     | "Disabled-by-default allowlist automatic pairing vulnerability है"       |
-
-## Design के अनुसार vulnerabilities नहीं
-
-<Accordion title="सामान्य findings जो scope से बाहर हैं">
-
-ये patterns अक्सर report होते हैं और आम तौर पर no-action के रूप में close किए जाते हैं, जब तक
-कोई वास्तविक boundary bypass demonstrate न किया जाए:
-
-- Policy, auth, या sandbox bypass के बिना prompt-injection-only chains.
-- ऐसे claims जो एक shared host या config पर hostile multi-tenant operation मानते हैं।
-- ऐसे claims जो normal operator read-path access (उदाहरण के लिए
-  `sessions.list` / `sessions.preview` / `chat.history`) को shared-gateway setup में IDOR के रूप में classify करते हैं।
-- Localhost-only deployment findings (उदाहरण के लिए loopback-only
-  Gateway पर HSTS).
-- Discord inbound webhook signature findings उन inbound paths के लिए जो इस repo में मौजूद नहीं हैं।
-- Reports जो Node pairing metadata को `system.run` के लिए hidden second per-command
-  approval layer मानती हैं, जबकि real execution boundary अभी भी
-  Gateway की global Node command policy और Node की अपनी exec
-  approvals है।
-- Reports जो configured `gateway.nodes.pairing.autoApproveCidrs` को अपने-आप
-  vulnerability मानती हैं। यह setting default रूप से disabled है, explicit CIDR/IP entries
-  मांगती है, केवल no requested scopes के साथ first-time `role: node` pairing पर लागू होती है,
-  और operator/browser/Control UI,
-  WebChat, role upgrades, scope upgrades, metadata changes, public-key changes,
-  या same-host loopback trusted-proxy header paths को auto-approve नहीं करती,
-  जब तक loopback trusted-proxy auth explicit रूप से enabled न हो।
-- "Missing per-user authorization" findings जो `sessionKey` को
-  auth token मानती हैं।
-
-</Accordion>
-
-## 60 सेकंड में hardened baseline
-
-पहले इस baseline का उपयोग करें, फिर trusted agent के अनुसार tools को selectively re-enable करें:
+## 60 सेकंड में सुदृढ़ आधाररेखा
 
 ```json5
 {
@@ -207,324 +100,216 @@ Risk triage करते समय इसे quick model की तरह उप
 }
 ```
 
-यह Gateway को local-only रखता है, DMs को isolate करता है, और control-plane/runtime tools को default रूप से disable करता है।
+Gateway को केवल स्थानीय रखता है, DM को पृथक करता है और नियंत्रण-पटल/रनटाइम टूल को डिफ़ॉल्ट रूप से अक्षम करता है। इसके बाद प्रत्येक विश्वसनीय एजेंट के लिए टूल को चुनिंदा रूप से फिर से सक्षम करें।
 
-## Shared inbox quick rule
+चैट-संचालित एजेंट टर्न के लिए अंतर्निहित आधाररेखा: गैर-स्वामी प्रेषक कॉन्फ़िगरेशन की परवाह किए बिना `cron` या `gateway` टूल का उपयोग नहीं कर सकते।
 
-यदि एक से अधिक व्यक्ति आपके bot को DM कर सकते हैं:
+### अनुरोधकर्ता-दायरे वाले नियंत्रण और प्रॉम्प्ट संदर्भ
 
-- `session.dmScope: "per-channel-peer"` सेट करें (या बहु-खाता चैनलों के लिए `"per-account-channel-peer"`).
-- `dmPolicy: "pairing"` या सख्त अनुमति-सूचियाँ रखें.
-- साझा निजी संदेशों को व्यापक टूल पहुंच के साथ कभी न मिलाएँ.
-- यह सहयोगी/साझा इनबॉक्स को कठोर बनाता है, लेकिन जब उपयोगकर्ता होस्ट/config लिखने की पहुंच साझा करते हैं, तब इसे शत्रुतापूर्ण सह-किरायेदार अलगाव के रूप में डिजाइन नहीं किया गया है.
+`tools.toolsBySender`, प्रेषक स्वामित्व और केवल-स्वामी टूल सूची का मूल्यांकन वर्तमान टर्न के मूल अनुरोधकर्ता के आधार पर किया जाता है। वे उस मॉडल प्रॉम्प्ट की अन्य सामग्री को प्रमाणित या स्वच्छ नहीं करते, जिसमें उद्धृत टेक्स्ट, पहले का साझा-कक्ष इतिहास, अग्रेषित सामग्री, प्राप्त की गई सामग्री, अटैचमेंट, टूल परिणाम या अन्य प्रॉम्प्ट इनपुट शामिल हैं। इसलिए किसी अन्य व्यक्ति की सामग्री स्वामी द्वारा सक्रिय किए गए टर्न को प्रभावित कर सकती है, जब वह उस टर्न के संदर्भ में शामिल हो।
 
-## संदर्भ दृश्यता मॉडल
+इन नियंत्रणों को गहन रक्षा मानें, जो किसी अनुरोधकर्ता की प्रत्यक्ष क्षमता कम करती है, न कि शत्रुतापूर्ण बहु-उपयोगकर्ता पृथक्करण। समर्थित चैनल-प्रदत्त संदर्भ को फ़िल्टर करने के लिए `contextVisibility` का उपयोग करें, टूल को प्रतिबंधित करें और एजेंट को सैंडबॉक्स में रखें, तथा जब प्रतिभागी परस्पर विरोधी हों तो अलग-अलग Gateway और आदर्श रूप से अलग OS उपयोगकर्ता या होस्ट का उपयोग करें।
 
-OpenClaw दो अवधारणाओं को अलग करता है:
+## विश्वास सीमा मैट्रिक्स
 
-- **ट्रिगर प्राधिकरण**: एजेंट को कौन ट्रिगर कर सकता है (`dmPolicy`, `groupPolicy`, अनुमति-सूचियाँ, उल्लेख गेट).
-- **संदर्भ दृश्यता**: मॉडल इनपुट में कौन-सा पूरक संदर्भ इंजेक्ट किया जाता है (जवाब का मुख्य भाग, उद्धृत पाठ, थ्रेड इतिहास, अग्रेषित मेटाडेटा).
+जोखिम रिपोर्ट की प्राथमिकता तय करने के लिए संक्षिप्त मॉडल:
 
-अनुमति-सूचियाँ ट्रिगर और कमांड प्राधिकरण को नियंत्रित करती हैं. `contextVisibility` सेटिंग यह नियंत्रित करती है कि पूरक संदर्भ (उद्धृत जवाब, थ्रेड रूट, प्राप्त इतिहास) कैसे फिल्टर किया जाता है:
+| सीमा या नियंत्रण                                       | इसका अर्थ                                     | सामान्य गलत व्याख्या                                                                |
+| --------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `gateway.auth` (टोकन/पासवर्ड/विश्वसनीय-प्रॉक्सी/डिवाइस प्रमाणीकरण) | Gateway API के कॉलर को प्रमाणित करता है             | "सुरक्षित होने के लिए हर फ़्रेम पर प्रति-संदेश हस्ताक्षर आवश्यक हैं"                    |
+| `sessionKey`                                              | संदर्भ/सत्र चयन के लिए रूटिंग कुंजी         | "सत्र कुंजी उपयोगकर्ता प्रमाणीकरण सीमा है"                                         |
+| प्रॉम्प्ट/सामग्री सुरक्षा-सीमाएँ                                 | मॉडल के दुरुपयोग का जोखिम कम करती हैं                           | "अकेला प्रॉम्प्ट इंजेक्शन प्रमाणीकरण बायपास सिद्ध करता है"                                   |
+| `canvas.eval` / ब्राउज़र मूल्यांकन                          | सक्षम होने पर जानबूझकर दी गई ऑपरेटर क्षमता      | "इस विश्वास मॉडल में कोई भी JS eval प्रिमिटिव स्वतः एक कमज़ोरी है"           |
+| स्थानीय TUI `!` शेल                                       | ऑपरेटर द्वारा स्पष्ट रूप से सक्रिय स्थानीय निष्पादन       | "स्थानीय शेल सुविधा कमांड दूरस्थ इंजेक्शन है"                         |
+| Node पेयरिंग और Node कमांड                            | पेयर किए गए डिवाइस पर ऑपरेटर-स्तरीय दूरस्थ निष्पादन | "दूरस्थ डिवाइस नियंत्रण को डिफ़ॉल्ट रूप से अविश्वसनीय उपयोगकर्ता पहुँच माना जाना चाहिए" |
+| `gateway.nodes.pairing.autoApproveCidrs`                  | वैकल्पिक विश्वसनीय-नेटवर्क Node नामांकन नीति     | "डिफ़ॉल्ट रूप से अक्षम अनुमति-सूची स्वतः पेयरिंग कमज़ोरी है"       |
+| `gateway.nodes.pairing.sshVerify`                         | ऑपरेटर SSH पर कुंजी-सत्यापित Node नामांकन    | "डिफ़ॉल्ट रूप से चालू स्वतः-अनुमोदन स्वतः पेयरिंग कमज़ोरी है"              |
 
-- `contextVisibility: "all"` (डिफॉल्ट) पूरक संदर्भ को प्राप्त रूप में रखता है.
-- `contextVisibility: "allowlist"` पूरक संदर्भ को सक्रिय अनुमति-सूची जांचों द्वारा अनुमत प्रेषकों तक फिल्टर करता है.
-- `contextVisibility: "allowlist_quote"` `allowlist` जैसा व्यवहार करता है, लेकिन फिर भी एक स्पष्ट उद्धृत जवाब रखता है.
+## डिज़ाइन के अनुसार कमज़ोरियाँ नहीं
 
-`contextVisibility` को प्रति चैनल या प्रति रूम/बातचीत सेट करें. सेटअप विवरण के लिए [समूह चैट](/hi/channels/groups#context-visibility-and-allowlists) देखें.
+<Accordion title="सामान्य निष्कर्ष जिन्हें बिना कार्रवाई के बंद किया गया">
 
-सलाहकारी ट्रायज मार्गदर्शन:
+- नीति, प्रमाणीकरण या सैंडबॉक्स बायपास के बिना केवल प्रॉम्प्ट-इंजेक्शन शृंखलाएँ।
+- ऐसे दावे जो एक साझा होस्ट या कॉन्फ़िगरेशन पर शत्रुतापूर्ण बहु-किरायेदार संचालन मानते हैं।
+- साझा-Gateway सेटअप में सामान्य ऑपरेटर पठन-पथ पहुँच (उदाहरण के लिए `sessions.list` / `sessions.preview` / `chat.history`) को IDOR के रूप में वर्गीकृत करना।
+- केवल-localhost परिनियोजन के निष्कर्ष (उदाहरण के लिए केवल loopback वाले Gateway पर HSTS का अभाव)।
+- इस रेपो में अस्तित्वहीन इनबाउंड पथों के लिए Discord इनबाउंड Webhook हस्ताक्षर संबंधी निष्कर्ष।
+- Node पेयरिंग मेटाडेटा को `system.run` के लिए छिपी हुई दूसरी प्रति-कमांड अनुमोदन परत मानना; वास्तविक निष्पादन सीमा Gateway की वैश्विक Node कमांड नीति और Node के अपने exec अनुमोदन हैं।
+- `gateway.nodes.pairing.sshVerify` को डिफ़ॉल्ट रूप से सक्षम होने के कारण कमज़ोरी मानना। यह केवल नेटवर्क निकटता या SSH पहुँच-योग्यता के आधार पर कभी अनुमोदन नहीं करता: Gateway SSH पर डिवाइस पहचान वापस पढ़ता है (BatchMode, सख्त होस्ट कुंजियाँ) और केवल लंबित अनुरोध के साथ डिवाइस-कुंजी का सटीक मिलान होने पर अनुमोदन करता है, जिसके लिए कनेक्ट होने वाली कुंजी-जोड़ी का ऑपरेटर के नियंत्रण वाले होस्ट पर ऑपरेटर के खाते के अंतर्गत पहले से मौजूद होना आवश्यक है। जाँच निजी/CGNAT स्रोत पतों तक सीमित होती हैं, विश्वसनीय-CIDR पात्रता न्यूनतम स्तर (केवल नया, दायरा-रहित `role: node`) साझा करती हैं, और `sshVerify: false` इस सुविधा को बंद कर देता है।
+- `gateway.nodes.pairing.autoApproveCidrs` को अपने-आप में कमज़ोरी मानना। यह डिफ़ॉल्ट रूप से अक्षम है, स्पष्ट CIDR/IP प्रविष्टियों की आवश्यकता होती है, केवल पहली बार की `role: node` पेयरिंग पर लागू होता है जिसमें कोई अनुरोधित दायरा नहीं होता, और ऑपरेटर/ब्राउज़र/Control UI, WebChat, भूमिका/दायरा उन्नयन, मेटाडेटा या सार्वजनिक-कुंजी परिवर्तन, या समान-होस्ट loopback विश्वसनीय-प्रॉक्सी हेडर पथों को कभी स्वतः अनुमोदित नहीं करता (भले ही loopback विश्वसनीय-प्रॉक्सी प्रमाणीकरण सक्षम हो)।
+- ऐसे "प्रति-उपयोगकर्ता प्राधिकरण अनुपस्थित" निष्कर्ष जो `sessionKey` को प्रमाणीकरण टोकन मानते हैं।
 
-- ऐसे दावे जो केवल यह दिखाते हैं कि "मॉडल गैर-अनुमति-सूचीबद्ध प्रेषकों से उद्धृत या ऐतिहासिक पाठ देख सकता है", `contextVisibility` से संबोधित किए जा सकने वाले हार्डनिंग निष्कर्ष हैं, अपने आप में auth या sandbox सीमा बाइपास नहीं.
-- सुरक्षा-प्रभावी होने के लिए, रिपोर्टों में फिर भी किसी विश्वास-सीमा बाइपास (auth, नीति, sandbox, अनुमोदन, या कोई अन्य दस्तावेजीकृत सीमा) का प्रदर्शित प्रमाण चाहिए.
+</Accordion>
 
-## ऑडिट क्या जांचता है (उच्च स्तर)
+## Gateway और Node का विश्वास
 
-- **इनबाउंड पहुंच** (निजी संदेश नीतियाँ, समूह नीतियाँ, अनुमति-सूचियाँ): क्या अजनबी बॉट को ट्रिगर कर सकते हैं?
-- **टूल ब्लास्ट रेडियस** (उन्नत टूल + खुले रूम): क्या प्रॉम्प्ट इंजेक्शन shell/file/network कार्रवाइयों में बदल सकता है?
-- **Exec फाइलसिस्टम ड्रिफ्ट**: क्या परिवर्तित करने वाले फाइलसिस्टम टूल अस्वीकृत हैं जबकि `exec`/`process` sandbox फाइलसिस्टम बाधाओं के बिना उपलब्ध रहते हैं?
-- **Exec अनुमोदन ड्रिफ्ट** (`security=full`, `autoAllowSkills`, `strictInlineEval` के बिना इंटरप्रेटर अनुमति-सूचियाँ): क्या होस्ट-exec गार्डरेल अब भी वही कर रहे हैं जो आप समझते हैं?
-  - `security="full"` एक व्यापक मुद्रा चेतावनी है, किसी बग का प्रमाण नहीं. यह भरोसेमंद निजी-सहायक सेटअप के लिए चुना गया डिफॉल्ट है; इसे केवल तब सख्त करें जब आपके थ्रेट मॉडल को अनुमोदन या अनुमति-सूची गार्डरेल चाहिए.
-- **नेटवर्क एक्सपोजर** (Gateway bind/auth, Tailscale Serve/Funnel, कमजोर/छोटे auth टोकन).
-- **ब्राउजर नियंत्रण एक्सपोजर** (रिमोट नोड, रिले पोर्ट, रिमोट CDP एंडपॉइंट).
-- **स्थानीय डिस्क स्वच्छता** (अनुमतियाँ, symlinks, config includes, "सिंक किया गया फोल्डर" पाथ).
-- **Plugins** (Plugins स्पष्ट अनुमति-सूची के बिना लोड होते हैं).
-- **नीति ड्रिफ्ट/गलत कॉन्फिगरेशन** (sandbox docker सेटिंग्स कॉन्फिगर की गईं लेकिन sandbox मोड बंद है; अप्रभावी `gateway.nodes.denyCommands` पैटर्न क्योंकि मिलान केवल सटीक कमांड-नाम पर होता है (उदाहरण के लिए `system.run`) और shell पाठ की जांच नहीं करता; खतरनाक `gateway.nodes.allowCommands` प्रविष्टियाँ; वैश्विक `tools.profile="minimal"` प्रति-एजेंट प्रोफाइल द्वारा ओवरराइड; Plugin-स्वामित्व वाले टूल उदार टूल नीति के तहत पहुंच योग्य).
-- **रनटाइम अपेक्षा ड्रिफ्ट** (उदाहरण के लिए यह मानना कि implicit exec अब भी `sandbox` का अर्थ रखता है जब `tools.exec.host` अब `auto` पर डिफॉल्ट होता है, या sandbox मोड बंद रहते हुए स्पष्ट रूप से `tools.exec.host="sandbox"` सेट करना).
-- **मॉडल स्वच्छता** (जब कॉन्फिगर किए गए मॉडल पुराने लगें तो चेतावनी; कठोर अवरोध नहीं).
+Gateway और Node को अलग-अलग भूमिकाओं वाला एक ऑपरेटर विश्वास डोमेन मानें:
 
-यदि आप `--deep` चलाते हैं, तो OpenClaw सर्वश्रेष्ठ-प्रयास लाइव Gateway जांच भी करने की कोशिश करता है.
+- **Gateway**: नियंत्रण तल और नीति सतह (`gateway.auth`, टूल नीति, रूटिंग)।
+- **Node**: उस Gateway से युग्मित दूरस्थ निष्पादन सतह (कमांड, डिवाइस क्रियाएँ, होस्ट-स्थानीय क्षमताएँ)।
+- Gateway से प्रमाणित कॉलर पर Gateway के दायरे में भरोसा किया जाता है; युग्मन के बाद, Node की क्रियाओं को उस Node पर विश्वसनीय ऑपरेटर क्रियाएँ माना जाता है। [ऑपरेटर के दायरे](/hi/gateway/operator-scopes) देखें।
+- साझा Gateway टोकन/पासवर्ड से प्रमाणित प्रत्यक्ष लूपबैक बैकएंड क्लाइंट, उपयोगकर्ता डिवाइस पहचान प्रस्तुत किए बिना आंतरिक नियंत्रण-तल RPC कर सकते हैं। यह दूरस्थ या ब्राउज़र युग्मन को बायपास नहीं करता—नेटवर्क क्लाइंट, Node क्लाइंट, डिवाइस-टोकन क्लाइंट और स्पष्ट डिवाइस पहचान अब भी युग्मन और दायरा-अपग्रेड प्रवर्तन से गुजरते हैं।
+- निष्पादन अनुमोदन (अनुमति-सूची + पूछना) ऑपरेटर के आशय के लिए सुरक्षात्मक सीमाएँ हैं, शत्रुतापूर्ण बहु-किरायेदार पृथक्करण नहीं। वे सटीक अनुरोध संदर्भ और सर्वोत्तम-प्रयास वाले प्रत्यक्ष स्थानीय फ़ाइल ऑपरेंड से बँधते हैं; वे प्रत्येक रनटाइम/इंटरप्रेटर लोडर पथ का अर्थगत मॉडल नहीं बनाते। सुदृढ़ सीमाओं के लिए सैंडबॉक्सिंग और होस्ट पृथक्करण का उपयोग करें।
+- विश्वसनीय एकल-ऑपरेटर डिफ़ॉल्ट: `gateway`/`node` पर होस्ट निष्पादन अनुमोदन संकेतों के बिना अनुमत है (`security="full"`, `ask="off"`)। यह जानबूझकर बनाया गया UX है, अपने-आप में कोई भेद्यता नहीं।
 
-## क्रेडेंशियल संग्रहण मानचित्र
+शत्रुतापूर्ण उपयोगकर्ताओं के पृथक्करण के लिए, भरोसे की सीमाओं को OS उपयोगकर्ता/होस्ट के अनुसार विभाजित करें और अलग-अलग Gateway चलाएँ।
 
-पहुंच का ऑडिट करते समय या क्या बैकअप लेना है तय करते समय इसका उपयोग करें:
+## खतरा मॉडल
 
-- **WhatsApp**: `~/.openclaw/credentials/whatsapp/<accountId>/creds.json`
-- **Telegram बॉट टोकन**: config/env या `channels.telegram.tokenFile` (केवल नियमित फाइल; symlinks अस्वीकृत)
-- **Discord बॉट टोकन**: config/env या SecretRef (env/file/exec प्रदाता)
-- **Slack टोकन**: config/env (`channels.slack.*`)
-- **पेयरिंग अनुमति-सूचियाँ**:
-  - `~/.openclaw/credentials/<channel>-allowFrom.json` (डिफॉल्ट खाता)
-  - `~/.openclaw/credentials/<channel>-<accountId>-allowFrom.json` (गैर-डिफॉल्ट खाते)
-- **मॉडल auth प्रोफाइल**: `~/.openclaw/agents/<agentId>/agent/auth-profiles.json`
-- **Codex रनटाइम स्थिति (डिफॉल्ट)**: `~/.openclaw/agents/<agentId>/agent/codex-home/`
-- **साझा Codex रनटाइम स्थिति (ऑप्ट-इन)**: `$CODEX_HOME` या `~/.codex` जब
-  `plugins.entries.codex.config.appServer.homeScope` `"user"` हो. यह मोड
-  नेटिव Codex खाते, config, plugins, और थ्रेड स्टोर का उपयोग करता है; इसे केवल
-  owner-नियंत्रित स्थानीय Gateway के लिए सक्षम करें. [Codex harness](/hi/plugins/codex-harness#share-threads-with-codex-desktop-and-cli) देखें.
-- **फाइल-समर्थित सीक्रेट्स पेलोड (वैकल्पिक)**: `~/.openclaw/secrets.json`
-- **लेगेसी OAuth इंपोर्ट**: `~/.openclaw/credentials/oauth.json`
+आपका AI सहायक मनमाने शेल कमांड निष्पादित कर सकता है, फ़ाइलें पढ़/लिख सकता है, नेटवर्क सेवाओं तक पहुँच सकता है और किसी को भी संदेश भेज सकता है (यदि उसे चैनल पहुँच दी गई हो)। उसे संदेश भेजने वाले लोग उसे हानिकारक कार्य करने के लिए छलने, आपके डेटा तक पहुँच पाने हेतु सोशल इंजीनियरिंग करने या अवसंरचना के विवरणों की जाँच करने का प्रयास कर सकते हैं।
 
-## सुरक्षा ऑडिट चेकलिस्ट
+यहाँ अधिकांश विफलताएँ असामान्य कारनामे नहीं हैं—वे ऐसी स्थितियाँ हैं जहाँ "किसी ने बॉट को संदेश भेजा और बॉट ने वही किया जो उससे कहा गया।" OpenClaw का दृष्टिकोण, क्रम से:
 
-जब ऑडिट निष्कर्ष प्रिंट करता है, तो इसे प्राथमिकता क्रम मानें:
+1. **पहले पहचान**—निर्धारित करें कि बॉट से कौन बात कर सकता है (DM युग्मन / अनुमति-सूचियाँ / स्पष्ट "open")।
+2. **फिर दायरा**—निर्धारित करें कि बॉट कहाँ कार्य कर सकता है (समूह अनुमति-सूचियाँ + उल्लेख गेटिंग, टूल, सैंडबॉक्सिंग, डिवाइस अनुमतियाँ)।
+3. **अंत में मॉडल**—मानकर चलें कि मॉडल में हेरफेर किया जा सकता है; ऐसी संरचना बनाएँ कि हेरफेर का प्रभाव-क्षेत्र सीमित रहे।
 
-1. **कुछ भी "open" + टूल सक्षम**: पहले निजी संदेश/समूह लॉक डाउन करें (पेयरिंग/अनुमति-सूचियाँ), फिर टूल नीति/sandboxing सख्त करें.
-2. **सार्वजनिक नेटवर्क एक्सपोजर** (LAN bind, Funnel, गायब auth): तुरंत ठीक करें.
-3. **ब्राउजर नियंत्रण रिमोट एक्सपोजर**: इसे ऑपरेटर पहुंच जैसा मानें (केवल tailnet, नोड को जानबूझकर पेयर करें, सार्वजनिक एक्सपोजर से बचें).
-4. **अनुमतियाँ**: सुनिश्चित करें कि state/config/credentials/auth group/world-readable नहीं हैं.
-5. **Plugins**: केवल वही लोड करें जिन पर आप स्पष्ट रूप से भरोसा करते हैं.
-6. **मॉडल चयन**: टूल वाले किसी भी बॉट के लिए आधुनिक, निर्देश-कठोर मॉडल प्राथमिकता दें.
+## DM पहुँच: युग्मन, अनुमति-सूची, खुला, अक्षम
 
-## सुरक्षा ऑडिट शब्दावली
+DM में सक्षम प्रत्येक चैनल `dmPolicy` (या `*.dm.policy`) का समर्थन करता है, जो संदेश संसाधित होने से पहले आने वाले DM को नियंत्रित करता है:
 
-हर ऑडिट निष्कर्ष एक संरचित `checkId` से कुंजीबद्ध होता है (उदाहरण के लिए
-`gateway.bind_no_auth` या `tools.exec.security_full_configured`). सामान्य
-गंभीरता वर्ग:
+| नीति      | व्यवहार                                                                                                                                                                                                             |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pairing`   | डिफ़ॉल्ट। अज्ञात प्रेषकों को युग्मन कोड मिलता है; अनुमोदित होने तक बॉट उनकी उपेक्षा करता है। कोड 1 घंटे बाद समाप्त हो जाते हैं; नया अनुरोध बनने तक बार-बार भेजे गए DM से कोड दोबारा नहीं भेजा जाता। लंबित अनुरोध प्रति चैनल अधिकतम 3 हैं। |
+| `allowlist` | अज्ञात प्रेषक अवरुद्ध रहते हैं, कोई युग्मन हैंडशेक नहीं होता।                                                                                                                                                                       |
+| `open`      | कोई भी DM कर सकता है (सार्वजनिक)। चैनल की अनुमति-सूची में `"*"` शामिल होना आवश्यक है (स्पष्ट स्वीकृति)।                                                                                                                           |
+| `disabled`  | आने वाले DM की पूरी तरह उपेक्षा की जाती है।                                                                                                                                                                                        |
 
-- `fs.*` - state, config, credentials, auth profiles पर फाइलसिस्टम अनुमतियाँ.
-- `gateway.*` - bind मोड, auth, Tailscale, Control UI, trusted-proxy सेटअप.
-- `hooks.*`, `browser.*`, `sandbox.*`, `tools.exec.*` - प्रति-सतह हार्डनिंग.
-- `plugins.*`, `skills.*` - Plugin/skill सप्लाई चेन और स्कैन निष्कर्ष.
-- `security.exposure.*` - क्रॉस-कटिंग जांचें जहां पहुंच नीति टूल ब्लास्ट रेडियस से मिलती है.
-
-गंभीरता स्तर, fix keys, और auto-fix समर्थन के साथ पूरा कैटलॉग
-[सुरक्षा ऑडिट जांच](/hi/gateway/security/audit-checks) पर देखें.
-
-## HTTP पर Control UI
-
-Control UI को डिवाइस पहचान जनरेट करने के लिए **सुरक्षित संदर्भ** (HTTPS या localhost) चाहिए. `gateway.controlUi.allowInsecureAuth` एक स्थानीय संगतता टॉगल है:
-
-- localhost पर, यह पेज को गैर-सुरक्षित HTTP पर लोड किए जाने पर डिवाइस पहचान के बिना Control UI auth की अनुमति देता है.
-- यह पेयरिंग जांचों को बाइपास नहीं करता.
-- यह रिमोट (गैर-localhost) डिवाइस पहचान आवश्यकताओं को शिथिल नहीं करता.
-
-HTTPS (Tailscale Serve) को प्राथमिकता दें या UI को `127.0.0.1` पर खोलें.
-
-केवल break-glass परिदृश्यों के लिए, `gateway.controlUi.dangerouslyDisableDeviceAuth`
-डिवाइस पहचान जांचों को पूरी तरह अक्षम करता है. यह गंभीर सुरक्षा डाउनग्रेड है;
-इसे बंद रखें जब तक आप सक्रिय रूप से डीबग नहीं कर रहे हों और जल्दी वापस ला सकें.
-
-इन खतरनाक flags से अलग, सफल `gateway.auth.mode: "trusted-proxy"`
-डिवाइस पहचान के बिना **ऑपरेटर** Control UI सत्रों को प्रवेश दे सकता है. यह
-जानबूझकर auth-mode व्यवहार है, `allowInsecureAuth` शॉर्टकट नहीं, और यह फिर भी
-node-role Control UI सत्रों तक विस्तारित नहीं होता.
-
-`openclaw security audit` इस सेटिंग के सक्षम होने पर चेतावनी देता है.
-
-## असुरक्षित या खतरनाक flags सारांश
-
-ज्ञात असुरक्षित/खतरनाक डीबग स्विच सक्षम होने पर `openclaw security audit`
-`config.insecure_or_dangerous_flags` उठाता है. इन्हें उत्पादन में unset रखें.
-हर सक्षम flag अपने अलग निष्कर्ष के रूप में रिपोर्ट होता है. यदि ऑडिट
-suppressions कॉन्फिगर हैं, तो `security.audit.suppressions.active` सक्रिय
-ऑडिट आउटपुट में बना रहता है, भले ही मेल खाते निष्कर्ष `suppressedFindings` में चले जाएँ.
-
-<AccordionGroup>
-  <Accordion title="Flags tracked by the audit today">
-    - `gateway.controlUi.allowInsecureAuth=true`
-    - `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true`
-    - `gateway.controlUi.dangerouslyDisableDeviceAuth=true`
-    - `security.audit.suppressions configured (<count>)`
-    - `hooks.gmail.allowUnsafeExternalContent=true`
-    - `hooks.mappings[<index>].allowUnsafeExternalContent=true`
-    - `tools.exec.applyPatch.workspaceOnly=false`
-    - `plugins.entries.acpx.config.permissionMode=approve-all`
-
-  </Accordion>
-
-  <Accordion title="All `dangerous*` / `dangerously*` keys in the config schema">
-    Control UI और ब्राउजर:
-
-    - `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback`
-    - `gateway.controlUi.dangerouslyDisableDeviceAuth`
-    - `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork`
-
-    चैनल नाम-मिलान (बंडल और Plugin चैनल; लागू होने पर प्रति
-    `accounts.<accountId>` भी उपलब्ध):
-
-    - `channels.discord.dangerouslyAllowNameMatching`
-    - `channels.slack.dangerouslyAllowNameMatching`
-    - `channels.googlechat.dangerouslyAllowNameMatching`
-    - `channels.msteams.dangerouslyAllowNameMatching`
-    - `channels.synology-chat.dangerouslyAllowNameMatching` (Plugin चैनल)
-    - `channels.synology-chat.dangerouslyAllowInheritedWebhookPath` (Plugin चैनल)
-    - `channels.zalouser.dangerouslyAllowNameMatching` (Plugin चैनल)
-    - `channels.irc.dangerouslyAllowNameMatching` (Plugin चैनल)
-    - `channels.mattermost.dangerouslyAllowNameMatching` (Plugin चैनल)
-
-    नेटवर्क एक्सपोजर:
-
-    - `channels.telegram.network.dangerouslyAllowPrivateNetwork` (प्रति खाते भी)
-
-    Sandbox Docker (डिफॉल्ट + प्रति-एजेंट):
-
-    - `agents.defaults.sandbox.docker.dangerouslyAllowReservedContainerTargets`
-    - `agents.defaults.sandbox.docker.dangerouslyAllowExternalBindSources`
-    - `agents.defaults.sandbox.docker.dangerouslyAllowContainerNamespaceJoin`
-
-  </Accordion>
-</AccordionGroup>
-
-## रिवर्स प्रॉक्सी कॉन्फिगरेशन
-
-यदि आप Gateway को रिवर्स प्रॉक्सी (nginx, Caddy, Traefik, आदि) के पीछे चलाते हैं, तो
-उचित forwarded-client IP हैंडलिंग के लिए `gateway.trustedProxies` कॉन्फिगर करें.
-
-जब Gateway किसी ऐसे पते से प्रॉक्सी हेडर पहचानता है जो `trustedProxies` में **नहीं** है, तो वह कनेक्शनों को स्थानीय क्लाइंट नहीं मानेगा. यदि gateway auth अक्षम है, तो वे कनेक्शन अस्वीकृत कर दिए जाते हैं. यह authentication bypass को रोकता है, जहां proxied कनेक्शन अन्यथा localhost से आते हुए दिखते और स्वचालित trust प्राप्त करते.
-
-`gateway.trustedProxies` `gateway.auth.mode: "trusted-proxy"` को भी फीड करता है, लेकिन वह auth मोड अधिक सख्त है:
-
-- trusted-proxy auth डिफॉल्ट रूप से **loopback-source proxies पर fails closed**
-- same-host local loopback रिवर्स प्रॉक्सी स्थानीय-क्लाइंट पहचान और forwarded IP हैंडलिंग के लिए `gateway.trustedProxies` का उपयोग कर सकते हैं
-- same-host local loopback रिवर्स प्रॉक्सी `gateway.auth.mode: "trusted-proxy"` को केवल तब संतुष्ट कर सकते हैं जब `gateway.auth.trustedProxy.allowLoopback = true`; अन्यथा token/password auth का उपयोग करें
-
-```yaml
-gateway:
-  trustedProxies:
-    - "10.0.0.1" # reverse proxy IP
-  # Optional. Default false.
-  # Only enable if your proxy cannot provide X-Forwarded-For.
-  allowRealIpFallback: false
-  auth:
-    mode: password
-    password: ${OPENCLAW_GATEWAY_PASSWORD}
+```bash
+openclaw pairing list <channel>
+openclaw pairing approve <channel> <code>
 ```
 
-जब `trustedProxies` कॉन्फिगर होता है, Gateway क्लाइंट IP निर्धारित करने के लिए `X-Forwarded-For` का उपयोग करता है. `X-Real-IP` डिफॉल्ट रूप से अनदेखा किया जाता है, जब तक `gateway.allowRealIpFallback: true` स्पष्ट रूप से सेट न हो.
+विवरण + डिस्क पर फ़ाइलें: [युग्मन](/hi/channels/pairing)
 
-Trusted proxy हेडर node device pairing को स्वचालित रूप से trusted नहीं बनाते.
-`gateway.nodes.pairing.autoApproveCidrs` एक अलग, डिफॉल्ट रूप से अक्षम
-ऑपरेटर नीति है. सक्षम होने पर भी, loopback-source trusted-proxy header paths
-node auto-approval से बाहर रखे जाते हैं क्योंकि स्थानीय कॉलर उन
-हेडर को forge कर सकते हैं, तब भी जब loopback trusted-proxy auth स्पष्ट रूप से सक्षम हो.
+`dmPolicy="open"` और `groupPolicy="open"` को अंतिम उपाय वाली सेटिंग मानें; जब तक आपको कक्ष के प्रत्येक सदस्य पर पूर्ण भरोसा न हो, युग्मन + अनुमति-सूचियों को प्राथमिकता दें।
 
-अच्छा रिवर्स प्रॉक्सी व्यवहार (incoming forwarding headers को overwrite करें):
+### अनुमति-सूचियाँ (दो परतें)
 
-```nginx
-proxy_set_header X-Forwarded-For $remote_addr;
-proxy_set_header X-Real-IP $remote_addr;
+- **DM अनुमति-सूची** (`allowFrom` / `channels.discord.allowFrom` / `channels.slack.allowFrom`; पुराना: `channels.discord.dm.allowFrom`, `channels.slack.dm.allowFrom`): बॉट को कौन DM कर सकता है। जब `dmPolicy="pairing"` हो, तो अनुमोदन `~/.openclaw/credentials/<channel>-allowFrom.json` (डिफ़ॉल्ट खाता) या `<channel>-<accountId>-allowFrom.json` (गैर-डिफ़ॉल्ट खाते) में लिखे जाते हैं और कॉन्फ़िगरेशन अनुमति-सूचियों के साथ मिला दिए जाते हैं।
+- **समूह अनुमति-सूची** (चैनल-विशिष्ट): बॉट किन समूहों/चैनलों/गिल्ड को स्वीकार करता है।
+  - `channels.whatsapp.groups`, `channels.telegram.groups`, `channels.imessage.groups`: प्रति-समूह डिफ़ॉल्ट, जैसे `requireMention`; सेट होने पर यह समूह अनुमति-सूची के रूप में भी कार्य करता है (सभी को अनुमति देने वाला व्यवहार बनाए रखने के लिए `"*"` शामिल करें)। `agents.entries.*.groupChat.mentionPatterns` (उदाहरण के लिए `["@openclaw", "@mybot"]`) से उल्लेख ट्रिगर अनुकूलित करें, ताकि `requireMention` आपके अपने बॉट नामों के आधार पर नियंत्रण करे।
+  - `groupPolicy="allowlist"` + `groupAllowFrom`: सीमित करें कि समूह सत्र में बॉट को कौन ट्रिगर कर सकता है (WhatsApp/Telegram/Signal/iMessage/Microsoft Teams)।
+  - `channels.discord.guilds` / `channels.slack.channels`: प्रति-सतह अनुमति-सूचियाँ + उल्लेख डिफ़ॉल्ट।
+  - जाँच क्रम: पहले `groupPolicy`/समूह अनुमति-सूचियाँ, फिर उल्लेख/उत्तर सक्रियण। किसी बॉट संदेश का उत्तर देना (अंतर्निहित उल्लेख) `groupAllowFrom` को बायपास **नहीं** करता।
+
+विवरण: [कॉन्फ़िगरेशन](/hi/gateway/configuration) और [समूह](/hi/channels/groups)
+
+### DM सत्र पृथक्करण (बहु-उपयोगकर्ता मोड)
+
+डिफ़ॉल्ट रूप से, OpenClaw विभिन्न डिवाइसों में निरंतरता बनाए रखने के लिए सभी DM को मुख्य सत्र में रूट करता है। यदि कई लोग बॉट को DM कर सकते हैं (खुले DM या बहु-व्यक्ति अनुमति-सूची), तो DM सत्रों को अलग करें:
+
+```json5
+{ session: { dmScope: "per-channel-peer" } }
 ```
 
-खराब रिवर्स प्रॉक्सी व्यवहार (untrusted forwarding headers को append/preserve करें):
+`session.dmScope` के मान:
 
-```nginx
-proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-```
+| मान                      | दायरा                                                                  |
+| -------------------------- | ---------------------------------------------------------------------- |
+| `main` (कॉन्फ़िगरेशन डिफ़ॉल्ट)    | सभी DM एक सत्र साझा करते हैं।                                             |
+| `per-channel-peer`         | प्रत्येक चैनल+प्रेषक जोड़ी को अलग DM संदर्भ मिलता है (सुरक्षित DM मोड)। |
+| `per-account-channel-peer` | ऊपर जैसा, लेकिन खाते के अनुसार और विभाजित (बहु-खाता चैनल)।         |
+| `per-peer`                 | प्रत्येक प्रेषक को समान प्रकार के सभी चैनलों में एक सत्र मिलता है।     |
 
-## HSTS और origin नोट्स
+स्थानीय CLI ऑनबोर्डिंग स्पष्ट `session.dmScope` को बनाए रखती है और अन्यथा इसे सेट नहीं करती, इसलिए `"main"` डिफ़ॉल्ट लागू होता है: सभी चैनलों के प्रत्यक्ष संदेश एजेंट के क्रमिक मुख्य सत्र को साझा करते हैं (व्यक्तिगत-एजेंट डिफ़ॉल्ट)। साझा या बहु-उपयोगकर्ता इनबॉक्स के लिए `session.dmScope: "per-channel-peer"` सेट करें; बहु-उपयोगकर्ता DM ट्रैफ़िक मिलने पर `openclaw security audit` पृथक्करण की अनुशंसा करता है।
 
-- OpenClaw gateway पहले local/loopback है। यदि आप TLS को reverse proxy पर terminate करते हैं, तो proxy-facing HTTPS domain पर वहीं HSTS सेट करें।
-- यदि gateway स्वयं HTTPS terminate करता है, तो आप OpenClaw responses से HSTS header emit करने के लिए `gateway.http.securityHeaders.strictTransportSecurity` सेट कर सकते हैं।
-- विस्तृत deployment guidance [Trusted Proxy Auth](/hi/gateway/trusted-proxy-auth#tls-termination-and-hsts) में है।
-- non-loopback Control UI deployments के लिए, `gateway.controlUi.allowedOrigins` default रूप से आवश्यक है।
-- `gateway.controlUi.allowedOrigins: ["*"]` एक स्पष्ट allow-all browser-origin policy है, hardened default नहीं। tightly controlled local testing के बाहर इससे बचें।
-- loopback पर browser-origin auth failures अभी भी rate-limited होते हैं, भले ही
-  सामान्य loopback exemption enabled हो, लेकिन lockout key एक shared localhost bucket के बजाय प्रत्येक
-  normalized `Origin` value तक scoped होती है।
-- `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true` Host-header origin fallback mode enable करता है; इसे dangerous operator-selected policy मानें।
-- DNS rebinding और proxy-host header behavior को deployment hardening concerns मानें; `trustedProxies` को tight रखें और gateway को सीधे public internet पर expose करने से बचें।
+यह संदेश-संदर्भ की सीमा है, होस्ट-प्रशासक की सीमा नहीं। यदि उपयोगकर्ता परस्पर विरोधी हैं और समान Gateway होस्ट/कॉन्फ़िगरेशन साझा करते हैं, तो प्रत्येक भरोसा सीमा के लिए अलग-अलग Gateway चलाएँ।
 
-## Local session logs disk पर रहते हैं
+यदि वही व्यक्ति कई चैनलों पर आपसे संपर्क करता है, तो उन DM सत्रों को एक प्रामाणिक पहचान में समेकित करने के लिए `session.identityLinks` का उपयोग करें। [सत्र प्रबंधन](/hi/concepts/session) और [कॉन्फ़िगरेशन](/hi/gateway/configuration) देखें।
 
-OpenClaw session transcripts को disk पर `~/.openclaw/agents/<agentId>/sessions/*.jsonl` के अंतर्गत store करता है।
-यह session continuity और (वैकल्पिक रूप से) session memory indexing के लिए आवश्यक है, लेकिन इसका अर्थ यह भी है कि
-**filesystem access वाला कोई भी process/user उन logs को पढ़ सकता है**। disk access को trust
-boundary मानें और `~/.openclaw` पर permissions lock down करें (नीचे audit section देखें)। यदि आपको agents के बीच
-मजबूत isolation चाहिए, तो उन्हें अलग OS users या अलग hosts के अंतर्गत चलाएँ।
+## संदर्भ दृश्यता बनाम ट्रिगर प्राधिकरण
 
-## Node execution (system.run)
+दो अलग अवधारणाएँ:
 
-यदि कोई macOS Node paired है, तो Gateway उस Node पर `system.run` invoke कर सकता है। यह Mac पर **remote code execution** है:
+- **ट्रिगर प्राधिकरण**: एजेंट को कौन ट्रिगर कर सकता है (`dmPolicy`, `groupPolicy`, अनुमति-सूचियाँ, उल्लेख गेट)।
+- **संदर्भ दृश्यता**: मॉडल तक कौन-सा पूरक संदर्भ पहुँचता है (उत्तर का मुख्य भाग, उद्धृत पाठ, थ्रेड इतिहास, अग्रेषित मेटाडेटा)।
 
-- Node pairing (approval + token) आवश्यक है।
-- Gateway Node pairing per-command approval surface नहीं है। यह Node identity/trust और token issuance स्थापित करता है।
-- Gateway `gateway.nodes.allowCommands` / `denyCommands` के माध्यम से coarse global Node command policy लागू करता है।
-- Mac पर **Settings → Exec approvals** (security + ask + allowlist) के माध्यम से नियंत्रित।
-- per-node `system.run` policy Node की अपनी exec approvals file (`exec.approvals.node.*`) है, जो gateway की global command-ID policy से अधिक strict या अधिक loose हो सकती है।
-- `security="full"` और `ask="off"` के साथ चल रहा Node default trusted-operator model का पालन कर रहा है। जब तक आपका deployment स्पष्ट रूप से tighter approval या allowlist stance की मांग न करे, इसे expected behavior मानें।
-- Approval mode exact request context और, जहाँ संभव हो, एक concrete local script/file operand bind करता है। यदि OpenClaw किसी interpreter/runtime command के लिए ठीक एक direct local file identify नहीं कर सकता, तो approval-backed execution को full semantic coverage का वादा करने के बजाय deny किया जाता है।
-- `host=node` के लिए, approval-backed runs एक canonical prepared
-  `systemRunPlan` भी store करते हैं; बाद के approved forwards उसी stored plan को reuse करते हैं, और gateway
-  validation approval request बनने के बाद command/cwd/session context में caller edits को reject करता है।
-- यदि आप remote execution नहीं चाहते, तो security को **deny** पर सेट करें और उस Mac के लिए Node pairing हटाएँ।
+`contextVisibility` दूसरे को नियंत्रित करता है:
 
-यह अंतर triage के लिए मायने रखता है:
+- `"all"` (डिफ़ॉल्ट): पूरक संदर्भ प्राप्त रूप में रखा जाता है।
+- `"allowlist"`: पूरक संदर्भ को सक्रिय अनुमति-सूची जाँचों द्वारा अनुमत प्रेषकों तक सीमित किया जाता है।
+- `"allowlist_quote"`: `allowlist` जैसा, लेकिन फिर भी एक स्पष्ट उद्धृत उत्तर रखता है।
 
-- यदि reconnecting paired Node अलग command list advertise करता है, तो यह अपने आप में vulnerability नहीं है, बशर्ते Gateway global policy और Node की local exec approvals अभी भी actual execution boundary enforce करें।
-- Node pairing metadata को second hidden per-command approval layer मानने वाली reports आमतौर पर policy/UX confusion होती हैं, security boundary bypass नहीं।
+प्रति चैनल या प्रति कक्ष/वार्तालाप सेट करें—[समूह](/hi/channels/groups#context-visibility-and-allowlists) देखें। जो रिपोर्ट केवल यह दिखाती हैं कि "मॉडल अनुमति-सूची से बाहर के प्रेषकों का उद्धृत/ऐतिहासिक पाठ देख सकता है", वे `contextVisibility` से संबोधित किए जा सकने वाले सुदृढ़ीकरण निष्कर्ष हैं, अपने-आप में प्रमाणीकरण या सैंडबॉक्स बायपास नहीं; सुरक्षा को प्रभावित करने वाली रिपोर्ट में अब भी भरोसा सीमा के प्रदर्शित बायपास की आवश्यकता है।
 
-## Dynamic skills (watcher / remote nodes)
+## प्रॉम्प्ट इंजेक्शन
 
-OpenClaw mid-session skills list refresh कर सकता है:
+हमलावर ऐसा संदेश तैयार करता है जो मॉडल को असुरक्षित कार्रवाई के लिए प्रभावित करता है ("अपने निर्देशों की उपेक्षा करें", "अपनी फ़ाइल-प्रणाली की सामग्री उजागर करें", "इस लिंक पर जाएँ और कमांड चलाएँ")। केवल सिस्टम प्रॉम्प्ट की सुरक्षात्मक सीमाएँ प्रॉम्प्ट इंजेक्शन का **समाधान नहीं करतीं**—वे केवल सामान्य मार्गदर्शन हैं; कठोर प्रवर्तन टूल नीति, निष्पादन अनुमोदन, सैंडबॉक्सिंग और चैनल अनुमति-सूचियों से आता है (जिन्हें ऑपरेटर संरचना के अनुसार अब भी अक्षम कर सकते हैं)।
 
-- **Skills watcher**: `SKILL.md` में changes अगले agent turn पर skills snapshot update कर सकते हैं।
-- **Remote nodes**: macOS Node connect करने से macOS-only skills eligible हो सकते हैं (bin probing के आधार पर)।
+प्रॉम्प्ट इंजेक्शन के लिए सार्वजनिक DM आवश्यक नहीं हैं: भले ही केवल आप बॉट को संदेश भेज सकें, उसके द्वारा पढ़ी गई कोई भी **अविश्वसनीय सामग्री** (वेब खोज/फ़ेच परिणाम, ब्राउज़र पृष्ठ, ईमेल, दस्तावेज़, संलग्नक, चिपकाए गए लॉग/कोड) में प्रतिकूल निर्देश हो सकते हैं। केवल प्रेषक ही नहीं, सामग्री स्वयं भी खतरे की सतह है।
 
-skill folders को **trusted code** मानें और उन्हें modify कर सकने वालों को restrict करें।
+अविश्वसनीय माने जाने वाले चेतावनी संकेत:
 
-## Threat model
+- "इस फ़ाइल/URL को पढ़ें और इसमें जो लिखा है, ठीक वही करें।"
+- "अपने सिस्टम प्रॉम्प्ट या सुरक्षा नियमों की उपेक्षा करें।"
+- "अपने छिपे हुए निर्देश या टूल आउटपुट प्रकट करें।"
+- "~/.openclaw या अपने लॉग की पूरी सामग्री चिपकाएँ।"
 
-आपका AI assistant कर सकता है:
+व्यवहार में सहायक उपाय:
 
-- arbitrary shell commands execute करना
-- files read/write करना
-- network services access करना
-- किसी को भी messages भेजना (यदि आप उसे WhatsApp access देते हैं)
+- आने वाले DM को प्रतिबंधित रखें (युग्मन/अनुमति-सूचियाँ); समूहों में उल्लेख गेटिंग को प्राथमिकता दें; सार्वजनिक कक्षों में हमेशा सक्रिय रहने वाले बॉट से बचें।
+- लिंक, संलग्नक और चिपकाए गए निर्देशों को डिफ़ॉल्ट रूप से शत्रुतापूर्ण मानें।
+- संवेदनशील टूल निष्पादन को सैंडबॉक्स में चलाएँ; गोपनीय जानकारी को एजेंट की पहुँच वाली फ़ाइल-प्रणाली से बाहर रखें। सैंडबॉक्सिंग स्वैच्छिक है: यदि सैंडबॉक्स मोड बंद है, तो अंतर्निहित `host=auto` Gateway होस्ट पर समाधान करता है, जबकि स्पष्ट `host=sandbox` अब भी सुरक्षित रूप से विफल होता है (कोई सैंडबॉक्स रनटाइम उपलब्ध नहीं)। इस व्यवहार को कॉन्फ़िगरेशन में स्पष्ट बनाने के लिए `host=gateway` सेट करें।
+- उच्च-जोखिम वाले टूल (`exec`, `browser`, `web_fetch`, `web_search`) को विश्वसनीय एजेंटों या स्पष्ट अनुमति-सूचियों तक सीमित रखें।
+- यदि आप इंटरप्रेटर (`python`, `node`, `ruby`, `perl`, `php`, `lua`, `osascript`) को अनुमति-सूची में रखते हैं, तो `tools.exec.strictInlineEval` सक्षम करें ताकि इनलाइन मूल्यांकन रूपों (`-c`, `-e` और समान) के लिए अब भी स्पष्ट अनुमोदन आवश्यक हो। अनुमति-सूची मोड में, प्रत्येक heredoc खंड (`<<`) के लिए उद्धरण की परवाह किए बिना हमेशा समीक्षक या स्पष्ट अनुमोदन आवश्यक होता है—अनुमति-सूची में शामिल कमांड, अनुमति-सूची समीक्षा को बायपास करने के लिए heredoc मुख्य भाग का उपयोग नहीं कर सकता।
+- अविश्वसनीय सामग्री का सारांश बनाने के लिए केवल-पढ़ने योग्य या टूल-अक्षम **रीडर एजेंट** का उपयोग करके प्रभाव-क्षेत्र घटाएँ, फिर सारांश अपने मुख्य एजेंट को दें।
+- Gmail हुक के लिए, अंतर्निहित प्रति-संदेश सत्र वार्तालाप संदर्भ को अलग करता है, लेकिन लक्षित एजेंट की टूल या कार्यस्थान अनुमतियाँ नहीं हटाता। अविश्वसनीय मेल को किसी समर्पित रीडर एजेंट तक रूट करें, [प्रति-एजेंट सैंडबॉक्स और टूल प्रतिबंध](/hi/tools/multi-agent-sandbox-tools) लागू करें और [`tools.agentToAgent`](/hi/gateway/config-tools#toolsagenttoagent) से मुख्य एजेंट को किए जाने वाले किसी भी हस्तांतरण को सीमित करें। [Gmail एकीकरण](/hi/gateway/configuration-reference#gmail-integration) देखें।
+- टूल-सक्षम एजेंटों के लिए `web_search` / `web_fetch` / `browser` को आवश्यकता न होने तक बंद रखें।
+- OpenResponses URL इनपुट (`input_file` / `input_image`) के लिए, कड़ा `gateway.http.endpoints.responses.files.urlAllowlist` / `images.urlAllowlist` सेट करें और `maxUrlParts` को कम रखें (खाली अनुमति-सूचियाँ अनसेट मानी जाती हैं)। URL फ़ेचिंग पूरी तरह अक्षम करने के लिए `files.allowUrl: false` / `images.allowUrl: false` का उपयोग करें।
+- गोपनीय जानकारी को प्रॉम्प्ट से बाहर रखें; इसके बजाय उसे Gateway होस्ट पर env/कॉन्फ़िगरेशन के माध्यम से दें।
 
-जो लोग आपको message करते हैं, वे कर सकते हैं:
+**मॉडल का चयन मायने रखता है।** प्रॉम्प्ट-इंजेक्शन प्रतिरोध सभी मॉडल स्तरों पर समान नहीं होता—छोटे/सस्ते मॉडल प्रतिकूल प्रॉम्प्ट के तहत टूल के दुरुपयोग और निर्देशों के अपहरण के प्रति अधिक संवेदनशील होते हैं।
 
-- आपके AI को bad things करने के लिए trick करने की कोशिश
-- आपके data तक access के लिए social engineering
-- infrastructure details के लिए probe करना
+<Warning>
+टूल-सक्षम एजेंटों या अविश्वसनीय सामग्री पढ़ने वाले एजेंटों के लिए, पुराने/छोटे मॉडलों में प्रॉम्प्ट-इंजेक्शन का जोखिम अक्सर बहुत अधिक होता है। ऐसे कार्यभार कमजोर मॉडल स्तरों पर न चलाएँ।
+</Warning>
 
-## Core concept: intelligence से पहले access control
+- टूल चला सकने या फ़ाइलों/नेटवर्क को प्रभावित कर सकने वाले किसी भी बॉट के लिए नवीनतम पीढ़ी के सर्वोत्तम स्तर वाले मॉडल का उपयोग करें।
+- टूल-सक्षम एजेंटों या अविश्वसनीय इनबॉक्स के लिए पुराने/कमज़ोर/छोटे स्तरों का उपयोग न करें।
+- यदि छोटे मॉडल का उपयोग करना ही पड़े, तो प्रभाव-क्षेत्र घटाएँ: केवल-पढ़ने योग्य टूल, मज़बूत सैंडबॉक्सिंग, फ़ाइल सिस्टम तक न्यूनतम पहुँच और सख़्त अनुमत-सूचियाँ। सभी सत्रों के लिए सैंडबॉक्सिंग सक्षम करें और इनपुट पर कड़ा नियंत्रण न होने पर `web_search`/`web_fetch`/`browser` अक्षम करें।
+- विश्वसनीय इनपुट और बिना टूल वाले केवल-चैट निजी सहायकों के लिए छोटे मॉडल सामान्यतः पर्याप्त होते हैं।
 
-यहाँ अधिकांश failures fancy exploits नहीं होते - वे "किसी ने bot को message किया और bot ने वही कर दिया जो उससे कहा गया।" होते हैं।
+### बाहरी सामग्री और अविश्वसनीय इनपुट का आवरण
 
-OpenClaw का stance:
+OpenResponses `input_file` टेक्स्ट को अब भी अविश्वसनीय बाहरी सामग्री के रूप में अंतःक्षेपित किया जाता है, भले ही Gateway उसे स्थानीय रूप से डिकोड करता हो—ब्लॉक में `<<<EXTERNAL_UNTRUSTED_CONTENT ...>>>` सीमा चिह्नों के साथ `Source: External` मेटाडेटा होता है (इस पथ में अन्य जगह प्रयुक्त लंबा `SECURITY NOTICE:` बैनर शामिल नहीं होता)। संलग्न दस्तावेज़ों से टेक्स्ट निकालकर उसे मीडिया प्रॉम्प्ट में जोड़ने से पहले मीडिया-अंडरस्टैंडिंग में भी यही चिह्न-आधारित आवरण लागू होता है।
 
-- **Identity first:** तय करें कि bot से कौन बात कर सकता है (DM pairing / allowlists / explicit "open")।
-- **Scope next:** तय करें कि bot कहाँ act कर सकता है (group allowlists + mention gating, tools, sandboxing, device permissions)।
-- **Model last:** मानें कि model manipulate किया जा सकता है; design ऐसा करें कि manipulation का blast radius limited हो।
+OpenClaw मॉडल तक पहुँचने से पहले आवरित बाहरी सामग्री और मेटाडेटा से सामान्य स्व-होस्टेड LLM चैट-टेम्पलेट विशेष-टोकन लिटरल (Qwen/ChatML, Llama, Gemma, Mistral, Phi, GPT-OSS भूमिका/टर्न टोकन) भी हटा देता है। स्व-होस्टेड OpenAI-संगत बैकएंड (vLLM, SGLang, TGI, LM Studio, कस्टम Hugging Face टोकनाइज़र स्टैक) कभी-कभी उपयोगकर्ता सामग्री के भीतर `<|im_start|>` या `<|start_header_id|>` जैसी लिटरल स्ट्रिंग को संरचनात्मक चैट-टेम्पलेट टोकन के रूप में टोकनाइज़ करते हैं; इस शुद्धीकरण के बिना किसी प्राप्त पेज, ईमेल बॉडी या फ़ाइल-सामग्री टूल आउटपुट का अविश्वसनीय टेक्स्ट एक कृत्रिम `assistant`/`system` भूमिका सीमा गढ़ सकता है। शुद्धीकरण बाहरी-सामग्री आवरण परत पर होता है, इसलिए यह फ़ेच/रीड टूल और इनबाउंड चैनल सामग्री पर समान रूप से लागू होता है। होस्टेड प्रदाता (OpenAI, Anthropic) पहले से अपना अनुरोध-पक्षीय शुद्धीकरण लागू करते हैं; बाहरी-सामग्री आवरण सक्षम रखें और उपलब्ध होने पर विशेष टोकन को विभाजित/एस्केप करने वाली बैकएंड सेटिंग्स को प्राथमिकता दें।
 
-## Command authorization model
+आउटबाउंड मॉडल प्रतिक्रियाओं के लिए एक अलग शुद्धिकारक है, जो अंतिम चैनल डिलीवरी सीमा पर उपयोगकर्ता को दिखाई देने वाले उत्तरों से लीक हुए `<tool_call>`, `<function_calls>`, `<system-reminder>`, `<previous_response>` और इसी तरह के आंतरिक ढाँचे को हटा देता है।
 
-Slash commands और directives केवल **authorized senders** के लिए honored होते हैं। Authorization
-channel allowlists/pairing plus `commands.useAccessGroups` से derive होता है ([Configuration](/hi/gateway/configuration)
-और [Slash commands](/hi/tools/slash-commands) देखें)। यदि कोई channel allowlist empty है या उसमें `"*"` शामिल है,
-तो उस channel के लिए commands effectively open हैं।
+यह `dmPolicy`, अनुमत-सूचियों, exec स्वीकृतियों, सैंडबॉक्सिंग या `contextVisibility` का स्थान नहीं लेता—यह टोकनाइज़र परत के एक विशिष्ट बायपास को बंद करता है।
 
-`/exec` authorized operators के लिए session-only convenience है। यह config write नहीं करता या
-दूसरे sessions change नहीं करता।
+### बायपास फ़्लैग (प्रोडक्शन में बंद रखें)
 
-## Control plane tools risk
+- `hooks.mappings[].allowUnsafeExternalContent`
+- `hooks.gmail.allowUnsafeExternalContent`
+- Cron पेलोड फ़ील्ड `allowUnsafeExternalContent`
 
-दो built-in tools persistent control-plane changes कर सकते हैं:
+इन्हें केवल कड़े सीमित दायरे वाली डीबगिंग के लिए अस्थायी रूप से सक्षम करें; सक्षम होने पर उस एजेंट को पृथक रखें (सैंडबॉक्स + न्यूनतम टूल + समर्पित सत्र नेमस्पेस)।
 
-- `gateway` `config.schema.lookup` / `config.get` के साथ config inspect कर सकता है, और `config.apply`, `config.patch`, तथा `update.run` के साथ persistent changes कर सकता है।
-- `cron` scheduled jobs बना सकता है जो original chat/task समाप्त होने के बाद भी चलते रहते हैं।
+हुक पेलोड अविश्वसनीय सामग्री होते हैं, भले ही डिलीवरी आपके नियंत्रित सिस्टम से आए (मेल/दस्तावेज़/वेब सामग्री में प्रॉम्प्ट इंजेक्शन हो सकता है)। कमज़ोर मॉडल स्तर इस जोखिम को बढ़ाते हैं—हुक-संचालित स्वचालन के लिए मज़बूत आधुनिक मॉडल स्तरों को प्राथमिकता दें और टूल नीति कड़ी रखें (`tools.profile: "messaging"` या उससे अधिक सख़्त), साथ ही जहाँ संभव हो सैंडबॉक्सिंग का उपयोग करें।
 
-agent-facing `gateway` runtime tool अभी भी
-`tools.exec.ask` या `tools.exec.security` rewrite करने से मना करता है; legacy `tools.bash.*` aliases को
-write से पहले उसी protected exec paths में normalize किया जाता है।
-Agent-driven `gateway config.apply` और `gateway config.patch` edits
-default रूप से fail-closed हैं: केवल low-risk runtime tuning,
-mention-gating, और visible-reply paths का narrow set agent-tunable है। Global model defaults
-और prompt overlays operator-controlled रहते हैं। इसलिए new sensitive config trees
-protected रहती हैं, जब तक उन्हें जानबूझकर allowlist में add न किया जाए।
+### समूहों में रीजनिंग और विस्तृत आउटपुट
 
-किसी भी agent/surface के लिए जो untrusted content handle करता है, इन्हें default रूप से deny करें:
+`/reasoning`, `/verbose` और `/trace` आंतरिक रीजनिंग, टूल आउटपुट या सार्वजनिक चैनल के लिए अभिप्रेत न होने वाले Plugin निदान उजागर कर सकते हैं—इनमें टूल तर्क, URL, Plugin निदान और मॉडल द्वारा देखा गया डेटा शामिल हो सकता है। सार्वजनिक कक्षों में इन्हें अक्षम रखें; केवल विश्वसनीय DM या कड़े नियंत्रण वाले कक्षों में सक्षम करें।
+
+## कमांड प्राधिकरण
+
+स्लैश कमांड और निर्देश केवल अधिकृत प्रेषकों के लिए स्वीकार किए जाते हैं, जिनका निर्धारण चैनल अनुमत-सूचियों/पेयरिंग और `commands.useAccessGroups` से होता है ([कॉन्फ़िगरेशन](/hi/gateway/configuration) और [स्लैश कमांड](/hi/tools/slash-commands) देखें)। यदि किसी चैनल की अनुमत-सूची खाली है या उसमें `"*"` शामिल है, तो उस चैनल के लिए कमांड प्रभावी रूप से सभी के लिए खुले होते हैं।
+
+`/exec` अधिकृत ऑपरेटरों के लिए केवल-सत्र सुविधा है—यह कॉन्फ़िगरेशन नहीं लिखती और अन्य सत्रों को नहीं बदलती।
+
+## नियंत्रण-प्लेन टूल
+
+दो अंतर्निहित टूल नियंत्रण-प्लेन की दृष्टि से संवेदनशील बने रहते हैं:
+
+- `gateway`, `config.schema.lookup` / `config.get` के साथ कॉन्फ़िगरेशन पढ़ता है। यह कॉन्फ़िगरेशन नहीं लिख सकता, OpenClaw अपडेट नहीं कर सकता या Gateway पुनः आरंभ नहीं कर सकता।
+- `cron` ऐसे निर्धारित जॉब बनाता है जो मूल चैट/कार्य समाप्त होने के बाद भी चलते रहते हैं।
+
+`gateway` टूल केवल स्वामी के लिए रहता है क्योंकि कॉन्फ़िगरेशन रीड से सीक्रेट और होस्ट टोपोलॉजी उजागर हो सकते हैं। एजेंट स्थायी कॉन्फ़िगरेशन या जीवनचक्र परिवर्तनों का अनुरोध `openclaw` डेलिगेशन टूल के माध्यम से करते हैं; OpenClaw उन्हें टाइप किए गए ऑपरेशन में मैप करता है और लागू करने से पहले मानवीय स्वीकृति की आवश्यकता रखता है। [OpenClaw सेटअप एजेंट](/hi/cli/openclaw#operations-and-approval) देखें।
+
+अविश्वसनीय सामग्री संभालने वाले किसी भी एजेंट/सतह के लिए इन्हें डिफ़ॉल्ट रूप से अस्वीकार करें:
 
 ```json5
 {
@@ -534,263 +319,219 @@ protected रहती हैं, जब तक उन्हें जानब�
 }
 ```
 
-`commands.restart=false` केवल restart actions block करता है। यह `gateway` config/update actions disable नहीं करता।
+`commands.restart=false`, `/restart` और बाहरी `SIGUSR1` पुनः आरंभ अनुरोधों को अक्षम करता है। `gateway` एजेंट टूल में पुनः आरंभ कार्रवाई नहीं है।
+
+## Node निष्पादन (`system.run`)
+
+यदि कोई macOS Node पेयर किया गया है, तो Gateway उस पर `system.run` चला सकता है—यह उस Mac पर दूरस्थ कोड निष्पादन है।
+
+- Node पेयरिंग (स्वीकृति + टोकन) आवश्यक है। पेयरिंग Node की पहचान/विश्वास और टोकन जारी करना स्थापित करती है; यह प्रति-कमांड स्वीकृति सतह नहीं है।
+- Gateway, `gateway.nodes.commands.allow` / `gateway.nodes.commands.deny` के माध्यम से एक मोटी वैश्विक Node कमांड नीति लागू करता है। अस्वीकार-सूची केवल सटीक Node कमांड नामों (उदाहरण के लिए `system.run`) से मेल खाती है, कमांड पेलोड के भीतर के शेल टेक्स्ट से नहीं—यदि Gateway की वैश्विक नीति और Node की अपनी exec स्वीकृतियाँ अब भी सीमा लागू करती हैं, तो अलग कमांड सूची विज्ञापित करने वाला पुनः कनेक्ट हो रहा Node अपने आप में कोई भेद्यता नहीं है।
+- प्रति-Node `system.run` नीति Node की अपनी exec स्वीकृति फ़ाइल (`exec.approvals.node.*`) है, जिसे Mac पर Settings -> Exec approvals (security + ask + allowlist) के माध्यम से नियंत्रित किया जाता है; यह Gateway की वैश्विक कमांड-ID नीति से अधिक सख़्त या शिथिल हो सकती है।
+- `security="full"` और `ask="off"` चलाने वाला Node डिफ़ॉल्ट विश्वसनीय-ऑपरेटर मॉडल का पालन करता है—यह अपेक्षित व्यवहार है, बग नहीं, जब तक कि आपके डिप्लॉयमेंट को अधिक कड़ा रुख आवश्यक न हो।
+- स्वीकृति मोड सटीक अनुरोध संदर्भ और जहाँ संभव हो, एक ठोस स्थानीय स्क्रिप्ट/फ़ाइल ऑपरेंड को बाँधता है। यदि OpenClaw किसी इंटरप्रेटर/रनटाइम कमांड के लिए ठीक एक प्रत्यक्ष स्थानीय फ़ाइल की पहचान नहीं कर सकता, तो पूर्ण सिमेंटिक कवरेज का वादा करने के बजाय स्वीकृति-समर्थित निष्पादन अस्वीकार कर दिया जाता है।
+- `host=node` के लिए, स्वीकृति-समर्थित रन एक कैननिकल तैयार `systemRunPlan` भी संग्रहीत करते हैं; बाद के स्वीकृत फ़ॉरवर्ड उसी संग्रहीत योजना का पुनः उपयोग करते हैं, और Gateway सत्यापन स्वीकृति अनुरोध बनने के बाद कमांड/cwd/सत्र संदर्भ में कॉलर द्वारा किए गए संपादन अस्वीकार करता है।
+- दूरस्थ निष्पादन पूरी तरह अक्षम करने के लिए: सुरक्षा को `deny` पर सेट करें और उस Mac की Node पेयरिंग हटा दें।
+
+## डायनेमिक Skills (वॉचर / दूरस्थ Node)
+
+OpenClaw सत्र के बीच में Skills सूची रीफ़्रेश कर सकता है: `SKILL.md` बदलने पर Skills वॉचर अगले एजेंट टर्न में स्नैपशॉट अपडेट करता है, और macOS Node कनेक्ट होने पर केवल-macOS Skills पात्र हो सकते हैं (बाइनरी जाँच के आधार पर)। Skill फ़ोल्डरों को विश्वसनीय कोड मानें और यह सीमित करें कि उन्हें कौन संशोधित कर सकता है।
 
 ## Plugins
 
-Plugins Gateway के साथ **in-process** चलते हैं। उन्हें trusted code मानें:
+Plugins, Gateway के साथ प्रक्रिया के भीतर चलते हैं—उन्हें विश्वसनीय कोड मानें।
 
-- केवल उन sources से plugins install करें जिन पर आप trust करते हैं।
-- explicit `plugins.allow` allowlists को prefer करें।
-- enable करने से पहले plugin config review करें।
-- plugin changes के बाद Gateway restart करें।
-- यदि आप plugins install या update करते हैं (`openclaw plugins install <package>`, `openclaw plugins update <id>`), तो इसे untrusted code चलाने जैसा मानें:
-  - install path active plugin install root के अंतर्गत per-plugin directory है।
-  - OpenClaw install/update के दौरान built-in local dangerous-code blocking नहीं चलाता। operator-owned local allow/block decisions के लिए `security.installPolicy` और diagnostic scanning के लिए `openclaw security audit --deep` use करें।
-  - npm और git plugin installs केवल explicit install/update flow के दौरान package-manager dependency convergence चलाते हैं। Local paths और archives को self-contained plugin packages माना जाता है; OpenClaw उन्हें `npm install` चलाए बिना copy/reference करता है।
-  - pinned, exact versions (`@scope/pkg@1.2.3`) prefer करें, और enable करने से पहले disk पर unpacked code inspect करें।
-  - `--dangerously-force-unsafe-install` deprecated है और अब plugin install/update behavior change नहीं करता।
-  - जब operators को skill और plugin installs के लिए host-specific allow/block decisions लेने हेतु trusted local command चाहिए, तो `security.installPolicy` configure करें। यह policy source material staged होने के बाद लेकिन installation continue होने से पहले चलती है, ClawHub skills पर भी apply होती है, और deprecated unsafe flags से bypass नहीं होती।
+- केवल विश्वसनीय स्रोतों से इंस्टॉल करें; स्पष्ट `plugins.allow` अनुमत-सूचियों को प्राथमिकता दें; सक्षम करने से पहले Plugin कॉन्फ़िगरेशन की समीक्षा करें; Plugin परिवर्तनों के बाद Gateway पुनः आरंभ करें।
+- Plugins इंस्टॉल/अपडेट करने पर निष्पादन योग्य कोड चलता है:
+  - इंस्टॉल पथ सक्रिय Plugin इंस्टॉल रूट के अंतर्गत प्रति-Plugin डायरेक्टरी है।
+  - ClawHub पैकेज और OpenClaw की बंडल/आधिकारिक कैटलॉग विश्वसनीय स्रोत हैं। नया मनमाना npm, `npm-pack:`, git, स्थानीय पथ/आर्काइव या मार्केटप्लेस स्रोत इंस्टॉल से पहले चेतावनी देता है; गैर-संवादात्मक इंस्टॉल के लिए उस स्रोत की समीक्षा करके उस पर विश्वास करने के बाद `--force` आवश्यक है। `--force` उद्गम की पुष्टि करता है और ओवरराइट की अनुमति देता है; यह `security.installPolicy` या शेष इंस्टॉल सुरक्षा जाँचों को बायपास नहीं करता। अपडेट पहले से चुने गए स्रोत का पुनः उपयोग करते हैं।
+  - OpenClaw इंस्टॉल/अपडेट के दौरान अंतर्निहित स्थानीय खतरनाक-कोड अवरोधन नहीं चलाता। ऑपरेटर-स्वामित्व वाले स्थानीय अनुमति/अवरोध निर्णयों के लिए `security.installPolicy` और निदान स्कैनिंग के लिए `openclaw security audit --deep` का उपयोग करें।
+  - npm और git Plugin इंस्टॉल केवल स्पष्ट इंस्टॉल/अपडेट प्रवाह के दौरान पैकेज-मैनेजर निर्भरता अभिसरण चलाते हैं। स्थानीय पथों और आर्काइव को स्व-निहित पैकेज माना जाता है; OpenClaw `npm install` चलाए बिना उन्हें कॉपी/संदर्भित करता है।
+  - पिन किए गए सटीक संस्करणों (`@scope/pkg@1.2.3`) को प्राथमिकता दें और सक्षम करने से पहले अनपैक किए गए कोड का निरीक्षण करें।
+  - `--dangerously-force-unsafe-install` अप्रचलित है और अब इंस्टॉल/अपडेट व्यवहार नहीं बदलता।
+  - `security.installPolicy` ऑपरेटरों को Skill और Plugin इंस्टॉल के लिए होस्ट-विशिष्ट अनुमति/अवरोध निर्णय लेने हेतु विश्वसनीय स्थानीय कमांड चलाने देता है। यह स्रोत सामग्री स्टेज होने के बाद, लेकिन इंस्टॉल जारी रहने से पहले चलता है, ClawHub Skills पर भी लागू होता है और अप्रचलित असुरक्षित फ़्लैग द्वारा बायपास नहीं किया जाता।
 
-Details: [Plugins](/hi/tools/plugin)
+विवरण: [Plugins](/hi/tools/plugin)
 
-## DM access model: pairing, allowlist, open, disabled
+## सैंडबॉक्सिंग
 
-सभी current DM-capable channels DM policy (`dmPolicy` या `*.dm.policy`) support करते हैं जो message processed होने से **पहले** inbound DMs gate करती है:
+समर्पित दस्तावेज़: [सैंडबॉक्सिंग](/hi/gateway/sandboxing)
 
-- `pairing` (default): unknown senders को short pairing code मिलता है और bot approved होने तक उनका message ignore करता है। Codes 1 hour के बाद expire होते हैं; repeated DMs new request created होने तक code resend नहीं करेंगे। Pending requests default रूप से **3 per channel** तक capped हैं।
-- `allowlist`: unknown senders blocked होते हैं (कोई pairing handshake नहीं)।
-- `open`: किसी को भी DM करने दें (public)। channel allowlist में `"*"` शामिल होना **आवश्यक** है (explicit opt-in)।
-- `disabled`: inbound DMs को पूरी तरह ignore करें।
+दो पूरक दृष्टिकोण:
 
-CLI के माध्यम से approve करें:
+- **Docker में पूर्ण Gateway** (कंटेनर सीमा): [Docker](/hi/install/docker)
+- **टूल सैंडबॉक्स** (`agents.defaults.sandbox`; होस्ट Gateway + सैंडबॉक्स-पृथक टूल; Docker डिफ़ॉल्ट बैकएंड है): [सैंडबॉक्सिंग](/hi/gateway/sandboxing)
 
-```bash
-openclaw pairing list <channel>
-openclaw pairing approve <channel> <code>
-```
+<Note>
+एजेंटों के बीच पहुँच रोकने के लिए `agents.defaults.sandbox.scope` को `"agent"` (डिफ़ॉल्ट) पर रखें या अधिक सख़्त प्रति-सत्र पृथक्करण के लिए `"session"` का उपयोग करें। `scope: "shared"` एकल कंटेनर या कार्यक्षेत्र का उपयोग करता है।
+</Note>
 
-Details + disk पर files: [Pairing](/hi/channels/pairing)
+सैंडबॉक्स के भीतर एजेंट कार्यक्षेत्र की पहुँच (`agents.defaults.sandbox.workspaceAccess`):
 
-## DM session isolation (multi-user mode)
+- `"none"` (डिफ़ॉल्ट): टूल `~/.openclaw/sandboxes` के अंतर्गत सैंडबॉक्स कार्यक्षेत्र देखते हैं; एजेंट कार्यक्षेत्र तक पहुँच निषिद्ध है।
+- `"ro"`: एजेंट कार्यक्षेत्र को `/agent` पर केवल-पढ़ने योग्य रूप में माउंट करता है (`write`/`edit`/`apply_patch` अक्षम करता है)।
+- `"rw"`: एजेंट कार्यक्षेत्र को `/workspace` पर पढ़ने/लिखने योग्य रूप में माउंट करता है।
 
-Default रूप से, OpenClaw **सभी DMs को main session में route करता है** ताकि आपके assistant के पास devices और channels में continuity रहे। यदि **कई लोग** bot को DM कर सकते हैं (open DMs या multi-person allowlist), तो DM sessions isolate करने पर विचार करें:
+अतिरिक्त `sandbox.docker.binds` को सामान्यीकृत, कैननिकल किए गए स्रोत पथों के विरुद्ध सत्यापित किया जाता है। अवरुद्ध-पथ अस्वीकार-सूची में `/etc`, `/private/etc`, `/proc`, `/sys`, `/dev`, `/root`, `/boot` और वे डायरेक्टरियाँ शामिल हैं जिनमें सामान्यतः Docker सॉकेट होता है या जो उसका उपनाम होती हैं (उनके अंतर्गत `/run`, `/var/run` और `docker.sock`), साथ ही HOME क्रेडेंशियल उपपथ (`.aws`, `.cargo`, `.config`, `.docker`, `.gnupg`, `.netrc`, `.npm`, `.ssh`) भी शामिल हैं। पैरेंट-सिमलिंक तरकीबों और कैननिकल होम उपनामों को मौजूदा पूर्वजों के माध्यम से हल करके दोबारा जाँचा जाता है, इसलिए यदि वे किसी अवरुद्ध रूट में हल होते हैं तो वे अब भी सुरक्षित रूप से विफल होते हैं।
+
+<Warning>
+`tools.elevated` वैश्विक आधारभूत एस्केप हैच है, जो exec को सैंडबॉक्स के बाहर चलाता है। प्रभावी होस्ट डिफ़ॉल्ट रूप से `gateway` है, या जब exec लक्ष्य को `node` के रूप में कॉन्फ़िगर किया गया हो तब `node` है। `tools.elevated.allowFrom` को सख़्त रखें और इसे अजनबियों के लिए सक्षम न करें। प्रति एजेंट `agents.entries.*.tools.elevated` के माध्यम से इसे और सीमित करें। [उन्नत मोड](/hi/tools/elevated) देखें।
+</Warning>
+
+### उप-एजेंट डेलिगेशन सुरक्षा-सीमा
+
+यदि आप सत्र टूल की अनुमति देते हैं, तो प्रत्यायोजित उप-एजेंट रन को एक अन्य सीमा-संबंधी निर्णय मानें:
+
+- जब तक एजेंट को वास्तव में प्रत्यायोजन की आवश्यकता न हो, `sessions_spawn` को अस्वीकार करें।
+- `agents.defaults.subagents.allowAgents` और किसी भी प्रति-एजेंट `agents.entries.*.subagents.allowAgents` ओवरराइड को ज्ञात-सुरक्षित लक्ष्य एजेंटों तक सीमित रखें।
+- जिन कार्यप्रवाहों को सैंडबॉक्स में ही रहना आवश्यक है, उनके लिए `sessions_spawn` को `sandbox: "require"` के साथ कॉल करें (डिफ़ॉल्ट `"inherit"` है); जब लक्ष्य चाइल्ड रनटाइम सैंडबॉक्स में नहीं होता, तो `"require"` तुरंत विफल हो जाता है।
+
+### केवल-पठन मोड
+
+`agents.defaults.sandbox.workspaceAccess: "ro"` (या कार्यक्षेत्र तक पहुँच न देने के लिए `"none"`) को उन टूल अनुमति/अस्वीकृति सूचियों के साथ संयोजित करके केवल-पठन प्रोफ़ाइल बनाएँ जो `write`, `edit`, `apply_patch`, `exec`, `process` आदि को अवरुद्ध करती हों।
+
+- `tools.exec.applyPatch.workspaceOnly: true` (डिफ़ॉल्ट): सैंडबॉक्सिंग बंद होने पर भी `apply_patch` को कार्यक्षेत्र डायरेक्टरी के बाहर लिखने/हटाने से रोकता है। `false` केवल तभी सेट करें जब आप जानबूझकर चाहते हों कि `apply_patch` कार्यक्षेत्र के बाहर की फ़ाइलों को छुए।
+- `tools.fs.workspaceOnly: true` (वैकल्पिक): `read`/`write`/`edit`/`apply_patch` पथों और नेटिव प्रॉम्प्ट छवि के स्वतः-लोड पथों को कार्यक्षेत्र डायरेक्टरी तक सीमित करता है।
+- फ़ाइल-सिस्टम रूट सीमित रखें—एजेंट/सैंडबॉक्स कार्यक्षेत्रों के लिए अपनी होम डायरेक्टरी जैसे व्यापक रूट से बचें, क्योंकि वे संवेदनशील स्थानीय फ़ाइलों (उदाहरण के लिए `~/.openclaw` के अंतर्गत स्थिति/कॉन्फ़िगरेशन) को फ़ाइल-सिस्टम टूल के सामने उजागर कर सकते हैं।
+
+## प्रति-एजेंट पहुँच प्रोफ़ाइल (बहु-एजेंट)
+
+प्रत्येक एजेंट की अपनी सैंडबॉक्स + टूल नीति हो सकती है: पूर्ण पहुँच, केवल-पठन या कोई पहुँच नहीं। प्राथमिकता नियमों के लिए [बहु-एजेंट सैंडबॉक्स और टूल](/hi/tools/multi-agent-sandbox-tools) देखें।
+
+सामान्य पैटर्न: व्यक्तिगत एजेंट (पूर्ण पहुँच, कोई सैंडबॉक्स नहीं), परिवार/कार्य एजेंट (सैंडबॉक्सयुक्त + केवल-पठन टूल), सार्वजनिक एजेंट (सैंडबॉक्सयुक्त + कोई फ़ाइल-सिस्टम/शेल टूल नहीं)।
+
+### पूर्ण पहुँच (कोई सैंडबॉक्स नहीं)
 
 ```json5
 {
-  session: { dmScope: "per-channel-peer" },
+  agents: {
+    list: [
+      { id: "personal", workspace: "~/.openclaw/workspace-personal", sandbox: { mode: "off" } },
+    ],
+  },
 }
 ```
 
-यह group chats को isolated रखते हुए cross-user context leakage रोकता है।
+### केवल-पठन टूल + केवल-पठन कार्यक्षेत्र
 
-यह messaging-context boundary है, host-admin boundary नहीं। यदि users mutually adversarial हैं और वही Gateway host/config share करते हैं, तो प्रति trust boundary अलग gateways चलाएँ।
+```json5
+{
+  agents: {
+    list: [
+      {
+        id: "family",
+        workspace: "~/.openclaw/workspace-family",
+        sandbox: { mode: "all", scope: "agent", workspaceAccess: "ro" },
+        tools: {
+          allow: ["read"],
+          deny: ["write", "edit", "apply_patch", "exec", "process", "browser"],
+        },
+      },
+    ],
+  },
+}
+```
 
-### Secure DM mode (recommended)
+### कोई फ़ाइल-सिस्टम/शेल पहुँच नहीं (प्रदाता संदेश सेवा अनुमत)
 
-ऊपर दिए snippet को **secure DM mode** मानें:
+```json5
+{
+  agents: {
+    list: [
+      {
+        id: "public",
+        workspace: "~/.openclaw/workspace-public",
+        sandbox: { mode: "all", scope: "agent", workspaceAccess: "none" },
+        tools: {
+          // सत्र टूल ट्रांसक्रिप्ट डेटा प्रकट कर सकते हैं। डिफ़ॉल्ट दायरा वर्तमान + स्पॉन किए गए सत्र हैं;
+          // पठन में परिवेशी समूह जागरूकता के माध्यम से देखे जाने वाले समान-एजेंट समूह भी शामिल होते हैं।
+          // उन देखे गए सत्रों को बाहर रखने के लिए visibility: "self" का उपयोग करें।
+          sessions: { visibility: "tree" }, // self | tree | agent | all
+          allow: [
+            "sessions_list",
+            "sessions_history",
+            "sessions_send",
+            "sessions_spawn",
+            "session_status",
+            "discord",
+            "slack",
+            "telegram",
+            "whatsapp",
+          ],
+          deny: [
+            "apply_patch",
+            "browser",
+            "canvas",
+            "cron",
+            "edit",
+            "exec",
+            "gateway",
+            "image",
+            "nodes",
+            "process",
+            "read",
+            "write",
+          ],
+        },
+      },
+    ],
+  },
+}
+```
 
-- Default: `session.dmScope: "main"` (continuity के लिए सभी DMs एक session share करते हैं)।
-- Local CLI onboarding default: unset होने पर `session.dmScope: "per-channel-peer"` लिखता है (existing explicit values रखता है)।
-- Secure DM mode: `session.dmScope: "per-channel-peer"` (प्रत्येक channel+sender pair को isolated DM context मिलता है)।
-- Cross-channel peer isolation: `session.dmScope: "per-peer"` (प्रत्येक sender को same type के सभी channels में एक session मिलता है)।
+## ब्राउज़र नियंत्रण के जोखिम
 
-यदि आप same channel पर multiple accounts चलाते हैं, तो इसके बजाय `per-account-channel-peer` use करें। यदि वही व्यक्ति multiple channels पर आपसे contact करता है, तो उन DM sessions को एक canonical identity में collapse करने के लिए `session.identityLinks` use करें। [Session Management](/hi/concepts/session) और [Configuration](/hi/gateway/configuration) देखें।
+ब्राउज़र नियंत्रण सक्षम करने से मॉडल को एक वास्तविक ब्राउज़र मिलता है। यदि उस प्रोफ़ाइल में पहले से लॉग-इन सत्र हैं, तो मॉडल उन खातों और डेटा तक पहुँच सकता है—ब्राउज़र प्रोफ़ाइल को संवेदनशील स्थिति मानें।
 
-## DMs और groups के लिए allowlists
+- एजेंट के लिए एक समर्पित प्रोफ़ाइल को प्राथमिकता दें (डिफ़ॉल्ट `openclaw` प्रोफ़ाइल); अपनी व्यक्तिगत दैनिक-उपयोग प्रोफ़ाइल से बचें।
+- सैंडबॉक्सयुक्त एजेंटों के लिए होस्ट ब्राउज़र नियंत्रण तब तक अक्षम रखें, जब तक आप उन पर भरोसा न करते हों।
+- स्टैंडअलोन लूपबैक ब्राउज़र नियंत्रण API केवल साझा-सीक्रेट प्रमाणीकरण (Gateway टोकन बेयरर प्रमाणीकरण या Gateway पासवर्ड) का पालन करता है—यह विश्वसनीय-प्रॉक्सी या Tailscale Serve पहचान हेडर का उपयोग नहीं करता।
+- ब्राउज़र डाउनलोड को अविश्वसनीय इनपुट मानें; एक पृथक डाउनलोड डायरेक्टरी को प्राथमिकता दें।
+- यदि संभव हो, तो एजेंट प्रोफ़ाइल में ब्राउज़र सिंक/पासवर्ड मैनेजर अक्षम करें।
+- दूरस्थ Gateway के लिए, "ब्राउज़र नियंत्रण" उस प्रोफ़ाइल की पहुँच वाले संसाधनों पर "ऑपरेटर पहुँच" के समतुल्य है।
+- Gateway और Node होस्ट को केवल टेलनेट तक सीमित रखें; ब्राउज़र नियंत्रण पोर्ट को LAN या सार्वजनिक इंटरनेट पर उजागर करने से बचें।
+- आवश्यकता न होने पर ब्राउज़र प्रॉक्सी रूटिंग अक्षम करें (`gateway.nodes.browser.mode="off"`)।
+- Chrome MCP का मौजूदा-सत्र मोड "अधिक सुरक्षित" नहीं है—यह उस होस्ट Chrome प्रोफ़ाइल की पहुँच वाले संसाधनों पर आपकी ओर से कार्य कर सकता है।
+- ब्राउज़र मशीन पर एक **Node होस्ट** चलाएँ और जब Gateway ब्राउज़र से दूरस्थ हो, तो Gateway को ब्राउज़र क्रियाओं का प्रॉक्सी बनने दें ([ब्राउज़र टूल](/hi/tools/browser) देखें); Node पेयरिंग को व्यवस्थापक पहुँच की तरह मानें, Gateway और Node होस्ट को एक ही टेलनेट पर रखें और रिले/नियंत्रण पोर्ट को LAN, सार्वजनिक इंटरनेट या Tailscale Funnel पर उजागर करने से बचें।
 
-OpenClaw में दो अलग "who can trigger me?" layers हैं:
+### ब्राउज़र SSRF नीति (डिफ़ॉल्ट रूप से सख्त)
 
-- **DM अनुमति-सूची** (`allowFrom` / `channels.discord.allowFrom` / `channels.slack.allowFrom`; पुराना: `channels.discord.dm.allowFrom`, `channels.slack.dm.allowFrom`): सीधे संदेशों में bot से बात करने की अनुमति किसे है।
-  - जब `dmPolicy="pairing"` हो, तो अनुमोदन `~/.openclaw/credentials/` के अंतर्गत account-scoped pairing अनुमति-सूची store में लिखे जाते हैं (default account के लिए `<channel>-allowFrom.json`, non-default accounts के लिए `<channel>-<accountId>-allowFrom.json`), और config अनुमति-सूचियों के साथ merge किए जाते हैं।
-- **Group अनुमति-सूची** (channel-specific): bot किन groups/channels/guilds से संदेश स्वीकार करेगा।
-  - सामान्य patterns:
-    - `channels.whatsapp.groups`, `channels.telegram.groups`, `channels.imessage.groups`: per-group defaults जैसे `requireMention`; set होने पर, यह group अनुमति-सूची की तरह भी काम करता है (allow-all व्यवहार बनाए रखने के लिए `"*"` शामिल करें)।
-    - `groupPolicy="allowlist"` + `groupAllowFrom`: किसी group session _के अंदर_ bot को trigger कौन कर सकता है, इसे restrict करें (WhatsApp/Telegram/Signal/iMessage/Microsoft Teams)।
-    - `channels.discord.guilds` / `channels.slack.channels`: per-surface अनुमति-सूचियाँ + mention defaults।
-  - Group checks इस क्रम में चलते हैं: पहले `groupPolicy`/group अनुमति-सूचियाँ, फिर mention/reply activation।
-  - bot message का reply देना (implicit mention) `groupAllowFrom` जैसी sender अनुमति-सूचियों को **bypass नहीं** करता।
-  - **Security note:** `dmPolicy="open"` और `groupPolicy="open"` को अंतिम उपाय वाली settings मानें। इन्हें बहुत कम इस्तेमाल किया जाना चाहिए; pairing + अनुमति-सूचियों को प्राथमिकता दें, जब तक कि आप room के हर member पर पूरी तरह भरोसा न करते हों।
+जब तक आप स्पष्ट रूप से ऑप्ट-इन नहीं करते, निजी/आंतरिक गंतव्य अवरुद्ध रहते हैं।
 
-विवरण: [Configuration](/hi/gateway/configuration) और [Groups](/hi/channels/groups)
+- डिफ़ॉल्ट: `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork` सेट नहीं होता, इसलिए निजी/आंतरिक/विशेष-उपयोग गंतव्य अवरुद्ध रहते हैं। पुराना उपनाम `allowPrivateNetwork` अभी भी स्वीकार किया जाता है।
+- ऑप्ट-इन: उन गंतव्यों की अनुमति देने के लिए `dangerouslyAllowPrivateNetwork: true` सेट करें।
+- सख्त मोड में, स्पष्ट अपवादों के लिए `hostnameAllowlist` (`*.example.com` जैसे पैटर्न) और `allowedHostnames` (सटीक होस्ट अपवाद, जिनमें `localhost` जैसे अन्यथा-अवरुद्ध नाम शामिल हैं) का उपयोग करें।
+- प्रत्यक्ष नेविगेशन अनुरोधों की पूर्व-जाँच की जाती है। क्रिया और क्रिया-पश्चात सीमित अनुग्रह अवधि के दौरान, संरक्षित Playwright इंटरैक्शन (क्लिक, निर्देशांक क्लिक, होवर, ड्रैग, स्क्रॉल, चयन, कुंजी दबाना, टाइप करना, फ़ॉर्म भरना और मूल्यांकन) HTTP अनुरोध बाइट भेजे जाने से पहले नीति द्वारा अस्वीकृत शीर्ष-स्तरीय और सबफ़्रेम दस्तावेज़ लोड को रोकते हैं, फिर अंतिम `http(s)` URL की यथासंभव पुनः-जाँच करते हैं।
+- प्रत्येक नए प्रबंधित Chrome लॉन्च से पहले, OpenClaw यथासंभव नेटवर्क पूर्वानुमान अक्षम करता है, जिससे उन अस्वीकृत लोड के लिए Chromium का देखा गया सट्टात्मक प्रीकनेक्ट दब जाता है। यह बहुस्तरीय सुरक्षा है, नीति सीमा नहीं: नियंत्रण-सेवा पुनरारंभ के दौरान पुनः उपयोग किया गया ब्राउज़र और अन्य ब्राउज़र बैकएंड समान सुदृढ़ीकरण साझा नहीं कर सकते। पृष्ठ रूटिंग अनुरोध-स्तरीय अवरोधन ही रहती है, नेटवर्क फ़ायरवॉल नहीं: रीडायरेक्ट चरण, पॉपअप का पहला अनुरोध, Service Worker ट्रैफ़िक, सीमित सुरक्षा अवधि के बाद चलने वाला पृष्ठ कोड और कुछ पृष्ठभूमि/उप-संसाधन पथ इसे बायपास कर सकते हैं। अंतिम-URL जाँच पहचान/क्वारंटीन सुरक्षा बनी रहती है; पूर्ण रोकथाम के लिए स्वामी-पक्षीय निर्गमन पृथक्करण या नीति लागू करने वाला प्रॉक्सी आवश्यक है।
 
-## Prompt injection (यह क्या है, यह क्यों मायने रखता है)
+```json5
+{
+  browser: {
+    ssrfPolicy: {
+      dangerouslyAllowPrivateNetwork: false,
+      hostnameAllowlist: ["*.example.com", "example.com"],
+      allowedHostnames: ["localhost"],
+    },
+  },
+}
+```
 
-Prompt injection तब होता है जब कोई attacker ऐसा message बनाता है जो model को कुछ असुरक्षित करने के लिए manipulate करता है ("ignore your instructions", "dump your filesystem", "follow this link and run commands", आदि)।
+## नेटवर्क एक्सपोज़र
 
-मजबूत system prompts के साथ भी, **prompt injection हल नहीं हुआ है**। System prompt guardrails केवल soft guidance हैं; hard enforcement tool policy, exec approvals, sandboxing, और channel अनुमति-सूचियों से आता है (और operators design के अनुसार इन्हें disable कर सकते हैं)। व्यवहार में ये चीज़ें मदद करती हैं:
+### बाइंड, पोर्ट, फ़ायरवॉल
 
-- Inbound DMs को locked down रखें (pairing/अनुमति-सूचियाँ)।
-- Groups में mention gating को प्राथमिकता दें; public rooms में "always-on" bots से बचें।
-- Links, attachments, और paste किए गए instructions को default रूप से hostile मानें।
-- Sensitive tool execution को sandbox में run करें; secrets को agent के reachable filesystem से बाहर रखें।
-- Note: sandboxing opt-in है। अगर sandbox mode off है, तो implicit `host=auto` gateway host पर resolve होता है। Explicit `host=sandbox` फिर भी fail closed होता है क्योंकि कोई sandbox runtime उपलब्ध नहीं है। अगर आप चाहते हैं कि यह व्यवहार config में explicit हो, तो `host=gateway` set करें।
-- High-risk tools (`exec`, `browser`, `web_fetch`, `web_search`) को trusted agents या explicit अनुमति-सूचियों तक सीमित रखें।
-- अगर आप interpreters (`python`, `node`, `ruby`, `perl`, `php`, `lua`, `osascript`) को allowlist करते हैं, तो `tools.exec.strictInlineEval` enable करें ताकि inline eval forms को फिर भी explicit approval चाहिए हो।
-- Shell approval analysis **unquoted heredocs** के अंदर POSIX parameter-expansion forms (`$VAR`, `$?`, `$$`, `$1`, `$@`, `${…}`) को भी reject करता है, ताकि allowlisted heredoc body plain text के रूप में allowlist review से shell expansion चुपके से पार न करा सके। Literal body semantics में opt in करने के लिए heredoc terminator को quote करें (उदाहरण के लिए `<<'EOF'`); unquoted heredocs जो variables expand करते, वे reject किए जाते हैं।
-- **Model choice मायने रखता है:** पुराने/छोटे/legacy models prompt injection और tool misuse के विरुद्ध काफ़ी कम robust होते हैं। Tool-enabled agents के लिए उपलब्ध सबसे मजबूत latest-generation, instruction-hardened model इस्तेमाल करें।
+Gateway एक पोर्ट पर WebSocket + HTTP को मल्टीप्लेक्स करता है (डिफ़ॉल्ट `18789`; कॉन्फ़िगरेशन/फ़्लैग/पर्यावरण चर: `gateway.port`, `--port`, `OPENCLAW_GATEWAY_PORT`)। उस HTTP सतह में Control UI (SPA एसेट, डिफ़ॉल्ट आधार पथ `/`) और कैनवास होस्ट (`/__openclaw__/canvas` और `/__openclaw__/a2ui`—मनमाना HTML/JS; सामान्य ब्राउज़र में लोड किए जाने पर इसे अविश्वसनीय सामग्री मानें; इसे अविश्वसनीय नेटवर्क/उपयोगकर्ताओं के सामने उजागर न करें और न ही विशेषाधिकार-प्राप्त वेब सतहों के साथ एक ही ओरिजिन साझा करें) शामिल हैं।
 
-अविश्वसनीय मानने योग्य red flags:
+`gateway.bind` नियंत्रित करता है कि Gateway कहाँ सुनता है:
 
-- "यह file/URL पढ़ें और ठीक वही करें जो यह कहता है।"
-- "अपने system prompt या safety rules को ignore करें।"
-- "अपने hidden instructions या tool outputs reveal करें।"
-- "~/.openclaw या अपने logs की पूरी contents paste करें।"
+- `"loopback"` (डिफ़ॉल्ट): केवल स्थानीय क्लाइंट कनेक्ट कर सकते हैं।
+- `"lan"`, `"tailnet"`, `"custom"`: आक्रमण सतह बढ़ाते हैं। केवल Gateway प्रमाणीकरण (साझा टोकन/पासवर्ड या सही ढंग से कॉन्फ़िगर किया गया विश्वसनीय प्रॉक्सी) और वास्तविक फ़ायरवॉल के साथ उपयोग करें।
 
-## External content special-token sanitization
+व्यावहारिक नियम: LAN बाइंड की तुलना में Tailscale Serve को प्राथमिकता दें (Serve Gateway को लूपबैक पर रखता है और Tailscale पहुँच संभालता है); यदि LAN से बाइंड करना आवश्यक हो, तो व्यापक पोर्ट-फ़ॉरवर्डिंग के बजाय पोर्ट को सीमित स्रोत-IP अनुमति सूची से फ़ायरवॉल करें; Gateway को `0.0.0.0` पर बिना प्रमाणीकरण के कभी उजागर न करें।
 
-OpenClaw wrapped external content और metadata से common self-hosted LLM chat-template special-token literals को model तक पहुँचने से पहले strip करता है। Covered marker families में Qwen/ChatML, Llama, Gemma, Mistral, Phi, और GPT-OSS role/turn tokens शामिल हैं।
+### UFW के साथ Docker पोर्ट प्रकाशन
 
-क्यों:
-
-- Self-hosted models के सामने मौजूद OpenAI-compatible backends कभी-कभी user text में आने वाले special tokens को mask करने के बजाय preserve कर देते हैं। कोई attacker जो inbound external content (fetched page, email body, file contents tool output) में लिख सकता है, अन्यथा synthetic `assistant` या `system` role boundary inject कर सकता है और wrapped-content guardrails से बच सकता है।
-- Sanitization external-content wrapping layer पर होता है, इसलिए यह per-provider होने के बजाय fetch/read tools और inbound channel content पर समान रूप से apply होता है।
-- Outbound model responses के पास पहले से एक अलग sanitizer है जो final channel delivery boundary पर user-visible replies से leaked `<tool_call>`, `<function_calls>`, `<system-reminder>`, `<previous_response>`, और समान internal runtime scaffolding strip करता है। External-content sanitizer inbound counterpart है।
-
-यह इस page की दूसरी hardening को replace नहीं करता - `dmPolicy`, अनुमति-सूचियाँ, exec approvals, sandboxing, और `contextVisibility` अब भी primary काम करते हैं। यह self-hosted stacks के विरुद्ध एक specific tokenizer-layer bypass बंद करता है जो user text को special tokens intact रखकर forward करते हैं।
-
-## Unsafe external content bypass flags
-
-OpenClaw में explicit bypass flags शामिल हैं जो external-content safety wrapping disable करते हैं:
-
-- `hooks.mappings[].allowUnsafeExternalContent`
-- `hooks.gmail.allowUnsafeExternalContent`
-- Cron payload field `allowUnsafeExternalContent`
-
-Guidance:
-
-- Production में इन्हें unset/false रखें।
-- केवल tightly scoped debugging के लिए temporary enable करें।
-- अगर enable किया जाए, तो उस agent को isolate करें (sandbox + minimal tools + dedicated session namespace)।
-
-Hooks risk note:
-
-- Hook payloads untrusted content हैं, भले ही delivery आपके control वाले systems से आए (mail/docs/web content prompt injection carry कर सकता है)।
-- Weak model tiers यह risk बढ़ाते हैं। Hook-driven automation के लिए strong modern model tiers को प्राथमिकता दें और tool policy tight रखें (`tools.profile: "messaging"` या stricter), साथ ही जहाँ संभव हो sandboxing भी।
-
-### Prompt injection के लिए public DMs आवश्यक नहीं हैं
-
-भले ही bot को message **केवल आप** कर सकते हों, prompt injection फिर भी किसी भी
-**untrusted content** के ज़रिए हो सकता है जिसे bot पढ़ता है (web search/fetch results, browser pages,
-emails, docs, attachments, pasted logs/code)। दूसरे शब्दों में: sender ही
-एकमात्र threat surface नहीं है; **content itself** adversarial instructions carry कर सकता है।
-
-जब tools enabled हों, तो typical risk context exfiltrate करना या
-tool calls trigger करना होता है। Blast radius घटाएँ:
-
-- Untrusted content summarize करने के लिए read-only या tool-disabled **reader agent** इस्तेमाल करके,
-  फिर summary अपने main agent को pass करें।
-- Tool-enabled agents के लिए `web_search` / `web_fetch` / `browser` off रखें, जब तक जरूरत न हो।
-- OpenResponses URL inputs (`input_file` / `input_image`) के लिए tight
-  `gateway.http.endpoints.responses.files.urlAllowlist` और
-  `gateway.http.endpoints.responses.images.urlAllowlist` set करें, और `maxUrlParts` low रखें।
-  Empty अनुमति-सूचियाँ unset मानी जाती हैं; अगर आप URL fetching पूरी तरह disable करना चाहते हैं तो `files.allowUrl: false` / `images.allowUrl: false`
-  इस्तेमाल करें।
-- OpenResponses file inputs के लिए, decoded `input_file` text फिर भी
-  **untrusted external content** के रूप में inject होता है। File text trusted है, इस पर सिर्फ इसलिए rely न करें
-  क्योंकि Gateway ने इसे locally decode किया। Injected block में फिर भी explicit
-  `<<<EXTERNAL_UNTRUSTED_CONTENT ...>>>` boundary markers और `Source: External`
-  metadata रहता है, भले ही यह path लंबा `SECURITY NOTICE:` banner omit करता हो।
-- यही marker-based wrapping तब apply होता है जब media-understanding attached documents से text extract करता है
-  और उस text को media prompt में append करता है।
-- किसी भी untrusted input को touch करने वाले agent के लिए sandboxing और strict tool अनुमति-सूचियाँ enable करें।
-- Secrets को prompts से बाहर रखें; इसके बजाय उन्हें gateway host पर env/config के ज़रिए pass करें।
-
-### Self-hosted LLM backends
-
-OpenAI-compatible self-hosted backends जैसे vLLM, SGLang, TGI, LM Studio,
-या custom Hugging Face tokenizer stacks hosted providers से इस मामले में अलग हो सकते हैं कि
-chat-template special tokens कैसे handle किए जाते हैं। अगर कोई backend literal strings
-जैसे `<|im_start|>`, `<|start_header_id|>`, या `<start_of_turn>` को
-user content के अंदर structural chat-template tokens के रूप में tokenize करता है, तो untrusted text
-tokenizer layer पर role boundaries forge करने की कोशिश कर सकता है।
-
-OpenClaw wrapped external content से common model-family special-token literals को
-model को dispatch करने से पहले strip करता है। External-content wrapping enabled रखें,
-और जब available हो, तो ऐसी backend settings को प्राथमिकता दें जो user-provided content में special
-tokens को split या escape करती हैं। Hosted providers जैसे OpenAI
-और Anthropic पहले से अपनी request-side sanitization apply करते हैं।
-
-### Model strength (security note)
-
-Prompt injection resistance model tiers में **uniform नहीं** है। Smaller/cheaper models आम तौर पर tool misuse और instruction hijacking के प्रति अधिक susceptible होते हैं, खासकर adversarial prompts के तहत।
-
-<Warning>
-Tool-enabled agents या untrusted content पढ़ने वाले agents के लिए, पुराने/छोटे models के साथ prompt-injection risk अक्सर बहुत high होता है। उन workloads को weak model tiers पर run न करें।
-</Warning>
-
-Recommendations:
-
-- ऐसे किसी भी bot के लिए **latest generation, best-tier model इस्तेमाल करें** जो tools run कर सकता है या files/networks touch कर सकता है।
-- Tool-enabled agents या untrusted inboxes के लिए **older/weaker/smaller tiers इस्तेमाल न करें**; prompt-injection risk बहुत high है।
-- अगर आपको smaller model इस्तेमाल करना ही है, तो **blast radius घटाएँ** (read-only tools, strong sandboxing, minimal filesystem access, strict अनुमति-सूचियाँ)।
-- Small models run करते समय, **सभी sessions के लिए sandboxing enable करें** और inputs tightly controlled न हों तो **web_search/web_fetch/browser disable करें**।
-- Trusted input और no tools वाले chat-only personal assistants के लिए smaller models आम तौर पर ठीक होते हैं।
-
-## Groups में reasoning और verbose output
-
-`/reasoning`, `/verbose`, और `/trace` internal reasoning, tool
-output, या plugin diagnostics expose कर सकते हैं जो
-public channel के लिए अभिप्रेत नहीं था। Group settings में, इन्हें **debug
-only** मानें और off रखें जब तक आपको स्पष्ट रूप से इनकी जरूरत न हो।
-
-Guidance:
-
-- Public rooms में `/reasoning`, `/verbose`, और `/trace` disabled रखें।
-- अगर आप इन्हें enable करते हैं, तो केवल trusted DMs या tightly controlled rooms में ऐसा करें।
-- याद रखें: verbose और trace output में tool args, URLs, plugin diagnostics, और model द्वारा देखा गया data शामिल हो सकता है।
-
-## Configuration hardening examples
-
-### File permissions
-
-Gateway host पर config + state private रखें:
-
-- `~/.openclaw/openclaw.json`: `600` (सिर्फ user read/write)
-- `~/.openclaw`: `700` (सिर्फ user)
-
-`openclaw doctor` warning दे सकता है और इन permissions को tighten करने की पेशकश कर सकता है।
-
-### Network exposure (bind, port, firewall)
-
-Gateway एक ही port पर **WebSocket + HTTP** multiplex करता है:
-
-- Default: `18789`
-- Config/flags/env: `gateway.port`, `--port`, `OPENCLAW_GATEWAY_PORT`
-
-इस HTTP surface में Control UI और canvas host शामिल हैं:
-
-- Control UI (SPA assets) (default base path `/`)
-- Canvas host: `/__openclaw__/canvas/` और `/__openclaw__/a2ui/` (arbitrary HTML/JS; untrusted content की तरह treat करें)
-
-अगर आप canvas content को normal browser में load करते हैं, तो इसे किसी भी other untrusted web page जैसा मानें:
-
-- Canvas host को untrusted networks/users के सामने expose न करें।
-- जब तक आप implications को पूरी तरह न समझते हों, canvas content को privileged web surfaces के same origin के साथ share न कराएँ।
-
-Bind mode control करता है कि Gateway कहाँ listen करता है:
-
-- `gateway.bind: "loopback"` (default): केवल local clients connect कर सकते हैं।
-- Non-loopback binds (`"lan"`, `"tailnet"`, `"custom"`) attack surface बढ़ाते हैं। इन्हें केवल gateway auth (shared token/password या correctly configured trusted proxy) और real firewall के साथ इस्तेमाल करें।
-
-व्यावहारिक नियम:
-
-- LAN बाइंड्स के बजाय Tailscale Serve को प्राथमिकता दें (Serve Gateway को loopback पर रखता है, और Tailscale एक्सेस संभालता है)।
-- अगर आपको LAN से बाइंड करना ही पड़े, तो पोर्ट को स्रोत IPs की सख्त allowlist तक firewall करें; इसे व्यापक रूप से port-forward न करें।
-- Gateway को कभी भी `0.0.0.0` पर बिना authentication के expose न करें।
-
-### UFW के साथ Docker port publishing
-
-अगर आप VPS पर Docker के साथ OpenClaw चलाते हैं, तो याद रखें कि published container ports
-(`-p HOST:CONTAINER` या Compose `ports:`) Docker की forwarding
-chains के माध्यम से route होते हैं, केवल host `INPUT` rules से नहीं।
-
-Docker traffic को अपनी firewall policy के साथ aligned रखने के लिए,
-`DOCKER-USER` में rules enforce करें (यह chain Docker के अपने accept rules से पहले evaluate होती है)।
-कई modern distros पर, `iptables`/`ip6tables` `iptables-nft` frontend का उपयोग करते हैं
-और फिर भी इन rules को nftables backend पर लागू करते हैं।
-
-Minimal allowlist example (IPv4):
+प्रकाशित कंटेनर पोर्ट (`-p HOST:CONTAINER` या Compose `ports:`) केवल होस्ट `INPUT` नियमों से नहीं, बल्कि Docker की फ़ॉरवर्डिंग शृंखलाओं से रूट होते हैं। नियमों को `DOCKER-USER` में लागू करें (Docker के अपने स्वीकार नियमों से पहले मूल्यांकित); अधिकांश आधुनिक डिस्ट्रो `iptables-nft` फ़्रंटएंड का उपयोग करते हैं, जो इन नियमों को nftables बैकएंड पर भी लागू करता है।
 
 ```bash
 # /etc/ufw/after.rules (append as its own *filter section)
@@ -809,14 +550,7 @@ Minimal allowlist example (IPv4):
 COMMIT
 ```
 
-IPv6 की अलग tables होती हैं। अगर
-Docker IPv6 enabled है, तो `/etc/ufw/after6.rules` में matching policy जोड़ें।
-
-Docs snippets में `eth0` जैसे interface names hardcode करने से बचें। Interface names
-VPS images (`ens3`, `enp*`, आदि) में अलग-अलग होते हैं और mismatches अनजाने में
-आपके deny rule को skip कर सकते हैं।
-
-Reload के बाद quick validation:
+IPv6 की अलग तालिकाएँ होती हैं—यदि Docker IPv6 सक्षम है, तो `/etc/ufw/after6.rules` में मेल खाती नीति जोड़ें। इंटरफ़ेस नामों (`eth0`) को हार्डकोड करने से बचें, क्योंकि वे VPS इमेज (`ens3`, `enp*` आदि) के अनुसार बदलते हैं और असंगति आपके अस्वीकृति नियम को चुपचाप छोड़ सकती है।
 
 ```bash
 ufw reload
@@ -825,278 +559,244 @@ ip6tables -S DOCKER-USER
 nmap -sT -p 1-65535 <public-ip> --open
 ```
 
-Expected external ports केवल वही होने चाहिए जिन्हें आप जानबूझकर expose करते हैं (अधिकांश
-setups के लिए: SSH + आपके reverse proxy ports)।
+अपेक्षित बाहरी पोर्ट केवल वही होने चाहिए जिन्हें आप जानबूझकर उजागर करते हैं (अधिकांश सेटअप के लिए: SSH + रिवर्स प्रॉक्सी पोर्ट)।
 
-### mDNS/Bonjour discovery
+### mDNS/Bonjour खोज
 
-जब bundled `bonjour` Plugin enabled होता है, तो Gateway local device discovery के लिए mDNS (`_openclaw-gw._tcp` port 5353 पर) के माध्यम से अपनी presence broadcast करता है। Full mode में, इसमें TXT records शामिल होते हैं जो operational details expose कर सकते हैं:
+जब बंडल किया गया `bonjour` Plugin सक्षम होता है, तो Gateway स्थानीय डिवाइस खोज के लिए mDNS (`_openclaw-gw._tcp`, पोर्ट 5353) के माध्यम से अपनी उपस्थिति प्रसारित करता है। पूर्ण मोड में ऐसे TXT रिकॉर्ड शामिल होते हैं जो परिचालन विवरण उजागर करते हैं: `cliPath` (उपयोगकर्ता नाम और इंस्टॉलेशन स्थान बताने वाला फ़ाइल-सिस्टम पथ), `sshPort` (SSH उपलब्धता का विज्ञापन करता है), `displayName`/`lanHost` (होस्टनाम जानकारी)। अवसंरचना विवरण प्रसारित करने से LAN की टोह लेना आसान हो जाता है।
 
-- `cliPath`: CLI binary का full filesystem path (username और install location उजागर करता है)
-- `sshPort`: host पर SSH availability advertise करता है
-- `displayName`, `lanHost`: hostname information
+- जब तक LAN खोज आवश्यक न हो, Bonjour को अक्षम रखें—यह macOS होस्ट पर स्वतः शुरू होता है और अन्य जगहों पर ऑप्ट-इन है; प्रत्यक्ष Gateway URL, टेलनेट, SSH या वाइड-एरिया DNS-SD स्थानीय मल्टीकास्ट की आवश्यकता समाप्त करते हैं।
+- **न्यूनतम मोड** (Bonjour सक्षम होने पर डिफ़ॉल्ट, उजागर Gateway के लिए अनुशंसित) संवेदनशील फ़ील्ड छोड़ देता है:
 
-**Operational security consideration:** Infrastructure details broadcast करने से local network पर मौजूद किसी भी व्यक्ति के लिए reconnaissance आसान हो जाता है। Filesystem paths और SSH availability जैसी “harmless” जानकारी भी attackers को आपका environment map करने में मदद करती है।
+  ```json5
+  { discovery: { mdns: { mode: "minimal" } } }
+  ```
 
-**Recommendations:**
+- **बंद** Plugin को सक्षम रखते हुए स्थानीय खोज को रोकता है:
 
-1. **जब तक LAN discovery की जरूरत न हो, Bonjour disabled रखें।** Bonjour macOS hosts पर auto-start होता है और बाकी जगह opt-in है; direct Gateway URLs, Tailnet, SSH, या wide-area DNS-SD local multicast से बचते हैं।
+  ```json5
+  { discovery: { mdns: { mode: "off" } } }
+  ```
 
-2. **Minimal mode** (Bonjour enabled होने पर default, exposed gateways के लिए recommended): mDNS broadcasts से sensitive fields omit करें:
+- **पूर्ण मोड** (ऑप्ट-इन) में `cliPath` + `sshPort` शामिल होते हैं:
 
-   ```json5
-   {
-     discovery: {
-       mdns: { mode: "minimal" },
-     },
-   }
-   ```
+  ```json5
+  { discovery: { mdns: { mode: "full" } } }
+  ```
 
-3. अगर आप Plugin enabled रखना चाहते हैं लेकिन local device discovery suppress करना चाहते हैं, तो **mDNS mode disable करें**:
+- या कॉन्फ़िगरेशन बदले बिना mDNS अक्षम करने के लिए `OPENCLAW_DISABLE_BONJOUR=1` सेट करें।
 
-   ```json5
-   {
-     discovery: {
-       mdns: { mode: "off" },
-     },
-   }
-   ```
+न्यूनतम मोड में Gateway `role`, `gatewayPort`, `transport` प्रसारित करता है, लेकिन `cliPath`/`sshPort` छोड़ देता है; जिन ऐप को CLI पथ चाहिए, वे इसके बजाय प्रमाणीकृत WebSocket कनेक्शन के माध्यम से उसे प्राप्त कर सकते हैं।
 
-4. **Full mode** (opt-in): TXT records में `cliPath` + `sshPort` शामिल करें:
+### Gateway WebSocket प्रमाणीकरण
 
-   ```json5
-   {
-     discovery: {
-       mdns: { mode: "full" },
-     },
-   }
-   ```
-
-5. **Environment variable** (वैकल्पिक): config changes के बिना mDNS disable करने के लिए `OPENCLAW_DISABLE_BONJOUR=1` set करें।
-
-जब Bonjour minimal mode में enabled होता है, तो Gateway device discovery (`role`, `gatewayPort`, `transport`) के लिए पर्याप्त जानकारी broadcast करता है लेकिन `cliPath` और `sshPort` omit करता है। जिन apps को CLI path information चाहिए, वे इसे authenticated WebSocket connection के माध्यम से fetch कर सकते हैं।
-
-### Gateway WebSocket को lock down करें (local auth)
-
-Gateway auth **default रूप से required** है। अगर कोई valid gateway auth path configured नहीं है,
-तो Gateway WebSocket connections refuse करता है (fail-closed)।
-
-Onboarding default रूप से token generate करता है (loopback के लिए भी), इसलिए
-local clients को authenticate करना होगा।
-
-Token set करें ताकि **सभी** WS clients को authenticate करना पड़े:
+Gateway प्रमाणीकरण डिफ़ॉल्ट रूप से आवश्यक है—कोई वैध प्रमाणीकरण पथ कॉन्फ़िगर न होने पर Gateway WebSocket कनेक्शन अस्वीकार कर देता है (सुरक्षित रूप से बंद)। ऑनबोर्डिंग डिफ़ॉल्ट रूप से एक टोकन बनाती है (लूपबैक के लिए भी), इसलिए स्थानीय क्लाइंट को प्रमाणीकरण करना आवश्यक है।
 
 ```json5
-{
-  gateway: {
-    auth: { mode: "token", token: "your-token" },
-  },
-}
+{ gateway: { auth: { mode: "token", token: "your-token" } } }
 ```
 
-Doctor आपके लिए एक generate कर सकता है: `openclaw doctor --generate-gateway-token`.
+`openclaw doctor --generate-gateway-token` आपके लिए एक टोकन बना सकता है।
 
 <Note>
-`gateway.remote.token` और `gateway.remote.password` client credential sources हैं। वे अपने आप local WS access की रक्षा **नहीं** करते। Local call paths `gateway.auth.*` unset होने पर ही fallback के रूप में `gateway.remote.*` का उपयोग कर सकते हैं। अगर `gateway.auth.token` या `gateway.auth.password` SecretRef के माध्यम से explicitly configured है और unresolved है, तो resolution fail closed होता है (कोई remote fallback masking नहीं)।
+`gateway.remote.token` और `gateway.remote.password` क्लाइंट क्रेडेंशियल स्रोत हैं—वे स्वयं स्थानीय WS एक्सेस को सुरक्षित नहीं करते। स्थानीय कॉल पथ `gateway.remote.*` का उपयोग केवल फ़ॉलबैक के रूप में करते हैं, जब `gateway.auth.*` सेट न हो। यदि `gateway.auth.token` या `gateway.auth.password` को SecretRef के माध्यम से स्पष्ट रूप से कॉन्फ़िगर किया गया है और उसका समाधान नहीं हो पाता, तो समाधान बंद अवस्था में विफल होता है (रिमोट फ़ॉलबैक द्वारा कोई छिपाव नहीं)।
 </Note>
-वैकल्पिक: `wss://` उपयोग करते समय `gateway.remote.tlsFingerprint` के साथ remote TLS pin करें।
-Plaintext `ws://` loopback, private IP literals, `.local`, और
-Tailnet `*.ts.net` gateway URLs के लिए accepted है। अन्य trusted private-DNS names के लिए,
-client process पर break-glass के रूप में `OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1` set करें।
-यह जानबूझकर केवल process environment है, `openclaw.json` config
-key नहीं।
-Mobile pairing और Android manual या scanned gateway routes ज्यादा strict हैं:
-cleartext loopback के लिए accepted है, लेकिन private-LAN, link-local, `.local`, और
-dotless hostnames को TLS उपयोग करना होगा, जब तक कि आप explicitly trusted
-private-network cleartext path में opt in न करें।
 
-Local device pairing:
+`wss://` का उपयोग करते समय रिमोट TLS को `gateway.remote.tlsFingerprint` से पिन करें। प्लेनटेक्स्ट `ws://` को लूपबैक, निजी IP लिटरल, `.local`, और Tailnet `*.ts.net` gateway URL के लिए स्वीकार किया जाता है; अन्य विश्वसनीय निजी-DNS नामों के लिए, ब्रेक-ग्लास के रूप में क्लाइंट प्रोसेस पर `OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1` सेट करें (केवल प्रोसेस एनवायरनमेंट, कोई `openclaw.json` कुंजी नहीं)। मोबाइल पेयरिंग और Android के मैन्युअल/स्कैन किए गए gateway रूट अधिक सख्त हैं: क्लियरटेक्स्ट केवल लूपबैक के लिए अनुमत है, जबकि निजी-LAN, लिंक-लोकल, `.local`, और डॉट-रहित होस्टनाम को TLS का उपयोग करना होगा, जब तक कि आप विश्वसनीय निजी-नेटवर्क क्लियरटेक्स्ट पथ को स्पष्ट रूप से न चुनें।
 
-- Same-host clients को smooth रखने के लिए direct local loopback connects के लिए device pairing auto-approved होती है।
-- OpenClaw में trusted shared-secret helper flows के लिए narrow backend/container-local self-connect path भी है।
-- Tailnet और LAN connects, same-host tailnet binds सहित, pairing के लिए remote माने जाते हैं और फिर भी approval चाहिए।
-- Loopback request पर forwarded-header evidence loopback locality को disqualify करता है। Metadata-upgrade auto-approval narrow scope में है। दोनों rules के लिए [Gateway pairing](/hi/gateway/pairing) देखें।
+प्रत्यक्ष स्थानीय लूपबैक कनेक्शन के लिए डिवाइस पेयरिंग स्वतः स्वीकृत होती है (साथ ही विश्वसनीय साझा-सीक्रेट सहायक प्रवाहों के लिए एक सीमित बैकएंड/कंटेनर-स्थानीय स्व-कनेक्ट पथ); Tailnet और LAN कनेक्शन, जिनमें Tailnet पते पर समान-होस्ट कनेक्शन भी शामिल हैं, रिमोट माने जाते हैं और उन्हें अभी भी स्वीकृति की आवश्यकता होती है। हल किया गया `tailnet` पता या `127.0.0.1` अथवा `0.0.0.0` के अतिरिक्त कोई `custom` पता एक अलग `127.0.0.1` लिसनर जोड़ता है; केवल उस स्थानीय लिसनर के कनेक्शन को लूपबैक अर्थ-विज्ञान मिलता है। लूपबैक अनुरोध पर फ़ॉरवर्डेड-हेडर साक्ष्य लूपबैक स्थानीयता को अमान्य कर देता है; मेटाडेटा-अपग्रेड की स्वतः स्वीकृति का दायरा सीमित है। [Gateway पेयरिंग](/hi/gateway/pairing) देखें।
 
-Auth modes:
+प्रमाणीकरण मोड:
 
-- `gateway.auth.mode: "token"`: shared bearer token (अधिकांश setups के लिए recommended)।
-- `gateway.auth.mode: "password"`: password auth (env के माध्यम से set करना prefer करें: `OPENCLAW_GATEWAY_PASSWORD`)।
-- `gateway.auth.mode: "trusted-proxy"`: users को authenticate करने और headers के माध्यम से identity pass करने के लिए identity-aware reverse proxy पर trust करें ([Trusted Proxy Auth](/hi/gateway/trusted-proxy-auth) देखें)।
+- `"token"`: साझा बेयरर टोकन (अधिकांश सेटअप के लिए अनुशंसित)।
+- `"password"`: इसे `OPENCLAW_GATEWAY_PASSWORD` के माध्यम से सेट करना बेहतर है।
+- `"trusted-proxy"`: उपयोगकर्ताओं को प्रमाणित करने और हेडर के माध्यम से पहचान भेजने के लिए पहचान-जागरूक रिवर्स प्रॉक्सी पर भरोसा करें। [विश्वसनीय प्रॉक्सी प्रमाणीकरण](/hi/gateway/trusted-proxy-auth) देखें।
 
-Rotation checklist (token/password):
+रोटेशन चेकलिस्ट (टोकन/पासवर्ड): नया सीक्रेट जनरेट/सेट करें (`gateway.auth.token` या `OPENCLAW_GATEWAY_PASSWORD`); Gateway को रीस्टार्ट करें (या macOS ऐप को, यदि वह Gateway की निगरानी करता है); रिमोट क्लाइंट अपडेट करें (`gateway.remote.token`/`.password`); सत्यापित करें कि पुराने क्रेडेंशियल अब काम नहीं करते।
 
-1. नया secret generate/set करें (`gateway.auth.token` या `OPENCLAW_GATEWAY_PASSWORD`)।
-2. Gateway restart करें (या अगर macOS app Gateway supervise करता है, तो app restart करें)।
-3. किसी भी remote clients को update करें (`gateway.remote.token` / `.password` उन machines पर जो Gateway को call करती हैं)।
-4. Verify करें कि आप पुराने credentials से अब connect नहीं कर सकते।
+### Tailscale Serve पहचान हेडर
 
-### Tailscale Serve identity headers
+जब `gateway.auth.allowTailscale`, `true` हो (Serve के लिए डिफ़ॉल्ट), तो OpenClaw Control UI/WebSocket प्रमाणीकरण के लिए Tailscale Serve पहचान हेडर `tailscale-user-login` को स्वीकार करता है। यह स्थानीय Tailscale डेमन (`tailscale whois`) के माध्यम से `x-forwarded-for` पते को हल करके और उसे हेडर से मिलाकर पहचान सत्यापित करता है—यह केवल उन लूपबैक अनुरोधों के लिए सक्रिय होता है जिनमें Tailscale द्वारा इंजेक्ट किए गए `x-forwarded-for`, `x-forwarded-proto`, और `x-forwarded-host` मौजूद हों। इस एसिंक्रोनस जाँच के लिए, समान `{scope, ip}` के विफल प्रयासों को लिमिटर द्वारा विफलता दर्ज करने से पहले क्रमबद्ध किया जाता है, इसलिए एक Serve क्लाइंट से एक साथ किए गए गलत पुनः प्रयास दूसरे प्रयास को तुरंत लॉक आउट कर सकते हैं।
 
-जब `gateway.auth.allowTailscale` `true` होता है (Serve के लिए default), OpenClaw
-Control UI/WebSocket authentication के लिए Tailscale Serve identity headers (`tailscale-user-login`) accept करता है। OpenClaw
-local Tailscale daemon (`tailscale whois`) के माध्यम से
-`x-forwarded-for` address resolve करके और उसे header से match करके identity verify करता है। यह केवल उन requests के लिए trigger होता है जो loopback hit करती हैं
-और Tailscale द्वारा injected `x-forwarded-for`, `x-forwarded-proto`, और `x-forwarded-host` शामिल करती हैं।
-इस async identity check path के लिए, same `{scope, ip}` के failed attempts
-limiter failure record करने से पहले serialized होते हैं। इसलिए एक Serve client से concurrent bad retries
-दो plain mismatches की तरह race करने के बजाय second attempt को तुरंत lock out कर सकते हैं।
-HTTP API endpoints (उदाहरण के लिए `/v1/*`, `/tools/invoke`, और `/api/channels/*`)
-Tailscale identity-header auth का उपयोग **नहीं** करते। वे फिर भी gateway के
-configured HTTP auth mode का पालन करते हैं।
+HTTP API एंडपॉइंट (`/v1/*`, `/tools/invoke`, `/api/channels/*`) Tailscale पहचान-हेडर प्रमाणीकरण का उपयोग नहीं करते—वे gateway के कॉन्फ़िगर किए गए HTTP प्रमाणीकरण मोड का पालन करते हैं।
 
-Important boundary note:
+Gateway HTTP बेयरर प्रमाणीकरण प्रभावी रूप से पूर्ण-या-शून्य ऑपरेटर एक्सेस है। वे क्रेडेंशियल जो `/v1/chat/completions`, `/v1/responses`, `/api/v1/admin/rpc` जैसे Plugin रूट, या `/api/channels/*` को कॉल कर सकते हैं, उस gateway के लिए पूर्ण-एक्सेस ऑपरेटर सीक्रेट हैं: साझा-सीक्रेट बेयरर प्रमाणीकरण पूर्ण डिफ़ॉल्ट ऑपरेटर स्कोप (`operator.admin`, `operator.approvals`, `operator.pairing`, `operator.read`, `operator.talk.secrets`, `operator.write`) और एजेंट टर्न के लिए स्वामी अर्थ-विज्ञान पुनर्स्थापित करता है, तथा अधिक सीमित `x-openclaw-scopes` मान उस साझा-सीक्रेट पथ को कम नहीं करते। प्रति-अनुरोध स्कोप अर्थ-विज्ञान केवल तभी लागू होता है, जब अनुरोध पहचान-धारक मोड (विश्वसनीय प्रॉक्सी प्रमाणीकरण) या स्पष्ट रूप से बिना-प्रमाणीकरण वाले निजी इनग्रेस से आता है; इन मोड में, `x-openclaw-scopes` को छोड़ने पर सामान्य ऑपरेटर डिफ़ॉल्ट स्कोप सेट का फ़ॉलबैक उपयोग होता है, और स्कोप सीमित होने पर `x-openclaw-model` जैसे स्वामी-स्तरीय हेडर के लिए `operator.admin` आवश्यक होता है। `/tools/invoke` और HTTP सेशन इतिहास एंडपॉइंट समान साझा-सीक्रेट नियम का पालन करते हैं। इन क्रेडेंशियल को अविश्वसनीय कॉलर के साथ साझा न करें; प्रत्येक विश्वास सीमा के लिए अलग gateway को प्राथमिकता दें।
 
-- Gateway HTTP bearer auth प्रभावी रूप से all-or-nothing operator access है।
-- ऐसे credentials जो `/v1/chat/completions`, `/v1/responses`, `/api/v1/admin/rpc` जैसे plugin routes, या `/api/channels/*` call कर सकते हैं, उन्हें उस gateway के लिए full-access operator secrets मानें।
-- OpenAI-compatible HTTP surface पर, shared-secret bearer auth full default operator scopes (`operator.admin`, `operator.approvals`, `operator.pairing`, `operator.read`, `operator.talk.secrets`, `operator.write`) और agent turns के लिए owner semantics restore करता है; narrower `x-openclaw-scopes` values उस shared-secret path को reduce नहीं करतीं।
-- HTTP पर per-request scope semantics केवल तब apply होते हैं जब request trusted proxy auth जैसे identity-bearing mode से आती है, या explicitly no-auth private ingress से।
-- उन identity-bearing modes में, `x-openclaw-scopes` omit करने पर normal operator default scope set पर fallback होता है; जब आप narrower scope set चाहते हैं, तो header explicitly भेजें। `x-openclaw-model` जैसे owner-level OpenAI-compatible headers को scopes narrowed होने पर `operator.admin` चाहिए।
-- `/tools/invoke` और HTTP session history endpoints वही shared-secret rule follow करते हैं: token/password bearer auth वहां भी full operator access माना जाता है, जबकि identity-bearing modes declared scopes का सम्मान करते हैं।
-- इन credentials को untrusted callers के साथ share न करें; हर trust boundary के लिए separate gateways prefer करें।
+टोकन-रहित Serve प्रमाणीकरण यह मानता है कि gateway होस्ट स्वयं विश्वसनीय है—यह उसी होस्ट की दुर्भावनापूर्ण प्रोसेस के विरुद्ध सुरक्षा नहीं है। यदि gateway होस्ट पर अविश्वसनीय स्थानीय कोड चल सकता है, तो `allowTailscale` अक्षम करें और स्पष्ट साझा-सीक्रेट प्रमाणीकरण (`token` या `password`) आवश्यक करें।
 
-**Trust assumption:** tokenless Serve auth मानता है कि gateway host trusted है।
-इसे hostile same-host processes के विरुद्ध protection न मानें। अगर untrusted
-local code gateway host पर run हो सकता है, तो `gateway.auth.allowTailscale`
-disable करें और `gateway.auth.mode: "token"` या
-`"password"` के साथ explicit shared-secret auth require करें।
+इन हेडर को अपनी रिवर्स प्रॉक्सी से फ़ॉरवर्ड न करें। यदि आप gateway के सामने TLS समाप्त करते हैं या प्रॉक्सी लगाते हैं, तो `allowTailscale` अक्षम करें और इसके बजाय साझा-सीक्रेट प्रमाणीकरण या [विश्वसनीय प्रॉक्सी प्रमाणीकरण](/hi/gateway/trusted-proxy-auth) का उपयोग करें।
 
-**Security rule:** अपने reverse proxy से ये headers forward न करें। अगर
-आप gateway के सामने TLS terminate या proxy करते हैं, तो
-`gateway.auth.allowTailscale` disable करें और इसके बजाय shared-secret auth (`gateway.auth.mode:
-"token"` या `"password"`) या [Trusted Proxy Auth](/hi/gateway/trusted-proxy-auth)
-उपयोग करें।
+[Tailscale](/hi/gateway/tailscale) और [वेब अवलोकन](/hi/web) देखें।
 
-Trusted proxies:
+### रिवर्स प्रॉक्सी कॉन्फ़िगरेशन
 
-- अगर आप Gateway के सामने TLS terminate करते हैं, तो `gateway.trustedProxies` को अपने proxy IPs पर set करें।
-- OpenClaw उन IPs से आए `x-forwarded-for` (या `x-real-ip`) पर trust करेगा ताकि local pairing checks और HTTP auth/local checks के लिए client IP determine की जा सके।
-- सुनिश्चित करें कि आपका proxy `x-forwarded-for` को **overwrite** करता है और Gateway port तक direct access block करता है।
+nginx/Caddy/Traefik/आदि के पीछे फ़ॉरवर्ड किए गए क्लाइंट IP को सही ढंग से संभालने के लिए `gateway.trustedProxies` सेट करें। जब Gateway किसी ऐसे पते से प्रॉक्सी हेडर का पता लगाता है जो `trustedProxies` में **नहीं** है, तो वह कनेक्शन को स्थानीय नहीं मानेगा; यदि gateway प्रमाणीकरण अक्षम है, तो वह कनेक्शन अस्वीकार कर दिया जाता है। इससे प्रॉक्सी किए गए कनेक्शन localhost से आए हुए दिखाई देकर स्वतः विश्वास प्राप्त नहीं कर पाते।
 
-[Tailscale](/hi/gateway/tailscale) और [Web overview](/hi/web) देखें।
+`trustedProxies`, `gateway.auth.mode: "trusted-proxy"` को भी इनपुट देता है, जो अधिक सख्त है: यह डिफ़ॉल्ट रूप से लूपबैक-स्रोत प्रॉक्सी के लिए बंद अवस्था में विफल होता है। समान-होस्ट लूपबैक रिवर्स प्रॉक्सी स्थानीय-क्लाइंट पहचान और फ़ॉरवर्डेड-IP प्रबंधन के लिए `trustedProxies` का उपयोग कर सकते हैं, लेकिन `trusted-proxy` प्रमाणीकरण मोड को केवल तब संतुष्ट कर सकते हैं जब `gateway.auth.trustedProxy.allowLoopback = true`; अन्यथा टोकन/पासवर्ड प्रमाणीकरण का उपयोग करें।
 
-### node host के माध्यम से browser control (recommended)
-
-अगर आपका Gateway remote है लेकिन browser किसी दूसरी machine पर चलता है, तो browser machine पर एक **node host**
-चलाएं और Gateway को browser actions proxy करने दें ([Browser tool](/hi/tools/browser) देखें)।
-Node pairing को admin access की तरह treat करें।
-
-Recommended pattern:
-
-- Gateway और node host को same tailnet (Tailscale) पर रखें।
-- Node को intentionally pair करें; अगर आपको browser proxy routing की जरूरत नहीं है, तो उसे disable करें।
-
-Avoid:
-
-- Relay/control ports को LAN या public Internet पर expose करना।
-- Browser control endpoints के लिए Tailscale Funnel (public exposure)।
-
-### Disk पर secrets
-
-मान लें कि `~/.openclaw/` (या `$OPENCLAW_STATE_DIR/`) के अंतर्गत कुछ भी secrets या private data contain कर सकता है:
-
-- `openclaw.json`: कॉन्फ़िगरेशन में टोकन (gateway, remote gateway), provider सेटिंग्स, और allowlists शामिल हो सकते हैं।
-- `credentials/**`: channel credentials (उदाहरण: WhatsApp creds), pairing allowlists, legacy OAuth imports।
-- `agents/<agentId>/agent/auth-profiles.json`: API keys, token profiles, OAuth tokens, और वैकल्पिक `keyRef`/`tokenRef`।
-- `agents/<agentId>/agent/codex-home/**`: प्रति-agent Codex app-server account, config, skills, plugins, native thread state, और diagnostics (डिफ़ॉल्ट)।
-- `$CODEX_HOME/**` या `~/.codex/**`: जब Codex plugin स्पष्ट रूप से
-  `appServer.homeScope: "user"` का उपयोग करता है, Gateway native Codex
-  account, config, plugins, और threads को पढ़ और अपडेट कर सकता है। इसे privileged owner access मानें;
-  यह mode केवल local-stdio है और native thread management केवल owner के लिए है।
-- `secrets.json` (वैकल्पिक): `file` SecretRef providers (`secrets.providers`) द्वारा उपयोग किया जाने वाला file-backed secret payload।
-- `agents/<agentId>/agent/auth.json`: legacy compatibility file। Static `api_key` entries खोजे जाने पर scrub कर दी जाती हैं।
-- `agents/<agentId>/sessions/**`: session transcripts (`*.jsonl`) + routing metadata (`sessions.json`) जिनमें private messages और tool output हो सकते हैं।
-- bundled plugin packages: installed plugins (साथ में उनके `node_modules/`)।
-- `sandboxes/**`: tool sandbox workspaces; sandbox के अंदर आपके द्वारा पढ़ी/लिखी गई files की copies जमा हो सकती हैं।
-
-Hardening tips:
-
-- permissions कसी हुई रखें (dirs पर `700`, files पर `600`)।
-- gateway host पर full-disk encryption का उपयोग करें।
-- यदि host साझा है, तो Gateway के लिए dedicated OS user account को प्राथमिकता दें।
-
-### Workspace `.env` files
-
-OpenClaw agents और tools के लिए workspace-local `.env` files लोड करता है, लेकिन उन files को कभी भी gateway runtime controls को चुपचाप override करने नहीं देता।
-
-- Provider credential environment variables untrusted workspace `.env` files से blocked हैं। उदाहरणों में `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `XAI_API_KEY`, `MISTRAL_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `PERPLEXITY_API_KEY`, `BRAVE_API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `FIRECRAWL_API_KEY`, और installed trusted plugins द्वारा घोषित provider auth keys शामिल हैं। Provider credentials को Gateway process environment, `~/.openclaw/.env` (`$OPENCLAW_STATE_DIR/.env`), config `env` block, या वैकल्पिक login-shell import में रखें।
-- `OPENCLAW_*` से शुरू होने वाली कोई भी key untrusted workspace `.env` files से blocked है।
-- Matrix, Mattermost, IRC, और Synology Chat के लिए channel endpoint settings भी workspace `.env` overrides से blocked हैं, ताकि cloned workspaces bundled connector traffic को local endpoint config के जरिए redirect न कर सकें। Endpoint env keys (जैसे `MATRIX_HOMESERVER`, `MATTERMOST_URL`, `IRC_HOST`, `SYNOLOGY_CHAT_INCOMING_URL`) gateway process environment या `env.shellEnv` से आनी चाहिए, workspace-loaded `.env` से नहीं।
-- block fail-closed है: future release में जोड़ा गया नया runtime-control variable checked-in या attacker-supplied `.env` से inherit नहीं किया जा सकता; key ignored रहती है और gateway अपना value रखता है।
-- Trusted process/OS environment variables, global runtime dotenv, config `env`, और enabled login-shell import अब भी लागू होते हैं - यह केवल workspace `.env` file loading को सीमित करता है।
-
-क्यों: workspace `.env` files अक्सर agent code के पास रहती हैं, गलती से commit हो जाती हैं, या tools द्वारा लिखी जाती हैं। Provider credentials को block करना cloned workspace को attacker-controlled provider accounts substitute करने से रोकता है। पूरे `OPENCLAW_*` prefix को block करने का मतलब है कि बाद में नया `OPENCLAW_*` flag जोड़ना कभी भी workspace state से silent inheritance में regress नहीं कर सकता।
-
-### Logs and transcripts (redaction and retention)
-
-Logs और transcripts sensitive info leak कर सकते हैं, भले ही access controls सही हों:
-
-- Gateway logs में tool summaries, errors, और URLs शामिल हो सकते हैं।
-- Session transcripts में pasted secrets, file contents, command output, और links शामिल हो सकते हैं।
-
-Recommendations:
-
-- log और transcript redaction चालू रखें (`logging.redactSensitive: "tools"`; default)।
-- `logging.redactPatterns` के जरिए अपने environment के लिए custom patterns जोड़ें (tokens, hostnames, internal URLs)।
-- diagnostics share करते समय raw logs के बजाय `openclaw status --all` (pasteable, secrets redacted) को प्राथमिकता दें।
-- यदि आपको long retention की आवश्यकता नहीं है, तो old session transcripts और log files prune करें।
-
-Details: [Logging](/hi/gateway/logging)
-
-### DMs: pairing by default
-
-```json5
-{
-  channels: { whatsapp: { dmPolicy: "pairing" } },
-}
+```yaml
+gateway:
+  trustedProxies:
+    - "10.0.0.1" # रिवर्स प्रॉक्सी IP
+  allowRealIpFallback: false # डिफ़ॉल्ट false; केवल तभी सक्षम करें जब आपकी प्रॉक्सी X-Forwarded-For प्रदान न कर सके
+  auth:
+    mode: password
+    password: ${OPENCLAW_GATEWAY_PASSWORD}
 ```
 
-### Groups: require mention everywhere
+जब `trustedProxies` सेट होता है, तो Gateway क्लाइंट IP निर्धारित करने के लिए `X-Forwarded-For` का उपयोग करता है; जब तक `gateway.allowRealIpFallback: true` को स्पष्ट रूप से सेट न किया जाए, `X-Real-IP` को अनदेखा किया जाता है। सुनिश्चित करें कि आपकी प्रॉक्सी `X-Forwarded-For`/`X-Real-IP` में मान जोड़ने के बजाय उन्हें **अधिलेखित** करती है:
 
-```json
-{
-  "channels": {
-    "whatsapp": {
-      "groups": {
-        "*": { "requireMention": true }
-      }
-    }
-  },
-  "agents": {
-    "list": [
-      {
-        "id": "main",
-        "groupChat": { "mentionPatterns": ["@openclaw", "@mybot"] }
-      }
-    ]
-  }
-}
+```nginx
+# सही
+proxy_set_header X-Forwarded-For $remote_addr;
+proxy_set_header X-Real-IP $remote_addr;
+
+# गलत: अविश्वसनीय क्लाइंट द्वारा दिए गए मानों को बनाए रखता/जोड़ता है
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 ```
 
-group chats में, केवल स्पष्ट रूप से mention किए जाने पर respond करें।
+विश्वसनीय प्रॉक्सी हेडर Node डिवाइस पेयरिंग को स्वतः विश्वसनीय नहीं बनाते—`gateway.nodes.pairing.autoApproveCidrs` एक अलग, डिफ़ॉल्ट रूप से अक्षम ऑपरेटर नीति है, और लूपबैक-स्रोत विश्वसनीय-प्रॉक्सी हेडर पथ तब भी Node की स्वतः स्वीकृति से बाहर रहते हैं जब लूपबैक विश्वसनीय-प्रॉक्सी प्रमाणीकरण सक्षम हो (क्योंकि स्थानीय कॉलर उन हेडर की जालसाजी कर सकते हैं)।
 
-### Separate numbers (WhatsApp, Signal, Telegram)
+### HSTS और ओरिजिन संबंधी टिप्पणियाँ
 
-Phone-number-based channels के लिए, अपने AI को अपने personal number से अलग phone number पर चलाने पर विचार करें:
+- OpenClaw का gateway पहले स्थानीय/लूपबैक के लिए बनाया गया है। यदि आप किसी रिवर्स प्रॉक्सी पर TLS समाप्त करते हैं, तो HSTS वहीं सेट करें।
+- यदि gateway स्वयं HTTPS समाप्त करता है, तो `gateway.http.securityHeaders.strictTransportSecurity` OpenClaw प्रतिक्रियाओं से HSTS हेडर उत्सर्जित करता है।
+- गैर-लूपबैक Control UI परिनियोजन के लिए डिफ़ॉल्ट रूप से `gateway.controlUi.allowedOrigins` आवश्यक है; `allowedOrigins: ["*"]` एक स्पष्ट सभी-अनुमत नीति है, कोई सुदृढ़ डिफ़ॉल्ट नहीं—अत्यंत नियंत्रित स्थानीय परीक्षण के बाहर इससे बचें।
+- सामान्य लूपबैक छूट सक्षम होने पर भी लूपबैक पर ब्राउज़र-ओरिजिन प्रमाणीकरण विफलताएँ दर-सीमित रहती हैं, लेकिन लॉकआउट कुंजी एक साझा localhost बकेट के बजाय प्रत्येक सामान्यीकृत `Origin` मान के अनुसार सीमित होती है।
+- `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true` Host-हेडर ओरिजिन फ़ॉलबैक मोड सक्षम करता है; इसे ऑपरेटर द्वारा चुनी गई खतरनाक नीति मानें।
+- DNS रीबाइंडिंग और प्रॉक्सी-होस्ट हेडर व्यवहार को परिनियोजन सुदृढ़ीकरण की चिंता मानें; `trustedProxies` को कड़ा रखें और gateway को सीधे सार्वजनिक इंटरनेट पर उजागर करने से बचें।
+- विस्तृत परिनियोजन मार्गदर्शन: [विश्वसनीय प्रॉक्सी प्रमाणीकरण](/hi/gateway/trusted-proxy-auth#tls-termination-and-hsts)।
 
-- Personal number: आपकी conversations private रहती हैं
-- Bot number: AI इन्हें appropriate boundaries के साथ handle करता है
+### HTTP पर Control UI
 
-### Read-only mode (via sandbox and tools)
+डिवाइस पहचान जनरेट करने के लिए Control UI को सुरक्षित संदर्भ (HTTPS या localhost) की आवश्यकता होती है।
 
-आप इनको combine करके read-only profile बना सकते हैं:
+- `gateway.controlUi.allowInsecureAuth`: स्थानीय संगतता टॉगल। localhost पर, जब पृष्ठ असुरक्षित HTTP के माध्यम से लोड होता है, तो डिवाइस पहचान के बिना Control UI प्रमाणीकरण की अनुमति देता है। पेयरिंग जाँच को बायपास नहीं करता और रिमोट (गैर-localhost) डिवाइस पहचान आवश्यकताओं को शिथिल नहीं करता। HTTPS (Tailscale Serve) को प्राथमिकता दें या UI को `127.0.0.1` पर खोलें।
+- `gateway.controlUi.dangerouslyDisableDeviceAuth`: सेवानिवृत्त ब्रेक-ग्लास इनपुट। पुराने कॉन्फ़िग उपचार के लिए प्रमाणित, केवल-पेयरिंग Control UI एक्सेस तब तक बनाए रखते हैं, जब तक HTTPS या localhost पर दोबारा खोला गया ब्राउज़र सीमित, स्पष्ट स्व-पेयरिंग माइग्रेशन पूरा नहीं कर लेता; इसे वर्तमान कॉन्फ़िग में न जोड़ें।
+- उन फ़्लैग से अलग, एक सफल `gateway.auth.mode: "trusted-proxy"` डिवाइस पहचान के बिना **ऑपरेटर** Control UI सेशन स्वीकार कर सकता है—यह जानबूझकर किया गया प्रमाणीकरण-मोड व्यवहार है, कोई `allowInsecureAuth` शॉर्टकट नहीं, और यह Node-भूमिका वाले Control UI सेशन तक विस्तारित नहीं होता।
 
-- `agents.defaults.sandbox.workspaceAccess: "ro"` (या workspace access नहीं चाहिए तो `"none"`)
-- tool allow/deny lists जो `write`, `edit`, `apply_patch`, `exec`, `process`, आदि को block करती हैं।
+`allowInsecureAuth` सक्षम होने पर `openclaw security audit` चेतावनी देता है।
 
-Additional hardening options:
+### असुरक्षित/खतरनाक फ़्लैग
 
-- `tools.exec.applyPatch.workspaceOnly: true` (default): सुनिश्चित करता है कि sandboxing off होने पर भी `apply_patch` workspace directory के बाहर write/delete नहीं कर सकता। इसे `false` केवल तभी set करें जब आप जानबूझकर चाहते हों कि `apply_patch` workspace के बाहर files को छुए।
-- `tools.fs.workspaceOnly: true` (वैकल्पिक): `read`/`write`/`edit`/`apply_patch` paths और native prompt image auto-load paths को workspace directory तक restrict करता है (यदि आप आज absolute paths allow करते हैं और single guardrail चाहते हैं तो उपयोगी)।
-- filesystem roots narrow रखें: agent workspaces/sandbox workspaces के लिए अपने home directory जैसे broad roots से बचें। Broad roots sensitive local files (उदाहरण के लिए `~/.openclaw` के तहत state/config) को filesystem tools के सामने expose कर सकते हैं।
+`openclaw security audit` प्रत्येक सक्षम ज्ञात असुरक्षित/खतरनाक डीबग स्विच के लिए `config.insecure_or_dangerous_flags` उठाता है (प्रत्येक फ़्लैग के लिए एक निष्कर्ष)। उत्पादन में इन्हें सेट न रखें। यदि ऑडिट दमन कॉन्फ़िगर किए गए हैं, तो मेल खाते निष्कर्षों के `suppressedFindings` में जाने पर भी `security.audit.suppressions.active` सक्रिय आउटपुट में बना रहता है।
 
-### Secure baseline (copy/paste)
+<AccordionGroup>
+  <Accordion title="आज ऑडिट द्वारा ट्रैक किए जाने वाले फ़्लैग">
+    - `gateway.controlUi.allowInsecureAuth=true`
+    - `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback=true`
+    - सेवानिवृत्त `gateway.controlUi.dangerouslyDisableDeviceAuth=true` से आयातित लंबित Control UI डिवाइस-प्रमाणीकरण माइग्रेशन
+    - `security.audit.suppressions configured (<count>)`
+    - `hooks.gmail.allowUnsafeExternalContent=true`
+    - `hooks.mappings[<index>].allowUnsafeExternalContent=true`
+    - `tools.exec.applyPatch.workspaceOnly=false`
+    - `plugins.entries.acpx.config.permissionMode=approve-all`
 
-एक "safe default" config जो Gateway को private रखता है, DM pairing require करता है, और always-on group bots से बचता है:
+  </Accordion>
+
+  <Accordion title="कॉन्फ़िग स्कीमा में सभी dangerous*/dangerously* कुंजियाँ">
+    Control UI और ब्राउज़र:
+    - `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback`
+    - `gateway.controlUi.dangerouslyDisableDeviceAuth` (सेवानिवृत्त अपग्रेड इनपुट)
+    - `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork`
+
+    चैनल नाम-मिलान (बंडल किए गए और Plugin चैनल; जहाँ लागू हो वहाँ प्रति `accounts.<accountId>` भी):
+    - `channels.discord.dangerouslyAllowNameMatching`
+    - `channels.googlechat.dangerouslyAllowNameMatching`
+    - `channels.msteams.dangerouslyAllowNameMatching`
+    - `channels.slack.dangerouslyAllowNameMatching`
+    - `channels.irc.dangerouslyAllowNameMatching` (Plugin चैनल)
+    - `channels.mattermost.dangerouslyAllowNameMatching` (Plugin चैनल)
+    - `channels.synology-chat.dangerouslyAllowNameMatching` (Plugin चैनल)
+    - `channels.synology-chat.dangerouslyAllowInheritedWebhookPath` (Plugin चैनल)
+    - `channels.zalouser.dangerouslyAllowNameMatching` (Plugin चैनल)
+
+    नेटवर्क एक्सपोज़र:
+    - `channels.telegram.network.dangerouslyAllowPrivateNetwork` (प्रति अकाउंट भी)
+
+    सैंडबॉक्स Docker (डिफ़ॉल्ट + प्रति-एजेंट):
+    - `agents.defaults.sandbox.docker.dangerouslyAllowReservedContainerTargets`
+    - `agents.defaults.sandbox.docker.dangerouslyAllowExternalBindSources`
+    - `agents.defaults.sandbox.docker.dangerouslyAllowContainerNamespaceJoin`
+
+  </Accordion>
+</AccordionGroup>
+
+## परिनियोजन और होस्ट विश्वास
+
+- Gateway होस्ट पर पूर्ण-डिस्क एन्क्रिप्शन; यदि होस्ट साझा है, तो Gateway के लिए एक समर्पित OS उपयोगकर्ता खाते को प्राथमिकता दें।
+- प्रकाशित पैकेज निर्भरता लॉक: स्रोत चेकआउट `pnpm-lock.yaml` का उपयोग करते हैं; प्रकाशित `openclaw` npm पैकेज और OpenClaw के स्वामित्व वाले npm plugin पैकेजों में `npm-shrinkwrap.json` शामिल होता है, ताकि इंस्टॉलेशन के समय नया ग्राफ़ हल करने के बजाय रिलीज़ से समीक्षा किए गए ट्रांज़िटिव निर्भरता ग्राफ़ का उपयोग किया जाए। यह आपूर्ति-श्रृंखला सुदृढ़ीकरण और रिलीज़ पुनरुत्पादकता की सीमा है, सैंडबॉक्स नहीं—देखें [npm shrinkwrap](/hi/gateway/security/shrinkwrap)।
+- सुरक्षित फ़ाइल संचालन: OpenClaw रूट-सीमित फ़ाइल पहुँच, परमाणु लेखन, आर्काइव निष्कर्षण, अस्थायी कार्यस्थलों और गुप्त फ़ाइल सहायकों के लिए `@openclaw/fs-safe` का उपयोग करता है। वैकल्पिक POSIX Python सहायक डिफ़ॉल्ट रूप से **बंद** रहता है; `OPENCLAW_FS_SAFE_PYTHON_MODE=auto` या `require` केवल तभी सेट करें, जब आपको अतिरिक्त fd-सापेक्ष परिवर्तन सुदृढ़ीकरण चाहिए और आप Python रनटाइम का समर्थन कर सकते हैं। विवरण: [सुरक्षित फ़ाइल संचालन](/hi/gateway/security/secure-file-operations)।
+- साझा Slack कार्यस्थान का जोखिम: यदि Slack में हर कोई बॉट को संदेश भेज सकता है, तो मुख्य जोखिम प्रत्यायोजित टूल प्राधिकार है—कोई भी अनुमत प्रेषक एजेंट की नीति के अंतर्गत टूल कॉल (`exec`, ब्राउज़र, नेटवर्क/फ़ाइल टूल) करवा सकता है, किसी एक प्रेषक का प्रॉम्प्ट/सामग्री इंजेक्शन साझा स्थिति/डिवाइस/आउटपुट को प्रभावित कर सकता है, और यदि साझा एजेंट के पास संवेदनशील क्रेडेंशियल/फ़ाइलें हैं, तो कोई भी अनुमत प्रेषक टूल के उपयोग द्वारा संभावित रूप से डेटा बाहर निकलवा सकता है। टीम कार्यप्रवाहों के लिए न्यूनतम टूल वाले अलग एजेंट/Gateway का उपयोग करें; व्यक्तिगत-डेटा वाले एजेंट को निजी रखें।
+- कंपनी-साझा एजेंट (स्वीकार्य पैटर्न): यह तब उचित है, जब एजेंट का उपयोग करने वाला हर व्यक्ति समान विश्वास सीमा में हो (उदाहरण के लिए, कंपनी की एक टीम) और एजेंट का दायरा केवल व्यावसायिक हो। इसे किसी समर्पित मशीन/VM/कंटेनर पर चलाएँ, समर्पित OS उपयोगकर्ता + समर्पित ब्राउज़र/प्रोफ़ाइल/खातों का उपयोग करें, और उस रनटाइम में व्यक्तिगत Apple/Google खातों या व्यक्तिगत पासवर्ड-मैनेजर/ब्राउज़र प्रोफ़ाइल से साइन इन न करें। एक ही रनटाइम पर व्यक्तिगत और कंपनी की पहचानों को मिलाने से यह पृथक्करण समाप्त हो जाता है और व्यक्तिगत डेटा के उजागर होने का जोखिम बढ़ जाता है।
+
+## डिस्क पर गोपनीय जानकारियाँ
+
+मान लें कि `~/.openclaw/` (या `$OPENCLAW_STATE_DIR/`) के अंतर्गत किसी भी चीज़ में गोपनीय जानकारियाँ या निजी डेटा हो सकता है:
+
+| पथ                                           | सामग्री                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openclaw.json`                                | कॉन्फ़िगरेशन में टोकन (Gateway, रिमोट Gateway), प्रदाता सेटिंग्स और अनुमति-सूचियाँ शामिल हो सकती हैं।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `credentials/**`                               | चैनल क्रेडेंशियल (उदाहरण के लिए WhatsApp क्रेडेंशियल), पेयरिंग अनुमति-सूचियाँ, पुराने OAuth आयात।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `state/openclaw.sqlite`                        | साझा रनटाइम स्थिति, जिसमें नेटिव MCP OAuth एक्सेस/रिफ़्रेश टोकन, डायनेमिक क्लाइंट पंजीकरण सीक्रेट और डिस्कवरी स्थिति शामिल हैं।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `agents/<agentId>/agent/openclaw-agent.sqlite` | प्रति-एजेंट रनटाइम स्थिति, जिसमें मॉडल प्रमाणीकरण प्रोफ़ाइल शामिल हैं।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `agents/<agentId>/agent/auth-profiles.json`    | पुराने मॉडल-प्रमाणीकरण माइग्रेशन का स्रोत; doctor समर्थित रिकॉर्ड को प्रति-एजेंट SQLite डेटाबेस में आयात करता है।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `agents/<agentId>/agent/codex-home/**`         | प्रति-एजेंट Codex ऐप-सर्वर खाता, कॉन्फ़िगरेशन, कौशल, Plugin, नेटिव थ्रेड स्थिति, निदान (डिफ़ॉल्ट)।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `$CODEX_HOME/**` या `~/.codex/**`              | नेटिव Codex रनटाइम स्थिति। सामान्य हार्नेस इसे केवल स्पष्ट `plugins.entries.codex.config.appServer.homeScope: "user"` के साथ एक्सेस करता है। अलग पर्यवेक्षण कनेक्शन इसे तब एक्सेस करता है जब उसका निर्धारित होम स्कोप `"user"` हो, जो सेट न होने पर stdio या Unix के लिए डिफ़ॉल्ट है। इसमें नेटिव Codex खाता, कॉन्फ़िगरेशन, Plugin और थ्रेड स्टोर शामिल हैं। पर्यवेक्षण स्रोत मेटाडेटा सूचीबद्ध करता है और उस कनेक्शन पर जारी Chat की प्रामाणिक नेटिव शाखा तथा बाद के टर्न बनाए रखता है; ब्रांचिंग सीमित स्थायी उपयोगकर्ता और सहायक इतिहास को एक प्रमाणित, मॉडल-लॉक किए गए OpenClaw Chat में कॉपी करती है। इसे केवल स्वामी-नियंत्रित Gateway के लिए सक्षम करें। [Codex हार्नेस](/hi/plugins/codex-harness#share-threads-with-codex-desktop-and-cli) और [Codex पर्यवेक्षण](/hi/plugins/codex-supervision) देखें। |
+| `secrets.json` (वैकल्पिक)                      | `file` SecretRef प्रदाताओं (`secrets.providers`) द्वारा उपयोग किया जाने वाला फ़ाइल-समर्थित सीक्रेट पेलोड।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `agents/<agentId>/agent/auth.json`             | पुरानी संगतता फ़ाइल; मिलने पर स्थिर `api_key` प्रविष्टियाँ हटा दी जाती हैं।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `agents/<agentId>/agent/openclaw-agent.sqlite` | प्रति-एजेंट रनटाइम स्थिति, जिसमें ऐसे सत्र रिकॉर्ड और ट्रांसक्रिप्ट शामिल हैं जिनमें निजी संदेश और टूल आउटपुट हो सकते हैं।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `agents/<agentId>/sessions/**`                 | पुराने सत्र माइग्रेशन स्रोत और अभिलेखागार, जिनमें निजी संदेश और टूल आउटपुट हो सकते हैं।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| बंडल किए गए Plugin पैकेज                        | इंस्टॉल किए गए Plugin (और उनके `node_modules/`)।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `sandboxes/**`                                 | टूल सैंडबॉक्स कार्यस्थान; सैंडबॉक्स के भीतर पढ़ी/लिखी गई फ़ाइलों की प्रतियाँ जमा हो सकती हैं।                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+
+### क्रेडेंशियल संग्रहण मानचित्र
+
+बैकअप संबंधी निर्णयों के लिए भी उपयोगी:
+
+- WhatsApp: `~/.openclaw/credentials/whatsapp/<accountId>/creds.json`
+- Telegram बॉट टोकन: कॉन्फ़िगरेशन/पर्यावरण या `channels.telegram.tokenFile` (केवल सामान्य फ़ाइल; सिमलिंक अस्वीकृत)
+- Discord बॉट टोकन: कॉन्फ़िगरेशन/पर्यावरण या SecretRef (पर्यावरण/फ़ाइल/निष्पादन प्रदाता)
+- Slack टोकन: कॉन्फ़िगरेशन/पर्यावरण (`channels.slack.*`)
+- पेयरिंग अनुमति-सूचियाँ: `~/.openclaw/credentials/<channel>-allowFrom.json` (डिफ़ॉल्ट खाता) / `<channel>-<accountId>-allowFrom.json` (गैर-डिफ़ॉल्ट खाते)
+- मॉडल प्रमाणीकरण प्रोफ़ाइल: `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite` (`auth_profile_store`)
+- MCP OAuth सत्र: `~/.openclaw/state/openclaw.sqlite` (`mcp_oauth_stores`)
+- लेगेसी OAuth आयात: `~/.openclaw/credentials/oauth.json`
+
+सुदृढ़ीकरण: अनुमतियाँ प्रतिबंधित रखें (डायरेक्टरी पर `700`, फ़ाइलों पर `600`); Gateway होस्ट पर पूर्ण-डिस्क एन्क्रिप्शन का उपयोग करें; यदि होस्ट साझा है, तो समर्पित OS उपयोगकर्ता खाते को प्राथमिकता दें।
+
+### फ़ाइल अनुमतियाँ
+
+- `~/.openclaw/openclaw.json`: `600` (केवल उपयोगकर्ता के लिए पढ़ना/लिखना)
+- `~/.openclaw`: `700` (केवल उपयोगकर्ता)
+
+`openclaw doctor` चेतावनी दे सकता है और इन्हें अधिक प्रतिबंधित करने का विकल्प दे सकता है।
+
+### वर्कस्पेस `.env` फ़ाइलें
+
+OpenClaw एजेंटों और टूल के लिए वर्कस्पेस-स्थानीय `.env` फ़ाइलें लोड करता है, लेकिन उन्हें कभी भी Gateway रनटाइम नियंत्रणों को चुपचाप ओवरराइड नहीं करने देता:
+
+- अविश्वसनीय वर्कस्पेस `.env` फ़ाइलों से प्रदाता क्रेडेंशियल पर्यावरण चर अवरुद्ध किए जाते हैं—उदाहरण के लिए `GEMINI_API_KEY`, `GOOGLE_API_KEY`, `XAI_API_KEY`, `MISTRAL_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `PERPLEXITY_API_KEY`, `BRAVE_API_KEY`, `TAVILY_API_KEY`, `EXA_API_KEY`, `FIRECRAWL_API_KEY`, और इंस्टॉल किए गए विश्वसनीय plugins द्वारा घोषित प्रदाता प्रमाणीकरण कुंजियाँ। इसके बजाय प्रदाता क्रेडेंशियल को Gateway प्रक्रिया के पर्यावरण, `~/.openclaw/.env` (`$OPENCLAW_STATE_DIR/.env`), कॉन्फ़िगरेशन के `env` ब्लॉक, या वैकल्पिक लॉगिन-शेल आयात में रखें।
+- `OPENCLAW_` से शुरू होने वाली प्रत्येक कुंजी अविश्वसनीय वर्कस्पेस `.env` फ़ाइलों से अवरुद्ध की जाती है, जिससे पूरा रनटाइम नेमस्पेस आरक्षित रहता है, ताकि भविष्य का `OPENCLAW_*` नियंत्रण डिफ़ॉल्ट रूप से फ़ेल-क्लोज़्ड हो, न कि चेक-इन की गई या हमलावर द्वारा प्रदान की गई `.env` सामग्री से चुपचाप इनहेरिट हो सके।
+- चैनल और प्रदाता एंडपॉइंट-रूटिंग सेटिंग भी वर्कस्पेस `.env` ओवरराइड से अवरुद्ध हैं (उदाहरण के लिए `MATRIX_HOMESERVER`, `MATTERMOST_URL`, `IRC_HOST`, `SYNOLOGY_CHAT_INCOMING_URL`, `AZURE_SPEECH_ENDPOINT`, और `_ENDPOINT` पर समाप्त होने वाली अन्य कुंजियाँ), ताकि क्लोन किया गया वर्कस्पेस स्थानीय एंडपॉइंट कॉन्फ़िगरेशन के माध्यम से बंडल किए गए कनेक्टर ट्रैफ़िक को पुनर्निर्देशित न कर सके। इन्हें Gateway प्रक्रिया के पर्यावरण, वैश्विक रनटाइम dotenv, स्पष्ट कॉन्फ़िगरेशन, या `env.shellEnv` से आना चाहिए।
+- विश्वसनीय प्रक्रिया/OS पर्यावरण चर, वैश्विक रनटाइम dotenv, कॉन्फ़िगरेशन `env`, और सक्षम लॉगिन-शेल आयात अब भी लागू होते हैं—यह केवल वर्कस्पेस `.env` फ़ाइल लोडिंग को सीमित करता है।
+
+वर्कस्पेस `.env` फ़ाइलें प्रायः एजेंट कोड के पास रहती हैं, दुर्घटनावश कमिट हो जाती हैं, या टूल द्वारा लिखी जाती हैं; प्रदाता क्रेडेंशियल को अवरुद्ध करने से क्लोन किया गया वर्कस्पेस हमलावर-नियंत्रित प्रदाता खातों का प्रतिस्थापन नहीं कर सकता।
+
+### लॉग और ट्रांसक्रिप्ट
+
+OpenClaw सत्र निरंतरता और वैकल्पिक मेमोरी इंडेक्सिंग के लिए सत्र ट्रांसक्रिप्ट को डिस्क पर `~/.openclaw/agents/<agentId>/sessions/*.jsonl` के अंतर्गत संग्रहीत करता है—फ़ाइल सिस्टम एक्सेस वाली कोई भी प्रक्रिया/उपयोगकर्ता उन्हें पढ़ सकता है। डिस्क एक्सेस को विश्वास सीमा मानें और `~/.openclaw` अनुमतियों को प्रतिबंधित करें; अधिक मजबूत पृथक्करण के लिए एजेंटों को अलग-अलग OS उपयोगकर्ताओं या होस्ट पर चलाएँ।
+
+Gateway लॉग में टूल सारांश, त्रुटियाँ और URL शामिल हो सकते हैं; सत्र ट्रांसक्रिप्ट में चिपकाए गए सीक्रेट, फ़ाइल सामग्री, कमांड आउटपुट और लिंक शामिल हो सकते हैं।
+
+- लॉग/ट्रांसक्रिप्ट संशोधन चालू रखें (`logging.redactSensitive: "tools"`, डिफ़ॉल्ट)।
+- `logging.redactPatterns` के माध्यम से अपने पर्यावरण के लिए कस्टम पैटर्न जोड़ें (टोकन, होस्टनेम, आंतरिक URL)।
+- निदान साझा करते समय कच्चे लॉग के बजाय `openclaw status --all` (चिपकाने योग्य, सीक्रेट संशोधित) को प्राथमिकता दें।
+- यदि आपको लंबे समय तक प्रतिधारण की आवश्यकता नहीं है, तो पुराने सत्र ट्रांसक्रिप्ट और लॉग फ़ाइलें हटाएँ।
+
+विवरण: [लॉगिंग](/hi/gateway/logging)
+
+## सुरक्षित आधाररेखा (कॉपी/पेस्ट)
 
 ```json5
 {
@@ -1115,223 +815,43 @@ Additional hardening options:
 }
 ```
 
-यदि आप tool execution को भी "safer by default" चाहते हैं, तो किसी भी non-owner agent के लिए sandbox + dangerous tools deny जोड़ें (नीचे "Per-agent access profiles" के अंतर्गत example)।
+Gateway को निजी रखता है, DM पेयरिंग आवश्यक बनाता है, और हमेशा सक्रिय रहने वाले समूह बॉट से बचाता है। टूल निष्पादन को भी अधिक सुरक्षित बनाने के लिए, किसी भी गैर-स्वामी एजेंट के लिए सैंडबॉक्स जोड़ें और खतरनाक टूल अस्वीकार करें (ऊपर "प्रति-एजेंट एक्सेस प्रोफ़ाइल" देखें)।
 
-chat-driven agent turns के लिए built-in baseline: non-owner senders `cron` या `gateway` tools का उपयोग नहीं कर सकते।
+### अलग नंबर (WhatsApp, Signal, Telegram)
 
-## Sandboxing (recommended)
-
-Dedicated doc: [Sandboxing](/hi/gateway/sandboxing)
-
-दो complementary approaches:
-
-- **पूरा Gateway Docker में चलाएँ** (container boundary): [Docker](/hi/install/docker)
-- **Tool sandbox** (`agents.defaults.sandbox`, host gateway + sandbox-isolated tools; Docker default backend है): [Sandboxing](/hi/gateway/sandboxing)
-
-<Note>
-cross-agent access रोकने के लिए, `agents.defaults.sandbox.scope` को `"agent"` (default) पर रखें या stricter per-session isolation के लिए `"session"` पर रखें। `scope: "shared"` single container या workspace का उपयोग करता है।
-</Note>
-
-sandbox के अंदर agent workspace access पर भी विचार करें:
-
-- `agents.defaults.sandbox.workspaceAccess: "none"` (default) agent workspace को off-limits रखता है; tools `~/.openclaw/sandboxes` के तहत sandbox workspace के विरुद्ध run करते हैं
-- `agents.defaults.sandbox.workspaceAccess: "ro"` agent workspace को `/agent` पर read-only mount करता है (`write`/`edit`/`apply_patch` disable करता है)
-- `agents.defaults.sandbox.workspaceAccess: "rw"` agent workspace को `/workspace` पर read/write mount करता है
-- अतिरिक्त `sandbox.docker.binds` normalized और canonicalized source paths के विरुद्ध validate किए जाते हैं। Parent-symlink tricks और canonical home aliases अब भी fail closed होते हैं यदि वे `/etc`, `/var/run`, या OS home के तहत credential directories जैसे blocked roots में resolve होते हैं।
-
-<Warning>
-`tools.elevated` global baseline escape hatch है जो exec को sandbox के बाहर चलाता है। effective host default रूप से `gateway` है, या जब exec target `node` पर configured हो तो `node`। `tools.elevated.allowFrom` tight रखें और इसे strangers के लिए enable न करें। आप `agents.list[].tools.elevated` के जरिए per agent elevated को और restrict कर सकते हैं। देखें [Elevated mode](/hi/tools/elevated)।
-</Warning>
-
-### Sub-agent delegation guardrail
-
-यदि आप session tools allow करते हैं, तो delegated sub-agent runs को एक और boundary decision के रूप में treat करें:
-
-- जब तक agent को सच में delegation की आवश्यकता न हो, `sessions_spawn` deny करें।
-- `agents.defaults.subagents.allowAgents` और किसी भी per-agent `agents.list[].subagents.allowAgents` overrides को known-safe target agents तक restricted रखें।
-- किसी भी workflow के लिए जिसे sandboxed रहना ही चाहिए, `sessions_spawn` को `sandbox: "require"` के साथ call करें (default `inherit` है)।
-- target child runtime sandboxed नहीं होने पर `sandbox: "require"` fast fail करता है।
-
-## Browser control risks
-
-browser control enable करने से model को real browser चलाने की क्षमता मिलती है।
-यदि उस browser profile में पहले से logged-in sessions हैं, तो model उन
-accounts और data तक access कर सकता है। Browser profiles को **sensitive state** मानें:
-
-- agent के लिए dedicated profile को प्राथमिकता दें (default `openclaw` profile)।
-- agent को अपने personal daily-driver profile की ओर point करने से बचें।
-- sandboxed agents के लिए host browser control disabled रखें, जब तक आप उन पर trust न करते हों।
-- standalone loopback browser control API केवल shared-secret auth
-  (gateway token bearer auth या gateway password) को honor करता है। यह
-  trusted-proxy या Tailscale Serve identity headers consume नहीं करता।
-- browser downloads को untrusted input मानें; isolated downloads directory को प्राथमिकता दें।
-- संभव हो तो agent profile में browser sync/password managers disable करें (blast radius घटाता है)।
-- remote gateways के लिए, मानें कि "browser control" उस profile की पहुंच वाली किसी भी चीज़ के लिए "operator access" के equivalent है।
-- Gateway और node hosts को tailnet-only रखें; browser control ports को LAN या public Internet पर expose करने से बचें।
-- जब आवश्यकता न हो तो browser proxy routing disable करें (`gateway.nodes.browser.mode="off"`)।
-- Chrome MCP existing-session mode **"safer"** नहीं है; यह उस host Chrome profile की पहुंच वाली किसी भी चीज़ में आपकी तरह act कर सकता है।
-
-### Browser SSRF policy (strict by default)
-
-OpenClaw की browser navigation policy default रूप से strict है: private/internal destinations तब तक blocked रहते हैं जब तक आप explicit opt in न करें।
-
-- Default: `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork` unset है, इसलिए browser navigation private/internal/special-use destinations को blocked रखता है।
-- Legacy alias: compatibility के लिए `browser.ssrfPolicy.allowPrivateNetwork` अब भी accepted है।
-- Opt-in mode: private/internal/special-use destinations allow करने के लिए `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork: true` set करें।
-- strict mode में, explicit exceptions के लिए `hostnameAllowlist` (`*.example.com` जैसे patterns) और `allowedHostnames` (exact host exceptions, जिसमें `localhost` जैसे blocked names शामिल हैं) का उपयोग करें।
-- redirect-based pivots घटाने के लिए navigation से पहले request check किया जाता है और navigation के बाद final `http(s)` URL पर best-effort re-check किया जाता है।
-
-Example strict policy:
-
-```json5
-{
-  browser: {
-    ssrfPolicy: {
-      dangerouslyAllowPrivateNetwork: false,
-      hostnameAllowlist: ["*.example.com", "example.com"],
-      allowedHostnames: ["localhost"],
-    },
-  },
-}
-```
-
-## Per-agent access profiles (multi-agent)
-
-multi-agent routing के साथ, प्रत्येक agent की अपनी sandbox + tool policy हो सकती है:
-प्रति agent **full access**, **read-only**, या **no access** देने के लिए इसका उपयोग करें।
-पूरी details और precedence rules के लिए [Multi-Agent Sandbox & Tools](/hi/tools/multi-agent-sandbox-tools) देखें।
-
-Common use cases:
-
-- Personal agent: full access, no sandbox
-- Family/work agent: sandboxed + read-only tools
-- Public agent: sandboxed + no filesystem/shell tools
-
-### Example: full access (no sandbox)
-
-```json5
-{
-  agents: {
-    list: [
-      {
-        id: "personal",
-        workspace: "~/.openclaw/workspace-personal",
-        sandbox: { mode: "off" },
-      },
-    ],
-  },
-}
-```
-
-### उदाहरण: केवल-पढ़ने वाले टूल + केवल-पढ़ने वाला कार्यक्षेत्र
-
-```json5
-{
-  agents: {
-    list: [
-      {
-        id: "family",
-        workspace: "~/.openclaw/workspace-family",
-        sandbox: {
-          mode: "all",
-          scope: "agent",
-          workspaceAccess: "ro",
-        },
-        tools: {
-          allow: ["read"],
-          deny: ["write", "edit", "apply_patch", "exec", "process", "browser"],
-        },
-      },
-    ],
-  },
-}
-```
-
-### उदाहरण: कोई फाइलसिस्टम/शेल एक्सेस नहीं (प्रदाता मैसेजिंग अनुमत)
-
-```json5
-{
-  agents: {
-    list: [
-      {
-        id: "public",
-        workspace: "~/.openclaw/workspace-public",
-        sandbox: {
-          mode: "all",
-          scope: "agent",
-          workspaceAccess: "none",
-        },
-        // Session tools can reveal sensitive data from transcripts. By default OpenClaw limits these tools
-        // to the current session + spawned subagent sessions, but you can clamp further if needed.
-        // See `tools.sessions.visibility` in the configuration reference.
-        tools: {
-          sessions: { visibility: "tree" }, // self | tree | agent | all
-          allow: [
-            "sessions_list",
-            "sessions_history",
-            "sessions_send",
-            "sessions_spawn",
-            "session_status",
-            "whatsapp",
-            "telegram",
-            "slack",
-            "discord",
-          ],
-          deny: [
-            "read",
-            "write",
-            "edit",
-            "apply_patch",
-            "exec",
-            "process",
-            "browser",
-            "canvas",
-            "nodes",
-            "cron",
-            "gateway",
-            "image",
-          ],
-        },
-      },
-    ],
-  },
-}
-```
+फ़ोन नंबर-आधारित चैनलों के लिए सहायक को अपने व्यक्तिगत नंबर से अलग नंबर पर चलाने पर विचार करें, ताकि व्यक्तिगत बातचीत निजी रहे और बॉट नंबर अपनी सीमाओं के भीतर स्वचालन संभाले।
 
 ## घटना प्रतिक्रिया
 
-यदि आपका AI कुछ गलत करता है:
+### नियंत्रण
 
-### नियंत्रित करें
+1. इसे रोकें: macOS ऐप को रोकें (यदि वह Gateway की निगरानी करता है) या अपनी `openclaw gateway` प्रक्रिया समाप्त करें।
+2. एक्सपोज़र बंद करें: जब तक आप यह न समझ लें कि क्या हुआ, `gateway.bind: "loopback"` सेट करें (या Tailscale Funnel/Serve अक्षम करें)।
+3. एक्सेस स्थगित करें: जोखिमपूर्ण DM/समूहों को `dmPolicy: "disabled"` पर स्विच करें / उल्लेख आवश्यक बनाएँ, और सभी को अनुमति देने वाली कोई भी `"*"` प्रविष्टि हटाएँ।
 
-1. **इसे रोकें:** macOS ऐप को रोकें (यदि वह Gateway की निगरानी करता है) या अपनी `openclaw gateway` प्रक्रिया समाप्त करें।
-2. **एक्सपोज़र बंद करें:** जब तक आप समझ न लें कि क्या हुआ, `gateway.bind: "loopback"` सेट करें (या Tailscale Funnel/Serve अक्षम करें)।
-3. **एक्सेस रोकें:** जोखिम भरे DM/समूहों को `dmPolicy: "disabled"` पर स्विच करें / उल्लेख आवश्यक करें, और यदि आपने `"*"` allow-all प्रविष्टियां रखी थीं तो उन्हें हटा दें।
+### रोटेट करें (सीक्रेट लीक होने पर समझौता मानें)
 
-### रोटेट करें (यदि सीक्रेट लीक हुए हों तो समझौता मानें)
+1. Gateway प्रमाणीकरण (`gateway.auth.token` / `OPENCLAW_GATEWAY_PASSWORD`) रोटेट करें और पुनः आरंभ करें।
+2. Gateway को कॉल कर सकने वाली प्रत्येक मशीन पर दूरस्थ क्लाइंट सीक्रेट (`gateway.remote.token` / `.password`) रोटेट करें।
+3. प्रदाता/API क्रेडेंशियल (WhatsApp क्रेडेंशियल, Slack/Discord टोकन, `auth-profiles.json` में मॉडल/API कुंजियाँ, और उपयोग होने पर एन्क्रिप्ट किए गए सीक्रेट पेलोड मान) रोटेट करें।
 
-1. Gateway auth (`gateway.auth.token` / `OPENCLAW_GATEWAY_PASSWORD`) रोटेट करें और रीस्टार्ट करें।
-2. Gateway को कॉल कर सकने वाली किसी भी मशीन पर रिमोट क्लाइंट सीक्रेट (`gateway.remote.token` / `.password`) रोटेट करें।
-3. प्रदाता/API क्रेडेंशियल रोटेट करें (WhatsApp क्रेड्स, Slack/Discord टोकन, `auth-profiles.json` में मॉडल/API कुंजियां, और उपयोग होने पर एन्क्रिप्टेड सीक्रेट payload मान)।
+### ऑडिट
 
-### ऑडिट करें
-
-1. Gateway लॉग जांचें: `/tmp/openclaw/openclaw-YYYY-MM-DD.log` (या `logging.file`)।
-2. संबंधित transcript की समीक्षा करें: `~/.openclaw/agents/<agentId>/sessions/*.jsonl`।
-3. हाल के config बदलावों की समीक्षा करें (कुछ भी जिसने एक्सेस बढ़ाया हो: `gateway.bind`, `gateway.auth`, dm/group policies, `tools.elevated`, plugin बदलाव)।
-4. `openclaw security audit --deep` फिर से चलाएं और पुष्टि करें कि महत्वपूर्ण findings हल हो गई हैं।
+1. `openclaw logs` (या नामित प्रोफ़ाइल के लिए `openclaw --profile <profile> logs`) के साथ Gateway लॉग जाँचें। डिफ़ॉल्ट पथ `/tmp/openclaw/openclaw-YYYY-MM-DD.log` है; नामित प्रोफ़ाइल `/tmp/openclaw/openclaw-<profile>-YYYY-MM-DD.log` का उपयोग करती हैं, जब तक कि `logging.file` उसे ओवरराइड न करे।
+2. संबंधित ट्रांसक्रिप्ट की समीक्षा करें: `~/.openclaw/agents/<agentId>/sessions/*.jsonl`।
+3. हाल के उन कॉन्फ़िगरेशन परिवर्तनों की समीक्षा करें जिन्होंने एक्सेस बढ़ाया हो सकता है: `gateway.bind`, `gateway.auth`, DM/समूह नीतियाँ, `tools.elevated`, Plugin परिवर्तन।
+4. `openclaw security audit --deep` को फिर से चलाएँ और पुष्टि करें कि गंभीर निष्कर्षों का समाधान हो गया है।
 
 ### रिपोर्ट के लिए एकत्र करें
 
-- टाइमस्टैम्प, gateway होस्ट OS + OpenClaw संस्करण
-- session transcript(s) + छोटा log tail (redact करने के बाद)
-- हमलावर ने क्या भेजा + एजेंट ने क्या किया
-- क्या Gateway loopback से आगे एक्सपोज़ था (LAN/Tailscale Funnel/Serve)
+- टाइमस्टैम्प, Gateway होस्ट OS + OpenClaw संस्करण।
+- सत्र ट्रांसक्रिप्ट + लॉग का एक छोटा अंतिम भाग (संशोधन के बाद)।
+- हमलावर ने क्या भेजा और एजेंट ने क्या किया।
+- क्या Gateway लूपबैक से आगे एक्सपोज़ था (LAN/Tailscale Funnel/Serve)।
 
 ## सीक्रेट स्कैनिंग
 
-CI repository पर pre-commit `detect-private-key` hook चलाता है। यदि यह
-विफल होता है, committed key material हटाएं या रोटेट करें, फिर स्थानीय रूप से पुन: प्रस्तुत करें:
+CI रिपॉज़िटरी पर प्री-कमिट `detect-private-key` हुक चलाता है। यदि यह विफल हो, तो कमिट की गई कुंजी सामग्री हटाएँ या रोटेट करें, फिर स्थानीय रूप से पुनरुत्पादित करें:
 
 ```bash
 pre-commit run --all-files detect-private-key
@@ -1339,8 +859,8 @@ pre-commit run --all-files detect-private-key
 
 ## सुरक्षा समस्याओं की रिपोर्ट करना
 
-OpenClaw में vulnerability मिली? कृपया जिम्मेदारी से रिपोर्ट करें:
+OpenClaw में कोई भेद्यता मिली? ज़िम्मेदारी से रिपोर्ट करें:
 
 1. ईमेल: [security@openclaw.ai](mailto:security@openclaw.ai)
-2. ठीक होने तक सार्वजनिक रूप से पोस्ट न करें
-3. हम आपको श्रेय देंगे (जब तक आप गुमनाम रहना पसंद न करें)
+2. सुधार होने तक सार्वजनिक रूप से पोस्ट न करें।
+3. हम आपको श्रेय देंगे (जब तक आप गुमनाम रहना पसंद न करें)।

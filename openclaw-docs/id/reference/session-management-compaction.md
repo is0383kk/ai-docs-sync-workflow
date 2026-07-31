@@ -1,127 +1,77 @@
 ---
 read_when:
-    - Anda perlu men-debug ID sesi, transkrip JSONL, atau bidang sessions.json
-    - Anda mengubah perilaku auto-compaction atau menambahkan pemeliharaan "pre-compaction"
-    - Anda ingin mengimplementasikan pengosongan memori atau giliran sistem senyap
-summary: 'Pendalaman: penyimpanan sesi + transkrip, siklus hidup, dan internal Compaction (otomatis)'
-title: Pendalaman manajemen sesi
+    - Anda perlu men-debug ID sesi, peristiwa transkrip, atau bidang baris sesi
+    - Anda sedang mengubah perilaku Compaction otomatis atau menambahkan penataan "pra-Compaction"
+    - Anda ingin menerapkan pengosongan memori atau giliran sistem senyap
+summary: 'Pembahasan mendalam: penyimpanan sesi + transkrip, siklus hidup, dan internal (auto)compaction'
+title: Pembahasan mendalam tentang pengelolaan sesi
 x-i18n:
-    generated_at: "2026-07-04T20:44:10Z"
-    model: gpt-5.5
+    generated_at: "2026-07-20T03:56:52Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c97994f674e14ec01b2eaadc10a61e524f5071f95b2ef84957d71abacbdc719b
+    source_hash: ce3f4d5bc40f454f98950ec88230ad5caadb224e25c779f26a7b87f3349de47b
     source_path: reference/session-management-compaction.md
     workflow: 16
 ---
 
-OpenClaw mengelola sesi secara end-to-end di seluruh area ini:
+Satu **proses Gateway** memiliki status sesi secara menyeluruh. UI (aplikasi macOS, UI Kontrol web, TUI) meminta daftar sesi dan jumlah token dari Gateway. Dalam mode jarak jauh, berkas sesi berada di host jarak jauh, sehingga memeriksa berkas di Mac lokal Anda tidak akan mencerminkan apa yang digunakan Gateway.
 
-- **Perutean sesi** (bagaimana pesan masuk dipetakan ke `sessionKey`)
-- **Penyimpanan sesi** (`sessions.json`) dan apa yang dilacaknya
-- **Persistensi transkrip** (`*.jsonl`) dan strukturnya
-- **Higiene transkrip** (perbaikan khusus penyedia sebelum run)
-- **Batas konteks** (jendela konteks vs token yang dilacak)
-- **Compaction** (Compaction manual dan otomatis) dan tempat mengaitkan pekerjaan pra-Compaction
-- **Pemeliharaan senyap** (penulisan memori yang tidak boleh menghasilkan output yang terlihat oleh pengguna)
-
-Jika Anda ingin gambaran umum tingkat lebih tinggi terlebih dahulu, mulai dengan:
-
-- [Manajemen sesi](/id/concepts/session)
-- [Compaction](/id/concepts/compaction)
-- [Gambaran umum memori](/id/concepts/memory)
-- [Pencarian memori](/id/concepts/memory-search)
-- [Pemangkasan sesi](/id/concepts/session-pruning)
-- [Higiene transkrip](/id/reference/transcript-hygiene)
-
----
-
-## Sumber kebenaran: Gateway
-
-OpenClaw dirancang di sekitar satu **proses Gateway** yang memiliki status sesi.
-
-- UI (aplikasi macOS, Control UI web, TUI) harus mengkueri Gateway untuk daftar sesi dan jumlah token.
-- Dalam mode jarak jauh, file sesi berada di host jarak jauh; "memeriksa file Mac lokal Anda" tidak akan mencerminkan apa yang digunakan Gateway.
-
----
+Baca dokumentasi ikhtisar terlebih dahulu: [Pengelolaan sesi](/id/concepts/session), [Compaction](/id/concepts/compaction), [Ikhtisar memori](/id/concepts/memory), [Pencarian memori](/id/concepts/memory-search), [Pemangkasan sesi](/id/concepts/session-pruning), [Kebersihan transkrip](/id/reference/transcript-hygiene), referensi konfigurasi lengkap di [Konfigurasi agen](/id/gateway/config-agents).
 
 ## Dua lapisan persistensi
 
-OpenClaw mempersistenkan sesi dalam dua lapisan:
+1. **Baris sesi (SQLite per agen)** - peta kunci/nilai `sessionKey -> SessionEntry`. Status runtime yang dapat diubah dan dimiliki oleh Gateway. Melacak metadata: id sesi saat ini, aktivitas terakhir, sakelar, penghitung token.
+2. **Peristiwa transkrip (SQLite per agen)** - hanya dapat ditambahkan, terstruktur sebagai pohon (entri memiliki `id` + `parentId`). Menyimpan percakapan, pemanggilan alat, dan ringkasan Compaction; menyusun ulang konteks model untuk giliran mendatang. Titik pemeriksaan Compaction merupakan metadata pada transkrip penerus yang telah dipadatkan - Compaction baru tidak menulis salinan `.checkpoint.*.jsonl` kedua.
 
-1. **Penyimpanan sesi (`sessions.json`)**
-   - Peta kunci/nilai: `sessionKey -> SessionEntry`
-   - Kecil, dapat diubah, aman untuk diedit (atau menghapus entri)
-   - Melacak metadata sesi (id sesi saat ini, aktivitas terakhir, toggle, penghitung token, dll.)
+Instalasi lama mungkin masih memiliki berkas `sessions.json` di bawah direktori
+agen `sessions/`. Perlakukan berkas tersebut sebagai masukan migrasi baris
+sesi lama atau target pemeliharaan luring yang eksplisit. Saat Gateway dimulai,
+`openclaw doctor --fix` mengimpor baris lama yang aktif dan riwayat transkrip ke dalam
+penyimpanan SQLite per agen secara otomatis. Jalankan `openclaw doctor --session-sqlite inspect
+--session-sqlite-all-agents`, lalu
+ikuti [urutan migrasi Doctor](/id/cli/doctor#session-sqlite-migration), saat Anda
+memerlukan bukti pemeriksaan atau validasi yang eksplisit. Jika migrasi gagal
+setelah artefak transkrip lama diarsipkan, gunakan mode pemulihan Doctor dari
+urutan tersebut. Pemulihan menggunakan manifes migrasi, hanya memulihkan artefak
+dukungan arsip yang terdampak, menyiapkan laporan masalah GitHub yang telah
+disanitasi jika diminta, dan tidak membuat runtime aktif kembali membaca berkas
+JSONL.
 
-2. **Transkrip (`<sessionId>.jsonl`)**
-   - Transkrip append-only dengan struktur pohon (entri memiliki `id` + `parentId`)
-   - Menyimpan percakapan aktual + panggilan alat + ringkasan Compaction
-   - Digunakan untuk membangun ulang konteks model untuk giliran berikutnya
-   - Checkpoint Compaction adalah metadata di atas transkrip penerus yang telah dipadatkan. Compaction baru tidak menulis salinan `.checkpoint.*.jsonl` kedua.
+Pembaca riwayat Gateway menghindari pemuatan seluruh transkrip kecuali permukaan tersebut memerlukan akses historis arbitrer. Riwayat halaman pertama, riwayat obrolan tersemat, pemulihan setelah mulai ulang, serta pemeriksaan token/penggunaan menggunakan pembacaan bagian akhir yang dibatasi dari SQLite. Pemindaian transkrip penuh dilakukan melalui indeks transkrip asinkron dan digunakan bersama oleh pembaca yang berjalan bersamaan.
 
-Pembaca riwayat Gateway harus menghindari materialisasi seluruh transkrip kecuali
-surface secara eksplisit membutuhkan akses historis arbitrer. Riwayat halaman pertama,
-riwayat chat tertanam, pemulihan restart, dan pemeriksaan token/penggunaan memakai pembacaan ekor
-terbatas. Pemindaian transkrip penuh melewati indeks transkrip asinkron, yang
-di-cache berdasarkan path file plus `mtimeMs`/`size` dan dibagikan di antara pembaca konkuren.
+## Lokasi pada disk
 
----
+Per agen, pada host Gateway (diuraikan melalui `src/config/sessions.ts`):
 
-## Lokasi di disk
-
-Per agen, di host Gateway:
-
-- Penyimpanan: `~/.openclaw/agents/<agentId>/sessions/sessions.json`
-- Transkrip: `~/.openclaw/agents/<agentId>/sessions/<sessionId>.jsonl`
-  - Sesi topik Telegram: `.../<sessionId>-topic-<threadId>.jsonl`
-
-OpenClaw menyelesaikan ini melalui `src/config/sessions.ts`.
-
----
+- Penyimpanan baris sesi runtime: `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`
+- Baris transkrip runtime: `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`
+- Artefak transkrip lama/arsip: `~/.openclaw/agents/<agentId>/sessions/`
+- Masukan migrasi baris lama: `~/.openclaw/agents/<agentId>/sessions/sessions.json`
 
 ## Pemeliharaan penyimpanan dan kontrol disk
 
-Persistensi sesi memiliki kontrol pemeliharaan otomatis (`session.maintenance`) untuk `sessions.json`, artefak transkrip, dan sidecar trajektori:
+`session.maintenance` mengontrol pemeliharaan otomatis untuk baris sesi SQLite, baris transkrip SQLite, artefak arsip, dan sidecar lintasan:
 
-- `mode`: `enforce` (default) atau `warn`
-- `pruneAfter`: batas usia entri basi (default `30d`)
-- `maxEntries`: membatasi entri di `sessions.json` (default `500`)
-- Retensi probe model-run Gateway berumur pendek tetap pada `24h`, tetapi dibatasi tekanan: ia hanya menghapus baris probe ketat yang basi saat tekanan pemeliharaan/batas entri sesi tercapai. Ini hanya berlaku untuk kunci probe eksplisit ketat yang cocok dengan `agent:*:explicit:model-run-<uuid>` dan berjalan sebelum pembersihan/pembatasan entri basi global saat berjalan.
-- `resetArchiveRetention`: retensi untuk arsip transkrip `*.reset.<timestamp>` (default: sama dengan `pruneAfter`; `false` menonaktifkan pembersihan)
-- `maxDiskBytes`: anggaran direktori sesi opsional
-- `highWaterBytes`: target opsional setelah pembersihan (default `80%` dari `maxDiskBytes`)
+| Kunci                   | Bawaan                | Catatan                                                                                             |
+| ----------------------- | --------------------- | --------------------------------------------------------------------------------------------------- |
+| `mode`                  | `"enforce"`           | atau `"warn"` (hanya laporan, tanpa mutasi)                                                          |
+| `pruneAfter`            | `"30d"`               | batas usia entri kedaluwarsa                                                                       |
+| `maxEntries`            | `500`                 | batas jumlah entri sesi                                                                            |
+| `resetArchiveRetention` | pertahankan (tanpa batas usia) | batas usia untuk arsip transkrip `*.reset.*`/`*.deleted.*`; durasi mengaktifkan penghapusan |
+| `maxDiskBytes`          | `10gb`                | anggaran disk sesi per agen; `false` menonaktifkannya                                               |
+| `highWaterBytes`        | 80% dari `maxDiskBytes` | target setelah pembersihan anggaran disk                                                          |
 
-Penulisan Gateway normal mengalir melalui penulis sesi per penyimpanan yang menserialisasi mutasi dalam proses tanpa mengambil kunci file runtime. Helper patch jalur panas meminjam cache mutable yang telah divalidasi selama memegang slot penulis tersebut, sehingga file `sessions.json` besar tidak dikloning atau dibaca ulang untuk setiap pembaruan metadata. Kode runtime sebaiknya menggunakan `updateSessionStore(...)` atau `updateSessionStoreEntry(...)`; penyimpanan seluruh store secara langsung adalah alat kompatibilitas dan pemeliharaan offline. Saat Gateway dapat dijangkau, `openclaw sessions cleanup` dan `openclaw agents delete` non-dry-run mendelegasikan mutasi store ke Gateway sehingga pembersihan bergabung dengan antrean penulis yang sama; `--store <path>` adalah jalur perbaikan offline eksplisit untuk pemeliharaan file langsung. Pembersihan `maxEntries` tetap dibatch untuk batas berukuran produksi, sehingga store dapat sebentar melebihi batas yang dikonfigurasi sebelum pembersihan high-water berikutnya menulisnya kembali turun. Pembacaan store sesi tidak memangkas atau membatasi entri selama startup Gateway; gunakan penulisan atau `openclaw sessions cleanup --enforce` untuk pembersihan. `openclaw sessions cleanup --enforce` tetap menerapkan batas yang dikonfigurasi segera dan memangkas artefak transkrip, checkpoint, dan trajektori lama yang tidak direferensikan meskipun tidak ada anggaran disk yang dikonfigurasi.
+Pengaturan ulang memajukan pemetaan `sessionKey -> sessionId` aktif, tetapi mempertahankan baris sesi, transkrip, lintasan, dan pencarian SQLite sebelumnya. Riwayat tersebut tetap dapat dicari dengan kunci sesi yang sama; daftar entri dan sesi biasa hanya menampilkan pemetaan aktif yang baru. Riwayat pengaturan ulang yang dipertahankan dibatasi oleh anggaran disk, bukan oleh `resetArchiveRetention`, yang hanya membatasi usia artefak arsip. Penghapusan eksplisit berbeda: tindakan ini menulis dan memverifikasi arsip transkrip terkompresi (`*.jsonl.deleted.<timestamp>.zst` jika zstd tersedia) sebelum menghapus baris sesi yang dihapus.
 
-Pemeliharaan mempertahankan pointer percakapan eksternal yang tahan lama seperti sesi grup
-dan sesi chat berbasis thread, tetapi entri runtime sintetis untuk cron, hook,
-Heartbeat, ACP, dan sub-agen tetap dapat dihapus saat melebihi
-usia, jumlah, atau anggaran disk yang dikonfigurasi. Sesi probe model-run Gateway memakai
-retensi model-run `24h` terpisah hanya saat kuncinya persis cocok dengan
-`agent:*:explicit:model-run-<uuid>`; sesi eksplisit lain bukan bagian dari
-retensi tersebut. Pembersihan model-run hanya diterapkan di bawah tekanan batas
-entri sesi. Run cron terisolasi mempertahankan kontrol `cron.sessionRetention` sendiri,
-independen dari retensi probe model-run.
+Penerapan `maxDiskBytes` menggunakan byte fisik: berkas utama SQLite per agen, berkas `-wal` miliknya, dan berkas yang dihitung dalam direktori sesi agen. Penerapan ini tidak pernah memperkirakan ukuran JSON baris atau mengurangi ukuran logis baris dari total tersebut.
 
-OpenClaw tidak lagi membuat backup rotasi `sessions.json.bak.*` otomatis selama penulisan Gateway. Kunci lama `session.maintenance.rotateBytes` diabaikan dan `openclaw doctor --fix` menghapusnya dari konfigurasi lama.
+Sesi pemeriksaan eksekusi model Gateway (kunci yang cocok dengan `agent:*:explicit:model-run-<uuid>`) memiliki retensi tetap `24h` yang terpisah. Pemangkasan ini dipicu oleh tekanan: hanya dijalankan saat tekanan pemeliharaan/batas entri sesi tercapai, dan hanya sebelum langkah pembersihan/batas entri kedaluwarsa global. Sesi eksplisit lainnya tidak menggunakan retensi ini.
 
-Mutasi transkrip memakai kunci tulis sesi pada file transkrip. Akuisisi kunci menunggu hingga
-`session.writeLock.acquireTimeoutMs` sebelum memunculkan error sesi sibuk; defaultnya adalah `60000`
-md. Naikkan ini hanya ketika pekerjaan persiapan, pembersihan, Compaction, atau mirror transkrip yang sah berkompetisi
-lebih lama pada mesin lambat. `session.writeLock.staleMs` mengontrol kapan kunci yang ada dapat
-direklamasi sebagai basi; defaultnya adalah `1800000` md. `session.writeLock.maxHoldMs` mengontrol
-ambang rilis watchdog dalam proses; defaultnya adalah `300000` md. Override env darurat adalah
-`OPENCLAW_SESSION_WRITE_LOCK_ACQUIRE_TIMEOUT_MS`, `OPENCLAW_SESSION_WRITE_LOCK_STALE_MS`, dan
-`OPENCLAW_SESSION_WRITE_LOCK_MAX_HOLD_MS`.
+Saat penggunaan fisik gabungan melampaui `maxDiskBytes`, `mode: "enforce"` terlebih dahulu memperoleh kembali ruang basis data yang dapat diberi titik pemeriksaan, lalu menghapus arsip pengaturan ulang/penghapusan tertua yang dipertahankan. Jika penggunaan masih di atas `highWaterBytes`, proses tersebut menelusuri sesi SQLite historis berdasarkan `sessions.updated_at`, dimulai dari yang tertua. Historis berarti id sesi tidak dirujuk oleh entri sesi aktif, target rute, atau eksekusi yang diterima/sedang berlangsung. Untuk setiap korban, pembersihan menulis, menjalankan fsync, dan membaca kembali arsip terkompresi sebelum transaksi tulis menghapus baris sesi beserta proyeksi transkrip, lintasan, aktif, indeks, dan FTS-nya. Ini mencakup sesi yang berisi peristiwa lintasan tetapi tidak memiliki peristiwa transkrip. Pembersihan memeriksa ulang referensi rute, entri, dan penerimaan pada saat penghapusan, mengukur kembali penggunaan fisik setelah setiap arsip atau sesi korban, dan berhenti pada `highWaterBytes`.
 
-Urutan penegakan untuk pembersihan anggaran disk (`mode: "enforce"`):
-
-1. Hapus artefak arsip tertua, transkrip yatim, atau trajektori yatim terlebih dahulu.
-2. Jika masih di atas target, keluarkan entri sesi tertua beserta file transkrip/trajektorinya.
-3. Teruskan hingga penggunaan berada pada atau di bawah `highWaterBytes`.
-
-Dalam `mode: "warn"`, OpenClaw melaporkan potensi pengeluaran tetapi tidak memutasi store/file.
+Penulisan yang dikomit dan penghapusan terlebih dahulu masuk ke WAL. Pembersihan membuat titik pemeriksaan agar WAL dapat segera menyusut, lalu menggunakan vakum inkremental untuk mengembalikan halaman akhir kosong yang memenuhi syarat dari berkas utama; halaman yang belum dapat diperoleh kembali tetap berada dalam berkas utama dan karenanya tetap dihitung pada pengukuran fisik berikutnya. `mode: "warn"` melaporkan kelebihan fisik saat ini tanpa membuat titik pemeriksaan, menulis arsip, atau menghapus baris.
 
 Jalankan pemeliharaan sesuai permintaan:
 
@@ -130,370 +80,244 @@ openclaw sessions cleanup --dry-run
 openclaw sessions cleanup --enforce
 ```
 
----
+Pemeliharaan mempertahankan penunjuk percakapan eksternal yang persisten seperti sesi grup dan sesi obrolan dengan cakupan utas, tetapi entri runtime sintetis (cron, hook, heartbeat, ACP, subagen) tetap dapat dihapus setelah melampaui batas usia, jumlah, atau anggaran disk yang dikonfigurasi. Eksekusi cron terisolasi menggunakan kontrol `cron.sessionRetention` terpisah, yang tidak bergantung pada retensi pemeriksaan eksekusi model.
 
-## Sesi Cron dan log run
+Penulisan Gateway normal mengalir melalui pengakses sesi, yang menserialkan mutasi SQLite per agen melalui jalur penulis runtime. Kode runtime sebaiknya menggunakan pembantu pengakses di `src/config/sessions/session-accessor.ts`; pembantu `sessions.json` lama merupakan alat migrasi dan pemeliharaan luring. Saat Gateway dapat dijangkau, `openclaw sessions cleanup` dan `openclaw agents delete` yang bukan dry-run mendelegasikan mutasi penyimpanan ke Gateway agar pembersihan bergabung dengan antrean penulis yang sama; `--store <path>` adalah jalur perbaikan luring eksplisit untuk penyimpanan lama yang dipilih dan selalu tetap lokal (demikian juga `--dry-run`). Pembersihan `maxEntries` dilakukan secara bertahap untuk penyimpanan berukuran produksi, sehingga penyimpanan mungkin secara singkat melampaui batas yang dikonfigurasi sebelum pembersihan batas tinggi berikutnya menulis ulang dan menurunkannya. Pembacaan tidak pernah memangkas atau membatasi entri saat Gateway dimulai - hanya penulisan atau `openclaw sessions cleanup --enforce` yang melakukannya, dan yang terakhir juga segera menerapkan batas serta memangkas artefak transkrip, titik pemeriksaan, dan lintasan lama yang tidak dirujuk meskipun tidak ada anggaran disk yang dikonfigurasi.
 
-Run Cron terisolasi juga membuat entri sesi/transkrip, dan memiliki kontrol retensi khusus:
+OpenClaw tidak lagi membuat cadangan rotasi `sessions.json.bak.*` otomatis selama penulisan Gateway. Skema saat ini menolak kunci `session.maintenance.rotateBytes` lama, dan `openclaw doctor --fix` menghapusnya dari konfigurasi lama.
 
-- `cron.sessionRetention` (default `24h`) memangkas sesi run Cron terisolasi lama dari penyimpanan sesi (`false` menonaktifkan).
-- `cron.runLog.keepLines` memangkas baris riwayat run SQLite yang dipertahankan per job Cron (default: `2000`). `cron.runLog.maxBytes` tetap diterima untuk log run lama berbasis file.
+Mutasi transkrip menggunakan antrean penulisan sesi untuk target transkrip SQLite:
 
-Saat Cron memaksa pembuatan sesi run terisolasi baru, ia membersihkan entri sesi
-`cron:<jobId>` sebelumnya sebelum menulis baris baru. Ia membawa preferensi aman
-seperti pengaturan thinking/fast/verbose, label, dan override model/auth
-yang dipilih pengguna secara eksplisit. Ia membuang konteks percakapan ambient seperti
-perutean channel/grup, kebijakan kirim atau antrean, elevasi, asal, dan binding runtime
-ACP sehingga run terisolasi baru tidak dapat mewarisi pengiriman atau otoritas
-runtime yang basi dari run lama.
+Kunci penulisan sesi menggunakan bawaan produksi tetap. Variabel lingkungan
+`OPENCLAW_SESSION_WRITE_LOCK_*` terkait tetap tersedia untuk diagnostik tingkat proses dan
+penimpaan darurat.
 
----
+### Menurunkan Versi Setelah Peralihan SQLite
+
+Pulihkan artefak transkrip lama yang diarsipkan sebelum menjalankan versi
+OpenClaw lama yang didukung berkas:
+
+```bash
+openclaw doctor --session-sqlite restore --session-sqlite-all-agents
+```
+
+Migrasi mempertahankan berkas `sessions.json` lama untuk dukungan dan
+pengembalian versi, tetapi berkas JSONL transkrip aktif yang diimpor ke SQLite
+diganti namanya menjadi `session-sqlite-import-archive/`. Runtime lama yang didukung berkas
+mengikuti jalur `sessionFile` di `sessions.json`, sehingga artefak tersebut harus
+dipulihkan sebelum dimulai. Pemulihan menggunakan manifes migrasi, hanya
+memindahkan artefak arsip yang tercatat dan jalur aslinya tidak ada, serta
+mempertahankan basis data SQLite untuk pemulihan ke versi yang lebih baru.
+
+Sesi yang dibuat setelah peralihan SQLite hanya tersedia di SQLite dan tidak
+akan muncul pada runtime lama yang didukung berkas. Jika Anda meningkatkan versi
+kembali setelah menurunkannya, jalankan lagi urutan pemeriksaan dan validasi
+Doctor agar OpenClaw dapat memverifikasi artefak lama yang dipulihkan sebelum
+mengimpornya.
+
+## Sesi Cron dan log eksekusi
+
+Eksekusi Cron terisolasi membuat entri sesi/transkripnya sendiri dengan retensi khusus:
+
+- `cron.sessionRetention` (bawaan `"24h"`) memangkas sesi eksekusi cron terisolasi yang lama dari penyimpanan; `false` menonaktifkannya.
+- Riwayat eksekusi mempertahankan 2000 baris terminal terbaru per tugas cron. Baris yang hilang tetap memiliki jendela pembersihan 24 jam.
+
+Saat cron memaksa pembuatan sesi eksekusi terisolasi baru, cron menyanitasi entri sesi `cron:<jobId>` sebelumnya sebelum menulis baris baru: cron membawa preferensi aman (pengaturan pemikiran/cepat/verbose/penalaran, label, nama tampilan) serta penimpaan model/autentikasi yang dipilih pengguna secara eksplisit, tetapi menghapus konteks percakapan sekitar (perutean saluran/grup, kebijakan pengiriman/antrean, elevasi, asal, pengikatan runtime ACP) agar eksekusi terisolasi baru tidak dapat mewarisi otoritas pengiriman atau runtime usang dari eksekusi lama.
 
 ## Kunci sesi (`sessionKey`)
 
-`sessionKey` mengidentifikasi _bucket percakapan mana_ yang sedang Anda pakai (perutean + isolasi).
+Sebuah `sessionKey` mengidentifikasi wadah percakapan tempat Anda berada (perutean + isolasi). Aturan kanonis: [/concepts/session](/id/concepts/session).
 
-Pola umum:
-
-- Chat utama/langsung (per agen): `agent:<agentId>:<mainKey>` (default `main`)
-- Grup: `agent:<agentId>:<channel>:group:<id>`
-- Room/channel (Discord/Slack): `agent:<agentId>:<channel>:channel:<id>` atau `...:room:<id>`
-- Cron: `cron:<job.id>`
-- Webhook: `hook:<uuid>` (kecuali ditimpa)
-
-Aturan kanonis didokumentasikan di [/concepts/session](/id/concepts/session).
-
----
+| Pola                              | Contoh                                                      |
+| --------------------------------- | ----------------------------------------------------------- |
+| Obrolan utama/langsung (per agen) | `agent:<agentId>:<mainKey>` (bawaan `main`)                |
+| Grup                              | `agent:<agentId>:<channel>:group:<id>`                      |
+| Ruang/saluran (Discord/Slack)     | `agent:<agentId>:<channel>:channel:<id>` atau `...:room:<id>` |
+| Cron                              | `cron:<job.id>`                                             |
+| Webhook                           | `hook:<uuid>` (kecuali ditimpa)                           |
 
 ## Id sesi (`sessionId`)
 
-Setiap `sessionKey` menunjuk ke `sessionId` saat ini (file transkrip yang melanjutkan percakapan).
-
-Aturan praktis:
+Setiap `sessionKey` menunjuk ke `sessionId` saat ini (identitas transkrip SQLite yang melanjutkan percakapan). Logika keputusan berada di `initSessionState()` dalam `src/auto-reply/reply/session.ts`.
 
 - **Reset** (`/new`, `/reset`) membuat `sessionId` baru untuk `sessionKey` tersebut.
-- **Reset harian** (default 4:00 AM waktu lokal pada host gateway) membuat `sessionId` baru pada pesan berikutnya setelah batas reset.
-- **Kedaluwarsa idle** (`session.reset.idleMinutes` atau `session.idleMinutes` lama) membuat `sessionId` baru saat pesan datang setelah jendela idle. Saat harian + idle sama-sama dikonfigurasi, yang kedaluwarsa lebih dulu menang.
-- **Resume rekoneksi Control UI** dapat mempertahankan sesi yang saat ini terlihat untuk satu pengiriman rekoneksi ketika Gateway menerima `sessionId` yang cocok dari klien UI operator. Pengiriman basi biasa tetap membuat `sessionId` baru.
-- **Event sistem** (Heartbeat, wakeup Cron, notifikasi exec, pembukuan gateway) dapat memutasi baris sesi tetapi tidak memperpanjang kesegaran reset harian/idle. Rollover reset membuang pemberitahuan event sistem yang mengantre untuk sesi sebelumnya sebelum prompt baru dibuat.
-- **Kebijakan fork induk** memakai cabang aktif OpenClaw saat membuat thread atau fork subagen. Jika cabang itu terlalu besar, OpenClaw memulai anak dengan konteks terisolasi alih-alih gagal atau mewarisi riwayat yang tidak dapat digunakan. Kebijakan sizing otomatis; konfigurasi lama `session.parentForkMaxTokens` dihapus oleh `openclaw doctor --fix`.
+- **Tanpa reset otomatis** adalah pengaturan default. `sessionId` saat ini berlanjut sementara Compaction menjaga konteks model aktif tetap terbatas.
+- **Reset harian** (`session.reset.mode: "daily"`) membuat `sessionId` baru pada pesan berikutnya setelah batas jam lokal yang dikonfigurasi (`session.reset.atHour`, default `4`).
+- **Kedaluwarsa saat menganggur** (`session.reset.mode: "idle"` dengan `session.reset.idleMinutes`, atau `session.idleMinutes` lama) membuat `sessionId` baru ketika pesan tiba setelah jendela waktu menganggur. Jika harian dan menganggur sama-sama dikonfigurasi, yang kedaluwarsa lebih dahulu akan berlaku.
+- **Melanjutkan saat Control UI tersambung kembali** mempertahankan sesi yang sedang terlihat untuk satu pengiriman setelah tersambung kembali ketika Gateway menerima `sessionId` yang cocok dari klien UI operator. Ini adalah sinyal sekali pakai; pengiriman kedaluwarsa biasa tetap membuat `sessionId` baru.
+- **Peristiwa sistem** (Heartbeat, pengaktifan Cron, notifikasi exec, pencatatan internal Gateway) dapat mengubah baris sesi tetapi tidak pernah memperpanjang kesegaran reset harian/menganggur. Pergantian reset membuang notifikasi peristiwa sistem dalam antrean untuk sesi sebelumnya sebelum prompt baru dibuat.
+- **Kebijakan fork induk** menggunakan cabang aktif OpenClaw saat membuat fork utas atau subagen. Jika cabang tersebut terlalu besar (melampaui batas internal tetap, saat ini 100K token), OpenClaw memulai anak dengan konteks terisolasi alih-alih gagal atau mewarisi riwayat yang tidak dapat digunakan. Penentuan ukuran dilakukan secara otomatis dan tidak dapat dikonfigurasi; konfigurasi `session.parentForkMaxTokens` lama dihapus oleh `openclaw doctor --fix`.
+- **Fork operator**: `sessions.create { parentSessionKey, fork: true }` membuat sesi baru dengan transkrip yang bercabang dari keadaan induk saat ini (mekanisme fork yang sama seperti pembuatan subagen, termasuk batas ukuran di atas). Fork ditolak selama induk memiliki proses aktif, mewarisi pilihan model induk kecuali model diteruskan secara eksplisit, dan menandai anak sebagai `forkedFromParent` dengan penghitung token baru.
 
-Detail implementasi: keputusan terjadi di `initSessionState()` dalam `src/auto-reply/reply/session.ts`.
+## Skema penyimpanan sesi
 
----
+Penyimpanan runtime menyimpan nilai `SessionEntry` dalam SQLite per agen. Jenis nilainya adalah `SessionEntry` dalam `src/config/sessions.ts`. Bidang utama (tidak lengkap):
 
-## Skema penyimpanan sesi (`sessions.json`)
+- `sessionId`: id transkrip saat ini yang digunakan untuk mengalamatkan baris transkrip SQLite
+- `sessionStartedAt`: stempel waktu mulai untuk `sessionId` saat ini; kesegaran reset harian menggunakan nilai ini. Baris lama dapat memperolehnya dari header sesi JSONL.
+- `lastInteractionAt`: stempel waktu interaksi nyata terakhir pengguna/saluran; kesegaran reset saat menganggur menggunakan nilai ini agar peristiwa Heartbeat, Cron, dan exec tidak mempertahankan sesi tetap aktif. Baris lama tanpa bidang ini kembali menggunakan waktu mulai sesi yang dipulihkan.
+- `updatedAt`: stempel waktu perubahan terakhir pada baris penyimpanan, digunakan untuk pencantuman/pemangkasan/pencatatan internal—bukan sumber otoritatif kesegaran harian/menganggur.
+- `archivedAt`: stempel waktu arsip opsional. Sesi yang diarsipkan tetap berada dalam penyimpanan dengan transkrip utuh dan dikecualikan dari daftar aktif normal.
+- `pinnedAt`: stempel waktu sematan opsional. Sesi aktif yang disematkan diurutkan sebelum sesi yang tidak disematkan; mengarsipkan sesi akan menghapus sematannya.
+- Interoperabilitas utas Codex: kedua bidang mengikuti bentuk pengelolaan utas Codex—boolean `archived`/`pinned` pada jalur komunikasi selalu diturunkan dari stempel waktu dan diberi stempel di sisi server, sesuai dengan semantik `threads.archived_at` Codex dan serialisasi camelCase. Stempel waktu OpenClaw menggunakan milidetik epoch, sedangkan Codex menggunakan detik epoch, sehingga penghubung melakukan konversi pada batas Plugin `codex`. Codex belum memiliki API sematan (`thread/archive`/`thread/unarchive` saja); status sematan tetap berada di sisi OpenClaw hingga API tersebut tersedia, dan pada saat itu bentuk yang cocok memungkinkan sesi terikat melakukan pulang-pergi status sematan secara mekanis.
+- Supervisi Codex hanya mencantumkan utas native yang tidak diarsipkan. Utas dengan aktivitas tidak diketahui `idle` atau `notLoaded` yang bersifat lokal pada Gateway hanya dapat diarsipkan melalui `thread/archive` native setelah operator secara eksplisit mengonfirmasi bahwa tidak ada proses Codex lain yang memilikinya; Plugin terlebih dahulu melakukan pembacaan status lokal proses yang baru, lalu utas menghilang dari katalog. Pembacaan tersebut tidak dapat membuktikan bahwa proses App Server lain tidak sedang menggunakan utas. OpenClaw menolak mengarsipkan baris aktif dan baris galat, dan pengarsipan node berpasangan tidak tersedia hingga penghubung node dapat memiliki seluruh siklus hidup utas streaming. Membatalkan pengarsipan dalam klien Codex native membuat utas tersebut memenuhi syarat untuk muncul kembali.
+- `lastReadAt` / `markedUnreadAt`: stempel waktu status baca yang diberi stempel di sisi server oleh `sessions.patch { unread }`—`unread: false` mencatat pembacaan (menetapkan `lastReadAt`, menghapus `markedUnreadAt`); `unread: true` menandai sesi belum dibaca hingga pembacaan berikutnya. Baris sesi mengekspos boolean turunan `unread`: ditandai belum dibaca secara eksplisit, atau dibaca sebelum aktivitas terbaru. Sesi yang tidak pernah ditandai telah dibaca tetap `unread: false`, sehingga instalasi yang sudah ada tidak menyala setelah peningkatan.
+- `lastActivityAt`: stempel waktu proses agen terakhir yang selesai dan dianggap sebagai aktivitas yang layak ditandai belum dibaca (proses pengguna, saluran, dan Cron). Giliran Heartbeat dan peristiwa internal, serta patch metadata, tidak memperbaruinya; `updatedAt` bukan sinyal aktivitas.
+- `sessionFile`: penanda lama yang dipertahankan untuk kompatibilitas migrasi/arsip; runtime aktif menggunakan identitas SQLite
+- `chatType`: `direct | group | room`
+- `provider`, `subject`, `room`, `space`, `displayName`: metadata pelabelan grup/saluran
+- Sakelar: `thinkingLevel`, `verboseLevel`, `reasoningLevel`, `elevatedLevel`, `sendPolicy` (penggantian per sesi)
+- Pemilihan model: `providerOverride`, `modelOverride`, `authProfileOverride`
+- Penghitung token (upaya terbaik/bergantung pada penyedia): `inputTokens`, `outputTokens`, `totalTokens`, `contextTokens`
+- `compactionCount`: berapa kali Compaction otomatis selesai untuk kunci sesi ini
+- `memoryFlushAt` / `memoryFlushCompactionCount`: stempel waktu dan jumlah Compaction dari pengosongan memori pra-Compaction terakhir
 
-Tipe nilai store adalah `SessionEntry` di `src/config/sessions.ts`.
+Gateway adalah sumber otoritatif: Gateway dapat menulis ulang atau merehidrasi entri saat sesi
+berjalan. Untuk instalasi lama berbasis berkas, lakukan migrasi dengan
+`openclaw doctor --session-sqlite import --session-sqlite-all-agents`, alih-alih
+mengedit `sessions.json` dan mengharapkan runtime terus membaca berkas tersebut.
 
-Kolom kunci (tidak lengkap):
+## Struktur peristiwa transkrip
 
-- `sessionId`: id transkrip saat ini (nama file diturunkan dari ini kecuali `sessionFile` diatur)
-- `sessionStartedAt`: stempel waktu mulai untuk `sessionId` saat ini; kesegaran reset harian
-  menggunakan ini. Baris lama dapat menurunkannya dari header sesi JSONL.
-- `lastInteractionAt`: stempel waktu interaksi pengguna/channel nyata terakhir; kesegaran
-  reset idle menggunakan ini sehingga peristiwa heartbeat, cron, dan exec tidak membuat sesi
-  tetap hidup. Baris lama tanpa bidang ini kembali memakai waktu mulai sesi yang dipulihkan
-  untuk kesegaran idle.
-- `updatedAt`: stempel waktu mutasi baris penyimpanan terakhir, digunakan untuk pencantuman, pemangkasan, dan
-  pembukuan. Ini bukan otoritas untuk kesegaran reset harian/idle.
-- `archivedAt`: stempel waktu arsip opsional. Sesi yang diarsipkan tetap berada di penyimpanan
-  dengan transkripnya utuh dan dikecualikan dari daftar aktif normal.
-- `pinnedAt`: stempel waktu pin opsional. Sesi aktif yang dipin diurutkan sebelum
-  sesi yang tidak dipin; mengarsipkan sesi akan menghapus pinnya.
-- Interop thread Codex: kedua bidang mengikuti bentuk pengelolaan thread Codex —
-  boolean `archived`/`pinned` di wire selalu diturunkan dari
-  stempel waktu dan dicap di sisi server, sesuai semantik Codex `threads.archived_at`
-  dan serialisasi camelCase. Stempel waktu OpenClaw adalah milidetik epoch
-  sementara Codex menggunakan detik epoch, sehingga bridge mengonversi di seam plugin codex.
-  Codex belum memiliki API pin (`thread/archive`/`thread/unarchive`
-  saja); status pin tetap berada di sisi OpenClaw sampai API tersebut ada, dan pada saat itu
-  bentuk yang cocok memungkinkan sesi terikat melakukan round-trip status pin secara mekanis.
-- `sessionFile`: override jalur transkrip eksplisit opsional
-- `chatType`: `direct | group | room` (membantu UI dan kebijakan pengiriman)
-- `provider`, `subject`, `room`, `space`, `displayName`: metadata untuk pelabelan grup/channel
-- Toggle:
-  - `thinkingLevel`, `verboseLevel`, `reasoningLevel`, `elevatedLevel`
-  - `sendPolicy` (override per sesi)
-- Pemilihan model:
-  - `providerOverride`, `modelOverride`, `authProfileOverride`
-- Penghitung token (upaya terbaik / bergantung provider):
-  - `inputTokens`, `outputTokens`, `totalTokens`, `contextTokens`
-- `compactionCount`: seberapa sering auto-compaction selesai untuk kunci sesi ini
-- `memoryFlushAt`: stempel waktu untuk flush memori pra-compaction terakhir
-- `memoryFlushCompactionCount`: jumlah compaction saat flush terakhir berjalan
+Transkrip dikelola oleh pengakses sesi OpenClaw dan diekspos ke kode runtime melalui pembantu berbasis identitas. Aliran peristiwa hanya dapat ditambahkan:
 
-Penyimpanan aman untuk diedit, tetapi Gateway adalah otoritasnya: Gateway dapat menulis ulang atau merehidrasi entri saat sesi berjalan.
-
----
-
-## Struktur transkrip (`*.jsonl`)
-
-Transkrip dikelola oleh `SessionManager` milik `openclaw/plugin-sdk/agent-sessions`.
-
-File ini adalah JSONL:
-
-- Baris pertama: header sesi (`type: "session"`, menyertakan `id`, `cwd`, `timestamp`, `parentSession` opsional)
-- Lalu: entri sesi dengan `id` + `parentId` (pohon)
+- Entri pertama: header sesi—`type: "session"`, `id`, `cwd`, `timestamp`, `parentSession` opsional.
+- Kemudian: entri dengan `id` + `parentId` (struktur pohon).
 
 Jenis entri penting:
 
 - `message`: pesan pengguna/asisten/toolResult
-- `custom_message`: pesan yang disuntikkan ekstensi yang _memang_ masuk ke konteks model (dapat disembunyikan dari UI)
-- `custom`: status ekstensi yang _tidak_ masuk ke konteks model
-- `compaction`: ringkasan compaction yang dipersistenkan dengan `firstKeptEntryId` dan `tokensBefore`
-- `branch_summary`: ringkasan yang dipersistenkan saat menavigasi cabang pohon
+- `custom_message`: pesan yang disuntikkan ekstensi dan _memasuki_ konteks model (dirender dalam TUI ketika `display: true`, disembunyikan sepenuhnya ketika `display: false`)
+- `custom`: status ekstensi yang _tidak memasuki_ konteks model (untuk mempertahankan status ekstensi di seluruh pemuatan ulang)
+- `compaction`: ringkasan Compaction yang dipertahankan dengan `firstKeptEntryId` dan `tokensBefore`
+- `branch_summary`: ringkasan yang dipertahankan saat menavigasi cabang pohon
 
-OpenClaw sengaja **tidak** "memperbaiki" transkrip; Gateway menggunakan `SessionManager` untuk membaca/menulisnya.
+OpenClaw sengaja tidak "memperbaiki" transkrip; Gateway menggunakan `SessionManager` untuk membaca/menulisnya.
 
----
+## Jendela konteks dibandingkan token yang dilacak
 
-## Jendela konteks vs token yang dilacak
+Dua konsep berbeda:
 
-Ada dua konsep berbeda yang penting:
+1. **Jendela konteks model**: batas keras per model (token yang terlihat oleh model). Berasal dari katalog model dan dapat diganti melalui konfigurasi.
+2. **Penghitung penyimpanan sesi**: statistik berjalan yang ditulis ke dalam baris sesi (digunakan untuk `/status` dan dasbor). `contextTokens` adalah nilai estimasi/pelaporan runtime—jangan menganggapnya sebagai jaminan mutlak.
 
-1. **Jendela konteks model**: batas keras per model (token yang terlihat oleh model)
-2. **Penghitung penyimpanan sesi**: statistik berjalan yang ditulis ke `sessions.json` (digunakan untuk /status dan dashboard)
+Selengkapnya tentang batas: [/reference/token-use](/id/reference/token-use).
 
-Jika Anda menyesuaikan batas:
+## Compaction: pengertiannya
 
-- Jendela konteks berasal dari katalog model (dan dapat di-override melalui konfigurasi).
-- `contextTokens` dalam penyimpanan adalah nilai estimasi/pelaporan runtime; jangan memperlakukannya sebagai jaminan ketat.
+Compaction meringkas percakapan lama menjadi entri `compaction` yang dipertahankan dalam transkrip dan menjaga pesan terbaru tetap utuh. Setelah Compaction, giliran berikutnya melihat ringkasan Compaction beserta pesan setelah `firstKeptEntryId`. Compaction bersifat **persisten**, tidak seperti pemangkasan sesi—lihat [/concepts/session-pruning](/id/concepts/session-pruning).
 
-Untuk informasi lebih lanjut, lihat [/token-use](/id/reference/token-use).
+Compaction OpenClaw tertanam secara default mewarisi tingkat pemikiran sesi. Tetapkan `agents.defaults.compaction.thinkingLevel` untuk menggunakan tingkat terpisah bagi panggilan ringkasan; runtime membatasinya sesuai setiap model Compaction konkret atau model cadangan. Compaction app-server Codex native mengelola permintaan pemadatannya sendiri dan tidak dapat menerima penggantian tingkat pemikiran per Compaction, sehingga OpenClaw memberikan peringatan dan menyerahkan pengaturan tersebut kepada Codex.
 
----
+Penyuntikan ulang bagian AGENTS.md setelah Compaction bersifat opsional melalui `agents.defaults.compaction.postCompactionSections`; ketika tidak ditetapkan atau `[]`, OpenClaw tidak menambahkan kutipan AGENTS.md di atas ringkasan Compaction.
 
-## Compaction: apa itu
+### Batas potongan dan pemasangan alat
 
-Compaction merangkum percakapan lama ke dalam entri `compaction` yang dipersistenkan di transkrip dan menjaga pesan terbaru tetap utuh.
+Saat membagi transkrip panjang menjadi potongan Compaction, OpenClaw menjaga panggilan alat asisten tetap berpasangan dengan entri `toolResult` yang cocok:
 
-Setelah compaction, giliran berikutnya melihat:
+- Jika pembagian proporsi token jatuh di antara panggilan alat dan hasilnya, OpenClaw menggeser batas ke pesan panggilan alat asisten alih-alih memisahkan pasangan tersebut.
+- Jika blok hasil alat di bagian akhir akan membuat potongan melampaui target, OpenClaw mempertahankan blok alat yang tertunda tersebut dan menjaga bagian akhir yang belum diringkas tetap utuh.
+- Blok panggilan alat yang dibatalkan/galat tidak mempertahankan pembagian tertunda tetap terbuka.
 
-- Ringkasan compaction
-- Pesan setelah `firstKeptEntryId`
+## Kapan Compaction otomatis terjadi
 
-Penyuntikan ulang bagian AGENTS.md setelah compaction bersifat opt-in melalui
-`agents.defaults.compaction.postCompactionSections`; saat tidak diatur atau `[]`,
-OpenClaw tidak menambahkan kutipan AGENTS.md di atas ringkasan compaction.
+Dua pemicu dalam agen OpenClaw tertanam:
 
-Compaction bersifat **persisten** (tidak seperti pemangkasan sesi). Lihat [/concepts/session-pruning](/id/concepts/session-pruning).
+1. **Pemulihan luapan**: model mengembalikan galat luapan konteks (`request_too_large`, `context length exceeded`, `input exceeds the maximum number of tokens`, `input token count exceeds the maximum number of input tokens`, `input is too long for the model`, `ollama error: context length exceeded`, dan varian berbentuk penyedia lainnya)—lakukan Compaction, lalu coba lagi. Ketika penyedia melaporkan jumlah token yang dicoba, OpenClaw meneruskan jumlah yang diamati tersebut ke Compaction pemulihan luapan; jika penyedia mengonfirmasi luapan tetapi tidak mengekspos jumlah yang dapat diurai, OpenClaw meneruskan jumlah sintetis yang sedikit melampaui anggaran ke mesin Compaction dan diagnostik. Jika pemulihan luapan masih gagal, OpenClaw menampilkan panduan eksplisit dan mempertahankan pemetaan sesi saat ini alih-alih secara diam-diam beralih ke id sesi baru—coba lagi pesan tersebut, jalankan `/compact`, atau jalankan `/new`.
+2. **Pemeliharaan ambang batas**: setelah giliran berhasil, ketika konteks saat ini melampaui jendela model dikurangi ruang cadangan bawaan OpenClaw untuk prompt dan keluaran model berikutnya.
 
-## Batas chunk compaction dan pemasangan tool
+Dua pengaman tambahan berjalan di luar kedua pemicu ini:
 
-Saat OpenClaw membagi transkrip panjang menjadi chunk compaction, OpenClaw menjaga
-panggilan tool asisten tetap dipasangkan dengan entri `toolResult` yang sesuai.
+- **Compaction lokal prajalankan**: atur `agents.defaults.compaction.maxActiveTranscriptBytes` (byte atau string seperti `"20mb"`) untuk memicu Compaction lokal sebelum membuka proses berikutnya setelah transkrip aktif mencapai ukuran tersebut. Ini adalah pengaman ukuran untuk biaya pembukaan ulang lokal, bukan pengarsipan mentah—Compaction semantik normal tetap berjalan, dan memerlukan `truncateAfterCompaction` agar ringkasan hasil Compaction menjadi transkrip penerus baru.
+- **Prapemeriksaan di tengah giliran**: atur `agents.defaults.compaction.midTurnPrecheck.enabled: true` (default `false`) untuk menambahkan pengaman perulangan alat. Setelah hasil alat ditambahkan dan sebelum pemanggilan model berikutnya, OpenClaw memperkirakan tekanan prompt menggunakan logika anggaran prajalankan yang sama dengan yang digunakan pada awal giliran. Jika konteks tidak lagi muat, pengaman tidak menjalankan Compaction secara langsung—pengaman memunculkan sinyal prapemeriksaan tengah giliran yang terstruktur, menghentikan pengiriman prompt saat ini, dan membiarkan perulangan proses luar menggunakan jalur pemulihan yang ada (memangkas hasil alat yang terlalu besar jika itu sudah cukup, atau memicu mode Compaction yang dikonfigurasi lalu mencoba kembali). Berfungsi dengan mode Compaction `default` maupun `safeguard`, termasuk Compaction pengaman yang didukung penyedia. Independen dari `maxActiveTranscriptBytes`: pengaman ukuran byte berjalan sebelum giliran dibuka, sedangkan prapemeriksaan tengah giliran berjalan kemudian, setelah hasil alat baru ditambahkan.
 
-- Jika pembagian porsi token jatuh di antara panggilan tool dan hasilnya, OpenClaw
-  menggeser batas ke pesan panggilan tool asisten alih-alih memisahkan
-  pasangan tersebut.
-- Jika blok tool-result di akhir sebaliknya akan mendorong chunk melewati target,
-  OpenClaw mempertahankan blok tool tertunda itu dan menjaga ekor yang belum diringkas
-  tetap utuh.
-- Blok panggilan tool yang dibatalkan/error tidak membuat pembagian tertunda tetap terbuka.
-
----
-
-## Kapan auto-compaction terjadi (runtime OpenClaw)
-
-Di agen OpenClaw tertanam, auto-compaction terpicu dalam dua kasus:
-
-1. **Pemulihan overflow**: model mengembalikan error overflow konteks
-   (`request_too_large`, `context length exceeded`, `input exceeds the maximum
-number of tokens`, `input token count exceeds the maximum number of input
-tokens`, `input is too long for the model`, `ollama error: context length
-exceeded`, dan varian serupa berbentuk provider) → compact → retry.
-   Saat provider melaporkan jumlah token yang dicoba, OpenClaw meneruskan
-   jumlah teramati tersebut ke compaction pemulihan overflow. Jika provider mengonfirmasi
-   overflow tetapi tidak mengekspos jumlah yang dapat di-parse, OpenClaw meneruskan jumlah sintetis yang
-   sedikit melebihi anggaran ke mesin compaction dan diagnostik.
-   Jika pemulihan overflow masih gagal, OpenClaw menampilkan panduan eksplisit kepada
-   pengguna dan mempertahankan pemetaan sesi saat ini alih-alih diam-diam merotasi
-   kunci sesi ke id sesi baru. Langkah berikutnya dikendalikan operator:
-   coba lagi pesan, jalankan `/compact`, atau jalankan `/new` saat sesi baru
-   lebih disukai.
-2. **Pemeliharaan ambang**: setelah giliran berhasil, saat:
-
-`contextTokens > contextWindow - reserveTokens`
-
-Dengan:
-
-- `contextWindow` adalah jendela konteks model
-- `reserveTokens` adalah ruang cadangan yang disisihkan untuk prompt + output model berikutnya
-
-Ini adalah semantik runtime OpenClaw.
-
-OpenClaw juga dapat memicu compaction lokal preflight sebelum membuka run berikutnya
-saat `agents.defaults.compaction.maxActiveTranscriptBytes` diatur dan file
-transkrip aktif mencapai ukuran tersebut. Ini adalah guard ukuran file untuk biaya
-pembukaan ulang lokal, bukan pengarsipan mentah: OpenClaw tetap menjalankan compaction semantik normal,
-dan ini memerlukan `truncateAfterCompaction` agar ringkasan yang dipadatkan dapat menjadi
-transkrip penerus baru.
-
-Untuk run OpenClaw tertanam, `agents.defaults.compaction.midTurnPrecheck.enabled: true`
-menambahkan guard tool-loop opt-in. Setelah hasil tool ditambahkan dan sebelum
-panggilan model berikutnya, OpenClaw memperkirakan tekanan prompt menggunakan logika anggaran
-preflight yang sama dengan yang digunakan di awal giliran. Jika konteks tidak lagi muat, guard
-tidak melakukan compact di dalam hook `transformContext` runtime OpenClaw. Guard menaikkan sinyal
-precheck tengah giliran terstruktur, menghentikan pengiriman prompt saat ini, dan membiarkan
-loop run luar menggunakan jalur pemulihan yang sudah ada: memotong hasil tool yang terlalu besar
-saat itu cukup, atau memicu mode compaction yang dikonfigurasi dan mencoba lagi. Opsi
-ini dinonaktifkan secara default dan bekerja dengan mode compaction `default` maupun `safeguard`,
-termasuk compaction safeguard yang didukung provider.
-Ini independen dari `maxActiveTranscriptBytes`: guard ukuran byte berjalan
-sebelum giliran dibuka, sementara precheck tengah giliran berjalan kemudian di tool loop OpenClaw tertanam
-setelah hasil tool baru ditambahkan.
-
----
-
-## Pengaturan compaction (`reserveTokens`, `keepRecentTokens`)
-
-Pengaturan compaction runtime OpenClaw berada di pengaturan agen:
+## Pengaturan Compaction
 
 ```json5
 {
-  compaction: {
-    enabled: true,
-    reserveTokens: 16384,
-    keepRecentTokens: 20000,
+  agents: {
+    defaults: {
+      compaction: {
+        enabled: true,
+        keepRecentTokens: 20000,
+      },
+    },
   },
 }
 ```
 
-OpenClaw juga menerapkan batas bawah keselamatan untuk run tertanam:
+OpenClaw menerapkan cadangan bawaan untuk proses tertanam dan membatasinya berdasarkan jendela konteks model aktif agar tidak menghabiskan seluruh anggaran prompt. Hal ini mencegah model lokal berkonteks kecil memasuki Compaction sejak token pertama, sekaligus menyisakan ruang yang cukup untuk pemeliharaan multi-giliran seperti pembuangan memori.
 
-- Jika `compaction.reserveTokens < reserveTokensFloor`, OpenClaw menaikkannya.
-- Batas bawah default adalah `20000` token.
-- Atur `agents.defaults.compaction.reserveTokensFloor: 0` untuk menonaktifkan batas bawah.
-- Jika sudah lebih tinggi, OpenClaw membiarkannya.
-- `/compact` manual menghormati `agents.defaults.compaction.keepRecentTokens`
-  eksplisit dan mempertahankan titik potong ekor terbaru runtime OpenClaw. Tanpa anggaran keep eksplisit,
-  compaction manual tetap menjadi checkpoint keras dan konteks yang dibangun ulang dimulai dari
-  ringkasan baru.
-- Atur `agents.defaults.compaction.midTurnPrecheck.enabled: true` untuk menjalankan
-  precheck tool-loop opsional setelah hasil tool baru dan sebelum panggilan model
-  berikutnya. Ini hanya pemicu; pembuatan ringkasan tetap menggunakan jalur
-  compaction yang dikonfigurasi. Ini independen dari `maxActiveTranscriptBytes`, yang merupakan
-  guard ukuran byte transkrip aktif di awal giliran.
-- Atur `agents.defaults.compaction.maxActiveTranscriptBytes` ke nilai byte atau
-  string seperti `"20mb"` untuk menjalankan compaction lokal sebelum giliran saat transkrip
-  aktif menjadi besar. Guard ini aktif hanya saat
-  `truncateAfterCompaction` juga diaktifkan. Biarkan tidak diatur atau atur `0` untuk
-  menonaktifkan.
-- Saat `agents.defaults.compaction.truncateAfterCompaction` diaktifkan,
-  OpenClaw merotasi transkrip aktif ke JSONL penerus yang dipadatkan setelah
-  compaction. Tindakan checkpoint branch/restore menggunakan penerus yang dipadatkan itu;
-  file checkpoint pra-compaction lama tetap dapat dibaca selama masih direferensikan.
+`/compact` manual mematuhi `agents.defaults.compaction.keepRecentTokens` yang ditentukan secara eksplisit dan mempertahankan titik potong ekor terbaru milik runtime. Tanpa anggaran penyimpanan eksplisit, Compaction manual menjadi titik pemeriksaan penuh dan konteks yang dibangun ulang dimulai dari ringkasan baru.
 
-Alasan: sisakan cukup ruang untuk "housekeeping" multi-giliran (seperti penulisan memori) sebelum compaction menjadi tidak terhindarkan.
+Saat `truncateAfterCompaction` diaktifkan, OpenClaw merotasi transkrip aktif ke penerus hasil Compaction setelah Compaction. Tindakan titik pemeriksaan cabang/pemulihan menggunakan penerus hasil Compaction tersebut; file titik pemeriksaan lama sebelum Compaction tetap dapat dibaca selama masih dirujuk.
 
-Implementasi: `applyAgentCompactionSettingsFromConfig()` di `src/agents/agent-settings.ts`
-(dipanggil dari jalur giliran embedded-runner dan penyiapan compaction).
+## Penyedia Compaction yang dapat dipasang
 
----
+Plugin mendaftarkan penyedia Compaction melalui `registerCompactionProvider()` pada API Plugin. Saat `agents.defaults.compaction.provider` diatur ke id penyedia yang terdaftar, ekstensi pengaman mendelegasikan peringkasan kepada penyedia tersebut, bukan ke pipeline `summarizeInStages` bawaan.
 
-## Provider compaction yang dapat dipasang
-
-Plugin dapat mendaftarkan provider compaction melalui `registerCompactionProvider()` pada API plugin. Saat `agents.defaults.compaction.provider` diatur ke id provider terdaftar, ekstensi safeguard mendelegasikan peringkasan ke provider tersebut alih-alih pipeline bawaan `summarizeInStages`.
-
-- `provider`: id plugin provider compaction terdaftar. Biarkan tidak diatur untuk peringkasan LLM default.
-- Mengatur `provider` memaksa `mode: "safeguard"`.
-- Provider menerima instruksi compaction dan kebijakan pelestarian pengenal yang sama seperti jalur bawaan.
-- Safeguard tetap mempertahankan konteks sufiks giliran terbaru dan giliran terpisah setelah output provider.
-- Peringkasan safeguard bawaan menyuling ulang ringkasan sebelumnya dengan pesan baru
-  alih-alih mempertahankan seluruh ringkasan sebelumnya secara verbatim.
-- Mode safeguard mengaktifkan audit kualitas ringkasan secara default; atur
-  `qualityGuard.enabled: false` untuk melewati perilaku coba lagi saat output salah bentuk.
-- Jika provider gagal atau mengembalikan hasil kosong, OpenClaw otomatis kembali ke peringkasan LLM bawaan.
-- Sinyal abort/timeout dilempar ulang (tidak ditelan) untuk menghormati pembatalan pemanggil.
+- `provider`: id Plugin penyedia Compaction yang terdaftar. Biarkan tidak diatur untuk peringkasan LLM default. Mengatur `provider` akan memaksa `mode: "safeguard"`.
+- Penyedia menerima instruksi Compaction dan kebijakan pemeliharaan pengenal yang sama seperti jalur bawaan, dan pengaman tetap mempertahankan konteks akhiran giliran terbaru serta giliran terpisah setelah keluaran penyedia.
+- Peringkasan pengaman bawaan menyuling ulang ringkasan sebelumnya bersama pesan baru, alih-alih mempertahankan seluruh ringkasan sebelumnya kata demi kata.
+- Mode pengaman mengaktifkan audit kualitas ringkasan secara default; atur `qualityGuard.enabled: false` untuk melewati perilaku mencoba kembali saat keluaran tidak valid.
+- Jika penyedia gagal atau mengembalikan hasil kosong, OpenClaw secara otomatis beralih ke peringkasan LLM bawaan. Sinyal pembatalan/batas waktu yang dipicu secara eksplisit oleh pemanggil akan dilemparkan kembali, bukan ditelan, sehingga pembatalan selalu dipatuhi.
 
 Sumber: `src/plugins/compaction-provider.ts`, `src/agents/agent-hooks/compaction-safeguard.ts`.
 
----
+## Permukaan yang terlihat oleh pengguna
 
-## Permukaan yang terlihat pengguna
-
-Anda dapat mengamati compaction dan status sesi melalui:
-
-- `/status` (di sesi chat apa pun)
+- `/status` dalam sesi obrolan apa pun
 - `openclaw status` (CLI)
-- `openclaw sessions` / `sessions --json`
+- `openclaw sessions` / `openclaw sessions --json`
 - Log Gateway (`pnpm gateway:watch` atau `openclaw logs --follow`): `embedded run auto-compaction start` + `complete`
-- Mode verbose: `🧹 Auto-compaction complete` + jumlah compaction
+- Mode verbose: `🧹 Auto-compaction complete` ditambah jumlah Compaction
 
----
+## Pemeliharaan senyap (`NO_REPLY`)
 
-## Housekeeping senyap (`NO_REPLY`)
+OpenClaw mendukung giliran "senyap" untuk tugas latar belakang ketika pengguna tidak boleh melihat keluaran perantara.
 
-OpenClaw mendukung giliran "senyap" untuk tugas latar belakang saat pengguna tidak seharusnya melihat output antara.
+- Asisten memulai keluarannya dengan token senyap persis `NO_REPLY` / `no_reply` yang berarti "jangan kirim balasan kepada pengguna." OpenClaw menghapus/menyembunyikannya pada lapisan pengiriman.
+- Penyembunyian token senyap persis tidak membedakan huruf besar-kecil: `NO_REPLY` dan `no_reply` sama-sama berlaku ketika seluruh muatan hanya berisi token senyap.
+- Mulai `2026.1.10`, OpenClaw juga menyembunyikan streaming draf/indikator pengetikan ketika potongan parsial diawali dengan `NO_REPLY`, sehingga operasi senyap tidak membocorkan keluaran parsial di tengah giliran.
+- Ini hanya untuk giliran latar belakang/tanpa pengiriman yang sebenarnya—bukan jalan pintas untuk permintaan pengguna biasa yang dapat ditindaklanjuti.
 
-Konvensi:
+## Pembuangan memori sebelum Compaction
 
-- Asisten memulai outputnya dengan token senyap persis `NO_REPLY` /
-  `no_reply` untuk menunjukkan "jangan kirim balasan kepada pengguna".
-- OpenClaw menghapus/menekan ini di lapisan pengiriman.
-- Penekanan token senyap persis tidak peka huruf besar-kecil, sehingga `NO_REPLY` dan
-  `no_reply` keduanya dihitung ketika seluruh payload hanya berupa token senyap.
-- Ini hanya untuk giliran latar belakang/tanpa pengiriman yang sebenarnya; ini bukan pintasan untuk
-  permintaan pengguna biasa yang dapat ditindaklanjuti.
+Sebelum Compaction otomatis terjadi, OpenClaw dapat menjalankan giliran agentik senyap yang menulis status persisten ke disk (misalnya `memory/YYYY-MM-DD.md` di ruang kerja agen) agar Compaction tidak dapat menghapus konteks penting. OpenClaw memantau penggunaan konteks sesi, dan setelah melewati ambang lunak di bawah ambang Compaction, OpenClaw mengirim arahan senyap "tulis memori sekarang" menggunakan token senyap persis `NO_REPLY` / `no_reply` agar pengguna tidak melihat apa pun.
 
-Mulai `2026.1.10`, OpenClaw juga menekan **streaming draf/pengetikan** ketika
-chunk parsial dimulai dengan `NO_REPLY`, sehingga operasi senyap tidak membocorkan output
-parsial di tengah giliran.
+Konfigurasi (`agents.defaults.compaction.memoryFlush`), referensi lengkap di [/gateway/config-agents](/id/gateway/config-agents#agentsdefaultscompaction):
 
----
-
-## "Memory flush" pra-Compaction (diimplementasikan)
-
-Tujuan: sebelum Compaction otomatis terjadi, jalankan giliran agentik senyap yang menulis state
-tahan lama ke disk (misalnya `memory/YYYY-MM-DD.md` di workspace agen) sehingga Compaction tidak dapat
-menghapus konteks penting.
-
-OpenClaw menggunakan pendekatan **flush pra-ambang**:
-
-1. Pantau penggunaan konteks sesi.
-2. Ketika melewati "ambang lunak" (di bawah ambang Compaction runtime OpenClaw), jalankan direktif senyap
-   "tulis memori sekarang" ke agen.
-3. Gunakan token senyap persis `NO_REPLY` / `no_reply` sehingga pengguna tidak melihat
-   apa pun.
-
-Konfigurasi (`agents.defaults.compaction.memoryFlush`):
-
-- `enabled` (default: `true`)
-- `model` (override provider/model persis opsional untuk giliran flush, misalnya `ollama/qwen3:8b`)
-- `softThresholdTokens` (default: `4000`)
-- `prompt` (pesan pengguna untuk giliran flush)
-- `systemPrompt` (prompt sistem tambahan yang ditambahkan untuk giliran flush)
+| Kunci                       | Default          | Catatan                                                                                                                                |
+| --------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `enabled`                   | `true`           |                                                                                                                                        |
+| `model`                     | tidak diatur     | penggantian penyedia/model yang persis hanya untuk giliran pembuangan, misalnya `ollama/qwen3:8b`                                     |
+| `softThresholdTokens`       | `4000`           | jarak di bawah ambang Compaction yang memicu pembuangan                                                                                 |
+| `forceFlushTranscriptBytes` | tidak diatur (dinonaktifkan) | paksa pembuangan setelah file transkrip mencapai ukuran byte ini (atau string seperti `"2mb"`), meskipun penghitung token sudah kedaluwarsa; `0` menonaktifkan |
+| `prompt`                    | bawaan           | pesan pengguna untuk giliran pembuangan                                                                                                |
+| `systemPrompt`              | bawaan           | prompt sistem tambahan yang disisipkan untuk giliran pembuangan                                                                        |
 
 Catatan:
 
-- Prompt/prompt sistem default menyertakan petunjuk `NO_REPLY` untuk menekan
-  pengiriman.
-- Ketika `model` diatur, giliran flush menggunakan model tersebut tanpa mewarisi rantai fallback
-  sesi aktif, sehingga housekeeping khusus lokal tidak diam-diam
-  fallback ke model percakapan berbayar.
-- Flush berjalan sekali per siklus Compaction (dilacak di `sessions.json`).
-- Flush hanya berjalan untuk sesi OpenClaw tertanam (backend CLI melewatinya).
-- Flush dilewati ketika workspace sesi bersifat hanya-baca (`workspaceAccess: "ro"` atau `"none"`).
-- Lihat [Memori](/id/concepts/memory) untuk tata letak file workspace dan pola penulisan.
+- Prompt/prompt sistem default menyertakan petunjuk `NO_REPLY` untuk menyembunyikan pengiriman.
+- Saat `model` diatur, giliran pembuangan menggunakan model tersebut tanpa mewarisi rantai fallback sesi aktif, sehingga pemeliharaan khusus lokal tidak secara diam-diam beralih ke model percakapan berbayar ketika gagal.
+- Pembuangan berjalan satu kali per siklus Compaction (dilacak dalam baris sesi).
+- Pembuangan hanya berjalan untuk sesi OpenClaw tertanam; backend CLI dan giliran Heartbeat melewatinya.
+- Pembuangan dilewati saat ruang kerja sesi bersifat hanya-baca (`workspaceAccess: "ro"` atau `"none"`).
+- Lihat [Memori](/id/concepts/memory) untuk tata letak file ruang kerja dan pola penulisan.
 
-OpenClaw juga mengekspos hook `session_before_compact` di API ekstensi, tetapi logika
-flush OpenClaw saat ini berada di sisi Gateway.
-
----
+OpenClaw menyediakan hook `session_before_compact` dalam API ekstensi, tetapi logika pembuangan di atas berada di sisi Gateway (`src/auto-reply/reply/memory-flush.ts`, `src/auto-reply/reply/agent-runner-memory.ts`), bukan pada hook tersebut.
 
 ## Daftar periksa pemecahan masalah
 
-- Kunci sesi salah? Mulai dengan [/concepts/session](/id/concepts/session) dan konfirmasi `sessionKey` di `/status`.
-- Ketidakcocokan store vs transkrip? Konfirmasi host Gateway dan path store dari `openclaw status`.
-- Spam Compaction? Periksa:
-  - jendela konteks model (terlalu kecil)
-  - pengaturan Compaction (`reserveTokens` terlalu tinggi untuk jendela model dapat menyebabkan Compaction lebih awal)
-  - pembengkakan hasil tool: aktifkan/sesuaikan pemangkasan sesi
-- Giliran senyap bocor? Konfirmasi balasan dimulai dengan `NO_REPLY` (token persis yang tidak peka huruf besar-kecil) dan Anda berada pada build yang menyertakan perbaikan penekanan streaming.
+- **Kunci sesi salah?** Mulailah dari [/concepts/session](/id/concepts/session) dan konfirmasikan `sessionKey` di `/status`.
+- **Penyimpanan dan transkrip tidak cocok?** Konfirmasikan host Gateway dan jalur penyimpanan dari `openclaw status`.
+- **Compaction terus-menerus?** Periksa jendela konteks model (terlalu kecil memaksa Compaction yang sering) dan pembengkakan hasil alat (sesuaikan pemangkasan sesi).
+- **Setiap prompt tampaknya melampaui batas pada model lokal kecil?** Konfirmasikan bahwa penyedia melaporkan jendela konteks model yang benar. OpenClaw hanya dapat membatasi cadangan efektif jika jendela tersebut diketahui.
+- **Giliran senyap bocor?** Konfirmasikan bahwa balasan diawali dengan token senyap persis `NO_REPLY` (tidak membedakan huruf besar-kecil) dan Anda menggunakan build yang menyertakan perbaikan penyembunyian streaming (`2026.1.10`+).
 
 ## Terkait
 
 - [Manajemen sesi](/id/concepts/session)
 - [Pemangkasan sesi](/id/concepts/session-pruning)
 - [Mesin konteks](/id/concepts/context-engine)
+- [Referensi konfigurasi agen](/id/gateway/config-agents)

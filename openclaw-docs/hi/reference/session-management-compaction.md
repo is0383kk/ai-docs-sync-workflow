@@ -1,496 +1,316 @@
 ---
 read_when:
-    - आपको सत्र IDs, ट्रांसक्रिप्ट JSONL, या sessions.json फ़ील्ड को डीबग करना है
-    - आप स्वचालित Compaction व्यवहार बदल रहे हैं या "पूर्व-Compaction" रखरखाव जोड़ रहे हैं
-    - आप मेमोरी फ्लश या मौन सिस्टम टर्न लागू करना चाहते हैं
-summary: 'गहन अध्ययन: सत्र स्टोर + ट्रांसक्रिप्ट, लाइफ़साइकिल, और (ऑटो)Compaction के आंतरिक विवरण'
-title: सत्र प्रबंधन का गहन अध्ययन
+    - आपको सत्र आईडी, ट्रांसक्रिप्ट इवेंट या सत्र पंक्ति फ़ील्ड डीबग करने हैं
+    - आप स्वतः-Compaction व्यवहार बदल रहे हैं या "प्री-Compaction" रखरखाव जोड़ रहे हैं
+    - आप मेमोरी फ़्लश या मौन सिस्टम टर्न लागू करना चाहते हैं
+summary: 'गहन विश्लेषण: सत्र स्टोर + ट्रांसक्रिप्ट, जीवनचक्र और (स्वतः)Compaction की आंतरिक कार्यप्रणाली'
+title: सत्र प्रबंधन का गहन विश्लेषण
 x-i18n:
-    generated_at: "2026-07-04T20:34:29Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T21:39:25Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c97994f674e14ec01b2eaadc10a61e524f5071f95b2ef84957d71abacbdc719b
+    source_hash: 4ae02d49245768831abd17e1c2e5adacfa1a36673cef2a8a7a06a5300392b104
     source_path: reference/session-management-compaction.md
     workflow: 16
 ---
 
-OpenClaw इन क्षेत्रों में sessions को शुरू से अंत तक प्रबंधित करता है:
+एकल **Gateway प्रक्रिया** सत्र की स्थिति का शुरू से अंत तक स्वामित्व रखती है। UI (macOS ऐप, वेब Control UI, TUI) सत्र सूचियों और टोकन गणनाओं के लिए Gateway से क्वेरी करते हैं। रिमोट मोड में, सत्र फ़ाइलें रिमोट होस्ट पर रहती हैं, इसलिए आपके स्थानीय Mac की फ़ाइलों की जाँच से यह पता नहीं चलेगा कि Gateway क्या उपयोग कर रहा है।
 
-- **Session routing** (आने वाले संदेश `sessionKey` से कैसे मैप होते हैं)
-- **Session store** (`sessions.json`) और यह क्या ट्रैक करता है
-- **Transcript persistence** (`*.jsonl`) और इसकी संरचना
-- **Transcript hygiene** (रन से पहले provider-specific fixups)
-- **Context limits** (context window बनाम ट्रैक किए गए tokens)
-- **Compaction** (manual और auto-compaction) और pre-compaction काम कहां hook करना है
-- **Silent housekeeping** (memory writes जिनसे user-visible output नहीं बनना चाहिए)
+पहले अवलोकन दस्तावेज़ देखें: [सत्र प्रबंधन](/hi/concepts/session), [Compaction](/hi/concepts/compaction), [मेमोरी अवलोकन](/hi/concepts/memory), [मेमोरी खोज](/hi/concepts/memory-search), [सत्र छँटाई](/hi/concepts/session-pruning), [ट्रांसक्रिप्ट स्वच्छता](/hi/reference/transcript-hygiene), पूर्ण कॉन्फ़िगरेशन संदर्भ [एजेंट कॉन्फ़िगरेशन](/hi/gateway/config-agents) पर उपलब्ध है।
 
-अगर आप पहले उच्च-स्तरीय overview चाहते हैं, तो यहां से शुरू करें:
+## दो स्थायित्व परतें
 
-- [Session management](/hi/concepts/session)
-- [Compaction](/hi/concepts/compaction)
-- [Memory overview](/hi/concepts/memory)
-- [Memory search](/hi/concepts/memory-search)
-- [Session pruning](/hi/concepts/session-pruning)
-- [Transcript hygiene](/hi/reference/transcript-hygiene)
+1. **सत्र पंक्तियाँ (प्रति-एजेंट SQLite)** - कुंजी/मान मैप `sessionKey -> SessionEntry`। Gateway के स्वामित्व वाली परिवर्तनशील रनटाइम स्थिति। मेटाडेटा ट्रैक करती है: वर्तमान सत्र आईडी, अंतिम गतिविधि, टॉगल, टोकन काउंटर।
+2. **ट्रांसक्रिप्ट इवेंट (प्रति-एजेंट SQLite)** - केवल-संयोजन, वृक्ष-संरचित (प्रविष्टियों में `id` + `parentId` होते हैं)। वार्तालाप, टूल कॉल और Compaction सारांश संग्रहीत करता है; भविष्य के टर्न के लिए मॉडल संदर्भ फिर से बनाता है। Compaction चेकपॉइंट संकुचित उत्तरवर्ती ट्रांसक्रिप्ट के ऊपर मेटाडेटा होते हैं - नया Compaction दूसरी `.checkpoint.*.jsonl` प्रति नहीं लिखता।
 
----
+पुराने इंस्टॉलेशन में अभी भी एजेंट की `sessions/`
+डायरेक्टरी के अंतर्गत `sessions.json` फ़ाइलें हो सकती हैं। उन फ़ाइलों को लीगेसी सत्र-पंक्ति माइग्रेशन इनपुट या स्पष्ट
+ऑफ़लाइन-रखरखाव लक्ष्य मानें। Gateway स्टार्टअप और `openclaw doctor --fix`, सक्रिय लीगेसी पंक्तियों और ट्रांसक्रिप्ट इतिहास को
+स्वचालित रूप से प्रति-एजेंट SQLite स्टोर में आयात करते हैं।
+जब स्पष्ट निरीक्षण या सत्यापन प्रमाण की आवश्यकता हो, तो `openclaw doctor --session-sqlite inspect
+--session-sqlite-all-agents` चलाएँ, फिर [Doctor माइग्रेशन
+क्रम](/hi/cli/doctor#session-sqlite-migration) का पालन करें। यदि लीगेसी ट्रांसक्रिप्ट
+आर्टिफ़ैक्ट संग्रहित किए जाने के बाद माइग्रेशन विफल हो जाए, तो उस क्रम से Doctor पुनर्प्राप्ति मोड का उपयोग करें।
+पुनर्प्राप्ति माइग्रेशन मैनिफ़ेस्ट का उपयोग करती है, केवल प्रभावित संग्रहित सहायक
+आर्टिफ़ैक्ट पुनर्स्थापित करती है, अनुरोध किए जाने पर स्वच्छीकृत GitHub इश्यू रिपोर्ट तैयार करती है, और
+सक्रिय रनटाइम को JSONL फ़ाइलें फिर से पढ़ने नहीं देती।
 
-## सत्य का स्रोत: Gateway
+Gateway इतिहास रीडर पूरे ट्रांसक्रिप्ट को मेमोरी में लाने से बचते हैं, जब तक सतह को मनचाही ऐतिहासिक पहुँच की आवश्यकता न हो। प्रथम-पृष्ठ इतिहास, एम्बेडेड चैट इतिहास, पुनरारंभ पुनर्प्राप्ति और टोकन/उपयोग जाँच SQLite से सीमित टेल रीड का उपयोग करते हैं। पूर्ण ट्रांसक्रिप्ट स्कैन एसिंक ट्रांसक्रिप्ट इंडेक्स से गुजरते हैं और समवर्ती रीडर के बीच साझा किए जाते हैं।
 
-OpenClaw एकल **Gateway process** के इर्द-गिर्द डिज़ाइन किया गया है, जो session state का स्वामी होता है।
+## डिस्क पर स्थान
 
-- UIs (macOS app, web Control UI, TUI) को session lists और token counts के लिए Gateway से query करना चाहिए।
-- remote mode में, session files remote host पर होती हैं; "अपनी local Mac files जांचना" यह नहीं दिखाएगा कि Gateway क्या उपयोग कर रहा है।
+प्रति एजेंट, Gateway होस्ट पर (`src/config/sessions.ts` के माध्यम से निर्धारित):
 
----
+- रनटाइम सत्र पंक्ति स्टोर: `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`
+- रनटाइम ट्रांसक्रिप्ट पंक्तियाँ: `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`
+- लीगेसी/संग्रह ट्रांसक्रिप्ट आर्टिफ़ैक्ट: `~/.openclaw/agents/<agentId>/sessions/`
+- लीगेसी पंक्ति माइग्रेशन इनपुट: `~/.openclaw/agents/<agentId>/sessions/sessions.json`
 
-## दो persistence layers
+## स्टोर रखरखाव और डिस्क नियंत्रण
 
-OpenClaw sessions को दो layers में persist करता है:
+`session.maintenance`, SQLite सत्र पंक्तियों, SQLite ट्रांसक्रिप्ट पंक्तियों, संग्रह आर्टिफ़ैक्ट और ट्रैजेक्टरी साइडकार के स्वचालित रखरखाव को नियंत्रित करता है:
 
-1. **Session store (`sessions.json`)**
-   - Key/value map: `sessionKey -> SessionEntry`
-   - छोटा, mutable, edit करने के लिए सुरक्षित (या entries delete करने के लिए)
-   - session metadata ट्रैक करता है (current session id, last activity, toggles, token counters, आदि)
+| कुंजी                   | डिफ़ॉल्ट               | टिप्पणियाँ                                                                                  |
+| ----------------------- | --------------------- | ------------------------------------------------------------------------------------------- |
+| `mode`                  | `"enforce"`           | या `"warn"` (केवल रिपोर्ट, कोई परिवर्तन नहीं)                                                      |
+| `pruneAfter`            | `"30d"`               | बासी प्रविष्टि की आयु सीमा                                                                      |
+| `maxEntries`            | `500`                 | सत्र प्रविष्टियों की सीमा                                                                      |
+| `resetArchiveRetention` | रखें (कोई आयु सीमा नहीं)  | `*.reset.*`/`*.deleted.*` ट्रांसक्रिप्ट संग्रहों की आयु सीमा; अवधि निर्दिष्ट करने पर हटाना सक्रिय होता है |
+| `maxDiskBytes`          | `10gb`                | प्रति-एजेंट सत्र डिस्क बजट; `false` इसे अक्षम करता है                                            |
+| `highWaterBytes`        | `maxDiskBytes` का 80% | बजट सफ़ाई के बाद लक्ष्य                                                                 |
 
-2. **Transcript (`<sessionId>.jsonl`)**
-   - tree structure वाला append-only transcript (entries में `id` + `parentId` होते हैं)
-   - वास्तविक conversation + tool calls + compaction summaries store करता है
-   - भविष्य के turns के लिए model context rebuild करने में उपयोग होता है
-   - Compaction checkpoints, compacted successor
-     transcript के ऊपर metadata होते हैं। नई compactions दूसरी `.checkpoint.*.jsonl`
-     copy नहीं लिखतीं।
+रीसेट सक्रिय `sessionKey -> sessionId` मैपिंग को आगे बढ़ाता है, लेकिन पिछली SQLite सत्र, ट्रांसक्रिप्ट, ट्रैजेक्टरी और खोज पंक्तियाँ बनाए रखता है। वह इतिहास उसी सत्र कुंजी के अंतर्गत खोज योग्य रहता है; सामान्य प्रविष्टि और सत्र सूचियाँ केवल नई सक्रिय मैपिंग दिखाती हैं। बनाए रखा गया रीसेट इतिहास डिस्क बजट द्वारा सीमित होता है, `resetArchiveRetention` द्वारा नहीं, जो केवल संग्रह आर्टिफ़ैक्ट की आयु निर्धारित करता है। स्पष्ट विलोपन अलग है: हटाए गए सत्र की पंक्तियाँ निकालने से पहले यह संपीड़ित ट्रांसक्रिप्ट संग्रह लिखता और सत्यापित करता है (zstd उपलब्ध होने पर `*.jsonl.deleted.<timestamp>.zst`)।
 
-Gateway history readers को पूरा transcript materialize करने से बचना चाहिए जब तक
-surface को स्पष्ट रूप से arbitrary historical access की जरूरत न हो। First-page history,
-embedded chat history, restart recovery, और token/usage checks bounded tail
-reads का उपयोग करते हैं। Full transcript scans async transcript index से गुजरते हैं, जो
-file path और `mtimeMs`/`size` से cached होता है और concurrent readers के बीच shared होता है।
+`maxDiskBytes` प्रवर्तन भौतिक बाइट का उपयोग करता है: प्रति-एजेंट SQLite मुख्य फ़ाइल, उसकी `-wal` फ़ाइल, और एजेंट सत्र डायरेक्टरी में गिनी गई फ़ाइलें। यह कभी पंक्ति JSON आकार का अनुमान नहीं लगाता या उस कुल से तार्किक पंक्ति आकार नहीं घटाता।
 
----
+Gateway मॉडल-रन प्रोब सत्रों (जिनकी कुंजियाँ `agent:*:explicit:model-run-<uuid>` से मेल खाती हैं) के लिए अलग, निश्चित `24h` अवधारण होती है। यह छँटाई दबाव-आधारित है: यह केवल तभी चलती है जब सत्र-प्रविष्टि रखरखाव/सीमा का दबाव पहुँच जाता है, और वैश्विक बासी-प्रविष्टि सफ़ाई/सीमा चरण से केवल पहले चलती है। अन्य स्पष्ट सत्र इस अवधारण का उपयोग नहीं करते।
 
-## On-disk locations
+जब संयुक्त भौतिक उपयोग `maxDiskBytes` से अधिक हो जाता है, तो `mode: "enforce"` पहले चेकपॉइंट किए जा सकने वाले डेटाबेस स्थान को पुनः प्राप्त करता है, फिर बनाए रखे गए सबसे पुराने रीसेट/विलोपन संग्रह हटाता है। यदि उपयोग अभी भी `highWaterBytes` से अधिक है, तो यह `sessions.updated_at` के अनुसार ऐतिहासिक SQLite सत्रों को सबसे पुराने से शुरू करके देखता है। ऐतिहासिक का अर्थ है कि सत्र आईडी किसी सक्रिय सत्र प्रविष्टि, रूट लक्ष्य या स्वीकृत/प्रगतिशील रन द्वारा संदर्भित नहीं है। प्रत्येक चयनित सत्र के लिए, सफ़ाई संपीड़ित संग्रह को लिखती, fsync करती और वापस पढ़ती है, जिसके बाद एक राइट ट्रांज़ैक्शन सत्र पंक्ति और उसके ट्रांसक्रिप्ट, ट्रैजेक्टरी, सक्रिय, इंडेक्स तथा FTS प्रोजेक्शन हटाता है। इसमें वे सत्र भी शामिल हैं जिनमें ट्रैजेक्टरी इवेंट हैं लेकिन ट्रांसक्रिप्ट इवेंट नहीं हैं। सफ़ाई विलोपन के समय रूट, प्रविष्टि और स्वीकृति संदर्भों को फिर से जाँचती है, प्रत्येक संग्रह या चयनित सत्र के बाद भौतिक उपयोग को फिर से मापती है और `highWaterBytes` पर रुकती है।
 
-प्रति agent, Gateway host पर:
+कमिट किए गए लेखन और विलोपन पहले WAL में पहुँचते हैं। सफ़ाई इसका चेकपॉइंट बनाती है ताकि WAL तुरंत छोटा हो सके, फिर मुख्य फ़ाइल से योग्य मुक्त अंतिम पृष्ठ लौटाने के लिए इंक्रीमेंटल वैक्यूम का उपयोग करती है; जो पृष्ठ अभी पुनः प्राप्त करने योग्य नहीं हैं वे मुख्य फ़ाइल में रहते हैं और इसलिए अगले भौतिक मापन में गिने जाते हैं। `mode: "warn"` बिना चेकपॉइंट बनाए, संग्रह लिखे या पंक्तियाँ हटाए वर्तमान भौतिक अधिकता की रिपोर्ट करता है।
 
-- Store: `~/.openclaw/agents/<agentId>/sessions/sessions.json`
-- Transcripts: `~/.openclaw/agents/<agentId>/sessions/<sessionId>.jsonl`
-  - Telegram topic sessions: `.../<sessionId>-topic-<threadId>.jsonl`
-
-OpenClaw इन्हें `src/config/sessions.ts` के जरिए resolve करता है।
-
----
-
-## Store maintenance और disk controls
-
-Session persistence में `sessions.json`, transcript artifacts, और trajectory sidecars के लिए automatic maintenance controls (`session.maintenance`) हैं:
-
-- `mode`: `enforce` (default) या `warn`
-- `pruneAfter`: stale-entry age cutoff (default `30d`)
-- `maxEntries`: `sessions.json` में cap entries (default `500`)
-- Short-lived gateway model-run probe retention `24h` पर fixed है, लेकिन यह pressure-gated है: यह stale strict probe rows को तभी हटाता है जब session-entry maintenance/cap pressure पहुंचा हो। यह केवल `agent:*:explicit:model-run-<uuid>` से match करने वाली strict explicit probe keys पर लागू होता है और जब यह चलता है तो global stale-entry cleanup/capping से पहले चलता है।
-- `resetArchiveRetention`: `*.reset.<timestamp>` transcript archives के लिए retention (default: `pruneAfter` के समान; `false` cleanup disable करता है)
-- `maxDiskBytes`: optional sessions-directory budget
-- `highWaterBytes`: cleanup के बाद optional target (default `maxDiskBytes` का `80%`)
-
-Normal Gateway writes एक per-store session writer से गुजरती हैं जो runtime file lock लिए बिना in-process mutations को serialize करता है। Hot-path patch helpers उस writer slot को hold करते समय validated mutable cache borrow करते हैं, इसलिए बड़ी `sessions.json` files हर metadata update के लिए clone या reread नहीं होतीं। Runtime code को `updateSessionStore(...)` या `updateSessionStoreEntry(...)` prefer करना चाहिए; direct whole-store saves compatibility और offline-maintenance tools हैं। जब Gateway reachable हो, non-dry-run `openclaw sessions cleanup` और `openclaw agents delete` store mutations को Gateway को delegate करते हैं ताकि cleanup उसी writer queue में शामिल हो; `--store <path>` direct file maintenance के लिए explicit offline repair path है। `maxEntries` cleanup अभी भी production-sized caps के लिए batched है, इसलिए store configured cap को brief रूप से exceed कर सकता है, इससे पहले कि अगला high-water cleanup इसे वापस नीचे rewrite करे। Session store reads Gateway startup के दौरान entries को prune या cap नहीं करते; cleanup के लिए writes या `openclaw sessions cleanup --enforce` का उपयोग करें। `openclaw sessions cleanup --enforce` अभी भी configured cap को तुरंत apply करता है और कोई disk budget configured न होने पर भी पुराने unreferenced transcript, checkpoint, और trajectory artifacts को prune करता है।
-
-Maintenance durable external conversation pointers जैसे group sessions
-और thread-scoped chat sessions को बनाए रखता है, लेकिन cron, hooks,
-Heartbeat, ACP, और sub-agents के synthetic runtime entries तब भी हटाए जा सकते हैं
-जब वे configured age, count, या disk budget से अधिक हो जाएं। Gateway model-run probe sessions
-अलग `24h` model-run retention का उपयोग केवल तब करते हैं जब उनकी key बिल्कुल
-`agent:*:explicit:model-run-<uuid>` से match करती है; अन्य explicit sessions उस
-retention का हिस्सा नहीं हैं। model-run cleanup केवल session-entry cap
-pressure के तहत apply होता है। Isolated cron runs अपना अलग `cron.sessionRetention` control रखते हैं,
-जो model-run probe retention से independent है।
-
-OpenClaw अब Gateway writes के दौरान automatic `sessions.json.bak.*` rotation backups नहीं बनाता। legacy `session.maintenance.rotateBytes` key ignore की जाती है और `openclaw doctor --fix` इसे पुराने configs से हटा देता है।
-
-Transcript mutations transcript file पर session write lock का उपयोग करते हैं। Lock acquisition busy-session error surface करने से पहले
-`session.writeLock.acquireTimeoutMs` तक wait करता है; default `60000`
-ms है। इसे केवल तब बढ़ाएं जब legitimate prep, cleanup, compaction, या transcript mirror work slow machines पर
-लंबे समय तक contend करता हो। `session.writeLock.staleMs` control करता है कि existing lock को कब
-stale मानकर reclaim किया जा सकता है; default `1800000` ms है। `session.writeLock.maxHoldMs`
-in-process watchdog release threshold control करता है; default `300000` ms है। Emergency env overrides
-`OPENCLAW_SESSION_WRITE_LOCK_ACQUIRE_TIMEOUT_MS`, `OPENCLAW_SESSION_WRITE_LOCK_STALE_MS`, और
-`OPENCLAW_SESSION_WRITE_LOCK_MAX_HOLD_MS` हैं।
-
-Disk budget cleanup (`mode: "enforce"`) के लिए enforcement order:
-
-1. सबसे पहले सबसे पुराने archived, orphan transcript, या orphan trajectory artifacts हटाएं।
-2. अगर अभी भी target से ऊपर है, तो सबसे पुरानी session entries और उनकी transcript/trajectory files evict करें।
-3. तब तक जारी रखें जब तक usage `highWaterBytes` पर या उससे नीचे न हो।
-
-`mode: "warn"` में, OpenClaw potential evictions report करता है लेकिन store/files mutate नहीं करता।
-
-Demand पर maintenance चलाएं:
+माँग पर रखरखाव चलाएँ:
 
 ```bash
 openclaw sessions cleanup --dry-run
 openclaw sessions cleanup --enforce
 ```
 
----
+रखरखाव समूह सत्र और थ्रेड-स्कोप्ड चैट सत्र जैसे स्थायी बाहरी वार्तालाप पॉइंटर बनाए रखता है, लेकिन सिंथेटिक रनटाइम प्रविष्टियाँ (Cron, हुक, Heartbeat, ACP, उप-एजेंट) कॉन्फ़िगर की गई आयु, संख्या या डिस्क बजट पार करने के बाद भी हटाई जा सकती हैं। पृथक Cron रन, मॉडल-रन प्रोब अवधारण से स्वतंत्र एक अलग `cron.sessionRetention` नियंत्रण का उपयोग करते हैं।
 
-## Cron sessions और run logs
+सामान्य Gateway लेखन सत्र एक्सेसर से गुजरते हैं, जो रनटाइम राइटर पथ के माध्यम से प्रति-एजेंट SQLite परिवर्तनों को क्रमबद्ध करता है। रनटाइम कोड को `src/config/sessions/session-accessor.ts` में एक्सेसर हेल्पर को प्राथमिकता देनी चाहिए; लीगेसी `sessions.json` हेल्पर माइग्रेशन और ऑफ़लाइन-रखरखाव टूल हैं। जब Gateway उपलब्ध हो, तो गैर-ड्राई-रन `openclaw sessions cleanup` और `openclaw agents delete` स्टोर परिवर्तनों को Gateway को सौंपते हैं ताकि सफ़ाई उसी राइटर कतार में शामिल हो; `--store <path>` चयनित लीगेसी स्टोर का स्पष्ट ऑफ़लाइन मरम्मत पथ है और हमेशा स्थानीय रहता है (जैसे `--dry-run`)। `maxEntries` सफ़ाई उत्पादन-आकार के स्टोरों के लिए बैच में होती है, इसलिए अगली हाई-वॉटर सफ़ाई द्वारा स्टोर को कॉन्फ़िगर की गई सीमा तक फिर से घटाने से पहले वह कुछ समय के लिए सीमा पार कर सकता है। रीड कभी भी Gateway स्टार्टअप के दौरान प्रविष्टियों की छँटाई या सीमा लागू नहीं करते - केवल राइट या `openclaw sessions cleanup --enforce` ऐसा करते हैं, और बाद वाला सीमा को तुरंत लागू भी करता है तथा बिना किसी डिस्क बजट के कॉन्फ़िगर होने पर भी पुरानी असंदर्भित लीगेसी ट्रांसक्रिप्ट, चेकपॉइंट और ट्रैजेक्टरी आर्टिफ़ैक्ट की छँटाई करता है।
 
-Isolated cron runs भी session entries/transcripts बनाते हैं, और उनके पास dedicated retention controls हैं:
+OpenClaw अब Gateway लेखन के दौरान स्वचालित `sessions.json.bak.*` रोटेशन बैकअप नहीं बनाता। वर्तमान स्कीमा लीगेसी `session.maintenance.rotateBytes` कुंजी को अस्वीकार करता है, और `openclaw doctor --fix` इसे पुराने कॉन्फ़िगरेशन से हटा देता है।
 
-- `cron.sessionRetention` (default `24h`) पुराने isolated cron run sessions को session store से prune करता है (`false` disable करता है)।
-- `cron.runLog.keepLines` प्रति cron job retained SQLite run-history rows prune करता है (default: `2000`)। `cron.runLog.maxBytes` पुराने file-backed run logs के लिए accepted रहता है।
+ट्रांसक्रिप्ट परिवर्तन SQLite ट्रांसक्रिप्ट लक्ष्य के लिए सत्र लेखन कतार का उपयोग करते हैं:
 
-जब cron किसी नए isolated run session को force-create करता है, तो यह नई row लिखने से पहले पिछले
-`cron:<jobId>` session entry को sanitize करता है। यह thinking/fast/verbose settings, labels, और explicit
-user-selected model/auth overrides जैसी सुरक्षित
-preferences carry करता है। यह channel/group routing, send या queue policy, elevation, origin, और ACP
-runtime binding जैसे ambient conversation context drop करता है ताकि कोई fresh isolated run किसी पुराने run से stale delivery या
-runtime authority inherit न कर सके।
+सत्र लेखन लॉक निश्चित उत्पादन डिफ़ॉल्ट का उपयोग करते हैं। संबंधित
+`OPENCLAW_SESSION_WRITE_LOCK_*` पर्यावरण चर
+प्रक्रिया-स्तरीय निदान और आपातकालीन ओवरराइड के लिए उपलब्ध रहते हैं।
 
----
+### SQLite परिवर्तन के बाद डाउनग्रेड करना
 
-## Session keys (`sessionKey`)
+पुराना फ़ाइल-समर्थित OpenClaw संस्करण चलाने से पहले संग्रहित लीगेसी ट्रांसक्रिप्ट आर्टिफ़ैक्ट पुनर्स्थापित करें:
 
-`sessionKey` यह पहचानता है कि आप _किस conversation bucket_ में हैं (routing + isolation)।
+```bash
+openclaw doctor --session-sqlite restore --session-sqlite-all-agents
+```
 
-Common patterns:
+माइग्रेशन सहायता और
+रोलबैक के लिए लीगेसी `sessions.json` फ़ाइलों को यथास्थान छोड़ता है, लेकिन SQLite में आयात की गई
+सक्रिय ट्रांसक्रिप्ट JSONL फ़ाइलों का नाम बदलकर `session-sqlite-import-archive/` कर दिया जाता है। पुराने फ़ाइल-समर्थित रनटाइम
+`sessions.json` में `sessionFile` पथों का अनुसरण करते हैं, इसलिए स्टार्टअप
+से पहले उन्हें वे आर्टिफ़ैक्ट पुनर्स्थापित करने होते हैं। पुनर्स्थापन माइग्रेशन मैनिफ़ेस्ट का उपयोग करता है, केवल दर्ज किए गए उन संग्रहित
+आर्टिफ़ैक्ट को स्थानांतरित करता है जिनके मूल पथ अनुपस्थित हैं, और आगे की पुनर्प्राप्ति के लिए SQLite डेटाबेस को
+यथास्थान छोड़ देता है।
 
-- Main/direct chat (प्रति agent): `agent:<agentId>:<mainKey>` (default `main`)
-- Group: `agent:<agentId>:<channel>:group:<id>`
-- Room/channel (Discord/Slack): `agent:<agentId>:<channel>:channel:<id>` या `...:room:<id>`
-- Cron: `cron:<job.id>`
-- Webhook: `hook:<uuid>` (जब तक overridden न हो)
+SQLite परिवर्तन के बाद बनाए गए सत्र केवल SQLite में होते हैं और पुराने
+फ़ाइल-समर्थित रनटाइम को दिखाई नहीं देंगे। यदि डाउनग्रेड के बाद फिर से अपग्रेड करें, तो Doctor
+निरीक्षण और सत्यापन क्रम फिर चलाएँ ताकि OpenClaw आयात से पहले पुनर्स्थापित लीगेसी
+आर्टिफ़ैक्ट सत्यापित कर सके।
 
-Canonical rules [/concepts/session](/hi/concepts/session) पर documented हैं।
+## Cron सत्र और रन लॉग
 
----
+पृथक Cron रन समर्पित अवधारण के साथ अपनी स्वयं की सत्र प्रविष्टियाँ/ट्रांसक्रिप्ट बनाते हैं:
 
-## Session ids (`sessionId`)
+- `cron.sessionRetention` (डिफ़ॉल्ट `"24h"`) स्टोर से पुराने पृथक Cron रन सत्रों की छँटाई करता है; `false` इसे अक्षम करता है।
+- रन इतिहास प्रत्येक Cron जॉब के लिए नवीनतम 2000 अंतिम पंक्तियाँ बनाए रखता है। खोई हुई पंक्तियाँ अपनी 24-घंटे की सफ़ाई अवधि बनाए रखती हैं।
 
-हर `sessionKey` एक current `sessionId` की ओर point करता है (वह transcript file जो conversation जारी रखती है)।
+जब Cron बलपूर्वक नया पृथक रन सत्र बनाता है, तो नई पंक्ति लिखने से पहले पिछली `cron:<jobId>` सत्र प्रविष्टि को स्वच्छ करता है: यह सुरक्षित प्राथमिकताएँ (सोच/तेज़/वर्बोज़/रीज़निंग सेटिंग, लेबल, प्रदर्शन नाम) और स्पष्ट उपयोगकर्ता-चयनित मॉडल/प्रमाणीकरण ओवरराइड आगे ले जाता है, लेकिन परिवेशी वार्तालाप संदर्भ (चैनल/समूह रूटिंग, प्रेषण/कतार नीति, उन्नयन, मूल, ACP रनटाइम बाइंडिंग) हटा देता है, ताकि नया पृथक रन किसी पुराने रन से बासी डिलीवरी या रनटाइम प्राधिकार विरासत में न ले सके।
 
-Rules of thumb:
+## सत्र कुंजियाँ (`sessionKey`)
 
-- **Reset** (`/new`, `/reset`) उस `sessionKey` के लिए नया `sessionId` बनाता है।
-- **Daily reset** (gateway host पर default 4:00 AM local time) reset boundary के बाद अगले message पर नया `sessionId` बनाता है।
-- **Idle expiry** (`session.reset.idleMinutes` या legacy `session.idleMinutes`) idle window के बाद message आने पर नया `sessionId` बनाता है। जब daily + idle दोनों configured हों, तो जो पहले expire हो वही लागू होता है।
-- **Control UI reconnect resume** currently visible session को एक reconnect send के लिए preserve कर सकता है जब Gateway को operator UI client से matching `sessionId` मिलता है। Ordinary stale sends फिर भी नया `sessionId` बनाते हैं।
-- **System events** (heartbeat, cron wakeups, exec notifications, gateway bookkeeping) session row mutate कर सकते हैं लेकिन daily/idle reset freshness extend नहीं करते। Reset rollover fresh prompt build होने से पहले previous session के queued system-event notices discard करता है।
-- **Parent fork policy** thread या subagent fork बनाते समय OpenClaw की active branch का उपयोग करती है। अगर वह branch बहुत बड़ी है, तो OpenClaw fail होने या unusable history inherit करने के बजाय child को isolated context के साथ शुरू करता है। Sizing policy automatic है; legacy `session.parentForkMaxTokens` config `openclaw doctor --fix` द्वारा removed है।
+एक `sessionKey` यह पहचानता है कि आप किस वार्तालाप बकेट में हैं (रूटिंग + पृथक्करण)। कैनोनिकल नियम: [/concepts/session](/hi/concepts/session)।
 
-Implementation detail: decision `src/auto-reply/reply/session.ts` में `initSessionState()` में होता है।
+| पैटर्न                      | उदाहरण                                                     |
+| ---------------------------- | ----------------------------------------------------------- |
+| मुख्य/प्रत्यक्ष चैट (प्रति एजेंट) | `agent:<agentId>:<mainKey>` (डिफ़ॉल्ट `main`)                |
+| समूह                        | `agent:<agentId>:<channel>:group:<id>`                      |
+| रूम/चैनल (Discord/Slack) | `agent:<agentId>:<channel>:channel:<id>` या `...:room:<id>` |
+| Cron                         | `cron:<job.id>`                                             |
+| Webhook                      | `hook:<uuid>` (जब तक ओवरराइड न किया गया हो)                           |
 
----
+## सत्र आईडी (`sessionId`)
 
-## Session store schema (`sessions.json`)
+प्रत्येक `sessionKey` वर्तमान `sessionId` (वह SQLite ट्रांसक्रिप्ट पहचान जो वार्तालाप जारी रखती है) की ओर इंगित करता है। निर्णय तर्क `src/auto-reply/reply/session.ts` के `initSessionState()` में रहता है।
 
-Store का value type `src/config/sessions.ts` में `SessionEntry` है।
+- **रीसेट** (`/new`, `/reset`) उस `sessionKey` के लिए एक नया `sessionId` बनाता है।
+- **कोई स्वचालित रीसेट नहीं** डिफ़ॉल्ट है। वर्तमान `sessionId` जारी रहता है, जबकि Compaction सक्रिय मॉडल संदर्भ को सीमित रखता है।
+- **दैनिक रीसेट** (`session.reset.mode: "daily"`) कॉन्फ़िगर की गई स्थानीय-घंटे की सीमा (`session.reset.atHour`, डिफ़ॉल्ट `4`) के बाद अगले संदेश पर एक नया `sessionId` बनाता है।
+- **निष्क्रियता समाप्ति** (`session.reset.mode: "idle"` के साथ `session.reset.idleMinutes`, या पुराना `session.idleMinutes`) निष्क्रियता अवधि के बाद कोई संदेश आने पर एक नया `sessionId` बनाती है। यदि दैनिक और निष्क्रियता, दोनों कॉन्फ़िगर हैं, तो जो पहले समाप्त होता है वही प्रभावी होता है।
+- **Control UI के पुनः कनेक्ट होने पर पुनरारंभ** वर्तमान में दिखाई देने वाले सत्र को पुनः कनेक्ट होने के बाद भेजे जाने वाले एक संदेश के लिए सुरक्षित रखता है, जब Gateway को किसी ऑपरेटर UI क्लाइंट से मेल खाने वाला `sessionId` प्राप्त होता है। यह एक बार उपयोग होने वाला संकेत है; सामान्य पुराने प्रेषण अब भी एक नया `sessionId` बनाते हैं।
+- **सिस्टम इवेंट** (Heartbeat, Cron वेकअप, exec सूचनाएँ, Gateway बहीखाता) सत्र पंक्ति को बदल सकते हैं, लेकिन दैनिक/निष्क्रियता रीसेट की नवीनता को कभी नहीं बढ़ाते। रीसेट रोलओवर नया प्रॉम्प्ट बनने से पहले पिछले सत्र के लिए कतारबद्ध सिस्टम-इवेंट सूचनाएँ हटा देता है।
+- **पैरेंट फ़ोर्क नीति** थ्रेड या सबएजेंट फ़ोर्क बनाते समय OpenClaw की सक्रिय शाखा का उपयोग करती है। यदि वह शाखा बहुत बड़ी है (एक निश्चित आंतरिक सीमा से अधिक, वर्तमान में 100K टोकन), तो OpenClaw विफल होने या अनुपयोगी इतिहास इनहेरिट करने के बजाय चाइल्ड को पृथक संदर्भ के साथ शुरू करता है। आकार निर्धारण स्वचालित है और कॉन्फ़िगर करने योग्य नहीं है; पुराने `session.parentForkMaxTokens` कॉन्फ़िग को `openclaw doctor --fix` द्वारा हटा दिया जाता है।
+- **ऑपरेटर फ़ोर्क**: `sessions.create { parentSessionKey, fork: true }` एक नया सत्र बनाता है, जिसका ट्रांसक्रिप्ट पैरेंट की वर्तमान स्थिति से शाखित होता है (सबएजेंट स्पॉन के समान फ़ोर्क तंत्र, जिसमें ऊपर दी गई आकार सीमा भी शामिल है)। पैरेंट का कोई सक्रिय रन होने पर फ़ोर्क अस्वीकार कर दिया जाता है, स्पष्ट रूप से कोई चयन न दिए जाने तक यह पैरेंट का मॉडल चयन इनहेरिट करता है, और चाइल्ड `forkedFromParent` को नए टोकन काउंटर के साथ चिह्नित करता है।
 
-Key fields (exhaustive नहीं):
+## सत्र स्टोर स्कीमा
 
-- `sessionId`: वर्तमान transcript id (filename इससे निकाला जाता है, जब तक `sessionFile` सेट न हो)
-- `sessionStartedAt`: वर्तमान `sessionId` के लिए start timestamp; daily reset
-  freshness इसका उपयोग करती है। Legacy rows इसे JSONL session header से निकाल सकती हैं।
-- `lastInteractionAt`: अंतिम वास्तविक user/channel interaction timestamp; idle reset
-  freshness इसका उपयोग करती है ताकि Heartbeat, Cron, और exec events sessions को
-  alive न रखें। इस field के बिना legacy rows idle freshness के लिए recovered session start
-  time पर fall back करती हैं।
-- `updatedAt`: अंतिम store-row mutation timestamp, listing, pruning, और
-  bookkeeping के लिए उपयोग किया जाता है। यह daily/idle reset freshness का authority नहीं है।
-- `archivedAt`: वैकल्पिक archive timestamp। Archived sessions store में अपने transcript के साथ
-  intact रहती हैं और सामान्य active listings से बाहर रहती हैं।
-- `pinnedAt`: वैकल्पिक pin timestamp। Active pinned sessions
-  unpinned sessions से पहले sort होती हैं; session को archive करने पर उसका pin clear हो जाता है।
-- Codex thread interop: दोनों fields Codex thread-management shape का पालन करते हैं —
-  wire पर `archived`/`pinned` booleans हमेशा timestamp से derived होते हैं
-  और server-side stamped होते हैं, Codex `threads.archived_at`
-  semantics और camelCase serialization से match करते हुए। OpenClaw timestamps epoch
-  milliseconds हैं जबकि Codex epoch seconds उपयोग करता है, इसलिए bridges codex
-  Plugin seam पर convert करते हैं। Codex के पास अभी कोई pin API नहीं है (`thread/archive`/`thread/unarchive`
-  only); pinned state OpenClaw-side रहती है जब तक कोई मौजूद न हो, और तब
-  matching shape bound sessions को pin state mechanically round-trip करने देती है।
-- `sessionFile`: वैकल्पिक explicit transcript path override
-- `chatType`: `direct | group | room` (UIs और send policy में मदद करता है)
-- `provider`, `subject`, `room`, `space`, `displayName`: group/channel labeling के लिए metadata
-- Toggles:
-  - `thinkingLevel`, `verboseLevel`, `reasoningLevel`, `elevatedLevel`
-  - `sendPolicy` (per-session override)
-- Model selection:
-  - `providerOverride`, `modelOverride`, `authProfileOverride`
-- Token counters (best-effort / provider-dependent):
-  - `inputTokens`, `outputTokens`, `totalTokens`, `contextTokens`
-- `compactionCount`: इस session key के लिए auto-Compaction कितनी बार पूरी हुई
-- `memoryFlushAt`: अंतिम pre-Compaction memory flush का timestamp
-- `memoryFlushCompactionCount`: अंतिम flush चलने के समय Compaction count
+रनटाइम स्टोर प्रति-एजेंट SQLite में `SessionEntry` मान रखता है। मान का प्रकार `src/config/sessions.ts` में `SessionEntry` है। मुख्य फ़ील्ड (संपूर्ण सूची नहीं):
 
-Store edit करने के लिए safe है, लेकिन Gateway authority है: sessions चलने पर यह entries को rewrite या rehydrate कर सकता है।
+- `sessionId`: SQLite ट्रांसक्रिप्ट पंक्तियों को संबोधित करने के लिए प्रयुक्त वर्तमान ट्रांसक्रिप्ट आईडी
+- `sessionStartedAt`: वर्तमान `sessionId` का आरंभ टाइमस्टैम्प; दैनिक रीसेट की नवीनता इसका उपयोग करती है। पुरानी पंक्तियाँ इसे JSONL सत्र हेडर से प्राप्त कर सकती हैं।
+- `lastInteractionAt`: अंतिम वास्तविक उपयोगकर्ता/चैनल इंटरैक्शन का टाइमस्टैम्प; निष्क्रियता रीसेट की नवीनता इसका उपयोग करती है, ताकि Heartbeat, Cron और exec इवेंट सत्रों को सक्रिय न रखें। इस फ़ील्ड के बिना पुरानी पंक्तियाँ पुनर्प्राप्त सत्र आरंभ समय का उपयोग करती हैं।
+- `updatedAt`: अंतिम स्टोर-पंक्ति परिवर्तन का टाइमस्टैम्प, जिसका उपयोग सूचीकरण/छँटाई/बहीखाते के लिए किया जाता है—यह दैनिक/निष्क्रियता नवीनता का प्राधिकार नहीं है।
+- `archivedAt`: वैकल्पिक संग्रह टाइमस्टैम्प। संग्रहित सत्र अपने अक्षुण्ण ट्रांसक्रिप्ट के साथ स्टोर में रहते हैं और सामान्य सक्रिय सूचियों से बाहर रखे जाते हैं।
+- `pinnedAt`: वैकल्पिक पिन टाइमस्टैम्प। सक्रिय पिन किए गए सत्र बिना पिन वाले सत्रों से पहले क्रमबद्ध होते हैं; किसी सत्र को संग्रहित करने पर उसका पिन हट जाता है।
+- Codex थ्रेड अंतर-संचालन: दोनों फ़ील्ड Codex थ्रेड-प्रबंधन संरचना का अनुसरण करते हैं—वायर पर `archived`/`pinned` बूलियन हमेशा टाइमस्टैम्प से व्युत्पन्न होते हैं और सर्वर-साइड पर अंकित किए जाते हैं, जो Codex `threads.archived_at` अर्थविज्ञान और camelCase क्रमांकन से मेल खाते हैं। OpenClaw टाइमस्टैम्प epoch मिलीसेकंड में होते हैं, जबकि Codex epoch सेकंड का उपयोग करता है, इसलिए ब्रिज `codex` Plugin सीमा पर रूपांतरण करते हैं। Codex में अभी कोई पिन API नहीं है (केवल `thread/archive`/`thread/unarchive`); पिन की स्थिति ऐसा API उपलब्ध होने तक OpenClaw की ओर रहती है, जिसके बाद मेल खाने वाली संरचना आबद्ध सत्रों को पिन स्थिति यांत्रिक रूप से राउंड-ट्रिप करने देती है।
+- Codex पर्यवेक्षण केवल गैर-संग्रहित नेटिव थ्रेड सूचीबद्ध करता है। Gateway-स्थानीय `idle` या `notLoaded` गतिविधि-अज्ञात थ्रेड को नेटिव `thread/archive` के माध्यम से केवल तभी संग्रहित किया जा सकता है, जब ऑपरेटर स्पष्ट रूप से पुष्टि करे कि कोई अन्य Codex प्रक्रिया उसकी स्वामी नहीं है; Plugin पहले प्रक्रिया-स्थानीय स्थिति का नया पठन करता है और फिर थ्रेड कैटलॉग से गायब हो जाता है। वह पठन यह सिद्ध नहीं कर सकता कि कोई अन्य App Server प्रक्रिया उस थ्रेड का उपयोग नहीं कर रही है। OpenClaw सक्रिय और त्रुटि वाली पंक्तियों को संग्रहित करने से मना करता है, और युग्मित-Node संग्रह तब तक अनुपलब्ध है जब तक Node ब्रिज पूरे स्ट्रीम किए गए थ्रेड जीवनचक्र का स्वामित्व नहीं ले सकता। किसी नेटिव Codex क्लाइंट में संग्रह से वापस लाने पर थ्रेड फिर से दिखाई देने के योग्य हो जाता है।
+- `lastReadAt` / `markedUnreadAt`: `sessions.patch { unread }` द्वारा सर्वर-साइड पर अंकित पठन-स्थिति टाइमस्टैम्प—`unread: false` पठन दर्ज करता है (`lastReadAt` सेट करता है, `markedUnreadAt` हटाता है); `unread: true` अगले पठन तक सत्र को अपठित चिह्नित करता है। सत्र पंक्तियाँ एक व्युत्पन्न `unread` बूलियन प्रदर्शित करती हैं: स्पष्ट रूप से अपठित चिह्नित, या नवीनतम गतिविधि से पहले पढ़ा गया। जिन सत्रों को कभी पढ़ा हुआ चिह्नित नहीं किया गया, वे `unread: false` रहते हैं, इसलिए मौजूदा इंस्टॉलेशन अपग्रेड होने पर सक्रिय नहीं दिखते।
+- `lastActivityAt`: अंतिम पूर्ण हुए एजेंट रन का टाइमस्टैम्प, जिसे अपठित माने जाने योग्य गतिविधि समझा जाता है (उपयोगकर्ता, चैनल और Cron रन)। Heartbeat और आंतरिक-इवेंट टर्न तथा मेटाडेटा पैच इसे अपडेट नहीं करते; `updatedAt` गतिविधि संकेत नहीं है।
+- `sessionFile`: माइग्रेशन/संग्रह संगतता के लिए रखा गया पुराना मार्कर; सक्रिय रनटाइम SQLite पहचान का उपयोग करता है
+- `chatType`: `direct | group | room`
+- `provider`, `subject`, `room`, `space`, `displayName`: समूह/चैनल लेबलिंग मेटाडेटा
+- टॉगल: `thinkingLevel`, `verboseLevel`, `reasoningLevel`, `elevatedLevel`, `sendPolicy` (प्रति-सत्र ओवरराइड)
+- मॉडल चयन: `providerOverride`, `modelOverride`, `authProfileOverride`
+- टोकन काउंटर (सर्वोत्तम प्रयास/प्रदाता-निर्भर): `inputTokens`, `outputTokens`, `totalTokens`, `contextTokens`
+- `compactionCount`: इस सत्र कुंजी के लिए स्वतः-Compaction कितनी बार पूर्ण हुआ
+- `memoryFlushAt` / `memoryFlushCompactionCount`: अंतिम पूर्व-Compaction मेमोरी फ़्लश का टाइमस्टैम्प और Compaction गणना
 
----
+Gateway प्राधिकार है: सत्र चलने के दौरान यह प्रविष्टियों को फिर से लिख या पुनर्जलित कर सकता है। पुरानी फ़ाइल-समर्थित इंस्टॉलेशन के लिए,
+`sessions.json` को संपादित करके रनटाइम से उस फ़ाइल को पढ़ते रहने की अपेक्षा करने के बजाय
+`openclaw doctor --session-sqlite import --session-sqlite-all-agents` से माइग्रेट करें।
 
-## Transcript संरचना (`*.jsonl`)
+## ट्रांसक्रिप्ट इवेंट संरचना
 
-Transcripts `openclaw/plugin-sdk/agent-sessions` के `SessionManager` द्वारा managed होते हैं।
+ट्रांसक्रिप्ट OpenClaw सत्र एक्सेसर द्वारा प्रबंधित किए जाते हैं और पहचान-आधारित सहायकों के माध्यम से रनटाइम कोड के लिए उपलब्ध कराए जाते हैं। इवेंट स्ट्रीम केवल संलग्न करने योग्य है:
 
-File JSONL है:
+- पहली प्रविष्टि: सत्र हेडर—`type: "session"`, `id`, `cwd`, `timestamp`, वैकल्पिक `parentSession`।
+- फिर: `id` + `parentId` वाली प्रविष्टियाँ (ट्री संरचना)।
 
-- पहली line: session header (`type: "session"`, इसमें `id`, `cwd`, `timestamp`, वैकल्पिक `parentSession` शामिल हैं)
-- फिर: `id` + `parentId` (tree) वाली session entries
+उल्लेखनीय प्रविष्टि प्रकार:
 
-ध्यान देने योग्य entry types:
+- `message`: उपयोगकर्ता/सहायक/toolResult संदेश
+- `custom_message`: एक्सटेंशन द्वारा प्रविष्ट कराया गया संदेश, जो मॉडल संदर्भ में _प्रवेश करता है_ (`display: true` होने पर TUI में रेंडर होता है, `display: false` होने पर पूरी तरह छिपा रहता है)
+- `custom`: एक्सटेंशन स्थिति, जो मॉडल संदर्भ में _प्रवेश नहीं करती_ (रीलोड के बीच एक्सटेंशन स्थिति बनाए रखने के लिए)
+- `compaction`: `firstKeptEntryId` और `tokensBefore` सहित स्थायी Compaction सारांश
+- `branch_summary`: ट्री शाखा में नेविगेट करते समय स्थायी सारांश
 
-- `message`: user/assistant/toolResult messages
-- `custom_message`: extension-injected messages जो model context में _जाती_ हैं (UI से hidden हो सकती हैं)
-- `custom`: extension state जो model context में _नहीं_ जाती
-- `compaction`: `firstKeptEntryId` और `tokensBefore` के साथ persisted Compaction summary
-- `branch_summary`: tree branch navigate करते समय persisted summary
+OpenClaw जानबूझकर ट्रांसक्रिप्ट को "ठीक" नहीं करता; Gateway उन्हें पढ़ने/लिखने के लिए `SessionManager` का उपयोग करता है।
 
-OpenClaw जानबूझकर transcripts को "fix up" नहीं करता; Gateway उन्हें read/write करने के लिए `SessionManager` का उपयोग करता है।
+## संदर्भ विंडो बनाम ट्रैक किए गए टोकन
 
----
+दो अलग अवधारणाएँ:
 
-## Context windows बनाम tracked tokens
+1. **मॉडल संदर्भ विंडो**: प्रति मॉडल कठोर सीमा (मॉडल को दिखाई देने वाले टोकन)। यह मॉडल कैटलॉग से आती है और कॉन्फ़िग के माध्यम से ओवरराइड की जा सकती है।
+2. **सत्र स्टोर काउंटर**: सत्र पंक्ति में लिखे जाने वाले क्रमिक आँकड़े (`/status` और डैशबोर्ड के लिए प्रयुक्त)। `contextTokens` एक रनटाइम अनुमान/रिपोर्टिंग मान है—इसे कठोर गारंटी न मानें।
 
-दो अलग concepts महत्वपूर्ण हैं:
-
-1. **Model context window**: प्रति model hard cap (model को visible tokens)
-2. **Session store counters**: `sessions.json` में लिखे rolling stats (/status और dashboards के लिए उपयोग)
-
-अगर आप limits tune कर रहे हैं:
-
-- Context window model catalog से आता है (और config के जरिए overridden हो सकता है)।
-- Store में `contextTokens` runtime estimate/reporting value है; इसे strict guarantee न मानें।
-
-अधिक के लिए, [/token-use](/hi/reference/token-use) देखें।
-
----
+सीमाओं के बारे में अधिक जानकारी: [/reference/token-use](/hi/reference/token-use)।
 
 ## Compaction: यह क्या है
 
-Compaction पुरानी conversation को transcript में persisted `compaction` entry में summarize करता है और recent messages intact रखता है।
+Compaction पुरानी बातचीत को ट्रांसक्रिप्ट में एक स्थायी `compaction` प्रविष्टि में सारांशित करता है और हाल के संदेश अक्षुण्ण रखता है। Compaction के बाद, भावी टर्न Compaction सारांश तथा `firstKeptEntryId` के बाद के संदेश देखते हैं। सत्र छँटाई के विपरीत Compaction **स्थायी** है—[/concepts/session-pruning](/hi/concepts/session-pruning) देखें।
 
-Compaction के बाद, future turns देखते हैं:
+एम्बेडेड OpenClaw Compaction डिफ़ॉल्ट रूप से सत्र का विचार स्तर इनहेरिट करता है। सारांश कॉल के लिए अलग स्तर का उपयोग करने हेतु `agents.defaults.compaction.thinkingLevel` सेट करें; रनटाइम इसे प्रत्येक ठोस Compaction मॉडल या फ़ॉलबैक के अनुसार सीमित करता है। नेटिव Codex app-server Compaction अपने compact अनुरोध का स्वामी होता है और प्रति-Compaction विचार ओवरराइड स्वीकार नहीं कर सकता, इसलिए OpenClaw चेतावनी देता है और वह सेटिंग Codex पर छोड़ देता है।
 
-- Compaction summary
-- `firstKeptEntryId` के बाद के messages
+Compaction के बाद AGENTS.md अनुभाग की पुनः प्रविष्टि `agents.defaults.compaction.postCompactionSections` के माध्यम से वैकल्पिक बनी रहती है। Plugins `before_prompt_build` के माध्यम से अन्य प्रॉम्प्ट संदर्भ जोड़ सकते हैं।
 
-Compaction के बाद AGENTS.md section reinjection opt-in है
-`agents.defaults.compaction.postCompactionSections` के जरिए; जब unset या `[]` हो,
-OpenClaw Compaction summary के ऊपर AGENTS.md excerpts append नहीं करता।
+### खंड सीमाएँ और टूल युग्मन
 
-Compaction **persistent** है (session pruning के विपरीत)। [/concepts/session-pruning](/hi/concepts/session-pruning) देखें।
+लंबे ट्रांसक्रिप्ट को Compaction खंडों में विभाजित करते समय, OpenClaw सहायक टूल कॉल को उनकी मेल खाने वाली `toolResult` प्रविष्टियों के साथ युग्मित रखता है:
 
-## Compaction chunk boundaries और tool pairing
+- यदि टोकन-अंश विभाजन किसी टूल कॉल और उसके परिणाम के बीच पड़ता, तो OpenClaw युग्म को अलग करने के बजाय सीमा को सहायक के टूल-कॉल संदेश पर स्थानांतरित कर देता है।
+- यदि अंतिम टूल-परिणाम ब्लॉक अन्यथा खंड को लक्ष्य से आगे धकेल देता, तो OpenClaw उस लंबित टूल ब्लॉक को सुरक्षित रखता है और असारांशित अंतिम भाग को अक्षुण्ण रखता है।
+- निरस्त/त्रुटिपूर्ण टूल-कॉल ब्लॉक लंबित विभाजन को खुला नहीं रखते।
 
-जब OpenClaw लंबे transcript को Compaction chunks में split करता है, तो यह
-assistant tool calls को उनकी matching `toolResult` entries के साथ paired रखता है।
+## स्वतः-Compaction कब होता है
 
-- अगर token-share split किसी tool call और उसके result के बीच land करता है, तो OpenClaw
-  pair को separate करने के बजाय boundary को assistant tool-call message पर shift करता है।
-- अगर trailing tool-result block अन्यथा chunk को target से ऊपर push कर देता,
-  तो OpenClaw उस pending tool block को preserve करता है और unsummarized tail
-  intact रखता है।
-- Aborted/error tool-call blocks pending split को open नहीं रखते।
+एम्बेडेड OpenClaw एजेंट में दो ट्रिगर:
 
----
+1. **ओवरफ़्लो पुनर्प्राप्ति**: मॉडल संदर्भ-ओवरफ़्लो त्रुटि लौटाता है (`request_too_large`, `context length exceeded`, `input exceeds the maximum number of tokens`, `input token count exceeds the maximum number of input tokens`, `input is too long for the model`, `ollama error: context length exceeded` और प्रदाता-आकार के अन्य प्रकार)—Compaction करें, फिर पुनः प्रयास करें। जब प्रदाता प्रयास किए गए टोकन की संख्या रिपोर्ट करता है, तो OpenClaw उस देखी गई संख्या को ओवरफ़्लो-पुनर्प्राप्ति Compaction में भेजता है; यदि प्रदाता ओवरफ़्लो की पुष्टि करता है लेकिन कोई पार्स करने योग्य संख्या प्रदर्शित नहीं करता, तो OpenClaw Compaction इंजनों और निदान को बजट से न्यूनतम अधिक एक कृत्रिम संख्या भेजता है। यदि ओवरफ़्लो पुनर्प्राप्ति फिर भी विफल होती है, तो OpenClaw वर्तमान सत्र मैपिंग को चुपचाप नई सत्र आईडी में बदलने के बजाय स्पष्ट मार्गदर्शन दिखाता है और उसे सुरक्षित रखता है—संदेश का पुनः प्रयास करें, `/compact` चलाएँ, या `/new` चलाएँ।
+2. **सीमा रखरखाव**: सफल टर्न के बाद, जब वर्तमान संदर्भ मॉडल विंडो में से प्रॉम्प्ट और अगले मॉडल आउटपुट के लिए OpenClaw का अंतर्निहित अतिरिक्त स्थान घटाने पर बची सीमा से अधिक हो जाता है।
 
-## Auto-Compaction कब होता है (OpenClaw runtime)
+इन दोनों ट्रिगर के बाहर दो अतिरिक्त सुरक्षा-जाँच चलती हैं:
 
-Embedded OpenClaw agent में, auto-Compaction दो cases में trigger होता है:
+- **प्रीफ़्लाइट स्थानीय Compaction**: सक्रिय ट्रांसक्रिप्ट के उस आकार तक पहुँचने पर अगला रन खोलने से पहले स्थानीय Compaction ट्रिगर करने के लिए `agents.defaults.compaction.maxActiveTranscriptBytes` (बाइट या `"20mb"` जैसी स्ट्रिंग) सेट करें। यह स्थानीय रूप से दोबारा खोलने की लागत के लिए आकार-सुरक्षा है, अपरिष्कृत संग्रहण नहीं—सामान्य सिमैंटिक Compaction फिर भी चलता है, और इसके लिए `truncateAfterCompaction` आवश्यक है ताकि संक्षिप्त सारांश एक नया उत्तराधिकारी ट्रांसक्रिप्ट बन जाए।
+- **मध्य-टर्न पूर्व-जाँच**: टूल-लूप सुरक्षा जोड़ने के लिए `agents.defaults.compaction.midTurnPrecheck.enabled: true` (डिफ़ॉल्ट `false`) सेट करें। टूल परिणाम जोड़े जाने के बाद और अगले मॉडल कॉल से पहले, OpenClaw उसी प्रीफ़्लाइट बजट तर्क का उपयोग करके प्रॉम्प्ट दबाव का अनुमान लगाता है जो टर्न की शुरुआत में उपयोग होता है। यदि संदर्भ अब फ़िट नहीं होता, तो सुरक्षा इनलाइन Compaction नहीं करती—यह एक संरचित मध्य-टर्न पूर्व-जाँच संकेत उत्पन्न करती है, वर्तमान प्रॉम्प्ट सबमिशन रोकती है, और बाहरी रन लूप को मौजूदा पुनर्प्राप्ति पथ का उपयोग करने देती है (जब पर्याप्त हो तो अत्यधिक बड़े टूल परिणामों को छोटा करना, या कॉन्फ़िगर किया गया Compaction मोड ट्रिगर करके पुनः प्रयास करना)। यह प्रदाता-समर्थित सुरक्षा Compaction सहित `default` और `safeguard` दोनों Compaction मोड के साथ काम करती है। `maxActiveTranscriptBytes` से स्वतंत्र: बाइट-आकार सुरक्षा किसी टर्न के खुलने से पहले चलती है, जबकि मध्य-टर्न पूर्व-जाँच बाद में, नए टूल परिणाम जोड़े जाने के बाद चलती है।
 
-1. **Overflow recovery**: model context overflow error लौटाता है
-   (`request_too_large`, `context length exceeded`, `input exceeds the maximum
-number of tokens`, `input token count exceeds the maximum number of input
-tokens`, `input is too long for the model`, `ollama error: context length
-exceeded`, और समान provider-shaped variants) → compact → retry.
-   जब provider attempted token count report करता है, OpenClaw उस
-   observed count को overflow recovery Compaction में forward करता है। अगर provider
-   overflow confirm करता है लेकिन parseable count expose नहीं करता, तो OpenClaw Compaction engines और diagnostics को minimally
-   over-budget synthetic count pass करता है।
-   अगर overflow recovery फिर भी fail होती है, तो OpenClaw user को explicit guidance surface करता है
-   और session key को fresh session id में silently rotate करने के बजाय current session mapping
-   preserve करता है। Next step operator-controlled है:
-   message retry करें, `/compact` run करें, या fresh session preferred होने पर `/new` run करें।
-2. **Threshold maintenance**: successful turn के बाद, जब:
-
-`contextTokens > contextWindow - reserveTokens`
-
-जहां:
-
-- `contextWindow` model का context window है
-- `reserveTokens` prompts + अगले model output के लिए reserved headroom है
-
-ये OpenClaw runtime semantics हैं।
-
-OpenClaw अगला run खोलने से पहले preflight local Compaction भी trigger कर सकता है
-जब `agents.defaults.compaction.maxActiveTranscriptBytes` set हो और
-active transcript file उस size तक पहुंच जाए। यह local reopen cost के लिए file-size guard है,
-raw archival नहीं: OpenClaw अभी भी normal semantic Compaction चलाता है,
-और इसे `truncateAfterCompaction` चाहिए ताकि compacted summary
-new successor transcript बन सके।
-
-Embedded OpenClaw runs के लिए, `agents.defaults.compaction.midTurnPrecheck.enabled: true`
-opt-in tool-loop guard जोड़ता है। Tool result append होने के बाद और
-अगली model call से पहले, OpenClaw उसी preflight
-budget logic का उपयोग करके prompt pressure estimate करता है जो turn start पर उपयोग होता है। अगर context अब fit नहीं होता, तो guard
-OpenClaw runtime के `transformContext` hook के अंदर compact नहीं करता। यह structured
-mid-turn precheck signal raise करता है, current prompt submission रोकता है, और
-outer run loop को existing recovery path उपयोग करने देता है: oversized tool results truncate करें
-जब वह enough हो, या configured Compaction mode trigger करके retry करें। यह
-option default रूप से disabled है और `default` तथा `safeguard`
-Compaction modes दोनों के साथ काम करता है, provider-backed safeguard Compaction सहित।
-यह `maxActiveTranscriptBytes` से independent है: byte-size guard
-turn खुलने से पहले चलता है, जबकि mid-turn precheck embedded OpenClaw tool
-loop में बाद में चलता है, जब new tool results append हो चुके होते हैं।
-
----
-
-## Compaction settings (`reserveTokens`, `keepRecentTokens`)
-
-OpenClaw runtime की Compaction settings agent settings में रहती हैं:
+## Compaction सेटिंग्स
 
 ```json5
 {
-  compaction: {
-    enabled: true,
-    reserveTokens: 16384,
-    keepRecentTokens: 20000,
+  agents: {
+    defaults: {
+      compaction: {
+        enabled: true,
+        keepRecentTokens: 20000,
+      },
+    },
   },
 }
 ```
 
-OpenClaw embedded runs के लिए safety floor भी enforce करता है:
+OpenClaw एम्बेडेड रन के लिए एक अंतर्निहित रिज़र्व लागू करता है और उसे सक्रिय मॉडल संदर्भ विंडो के अनुसार सीमित करता है, ताकि वह पूरा प्रॉम्प्ट बजट न खा सके। इससे छोटे-संदर्भ वाले स्थानीय मॉडल पहले टोकन से ही Compaction में जाने से बचते हैं, साथ ही मेमोरी फ़्लश जैसे बहु-टर्न रखरखाव के लिए पर्याप्त अतिरिक्त स्थान बना रहता है।
 
-- अगर `compaction.reserveTokens < reserveTokensFloor`, OpenClaw उसे bump करता है।
-- Default floor `20000` tokens है।
-- Floor disable करने के लिए `agents.defaults.compaction.reserveTokensFloor: 0` set करें।
-- अगर यह पहले से higher है, OpenClaw इसे वैसे ही छोड़ता है।
-- Manual `/compact` explicit `agents.defaults.compaction.keepRecentTokens`
-  को honor करता है और OpenClaw runtime का recent-tail cut point रखता है। Explicit keep budget के बिना,
-  manual Compaction hard checkpoint रहता है और rebuilt context
-  new summary से start होता है।
-- New tool results के बाद और अगली model
-  call से पहले optional tool-loop precheck चलाने के लिए `agents.defaults.compaction.midTurnPrecheck.enabled: true` set करें।
-  यह केवल trigger है; summary generation फिर भी configured
-  Compaction path का उपयोग करती है। यह `maxActiveTranscriptBytes` से independent है, जो
-  turn-start active-transcript byte-size guard है।
-- `agents.defaults.compaction.maxActiveTranscriptBytes` को byte value या
-  `"20mb"` जैसी string पर set करें ताकि active
-  transcript large होने पर turn से पहले local Compaction चल सके। यह guard केवल तब active होता है जब
-  `truncateAfterCompaction` भी enabled हो। Disable करने के लिए इसे unset छोड़ें या `0` set करें।
-- जब `agents.defaults.compaction.truncateAfterCompaction` enabled होता है,
-  OpenClaw Compaction के बाद active transcript को compacted successor JSONL में rotate करता है।
-  Branch/restore checkpoint actions उस compacted successor का उपयोग करते हैं;
-  legacy pre-Compaction checkpoint files referenced रहते हुए readable रहती हैं।
+मैन्युअल `/compact` स्पष्ट `agents.defaults.compaction.keepRecentTokens` का पालन करता है और रनटाइम के हालिया-टेल कट बिंदु को बनाए रखता है। स्पष्ट रखरखाव बजट के बिना, मैन्युअल Compaction एक कठोर चेकपॉइंट होता है और पुनर्निर्मित संदर्भ नए सारांश से शुरू होता है।
 
-क्यों: Compaction unavoidable होने से पहले multi-turn "housekeeping" (जैसे memory writes) के लिए पर्याप्त headroom छोड़ें।
+जब `truncateAfterCompaction` सक्षम होता है, तो OpenClaw Compaction के बाद सक्रिय ट्रांसक्रिप्ट को संक्षिप्त उत्तराधिकारी में रोटेट करता है। ब्रांच/पुनर्स्थापन चेकपॉइंट क्रियाएँ उस संक्षिप्त उत्तराधिकारी का उपयोग करती हैं; पुराने, Compaction-पूर्व चेकपॉइंट फ़ाइलें संदर्भित रहने तक पढ़ी जा सकती हैं।
 
-Implementation: `src/agents/agent-settings.ts` में `applyAgentCompactionSettingsFromConfig()`
-(embedded-runner turn और Compaction setup paths से called).
+## प्लग करने योग्य Compaction प्रदाता
 
----
+Plugins, Plugin API पर `registerCompactionProvider()` के माध्यम से Compaction प्रदाता पंजीकृत करते हैं। जब `agents.defaults.compaction.provider` को किसी पंजीकृत प्रदाता आईडी पर सेट किया जाता है, तो सुरक्षा एक्सटेंशन अंतर्निहित `summarizeInStages` पाइपलाइन के बजाय सारांशीकरण उस प्रदाता को सौंपता है।
 
-## Pluggable Compaction providers
+- `provider`: किसी पंजीकृत Compaction प्रदाता Plugin की आईडी। डिफ़ॉल्ट LLM सारांशीकरण के लिए इसे सेट न करें। `provider` सेट करने से `mode: "safeguard"` बाध्य होता है।
+- प्रदाताओं को अंतर्निहित पथ जैसे ही Compaction निर्देश और पहचानकर्ता-संरक्षण नीति मिलती है, और सुरक्षा प्रदाता आउटपुट के बाद भी हालिया-टर्न तथा विभाजित-टर्न प्रत्यय संदर्भ को सुरक्षित रखती है।
+- अंतर्निहित सुरक्षा सारांशीकरण पिछले पूरे सारांश को शब्दशः सुरक्षित रखने के बजाय उसे नए संदेशों के साथ दोबारा परिष्कृत करता है।
+- सुरक्षा मोड डिफ़ॉल्ट रूप से सारांश गुणवत्ता ऑडिट सक्षम करता है; विकृत आउटपुट पर पुनः प्रयास का व्यवहार छोड़ने के लिए `qualityGuard.enabled: false` सेट करें।
+- यदि प्रदाता विफल होता है या खाली परिणाम लौटाता है, तो OpenClaw स्वचालित रूप से अंतर्निहित LLM सारांशीकरण पर वापस चला जाता है। कॉलर द्वारा स्पष्ट रूप से ट्रिगर किए गए निरस्तीकरण/टाइमआउट संकेतों को निगला नहीं जाता, बल्कि दोबारा थ्रो किया जाता है, ताकि रद्दीकरण का हमेशा सम्मान हो।
 
-Plugins plugin API पर `registerCompactionProvider()` के जरिए Compaction provider register कर सकते हैं। जब `agents.defaults.compaction.provider` registered provider id पर set होता है, safeguard extension built-in `summarizeInStages` pipeline के बजाय summarization उस provider को delegate करता है।
+स्रोत: `src/plugins/compaction-provider.ts`, `src/agents/agent-hooks/compaction-safeguard.ts`।
 
-- `provider`: registered Compaction provider Plugin की id. Default LLM summarization के लिए unset छोड़ें।
-- `provider` set करने से `mode: "safeguard"` force होता है।
-- Providers को built-in path जैसे ही Compaction instructions और identifier-preservation policy मिलती है।
-- Safeguard provider output के बाद भी recent-turn और split-turn suffix context preserve करता है।
-- Built-in safeguard summarization prior summaries को new messages के साथ re-distill करता है
-  full previous summary verbatim preserve करने के बजाय।
-- Safeguard mode default रूप से summary quality audits enable करता है; retry-on-malformed-output behavior skip करने के लिए
-  `qualityGuard.enabled: false` set करें।
-- अगर provider fail होता है या empty result लौटाता है, OpenClaw automatically built-in LLM summarization पर fall back करता है।
-- Abort/timeout signals caller cancellation का सम्मान करने के लिए re-thrown होते हैं (swallowed नहीं)।
+## उपयोगकर्ता को दिखाई देने वाली सतहें
 
-Source: `src/plugins/compaction-provider.ts`, `src/agents/agent-hooks/compaction-safeguard.ts`.
-
----
-
-## User-visible surfaces
-
-आप Compaction और session state को इनके जरिए observe कर सकते हैं:
-
-- `/status` (किसी भी chat session में)
+- किसी भी चैट सत्र में `/status`
 - `openclaw status` (CLI)
-- `openclaw sessions` / `sessions --json`
-- Gateway logs (`pnpm gateway:watch` या `openclaw logs --follow`): `embedded run auto-compaction start` + `complete`
-- Verbose mode: `🧹 Auto-compaction complete` + Compaction count
+- `openclaw sessions` / `openclaw sessions --json`
+- Gateway लॉग (`pnpm gateway:watch` या `openclaw logs --follow`): `embedded run auto-compaction start` + `complete`
+- वर्बोज़ मोड: `🧹 Auto-compaction complete` तथा Compaction की संख्या
 
----
+## मौन रखरखाव (`NO_REPLY`)
 
-## Silent housekeeping (`NO_REPLY`)
+OpenClaw उन पृष्ठभूमि कार्यों के लिए "मौन" टर्न का समर्थन करता है जिनमें उपयोगकर्ता को मध्यवर्ती आउटपुट नहीं दिखना चाहिए।
 
-OpenClaw background tasks के लिए "silent" turns support करता है जहां user को intermediate output नहीं दिखना चाहिए।
+- सहायक अपना आउटपुट सटीक मौन टोकन `NO_REPLY` / `no_reply` से शुरू करता है, जिसका अर्थ है "उपयोगकर्ता को उत्तर न दें।" OpenClaw डिलीवरी परत में इसे हटा/दबा देता है।
+- सटीक मौन-टोकन दमन केस-असंवेदी है: यदि पूरा पेलोड केवल मौन टोकन है, तो `NO_REPLY` और `no_reply` दोनों मान्य होते हैं।
+- `2026.1.10` से, OpenClaw उस समय ड्राफ़्ट/टाइपिंग स्ट्रीमिंग भी दबाता है जब कोई आंशिक खंड `NO_REPLY` से शुरू होता है, ताकि मौन संचालन मध्य-टर्न में आंशिक आउटपुट उजागर न करें।
+- यह केवल वास्तविक पृष्ठभूमि/बिना-डिलीवरी वाले टर्न के लिए है—यह सामान्य कार्रवाई योग्य उपयोगकर्ता अनुरोधों का शॉर्टकट नहीं है।
 
-Convention:
+## Compaction-पूर्व मेमोरी फ़्लश
 
-- सहायक अपने आउटपुट की शुरुआत सटीक मौन टोकन `NO_REPLY` /
-  `no_reply` से करता है, ताकि यह संकेत दिया जा सके कि "उपयोगकर्ता को उत्तर न भेजें"।
-- OpenClaw इसे डिलीवरी लेयर में हटा/दबा देता है।
-- सटीक मौन-टोकन दमन केस-असंवेदनशील है, इसलिए `NO_REPLY` और
-  `no_reply` दोनों गिने जाते हैं जब पूरा पेलोड केवल मौन टोकन हो।
-- यह केवल वास्तविक पृष्ठभूमि/बिना-डिलीवरी टर्न के लिए है; यह
-  सामान्य कार्रवाई योग्य उपयोगकर्ता अनुरोधों का शॉर्टकट नहीं है।
+स्वचालित Compaction होने से पहले, OpenClaw एक मौन एजेंटिक टर्न चला सकता है जो डिस्क पर टिकाऊ स्थिति लिखता है (उदाहरण के लिए, एजेंट कार्यक्षेत्र में `memory/YYYY-MM-DD.md`), ताकि Compaction महत्वपूर्ण संदर्भ मिटा न सके। यह सत्र संदर्भ उपयोग की निगरानी करता है और Compaction सीमा से नीचे की नरम सीमा पार होते ही सटीक मौन टोकन `NO_REPLY` / `no_reply` का उपयोग करते हुए एक मौन "अभी मेमोरी लिखें" निर्देश भेजता है, ताकि उपयोगकर्ता को कुछ दिखाई न दे।
 
-`2026.1.10` के अनुसार, OpenClaw **ड्राफ्ट/टाइपिंग स्ट्रीमिंग** को भी दबाता है जब कोई
-आंशिक खंड `NO_REPLY` से शुरू होता है, ताकि मौन कार्रवाइयां टर्न के बीच आंशिक
-आउटपुट लीक न करें।
+कॉन्फ़िगरेशन (`agents.defaults.compaction.memoryFlush`), पूरा संदर्भ [/gateway/config-agents](/hi/gateway/config-agents#agentsdefaultscompaction) पर:
 
----
+| कुंजी                         | डिफ़ॉल्ट          | टिप्पणियाँ                                                                                                                                  |
+| --------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `enabled`                   | `true`           |                                                                                                                                        |
+| `model`                     | सेट नहीं            | केवल फ़्लश टर्न के लिए सटीक प्रदाता/मॉडल ओवरराइड, उदाहरण के लिए `ollama/qwen3:8b`                                                   |
+| `softThresholdTokens`       | `4000`           | Compaction सीमा के नीचे का अंतर जो फ़्लश ट्रिगर करता है                                                                               |
+| `forceFlushTranscriptBytes` | सेट नहीं (अक्षम) | ट्रांसक्रिप्ट फ़ाइल के इस बाइट आकार (या `"2mb"` जैसी स्ट्रिंग) तक पहुँचने पर फ़्लश बाध्य करें, भले ही टोकन काउंटर पुराने हों; `0` अक्षम करता है |
 
-## पूर्व-Compaction "मेमरी फ्लश" (लागू)
+टिप्पणियाँ:
 
-लक्ष्य: auto-compaction होने से पहले, एक मौन एजेंटिक टर्न चलाएं जो टिकाऊ
-स्टेट को डिस्क पर लिखे (उदा. एजेंट वर्कस्पेस में `memory/YYYY-MM-DD.md`) ताकि Compaction
-महत्वपूर्ण संदर्भ मिटा न सके।
+- अंतर्निहित प्रॉम्प्ट और सिस्टम प्रॉम्प्ट में डिलीवरी दबाने के लिए `NO_REPLY` संकेत शामिल होता है।
+- जब `model` सेट होता है, तो फ़्लश टर्न सक्रिय सत्र की फ़ॉलबैक शृंखला इनहेरिट किए बिना उस मॉडल का उपयोग करता है, ताकि केवल-स्थानीय रखरखाव विफलता पर चुपचाप किसी सशुल्क वार्तालाप मॉडल पर फ़ॉलबैक न करे।
+- फ़्लश प्रत्येक Compaction चक्र में एक बार चलता है (सत्र पंक्ति में ट्रैक किया जाता है)।
+- फ़्लश केवल एम्बेडेड OpenClaw सत्रों के लिए चलता है; CLI बैकएंड और Heartbeat टर्न इसे छोड़ देते हैं।
+- सत्र कार्यक्षेत्र केवल-पठन होने पर फ़्लश छोड़ दिया जाता है (`workspaceAccess: "ro"` या `"none"`)।
+- कार्यस्थल फ़ाइल लेआउट और लेखन पैटर्न के लिए [मेमोरी](/hi/concepts/memory) देखें।
 
-OpenClaw **पूर्व-थ्रेशहोल्ड फ्लश** दृष्टिकोण का उपयोग करता है:
+OpenClaw एक्सटेंशन API में `session_before_compact` हुक उपलब्ध कराता है, लेकिन ऊपर दिया गया फ़्लश तर्क उस हुक पर नहीं, बल्कि Gateway पक्ष (`src/auto-reply/reply/memory-flush.ts`, `src/auto-reply/reply/agent-runner-memory.ts`) पर रहता है।
 
-1. सेशन संदर्भ उपयोग की निगरानी करें।
-2. जब यह "सॉफ्ट थ्रेशहोल्ड" पार करता है (OpenClaw रनटाइम के Compaction थ्रेशहोल्ड से नीचे), तो एजेंट को मौन
-   "अब मेमरी लिखें" निर्देश चलाएं।
-3. सटीक मौन टोकन `NO_REPLY` / `no_reply` का उपयोग करें ताकि उपयोगकर्ता को
-   कुछ न दिखे।
+## समस्या निवारण चेकलिस्ट
 
-कॉन्फिग (`agents.defaults.compaction.memoryFlush`):
-
-- `enabled` (डिफॉल्ट: `true`)
-- `model` (फ्लश टर्न के लिए वैकल्पिक सटीक प्रदाता/मॉडल ओवरराइड, उदाहरण के लिए `ollama/qwen3:8b`)
-- `softThresholdTokens` (डिफॉल्ट: `4000`)
-- `prompt` (फ्लश टर्न के लिए उपयोगकर्ता संदेश)
-- `systemPrompt` (फ्लश टर्न के लिए जोड़ा गया अतिरिक्त सिस्टम प्रॉम्प्ट)
-
-टिप्पणियां:
-
-- डिफॉल्ट प्रॉम्प्ट/सिस्टम प्रॉम्प्ट में डिलीवरी दबाने के लिए `NO_REPLY` संकेत शामिल होता है।
-- जब `model` सेट होता है, तो फ्लश टर्न सक्रिय सेशन फॉलबैक चेन विरासत में लिए बिना
-  उसी मॉडल का उपयोग करता है, ताकि केवल-स्थानीय हाउसकीपिंग चुपचाप किसी भुगतान वाले
-  बातचीत मॉडल पर फॉलबैक न करे।
-- फ्लश हर Compaction चक्र में एक बार चलता है (`sessions.json` में ट्रैक किया जाता है)।
-- फ्लश केवल एम्बेडेड OpenClaw सेशनों के लिए चलता है (CLI बैकएंड इसे छोड़ देते हैं)।
-- जब सेशन वर्कस्पेस केवल-पढ़ने योग्य हो (`workspaceAccess: "ro"` या `"none"`), तो फ्लश छोड़ दिया जाता है।
-- वर्कस्पेस फ़ाइल लेआउट और लेखन पैटर्न के लिए [मेमरी](/hi/concepts/memory) देखें।
-
-OpenClaw एक्सटेंशन API में `session_before_compact` हुक भी उजागर करता है, लेकिन OpenClaw का
-फ्लश लॉजिक आज Gateway साइड पर रहता है।
-
----
-
-## समस्या-निवारण चेकलिस्ट
-
-- सेशन कुंजी गलत है? [/concepts/session](/hi/concepts/session) से शुरू करें और `/status` में `sessionKey` की पुष्टि करें।
-- स्टोर बनाम ट्रांसक्रिप्ट असंगति? `openclaw status` से Gateway होस्ट और स्टोर पथ की पुष्टि करें।
-- Compaction स्पैम? जांचें:
-  - मॉडल संदर्भ विंडो (बहुत छोटी)
-  - Compaction सेटिंग्स (मॉडल विंडो के लिए `reserveTokens` बहुत अधिक होने पर Compaction जल्दी हो सकता है)
-  - टूल-परिणाम ब्लोट: सेशन प्रूनिंग सक्षम/ट्यून करें
-- मौन टर्न लीक हो रहे हैं? पुष्टि करें कि उत्तर `NO_REPLY` से शुरू होता है (केस-असंवेदनशील सटीक टोकन) और आप ऐसे बिल्ड पर हैं जिसमें स्ट्रीमिंग दमन फिक्स शामिल है।
+- **सत्र कुंजी गलत है?** [/concepts/session](/hi/concepts/session) से शुरू करें और `/status` में `sessionKey` की पुष्टि करें।
+- **स्टोर और ट्रांसक्रिप्ट में असंगति है?** `openclaw status` से Gateway होस्ट और स्टोर पथ की पुष्टि करें।
+- **बार-बार Compaction हो रहा है?** मॉडल की संदर्भ विंडो (बहुत छोटी होने पर बार-बार Compaction बाध्य होता है) और टूल-परिणाम की अधिकता (सत्र प्रूनिंग समायोजित करें) जाँचें।
+- **छोटे स्थानीय मॉडल पर हर प्रॉम्प्ट ओवरफ़्लो होता दिख रहा है?** पुष्टि करें कि प्रदाता सही मॉडल संदर्भ विंडो रिपोर्ट करता है। OpenClaw प्रभावी रिज़र्व को केवल तभी सीमित कर सकता है जब वह विंडो ज्ञात हो।
+- **मौन टर्न लीक हो रहे हैं?** पुष्टि करें कि उत्तर सटीक मौन टोकन `NO_REPLY` (केस-असंवेदी) से शुरू होता है और आप ऐसे बिल्ड पर हैं जिसमें स्ट्रीमिंग-दमन सुधार (`2026.1.10`+) शामिल है।
 
 ## संबंधित
 
-- [सेशन प्रबंधन](/hi/concepts/session)
-- [सेशन प्रूनिंग](/hi/concepts/session-pruning)
+- [सत्र प्रबंधन](/hi/concepts/session)
+- [सत्र प्रूनिंग](/hi/concepts/session-pruning)
 - [संदर्भ इंजन](/hi/concepts/context-engine)
+- [एजेंट कॉन्फ़िगरेशन संदर्भ](/hi/gateway/config-agents)

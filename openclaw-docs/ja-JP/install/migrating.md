@@ -2,39 +2,40 @@
 read_when:
     - OpenClaw を新しいノートパソコンまたはサーバーに移行する場合
     - 別のエージェントシステムから移行し、状態を維持したい場合
-    - 既存の場所にあるPluginをアップグレードしています
+    - 既存の Plugin をその場でアップグレードしています
 summary: 移行ハブ：システム間インポート、マシン間移行、Plugin のアップグレード
 title: 移行ガイド
 x-i18n:
-    generated_at: "2026-07-11T22:21:54Z"
+    generated_at: "2026-07-26T10:07:12Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c7961f78bc654d328cb91a6ef982b6e47740fd831aec9249c8ffed3225dd0ccf
+    source_hash: e9ceb80045ab082c9cfc9e1aca59e079b6bf28b1d047265a0be40c03ebe5dac6
     source_path: install/migrating.md
     workflow: 16
 ---
 
-OpenClaw は、別のエージェントシステムからのインポート、既存のインストール環境の新しいマシンへの移行、Plugin のインプレースアップグレードという 3 つの移行パスをサポートしています。
+OpenClaw は、別のエージェントシステムからのインポート、既存のインストール環境の新しいマシンへの移動、Plugin のインプレースアップグレードという 3 つの移行パスをサポートしています。
 
 ## 別のエージェントシステムからインポートする
 
-同梱の移行プロバイダーは、手順、MCP サーバー、Skills、モデル設定、オプトインの API キーを OpenClaw に取り込みます。変更前に計画がプレビューされ、レポートではシークレットが伏せられ、適用時には検証済みのバックアップが作成されます。
+同梱の移行プロバイダーは、指示、MCP サーバー、Skills、モデル設定、および（オプトインの）API キーを OpenClaw に取り込みます。変更を加える前にプランがプレビューされ、レポートではシークレットが秘匿されます。スタンドアロンの `openclaw migrate` は検証済みのバックアップによって保護されます。一方、新規オンボーディングでのインポートでは、ローカルアーティファクトをステージングして検証してから公開し、不可逆な外部アクティベーションを行う前に設定をコミットします。
 
 <CardGroup cols={2}>
-  <Card title="Claude から移行" href="/ja-JP/install/migrating-claude" icon="brain">
+  <Card title="Claude からの移行" href="/ja-JP/install/migrating-claude" icon="brain">
     `CLAUDE.md`、MCP サーバー、Skills、プロジェクトコマンドを含む Claude Code と Claude Desktop の状態をインポートします。
   </Card>
-  <Card title="Hermes から移行" href="/ja-JP/install/migrating-hermes" icon="feather">
-    Hermes の設定、プロバイダー、MCP サーバー、メモリ、Skills、サポートされている `.env` キーをインポートします。
+  <Card title="Hermes からの移行" href="/ja-JP/install/migrating-hermes" icon="feather">
+    Hermes の設定、プロバイダー、MCP サーバー、メモリ、Skills、およびサポートされている `.env` キーをインポートします。
   </Card>
 </CardGroup>
 
-CLI のエントリーポイントは [`openclaw migrate`](/ja-JP/cli/migrate) です。既知の移行元を検出した場合、オンボーディングから移行を選択することもできます（`openclaw onboard --flow import`）。
+CLI のエントリーポイントは [`openclaw migrate`](/ja-JP/cli/migrate) です。既知のソース（`openclaw onboard --flow import`）を検出した場合、オンボーディングでも移行を提案できます。
 
-## OpenClaw を新しいマシンに移行する
+## OpenClaw を新しいマシンに移動する
 
-次のものを保持するには、**状態ディレクトリ**（デフォルトでは `~/.openclaw/`）と**ワークスペース**をコピーします。
+以下を保持するには、**状態ディレクトリ**（デフォルトでは `~/.openclaw/`）と**ワークスペース**をコピーします。
 
 - **設定** — `openclaw.json` とすべての Gateway 設定。
 - **認証** — エージェントごとの `auth-profiles.json`（API キーと OAuth）、および `credentials/` 配下のチャンネルまたはプロバイダーの状態。
@@ -43,14 +44,14 @@ CLI のエントリーポイントは [`openclaw migrate`](/ja-JP/cli/migrate) �
 - **ワークスペースファイル** — `MEMORY.md`、`USER.md`、Skills、プロンプト。
 
 <Tip>
-古いマシンで `openclaw status` を実行し、状態ディレクトリのパスを確認します。カスタムプロファイルでは `~/.openclaw-<profile>/`、または `OPENCLAW_STATE_DIR` で設定されたパスを使用します。
+古いマシンで `openclaw status` を実行し、状態ディレクトリのパスを確認してください。カスタムプロファイルでは、`~/.openclaw-<profile>/`、または `OPENCLAW_STATE_DIR` で設定したパスが使用されます。
 </Tip>
 
 ### 移行手順
 
 <Steps>
   <Step title="Gateway を停止してバックアップする">
-    コピー中にファイルが変更されないよう、**古い**マシンで Gateway を停止してからアーカイブします。
+    **古い**マシンで、コピー中にファイルが変更されないように Gateway を停止してから、アーカイブを作成します。
 
     ```bash
     openclaw gateway stop
@@ -58,7 +59,7 @@ CLI のエントリーポイントは [`openclaw migrate`](/ja-JP/cli/migrate) �
     tar -czf openclaw-state.tgz .openclaw
     ```
 
-    複数のプロファイル（例：`~/.openclaw-work`）を使用している場合は、それぞれを個別にアーカイブします。
+    複数のプロファイル（例: `~/.openclaw-work`）を使用している場合は、それぞれを個別にアーカイブします。
 
   </Step>
 
@@ -67,7 +68,7 @@ CLI のエントリーポイントは [`openclaw migrate`](/ja-JP/cli/migrate) �
   </Step>
 
   <Step title="状態ディレクトリとワークスペースをコピーする">
-    `scp`、`rsync -a`、または外部ドライブを使用してアーカイブを転送し、展開します。
+    `scp`、`rsync -a`、または外付けドライブを使用してアーカイブを転送し、展開します。
 
     ```bash
     cd ~
@@ -78,8 +79,8 @@ CLI のエントリーポイントは [`openclaw migrate`](/ja-JP/cli/migrate) �
 
   </Step>
 
-  <Step title="doctor を実行して確認する">
-    新しいマシンで [Doctor](/ja-JP/gateway/doctor) を実行し、設定の移行を適用してサービスを修復します。
+  <Step title="Doctor を実行して検証する">
+    新しいマシンで [Doctor](/ja-JP/gateway/doctor) を実行し、設定の移行とサービスの修復を行います。
 
     ```bash
     openclaw doctor
@@ -90,56 +91,56 @@ CLI のエントリーポイントは [`openclaw migrate`](/ja-JP/cli/migrate) �
   </Step>
 </Steps>
 
-Telegram または Discord がデフォルトの環境変数フォールバック（`TELEGRAM_BOT_TOKEN` または `DISCORD_BOT_TOKEN`）を使用している場合は、シークレット値を表示せずに、移行した状態ディレクトリの `.env` にこれらのキーが含まれていることを確認します。
+Telegram または Discord がデフォルトの環境変数フォールバック（`TELEGRAM_BOT_TOKEN` または `DISCORD_BOT_TOKEN`）を使用している場合は、シークレット値を出力せずに、移行した状態ディレクトリの `.env` にそれらのキーが含まれていることを確認します。
 
 ```bash
 awk -F= '/^(TELEGRAM_BOT_TOKEN|DISCORD_BOT_TOKEN)=/ { print $1 "=present" }' ~/.openclaw/.env
 ```
 
-`openclaw doctor` は、有効になっているデフォルトの Telegram または Discord アカウントにトークンが設定されておらず、対応する環境変数を doctor プロセスから利用できない場合にも警告します。
+有効なデフォルトの Telegram または Discord アカウントにトークンが設定されておらず、対応する環境変数を Doctor プロセスで利用できない場合、`openclaw doctor` も警告します。
 
 ### よくある問題
 
 <AccordionGroup>
   <Accordion title="プロファイルまたは状態ディレクトリの不一致">
-    古い Gateway が `--profile` または `OPENCLAW_STATE_DIR` を使用していて、新しい Gateway がそれを使用していない場合、チャンネルはログアウトしているように表示され、セッションは空になります。移行したものと**同じ**プロファイルまたは状態ディレクトリを使用して Gateway を起動し、`openclaw doctor` を再実行します。
+    古い Gateway が `--profile` または `OPENCLAW_STATE_DIR` を使用していて、新しい Gateway が使用していない場合、チャンネルはログアウト状態として表示され、セッションは空になります。移行したものと**同じ**プロファイルまたは状態ディレクトリを指定して Gateway を起動し、`openclaw doctor` を再実行してください。
   </Accordion>
 
-  <Accordion title="openclaw.json だけをコピーしている">
-    設定ファイルだけでは不十分です。モデルの認証プロファイルは `agents/<agentId>/agent/auth-profiles.json` に、チャンネルとプロバイダーの状態は `credentials/` に保存されています。必ず**状態ディレクトリ全体**を移行してください。
+  <Accordion title="openclaw.json のみをコピーする">
+    設定ファイルだけでは不十分です。モデル認証プロファイルは `agents/<agentId>/agent/auth-profiles.json` 配下にあり、チャンネルとプロバイダーの状態は `credentials/` 配下にあります。必ず状態ディレクトリ**全体**を移行してください。
   </Accordion>
 
   <Accordion title="権限と所有権">
-    root としてコピーした場合やユーザーを変更した場合、Gateway が認証情報を読み取れないことがあります。状態ディレクトリとワークスペースの所有者が Gateway を実行するユーザーであることを確認してください。
+    root としてコピーした場合やユーザーを切り替えた場合、Gateway が認証情報を読み取れないことがあります。状態ディレクトリとワークスペースが、Gateway を実行するユーザーによって所有されていることを確認してください。
   </Accordion>
 
   <Accordion title="リモートモード">
-    UI が**リモート**の Gateway を参照している場合、セッションとワークスペースはリモートホストが保持しています。ローカルのノートパソコンではなく、Gateway ホスト自体を移行してください。[よくある質問](/ja-JP/help/faq#where-things-live-on-disk)を参照してください。
+    UI が**リモート**の Gateway を参照している場合、セッションとワークスペースはリモートホストが所有しています。ローカルのノートパソコンではなく、Gateway ホスト自体を移行してください。[FAQ](/ja-JP/help/faq#where-things-live-on-disk) を参照してください。
   </Accordion>
 
   <Accordion title="バックアップ内のシークレット">
-    状態ディレクトリには、認証プロファイル、チャンネルの認証情報、その他のプロバイダー状態が含まれています。バックアップは暗号化して保存し、安全でない転送経路を避け、漏えいした可能性がある場合はキーをローテーションしてください。
+    状態ディレクトリには、認証プロファイル、チャンネルの認証情報、その他のプロバイダーの状態が含まれています。バックアップは暗号化して保存し、安全でない転送経路を避け、漏洩した疑いがある場合はキーをローテーションしてください。
   </Accordion>
 </AccordionGroup>
 
-### 確認チェックリスト
+### 検証チェックリスト
 
-新しいマシンで次を確認します。
+新しいマシンで、以下を確認します。
 
-- [ ] `openclaw status` で Gateway が実行中と表示される。
+- [ ] `openclaw status` に Gateway が実行中であると表示される。
 - [ ] チャンネルが引き続き接続されている（再ペアリングは不要）。
-- [ ] ダッシュボードを開くことができ、既存のセッションが表示される。
+- [ ] ダッシュボードが開き、既存のセッションが表示される。
 - [ ] ワークスペースファイル（メモリ、設定）が存在する。
 
 ## Plugin をインプレースアップグレードする
 
-Plugin のインプレースアップグレードでは、同じ Plugin ID と設定キーを保持しますが、ディスク上の状態を現在のレイアウトに移動する場合があります。Plugin 固有のアップグレードガイドは、対応するチャンネルのドキュメントにあります。
+Plugin のインプレースアップグレードでは、同じ Plugin ID と設定キーが維持されますが、ディスク上の状態が現在のレイアウトに移動される場合があります。Plugin 固有のアップグレードガイドは、それぞれのチャンネルとともに提供されています。
 
-- [Matrix の移行](/ja-JP/channels/matrix-migration)：暗号化された状態の復旧制限、自動スナップショットの動作、手動復旧コマンド。
+- [Matrix の移行](/ja-JP/channels/matrix-migration): 暗号化された状態の復旧制限、自動スナップショットの動作、手動復旧コマンド。
 
 ## 関連項目
 
-- [`openclaw migrate`](/ja-JP/cli/migrate)：システム間インポートの CLI リファレンス。
-- [インストールの概要](/ja-JP/install)：すべてのインストール方法。
-- [Doctor](/ja-JP/gateway/doctor)：移行後の健全性チェック。
-- [アンインストール](/ja-JP/install/uninstall)：OpenClaw をクリーンに削除する方法。
+- [`openclaw migrate`](/ja-JP/cli/migrate): システム間インポート用の CLI リファレンス。
+- [インストールの概要](/ja-JP/install): すべてのインストール方法。
+- [Doctor](/ja-JP/gateway/doctor): 移行後の健全性チェック。
+- [アンインストール](/ja-JP/install/uninstall): OpenClaw を完全に削除する方法。

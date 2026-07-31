@@ -5,9 +5,10 @@ read_when:
 summary: Configuratie van Perplexity als webzoekprovider (API-sleutel, zoekmodi, filtering)
 title: Perplexity
 x-i18n:
-    generated_at: "2026-07-12T09:20:14Z"
+    generated_at: "2026-07-27T05:20:09Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: ea76a5cb7befce95756e9bcc8f9c1637fac87711d02d8a486ec2a1b9f51b73dc
     source_path: providers/perplexity-provider.md
@@ -23,13 +24,13 @@ bronverwijzingen).
 Deze pagina behandelt de configuratie van de Perplexity-**provider**. Zie [Zoeken met Perplexity](/nl/tools/perplexity-search) voor de Perplexity-**tool** (hoe de agent deze gebruikt).
 </Note>
 
-| Eigenschap   | Waarde                                                                 |
-| ------------ | ---------------------------------------------------------------------- |
-| Type         | Webzoekprovider (geen modelprovider)                                   |
-| Authenticatie | `PERPLEXITY_API_KEY` (native) of `OPENROUTER_API_KEY` (via OpenRouter) |
-| Configuratiepad | `plugins.entries.perplexity.config.webSearch.apiKey`                |
-| Overschrijvingen | `plugins.entries.perplexity.config.webSearch.baseUrl` / `.model`   |
-| Sleutel verkrijgen | [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api) |
+| Eigenschap  | Waarde                                                                 |
+| ----------- | ---------------------------------------------------------------------- |
+| Type        | Webzoekprovider (geen modelprovider)                                   |
+| Auth        | `PERPLEXITY_API_KEY` (native) of `OPENROUTER_API_KEY` (via OpenRouter) |
+| Configuratiepad | `plugins.entries.perplexity.config.webSearch.apiKey`                   |
+| Overschrijvingen | `plugins.entries.perplexity.config.webSearch.baseUrl` / `.model`       |
+| Sleutel verkrijgen | [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api)   |
 
 ## Plugin installeren
 
@@ -41,7 +42,7 @@ openclaw gateway restart
 ## Aan de slag
 
 <Steps>
-  <Step title="De API-sleutel instellen">
+  <Step title="Stel de API-sleutel in">
     ```bash
     openclaw configure --section web
     ```
@@ -56,9 +57,9 @@ openclaw gateway restart
     is geëxporteerd, werkt ook.
 
   </Step>
-  <Step title="Beginnen met zoeken">
+  <Step title="Begin met zoeken">
     `web_search` detecteert Perplexity automatisch zodra de sleutel de beschikbare
-    zoekreferentie is; verdere configuratie is niet vereist. Om de provider expliciet vast te leggen:
+    zoekreferentie is; verdere configuratie is niet nodig. Om de provider expliciet vast te zetten:
 
     ```bash
     openclaw config set tools.web.search.provider perplexity
@@ -72,30 +73,30 @@ openclaw gateway restart
 De Plugin bepaalt de transportmethode in deze volgorde:
 
 1. `webSearch.baseUrl` of `webSearch.model` ingesteld: routeert altijd via Sonar-chatvoltooiingen naar dat eindpunt, ongeacht het sleuteltype.
-2. Anders bepaalt de sleutelbron het eindpunt: het voorvoegsel van een geconfigureerde sleutel bepaalt de transportmethode (configuratie heeft voorrang op omgevingsvariabelen); een omgevingssleutel gebruikt rechtstreeks het bijbehorende eindpunt.
+2. Anders bepaalt de bron van de sleutel het eindpunt: het voorvoegsel van een geconfigureerde sleutel selecteert de transportmethode (configuratie heeft voorrang op omgevingsvariabelen); een omgevingssleutel gebruikt rechtstreeks het bijbehorende eindpunt.
 
-| Sleutelvoorvoegsel | Transportmethode                                         | Functies                                                |
-| ------------------ | -------------------------------------------------------- | ------------------------------------------------------- |
-| `pplx-`            | Native Perplexity Search API (`https://api.perplexity.ai`) | Gestructureerde resultaten, domein-/taal-/datumfilters |
-| `sk-or-`           | OpenRouter (`https://openrouter.ai/api/v1`), Sonar-model | Door AI samengestelde antwoorden met bronverwijzingen  |
+| Sleutelvoorvoegsel | Transport                                                  | Functies                                         |
+| ---------- | ---------------------------------------------------------- | ------------------------------------------------ |
+| `pplx-`    | Native Perplexity Search API (`https://api.perplexity.ai`) | Gestructureerde resultaten, domein-/taal-/datumfilters |
+| `sk-or-`   | OpenRouter (`https://openrouter.ai/api/v1`), Sonar-model   | Door AI samengestelde antwoorden met bronverwijzingen |
 
 Een geconfigureerde sleutel met een ander voorvoegsel gebruikt eveneens de native Search API. Het
-pad voor chatvoltooiingen gebruikt standaard het model `perplexity/sonar-pro`; overschrijf dit
+chatvoltooiingspad gebruikt standaard het `perplexity/sonar-pro`-model; overschrijf dit
 met `plugins.entries.perplexity.config.webSearch.model`.
 
-## Filteren met de native API
+## Filters voor de native API
 
-| Filter                               | Beschrijving                                                        | Transportmethode |
-| ------------------------------------ | ------------------------------------------------------------------- | ---------------- |
-| `count`                              | Resultaten per zoekopdracht, 1-10 (standaard 5)                     | Alleen native    |
-| `freshness`                          | Recentheidsvenster: `day`, `week`, `month`, `year`                  | Beide            |
-| `country`                            | Landcode van twee letters (`us`, `de`, `jp`)                        | Alleen native    |
-| `language`                           | ISO 639-1-taalcode (`en`, `fr`, `zh`)                               | Alleen native    |
-| `date_after` / `date_before`         | Publicatiedatumbereik in `YYYY-MM-DD`                               | Alleen native    |
-| `domain_filter`                      | Maximaal 20 domeinen; toelatingslijst of met `-` voorafgegane blokkeerlijst, nooit gemengd | Alleen native |
-| `max_tokens` / `max_tokens_per_page` | Inhoudsbudget voor alle resultaten / per pagina                     | Alleen native    |
+| Filter                               | Beschrijving                                                    | Transport   |
+| ------------------------------------ | --------------------------------------------------------------- | ----------- |
+| `count`                              | Resultaten per zoekopdracht, 1-10 (standaard 5)                 | Alleen native |
+| `freshness`                          | Recentheidsperiode: `day`, `week`, `month`, `year`                  | Beide       |
+| `country`                            | Landcode van 2 letters (`us`, `de`, `jp`)                        | Alleen native |
+| `language`                           | ISO 639-1-taalcode (`en`, `fr`, `zh`)                      | Alleen native |
+| `date_after` / `date_before`         | Publicatiedatumbereik in `YYYY-MM-DD`                            | Alleen native |
+| `domain_filter`                      | Maximaal 20 domeinen; acceptatielijst of weigeringslijst met het voorvoegsel `-`, nooit gecombineerd | Alleen native |
+| `max_tokens` / `max_tokens_per_page` | Inhoudsbudget voor alle resultaten / per pagina                 | Alleen native |
 
-Filters die alleen voor de native API gelden, retourneren een beschrijvende fout bij het pad voor chatvoltooiingen.
+Filters die alleen native beschikbaar zijn, retourneren een beschrijvende fout in het chatvoltooiingspad.
 `freshness` kan niet worden gecombineerd met `date_after`/`date_before`.
 
 ## Geavanceerde configuratie
@@ -111,11 +112,11 @@ Filters die alleen voor de native API gelden, retourneren een beschrijvende fout
     </Warning>
   </Accordion>
 
-  <Accordion title="OpenRouter-proxyconfiguratie">
-    Om Perplexity-zoekopdrachten via OpenRouter te routeren, stelt u een `OPENROUTER_API_KEY`
+  <Accordion title="OpenRouter-proxy configureren">
+    Om Perplexity-zoekopdrachten via OpenRouter te routeren, stel je een `OPENROUTER_API_KEY`
     (voorvoegsel `sk-or-`) in in plaats van een native Perplexity-sleutel. OpenClaw detecteert de
-    sleutel en schakelt automatisch over op de Sonar-transportmethode. Dit is nuttig als u facturering via OpenRouter al
-    hebt ingesteld en providers daar wilt consolideren.
+    sleutel en schakelt automatisch over naar de Sonar-transportmethode. Dit is handig als je al
+    facturering via OpenRouter hebt ingesteld en providers daar wilt consolideren.
   </Accordion>
 </AccordionGroup>
 
@@ -126,6 +127,6 @@ Filters die alleen voor de native API gelden, retourneren een beschrijvende fout
     Hoe de agent Perplexity-zoekopdrachten aanroept en resultaten interpreteert.
   </Card>
   <Card title="Configuratiereferentie" href="/nl/gateway/configuration-reference" icon="gear">
-    Volledige configuratiereferentie, inclusief pluginvermeldingen.
+    Volledige configuratiereferentie, inclusief Plugin-vermeldingen.
   </Card>
 </CardGroup>

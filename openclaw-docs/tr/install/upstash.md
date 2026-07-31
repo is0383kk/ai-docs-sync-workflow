@@ -2,44 +2,47 @@
 read_when:
     - OpenClaw'u Upstash Box'a Dağıtma
     - OpenClaw için SSH tüneli üzerinden pano erişimi sunan yönetilen bir Linux ortamı istiyorsunuz
-summary: OpenClaw'u sürekli çalışır durumda tutma ve SSH tüneli erişimiyle Upstash Box'ta barındırın
-title: Upstash Kutusu
+summary: OpenClaw'u keep-alive ve SSH tüneli erişimiyle Upstash Box'ta barındırma
+title: Upstash Box
 x-i18n:
-    generated_at: "2026-07-12T12:23:44Z"
+    generated_at: "2026-07-26T23:26:22Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 29232c43e0e4940b7445ab8896c9ccd3e81d0fdbdd522d7f50cb8c8057ac18f0
     source_path: install/upstash.md
     workflow: 16
 ---
 
-Upstash Box üzerinde, canlı tutma yaşam döngüsü desteğine sahip yönetilen bir Linux ortamında kalıcı bir OpenClaw Gateway çalıştırın.
+Kalıcı çalışma döngüsü desteğine sahip, yönetilen bir Linux ortamı olan Upstash Box üzerinde kalıcı bir OpenClaw Gateway çalıştırın.
 
-Kontrol paneline erişmek için bir SSH tüneli kullanın. Gateway portunu doğrudan genel internete açmayın.
+Kontrol paneline erişmek için bir SSH tüneli kullanın. Gateway bağlantı noktasını doğrudan genel internete açmayın.
 
 ## Ön koşullar
 
 - Upstash hesabı
-- Canlı tutma özellikli Upstash Box
+- Kalıcı çalışma döngülü Upstash Box
 - Yerel makinenizde SSH istemcisi
 
 ## Box oluşturma
 
-Upstash Console'da canlı tutma özellikli bir Box oluşturun. Box kimliğini (örneğin `right-flamingo-14486`) ve Box API anahtarınızı not edin.
+Upstash Console'da kalıcı çalışma döngülü bir Box oluşturun. Box kimliğini (örneğin
+`right-flamingo-14486`) ve Box API anahtarınızı not edin.
 
 Upstash, güncel OpenClaw Box kılavuzunu
 [OpenClaw Kurulumu](https://upstash.com/docs/box/guides/openclaw-setup) sayfasında tutar.
 
 ## SSH tüneliyle bağlanma
 
-OpenClaw kontrol paneli portunu yerel makinenize yönlendirin. İstendiğinde SSH parolası olarak Box API anahtarınızı kullanın:
+OpenClaw kontrol paneli bağlantı noktasını yerel makinenize yönlendirin. İstendiğinde
+SSH parolası olarak Box API anahtarınızı kullanın:
 
 ```bash
 ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -L 18789:127.0.0.1:18789 <box-id>@us-east-1.box.upstash.com
 ```
 
-Canlı tutma seçenekleri, ilk yapılandırma sırasında tünelin boşta kalma nedeniyle kopmasını azaltır.
+Kalıcı bağlantı seçenekleri, ilk katılım sırasında tünelin boşta kalma nedeniyle kopmasını azaltır.
 
 ## OpenClaw'ı yükleme
 
@@ -49,13 +52,13 @@ Box içinde:
 sudo npm install -g openclaw
 ```
 
-## İlk yapılandırmayı çalıştırma
+## İlk katılımı çalıştırma
 
 ```bash
 openclaw onboard --install-daemon
 ```
 
-İstemleri izleyin. İlk yapılandırma tamamlandığında kontrol paneli URL'sini ve belirteci kopyalayın.
+İstemleri izleyin. İlk katılım tamamlandığında kontrol paneli URL'sini ve token'ı kopyalayın.
 
 ## Gateway'i başlatma
 
@@ -74,7 +77,7 @@ http://127.0.0.1:18789/#token=<your-token>
 
 ## Otomatik yeniden başlatma
 
-Box başladığında Gateway'in yeniden başlatılması için bu komutu Box başlangıç betiği olarak ayarlayın:
+Box başlatıldığında Gateway'in yeniden başlaması için bu komutu Box başlangıç betiği olarak ayarlayın:
 
 ```bash
 nohup openclaw gateway > gateway.log 2>&1 &
@@ -82,7 +85,7 @@ nohup openclaw gateway > gateway.log 2>&1 &
 
 ## Sorun giderme
 
-İlk yapılandırma sırasında SSH donarsa temiz bir SSH yapılandırması ve canlı tutma seçenekleriyle yeniden bağlanın:
+İlk katılım sırasında SSH donarsa temiz bir SSH yapılandırması ve kalıcı bağlantı seçenekleriyle yeniden bağlanın:
 
 ```bash
 ssh -F /dev/null -o ControlMaster=no -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -L 18789:127.0.0.1:18789 <box-id>@us-east-1.box.upstash.com
@@ -90,7 +93,7 @@ ssh -F /dev/null -o ControlMaster=no -o ServerAliveInterval=15 -o ServerAliveCou
 
 Bu işlem, eski yerel `~/.ssh/config` ayarlarını atlar ve ağın boşta kaldığı dönemlerde tüneli etkin tutar.
 
-## İlgili konular
+## İlgili
 
 - [Uzaktan erişim](/tr/gateway/remote)
 - [Gateway güvenliği](/tr/gateway/security)

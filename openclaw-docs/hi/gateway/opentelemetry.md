@@ -1,32 +1,40 @@
 ---
 read_when:
-    - आप OpenClaw मॉडल उपयोग, संदेश प्रवाह, या सत्र मेट्रिक्स को OpenTelemetry collector पर भेजना चाहते हैं
-    - आप ट्रेस, मेट्रिक्स, या लॉग को Grafana, Datadog, Honeycomb, New Relic, Tempo, या किसी अन्य OTLP बैकएंड में जोड़ रहे हैं
+    - आप OpenClaw मॉडल के उपयोग, संदेश प्रवाह या सत्र मेट्रिक्स को किसी OpenTelemetry कलेक्टर को भेजना चाहते हैं
+    - आप ट्रेस, मेट्रिक्स या लॉग को Grafana, Datadog, Honeycomb, New Relic, Tempo या किसी अन्य OTLP बैकएंड से जोड़ रहे हैं
     - डैशबोर्ड या अलर्ट बनाने के लिए आपको सटीक मेट्रिक नाम, स्पैन नाम या एट्रिब्यूट संरचनाएँ चाहिए
-summary: OpenClaw डायग्नॉस्टिक्स को diagnostics-otel Plugin के जरिए OpenTelemetry collectors या stdout JSONL में निर्यात करें
+summary: diagnostics-otel Plugin के माध्यम से OpenClaw डायग्नोस्टिक्स को OpenTelemetry कलेक्टर या stdout JSONL में एक्सपोर्ट करें
 title: OpenTelemetry निर्यात
 x-i18n:
-    generated_at: "2026-07-01T05:44:28Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T17:49:05Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: d2e23876db9446a97545f01436326d08aadf222ec41a326749fd084779a7259f
+    source_hash: 6ed37f094c6c151379d8e0aaa2633b3ebebdb08b7dcbc9403c4bdeb6e5b8cf76
     source_path: gateway/opentelemetry.md
     workflow: 16
 ---
 
-OpenClaw आधिकारिक `diagnostics-otel` Plugin के माध्यम से **OTLP/HTTP (protobuf)** का उपयोग करके diagnostics निर्यात करता है। कंटेनर और sandbox log pipelines के लिए logs को stdout JSONL के रूप में भी लिखा जा सकता है। OTLP/HTTP स्वीकार करने वाला कोई भी collector या backend बिना code changes के काम करता है। स्थानीय file logs और उन्हें पढ़ने के तरीके के लिए, [Logging](/hi/logging) देखें।
+OpenClaw आधिकारिक `diagnostics-otel` plugin के माध्यम से डायग्नोस्टिक्स निर्यात करता है,
+जिसमें **OTLP/HTTP (protobuf)** का उपयोग होता है। कंटेनर और सैंडबॉक्स लॉग पाइपलाइनों के लिए
+लॉग stdout JSONL के रूप में भी लिखे जा सकते हैं। OTLP/HTTP स्वीकार करने वाला कोई भी
+कलेक्टर या बैकएंड बिना कोड परिवर्तन के काम करता है। स्थानीय फ़ाइल लॉग के लिए,
+[लॉगिंग](/hi/logging) देखें।
 
-## यह साथ में कैसे काम करता है
+- **डायग्नोस्टिक्स इवेंट** संरचित, इन-प्रोसेस रिकॉर्ड हैं, जिन्हें
+  Gateway और बंडल किए गए plugins मॉडल रन, संदेश प्रवाह, सत्र, कतारों
+  और exec के लिए उत्सर्जित करते हैं।
+- **`diagnostics-otel`** उन इवेंट की सदस्यता लेता है और उन्हें OTLP/HTTP पर
+  OpenTelemetry **मेट्रिक्स**, **ट्रेस** और **लॉग** के रूप में निर्यात करता है तथा
+  लॉग रिकॉर्ड को stdout JSONL पर मिरर कर सकता है।
+- **प्रोवाइडर कॉल** को OpenClaw के विश्वसनीय मॉडल-कॉल स्पैन संदर्भ से एक W3C `traceparent`
+  हेडर मिलता है, जब प्रोवाइडर ट्रांसपोर्ट कस्टम हेडर स्वीकार करता है।
+  Plugin द्वारा उत्सर्जित ट्रेस संदर्भ आगे प्रसारित नहीं किया जाता।
+- निर्यातक केवल तभी संलग्न होते हैं, जब डायग्नोस्टिक्स सतह और plugin दोनों
+  सक्षम हों, इसलिए डिफ़ॉल्ट रूप से इन-प्रोसेस लागत लगभग शून्य रहती है।
 
-- **Diagnostics events** संरचित, in-process records हैं जिन्हें Gateway और bundled plugins model runs, message flow, sessions, queues, और exec के लिए emit करते हैं।
-- **`diagnostics-otel` plugin** उन events को subscribe करता है और उन्हें OTLP/HTTP पर OpenTelemetry **metrics**, **traces**, और **logs** के रूप में export करता है। यह diagnostic log records को stdout JSONL पर mirror भी कर सकता है।
-- **Provider calls** को OpenClaw के trusted model-call span context से W3C `traceparent` header मिलता है, जब provider transport custom headers स्वीकार करता है। Plugin-emitted trace context propagate नहीं किया जाता।
-- Exporters केवल तब attach होते हैं जब diagnostics surface और plugin दोनों enabled हों, इसलिए in-process cost default रूप से लगभग zero रहती है।
-
-## Quick start
-
-Packaged installs के लिए, पहले plugin install करें:
+## त्वरित शुरुआत
 
 ```bash
 openclaw plugins install clawhub:@openclaw/diagnostics-otel
@@ -57,27 +65,27 @@ openclaw plugins install clawhub:@openclaw/diagnostics-otel
 }
 ```
 
-आप CLI से भी plugin enable कर सकते हैं:
-
-```bash
-openclaw plugins enable diagnostics-otel
-```
+या CLI से plugin सक्षम करें: `openclaw plugins enable diagnostics-otel`।
 
 <Note>
-`protocol` अभी केवल `http/protobuf` support करता है। `grpc` को ignore किया जाता है।
+`protocol` केवल `http/protobuf` का समर्थन करता है। चूँकि `traces` और `metrics` डिफ़ॉल्ट रूप से सक्षम होते हैं, इसलिए कोई भी अन्य मान (`grpc` सहित) `unsupported protocol` चेतावनी के साथ पूरी diagnostics-otel सदस्यता को रोक देता है—इससे stdout लॉग निर्यात भी रुक जाता है। यदि आपको गैर-OTLP प्रोटोकॉल मान के साथ केवल `logsExporter: "stdout"` चाहिए, तो `traces: false` और `metrics: false` को स्पष्ट रूप से सेट करें।
 </Note>
 
-## Export किए गए signals
+## निर्यात किए गए सिग्नल
 
-| Signal      | इसमें क्या जाता है                                                                                                                                                                                                    |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Metrics** | token usage, cost, run duration, failover, skill usage, message flow, Talk events, queue lanes, session state/recovery, tool execution, oversized payloads, exec, और memory pressure के लिए counters और histograms. |
-| **Traces**  | model usage, model calls, harness lifecycle, skill usage, tool execution, exec, webhook/message processing, context assembly, और tool loops के लिए spans.                                                            |
-| **Logs**    | `diagnostics.otel.logs` enabled होने पर OTLP या stdout JSONL पर export किए गए structured `logging.file` records; log bodies तब तक रोकी जाती हैं जब तक content capture स्पष्ट रूप से enabled न हो।                                |
+| सिग्नल      | इसमें क्या शामिल होता है                                                                                                                                                                                              |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **मेट्रिक्स** | टोकन उपयोग, लागत, रन अवधि, फ़ेलओवर, स्किल उपयोग, संदेश प्रवाह, Talk इवेंट, कतार लेन, सत्र स्थिति/पुनर्प्राप्ति, टूल निष्पादन, exec, मेमोरी, जीवंतता और निर्यातक स्वास्थ्य के लिए काउंटर/हिस्टोग्राम। |
+| **ट्रेस**  | मॉडल उपयोग, मॉडल कॉल, हार्नेस जीवनचक्र, स्किल उपयोग, टूल निष्पादन, exec, webhook/संदेश प्रोसेसिंग, संदर्भ संयोजन और टूल लूप के लिए स्पैन।                                                      |
+| **लॉग**    | जब `diagnostics.otel.logs` सक्षम हो, तब OTLP या stdout JSONL पर निर्यात किए गए संरचित `logging.file` रिकॉर्ड; जब तक सामग्री कैप्चर स्पष्ट रूप से सक्षम न हो, लॉग बॉडी रोक दी जाती हैं।                          |
 
-`traces`, `metrics`, और `logs` को स्वतंत्र रूप से toggle करें। `diagnostics.otel.enabled` true होने पर traces और metrics default रूप से on होते हैं। Logs default रूप से off होते हैं और केवल तब export किए जाते हैं जब `diagnostics.otel.logs` स्पष्ट रूप से `true` हो। Log export default रूप से OTLP होता है; stdout पर JSONL के लिए `diagnostics.otel.logsExporter` को `stdout` पर set करें, या प्रत्येक diagnostic log record को OTLP और stdout दोनों पर भेजने के लिए `both` पर set करें।
+`traces`, `metrics` और `logs` को स्वतंत्र रूप से टॉगल करें। जब `diagnostics.otel.enabled` true होता है, तब ट्रेस और मेट्रिक्स
+डिफ़ॉल्ट रूप से चालू होते हैं; लॉग डिफ़ॉल्ट रूप से बंद होते हैं
+और केवल तभी निर्यात होते हैं, जब `diagnostics.otel.logs` को स्पष्ट रूप से `true` किया गया हो। लॉग निर्यात
+का डिफ़ॉल्ट OTLP है; stdout पर JSONL के लिए `diagnostics.otel.logsExporter` को `stdout`,
+या दोनों के लिए `both` सेट करें।
 
-## Configuration reference
+## कॉन्फ़िगरेशन संदर्भ
 
 ```json5
 {
@@ -89,8 +97,8 @@ openclaw plugins enable diagnostics-otel
       tracesEndpoint: "http://otel-collector:4318/v1/traces",
       metricsEndpoint: "http://otel-collector:4318/v1/metrics",
       logsEndpoint: "http://otel-collector:4318/v1/logs",
-      protocol: "http/protobuf", // grpc is ignored
-      serviceName: "openclaw-gateway",
+      protocol: "http/protobuf", // grpc disables OTLP export
+      serviceName: "openclaw-gateway", // unset falls back to OTEL_SERVICE_NAME, then "openclaw"
       headers: { "x-collector-token": "..." },
       traces: true,
       metrics: true,
@@ -112,213 +120,325 @@ openclaw plugins enable diagnostics-otel
 }
 ```
 
-### Environment variables
+### पर्यावरण चर
 
-| Variable                                                                                                          | Purpose                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OTEL_EXPORTER_OTLP_ENDPOINT`                                                                                     | `diagnostics.otel.endpoint` को override करें। यदि value में पहले से `/v1/traces`, `/v1/metrics`, या `/v1/logs` है, तो उसे वैसे ही use किया जाता है।                                                                                                                                                                                                              |
-| `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` / `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` / `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` | Matching `diagnostics.otel.*Endpoint` config key unset होने पर उपयोग किए जाने वाले signal-specific endpoint overrides। Signal-specific config, signal-specific env पर प्राथमिकता पाता है, और वह shared endpoint पर प्राथमिकता पाता है।                                                                                                                                         |
-| `OTEL_SERVICE_NAME`                                                                                               | `diagnostics.otel.serviceName` को override करें।                                                                                                                                                                                                                                                                                                       |
-| `OTEL_EXPORTER_OTLP_PROTOCOL`                                                                                     | wire protocol को override करें (आज केवल `http/protobuf` honored है)।                                                                                                                                                                                                                                                                            |
-| `OTEL_SEMCONV_STABILITY_OPT_IN`                                                                                   | latest experimental GenAI inference span shape emit करने के लिए `gen_ai_latest_experimental` पर set करें, जिसमें `{gen_ai.operation.name} {gen_ai.request.model}` span names, `CLIENT` span kind, और legacy `gen_ai.system` के बजाय `gen_ai.provider.name` शामिल हैं। GenAI metrics हमेशा bounded, low-cardinality semantic attributes use करते हैं। |
-| `OPENCLAW_OTEL_PRELOADED`                                                                                         | जब किसी अन्य preload या host process ने global OpenTelemetry SDK पहले से register कर दिया हो, तो `1` पर set करें। Plugin तब अपना NodeSDK lifecycle skip करता है लेकिन फिर भी diagnostic listeners wire करता है और `traces`/`metrics`/`logs` का सम्मान करता है।                                                                                                                    |
+| चर                                                                                                          | उद्देश्य                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`                                                                                     | कॉन्फ़िगरेशन कुंजी सेट न होने पर `diagnostics.otel.endpoint` के लिए फ़ॉलबैक।                                                                                                                                                                                                                                         |
+| `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` / `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` / `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` | मेल खाने वाली `diagnostics.otel.*Endpoint` कॉन्फ़िगरेशन कुंजी सेट न होने पर उपयोग किए जाने वाले सिग्नल-विशिष्ट एंडपॉइंट फ़ॉलबैक। सिग्नल-विशिष्ट कॉन्फ़िगरेशन की प्राथमिकता सिग्नल-विशिष्ट पर्यावरण चर से अधिक होती है और उसकी प्राथमिकता साझा एंडपॉइंट से अधिक होती है।                                                                                                         |
+| `OTEL_SERVICE_NAME`                                                                                               | कॉन्फ़िगरेशन कुंजी सेट न होने पर `diagnostics.otel.serviceName` के लिए फ़ॉलबैक। डिफ़ॉल्ट सेवा नाम `openclaw` है।                                                                                                                                                                                                  |
+| `OTEL_EXPORTER_OTLP_PROTOCOL`                                                                                     | `diagnostics.otel.protocol` सेट न होने पर वायर प्रोटोकॉल के लिए फ़ॉलबैक। केवल `http/protobuf` निर्यात सक्षम करता है।                                                                                                                                                                                                 |
+| `OTEL_SEMCONV_STABILITY_OPT_IN`                                                                                   | नवीनतम GenAI इन्फ़रेंस स्पैन स्वरूप उत्सर्जित करने के लिए `gen_ai_latest_experimental` पर सेट करें: `{gen_ai.operation.name} {gen_ai.request.model}` स्पैन नाम, `CLIENT` स्पैन प्रकार और लेगेसी `gen_ai.system` के बजाय `gen_ai.provider.name`। GenAI मेट्रिक्स किसी भी स्थिति में सीमित, कम-कार्डिनैलिटी विशेषताओं का उपयोग करते हैं। |
+| `OPENCLAW_OTEL_PRELOADED`                                                                                         | जब किसी अन्य प्रीलोड या होस्ट प्रक्रिया ने पहले ही ग्लोबल OpenTelemetry SDK पंजीकृत कर दिया हो, तब `1` पर सेट करें। इसके बाद plugin अपना NodeSDK जीवनचक्र छोड़ देता है, लेकिन फिर भी डायग्नोस्टिक लिसनर जोड़ता है और `traces`/`metrics`/`logs` का पालन करता है।                                                                                    |
 
-## Privacy और content capture
+## गोपनीयता और सामग्री कैप्चर
 
-Raw model/tool content default रूप से export **नहीं** किया जाता। Spans bounded identifiers (channel, provider, model, error category, hash-only request ids, tool source, tool owner, और skill name/source) carry करते हैं और कभी भी prompt text, response text, tool inputs, tool outputs, skill file paths, या session keys शामिल नहीं करते। OTLP log records default रूप से severity, logger, code location, trusted trace context, और sanitized attributes रखते हैं, लेकिन raw log message body केवल तब export होती है जब `diagnostics.otel.captureContent` boolean `true` पर set हो। Granular `captureContent.*` subkeys log bodies enable नहीं करते। Scoped agent session keys जैसे दिखने वाले labels को `unknown` से बदल दिया जाता है।
-Talk metrics केवल bounded event metadata जैसे mode, transport, provider, और event type export करते हैं। उनमें transcripts, audio payloads, session ids, turn ids, call ids, room ids, या handoff tokens शामिल नहीं होते।
+कच्ची मॉडल/टूल सामग्री डिफ़ॉल्ट रूप से निर्यात **नहीं** की जाती। स्पैन में सीमित
+पहचानकर्ता (चैनल, प्रोवाइडर, मॉडल, त्रुटि श्रेणी, केवल-हैश अनुरोध आईडी,
+टूल स्रोत, टूल स्वामी, स्किल नाम/स्रोत) होते हैं और उनमें कभी भी प्रॉम्प्ट टेक्स्ट,
+प्रतिक्रिया टेक्स्ट, टूल इनपुट, टूल आउटपुट, स्किल फ़ाइल पथ या सत्र कुंजियाँ शामिल नहीं होतीं।
+स्कोप किए गए एजेंट सत्र कुंजियों जैसे दिखने वाले मान (उदाहरण के लिए
+`agent:` से शुरू होने वाले) कम-कार्डिनैलिटी विशेषताओं पर `unknown` से बदल दिए जाते हैं। OTLP लॉग
+रिकॉर्ड डिफ़ॉल्ट रूप से गंभीरता, लॉगर, कोड स्थान, विश्वसनीय ट्रेस संदर्भ और
+सैनिटाइज़ की गई विशेषताएँ बनाए रखते हैं; कच्ची लॉग संदेश बॉडी केवल
+तभी निर्यात की जाती है, जब `diagnostics.otel.captureContent` बूलियन `true` हो। सूक्ष्म
+`captureContent.*` उपकुंजियाँ कभी भी लॉग बॉडी सक्षम नहीं करतीं। Talk मेट्रिक्स केवल
+सीमित इवेंट मेटाडेटा (मोड, ट्रांसपोर्ट, प्रोवाइडर, इवेंट प्रकार) निर्यात करते हैं—कोई
+ट्रांसक्रिप्ट, ऑडियो पेलोड, सत्र आईडी, टर्न आईडी, कॉल आईडी, रूम आईडी या
+हैंडऑफ़ टोकन नहीं।
 
-Outbound model requests में W3C `traceparent` header शामिल हो सकता है। वह header केवल active model call के लिए OpenClaw-owned diagnostic trace context से generate होता है। Existing caller-supplied `traceparent` headers replace कर दिए जाते हैं, इसलिए plugins या custom provider options cross-service trace ancestry spoof नहीं कर सकते।
+आउटबाउंड मॉडल अनुरोधों में एक W3C `traceparent` हेडर शामिल हो सकता है, जो केवल
+सक्रिय मॉडल कॉल के लिए OpenClaw-स्वामित्व वाले डायग्नोस्टिक ट्रेस संदर्भ से जनरेट होता है।
+कॉलर द्वारा पहले से दिए गए `traceparent` हेडर बदल दिए जाते हैं, इसलिए plugins या
+कस्टम प्रोवाइडर विकल्प क्रॉस-सर्विस ट्रेस वंशावली की जालसाज़ी नहीं कर सकते।
 
-`diagnostics.otel.captureContent.*` को `true` पर केवल तब set करें जब आपका collector और retention policy prompt, response, tool, या system-prompt text के लिए approved हों। प्रत्येक subkey स्वतंत्र रूप से opt-in है:
+`diagnostics.otel.captureContent.*` को `true` पर केवल तभी सेट करें, जब आपका कलेक्टर
+और अवधारण नीति प्रॉम्प्ट, प्रतिक्रिया, टूल या
+सिस्टम-प्रॉम्प्ट टेक्स्ट के लिए अनुमोदित हो। प्रत्येक उपकुंजी स्वतंत्र है:
 
-- `inputMessages` - user prompt content.
-- `outputMessages` - model response content.
-- `toolInputs` - tool argument payloads.
-- `toolOutputs` - tool result payloads.
-- `systemPrompt` - assembled system/developer prompt.
-- `toolDefinitions` - model tool names, descriptions, और schemas.
+- `inputMessages` - उपयोगकर्ता प्रॉम्प्ट सामग्री।
+- `outputMessages` - मॉडल प्रतिक्रिया सामग्री।
+- `toolInputs` - टूल तर्क पेलोड।
+- `toolOutputs` - टूल परिणाम पेलोड।
+- `systemPrompt` - संयोजित सिस्टम/डेवलपर प्रॉम्प्ट।
+- `toolDefinitions` - मॉडल टूल के नाम, विवरण और स्कीमा।
 
-जब कोई subkey enabled होता है, तो model और tool spans को केवल उस class के लिए bounded, redacted `openclaw.content.*` attributes मिलते हैं। Boolean `captureContent: true` केवल व्यापक diagnostics captures के लिए use करें जहां OTLP log message bodies भी export के लिए approved हों।
+जब कोई उपकुंजी सक्षम होती है, तब मॉडल और टूल स्पैन को केवल उस वर्ग के लिए सीमित, संशोधित
+`openclaw.content.*` विशेषताएँ मिलती हैं।
 
-`toolInputs`/`toolOutputs` content built-in agent runtime के tool executions के लिए capture होता है (completed/error spans पर `openclaw.content.tool_input`, completed spans पर `openclaw.content.tool_output`)। External harness tool calls (Codex, Claude CLI) content payloads के बिना `tool.execution.*` spans emit करते हैं। Captured content trusted, listener-only channel पर travel करता है और public diagnostic event bus पर कभी placed नहीं किया जाता।
+<Note>
+बूलियन `captureContent: true`, `inputMessages`, `outputMessages`, `toolInputs`, `toolOutputs`, `toolDefinitions` और OTLP लॉग बॉडी को एक साथ सक्षम करता है, लेकिन `systemPrompt` को **नहीं**—यदि आपको संयोजित सिस्टम प्रॉम्प्ट भी चाहिए, तो `captureContent.systemPrompt: true` को स्पष्ट रूप से सेट करें।
+</Note>
 
-## Sampling और flushing
+`toolInputs`/`toolOutputs` सामग्री बिल्ट-इन एजेंट
+रनटाइम के टूल निष्पादनों के लिए कैप्चर की जाती है (पूर्ण/त्रुटि स्पैन पर `openclaw.content.tool_input` और
+`gen_ai.tool.call.arguments`;
+पूर्ण स्पैन पर `openclaw.content.tool_output` और `gen_ai.tool.call.result`)।
+`openclaw.content.*` नाम स्थिर OpenClaw विशेषता
+नाम बने रहते हैं; `gen_ai.tool.call.*` प्रतियाँ semconv-मूल व्यूअर के लिए उन्हें मिरर करती हैं।
+बाहरी हार्नेस टूल कॉल (Codex, Claude CLI)
+सामग्री पेलोड के बिना `tool.execution.*` स्पैन उत्सर्जित करते हैं। कैप्चर की गई सामग्री एक
+विश्वसनीय, केवल-लिसनर चैनल पर जाती है और उसे कभी भी सार्वजनिक डायग्नोस्टिक इवेंट
+बस पर नहीं रखा जाता।
 
-- **ट्रेस:** `diagnostics.otel.sampleRate` (केवल root-span, `0.0` सब हटाता है,
-  `1.0` सब रखता है)।
-- **मेट्रिक्स:** `diagnostics.otel.flushIntervalMs` (न्यूनतम `1000`)।
-- **लॉग:** OTLP लॉग `logging.level` (फ़ाइल लॉग स्तर) का सम्मान करते हैं। वे
-  डायग्नोस्टिक log-record रिडैक्शन पथ का उपयोग करते हैं, कंसोल फ़ॉर्मैटिंग का नहीं। उच्च-वॉल्यूम
-  इंस्टॉल को स्थानीय सैंपलिंग के बजाय OTLP कलेक्टर सैंपलिंग/फ़िल्टरिंग को प्राथमिकता देनी चाहिए।
-  जब आपका प्लेटफ़ॉर्म पहले से stdout/stderr को लॉग प्रोसेसर तक भेजता है और आपके पास OTLP लॉग
+## सैंपलिंग और फ्लशिंग
+
+- **ट्रेस:** `diagnostics.otel.sampleRate` केवल रूट स्पैन पर एक `TraceIdRatioBasedSampler`
+  सेट करता है (`0.0` सभी को हटा देता है, `1.0` सभी को रखता है)। सेट न होने पर
+  OpenTelemetry SDK का डिफ़ॉल्ट (हमेशा चालू) उपयोग होता है।
+- **मेट्रिक्स:** `diagnostics.otel.flushIntervalMs` (न्यूनतम
+  `1000` तक सीमित); सेट न होने पर SDK के आवधिक-निर्यात डिफ़ॉल्ट का उपयोग होता है।
+- **लॉग:** OTLP लॉग `logging.level` (फ़ाइल लॉग स्तर) का पालन करते हैं और
+  कंसोल फ़ॉर्मैटिंग के बजाय डायग्नोस्टिक लॉग-रिकॉर्ड रिडैक्शन पथ का उपयोग करते हैं। अधिक मात्रा वाले
+  इंस्टॉलेशन में स्थानीय सैंपलिंग के बजाय OTLP कलेक्टर सैंपलिंग/फ़िल्टरिंग को
+  प्राथमिकता देनी चाहिए। जब आपका प्लेटफ़ॉर्म
+  पहले से stdout/stderr को किसी लॉग प्रोसेसर को भेजता है और आपके पास कोई OTLP लॉग
   कलेक्टर नहीं है, तब `diagnostics.otel.logsExporter: "stdout"` सेट करें। Stdout रिकॉर्ड प्रति पंक्ति एक JSON ऑब्जेक्ट होते हैं, जिनमें `ts`, `signal`,
-  `service.name`, severity, body, रिडैक्ट किए गए attributes, और उपलब्ध होने पर विश्वसनीय trace fields
-  होते हैं।
-- **फ़ाइल-लॉग सहसंबंध:** JSONL फ़ाइल लॉग में शीर्ष-स्तरीय `traceId`,
-  `spanId`, `parentSpanId`, और `traceFlags` शामिल होते हैं, जब लॉग कॉल में मान्य
-  डायग्नोस्टिक trace context होता है, जिससे लॉग प्रोसेसर स्थानीय लॉग पंक्तियों को
-  एक्सपोर्ट किए गए spans से जोड़ सकते हैं।
-- **अनुरोध सहसंबंध:** Gateway HTTP अनुरोध और WebSocket frames एक
-  आंतरिक request trace scope बनाते हैं। उस scope के भीतर लॉग और डायग्नोस्टिक events
-  डिफ़ॉल्ट रूप से request trace विरासत में लेते हैं, जबकि agent run और model-call spans
-  children के रूप में बनाए जाते हैं ताकि provider `traceparent` headers उसी trace पर रहें।
-- **Model-call सहसंबंध:** `openclaw.model.call` spans डिफ़ॉल्ट रूप से सुरक्षित prompt
-  component sizes शामिल करते हैं और जब provider result usage उजागर करता है तब per-call token attributes
-  शामिल करते हैं। `openclaw.model.usage` aggregate cost, context, और channel dashboards के लिए
-  run-level accounting span बना रहता है; जब emitting runtime के पास विश्वसनीय trace
-  context होता है, तब यह उसी diagnostic trace पर रहता है।
+  `service.name`, गंभीरता, मुख्य सामग्री, रिडैक्ट किए गए एट्रिब्यूट और उपलब्ध होने पर विश्वसनीय ट्रेस
+  फ़ील्ड होते हैं।
+- **फ़ाइल-लॉग सहसंबंध:** जब लॉग कॉल में मान्य
+  डायग्नोस्टिक ट्रेस संदर्भ होता है, तब JSONL फ़ाइल लॉग में शीर्ष-स्तरीय `traceId`,
+  `spanId`, `parentSpanId` और `traceFlags` शामिल होते हैं, जिससे लॉग प्रोसेसर स्थानीय लॉग पंक्तियों को
+  निर्यात किए गए स्पैन से जोड़ सकते हैं।
+- **अनुरोध सहसंबंध:** Gateway HTTP अनुरोध और WebSocket फ़्रेम
+  एक आंतरिक अनुरोध ट्रेस स्कोप बनाते हैं। उस स्कोप के भीतर लॉग और डायग्नोस्टिक इवेंट
+  डिफ़ॉल्ट रूप से अनुरोध ट्रेस प्राप्त करते हैं, जबकि एजेंट रन और मॉडल-कॉल
+  स्पैन चाइल्ड के रूप में बनाए जाते हैं, ताकि प्रोवाइडर के `traceparent` हेडर उसी
+  ट्रेस पर रहें।
+- **मॉडल-कॉल सहसंबंध:** `openclaw.model.call` स्पैन में डिफ़ॉल्ट रूप से सुरक्षित प्रॉम्प्ट
+  घटक आकार और, प्रोवाइडर परिणाम में उपयोग उपलब्ध होने पर, प्रति-कॉल टोकन एट्रिब्यूट शामिल होते हैं। `openclaw.model.usage` समग्र लागत, संदर्भ और चैनल डैशबोर्ड के लिए रन-स्तरीय
+  लेखांकन स्पैन बना रहता है और उत्सर्जन करने वाले रनटाइम में विश्वसनीय
+  ट्रेस संदर्भ होने पर उसी डायग्नोस्टिक ट्रेस पर रहता है।
 
-## एक्सपोर्ट किए गए मेट्रिक्स
+### मॉडल-कॉल अवलोकन इकाइयाँ
 
-### Model usage
+प्रत्येक `openclaw.model.call` स्पैन `openclaw.model_call.observation_unit` के माध्यम से बताता है कि उसका जीवनचक्र क्या मापता है:
 
-- `openclaw.tokens` (काउंटर, attrs: `openclaw.token`, `openclaw.channel`, `openclaw.provider`, `openclaw.model`, `openclaw.agent`)
-- `openclaw.cost.usd` (काउंटर, attrs: `openclaw.channel`, `openclaw.provider`, `openclaw.model`)
-- `openclaw.run.duration_ms` (हिस्टोग्राम, attrs: `openclaw.channel`, `openclaw.provider`, `openclaw.model`)
-- `openclaw.context.tokens` (हिस्टोग्राम, attrs: `openclaw.context`, `openclaw.channel`, `openclaw.provider`, `openclaw.model`)
-- `gen_ai.client.token.usage` (हिस्टोग्राम, GenAI semantic-conventions metric, attrs: `gen_ai.token.type` = `input`/`output`, `gen_ai.provider.name`, `gen_ai.operation.name`, `gen_ai.request.model`)
-- `gen_ai.client.operation.duration` (हिस्टोग्राम, सेकंड, GenAI semantic-conventions metric, attrs: `gen_ai.provider.name`, `gen_ai.operation.name`, `gen_ai.request.model`, वैकल्पिक `error.type`)
-- `openclaw.model_call.duration_ms` (हिस्टोग्राम, attrs: `openclaw.provider`, `openclaw.model`, `openclaw.api`, `openclaw.transport`, साथ में वर्गीकृत त्रुटियों पर `openclaw.errorCategory` और `openclaw.failureKind`)
-- `openclaw.model_call.request_bytes` (हिस्टोग्राम, अंतिम model request payload का UTF-8 byte size; कोई raw payload content नहीं)
-- `openclaw.model_call.response_bytes` (हिस्टोग्राम, streamed response chunk payloads का UTF-8 byte size; high-frequency text, thinking, और tool-call deltas केवल incremental `delta` bytes गिनते हैं; कोई raw response content नहीं)
-- `openclaw.model_call.time_to_first_byte_ms` (हिस्टोग्राम, पहले streamed response event से पहले बीता समय)
-- `openclaw.model.failover` (काउंटर, attrs: `openclaw.provider`, `openclaw.model`, `openclaw.failover.to_provider`, `openclaw.failover.to_model`, `openclaw.failover.reason`, `openclaw.failover.suspended`, `openclaw.lane`)
-- `openclaw.skill.used` (काउंटर, attrs: `openclaw.skill.name`, `openclaw.skill.source`, `openclaw.skill.activation`, वैकल्पिक `openclaw.agent`, वैकल्पिक `openclaw.toolName`)
+- `request` - एक अवलोकनीय मॉडल/प्रोवाइडर अनुरोध। मूल एम्बेडेड मॉडल
+  कॉल इस इकाई का उपयोग करते हैं, और पुराने या बाहरी उत्सर्जकों के साथ
+  संगतता के लिए निर्यातक अनुपस्थित मान को `request` मानते हैं।
+- `turn` - एक अपारदर्शी एजेंट CLI टर्न, जिसमें छिपे हुए मॉडल अनुरोध,
+  पुनः प्रयास, टूल कार्य या पृष्ठभूमि कार्य हो सकते हैं। Claude Code CLI और Codex ऐप-सर्वर
+  कॉल इस इकाई का उपयोग करते हैं।
+
+दोनों इकाइयाँ मॉडल-कॉल स्पैन बनी रहती हैं, ताकि ट्रेस बैकएंड मॉडल इनपुट,
+आउटपुट, उपयोग और पदानुक्रम प्रदर्शित कर सकें। अनुरोध स्पैन API से प्राप्त GenAI ऑपरेशन
+(`chat`, `generate_content` या `text_completion`) का उपयोग करते हैं, जबकि टर्न स्पैन
+`gen_ai.operation.name = invoke_agent` का उपयोग करते हैं। दोनों
+`gen_ai.client.operation.duration` में योगदान देते हैं, जहाँ ऑपरेशन नाम प्रत्यक्ष
+अनुरोध विलंबता को पूर्ण-टर्न विलंबता से अलग रखता है। OpenClaw के OTEL मॉडल-कॉल
+मेट्रिक्स में `openclaw.model_call.observation_unit` भी शामिल है; Prometheus
+मॉडल-कॉल मेट्रिक्स समतुल्य `observation_unit` लेबल प्रदर्शित करते हैं।
+
+### Claude Code CLI मॉडल-कॉल निष्ठा
+
+Claude Code CLI टर्न एक संश्लेषित, टर्न-स्तरीय `openclaw.model.call`
+स्पैन उत्सर्जित करते हैं। ये Anthropic HTTP अनुरोध स्पैन नहीं हैं। वे `openclaw.api =
+claude-code`, `openclaw.model_call.observation_unit = turn` का उपयोग करते हैं और
+ऑपरेशन की पहचान `gen_ai.operation.name = invoke_agent` के रूप में करते हैं। वे
+`openclaw.transport` के माध्यम से OpenClaw की CLI सीमा की पहचान करते हैं:
+
+- `stdio` - एक बार चलने वाली स्थानीय Claude Code प्रक्रिया।
+- `stdio-live` - प्रबंधित स्थायी Claude stdio सत्र में एक टर्न।
+- `paired-node-cli` - युग्मित
+  Node को सौंपा गया एक बार का Claude Code निष्पादन।
+
+Claude CLI डायग्नोस्टिक्स केवल तभी इंस्टैंशिएट होते हैं, जब प्रक्रिया डायग्नोस्टिक
+डिस्पैचर सक्षम हो और कोई आंतरिक या विश्वसनीय इवेंट लिसनर संलग्न हो।
+कोई ऑब्ज़र्वेबिलिटी Plugin या अन्य लिसनर सक्रिय न होने पर Claude CLI टर्न
+संश्लेषित ट्रेस पदानुक्रम, सामग्री बफ़र और डायग्नोस्टिक स्ट्रीम-बाइट
+लेखांकन छोड़ देते हैं। सामग्री कैप्चर सक्षम होने पर प्रॉम्प्ट और सिस्टम-प्रॉम्प्ट फ़ील्ड
+प्रत्येक अधिकतम 128 KiB तक सीमित होते हैं; असिस्टेंट आउटपुट अधिकतम 200 एनवेलप में कुल 128 KiB तक
+सीमित होता है, जिसमें अंतिम दृश्यमान फ़ॉलबैक
+प्रतिक्रिया के लिए 16 KiB और एक आइटम आरक्षित रहता है। सीमा पूरी होने पर एक मार्कर ट्रंकेशन दर्ज करता है।
+
+OpenClaw, Claude CLI टर्न को वही स्वामित्व पदानुक्रम देता है जो अन्य
+एजेंट रनटाइम उपयोग करते हैं: `openclaw.harness.run` (`openclaw.harness.id = claude-cli`)
+में `openclaw.run` होता है, जिसमें Claude का `openclaw.model.call`
+स्पैन होता है। हार्नेस और रन स्पैन संश्लेषित OpenClaw टर्न सीमाएँ हैं, न कि
+Claude Code के आंतरिक चरण। एक बार चलने वाले और प्रबंधित stdio टर्न समान
+पदानुक्रम का उपयोग करते हैं; वास्तविक नए-सत्र का पुनः प्रयास उसी OpenClaw रन के भीतर
+एक और मॉडल-कॉल चाइल्ड बनाता है।
+
+स्पैन तब शुरू होता है जब OpenClaw तैयार CLI टर्न को स्वीकार करता है और केवल
+उस टर्न की सफलता या विफलता के बाद समाप्त होता है। प्रबंधित सत्रों में, जब Claude परिणाम रोके रखने वाले पृष्ठभूमि एजेंट या
+वर्कफ़्लो की रिपोर्ट करता है, तब अंतरिम सफल परिणाम
+स्पैन समाप्त नहीं करता; ड्रेन के बाद का अंतिम परिणाम ऐसा करता है। निरस्तीकरण, टाइमआउट, प्रक्रिया विफलता,
+आउटपुट/पार्स विफलता और अन्य टर्न विफलताएँ उसी स्पैन को त्रुटि के साथ समाप्त करती हैं।
+
+Claude Code प्रति-असिस्टेंट-संदेश उपयोग की रिपोर्ट करता है और अपने टर्मिनल परिणाम पर संचयी
+उपयोग की रिपोर्ट भी कर सकता है। OpenClaw उत्तर लेखांकन अंतिम असिस्टेंट संदेश का उपयोग
+जारी रखता है, ताकि मौजूदा लागत अर्थविज्ञान न बदले; टर्न-स्तरीय मॉडल-कॉल स्पैन उपलब्ध होने पर
+टर्मिनल संचयी उपयोग का उपयोग करता है, जिसमें कैश-पठन और कैश-निर्माण टोकन शामिल हैं।
+
+इन CLI स्पैन के लिए बाइट और समय फ़ील्ड अवलोकनीय OpenClaw
+CLI सीमा का वर्णन करते हैं:
+
+- `openclaw.model_call.request_bytes` एक बार चलने वाले stdin/argv पर भेजे गए प्रॉम्प्ट मान
+  या प्रबंधित stdio JSONL उपयोगकर्ता एनवेलप का UTF-8 आकार है। यह
+  Claude Code के छिपे हुए मॉडल अनुरोध का आकार नहीं है।
+- `openclaw.model_call.response_bytes` टर्न के दौरान देखे गए Claude CLI stdout का UTF-8 आकार
+  है। यह Anthropic HTTP प्रतिक्रिया का आकार नहीं है।
+- `openclaw.model_call.time_to_first_byte_ms` पहले अवलोकनीय
+  Claude CLI stdout या stderr आउटपुट तक का समय है। यह नेटवर्क TTFB नहीं है।
+
+मेल खाते सूक्ष्म `captureContent` फ़ील्ड सक्षम होने पर स्पैन
+OpenClaw द्वारा Claude Code को भेजा गया प्रभावी प्रॉम्प्ट, OpenClaw का जोड़ा गया सिस्टम
+प्रॉम्प्ट और दृश्यमान असिस्टेंट पाठ/रीज़निंग/टूल-कॉल पहचान
+`gen_ai.input.messages`, `gen_ai.output.messages` और
+`gen_ai.system_instructions` के माध्यम से निर्यात करता है। टूल आर्ग्युमेंट, अपारदर्शी थिंकिंग सिग्नेचर और
+टूल परिणाम Claude असिस्टेंट एनवेलप से बाहर रखे जाते हैं। OpenClaw
+Claude Code के निजी सिस्टम प्रॉम्प्ट, छिपे हुए पुनः आरंभ या
+Compaction किए गए अनुरोध पेलोड, मूल आंतरिक टूल स्कीमा, कच्चे Anthropic HTTP
+अनुरोध, आंतरिक पुनः प्रयास, अपस्ट्रीम अनुरोध आईडी या वास्तविक नेटवर्क TTFB तक पहुँच का दावा नहीं करता। चूँकि
+Claude Code अपनी प्रभावी मूल टूल परिभाषाएँ सटीक रूप से प्रदर्शित नहीं करता,
+ये स्पैन `gen_ai.tool.definitions` को पॉप्युलेट नहीं करते।
+
+बाहरी Claude हार्नेस टूल स्पैन, टूल सामग्री
+कैप्चर सक्षम होने पर भी, केवल मेटाडेटा बने रहते हैं। प्रत्येक मॉडल स्पैन की तरह कैप्चर की गई Claude CLI सामग्री
+केवल विश्वसनीय लिसनर वाले पथ और निर्यातक की मौजूदा रिडैक्शन तथा आकार
+सीमाओं का उपयोग करती है; सामग्री डिफ़ॉल्ट रूप से बंद रहती है।
+
+## निर्यात किए गए मेट्रिक्स
+
+### मॉडल उपयोग
+
+- `openclaw.tokens` (काउंटर, एट्रिब्यूट: `openclaw.token`, `openclaw.channel`, `openclaw.provider`, `openclaw.model`, `openclaw.agent`)
+- `openclaw.cost.usd` (काउंटर, एट्रिब्यूट: `openclaw.channel`, `openclaw.provider`, `openclaw.model`)
+- `openclaw.run.duration_ms` (हिस्टोग्राम, एट्रिब्यूट: `openclaw.channel`, `openclaw.provider`, `openclaw.model`)
+- `openclaw.context.tokens` (हिस्टोग्राम, एट्रिब्यूट: `openclaw.context`, `openclaw.channel`, `openclaw.provider`, `openclaw.model`)
+- `gen_ai.client.token.usage` (हिस्टोग्राम, GenAI सिमेंटिक-कन्वेंशन मेट्रिक, एट्रिब्यूट: `gen_ai.token.type` = `input`/`output`, `gen_ai.provider.name`, `gen_ai.operation.name`, `gen_ai.request.model`)
+- `gen_ai.client.operation.duration` (हिस्टोग्राम, सेकंड, मॉडल अनुरोधों और संश्लेषित एजेंट टर्न के लिए GenAI सिमेंटिक-कन्वेंशन मेट्रिक; एट्रिब्यूट: `gen_ai.provider.name`, `gen_ai.operation.name`, `gen_ai.request.model`, वैकल्पिक `error.type`; टर्न अवलोकन `gen_ai.operation.name = invoke_agent` का उपयोग करते हैं)
+- `openclaw.model_call.duration_ms` (हिस्टोग्राम, एट्रिब्यूट: `openclaw.provider`, `openclaw.model`, `openclaw.api`, `openclaw.transport`, `openclaw.model_call.observation_unit`, साथ ही वर्गीकृत त्रुटियों पर `openclaw.errorCategory` और `openclaw.failureKind`)
+- `openclaw.model_call.request_bytes` (हिस्टोग्राम, अंतिम मॉडल अनुरोध पेलोड का UTF-8 बाइट आकार; Claude Code CLI के लिए ऊपर वर्णित अवलोकनीय प्रॉम्प्ट इनपुट/एनवेलप; कोई कच्ची पेलोड सामग्री नहीं)
+- `openclaw.model_call.response_bytes` (हिस्टोग्राम, स्ट्रीम किए गए प्रतिक्रिया चंक पेलोड का UTF-8 बाइट आकार; उच्च-आवृत्ति पाठ, थिंकिंग और टूल-कॉल डेल्टा केवल वृद्धिशील `delta` बाइट गिनते हैं; Claude Code CLI के लिए देखे गए stdout बाइट; कोई कच्ची प्रतिक्रिया सामग्री नहीं)
+- `openclaw.model_call.time_to_first_byte_ms` (हिस्टोग्राम, पहले स्ट्रीम किए गए प्रतिक्रिया इवेंट से पहले बीता समय; Claude Code CLI के लिए नेटवर्क TTFB के बजाय पहला अवलोकनीय CLI आउटपुट)
+- `openclaw.model.failover` (काउंटर, एट्रिब्यूट: `openclaw.provider`, `openclaw.model`, `openclaw.failover.to_provider`, `openclaw.failover.to_model`, `openclaw.failover.reason`, `openclaw.failover.suspended`, `openclaw.lane`)
+- `openclaw.skill.used` (काउंटर, एट्रिब्यूट: `openclaw.skill.name`, `openclaw.skill.source`, `openclaw.skill.activation`, वैकल्पिक `openclaw.agent`, वैकल्पिक `openclaw.toolName`)
 
 ### संदेश प्रवाह
 
-- `openclaw.webhook.received` (काउंटर, attrs: `openclaw.channel`, `openclaw.webhook`)
-- `openclaw.webhook.error` (काउंटर, attrs: `openclaw.channel`, `openclaw.webhook`)
-- `openclaw.webhook.duration_ms` (हिस्टोग्राम, attrs: `openclaw.channel`, `openclaw.webhook`)
-- `openclaw.message.queued` (काउंटर, attrs: `openclaw.channel`, `openclaw.source`)
-- `openclaw.message.received` (काउंटर, attrs: `openclaw.channel`, `openclaw.source`)
-- `openclaw.message.dispatch.started` (काउंटर, attrs: `openclaw.channel`, `openclaw.source`)
-- `openclaw.message.dispatch.completed` (काउंटर, attrs: `openclaw.channel`, `openclaw.outcome`, `openclaw.reason`, `openclaw.source`)
-- `openclaw.message.dispatch.duration_ms` (हिस्टोग्राम, attrs: `openclaw.channel`, `openclaw.outcome`, `openclaw.reason`, `openclaw.source`)
-- `openclaw.message.processed` (काउंटर, attrs: `openclaw.channel`, `openclaw.outcome`)
-- `openclaw.message.duration_ms` (हिस्टोग्राम, attrs: `openclaw.channel`, `openclaw.outcome`)
-- `openclaw.message.delivery.started` (काउंटर, attrs: `openclaw.channel`, `openclaw.delivery.kind`)
-- `openclaw.message.delivery.duration_ms` (हिस्टोग्राम, attrs: `openclaw.channel`, `openclaw.delivery.kind`, `openclaw.outcome`, `openclaw.errorCategory`)
+- `openclaw.webhook.received` (काउंटर, एट्रिब्यूट: `openclaw.channel`, `openclaw.webhook`)
+- `openclaw.webhook.error` (काउंटर, एट्रिब्यूट: `openclaw.channel`, `openclaw.webhook`)
+- `openclaw.webhook.duration_ms` (हिस्टोग्राम, एट्रिब्यूट: `openclaw.channel`, `openclaw.webhook`)
+- `openclaw.message.queued` (काउंटर, एट्रिब्यूट: `openclaw.channel`, `openclaw.source`)
+- `openclaw.message.received` (काउंटर, एट्रिब्यूट: `openclaw.channel`, `openclaw.source`)
+- `openclaw.message.dispatch.started` (काउंटर, एट्रिब्यूट: `openclaw.channel`, `openclaw.source`)
+- `openclaw.message.dispatch.completed` (काउंटर, एट्रिब्यूट: `openclaw.channel`, `openclaw.outcome`, `openclaw.reason`, `openclaw.source`)
+- `openclaw.message.dispatch.duration_ms` (हिस्टोग्राम, एट्रिब्यूट: `openclaw.channel`, `openclaw.outcome`, `openclaw.reason`, `openclaw.source`)
+- `openclaw.message.processed` (काउंटर, एट्रिब्यूट: `openclaw.channel`, `openclaw.outcome`)
+- `openclaw.message.duration_ms` (हिस्टोग्राम, एट्रिब्यूट: `openclaw.channel`, `openclaw.outcome`)
+- `openclaw.message.delivery.started` (काउंटर, एट्रिब्यूट: `openclaw.channel`, `openclaw.delivery.kind`)
+- `openclaw.message.delivery.duration_ms` (हिस्टोग्राम, एट्रिब्यूट: `openclaw.channel`, `openclaw.delivery.kind`, `openclaw.outcome`, `openclaw.errorCategory`)
 
-### बातचीत
+### वार्ता
 
-- `openclaw.talk.event` (काउंटर, attrs: `openclaw.talk.event_type`, `openclaw.talk.mode`, `openclaw.talk.transport`, `openclaw.talk.brain`, `openclaw.talk.provider`)
-- `openclaw.talk.event.duration_ms` (हिस्टोग्राम, attrs: `openclaw.talk.event` जैसा ही; तब emit होता है जब कोई Talk event अवधि रिपोर्ट करता है)
-- `openclaw.talk.audio.bytes` (हिस्टोग्राम, attrs: `openclaw.talk.event` जैसा ही; byte length रिपोर्ट करने वाले Talk audio frame events के लिए emit होता है)
+- `openclaw.talk.event` (काउंटर, एट्रिब्यूट: `openclaw.talk.event_type`, `openclaw.talk.mode`, `openclaw.talk.transport`, `openclaw.talk.brain`, `openclaw.talk.provider`)
+- `openclaw.talk.event.duration_ms` (हिस्टोग्राम, एट्रिब्यूट: `openclaw.talk.event` के समान; जब कोई वार्ता इवेंट अवधि की रिपोर्ट करता है, तब उत्सर्जित)
+- `openclaw.talk.audio.bytes` (हिस्टोग्राम, एट्रिब्यूट: `openclaw.talk.event` के समान; बाइट लंबाई की रिपोर्ट करने वाले वार्ता ऑडियो फ़्रेम इवेंट के लिए उत्सर्जित)
 
-### कतारें और sessions
+### कतारें और सत्र
 
-- `openclaw.queue.lane.enqueue` (काउंटर, attrs: `openclaw.lane`)
-- `openclaw.queue.lane.dequeue` (काउंटर, attrs: `openclaw.lane`)
-- `openclaw.queue.depth` (हिस्टोग्राम, attrs: `openclaw.lane` या `openclaw.channel=heartbeat`)
-- `openclaw.queue.wait_ms` (हिस्टोग्राम, attrs: `openclaw.lane`)
-- `openclaw.session.state` (काउंटर, attrs: `openclaw.state`, `openclaw.reason`)
-- `openclaw.session.stuck` (काउंटर, attrs: `openclaw.state`; recoverable stale session bookkeeping के लिए emit होता है)
-- `openclaw.session.stuck_age_ms` (हिस्टोग्राम, attrs: `openclaw.state`; recoverable stale session bookkeeping के लिए emit होता है)
-- `openclaw.session.turn.created` (काउंटर, attrs: `openclaw.agent`, `openclaw.channel`, `openclaw.trigger`)
-- `openclaw.session.recovery.requested` (काउंटर, attrs: `openclaw.state`, `openclaw.action`, `openclaw.active_work_kind`, `openclaw.reason`)
-- `openclaw.session.recovery.completed` (काउंटर, attrs: `openclaw.state`, `openclaw.action`, `openclaw.status`, `openclaw.active_work_kind`, `openclaw.reason`)
-- `openclaw.session.recovery.age_ms` (हिस्टोग्राम, attrs: matching recovery counter जैसा ही)
-- `openclaw.run.attempt` (काउंटर, attrs: `openclaw.attempt`)
+- `openclaw.queue.lane.enqueue` (काउंटर, विशेषताएँ: `openclaw.lane`)
+- `openclaw.queue.lane.dequeue` (काउंटर, विशेषताएँ: `openclaw.lane`)
+- `openclaw.queue.depth` (हिस्टोग्राम, विशेषताएँ: `openclaw.lane` या `openclaw.channel=heartbeat`)
+- `openclaw.queue.wait_ms` (हिस्टोग्राम, विशेषताएँ: `openclaw.lane`)
+- `openclaw.session.state` (काउंटर, विशेषताएँ: `openclaw.state`, `openclaw.reason`)
+- `openclaw.session.stuck` (काउंटर, विशेषताएँ: `openclaw.state`; पुनर्प्राप्ति योग्य पुराने सत्र के लेखांकन के लिए उत्सर्जित)
+- `openclaw.session.stuck_age_ms` (हिस्टोग्राम, विशेषताएँ: `openclaw.state`; पुनर्प्राप्ति योग्य पुराने सत्र के लेखांकन के लिए उत्सर्जित)
+- `openclaw.session.turn.created` (काउंटर, विशेषताएँ: `openclaw.agent`, `openclaw.channel`, `openclaw.trigger`)
+- `openclaw.session.recovery.requested` (काउंटर, विशेषताएँ: `openclaw.state`, `openclaw.action`, `openclaw.active_work_kind`, `openclaw.reason`)
+- `openclaw.session.recovery.completed` (काउंटर, विशेषताएँ: `openclaw.state`, `openclaw.action`, `openclaw.status`, `openclaw.active_work_kind`, `openclaw.reason`)
+- `openclaw.session.recovery.age_ms` (हिस्टोग्राम, विशेषताएँ: संबंधित पुनर्प्राप्ति काउंटर के समान)
+- `openclaw.run.attempt` (काउंटर, विशेषताएँ: `openclaw.attempt`)
 
-### Session liveness telemetry
+### सत्र सक्रियता टेलीमेट्री
 
-`diagnostics.stuckSessionWarnMs` session
-liveness diagnostics के लिए no-progress age threshold है। कोई `processing` session इस threshold की ओर age नहीं करता
-जब तक OpenClaw reply, tool, status, block, या ACP runtime progress देखता है।
-Typing keepalives को progress के रूप में नहीं गिना जाता, इसलिए silent model या harness को
-फिर भी detect किया जा सकता है।
+जब OpenClaw उत्तर, टूल, स्थिति, ब्लॉक या ACP रनटाइम प्रगति देखता है, तब कोई `processing` सत्र अंतर्निहित सक्रियता सीमा की ओर पुराना नहीं होता। टाइपिंग कीपअलाइव को प्रगति नहीं माना जाता, इसलिए मौन मॉडल या हार्नेस का फिर भी पता लगाया जा सकता है।
 
-OpenClaw sessions को उस work के आधार पर वर्गीकृत करता है जिसे वह अब भी observe कर सकता है:
+OpenClaw सत्रों को उस कार्य के आधार पर वर्गीकृत करता है जिसे वह अभी भी देख सकता है:
 
-- `session.long_running`: active embedded work, model calls, या tool calls
-  अब भी progress कर रहे हैं। Owned model calls जो
-  `diagnostics.stuckSessionWarnMs` के बाद भी silent रहते हैं, वे
-  `diagnostics.stuckSessionAbortMs` से पहले भी long-running के रूप में report होते हैं ताकि slow या non-streaming model providers
-  stalled gateway sessions जैसे न दिखें जब तक वे abort-observable रहें।
-- `session.stalled`: active work मौजूद है, लेकिन active run ने
-  हालिया progress report नहीं किया है। Owned model calls `diagnostics.stuckSessionAbortMs` पर या उसके बाद
-  `session.long_running` से `session.stalled` में switch करते हैं; ownerless
-  stale model/tool activity को harmless long-running work नहीं माना जाता।
-  Stalled embedded runs पहले observe-only रहते हैं, फिर
-  `diagnostics.stuckSessionAbortMs` के बाद बिना progress के abort-drain होते हैं ताकि lane के पीछे queued turns resume कर सकें।
-  unset होने पर, abort threshold कम-से-कम 5 minutes और
-  `diagnostics.stuckSessionWarnMs` के 3x की safer
-  extended window पर default होता है।
-- `session.stuck`: बिना active work के stale session bookkeeping, या stale ownerless model/tool activity वाला idle
-  queued session। Recovery gates pass होने के तुरंत बाद यह प्रभावित
-  session lane release करता है।
+- `session.long_running`: सक्रिय एम्बेडेड कार्य, मॉडल कॉल या टूल कॉल
+  अभी भी प्रगति कर रहे हैं। स्वामित्व वाली मौन मॉडल कॉल भी अंतर्निहित निरस्तीकरण सीमा से पहले लंबे समय से चल रही के रूप में रिपोर्ट होती हैं, ताकि धीमे या गैर-स्ट्रीमिंग मॉडल प्रदाता निरस्तीकरण-अवलोकनीय रहने के दौरान रुके हुए Gateway सत्रों जैसे न दिखें।
+- `session.stalled`: सक्रिय कार्य मौजूद है, लेकिन सक्रिय रन ने हाल की
+  प्रगति रिपोर्ट नहीं की है। स्वामित्व वाली मॉडल कॉल अंतर्निहित निरस्तीकरण सीमा पर या उसके बाद `session.long_running` से
+  `session.stalled` पर चली जाती हैं; स्वामी-रहित
+  पुरानी मॉडल/टूल गतिविधि को हानिरहित दीर्घकालिक कार्य नहीं माना जाता।
+  रुके हुए एम्बेडेड रन आरंभ में केवल-अवलोकन स्थिति में रहते हैं, फिर
+  बिना प्रगति के निरस्तीकरण सीमा के बाद निरस्त होकर निकासी करते हैं, ताकि लेन में उनके पीछे कतारबद्ध टर्न फिर से शुरू हो सकें।
+- `session.stuck`: बिना किसी सक्रिय कार्य वाला पुराना सत्र लेखांकन, या पुरानी
+  स्वामी-रहित मॉडल/टूल गतिविधि वाला निष्क्रिय कतारबद्ध सत्र। पुनर्प्राप्ति गेट पार होते ही यह
+  प्रभावित सत्र लेन को तुरंत मुक्त कर देता है।
 
-Recovery structured `session.recovery.requested` और
-`session.recovery.completed` events emit करता है। Diagnostic session state को idle
-केवल mutating recovery outcome (`aborted` या `released`) के बाद और केवल तब चिह्नित किया जाता है जब
-वही processing generation अब भी current हो।
+पुनर्प्राप्ति संरचित `session.recovery.requested` और
+`session.recovery.completed` इवेंट उत्सर्जित करती है। निदान सत्र स्थिति को निष्क्रिय
+केवल परिवर्तनकारी पुनर्प्राप्ति परिणाम (`aborted` या `released`) के बाद और केवल तभी चिह्नित किया जाता है
+जब वही प्रोसेसिंग जनरेशन अभी भी वर्तमान हो।
 
-केवल `session.stuck` `openclaw.session.stuck` counter,
-`openclaw.session.stuck_age_ms` histogram, और `openclaw.session.stuck`
-span emit करता है। Repeated `session.stuck` diagnostics तब तक back off करते हैं जब तक session
-unchanged रहता है, इसलिए dashboards को हर
-heartbeat tick के बजाय sustained increases पर alert करना चाहिए। Config knob और defaults के लिए,
-[Configuration reference](/hi/gateway/configuration-reference#diagnostics) देखें।
+केवल `session.stuck`, `openclaw.session.stuck` काउंटर,
+`openclaw.session.stuck_age_ms` हिस्टोग्राम और `openclaw.session.stuck`
+स्पैन उत्सर्जित करता है। सत्र के अपरिवर्तित रहने पर दोहराए गए `session.stuck` निदान की आवृत्ति धीरे-धीरे घटती है, इसलिए डैशबोर्ड को
+हर Heartbeat टिक के बजाय निरंतर वृद्धि पर चेतावनी देनी चाहिए। कॉन्फ़िगरेशन विकल्प और डिफ़ॉल्ट के लिए,
+[कॉन्फ़िगरेशन संदर्भ](/hi/gateway/configuration-reference#diagnostics) देखें।
 
-Liveness warnings भी emit करते हैं:
+सक्रियता चेतावनियाँ ये भी उत्सर्जित करती हैं:
 
-- `openclaw.liveness.warning` (काउंटर, attrs: `openclaw.liveness.reason`)
-- `openclaw.liveness.event_loop_delay_p99_ms` (हिस्टोग्राम, attrs: `openclaw.liveness.reason`)
-- `openclaw.liveness.event_loop_delay_max_ms` (हिस्टोग्राम, attrs: `openclaw.liveness.reason`)
-- `openclaw.liveness.event_loop_utilization` (हिस्टोग्राम, attrs: `openclaw.liveness.reason`)
-- `openclaw.liveness.cpu_core_ratio` (हिस्टोग्राम, attrs: `openclaw.liveness.reason`)
+- `openclaw.liveness.warning` (काउंटर, विशेषताएँ: `openclaw.liveness.reason`)
+- `openclaw.liveness.event_loop_delay_p99_ms` (हिस्टोग्राम, विशेषताएँ: `openclaw.liveness.reason`)
+- `openclaw.liveness.event_loop_delay_max_ms` (हिस्टोग्राम, विशेषताएँ: `openclaw.liveness.reason`)
+- `openclaw.liveness.event_loop_utilization` (हिस्टोग्राम, विशेषताएँ: `openclaw.liveness.reason`)
+- `openclaw.liveness.cpu_core_ratio` (हिस्टोग्राम, विशेषताएँ: `openclaw.liveness.reason`)
 
-### Harness lifecycle
+### हार्नेस जीवनचक्र
 
-- `openclaw.harness.duration_ms` (हिस्टोग्राम, attrs: `openclaw.harness.id`, `openclaw.harness.plugin`, `openclaw.outcome`, त्रुटियों पर `openclaw.harness.phase`)
+- `openclaw.harness.duration_ms` (हिस्टोग्राम, विशेषताएँ: `openclaw.harness.id`, `openclaw.harness.plugin`, `openclaw.outcome`, त्रुटियों पर `openclaw.harness.phase`)
 
-### Tool execution
+### टूल निष्पादन और लूप पहचान
 
-- `openclaw.tool.execution.duration_ms` (हिस्टोग्राम, attrs: `gen_ai.tool.name`, `openclaw.toolName`, `openclaw.tool.source`, `openclaw.tool.owner`, `openclaw.tool.params.kind`, साथ में त्रुटियों पर `openclaw.errorCategory`)
-- `openclaw.tool.execution.blocked` (काउंटर, attrs: `gen_ai.tool.name`, `openclaw.toolName`, `openclaw.tool.source`, `openclaw.tool.owner`, `openclaw.tool.params.kind`, `openclaw.deniedReason`)
+- `openclaw.tool.execution.duration_ms` (हिस्टोग्राम, विशेषताएँ: `gen_ai.tool.name`, `openclaw.toolName`, `openclaw.tool.source`, `openclaw.tool.owner`, `openclaw.tool.params.kind`, साथ ही त्रुटियों पर `openclaw.errorCategory`)
+- `openclaw.tool.execution.blocked` (काउंटर, विशेषताएँ: `gen_ai.tool.name`, `openclaw.toolName`, `openclaw.tool.source`, `openclaw.tool.owner`, `openclaw.tool.params.kind`, `openclaw.deniedReason`)
+- `openclaw.tool.loop` (काउंटर, विशेषताएँ: `openclaw.toolName`, `openclaw.loop.level`, `openclaw.loop.action`, `openclaw.loop.detector`, `openclaw.loop.count`, वैकल्पिक `openclaw.loop.paired_tool`; दोहराव वाले टूल-कॉल लूप का पता लगने पर उत्सर्जित)
 
 ### Exec
 
-- `openclaw.exec.duration_ms` (हिस्टोग्राम, attrs: `openclaw.exec.target`, `openclaw.exec.mode`, `openclaw.outcome`, `openclaw.failureKind`)
+- `openclaw.exec.duration_ms` (हिस्टोग्राम, विशेषताएँ: `openclaw.exec.target`, `openclaw.exec.mode`, `openclaw.outcome`, `openclaw.failureKind`)
 
-### Diagnostics internals (memory और tool loop)
+### निदान आंतरिक घटक (मेमोरी, पेलोड, एक्सपोर्टर स्वास्थ्य)
 
-- `openclaw.payload.large` (काउंटर, attrs: `openclaw.payload.surface`, `openclaw.payload.action`, `openclaw.channel`, `openclaw.plugin`, `openclaw.reason`)
-- `openclaw.payload.large_bytes` (हिस्टोग्राम, attrs: `openclaw.payload.large` जैसा ही)
-- `openclaw.memory.heap_used_bytes` (हिस्टोग्राम, attrs: `openclaw.memory.kind`)
-- `openclaw.memory.rss_bytes` (हिस्टोग्राम)
-- `openclaw.memory.pressure` (काउंटर, attrs: `openclaw.memory.level`)
-- `openclaw.tool.loop.iterations` (काउंटर, attrs: `openclaw.toolName`, `openclaw.outcome`)
-- `openclaw.tool.loop.duration_ms` (हिस्टोग्राम, attrs: `openclaw.toolName`, `openclaw.outcome`)
+- `openclaw.payload.large` (काउंटर, विशेषताएँ: `openclaw.payload.surface`, `openclaw.payload.action`, `openclaw.channel`, `openclaw.plugin`, `openclaw.reason`)
+- `openclaw.payload.large_bytes` (हिस्टोग्राम, विशेषताएँ: `openclaw.payload.large` के समान)
+- `openclaw.memory.rss_bytes` / `openclaw.memory.heap_used_bytes` / `openclaw.memory.heap_total_bytes` / `openclaw.memory.external_bytes` / `openclaw.memory.array_buffers_bytes` (हिस्टोग्राम, कोई विशेषता नहीं; प्रोसेस मेमोरी नमूने)
+- `openclaw.memory.pressure` (काउंटर, विशेषताएँ: `openclaw.memory.level`, `openclaw.memory.reason`)
+- `openclaw.diagnostic.async_queue.dropped` (काउंटर, विशेषताएँ: `openclaw.diagnostic.async_queue.drop_class`; आंतरिक निदान-कतार बैकप्रेशर के कारण ड्रॉप)
+- `openclaw.telemetry.exporter.events` (काउंटर, विशेषताएँ: `openclaw.exporter`, `openclaw.signal`, `openclaw.status`, वैकल्पिक `openclaw.reason`, वैकल्पिक `openclaw.errorCategory`; एक्सपोर्टर जीवनचक्र/विफलता स्व-टेलीमेट्री)
 
-## एक्सपोर्ट किए गए spans
+## एक्सपोर्ट किए गए स्पैन
 
 - `openclaw.model.usage`
   - `openclaw.channel`, `openclaw.provider`, `openclaw.model`
-  - `openclaw.tokens.*` (input/output/cache_read/cache_write/total)
-  - डिफ़ॉल्ट रूप से `gen_ai.system`, या जब नवीनतम GenAI सिमैंटिक कन्वेंशन चुने गए हों तब `gen_ai.provider.name`
+  - `openclaw.tokens.*` (इनपुट/आउटपुट/cache_read/cache_write/कुल)
+  - डिफ़ॉल्ट रूप से `gen_ai.system`, या नवीनतम GenAI सिमेंटिक परिपाटियों को चुनने पर `gen_ai.provider.name`
   - `gen_ai.request.model`, `gen_ai.operation.name`, `gen_ai.usage.*`
 - `openclaw.run`
   - `openclaw.outcome`, `openclaw.channel`, `openclaw.provider`, `openclaw.model`, `openclaw.errorCategory`
 - `openclaw.model.call`
-  - डिफ़ॉल्ट रूप से `gen_ai.system`, या जब नवीनतम GenAI सिमैंटिक कन्वेंशन चुने गए हों तब `gen_ai.provider.name`
-  - `gen_ai.request.model`, `gen_ai.operation.name`, `openclaw.provider`, `openclaw.model`, `openclaw.api`, `openclaw.transport`
-  - त्रुटियों पर `openclaw.errorCategory` और वैकल्पिक `openclaw.failureKind`
+  - डिफ़ॉल्ट रूप से `gen_ai.system`, या नवीनतम GenAI सिमेंटिक परिपाटियों को चुनने पर `gen_ai.provider.name`
+  - `gen_ai.request.model`, `gen_ai.operation.name`, `openclaw.provider`, `openclaw.model`, `openclaw.api`, `openclaw.transport`, `openclaw.model_call.observation_unit` (`request` या `turn`)
+  - `openclaw.errorCategory`, `error.type`, और त्रुटियों पर वैकल्पिक `openclaw.failureKind`
   - `openclaw.model_call.request_bytes`, `openclaw.model_call.response_bytes`, `openclaw.model_call.time_to_first_byte_ms`
   - `openclaw.model_call.prompt.input_messages_count`, `openclaw.model_call.prompt.input_messages_chars`, `openclaw.model_call.prompt.system_prompt_chars`, `openclaw.model_call.prompt.tool_definitions_count`, `openclaw.model_call.prompt.tool_definitions_chars`, `openclaw.model_call.prompt.total_chars` (केवल सुरक्षित घटक आकार, कोई प्रॉम्प्ट टेक्स्ट नहीं)
-  - `openclaw.model_call.usage.*` और `gen_ai.usage.*` जब मॉडल-कॉल परिणाम उस अलग कॉल के लिए प्रदाता उपयोग रखता हो
-  - `openclaw.provider.request_id_hash` (अपस्ट्रीम प्रदाता अनुरोध आईडी का सीमित SHA-आधारित हैश; कच्ची आईडी निर्यात नहीं की जातीं)
-  - `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental` के साथ, मॉडल-कॉल स्पैन `openclaw.model.call` के बजाय नवीनतम GenAI inference स्पैन नाम `{gen_ai.operation.name} {gen_ai.request.model}` और `CLIENT` स्पैन प्रकार का उपयोग करते हैं।
+  - जब परिणाम में उस अनुरोध या समग्र टर्न के लिए उपयोग शामिल हो, तब `openclaw.model_call.usage.*` और `gen_ai.usage.*`
+  - जब अपस्ट्रीम प्रदाता परिणाम अनुरोध आईडी दिखाता है, तब विशेषता `openclaw.upstreamRequestIdHash` (सीमित, हैश-आधारित) वाला स्पैन इवेंट `openclaw.provider.request`; अपरिष्कृत आईडी कभी एक्सपोर्ट नहीं किए जाते
+  - `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental` के साथ, अनुरोध स्पैन नवीनतम GenAI इन्फ़रेंस स्पैन नाम `{gen_ai.operation.name} {gen_ai.request.model}` का उपयोग करते हैं। टर्न स्पैन `invoke_agent` का उपयोग करते हैं क्योंकि OpenClaw अपारदर्शी CLI सीमा से किसी मूल एजेंट नाम का दावा नहीं करता। दोनों `openclaw.model.call` के बजाय `CLIENT` स्पैन प्रकार का उपयोग करते हैं।
 - `openclaw.harness.run`
   - `openclaw.harness.id`, `openclaw.harness.plugin`, `openclaw.outcome`, `openclaw.provider`, `openclaw.model`, `openclaw.channel`
-  - पूरा होने पर: `openclaw.harness.result_classification`, `openclaw.harness.yield_detected`, `openclaw.harness.items.started`, `openclaw.harness.items.completed`, `openclaw.harness.items.active`
+  - पूर्ण होने पर: `openclaw.harness.result_classification`, `openclaw.harness.yield_detected`, `openclaw.harness.items.started`, `openclaw.harness.items.completed`, `openclaw.harness.items.active`
   - त्रुटि पर: `openclaw.harness.phase`, `openclaw.errorCategory`, वैकल्पिक `openclaw.harness.cleanup_failed`
 - `openclaw.tool.execution`
-  - `gen_ai.tool.name`, `openclaw.toolName`, `openclaw.errorCategory`, `openclaw.tool.params.*`
+  - `gen_ai.tool.name`, `gen_ai.operation.name` (`execute_tool`), `openclaw.toolName`, `openclaw.tool.source`, वैकल्पिक `gen_ai.tool.call.id`, `openclaw.tool.owner`, `openclaw.tool.params.*`
+  - त्रुटियों पर वैकल्पिक `openclaw.errorCategory`/`openclaw.errorCode`, नीति या सैंडबॉक्स द्वारा अस्वीकृत होने पर `openclaw.deniedReason` और `openclaw.outcome=blocked`
 - `openclaw.exec`
-  - `openclaw.exec.target`, `openclaw.exec.mode`, `openclaw.outcome`, `openclaw.failureKind`, `openclaw.exec.command_length`, `openclaw.exec.exit_code`, `openclaw.exec.timed_out`
+  - `openclaw.exec.target`, `openclaw.exec.mode`, `openclaw.outcome`, `openclaw.failureKind`, `openclaw.exec.command_length`, `openclaw.exec.exit_code`, `openclaw.exec.exit_signal`, `openclaw.exec.timed_out`
 - `openclaw.webhook.processed`
   - `openclaw.channel`, `openclaw.webhook`
 - `openclaw.webhook.error`
@@ -330,27 +450,31 @@ Liveness warnings भी emit करते हैं:
 - `openclaw.session.stuck`
   - `openclaw.state`, `openclaw.ageMs`, `openclaw.queueDepth`
 - `openclaw.context.assembled`
-  - `openclaw.prompt.size`, `openclaw.history.size`, `openclaw.context.tokens`, `openclaw.errorCategory` (कोई प्रॉम्प्ट, इतिहास, प्रतिक्रिया, या सत्र-कुंजी सामग्री नहीं)
+  - `openclaw.prompt.size`, `openclaw.history.size`, `openclaw.context.tokens`, `openclaw.errorCategory` (कोई प्रॉम्प्ट, इतिहास, प्रतिक्रिया या सत्र-कुंजी सामग्री नहीं)
 - `openclaw.tool.loop`
-  - `openclaw.toolName`, `openclaw.outcome`, `openclaw.iterations`, `openclaw.errorCategory` (कोई लूप संदेश, पैरामीटर, या टूल आउटपुट नहीं)
+  - `openclaw.toolName`, `openclaw.loop.level`, `openclaw.loop.action`, `openclaw.loop.detector`, `openclaw.loop.count`, वैकल्पिक `openclaw.loop.paired_tool` (कोई लूप संदेश, पैरामीटर या टूल आउटपुट नहीं)
 - `openclaw.memory.pressure`
-  - `openclaw.memory.level`, `openclaw.memory.heap_used_bytes`, `openclaw.memory.rss_bytes`
+  - `openclaw.memory.level`, `openclaw.memory.reason`, `openclaw.memory.rss_bytes`, `openclaw.memory.heap_used_bytes`, `openclaw.memory.heap_total_bytes`, `openclaw.memory.external_bytes`, `openclaw.memory.array_buffers_bytes`, वैकल्पिक `openclaw.memory.threshold_bytes`/`openclaw.memory.rss_growth_bytes`/`openclaw.memory.window_ms`
 
-जब सामग्री कैप्चर स्पष्ट रूप से सक्षम हो, तो मॉडल और टूल स्पैन उन विशिष्ट
-सामग्री वर्गों के लिए सीमित, रिडैक्ट किए गए `openclaw.content.*` गुण भी
+जब सामग्री कैप्चर स्पष्ट रूप से सक्षम हो, तब मॉडल और टूल स्पैन उन विशिष्ट
+सामग्री वर्गों के लिए सीमित, संशोधित `openclaw.content.*` विशेषताएँ भी
 शामिल कर सकते हैं जिन्हें आपने चुना है।
 
-## निदान इवेंट कैटलॉग
+## निदान इवेंट सूची
 
-नीचे दिए गए इवेंट ऊपर के मेट्रिक और स्पैन का आधार हैं। Plugins सीधे भी
-इनकी सदस्यता ले सकते हैं, OTLP निर्यात के बिना।
+नीचे दिए गए इवेंट ऊपर के मेट्रिक्स और स्पैन का आधार बनते हैं या सीधे
+Plugin सदस्यता के लिए उपलब्ध हैं। `run.progress` और `run.execution_phase` केवल-प्रत्यक्ष
+जीवनचक्र संकेत हैं; diagnostics-otel Plugin उन्हें
+स्वतंत्र OTLP संकेतों के रूप में एक्सपोर्ट नहीं करता। इवेंट प्रकार और `run.execution_phase.phase` मान
+योगात्मक हैं। TypeScript उपभोक्ताओं को किसी भी
+यूनियन को स्थायी रूप से पूर्ण मानने के बजाय डिफ़ॉल्ट शाखाएँ रखनी चाहिए।
 
 **मॉडल उपयोग**
 
 - `model.usage` - टोकन, लागत, अवधि, संदर्भ, प्रदाता/मॉडल/चैनल,
   सत्र आईडी। `usage` लागत और टेलीमेट्री के लिए प्रदाता/टर्न लेखांकन है;
-  `context.used` मौजूदा प्रॉम्प्ट/संदर्भ स्नैपशॉट है और कैश किए गए इनपुट या
-  टूल-लूप कॉल शामिल होने पर प्रदाता `usage.total` से कम हो सकता है।
+  `context.used` वर्तमान प्रॉम्प्ट/संदर्भ स्नैपशॉट है और कैश्ड इनपुट या टूल-लूप कॉल शामिल होने पर
+  प्रदाता `usage.total` से कम हो सकता है।
 
 **संदेश प्रवाह**
 
@@ -363,32 +487,34 @@ Liveness warnings भी emit करते हैं:
 - `queue.lane.enqueue` / `queue.lane.dequeue`
 - `session.state` / `session.long_running` / `session.stalled` / `session.stuck`
 - `run.attempt` / `run.progress`
-- `diagnostic.heartbeat` (समेकित काउंटर: Webhook/कतार/सत्र)
+- `run.execution_phase` (सार्वजनिक, सत्र-सहसंबद्ध एम्बेडेड-रनर स्टार्टअप माइलस्टोन)
+- `diagnostic.heartbeat` (समग्र काउंटर: Webhook/कतार/सत्र)
 
 **हार्नेस जीवनचक्र**
 
 - `harness.run.started` / `harness.run.completed` / `harness.run.error` -
   एजेंट हार्नेस के लिए प्रति-रन जीवनचक्र। इसमें `harnessId`, वैकल्पिक
-  `pluginId`, प्रदाता/मॉडल/चैनल, और रन आईडी शामिल हैं। पूर्णता
+  `pluginId`, प्रदाता/मॉडल/चैनल और रन आईडी शामिल हैं। पूर्णता पर
   `durationMs`, `outcome`, वैकल्पिक `resultClassification`, `yieldDetected`,
-  और `itemLifecycle` काउंट जोड़ती है। त्रुटियां `phase`
+  और `itemLifecycle` गणनाएँ जोड़ी जाती हैं। त्रुटियाँ `phase`
   (`prepare`/`start`/`send`/`resolve`/`cleanup`), `errorCategory`, और
   वैकल्पिक `cleanupFailed` जोड़ती हैं।
 
 **Exec**
 
-- `exec.process.completed` - टर्मिनल परिणाम, अवधि, लक्ष्य, मोड, निकास
-  कोड, और विफलता प्रकार। कमांड टेक्स्ट और कार्यशील निर्देशिकाएं
+- `exec.process.completed` - टर्मिनल परिणाम, अवधि, लक्ष्य, मोड, एग्ज़िट
+  कोड और विफलता का प्रकार। कमांड टेक्स्ट और कार्यशील डायरेक्टरियाँ
   शामिल नहीं हैं।
-- `exec.approval.followup_suppressed` - सत्र रिबाउंड के बाद पुराना अनुमोदन फ़ॉलो-अप छोड़ा गया।
-  इसमें `approvalId`, `reason` (`session_rebound`),
-  `phase` (`direct_delivery` या `gateway_preflight`), और डिस्पैचर
-  टाइमस्टैम्प शामिल हैं। सत्र कुंजियां, रूट, और कमांड टेक्स्ट शामिल नहीं हैं।
+- `exec.approval.followup_suppressed` - सत्र के दोबारा जुड़ने के बाद पुराने अनुमोदन का फ़ॉलो-अप
+  हटा दिया गया। इसमें `approvalId`, `reason`
+  (`session_rebound`), `phase` (`direct_delivery` या `gateway_preflight`),
+  और डिस्पैचर टाइमस्टैम्प शामिल हैं। सत्र कुंजियाँ, रूट और कमांड टेक्स्ट
+  शामिल नहीं हैं।
 
-## निर्यातक के बिना
+## एक्सपोर्टर के बिना
 
-आप `diagnostics-otel` चलाए बिना निदान इवेंट को Plugins या कस्टम सिंक के लिए
-उपलब्ध रख सकते हैं:
+`diagnostics-otel` चलाए बिना डायग्नोस्टिक्स इवेंट को Plugin या कस्टम सिंक के लिए
+उपलब्ध रखें:
 
 ```json5
 {
@@ -396,9 +522,9 @@ Liveness warnings भी emit करते हैं:
 }
 ```
 
-`logging.level` बढ़ाए बिना लक्षित डीबग आउटपुट के लिए, निदान
-फ़्लैग का उपयोग करें। फ़्लैग केस-असंवेदनशील हैं और वाइल्डकार्ड का समर्थन करते हैं (जैसे `telegram.*` या
-`*`):
+`logging.level` बढ़ाए बिना लक्षित डीबग आउटपुट के लिए डायग्नोस्टिक्स
+फ़्लैग का उपयोग करें। फ़्लैग केस-इनसेंसिटिव होते हैं और वाइल्डकार्ड (`telegram.*` या
+`*`) का समर्थन करते हैं:
 
 ```json5
 {
@@ -406,15 +532,15 @@ Liveness warnings भी emit करते हैं:
 }
 ```
 
-या एकबारगी env ओवरराइड के रूप में:
+या एकबारगी एनवायरनमेंट ओवरराइड के रूप में:
 
 ```bash
 OPENCLAW_DIAGNOSTICS=telegram.http,telegram.payload openclaw gateway
 ```
 
 फ़्लैग आउटपुट मानक लॉग फ़ाइल (`logging.file`) में जाता है और फिर भी
-`logging.redactSensitive` द्वारा रिडैक्ट किया जाता है। पूरा मार्गदर्शक:
-[निदान फ़्लैग](/hi/diagnostics/flags)।
+`logging.redactSensitive` द्वारा संपादित किया जाता है। पूरी मार्गदर्शिका:
+[डायग्नोस्टिक्स फ़्लैग](/hi/diagnostics/flags)।
 
 ## अक्षम करें
 
@@ -424,13 +550,13 @@ OPENCLAW_DIAGNOSTICS=telegram.http,telegram.payload openclaw gateway
 }
 ```
 
-आप `diagnostics-otel` को `plugins.allow` से बाहर भी रख सकते हैं, या
-`openclaw plugins disable diagnostics-otel` चला सकते हैं।
+या `plugins.allow` में `diagnostics-otel` को शामिल न करें, अथवा
+`openclaw plugins disable diagnostics-otel` चलाएँ।
 
 ## संबंधित
 
-- [लॉगिंग](/hi/logging) - फ़ाइल लॉग, कंसोल आउटपुट, CLI tailing, और Control UI Logs टैब
-- [Gateway लॉगिंग आंतरिक विवरण](/hi/gateway/logging) - WS लॉग शैलियां, सबसिस्टम उपसर्ग, और कंसोल कैप्चर
-- [निदान फ़्लैग](/hi/diagnostics/flags) - लक्षित डीबग-लॉग फ़्लैग
-- [निदान निर्यात](/hi/gateway/diagnostics) - ऑपरेटर सपोर्ट-बंडल टूल (OTEL निर्यात से अलग)
-- [कॉन्फ़िगरेशन संदर्भ](/hi/gateway/configuration-reference#diagnostics) - पूरा `diagnostics.*` फ़ील्ड संदर्भ
+- [लॉगिंग](/hi/logging) - फ़ाइल लॉग, कंसोल आउटपुट, CLI टेलिंग और Control UI का Logs टैब
+- [Gateway लॉगिंग की आंतरिक कार्यप्रणाली](/hi/gateway/logging) - WS लॉग शैलियाँ, सबसिस्टम प्रीफ़िक्स और कंसोल कैप्चर
+- [डायग्नोस्टिक्स फ़्लैग](/hi/diagnostics/flags) - लक्षित डीबग-लॉग फ़्लैग
+- [डायग्नोस्टिक्स एक्सपोर्ट](/hi/gateway/diagnostics) - ऑपरेटर सपोर्ट-बंडल टूल (OTEL एक्सपोर्ट से अलग)
+- [कॉन्फ़िगरेशन संदर्भ](/hi/gateway/configuration-reference#diagnostics) - `diagnostics.*` फ़ील्ड का पूरा संदर्भ

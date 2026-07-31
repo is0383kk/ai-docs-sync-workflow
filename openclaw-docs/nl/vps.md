@@ -1,22 +1,23 @@
 ---
 read_when:
-    - U wilt de Gateway uitvoeren op een Linux-server of cloud-VPS
+    - Je wilt de Gateway uitvoeren op een Linux-server of cloud-VPS
     - Je hebt een snel overzicht van hostinghandleidingen nodig
-    - U wilt algemene Linux-serveroptimalisatie voor OpenClaw
+    - Je wilt algemene Linux-servertuning voor OpenClaw
 sidebarTitle: Linux Server
-summary: Voer OpenClaw uit op een Linux-server of cloud-VPS — providerselectie, architectuur en optimalisatie
+summary: OpenClaw uitvoeren op een Linux-server of cloud-VPS — providerkeuze, architectuur en optimalisatie
 title: Linux-server
 x-i18n:
-    generated_at: "2026-07-12T09:32:07Z"
+    generated_at: "2026-07-27T05:56:22Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 634a246850ab8b854c2c799688fd368ebed3a02124baa85bf38d5ff6ef8cec64
     source_path: vps.md
     workflow: 16
 ---
 
-Voer de OpenClaw Gateway uit op elke Linux-server of cloud-VPS. Deze pagina helpt u
+Voer de OpenClaw Gateway uit op elke Linux-server of cloud-VPS. Deze pagina helpt je
 een provider te kiezen, legt uit hoe cloudimplementaties werken en behandelt algemene Linux-
 optimalisaties die overal van toepassing zijn.
 
@@ -30,66 +31,66 @@ optimalisaties die overal van toepassing zijn.
   <Card title="GCP" href="/nl/install/gcp">Compute Engine</Card>
   <Card title="Hetzner" href="/nl/install/hetzner">Docker op een Hetzner-VPS</Card>
   <Card title="Hostinger" href="/nl/install/hostinger">VPS met installatie met één klik</Card>
-  <Card title="Northflank" href="/nl/install/northflank">Browserinstallatie met één klik</Card>
-  <Card title="Oracle Cloud" href="/nl/install/oracle">Altijd gratis ARM-niveau</Card>
-  <Card title="Railway" href="/nl/install/railway">Browserinstallatie met één klik</Card>
-  <Card title="Raspberry Pi" href="/nl/install/raspberry-pi">Zelf gehost op ARM</Card>
+  <Card title="Northflank" href="/nl/install/northflank">Installatie met één klik via de browser</Card>
+  <Card title="Oracle Cloud" href="/nl/install/oracle">Always Free ARM-niveau</Card>
+  <Card title="Railway" href="/nl/install/railway">Installatie met één klik via de browser</Card>
+  <Card title="Raspberry Pi" href="/nl/install/raspberry-pi">Zelfgehost op ARM</Card>
 </CardGroup>
 
 **AWS (EC2 / Lightsail / gratis niveau)** werkt ook goed.
-Een videohandleiding van de community is beschikbaar op
+Een stapsgewijze communityvideo is beschikbaar op
 [x.com/techfrenAJ/status/2014934471095812547](https://x.com/techfrenAJ/status/2014934471095812547)
-(communitybron — kan onbeschikbaar worden).
+(communitybron -- kan onbeschikbaar worden).
 
 ## Hoe cloudconfiguraties werken
 
 - De **Gateway draait op de VPS** en beheert de status en werkruimte.
-- U maakt vanaf uw laptop of telefoon verbinding via de **bedieningsinterface** of **Tailscale/SSH**.
-- Beschouw de VPS als de gezaghebbende bron en maak regelmatig een **back-up** van de status en werkruimte.
-- Veilige standaardinstelling: houd de Gateway op local loopback en benader deze via een SSH-tunnel of Tailscale Serve.
-  Als u deze aan `lan` of `tailnet` bindt, vereist de Gateway een gedeeld geheim
-  (`gateway.auth.token` of `gateway.auth.password`), tenzij authenticatie aan een
-  vertrouwde proxy is gedelegeerd.
+- Je maakt vanaf je laptop of telefoon verbinding via de **bedieningsinterface** of **Tailscale/SSH**.
+- Beschouw de VPS als de bron van waarheid en maak regelmatig een **back-up** van de status en werkruimte.
+- Veilige standaardinstelling: houd de Gateway op loopback en open deze via een SSH-tunnel of Tailscale Serve.
+  Als je deze aan `lan` of `tailnet` bindt, vereist de Gateway een gedeeld geheim
+  (`gateway.auth.token` of `gateway.auth.password`), tenzij authenticatie wordt gedelegeerd aan een
+  vertrouwde proxy.
 
 Gerelateerde pagina's: [Externe toegang tot de Gateway](/nl/gateway/remote), [Platformoverzicht](/nl/platforms).
 
 ## Beveilig eerst de beheerderstoegang
 
-Bepaal voordat u OpenClaw op een openbare VPS installeert hoe u
-de machine zelf wilt beheren.
+Bepaal voordat je OpenClaw op een openbare VPS installeert hoe je
+de server zelf wilt beheren.
 
-- Voor beheerderstoegang die uitsluitend via Tailnet verloopt: installeer eerst Tailscale, voeg de VPS toe aan uw
-  tailnet, controleer een tweede SSH-sessie via het Tailscale-IP-adres of de MagicDNS-naam
+- Voor beheerderstoegang uitsluitend via Tailnet: installeer eerst Tailscale, voeg de VPS toe aan je
+  tailnet, verifieer een tweede SSH-sessie via het Tailscale-IP-adres of de MagicDNS-naam
   en beperk daarna openbare SSH-toegang.
-- Zonder Tailscale: pas gelijkwaardige beveiligingsmaatregelen toe op uw SSH-route voordat u
-  meer diensten beschikbaar stelt.
-- Dit staat los van toegang tot de Gateway. U kunt OpenClaw nog steeds aan
-  local loopback gebonden houden en een SSH-tunnel of Tailscale Serve voor het dashboard gebruiken.
+- Zonder Tailscale: pas de overeenkomstige beveiligingsmaatregelen toe op je SSH-toegang voordat
+  je meer services beschikbaar stelt.
+- Dit staat los van toegang tot de Gateway. Je kunt OpenClaw nog steeds aan
+  loopback gebonden houden en een SSH-tunnel of Tailscale Serve voor het dashboard gebruiken.
 
-Tailscale-specifieke Gateway-opties vindt u onder [Tailscale](/nl/gateway/tailscale).
+Gateway-opties die specifiek zijn voor Tailscale staan in [Tailscale](/nl/gateway/tailscale).
 
 ## Gedeelde bedrijfsagent op een VPS
 
-Het uitvoeren van één agent voor een team is een geldige configuratie wanneer elke gebruiker zich binnen
+Eén agent voor een team uitvoeren is een geldige configuratie wanneer elke gebruiker zich binnen
 dezelfde vertrouwensgrens bevindt en de agent uitsluitend zakelijk wordt gebruikt.
 
-- Gebruik hiervoor een specifieke runtime (VPS/VM/container en een afzonderlijke OS-gebruiker/aparte accounts).
+- Houd deze in een speciale runtime (VPS/VM/container + afzonderlijke OS-gebruiker/accounts).
 - Meld die runtime niet aan bij persoonlijke Apple-/Google-accounts of persoonlijke browser-/wachtwoordbeheerderprofielen.
-- Als gebruikers elkaar niet vertrouwen, scheidt u ze per Gateway/host/OS-gebruiker.
+- Als gebruikers elkaar als tegenstanders kunnen behandelen, splits je ze op per Gateway/host/OS-gebruiker.
 
 Details over het beveiligingsmodel: [Beveiliging](/nl/gateway/security).
 
 ## Nodes gebruiken met een VPS
 
-U kunt de Gateway in de cloud houden en **nodes** op uw lokale apparaten koppelen
+Je kunt de Gateway in de cloud houden en **nodes** koppelen op je lokale apparaten
 (Mac/iOS/Android/headless). Nodes bieden lokale scherm-, camera- en canvasmogelijkheden en `system.run`-
-functionaliteit, terwijl de Gateway in de cloud blijft.
+mogelijkheden, terwijl de Gateway in de cloud blijft.
 
 Documentatie: [Nodes](/nl/nodes), [Nodes-CLI](/nl/cli/nodes).
 
 ## Opstartoptimalisatie voor kleine VM's en ARM-hosts
 
-Als CLI-opdrachten traag aanvoelen op VM's met weinig rekenkracht (of ARM-hosts), schakelt u de modulecompilatiecache van Node in:
+Als CLI-opdrachten traag aanvoelen op VM's met weinig rekenkracht (of ARM-hosts), schakel dan de modulecompilatiecache van Node in:
 
 ```bash
 grep -q 'NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache' ~/.bashrc || cat >> ~/.bashrc <<'EOF'
@@ -100,21 +101,21 @@ EOF
 source ~/.bashrc
 ```
 
-- `NODE_COMPILE_CACHE` versnelt het herhaaldelijk starten van opdrachten; bij de eerste uitvoering wordt de cache opgewarmd.
-- `OPENCLAW_NO_RESPAWN=1` houdt normale herstarts van de Gateway binnen hetzelfde proces. Dit voorkomt extra overdrachten tussen processen en houdt het volgen van PID's eenvoudig op kleine hosts.
-- Zie [Raspberry Pi](/nl/install/raspberry-pi) voor informatie die specifiek is voor Raspberry Pi.
+- `NODE_COMPILE_CACHE` verkort de opstarttijd van herhaalde opdrachten; bij de eerste uitvoering wordt de cache opgewarmd.
+- `OPENCLAW_NO_RESPAWN=1` houdt routinematige herstarts van de Gateway binnen hetzelfde proces, waardoor extra procesoverdrachten worden vermeden en PID-tracering eenvoudig blijft op kleine hosts.
+- Zie [Raspberry Pi](/nl/install/raspberry-pi) voor specifieke informatie over Raspberry Pi.
 
 ### Checklist voor systemd-optimalisatie (optioneel)
 
 Overweeg voor VM-hosts die `systemd` gebruiken:
 
-- Omgevingsvariabelen voor de dienst voor een stabiel opstartpad: `OPENCLAW_NO_RESPAWN=1` en
+- Service-omgevingsvariabelen voor een stabiel opstartpad: `OPENCLAW_NO_RESPAWN=1` en
   `NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache`
 - Expliciet herstartgedrag: `Restart=always`, `RestartSec=2`, `TimeoutStartSec=90`
-- SSD-opslag voor status- en cachepaden om nadelen bij koude starts door willekeurige I/O te beperken.
+- Schijven op SSD-basis voor status-/cachepaden om nadelen bij koude starts door willekeurige I/O te beperken.
 
-Het standaardpad `openclaw onboard --install-daemon` installeert een systemd-eenheid voor de
-gebruiker; bewerk deze met:
+Het standaardpad `openclaw onboard --install-daemon` installeert een systemd-gebruikers-
+unit; bewerk deze met:
 
 ```bash
 systemctl --user edit openclaw-gateway.service
@@ -129,14 +130,14 @@ RestartSec=2
 TimeoutStartSec=90
 ```
 
-Als u bewust een systeemeenheid hebt geïnstalleerd, bewerkt u deze via
+Als je bewust een systeemunit hebt geïnstalleerd, bewerk je deze via
 `sudo systemctl edit openclaw-gateway.service`.
 
 Hoe `Restart=`-beleid geautomatiseerd herstel ondersteunt:
-[systemd kan dienstherstel automatiseren](https://www.redhat.com/en/blog/systemd-automate-recovery).
+[systemd kan serviceherstel automatiseren](https://www.redhat.com/en/blog/systemd-automate-recovery).
 
-Zie [Linux-geheugendruk en beëindigingen door OOM](/nl/platforms/linux#memory-pressure-and-oom-kills) voor het OOM-gedrag van Linux, de selectie van te beëindigen
-onderliggende processen en diagnostiek voor `exit 137`.
+Zie [Linux-geheugendruk en OOM-beëindigingen](/nl/platforms/linux#memory-pressure-and-oom-kills) voor het Linux OOM-gedrag, de selectie van onderliggende processen als slachtoffer en
+`exit 137`-diagnostiek.
 
 ## Gerelateerd
 

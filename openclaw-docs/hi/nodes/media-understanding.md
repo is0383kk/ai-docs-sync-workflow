@@ -1,123 +1,106 @@
 ---
 read_when:
-    - मीडिया समझ को डिज़ाइन या रिफैक्टर करना
+    - मीडिया की समझ को डिज़ाइन या पुनर्संरचित करना
     - इनबाउंड ऑडियो/वीडियो/इमेज प्रीप्रोसेसिंग को ट्यून करना
 sidebarTitle: Media understanding
-summary: इनबाउंड छवि/ऑडियो/वीडियो समझ (वैकल्पिक), प्रदाता + CLI फ़ॉलबैक के साथ
+summary: प्रदाता और CLI फ़ॉलबैक के साथ इनबाउंड इमेज/ऑडियो/वीडियो की समझ (वैकल्पिक)
 title: मीडिया की समझ
 x-i18n:
-    generated_at: "2026-06-28T23:25:20Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T21:08:50Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 40ce9b5c65857702015172cbba76ea4396267894888487b40c11b5997a992362
+    source_hash: 38e9a0f89607bb9c4af85689ef0fbd3df9234b36e06d86c129e0d823d6e05143
     source_path: nodes/media-understanding.md
     workflow: 16
 ---
 
-OpenClaw उत्तर पाइपलाइन चलने से पहले **इनबाउंड मीडिया का सारांश** (छवि/ऑडियो/वीडियो) बना सकता है। यह अपने-आप पता लगाता है कि स्थानीय टूल या प्रदाता कुंजियां उपलब्ध हैं या नहीं, और इसे अक्षम या अनुकूलित किया जा सकता है। यदि समझना बंद है, तो मॉडल फिर भी हमेशा की तरह मूल फाइलें/URL प्राप्त करते हैं।
+OpenClaw उत्तर पाइपलाइन चलने से पहले आने वाले मीडिया (इमेज/ऑडियो/वीडियो) का सारांश बना सकता है, ताकि कमांड पार्सिंग और रूटिंग अपरिष्कृत बाइट्स के बजाय संक्षिप्त टेक्स्ट पर काम करें। अंडरस्टैंडिंग स्थानीय टूल या प्रदाता कुंजियों का स्वतः पता लगाती है, या आप स्पष्ट मॉडल कॉन्फ़िगर कर सकते हैं। मूल मीडिया हमेशा की तरह मॉडल को दिया जाता है; अंडरस्टैंडिंग विफल होने या अक्षम होने पर उत्तर प्रवाह बिना बदलाव के जारी रहता है।
 
-विक्रेता-विशिष्ट मीडिया व्यवहार विक्रेता plugins द्वारा पंजीकृत किया जाता है, जबकि OpenClaw core साझा `tools.media` कॉन्फिग, fallback क्रम, और उत्तर-पाइपलाइन एकीकरण का स्वामी है।
+वेंडर plugins क्षमता मेटाडेटा पंजीकृत करते हैं (कौन-सा प्रदाता किस मीडिया प्रकार का समर्थन करता है, डिफ़ॉल्ट मॉडल, प्राथमिकता)। OpenClaw कोर साझा `tools.media` कॉन्फ़िगरेशन, फ़ॉलबैक क्रम और उत्तर-पाइपलाइन एकीकरण का स्वामी है।
 
-## लक्ष्य
-
-- वैकल्पिक: तेज़ routing + बेहतर command parsing के लिए इनबाउंड मीडिया को छोटे पाठ में पहले से digest करना।
-- मॉडल तक मूल मीडिया डिलीवरी सुरक्षित रखें (हमेशा)।
-- **प्रदाता APIs** और **CLI fallbacks** का समर्थन करें।
-- क्रमबद्ध fallback (त्रुटि/आकार/timeout) के साथ कई मॉडलों की अनुमति दें।
-
-## उच्च-स्तरीय व्यवहार
+## यह कैसे काम करता है
 
 <Steps>
-  <Step title="अटैचमेंट इकट्ठा करें">
-    इनबाउंड अटैचमेंट (`MediaPaths`, `MediaUrls`, `MediaTypes`) इकट्ठा करें।
+  <Step title="अटैचमेंट एकत्र करें">
+    क्रमबद्ध आने वाले मीडिया तथ्य (`path`, `url`, `contentType`, और `kind`) एकत्र करें।
   </Step>
-  <Step title="प्रति-क्षमता चुनें">
-    हर सक्षम क्षमता (छवि/ऑडियो/वीडियो) के लिए, नीति के अनुसार अटैचमेंट चुनें (डिफॉल्ट: **पहला**)।
+  <Step title="प्रति क्षमता चयन करें">
+    प्रत्येक सक्षम क्षमता (इमेज/ऑडियो/वीडियो) के लिए `attachments` नीति के अनुसार अटैचमेंट चुनें (डिफ़ॉल्ट: केवल पहला अटैचमेंट)।
   </Step>
   <Step title="मॉडल चुनें">
-    पहला योग्य मॉडल entry चुनें (आकार + क्षमता + auth)।
+    पहली पात्र मॉडल प्रविष्टि चुनें (आकार + क्षमता + प्रमाणीकरण उपलब्ध)।
   </Step>
-  <Step title="विफलता पर fallback">
-    यदि कोई मॉडल विफल होता है या मीडिया बहुत बड़ा है, तो **अगली entry पर fallback करें**।
+  <Step title="विफलता पर फ़ॉलबैक करें">
+    यदि किसी मॉडल में त्रुटि आती है, समय समाप्त हो जाता है या मीडिया `maxBytes` से अधिक है, तो अगली प्रविष्टि आज़माएँ।
   </Step>
-  <Step title="सफलता ब्लॉक लागू करें">
-    सफलता पर:
-
-    - `Body` `[Image]`, `[Audio]`, या `[Video]` block बन जाता है।
-    - ऑडियो `{{Transcript}}` सेट करता है; command parsing caption text मौजूद होने पर उसका उपयोग करती है, अन्यथा transcript का।
-    - captions को block के अंदर `User text:` के रूप में सुरक्षित रखा जाता है।
-
+  <Step title="सफलता पर लागू करें">
+    `Body` एक `[Image]`, `[Audio]`, या `[Video]` ब्लॉक बन जाता है। ऑडियो `{{Transcript}}` भी सेट करता है; कैप्शन टेक्स्ट मौजूद होने पर कमांड पार्सिंग उसका उपयोग करती है, अन्यथा ट्रांसक्रिप्ट का। कैप्शन ब्लॉक के भीतर `User text:` के रूप में संरक्षित रहते हैं।
   </Step>
 </Steps>
 
-यदि समझना विफल होता है या अक्षम है, तो **उत्तर flow जारी रहता है** मूल body + attachments के साथ।
+## कॉन्फ़िगरेशन
 
-## कॉन्फिग overview
-
-`tools.media` **साझा models** और प्रति-क्षमता overrides का समर्थन करता है:
-
-<AccordionGroup>
-  <Accordion title="शीर्ष-स्तरीय keys">
-    - `tools.media.models`: साझा model list (`capabilities` का उपयोग gate करने के लिए करें)।
-    - `tools.media.image` / `tools.media.audio` / `tools.media.video`:
-      - डिफॉल्ट (`prompt`, `maxChars`, `maxBytes`, `timeoutSeconds`, `language`)
-      - provider overrides (`baseUrl`, `headers`, `providerOptions`)
-      - `tools.media.audio.providerOptions.deepgram` के जरिए Deepgram audio options
-      - audio transcript echo controls (`echoTranscript`, डिफॉल्ट `false`; `echoFormat`)
-      - वैकल्पिक **प्रति-क्षमता `models` list** (साझा models से पहले पसंदीदा)
-      - `attachments` नीति (`mode`, `maxAttachments`, `prefer`)
-      - `scope` (channel/chatType/session key द्वारा वैकल्पिक gating)
-    - `tools.media.concurrency`: अधिकतम concurrent capability runs (डिफॉल्ट **2**)।
-
-  </Accordion>
-</AccordionGroup>
+`tools.media` में क्षमता-टैग वाली एक मॉडल सूची और प्रति-क्षमता छोटे नियंत्रण होते हैं:
 
 ```json5
 {
   tools: {
     media: {
+      concurrency: 2, // अधिकतम समवर्ती क्षमता रन (डिफ़ॉल्ट)
       models: [
-        /* shared list */
+        { provider: "openai", model: "gpt-4o-mini-transcribe", capabilities: ["audio"] },
+        { provider: "google", model: "gemini-3-flash-preview", capabilities: ["image", "video"] },
       ],
-      image: {
-        /* optional overrides */
-      },
-      audio: {
-        /* optional overrides */
-        echoTranscript: true,
-        echoFormat: '📝 "{transcript}"',
-      },
-      video: {
-        /* optional overrides */
-      },
+      image: { preferredModel: "google/gemini-3-flash-preview" },
+      audio: { enabled: true },
+      video: { enabled: true },
     },
   },
 }
 ```
 
-### मॉडल entries
+प्रति-क्षमता (`image`/`audio`/`video`) कुंजियाँ:
 
-हर `models[]` entry **provider** या **CLI** हो सकती है:
+| कुंजी              | प्रकार      | डिफ़ॉल्ट                                | टिप्पणियाँ                                                                |
+| ---------------- | --------- | -------------------------------------- | -------------------------------------------------------------------- |
+| `enabled`        | `boolean` | स्वतः (`false` अक्षम करता है)                | इस क्षमता के लिए स्वतः-पहचान बंद करने हेतु `false` सेट करें              |
+| `preferredModel` | `string`  | पहली संगत प्रविष्टि                 | `provider/model`, मॉडल आईडी, `provider:<id>`, या `cli:command` को प्राथमिकता दें |
+| `prompt`         | `string`  | क्षमता डिफ़ॉल्ट                     | जब कोई प्रविष्टि इसे ओवरराइड न करे, तब डिफ़ॉल्ट प्रॉम्प्ट                    |
+| `maxChars`       | `number`  | `500` इमेज/वीडियो, ऑडियो अनसेट         | डिफ़ॉल्ट आउटपुट सीमा                                                 |
+| `maxBytes`       | `number`  | 10MB इमेज, 20MB ऑडियो, 50MB वीडियो     | डिफ़ॉल्ट इनपुट सीमा                                                  |
+| `timeoutSeconds` | `number`  | `60` इमेज/ऑडियो, `120` वीडियो          | डिफ़ॉल्ट अनुरोध समय-समाप्ति                                              |
+| `language`       | `string`  | अनसेट                                  | ऑडियो ट्रांसक्रिप्शन संकेत                                             |
+| `scope`          | ऑब्जेक्ट    | अनसेट                                  | चैनल/चैट प्रकार/स्रोत कुंजी के आधार पर नियंत्रित करें                                 |
+| `attachments`    | ऑब्जेक्ट    | `{ mode: "first", maxAttachments: 1 }` | चुनें कि किन मेल खाते अटैचमेंट को संसाधित किया जाए                      |
+| `echoTranscript` | `boolean` | `false`                                | केवल ऑडियो: एजेंट प्रसंस्करण से पहले ट्रांसक्रिप्ट को प्रतिध्वनित करें              |
+| `echoFormat`     | `string`  | `'📝 "{transcript}"'`                  | केवल ऑडियो: प्रतिध्वनित ट्रांसक्रिप्ट का प्रारूप                         |
+
+प्रॉम्प्ट, सीमाएँ, भाषा संकेत, अनुरोध ओवरराइड और प्रदाता विकल्प क्षमता डिफ़ॉल्ट के रूप में सेट किए जा सकते हैं या अलग-अलग `tools.media.models[]` प्रविष्टियों पर ओवरराइड किए जा सकते हैं। जब कोई स्पष्ट मॉडल कॉन्फ़िगर न हो, तब क्षमता डिफ़ॉल्ट स्वतः-पहचाने गए प्रदाताओं पर भी लागू होते हैं।
+
+### मॉडल प्रविष्टियाँ
+
+प्रत्येक `models[]` प्रविष्टि एक **प्रदाता** प्रविष्टि (डिफ़ॉल्ट) या एक **CLI** प्रविष्टि होती है:
 
 <Tabs>
-  <Tab title="Provider entry">
+  <Tab title="प्रदाता प्रविष्टि">
     ```json5
     {
-      type: "provider", // default if omitted
+      type: "provider", // छोड़े जाने पर डिफ़ॉल्ट
       provider: "openai",
-      model: "gpt-5.5",
-      prompt: "Describe the image in <= 500 chars.",
+      model: "gpt-5.6-sol",
+      prompt: "इमेज का वर्णन <= 500 वर्णों में करें।",
       maxChars: 500,
       maxBytes: 10485760,
       timeoutSeconds: 60,
-      capabilities: ["image"], // optional, used for multi-modal entries
+      capabilities: ["image"],
       profile: "vision-profile",
       preferredProfile: "vision-fallback",
     }
     ```
   </Tab>
-  <Tab title="CLI entry">
+  <Tab title="CLI प्रविष्टि">
     ```json5
     {
       type: "cli",
@@ -127,7 +110,7 @@ OpenClaw उत्तर पाइपलाइन चलने से पहल�
         "gemini-3-flash",
         "--allowed-tools",
         "read_file",
-        "Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.",
+        "{{AttachmentPath}} पर स्थित मीडिया पढ़ें और उसका वर्णन <= {{MaxChars}} वर्णों में करें।",
       ],
       maxChars: 500,
       maxBytes: 52428800,
@@ -136,22 +119,14 @@ OpenClaw उत्तर पाइपलाइन चलने से पहल�
     }
     ```
 
-    CLI templates इनका भी उपयोग कर सकते हैं:
-
-    - `{{MediaDir}}` (media file वाली directory)
-    - `{{OutputDir}}` (इस run के लिए बनाई गई scratch dir)
-    - `{{OutputBase}}` (scratch file base path, extension नहीं)
+    CLI टेम्पलेट `{{AttachmentUrl}}`, `{{AttachmentContentType}}`, `{{AttachmentDir}}`, `{{AttachmentIndex}}`, `{{OutputDir}}` (इस रन के लिए बनाई गई स्क्रैच डायरेक्टरी), और `{{OutputBase}}` (स्क्रैच फ़ाइल का आधार पथ, बिना एक्सटेंशन) का भी उपयोग कर सकते हैं। पुराने `{{MediaPath}}`, `{{MediaUrl}}`, `{{MediaType}}`, और `{{MediaDir}}` नाम पदावनत संगतता उपनाम बने हुए हैं।
 
   </Tab>
 </Tabs>
 
-### Provider credentials (`apiKey`)
+### प्रदाता क्रेडेंशियल
 
-Provider media understanding सामान्य model calls जैसी ही provider auth resolution का उपयोग करता है: auth profiles, environment variables, फिर `models.providers.<providerId>.apiKey`।
-
-`tools.media.*.models[]` entries inline `apiKey` field स्वीकार नहीं करतीं। media model entry में `provider` value, जैसे `openai` या `moonshot`, के पास मानक provider auth sources में से किसी एक के जरिए credentials उपलब्ध होने चाहिए।
-
-न्यूनतम उदाहरण:
+प्रदाता मीडिया अंडरस्टैंडिंग सामान्य मॉडल कॉल के समान प्रमाणीकरण समाधान का उपयोग करती है: प्रमाणीकरण प्रोफ़ाइल, पर्यावरण चर, फिर `models.providers.<providerId>.apiKey`। `tools.media.models[]` प्रविष्टियाँ इनलाइन `apiKey` फ़ील्ड स्वीकार नहीं करतीं।
 
 ```json5
 {
@@ -164,71 +139,56 @@ Provider media understanding सामान्य model calls जैसी ह�
 }
 ```
 
-profiles, environment variables, और custom base URLs सहित पूर्ण provider auth reference के लिए, [Tools और custom providers](/hi/gateway/config-tools) देखें।
+प्रोफ़ाइल, पर्यावरण चर और कस्टम आधार URL के लिए [टूल और कस्टम प्रदाता](/hi/gateway/config-tools) देखें।
 
-## डिफॉल्ट और सीमाएं
+## नियम और व्यवहार
 
-अनुशंसित डिफॉल्ट:
+- `maxBytes` से अधिक आकार वाला मीडिया उस मॉडल को छोड़कर अगला मॉडल आज़माता है।
+- 1024 बाइट से छोटी ऑडियो फ़ाइलों को खाली/दूषित माना जाता है और ट्रांसक्रिप्शन से पहले छोड़ दिया जाता है; इसके बजाय एजेंट को एक नियतात्मक प्लेसहोल्डर ट्रांसक्रिप्ट मिलती है।
+- यदि सक्रिय प्राथमिक इमेज मॉडल पहले से ही मूल रूप से विज़न का समर्थन करता है, तो OpenClaw `[Image]` सारांश ब्लॉक छोड़ देता है और मूल इमेज सीधे मॉडल को देता है। MiniMax एक अपवाद है: `minimax`, `minimax-cn`, `minimax-portal`, और `minimax-portal-cn` हमेशा इमेज अंडरस्टैंडिंग को plugin-स्वामित्व वाले `MiniMax-VL-01` मीडिया प्रदाता के माध्यम से रूट करते हैं, भले ही पुराने MiniMax M2.x चैट मेटाडेटा में इमेज इनपुट का दावा हो (केवल `MiniMax-M3` और बाद के संस्करणों को मूल रूप से विज़न-सक्षम माना जाता है)।
+- यदि Gateway/WebChat प्राथमिक मॉडल केवल-टेक्स्ट है, तो इमेज अटैचमेंट ऑफ़लोड किए गए `media://inbound/*` संदर्भों के रूप में संरक्षित रहते हैं, ताकि अटैचमेंट खोने के बजाय इमेज/PDF टूल या कॉन्फ़िगर किया गया इमेज मॉडल अब भी उनका निरीक्षण कर सके।
+- स्पष्ट `openclaw infer image describe --file <path> --model <provider/model>` (उपनाम: `openclaw capability image describe`) उस इमेज-सक्षम प्रदाता/मॉडल को सीधे चलाता है, जिसमें `ollama/qwen2.5vl:7b` जैसे Ollama संदर्भ भी शामिल हैं, जब `models.providers.ollama.models[]` के अंतर्गत मेल खाता इमेज-सक्षम मॉडल कॉन्फ़िगर हो।
+- यदि `<capability>.enabled`, `false` नहीं है लेकिन कोई मॉडल कॉन्फ़िगर नहीं है, तो OpenClaw सक्रिय उत्तर मॉडल को आज़माता है, बशर्ते उसका प्रदाता उस क्षमता का समर्थन करता हो।
 
-- `maxChars`: image/video के लिए **500** (छोटा, command-friendly)
-- `maxChars`: audio के लिए **unset** (जब तक आप सीमा सेट न करें, पूरा transcript)
-- `maxBytes`:
-  - image: **10MB**
-  - audio: **20MB**
-  - video: **50MB**
+### स्वतः-पहचान (डिफ़ॉल्ट)
 
-<AccordionGroup>
-  <Accordion title="नियम">
-    - यदि media `maxBytes` से अधिक है, तो वह model छोड़ा जाता है और **अगला model आजमाया जाता है**।
-    - **1024 bytes** से छोटी audio files को खाली/corrupt माना जाता है और provider/CLI transcription से पहले छोड़ा जाता है; inbound reply context को deterministic placeholder transcript मिलता है ताकि agent जान सके कि note बहुत छोटा था।
-    - यदि model `maxChars` से अधिक लौटाता है, तो output trim कर दिया जाता है।
-    - `prompt` साधारण "Describe the {media}." और `maxChars` guidance (केवल image/video) पर डिफॉल्ट होता है।
-    - यदि सक्रिय primary image model पहले से vision को native रूप से support करता है, तो OpenClaw `[Image]` summary block छोड़ देता है और इसके बजाय मूल image को model में पास करता है।
-    - यदि Gateway/WebChat primary model text-only है, तो image attachments को offloaded `media://inbound/*` refs के रूप में सुरक्षित रखा जाता है ताकि image/PDF tools या configured image model attachment खोने के बजाय अब भी उन्हें inspect कर सकें।
-    - स्पष्ट `openclaw infer image describe --model <provider/model>` requests अलग हैं: वे उस image-capable provider/model को सीधे चलाते हैं, जिनमें `ollama/qwen2.5vl:7b` जैसे Ollama refs शामिल हैं।
-    - यदि `<capability>.enabled: true` है लेकिन कोई models configured नहीं हैं, तो OpenClaw **सक्रिय reply model** आजमाता है जब उसका provider क्षमता support करता है।
-
-  </Accordion>
-</AccordionGroup>
-
-### Auto-detect media understanding (डिफॉल्ट)
-
-यदि `tools.media.<capability>.enabled` को `false` पर सेट **नहीं** किया गया है और आपने models configure नहीं किए हैं, तो OpenClaw इस क्रम में auto-detect करता है और **पहले काम करने वाले option पर रुक जाता है**:
+जब `tools.media.<capability>.enabled`, `false` नहीं है और कोई मॉडल कॉन्फ़िगर नहीं है, तो OpenClaw निम्न विकल्पों को क्रम में आज़माता है और पहले कार्यशील विकल्प पर रुक जाता है:
 
 <Steps>
-  <Step title="सक्रिय reply model">
-    सक्रिय reply model जब उसका provider क्षमता support करता है।
+  <Step title="कॉन्फ़िगर किया गया इमेज मॉडल (केवल इमेज)">
+    `agents.defaults.imageModel` प्राथमिक/फ़ॉलबैक संदर्भ, जब तक सक्रिय उत्तर मॉडल पहले से ही मूल रूप से विज़न का समर्थन न करता हो। `provider/model` संदर्भों को प्राथमिकता दें; केवल तभी कॉन्फ़िगर की गई इमेज-सक्षम प्रदाता मॉडल प्रविष्टियों से अपूर्ण संदर्भों को योग्य बनाया जाता है, जब मिलान अद्वितीय हो।
   </Step>
-  <Step title="agents.defaults.imageModel">
-    `agents.defaults.imageModel` primary/fallback refs (केवल image)।
-    `provider/model` refs को प्राथमिकता दें। Bare refs को configured image-capable provider model entries से qualify किया जाता है, केवल जब match unique हो।
+  <Step title="सक्रिय उत्तर मॉडल">
+    सक्रिय उत्तर मॉडल, जब उसका प्रदाता उस क्षमता का समर्थन करता हो।
   </Step>
-  <Step title="Local CLIs (केवल audio)">
-    Local CLIs (यदि installed हों):
+  <Step title="प्रदाता प्रमाणीकरण (केवल ऑडियो, स्थानीय CLI से पहले)">
+    ऑडियो का समर्थन करने वाली कॉन्फ़िगर की गई `models.providers.*` प्रविष्टियाँ स्थानीय CLI से पहले आज़माई जाती हैं। बंडल किए गए प्रदाताओं का प्राथमिकता क्रम (समान प्राथमिकता की स्थिति में प्रदाता आईडी के वर्णानुक्रम से निर्णय): Groq/OpenAI &rarr; xAI &rarr; Deepgram &rarr; OpenRouter &rarr; Google/SenseAudio &rarr; Deepinfra/ElevenLabs &rarr; Mistral।
+  </Step>
+  <Step title="स्थानीय CLI (केवल ऑडियो)">
+    तैयार स्थानीय बाइनरी एक क्रमबद्ध फ़ॉलबैक सूची बनाती हैं:
+    - `whisper-cli` पहले केवल तब, जब वर्तमान प्रक्रिया में किसी पिछले मॉडल आह्वान ने Metal या CUDA देखा हो
+    - CPU-डिफ़ॉल्ट `sherpa-onnx-offline` (इसके लिए `SHERPA_ONNX_MODEL_DIR` के साथ `tokens.txt`/`encoder.onnx`/`decoder.onnx`/`joiner.onnx` आवश्यक हैं)
+    - `whisper-cli` जब त्वरण केवल बिल्ड-सक्षम हो या देखा न गया हो
+    - Apple Silicon पर `parakeet-mlx` (MLX-सक्षम, डिवाइस उपयोग नहीं देखा गया)
+    - `whisper` (Python CLI; डिफ़ॉल्ट रूप से `turbo` मॉडल का उपयोग करता है, स्वचालित रूप से डाउनलोड होता है)
 
-    - `sherpa-onnx-offline` (encoder/decoder/joiner/tokens के साथ `SHERPA_ONNX_MODEL_DIR` आवश्यक)
-    - `whisper-cli` (`whisper-cpp`; `WHISPER_CPP_MODEL` या bundled tiny model का उपयोग करता है)
-    - `whisper` (Python CLI; models अपने-आप downloads करता है)
+    बैकएंड क्षमता निरीक्षण कैश किया जाता है और मॉडल लोड नहीं करता। बिल्ड क्षमता, अनुरोधित बैकएंड फ़्लैग और वास्तविक आह्वान से देखा गया बैकएंड अलग-अलग रहते हैं। स्वतः-पहचाना गया whisper.cpp मॉडल-रन लॉग सक्षम रखता है, ताकि अपस्ट्रीम द्वारा चयनित बैकएंड वाली पंक्ति दर्ज की जा सके। स्पष्ट CLI प्रविष्टियाँ अपना कॉन्फ़िगर किया गया क्रम, बैकएंड फ़्लैग और आउटपुट फ़्लैग बनाए रखती हैं।
 
   </Step>
-  <Step title="Gemini CLI">
-    `read_many_files` का उपयोग करके `gemini`।
+  <Step title="प्रदाता प्रमाणीकरण (इमेज/वीडियो)">
+    क्षमता का समर्थन करने वाली कॉन्फ़िगर की गई `models.providers.*` प्रविष्टियाँ बंडल किए गए फ़ॉलबैक क्रम से पहले आज़माई जाती हैं। इमेज-सक्षम मॉडल वाले केवल-इमेज कॉन्फ़िगरेशन प्रदाता मीडिया अंडरस्टैंडिंग के लिए स्वतः पंजीकृत हो जाते हैं, भले ही वे बंडल किए गए वेंडर plugin न हों।
+
+    बंडल किए गए प्रदाताओं का प्राथमिकता क्रम (समान प्राथमिकता की स्थिति में प्रदाता आईडी के वर्णानुक्रम से निर्णय):
+    - इमेज: Anthropic/OpenAI &rarr; Google &rarr; MiniMax &rarr; Deepinfra &rarr; MiniMax Portal &rarr; Z.AI
+    - वीडियो: Google &rarr; Qwen &rarr; Moonshot
+
   </Step>
-  <Step title="Provider auth">
-    - Configured `models.providers.*` entries जो क्षमता support करती हैं, bundled fallback order से पहले आजमाई जाती हैं।
-    - image-capable model वाले image-only config providers media understanding के लिए auto-register होते हैं, भले वे bundled vendor plugin न हों।
-    - Ollama image understanding स्पष्ट रूप से चुने जाने पर उपलब्ध है, उदाहरण के लिए `agents.defaults.imageModel` या `openclaw infer image describe --model ollama/<vision-model>` के जरिए।
-
-    Bundled fallback order:
-
-    - Audio: OpenAI → Groq → xAI → Deepgram → OpenRouter → Google → SenseAudio → ElevenLabs → Mistral
-    - Image: OpenAI → Anthropic → Google → MiniMax → MiniMax Portal → Z.AI
-    - Video: Google → Qwen → Moonshot
-
+  <Step title="Antigravity CLI (केवल इमेज/वीडियो)">
+    पहली इंस्टॉल की गई `agy` या `antigravity` बाइनरी (`OPENCLAW_ANTIGRAVITY_CLI` से ओवरराइड करें), जिसे मीडिया की डायरेक्टरी के विरुद्ध सैंडबॉक्स किया गया हो।
   </Step>
 </Steps>
 
-auto-detection को अक्षम करने के लिए, सेट करें:
+किसी क्षमता के लिए स्वतः-पहचान अक्षम करने हेतु:
 
 ```json5
 {
@@ -243,102 +203,87 @@ auto-detection को अक्षम करने के लिए, सेट �
 ```
 
 <Note>
-Binary detection macOS/Linux/Windows पर best-effort है; सुनिश्चित करें कि CLI `PATH` पर है (हम `~` expand करते हैं), या full command path के साथ explicit CLI model सेट करें।
+macOS/Linux/Windows में बाइनरी पहचान सर्वोत्तम-प्रयास के आधार पर होती है; सुनिश्चित करें कि CLI `PATH` पर है (`~` का विस्तार किया जाता है), या पूर्ण कमांड पथ वाली स्पष्ट CLI मॉडल प्रविष्टि सेट करें।
 </Note>
 
-### Proxy environment support (provider models)
+### प्रॉक्सी समर्थन (ऑडियो/वीडियो प्रदाता कॉल)
 
-जब provider-based **audio** और **video** media understanding सक्षम होता है, तो OpenClaw provider HTTP calls के लिए मानक outbound proxy environment variables का सम्मान करता है:
+प्रदाता-आधारित **ऑडियो** और **वीडियो** अंडरस्टैंडिंग मानक आउटबाउंड प्रॉक्सी पर्यावरण चरों का पालन करती है, जिनमें `NO_PROXY`/`no_proxy` बायपास नियम शामिल हैं: `HTTPS_PROXY`, `HTTP_PROXY`, `ALL_PROXY`, `https_proxy`, `http_proxy`, `all_proxy`। लोअरकेस चर अपरकेस से अधिक प्राथमिकता लेते हैं। यदि कोई भी सेट नहीं है, तो मीडिया अंडरस्टैंडिंग सीधे निर्गमन का उपयोग करती है; यदि प्रॉक्सी मान विकृत है, तो OpenClaw चेतावनी लॉग करता है और सीधे फ़ेच पर फ़ॉलबैक करता है। इमेज अंडरस्टैंडिंग इस प्रॉक्सी पथ से नहीं गुजरती।
 
-- `HTTPS_PROXY`
-- `HTTP_PROXY`
-- `ALL_PROXY`
-- `https_proxy`
-- `http_proxy`
-- `all_proxy`
+## क्षमताएँ
 
-यदि कोई proxy env vars सेट नहीं हैं, तो media understanding direct egress का उपयोग करता है। यदि proxy value malformed है, तो OpenClaw warning log करता है और direct fetch पर fallback करता है।
+किसी `models[]` प्रविष्टि को विशिष्ट मीडिया प्रकारों तक सीमित करने के लिए उस पर `capabilities` सेट करें। साझा सूचियों के लिए OpenClaw प्रत्येक बंडल किए गए प्रदाता के अनुसार डिफ़ॉल्ट का अनुमान लगाता है:
 
-## क्षमताएं (वैकल्पिक)
+| प्रदाता                                                                 | क्षमताएँ          |
+| ------------------------------------------------------------------------ | --------------------- |
+| `openai`, `anthropic`, `minimax`                                         | छवि                 |
+| `minimax-portal`                                                         | छवि                 |
+| `moonshot`                                                               | छवि + वीडियो         |
+| `openrouter`                                                             | छवि + ऑडियो         |
+| `google` (Gemini API)                                                    | छवि + ऑडियो + वीडियो |
+| `qwen`                                                                   | छवि + वीडियो         |
+| `deepinfra`                                                              | छवि + ऑडियो         |
+| `mistral`                                                                | ऑडियो                 |
+| `zai`                                                                    | छवि                 |
+| `groq`, `xai`, `deepgram`, `senseaudio`                                  | ऑडियो                 |
+| छवि-सक्षम मॉडल वाली कोई भी `models.providers.<id>.models[]` कैटलॉग | छवि                 |
 
-यदि आप `capabilities` सेट करते हैं, तो entry केवल उन media types के लिए चलती है। साझा lists के लिए, OpenClaw डिफॉल्ट infer कर सकता है:
+CLI प्रविष्टियों के लिए, अप्रत्याशित मिलानों से बचने हेतु `capabilities` को स्पष्ट रूप से सेट करें; इसे छोड़ने पर प्रविष्टि उन सभी क्षमता सूचियों के लिए पात्र होगी जिनमें वह दिखाई देती है।
 
-- `openai`, `anthropic`, `minimax`: **image**
-- `minimax-portal`: **image**
-- `moonshot`: **image + video**
-- `openrouter`: **image + audio**
-- `google` (Gemini API): **image + audio + video**
-- `qwen`: **image + video**
-- `mistral`: **audio**
-- `zai`: **image**
-- `groq`: **audio**
-- `xai`: **audio**
-- `deepgram`: **audio**
-- Any `models.providers.<id>.models[]` catalog with an image-capable model: **image**
+## प्रदाता समर्थन मैट्रिक्स
 
-CLI entries के लिए, अप्रत्याशित matches से बचने के लिए **`capabilities` स्पष्ट रूप से सेट करें**। यदि आप `capabilities` छोड़ देते हैं, तो entry उस list के लिए eligible है जिसमें वह दिखाई देती है।
-
-## Provider support matrix (OpenClaw integrations)
-
-| क्षमता | Provider integration                                                                                                         | Notes                                                                                                                                                                                                                                       |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Image      | OpenAI, OpenAI Codex OAuth, Codex app-server, OpenRouter, Anthropic, Google, MiniMax, Moonshot, Qwen, Z.AI, config providers | Vendor plugins image support register करते हैं; `openai/*` API-key या Codex OAuth routing का उपयोग कर सकता है; `codex/*` bounded Codex app-server turn का उपयोग करता है; MiniMax और MiniMax OAuth दोनों `MiniMax-VL-01` का उपयोग करते हैं; image-capable config providers auto-register होते हैं। |
-| Audio      | OpenAI, Groq, xAI, Deepgram, OpenRouter, Google, SenseAudio, ElevenLabs, Mistral                                             | Provider transcription (Whisper/Groq/xAI/Deepgram/OpenRouter STT/Gemini/SenseAudio/Scribe/Voxtral)।                                                                                                                                         |
-| Video      | Google, Qwen, Moonshot                                                                                                       | Vendor plugins के जरिए provider video understanding; Qwen video understanding Standard DashScope endpoints का उपयोग करता है।                                                                                                                            |
+| क्षमता | प्रदाता                                                                                                                                               | टिप्पणियाँ                                                                                                                                                                                   |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| छवि      | Anthropic, Codex app-server, Deepinfra, Google, MiniMax, MiniMax Portal, Moonshot, OpenAI, OpenAI Codex OAuth, OpenRouter, Qwen, Z.AI, कॉन्फ़िगरेशन प्रदाता | विक्रेता Plugin छवि समर्थन पंजीकृत करते हैं; `openai/*` API कुंजी या Codex OAuth रूटिंग का उपयोग कर सकता है; `codex/*` एक सीमित Codex app-server टर्न का उपयोग करता है; छवि-सक्षम कॉन्फ़िगरेशन प्रदाता स्वतः पंजीकृत होते हैं। |
+| ऑडियो      | Deepgram, Deepinfra, ElevenLabs, Google, Groq, Mistral, OpenAI, OpenRouter, SenseAudio, xAI                                                             | प्रदाता ट्रांसक्रिप्शन (Whisper/Groq/xAI/Deepgram/OpenRouter STT/Gemini/SenseAudio/Scribe/Voxtral)।                                                                                     |
+| वीडियो      | Google, Moonshot, Qwen                                                                                                                                  | विक्रेता Plugin के माध्यम से प्रदाता वीडियो समझ; Qwen वीडियो समझ मानक DashScope एंडपॉइंट का उपयोग करती है।                                                                        |
 
 <Note>
-**MiniMax note**
-
-- `minimax`, `minimax-cn`, `minimax-portal`, और `minimax-portal-cn` इमेज समझ Plugin-स्वामित्व वाले `MiniMax-VL-01` मीडिया प्रदाता से आती है।
-- स्वचालित इमेज रूटिंग `MiniMax-VL-01` का उपयोग करती रहती है, भले ही लेगेसी MiniMax M2.x चैट मेटाडेटा इमेज इनपुट का दावा करे।
-
+**MiniMax टिप्पणी**: `minimax`, `minimax-cn`, `minimax-portal`, और `minimax-portal-cn` की छवि समझ हमेशा Plugin के स्वामित्व वाले `MiniMax-VL-01` मीडिया प्रदाता से आती है, भले ही पुराना MiniMax M2.x चैट मेटाडेटा छवि इनपुट का दावा करे।
 </Note>
 
 ## मॉडल चयन मार्गदर्शन
 
-- जब गुणवत्ता और सुरक्षा महत्वपूर्ण हों, तो प्रत्येक मीडिया क्षमता के लिए उपलब्ध सबसे मजबूत नवीनतम पीढ़ी के मॉडल को प्राथमिकता दें।
-- अविश्वसनीय इनपुट संभालने वाले टूल-सक्षम एजेंटों के लिए पुराने/कमजोर मीडिया मॉडल से बचें।
-- उपलब्धता के लिए प्रति क्षमता कम से कम एक फ़ॉलबैक रखें (गुणवत्ता मॉडल + तेज़/सस्ता मॉडल)।
-- CLI फ़ॉलबैक (`whisper-cli`, `whisper`, `gemini`) तब उपयोगी होते हैं जब प्रदाता API उपलब्ध न हों।
-- `parakeet-mlx` नोट: `--output-dir` के साथ, जब आउटपुट फ़ॉर्मैट `txt` हो (या निर्दिष्ट न हो), तो OpenClaw `<output-dir>/<media-basename>.txt` पढ़ता है; गैर-`txt` फ़ॉर्मैट stdout पर फ़ॉलबैक करते हैं।
+- गुणवत्ता और सुरक्षा महत्वपूर्ण होने पर प्रत्येक मीडिया क्षमता के लिए वर्तमान पीढ़ी के सबसे शक्तिशाली मॉडल को प्राथमिकता दें।
+- अविश्वसनीय इनपुट संभालने वाले टूल-सक्षम एजेंटों के लिए पुराने/कमज़ोर मीडिया मॉडल से बचें।
+- उपलब्धता के लिए प्रत्येक क्षमता का कम-से-कम एक फ़ॉलबैक रखें (गुणवत्ता मॉडल + तेज़/सस्ता मॉडल)।
+- प्रदाता API अनुपलब्ध होने पर CLI फ़ॉलबैक (`whisper-cli`, `whisper`, `gemini`) सहायक होते हैं।
+- ज्ञात फ़ाइल-आउटपुट मोड प्रामाणिक हैं: रिक्त या अनुपलब्ध अनुमानित ट्रांसक्रिप्ट फ़ाइल, CLI प्रगति आउटपुट पर फ़ॉलबैक करने के बजाय कोई ट्रांसक्रिप्ट उत्पन्न नहीं करती।
+- `parakeet-mlx`: `--output-dir` और डिफ़ॉल्ट `{filename}` आउटपुट टेम्पलेट के साथ `--output-format txt` (या `all`) का उपयोग करें। अपस्ट्रीम `PARAKEET_OUTPUT_FORMAT` और `PARAKEET_OUTPUT_TEMPLATE` पर्यावरण चर भी स्वीकार किए जाते हैं। OpenClaw `<output-dir>/<media-basename>.txt` पढ़ता है; डिफ़ॉल्ट `srt` प्रारूप, अन्य प्रारूप और कस्टम आउटपुट टेम्पलेट stdout का उपयोग जारी रखते हैं।
 
 ## अटैचमेंट नीति
 
-प्रति-क्षमता `attachments` नियंत्रित करता है कि कौन-से अटैचमेंट संसाधित किए जाते हैं:
+प्रत्येक क्षमता का `attachments` नियंत्रित करता है कि किन अटैचमेंट को संसाधित किया जाए:
 
 <ParamField path="mode" type='"first" | "all"' default="first">
-  पहला चयनित अटैचमेंट संसाधित करना है या सभी को।
+  केवल पहले चयनित अटैचमेंट या उन सभी को संसाधित करें।
 </ParamField>
 <ParamField path="maxAttachments" type="number" default="1">
-  संसाधित की जाने वाली संख्या की सीमा लगाएं।
+  संसाधित किए जाने वाले अटैचमेंट की संख्या सीमित करें।
 </ParamField>
 <ParamField path="prefer" type='"first" | "last" | "path" | "url"'>
-  उम्मीदवार अटैचमेंट में चयन प्राथमिकता।
+  संभावित अटैचमेंट के बीच चयन प्राथमिकता।
 </ParamField>
 
-जब `mode: "all"` हो, तो आउटपुट को `[Image 1/2]`, `[Audio 2/2]`, आदि लेबल दिए जाते हैं।
+जब `mode: "all"`, आउटपुट को `[Image 1/2]`, `[Audio 2/2]`, आदि लेबल दिए जाते हैं।
 
-<AccordionGroup>
-  <Accordion title="File-attachment extraction behavior">
-    - निकाला गया फ़ाइल टेक्स्ट मीडिया प्रॉम्प्ट में जोड़े जाने से पहले **अविश्वसनीय बाहरी सामग्री** के रूप में लपेटा जाता है।
-    - इंजेक्ट किया गया ब्लॉक `<<<EXTERNAL_UNTRUSTED_CONTENT id="...">>>` / `<<<END_EXTERNAL_UNTRUSTED_CONTENT id="...">>>` जैसे स्पष्ट सीमा मार्कर का उपयोग करता है और इसमें `Source: External` मेटाडेटा लाइन शामिल होती है।
-    - यह अटैचमेंट-निष्कर्षण पथ मीडिया प्रॉम्प्ट को अनावश्यक रूप से बड़ा होने से बचाने के लिए लंबा `SECURITY NOTICE:` बैनर जानबूझकर छोड़ देता है; सीमा मार्कर और मेटाडेटा फिर भी बने रहते हैं।
-    - यदि किसी फ़ाइल में निकालने योग्य टेक्स्ट नहीं है, तो OpenClaw `[No extractable text]` इंजेक्ट करता है।
-    - यदि इस पथ में कोई PDF रेंडर की गई पेज इमेज पर फ़ॉलबैक करती है, तो OpenClaw उन पेज इमेज को विज़न-सक्षम उत्तर मॉडल को अग्रेषित करता है और फ़ाइल ब्लॉक में प्लेसहोल्डर `[PDF content rendered to images]` रखता है।
+### फ़ाइल-अटैचमेंट निष्कर्षण
 
-  </Accordion>
-</AccordionGroup>
+- निष्कर्षित फ़ाइल टेक्स्ट को मीडिया प्रॉम्प्ट में जोड़ने से पहले अविश्वसनीय बाहरी सामग्री के रूप में लपेटा जाता है, जिसमें `<<<EXTERNAL_UNTRUSTED_CONTENT id="...">>>` / `<<<END_EXTERNAL_UNTRUSTED_CONTENT id="...">>>` जैसे सीमा चिह्न और एक `Source: External` मेटाडेटा पंक्ति उपयोग की जाती है।
+- मीडिया प्रॉम्प्ट छोटा रखने के लिए यह पथ जानबूझकर लंबे `SECURITY NOTICE:` बैनर को छोड़ देता है; सीमा चिह्न और मेटाडेटा फिर भी लागू होते हैं।
+- जिस फ़ाइल में निष्कर्षण योग्य टेक्स्ट नहीं है, उसे `[No extractable text]` मिलता है।
+- यदि कोई PDF रेंडर की गई पृष्ठ छवियों पर फ़ॉलबैक करता है, तो OpenClaw उन छवियों को विज़न-सक्षम उत्तर मॉडल को अग्रेषित करता है और फ़ाइल ब्लॉक में प्लेसहोल्डर `[PDF content rendered to images]` बनाए रखता है।
 
 ## कॉन्फ़िगरेशन उदाहरण
 
 <Tabs>
-  <Tab title="Shared models + overrides">
+  <Tab title="साझा मॉडल + ओवरराइड">
     ```json5
     {
       tools: {
         media: {
           models: [
-            { provider: "openai", model: "gpt-5.5", capabilities: ["image"] },
+            { provider: "openai", model: "gpt-5.6-sol", capabilities: ["image"] },
             {
               provider: "google",
               model: "gemini-3-flash-preview",
@@ -352,7 +297,7 @@ CLI entries के लिए, अप्रत्याशित matches से �
                 "gemini-3-flash",
                 "--allowed-tools",
                 "read_file",
-                "Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.",
+                "{{AttachmentPath}} पर मौजूद मीडिया को पढ़ें और उसका वर्णन <= {{MaxChars}} वर्णों में करें।",
               ],
               capabilities: ["image", "video"],
             },
@@ -368,7 +313,7 @@ CLI entries के लिए, अप्रत्याशित matches से �
     }
     ```
   </Tab>
-  <Tab title="Audio + video only">
+  <Tab title="केवल ऑडियो + वीडियो">
     ```json5
     {
       tools: {
@@ -380,7 +325,7 @@ CLI entries के लिए, अप्रत्याशित matches से �
               {
                 type: "cli",
                 command: "whisper",
-                args: ["--model", "base", "{{MediaPath}}"],
+                args: ["--model", "base", "{{AttachmentPath}}"],
               },
             ],
           },
@@ -397,7 +342,7 @@ CLI entries के लिए, अप्रत्याशित matches से �
                   "gemini-3-flash",
                   "--allowed-tools",
                   "read_file",
-                  "Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.",
+                  "{{AttachmentPath}} पर मौजूद मीडिया को पढ़ें और उसका वर्णन <= {{MaxChars}} वर्णों में करें।",
                 ],
               },
             ],
@@ -407,7 +352,7 @@ CLI entries के लिए, अप्रत्याशित matches से �
     }
     ```
   </Tab>
-  <Tab title="Image-only">
+  <Tab title="केवल छवि">
     ```json5
     {
       tools: {
@@ -417,8 +362,8 @@ CLI entries के लिए, अप्रत्याशित matches से �
             maxBytes: 10485760,
             maxChars: 500,
             models: [
-              { provider: "openai", model: "gpt-5.5" },
-              { provider: "anthropic", model: "claude-opus-4-6" },
+              { provider: "openai", model: "gpt-5.6-sol" },
+              { provider: "anthropic", model: "claude-opus-5" },
               {
                 type: "cli",
                 command: "gemini",
@@ -427,7 +372,7 @@ CLI entries के लिए, अप्रत्याशित matches से �
                   "gemini-3-flash",
                   "--allowed-tools",
                   "read_file",
-                  "Read the media at {{MediaPath}} and describe it in <= {{MaxChars}} characters.",
+                  "{{AttachmentPath}} पर मौजूद मीडिया को पढ़ें और उसका वर्णन <= {{MaxChars}} वर्णों में करें।",
                 ],
               },
             ],
@@ -437,7 +382,7 @@ CLI entries के लिए, अप्रत्याशित matches से �
     }
     ```
   </Tab>
-  <Tab title="Multi-modal single entry">
+  <Tab title="बहु-मोडल एकल प्रविष्टि">
     ```json5
     {
       tools: {
@@ -478,21 +423,25 @@ CLI entries के लिए, अप्रत्याशित matches से �
 
 ## स्थिति आउटपुट
 
-जब मीडिया समझ चलती है, तो `/status` में एक संक्षिप्त सारांश लाइन शामिल होती है:
+मीडिया समझ चलने पर, `/status` में प्रत्येक क्षमता की एक सारांश पंक्ति शामिल होती है:
 
 ```
-📎 Media: image ok (openai/gpt-5.4) · audio skipped (maxBytes)
+📎 मीडिया: छवि सफल (openai/gpt-5.6-sol) · ऑडियो सफल (whisper-cli प्रेक्षित=metal)
 ```
 
-यह प्रति-क्षमता परिणाम और लागू होने पर चुना गया प्रदाता/मॉडल दिखाता है।
+प्रीफ़्लाइट इन्वेंट्री के लिए, `openclaw capability audio providers` चलाएँ। स्थानीय पंक्तियाँ स्थानीय फ़ॉलबैक विजेता को वैश्विक प्रदाता चयन, तत्परता और अलग-अलग सक्षम/अनुरोधित/प्रेक्षित बैकएंड फ़ील्ड से पृथक दिखाती हैं। यही स्थानीय चयन सूचनात्मक doctor निष्कर्ष के रूप में भी उपलब्ध है:
 
-## नोट्स
+```bash
+openclaw doctor --lint --only core/doctor/local-audio-acceleration --severity-min info
+```
 
-- समझना **सर्वोत्तम-प्रयास** है। त्रुटियां उत्तरों को ब्लॉक नहीं करतीं।
+## टिप्पणियाँ
+
+- समझ सर्वोत्तम-प्रयास पर आधारित है। त्रुटियाँ उत्तरों को अवरुद्ध नहीं करतीं।
 - समझ अक्षम होने पर भी अटैचमेंट मॉडल को भेजे जाते हैं।
-- समझ कहां चलती है, इसे सीमित करने के लिए `scope` का उपयोग करें (जैसे केवल DM)।
+- समझ कहाँ चले, इसे सीमित करने के लिए `scope` का उपयोग करें (उदाहरण के लिए, केवल DM में)।
 
 ## संबंधित
 
 - [कॉन्फ़िगरेशन](/hi/gateway/configuration)
-- [इमेज और मीडिया समर्थन](/hi/nodes/images)
+- [छवि और मीडिया समर्थन](/hi/nodes/images)

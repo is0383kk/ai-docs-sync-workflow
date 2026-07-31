@@ -1,19 +1,20 @@
 ---
 read_when:
-    - together Pluginをインストール、設定、または監査しています
+    - together Plugin のインストール、設定、または監査を行っています
 summary: OpenClaw に Together モデルプロバイダーのサポートを追加します。
 title: Together Plugin
 x-i18n:
-    generated_at: "2026-07-11T22:32:15Z"
+    generated_at: "2026-07-26T09:54:26Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c6d9c45bb128e18cbb931c6e6f429a3f60b25a1f1faeb83676989da2a12b5866
+    source_hash: 96d2a19fb8a9ab445d826b0b238f565d606fc9150e5dd45a9d2323e6b3048396
     source_path: plugins/reference/together.md
     workflow: 16
 ---
 
-# Together Plugin
+# Together plugin
 
 OpenClaw に Together モデルプロバイダーのサポートを追加します。
 
@@ -22,9 +23,9 @@ OpenClaw に Together モデルプロバイダーのサポートを追加しま�
 - パッケージ: `@openclaw/together-provider`
 - インストール方法: OpenClaw に同梱
 
-## 提供機能
+## サーフェス
 
-プロバイダー: together、コントラクト: videoGenerationProviders
+プロバイダー: `together`; コントラクト: `videoGenerationProviders`
 
 ## 関連ドキュメント
 

@@ -1,33 +1,34 @@
 ---
 read_when:
     - می‌خواهید از Fireworks با OpenClaw استفاده کنید
-    - به متغیر محیطی کلید API سرویس Fireworks یا شناسهٔ مدل پیش‌فرض نیاز دارید
-    - شما در حال اشکال‌زدایی رفتار Kimi در حالت خاموش بودن تفکر روی Fireworks هستید
+    - به متغیر محیطی کلید API مربوط به Fireworks یا شناسه مدل پیش‌فرض نیاز دارید
+    - در حال اشکال‌زدایی رفتار thinking-off در Kimi روی Fireworks هستید
 summary: راه‌اندازی Fireworks (احراز هویت + انتخاب مدل)
-title: فایروُرکس
+title: Fireworks
 x-i18n:
-    generated_at: "2026-07-12T10:43:48Z"
+    generated_at: "2026-07-27T15:50:31Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 15feed0730ec65d943f103824468490be6616478ece80bedfeb9ad8137506180
+    source_hash: 7720b23b69aa716d2e2903f5644bb74f81ca1c5e753f71d72d4d7a25c0747884
     source_path: providers/fireworks.md
     workflow: 16
 ---
 
-[Fireworks](https://fireworks.ai) مدل‌های با وزن‌های باز و مدل‌های مسیریابی‌شده را از طریق یک API سازگار با OpenAI ارائه می‌کند. برای استفاده از دو مدل Kimi ازپیش‌فهرست‌شده و هر شناسهٔ مدل یا مسیریاب Fireworks در زمان اجرا، Plugin رسمی ارائه‌دهندهٔ Fireworks را نصب کنید.
+[Fireworks](https://fireworks.ai) مدل‌های با وزن‌های باز و مسیریابی‌شده را از طریق یک API سازگار با OpenAI ارائه می‌کند. برای استفاده از دو مدل Kimi ازپیش‌فهرست‌شده و هر شناسه مدل یا مسیریاب Fireworks در زمان اجرا، Plugin رسمی ارائه‌دهنده Fireworks را نصب کنید.
 
-| ویژگی                | مقدار                                                  |
-| -------------------- | ------------------------------------------------------ |
-| شناسهٔ ارائه‌دهنده   | `fireworks` (نام مستعار: `fireworks-ai`)               |
-| بسته                  | `@openclaw/fireworks-provider`                         |
-| متغیر محیطی احراز هویت | `FIREWORKS_API_KEY`                                  |
-| پرچم راه‌اندازی      | `--auth-choice fireworks-api-key`                      |
-| پرچم مستقیم CLI      | `--fireworks-api-key <key>`                            |
-| API                   | سازگار با OpenAI (`openai-completions`)                |
-| نشانی پایه            | `https://api.fireworks.ai/inference/v1`                |
-| مدل پیش‌فرض           | `fireworks/accounts/fireworks/routers/kimi-k2p5-turbo` |
-| نام مستعار پیش‌فرض   | `Kimi K2.5 Turbo`                                      |
+| ویژگی        | مقدار                                                  |
+| --------------- | ------------------------------------------------------ |
+| شناسه ارائه‌دهنده     | `fireworks` (نام مستعار: `fireworks-ai`)                    |
+| بسته         | `@openclaw/fireworks-provider`                         |
+| متغیر محیطی احراز هویت    | `FIREWORKS_API_KEY`                                    |
+| پرچم راه‌اندازی اولیه | `--auth-choice fireworks-api-key`                      |
+| پرچم مستقیم CLI | `--fireworks-api-key <key>`                            |
+| API             | سازگار با OpenAI (`openai-completions`)               |
+| نشانی پایه        | `https://api.fireworks.ai/inference/v1`                |
+| مدل پیش‌فرض   | `fireworks/accounts/fireworks/routers/kimi-k2p6-turbo` |
+| نام مستعار پیش‌فرض   | `Kimi K2.6 Turbo`                                      |
 
 ## شروع به کار
 
@@ -40,7 +41,7 @@ x-i18n:
   <Step title="تنظیم کلید API مربوط به Fireworks">
     <CodeGroup>
 
-```bash راه‌اندازی
+```bash راه‌اندازی اولیه
 openclaw onboard --auth-choice fireworks-api-key
 ```
 
@@ -56,15 +57,15 @@ export FIREWORKS_API_KEY=fw-...
 
     </CodeGroup>
 
-    فرایند راه‌اندازی، کلید را برای ارائه‌دهندهٔ `fireworks` در نمایه‌های احراز هویت شما ذخیره می‌کند و مسیریاب Kimi K2.5 Turbo با **Fire Pass** را به‌عنوان مدل پیش‌فرض تنظیم می‌کند.
+    راه‌اندازی اولیه، کلید را برای ارائه‌دهنده `fireworks` در پروفایل‌های احراز هویت شما ذخیره می‌کند و مسیریاب Kimi K2.6 Turbo با **Fire Pass** را به‌عنوان مدل پیش‌فرض تنظیم می‌کند.
 
   </Step>
-  <Step title="بررسی دردسترس‌بودن مدل">
+  <Step title="اطمینان از دردسترس‌بودن مدل">
     ```bash
     openclaw models list --provider fireworks
     ```
 
-    فهرست باید شامل `Kimi K2.6` و `Kimi K2.5 Turbo (Fire Pass)` باشد. اگر `FIREWORKS_API_KEY` قابل دریافت نباشد، `openclaw models status --json` اعتبارنامهٔ مفقود را در `auth.unusableProfiles` گزارش می‌کند.
+    فهرست باید شامل `Kimi K2.6` و `Kimi K2.6 Turbo (Fire Pass)` باشد. اگر `FIREWORKS_API_KEY` حل‌نشده باشد، `openclaw models status --json` اعتبارنامه مفقود را در بخش `auth.unusableProfiles` گزارش می‌کند.
 
   </Step>
 </Steps>
@@ -82,20 +83,20 @@ openclaw onboard --non-interactive \
   --accept-risk
 ```
 
-## فهرست داخلی
+## کاتالوگ داخلی
 
-| ارجاع مدل                                              | نام                         | ورودی       | زمینه   | حداکثر خروجی | تفکر                    |
-| ------------------------------------------------------ | --------------------------- | ----------- | ------- | ------------ | ----------------------- |
-| `fireworks/accounts/fireworks/models/kimi-k2p6`        | Kimi K2.6                   | متن + تصویر | 262,144 | 262,144      | اجباری غیرفعال          |
-| `fireworks/accounts/fireworks/routers/kimi-k2p5-turbo` | Kimi K2.5 Turbo (Fire Pass) | متن + تصویر | 256,000 | 256,000      | اجباری غیرفعال (پیش‌فرض) |
+| ارجاع مدل                                              | نام                        | ورودی        | زمینه | حداکثر خروجی | تفکر             |
+| ------------------------------------------------------ | --------------------------- | ------------ | ------- | ---------- | -------------------- |
+| `fireworks/accounts/fireworks/models/kimi-k2p6`        | Kimi K2.6                   | متن + تصویر | 262,144 | 262,144    | اجباراً خاموش           |
+| `fireworks/accounts/fireworks/routers/kimi-k2p6-turbo` | Kimi K2.6 Turbo (Fire Pass) | متن + تصویر | 256,000 | 256,000    | اجباراً خاموش (پیش‌فرض) |
 
 <Note>
-  OpenClaw همهٔ مدل‌های Kimi در Fireworks را روی `thinking: off` ثابت می‌کند، زیرا Kimi در Fireworks ممکن است زنجیرهٔ تفکر را در پاسخ قابل‌مشاهده افشا کند، مگر اینکه درخواست به‌صراحت تفکر را غیرفعال کند. مسیریابی مستقیم همان مدل از طریق [Moonshot](/fa/providers/moonshot)، خروجی استدلال Kimi را حفظ می‌کند. برای جابه‌جایی میان ارائه‌دهندگان، [حالت‌های تفکر](/fa/tools/thinking) را ببینید.
+  OpenClaw همه مدل‌های Kimi در Fireworks را روی `thinking: off` ثابت می‌کند، زیرا Kimi در Fireworks ممکن است زنجیره فکر را در پاسخ قابل‌مشاهده افشا کند، مگر آنکه درخواست صراحتاً تفکر را غیرفعال کند. مسیریابی مستقیم همان مدل از طریق [Moonshot](/fa/providers/moonshot)، خروجی استدلال Kimi را حفظ می‌کند. برای جابه‌جایی میان ارائه‌دهندگان، به [حالت‌های تفکر](/fa/tools/thinking) مراجعه کنید.
 </Note>
 
 ## شناسه‌های سفارشی مدل Fireworks
 
-OpenClaw در زمان اجرا هر شناسهٔ مدل یا مسیریاب Fireworks را می‌پذیرد. از شناسهٔ دقیق نمایش‌داده‌شده در Fireworks استفاده کنید و پیشوند `fireworks/` را به آن بیفزایید. تفکیک پویا، الگوی Fire Pass را شبیه‌سازی می‌کند (ورودی متن + تصویر، API سازگار با OpenAI و هزینهٔ پیش‌فرض صفر) و هنگامی که شناسه با الگوی Kimi مطابقت داشته باشد، تفکر را به‌صورت خودکار غیرفعال می‌کند. شناسه‌های پویای GLM فقط‌متنی علامت‌گذاری می‌شوند، مگر اینکه یک ورودی مدل سفارشی با ورودی تصویر پیکربندی کنید.
+OpenClaw در زمان اجرا هر شناسه مدل یا مسیریاب Fireworks را می‌پذیرد. از شناسه دقیق نمایش‌داده‌شده در Fireworks استفاده کنید و پیشوند `fireworks/` را به آن بیفزایید. تفکیک پویا، الگوی Fire Pass را شبیه‌سازی می‌کند (ورودی متن + تصویر، API سازگار با OpenAI و هزینه پیش‌فرض صفر) و وقتی شناسه با الگوی Kimi مطابقت داشته باشد، تفکر را به‌طور خودکار غیرفعال می‌کند. شناسه‌های پویای GLM فقط‌متنی علامت‌گذاری می‌شوند، مگر آنکه یک ورودی مدل سفارشی با ورودی تصویر پیکربندی کنید.
 
 ```json5
 {
@@ -110,31 +111,31 @@ OpenClaw در زمان اجرا هر شناسهٔ مدل یا مسیریاب Fir
 ```
 
 <AccordionGroup>
-  <Accordion title="نحوهٔ کار پیشوندگذاری شناسهٔ مدل">
-    هر ارجاع مدل Fireworks در OpenClaw با `fireworks/` آغاز می‌شود و پس از آن، شناسهٔ دقیق یا مسیر مسیریاب از پلتفرم Fireworks قرار می‌گیرد. برای نمونه:
+  <Accordion title="نحوه کار پیشوندگذاری شناسه مدل">
+    هر ارجاع مدل Fireworks در OpenClaw با `fireworks/` آغاز می‌شود و پس از آن، شناسه دقیق یا مسیر مسیریاب از پلتفرم Fireworks می‌آید. برای مثال:
 
-    - مدل مسیریاب: `fireworks/accounts/fireworks/routers/kimi-k2p5-turbo`
+    - مدل مسیریاب: `fireworks/accounts/fireworks/routers/kimi-k2p6-turbo`
     - مدل مستقیم: `fireworks/accounts/fireworks/models/<model-name>`
 
-    OpenClaw هنگام ساخت درخواست API، پیشوند `fireworks/` را حذف می‌کند و مسیر باقی‌مانده را به‌عنوان فیلد سازگار با OpenAI یعنی `model` به نقطهٔ پایانی Fireworks می‌فرستد.
+    OpenClaw هنگام ساخت درخواست API، پیشوند `fireworks/` را حذف می‌کند و مسیر باقی‌مانده را به‌عنوان فیلد سازگار با OpenAI یعنی `model` به نقطه پایانی Fireworks می‌فرستد.
 
   </Accordion>
 
-  <Accordion title="دلیل غیرفعال‌سازی اجباری تفکر برای Kimi">
-    Fireworks مدل Kimi را بدون کانال استدلال جداگانه ارائه می‌کند؛ بنابراین ممکن است زنجیرهٔ تفکر در جریان قابل‌مشاهدهٔ `content` ظاهر شود. OpenClaw در هر درخواست Kimi به Fireworks، مقدار `thinking: { type: "disabled" }` را می‌فرستد و `reasoning`، `reasoning_effort` و `reasoningEffort` را از محموله حذف می‌کند (`extensions/fireworks/stream.ts`). سیاست ارائه‌دهنده (`extensions/fireworks/thinking-policy.ts`) برای شناسه‌های مدل Kimi فقط سطح تفکر `off` را اعلام می‌کند تا تغییرات دستی `/think` و سطوح سیاست ارائه‌دهنده با قرارداد زمان اجرا هم‌راستا بمانند.
+  <Accordion title="چرا تفکر برای Kimi اجباراً خاموش است">
+    Fireworks مدل Kimi را بدون کانال استدلال جداگانه ارائه می‌کند؛ بنابراین زنجیره فکر ممکن است در جریان قابل‌مشاهده `content` ظاهر شود. OpenClaw در هر درخواست Kimi به Fireworks، مقدار `thinking: { type: "disabled" }` را ارسال می‌کند و `reasoning`، `reasoning_effort` و `reasoningEffort` را از محموله حذف می‌کند (`extensions/fireworks/stream.ts`). خط‌مشی ارائه‌دهنده (`extensions/fireworks/thinking-policy.ts`) برای شناسه‌های مدل Kimi فقط سطح تفکر `off` را اعلام می‌کند؛ بنابراین تغییرات دستی `/think` و سطوح خط‌مشی ارائه‌دهنده با قرارداد زمان اجرا هم‌راستا می‌مانند.
 
-    برای استفادهٔ سرتاسری از استدلال Kimi، [ارائه‌دهندهٔ Moonshot](/fa/providers/moonshot) را پیکربندی کنید و همان مدل را از طریق آن مسیریابی کنید.
+    برای استفاده سرتاسری از استدلال Kimi، [ارائه‌دهنده Moonshot](/fa/providers/moonshot) را پیکربندی و همان مدل را از طریق آن مسیریابی کنید.
 
   </Accordion>
 
-  <Accordion title="دردسترس‌بودن محیط برای سرویس پس‌زمینه">
-    اگر Gateway به‌صورت یک سرویس مدیریت‌شده اجرا می‌شود (launchd، systemd یا Docker)، کلید Fireworks باید برای همان فرایند قابل‌مشاهده باشد، نه فقط برای پوستهٔ تعاملی شما.
+  <Accordion title="دردسترس‌بودن محیط برای دیمن">
+    اگر Gateway به‌صورت یک سرویس مدیریت‌شده (launchd، systemd، Docker) اجرا می‌شود، کلید Fireworks باید برای آن فرایند قابل‌مشاهده باشد، نه فقط برای پوسته تعاملی شما.
 
     <Warning>
-      کلیدی که فقط در یک پوستهٔ تعاملی صادر شده باشد، برای سرویس پس‌زمینهٔ launchd یا systemd مفید نخواهد بود، مگر اینکه آن محیط نیز در سرویس وارد شود. برای اینکه کلید از فرایند Gateway قابل‌خواندن باشد، آن را در `~/.openclaw/.env` یا از طریق `env.shellEnv` تنظیم کنید.
+      کلیدی که فقط در یک پوسته تعاملی صادر شده است، برای دیمن launchd یا systemd مفید نخواهد بود، مگر آنکه آن محیط نیز در آنجا وارد شود. برای آنکه کلید از فرایند Gateway قابل‌خواندن باشد، آن را در `~/.openclaw/.env` یا از طریق `env.shellEnv` تنظیم کنید.
     </Warning>
 
-    OpenClaw هنگام بارگذاری پیکربندی، `~/.openclaw/.env` را بارگذاری می‌کند؛ بنابراین کلیدهای ذخیره‌شده در آن، در همهٔ پلتفرم‌ها به سرویس‌های مدیریت‌شدهٔ Gateway می‌رسند. پس از تعویض کلید، Gateway را مجدداً راه‌اندازی کنید (یا دوباره `openclaw doctor --fix` را اجرا کنید).
+    OpenClaw هنگام بارگذاری پیکربندی، `~/.openclaw/.env` را بارگذاری می‌کند؛ بنابراین کلیدهای ذخیره‌شده در آن، در هر پلتفرمی به سرویس‌های مدیریت‌شده Gateway می‌رسند. پس از تعویض کلید، Gateway را راه‌اندازی مجدد کنید (یا `openclaw doctor --fix` را دوباره اجرا کنید).
 
   </Accordion>
 </AccordionGroup>
@@ -146,7 +147,7 @@ OpenClaw در زمان اجرا هر شناسهٔ مدل یا مسیریاب Fir
     انتخاب ارائه‌دهندگان، ارجاع‌های مدل و رفتار جایگزینی هنگام خرابی.
   </Card>
   <Card title="حالت‌های تفکر" href="/fa/tools/thinking" icon="brain">
-    سطوح `/think`، سیاست‌های ارائه‌دهنده و مسیریابی مدل‌های دارای قابلیت استدلال.
+    سطوح `/think`، خط‌مشی‌های ارائه‌دهنده و مسیریابی مدل‌های دارای قابلیت استدلال.
   </Card>
   <Card title="Moonshot" href="/fa/providers/moonshot" icon="moon">
     اجرای Kimi با خروجی تفکر بومی از طریق API اختصاصی Moonshot.

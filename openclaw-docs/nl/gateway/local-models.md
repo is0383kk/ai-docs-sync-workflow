@@ -1,47 +1,48 @@
 ---
 read_when:
     - Je wilt modellen aanbieden vanaf je eigen GPU-machine
-    - Je configureert LM Studio of een OpenAI-compatibele proxy
+    - Je koppelt LM Studio of een OpenAI-compatibele proxy aan
     - Je hebt richtlijnen nodig voor het veiligste lokale model
 summary: Voer OpenClaw uit op lokale LLM's (LM Studio, vLLM, LiteLLM, aangepaste OpenAI-eindpunten)
 title: Lokale modellen
 x-i18n:
-    generated_at: "2026-07-12T08:54:51Z"
+    generated_at: "2026-07-27T05:00:11Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 386d46af219a368e2ae5089a72cda4bc735c7d6a5f66aec3c314f71b63a860ec
+    source_hash: af76c9e97bd1d3c9665c347944511b4f466f0b620bb8af7b5f95b1e9145aadec
     source_path: gateway/local-models.md
     workflow: 16
 ---
 
-Lokale modellen werken, maar stellen hogere eisen aan hardware, contextgrootte en bescherming tegen promptinjectie: kleine of agressief gekwantiseerde modellen kappen de context af en slaan veiligheidsfilters aan de providerzijde over. Deze pagina behandelt geavanceerdere lokale stacks en aangepaste OpenAI-compatibele servers. Begin voor de eenvoudigste aanpak met [LM Studio](/nl/providers/lmstudio) of [Ollama](/nl/providers/ollama) en `openclaw onboard`.
+Lokale modellen werken, maar stellen hogere eisen aan hardware, contextgrootte en bescherming tegen promptinjectie: kleine of agressief gekwantiseerde modellen kappen context af en slaan veiligheidsfilters aan providerzijde over. Deze pagina behandelt geavanceerdere lokale stacks en aangepaste OpenAI-compatibele servers. Begin voor de eenvoudigste aanpak met [LM Studio](/nl/providers/lmstudio) of [Ollama](/nl/providers/ollama) en `openclaw onboard`.
 
 Zie [Lokale modelservices](/nl/gateway/local-model-services) voor lokale servers die alleen moeten starten wanneer een geselecteerd model ze nodig heeft.
 
 ## Minimale hardwarevereisten
 
-Streef naar **2 of meer maximaal uitgeruste Mac Studio's of een vergelijkbare GPU-installatie (~$30.000+)** voor een soepel draaiende agentlus. Eén GPU met **24 GB** kan alleen lichtere prompts verwerken, met een hogere latentie. Gebruik altijd de **grootste variant of volledige versie die u kunt hosten** — kleine of sterk gekwantiseerde checkpoints verhogen het risico op promptinjectie (zie [Beveiliging](/nl/gateway/security)).
+Streef naar **2+ maximaal uitgeruste Mac Studios of een gelijkwaardige GPU-installatie (~$30k+)** voor een soepel werkende agentlus. Eén GPU van **24 GB** kan alleen lichtere prompts verwerken, met een hogere latentie. Gebruik altijd de **grootste variant / variant op volledige grootte die je kunt hosten** - kleine of sterk gekwantiseerde checkpoints verhogen het risico op promptinjectie (zie [Beveiliging](/nl/gateway/security)).
 
 ## Kies een backend
 
-| Backend                                              | Gebruiken wanneer                                                                                   |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [ds4](/nl/providers/ds4)                                | Lokale DeepSeek V4 Flash op macOS Metal met OpenAI-compatibele toolaanroepen                        |
-| [LM Studio](/nl/providers/lmstudio)                     | Eerste lokale installatie, GUI-lader, systeemeigen Responses API                                   |
-| LiteLLM / OAI-proxy / aangepaste OpenAI-compatibele proxy | U een andere model-API ontsluit en wilt dat OpenClaw deze als OpenAI behandelt                  |
-| MLX / vLLM / SGLang                                  | Zelfgehoste verwerking met hoge doorvoer en een OpenAI-compatibel HTTP-eindpunt                     |
-| [Ollama](/nl/providers/ollama)                          | CLI-workflow, modelbibliotheek, zelfstandig werkende systemd-service                                |
+| Backend                                              | Gebruiken wanneer                                                                 |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [ds4](/nl/providers/ds4)                                | Lokale DeepSeek V4 Flash op macOS Metal met OpenAI-compatibele toolaanroepen       |
+| [LM Studio](/nl/providers/lmstudio)                     | Eerste lokale configuratie, GUI-lader, systeemeigen Responses API                  |
+| LiteLLM / OAI-proxy / aangepaste OpenAI-compatibele proxy | Je een andere model-API ontsluit en OpenClaw die als OpenAI moet behandelen   |
+| MLX / vLLM / SGLang                                  | Zelfgehoste bediening met hoge doorvoer en een OpenAI-compatibel HTTP-eindpunt     |
+| [Ollama](/nl/providers/ollama)                          | CLI-workflow, modelbibliotheek, onderhoudsvrije systemd-service                    |
 
-Gebruik `api: "openai-responses"` wanneer de backend dit ondersteunt (LM Studio doet dat). Gebruik anders `api: "openai-completions"`. Als `api` bij een aangepaste provider met een `baseUrl` wordt weggelaten, gebruikt OpenClaw standaard `openai-completions`.
+Gebruik `api: "openai-responses"` wanneer de backend dit ondersteunt (LM Studio doet dat). Gebruik anders `api: "openai-completions"`. Als `api` wordt weggelaten bij een aangepaste provider met een `baseUrl`, gebruikt OpenClaw standaard `openai-completions`.
 
 <Warning>
-**WSL2 + Ollama + NVIDIA/CUDA:** het officiële Ollama-installatieprogramma voor Linux schakelt een systemd-service met `Restart=always` in. Bij WSL2-installaties met een GPU kan automatisch starten tijdens het opstarten het laatstgebruikte model opnieuw laden en het hostgeheugen bezet houden, waardoor de VM herhaaldelijk opnieuw wordt gestart. Zie [WSL2-crashlus](/nl/providers/ollama#troubleshooting).
+**WSL2 + Ollama + NVIDIA/CUDA:** het officiële Ollama-installatieprogramma voor Linux schakelt een systemd-service met `Restart=always` in. Bij WSL2-GPU-configuraties kan automatisch starten tijdens het opstarten het laatst gebruikte model opnieuw laden en hostgeheugen vastzetten, waardoor de VM herhaaldelijk opnieuw wordt gestart. Zie [WSL2-crashlus](/nl/providers/ollama#troubleshooting).
 </Warning>
 
 ## LM Studio + groot lokaal model (Responses API)
 
-Dit is momenteel de beste lokale stack. Laad een groot model in LM Studio (een volledige versie van Qwen, DeepSeek of Llama), schakel de lokale server in (standaard `http://127.0.0.1:1234`) en gebruik de Responses API om redeneringen gescheiden te houden van de uiteindelijke tekst.
+Dit is momenteel de beste lokale stack. Laad een groot model in LM Studio (een volledige Qwen-, DeepSeek- of Llama-build), schakel de lokale server in (standaard `http://127.0.0.1:1234`) en gebruik de Responses API om redeneringen gescheiden te houden van de definitieve tekst.
 
 ```json5
 {
@@ -78,14 +79,14 @@ Dit is momenteel de beste lokale stack. Laad een groot model in LM Studio (een v
 }
 ```
 
-Installatiecontrolelijst:
+Configuratiechecklist:
 
 - Installeer LM Studio: [https://lmstudio.ai](https://lmstudio.ai)
-- Download de **grootste beschikbare modelversie** (vermijd kleine of sterk gekwantiseerde varianten), start de server en controleer of `http://127.0.0.1:1234/v1/models` deze vermeldt.
+- Download de **grootste beschikbare modelbuild** (vermijd "small"/sterk gekwantiseerde varianten), start de server en controleer of `http://127.0.0.1:1234/v1/models` deze vermeldt.
 - Vervang `my-local-model` door de daadwerkelijke model-ID die in LM Studio wordt weergegeven.
-- Houd het model geladen; koud laden zorgt voor extra opstartlatentie.
-- Pas `contextWindow`/`maxTokens` aan als uw LM Studio-versie hiervan afwijkt.
-- Blijf voor WhatsApp bij de Responses API, zodat alleen de uiteindelijke tekst wordt verzonden.
+- Houd het model geladen; koud laden voegt opstartlatentie toe.
+- Pas `contextWindow`/`maxTokens` aan als jouw LM Studio-build afwijkt.
+- Blijf voor WhatsApp de Responses API gebruiken, zodat alleen de definitieve tekst wordt verzonden.
 - Behoud `models.mode: "merge"`, zodat gehoste modellen als terugvalopties beschikbaar blijven.
 
 ### Hybride configuratie: gehost primair model, lokale terugvaloptie
@@ -129,11 +130,11 @@ Installatiecontrolelijst:
 }
 ```
 
-Voor een lokale voorkeursconfiguratie met een gehost vangnet verwisselt u de volgorde van `primary`/`fallbacks` en behoudt u hetzelfde `providers`-blok en `models.mode: "merge"`.
+Voor een lokale-eerstconfiguratie met een gehost vangnet verwissel je de volgorde van `primary`/`fallbacks` en behoud je hetzelfde `providers`-blok en `models.mode: "merge"`.
 
-### Regionale hosting en gegevensroutering
+### Regionale hosting / gegevensroutering
 
-Gehoste varianten van MiniMax/Kimi/GLM zijn ook beschikbaar op OpenRouter met aan een regio gekoppelde eindpunten (bijvoorbeeld gehost in de VS). Kies de regionale variant om verkeer binnen het door u gekozen rechtsgebied te houden en behoud `models.mode: "merge"` voor Anthropic/OpenAI-terugvalopties. Alleen lokaal gebruiken biedt nog steeds de beste privacy; gehoste regionale routering is de middenweg wanneer u providerfuncties nodig hebt, maar controle wilt houden over de gegevensstroom.
+Gehoste MiniMax/Kimi/GLM-varianten bestaan ook op OpenRouter met aan een regio gebonden eindpunten (bijvoorbeeld gehost in de VS). Kies de regionale variant om verkeer binnen het gekozen rechtsgebied te houden en behoud `models.mode: "merge"` voor Anthropic/OpenAI-terugvalopties. Alleen lokaal blijft de beste keuze voor privacy; gehoste regionale routering is de middenweg wanneer je providerfuncties nodig hebt, maar controle over de gegevensstroom wilt behouden.
 
 ## Andere OpenAI-compatibele lokale proxy's
 
@@ -171,34 +172,36 @@ MLX (`mlx_lm.server`), vLLM, SGLang, LiteLLM, OAI-proxy of een aangepaste Gatewa
 }
 ```
 
-Vermeldingen voor aangepaste/lokale providers vertrouwen hun exact geconfigureerde `baseUrl`-oorsprong voor beveiligde modelaanvragen, waaronder loopback, LAN, tailnet en hosts met privé-DNS. Oorsprongen voor metadata/link-local worden altijd geblokkeerd. Voor aanvragen naar andere privé-oorsprongen is nog steeds `models.providers.<id>.request.allowPrivateNetwork: true` vereist; stel de vertrouwensvlag in op `false` om vertrouwen in de exacte oorsprong uit te schakelen.
+Vermeldingen voor aangepaste/lokale providers vertrouwen hun exact geconfigureerde `baseUrl`-oorsprong voor beveiligde modelaanvragen, waaronder loopback-, LAN-, tailnet- en privé-DNS-hosts. Oorsprongen voor metadata/link-local worden altijd geblokkeerd. Voor aanvragen naar andere privé-oorsprongen is `models.providers.<id>.request.allowPrivateNetwork: true` nog steeds vereist; stel de vertrouwensvlag in op `false` om het vertrouwen in de exacte oorsprong uit te schakelen.
 
-`models.providers.<id>.models[].id` is lokaal voor de provider — neem het providervoorvoegsel niet op. Voor een MLX-server die is gestart met `mlx_lm.server --model mlx-community/Qwen3-30B-A3B-6bit`:
+`models.providers.<id>.models[].id` is providerspecifiek - neem het providervoorvoegsel niet op. Voor een MLX-server die is gestart met `mlx_lm.server --model mlx-community/Qwen3-30B-A3B-6bit`:
 
 - `models.providers.mlx.models[].id: "mlx-community/Qwen3-30B-A3B-6bit"`
 - `agents.defaults.model.primary: "mlx/mlx-community/Qwen3-30B-A3B-6bit"`
 
-Stel `input: ["text", "image"]` in voor lokale of via een proxy aangeboden visiemodellen, zodat afbeeldingsbijlagen in agentbeurten worden ingevoegd. Interactieve onboarding van aangepaste providers herkent gangbare ID's van visiemodellen en stelt alleen vragen over onbekende namen; niet-interactieve onboarding gebruikt dezelfde herkenning, met `--custom-image-input` / `--custom-text-input` om deze te overschrijven.
+Stel `input: ["text", "image"]` in voor lokale of via proxy aangeboden visiemodellen, zodat afbeeldingsbijlagen in agentbeurten worden ingevoegd. Interactieve onboarding van aangepaste providers herkent veelgebruikte ID's van visiemodellen en vraagt alleen naar onbekende namen; niet-interactieve onboarding gebruikt dezelfde herkenning, met `--custom-image-input` / `--custom-text-input` om deze te overschrijven.
 
-Gebruik `models.providers.<id>.timeoutSeconds` voor trage lokale/externe modelservers voordat u `agents.defaults.timeoutSeconds` verhoogt. De providertime-out omvat verbinding, headers, streaming van de hoofdtekst en het volledig afbreken van beveiligd ophalen, uitsluitend voor HTTP-modelaanvragen. Als de time-out van de agent/uitvoering lager is, verhoogt u die ook, omdat de providertime-out niet de gehele uitvoering kan verlengen.
+Gebruik `models.providers.<id>.timeoutSeconds` voor trage lokale/externe modelservers voordat je `agents.defaults.timeoutSeconds` verhoogt. De providertime-out omvat verbinding, headers, streaming van de hoofdtekst en het volledig afbreken van beveiligd ophalen, uitsluitend voor HTTP-modelaanvragen - als de time-out van de agent/run lager is, verhoog die dan ook, omdat de providertime-out niet de volledige run kan verlengen.
 
 <Note>
-Voor aangepaste OpenAI-compatibele providers wordt een niet-geheime lokale markering zoals `apiKey: "ollama-local"` geaccepteerd wanneer `baseUrl` wordt omgezet naar loopback, een privé-LAN, `.local` of een kale hostnaam — OpenClaw behandelt deze als geldige lokale referentie in plaats van een ontbrekende sleutel te melden. Gebruik een echte waarde voor providers die een openbare hostnaam accepteren.
+Voor aangepaste OpenAI-compatibele providers wordt een niet-geheime lokale markering zoals `apiKey: "ollama-local"` geaccepteerd wanneer `baseUrl` wordt omgezet naar loopback, een privé-LAN, `.local` of een kale hostnaam - OpenClaw behandelt deze als geldige lokale referentie in plaats van een ontbrekende sleutel te melden. Gebruik een echte waarde voor elke provider die een openbare hostnaam accepteert.
 </Note>
 
-Gedragsopmerkingen voor lokale of via een proxy aangeboden `/v1`-backends:
+Gedragsopmerkingen voor lokale/via proxy aangeboden `/v1`-backends:
 
 - OpenClaw behandelt deze als OpenAI-compatibele proxyroutes, niet als systeemeigen OpenAI-eindpunten.
-- Aanvraagvormgeving die alleen voor systeemeigen OpenAI geldt, wordt niet toegepast: geen `service_tier`, geen Responses-`store`, geen OpenAI-compatibele vormgeving van redeneringspayloads en geen aanwijzingen voor promptcaching.
+- Aanvraagvorming die uitsluitend voor systeemeigen OpenAI geldt, wordt niet toegepast: geen `service_tier`, geen Responses-`store`, geen vormgeving van OpenAI-compatibele payloads voor redeneringen, geen hints voor promptcaching.
 - Verborgen OpenClaw-toeschrijvingsheaders (`originator`, `version`, `User-Agent`) worden niet ingevoegd bij aangepaste proxy-URL's.
 
-Compatibiliteitsoverschrijvingen voor strengere OpenAI-compatibele backends:
+Compat-declaraties gelden alleen voor het aangepaste eindpunt dat door deze providerregel wordt beschreven. Routes die in de catalogus bekend zijn, gebruiken in plaats daarvan mogelijkheden die eigendom zijn van de provider; zie de [handleiding voor mogelijkheden van aangepaste providers](/nl/gateway/config-tools#custom-provider-capability-declarations).
 
-- **Alleen tekenreeksinhoud**: sommige servers accepteren voor `messages[].content` alleen tekenreeksen, geen gestructureerde arrays met inhoudsdelen. Stel `models.providers.<provider>.models[].compat.requiresStringContent: true` in.
-- **Strikte berichtsleutels**: als de server berichtvermeldingen met meer dan `role`/`content` weigert, stelt u `compat.strictMessageKeys: true` in.
-- **Tooltekst tussen blokhaken**: sommige lokale modellen produceren zelfstandige toolaanvragen als tekst tussen blokhaken, zoals `[tool_name]` gevolgd door JSON en `[END_TOOL_REQUEST]`. OpenClaw zet deze alleen om in echte toolaanroepen wanneer de naam exact overeenkomt met een voor die beurt geregistreerde tool; anders blijft het verborgen, niet-ondersteunde tekst.
-- **Ongestructureerde tekst die op een toolaanroep lijkt**: als een model JSON/XML/ReAct-achtige tekst produceert die op een toolaanroep lijkt, maar geen gestructureerde aanroep was, laat OpenClaw deze als tekst staan en registreert het een waarschuwing met de uitvoerings-ID, provider/het model, het gedetecteerde patroon en, indien beschikbaar, de toolnaam. Dit is een incompatibiliteit van de provider/het model, geen voltooide tooluitvoering.
-- **Toolgebruik afdwingen**: als tools verschijnen als assistenttekst (onbewerkte JSON/XML/ReAct of een lege `tool_calls`-array), controleert u eerst of de chatsjabloon/parser van de server toolaanroepen ondersteunt. Als de parser alleen werkt wanneer toolgebruik wordt afgedwongen, overschrijft u per model de standaardproxywaarde van `tool_choice: "auto"`:
+Compat-overschrijvingen voor strengere OpenAI-compatibele backends:
+
+- **Alleen tekenreeksinhoud**: sommige servers accepteren alleen `messages[].content` als tekenreeks, geen gestructureerde arrays van inhoudsdelen. Stel `models.providers.<provider>.models[].compat.requiresStringContent: true` in.
+- **Strikte berichtsleutels**: als de server berichtvermeldingen met meer dan `role`/`content` weigert, stel je `compat.strictMessageKeys: true` in.
+- **Tooltekst tussen blokhaken**: sommige lokale modellen geven zelfstandige toolaanvragen als tekst tussen blokhaken weer, zoals `[tool_name]`, gevolgd door JSON en `[END_TOOL_REQUEST]`. OpenClaw zet deze alleen om in echte toolaanroepen wanneer de naam exact overeenkomt met een voor de beurt geregistreerde tool; anders blijft deze als verborgen, niet-ondersteunde tekst staan.
+- **Ongestructureerde tekst die op een toolaanroep lijkt**: als een model JSON/XML/ReAct-achtige tekst genereert die op een toolaanroep lijkt, maar geen gestructureerde aanroep was, laat OpenClaw deze als tekst staan en registreert het een waarschuwing met de run-ID, provider/het model, het gedetecteerde patroon en, indien beschikbaar, de toolnaam. Dit is incompatibiliteit van de provider/het model, geen voltooide toolrun.
+- **Toolgebruik afdwingen**: als tools als assistenttekst verschijnen (onbewerkte JSON/XML/ReAct of een lege `tool_calls`-array), controleer dan eerst of de chatsjabloon/parser van de server toolaanroepen ondersteunt. Als de parser alleen werkt wanneer toolgebruik wordt afgedwongen, overschrijf je de standaardproxywaarde van `tool_choice: "auto"` per model:
 
   ```json5
   {
@@ -218,13 +221,13 @@ Compatibiliteitsoverschrijvingen voor strengere OpenAI-compatibele backends:
   }
   ```
 
-  Gebruik dit alleen wanneer elke normale beurt een tool moet aanroepen. Vervang `local/my-local-model` door de exacte referentie uit `openclaw models list` of stel deze in via de CLI:
+  Gebruik dit alleen wanneer elke normale beurt een tool moet aanroepen. Vervang `local/my-local-model` door de exacte verwijzing uit `openclaw models list`, of stel deze in via de CLI:
 
   ```bash
   openclaw config set agents.defaults.models '{"local/my-local-model":{"params":{"extra_body":{"tool_choice":"required"}}}}' --strict-json --merge
   ```
 
-- **Extra redeneerniveaus**: als een aangepast OpenAI-compatibel model naast het ingebouwde profiel extra OpenAI-redeneerniveaus accepteert, declareert u deze in het compatibiliteitsblok van het model. Door `"xhigh"` toe te voegen, wordt dit voor die modelreferentie beschikbaar in `/think xhigh`, sessiekiezers, Gateway-validatie en `llm-task`-validatie:
+- **Extra redeneerinspanningen**: als een aangepast OpenAI-compatibel model OpenAI-redeneerinspanningen buiten het ingebouwde profiel accepteert, declareer je deze in het compat-blok van het model. Door `"xhigh"` toe te voegen, wordt deze voor die modelverwijzing beschikbaar in `/think xhigh`, sessiekiezers, Gateway-validatie en `llm-task`-validatie:
 
   ```json5
   {
@@ -237,7 +240,7 @@ Compatibiliteitsoverschrijvingen voor strengere OpenAI-compatibele backends:
           models: [
             {
               id: "gpt-5.4",
-              name: "GPT 5.4 via local proxy",
+              name: "GPT 5.4 via lokale proxy",
               reasoning: true,
               input: ["text"],
               cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
@@ -257,37 +260,37 @@ Compatibiliteitsoverschrijvingen voor strengere OpenAI-compatibele backends:
 
 ## Kleinere of strengere backends
 
-Als het model probleemloos wordt geladen, maar volledige agentbeurten niet goed werken, gaat u van boven naar beneden te werk: controleer eerst het transport en beperk daarna het oppervlak.
+Als het model zonder problemen wordt geladen, maar volledige agentbeurten zich verkeerd gedragen, werk dan van boven naar beneden: controleer eerst het transport en beperk vervolgens het oppervlak.
 
-1. **Controleer of het lokale model reageert** — zonder tools en zonder agentcontext:
-
-   ```bash
-   openclaw infer model run --local --model <provider/model> --prompt "Reply with exactly: pong" --json
-   ```
-
-2. **Bevestig Gateway-routering** - verzendt alleen de prompt en slaat het transcript, de AGENTS-bootstrap, de samenstelling van de context-engine, tools en meegeleverde MCP-servers over, maar test nog steeds de Gateway-routering, authenticatie en providerselectie:
+1. **Controleer of het lokale model reageert** - geen tools, geen agentcontext:
 
    ```bash
-   openclaw infer model run --gateway --model <provider/model> --prompt "Reply with exactly: pong" --json
+   openclaw infer model run --local --model <provider/model> --prompt "Antwoord exact met: pong" --json
    ```
 
-3. **Probeer de lichte modus** als beide controles slagen, maar echte agentbeurten mislukken met onjuist gevormde toolaanroepen of te grote prompts: stel `agents.defaults.experimental.localModelLean: true` in. Hiermee worden zware tools voor de browser, cron, berichten, mediageneratie, spraak en PDF's weggelaten, tenzij ze expliciet vereist zijn. Grotere toolcatalogi worden standaard achter gestructureerde Tool Search-bedieningselementen geplaatst, terwijl `exec` direct zichtbaar blijft. Zie [Experimentele functies -> Lichte modus voor lokale modellen](/nl/concepts/experimental-features#local-model-lean-mode) voor meer informatie en hoe u controleert of deze is ingeschakeld.
+2. **Controleer Gateway-routering** - verzendt alleen de prompt en slaat het transcript, de AGENTS-bootstrap, de samenstelling van de context-engine, tools en gebundelde MCP-servers over, maar test nog steeds Gateway-routering, authenticatie en providerselectie:
 
-4. **Schakel tools als laatste redmiddel volledig uit** door voor dat model `models.providers.<provider>.models[].compat.supportsTools: false` in te stellen. De agent wordt dan zonder toolaanroepen uitgevoerd.
+   ```bash
+   openclaw infer model run --gateway --model <provider/model> --prompt "Antwoord exact met: pong" --json
+   ```
 
-5. **Daarna ligt het knelpunt stroomopwaarts.** Als de backend na inschakeling van de lichte modus en `supportsTools: false` nog steeds alleen bij grotere OpenClaw-uitvoeringen mislukt, ligt het resterende probleem doorgaans bij het model of de server zelf — het contextvenster, GPU-geheugen, verwijdering uit de kv-cache of een backendfout — en niet bij de transportlaag van OpenClaw.
+3. **Probeer de zuinige modus** als beide tests slagen, maar echte agentbeurten mislukken door ongeldige toolaanroepen of te grote prompts: stel `agents.defaults.experimental.localModelLean: true` in. Hiermee worden zware browser-, cron-, bericht-, mediageneratie-, spraak- en PDF-tools weggelaten, tenzij ze expliciet vereist zijn, en worden grotere toolcatalogi standaard achter gestructureerde Tool Search-besturingselementen geplaatst, terwijl `exec` direct zichtbaar blijft. Zie [Experimentele functies -> Zuinige modus voor lokale modellen](/nl/concepts/experimental-features#local-model-lean-mode) voor details en hoe je controleert of deze actief is.
+
+4. **Schakel tools als laatste redmiddel volledig uit** door `models.providers.<provider>.models[].compat.supportsTools: false` voor dat model in te stellen - de agent wordt dan zonder toolaanroepen uitgevoerd.
+
+5. **Daarna ligt de bottleneck upstream.** Als de backend na de zuinige modus en `supportsTools: false` nog steeds alleen bij grotere OpenClaw-uitvoeringen mislukt, ligt het resterende probleem meestal bij het model of de server zelf - contextvenster, GPU-geheugen, verwijdering uit de kv-cache of een backendbug - en niet bij de transportlaag van OpenClaw.
 
 ## Problemen oplossen
 
 - **Kan de Gateway de proxy niet bereiken?** `curl http://127.0.0.1:1234/v1/models`.
-- **LM Studio-model niet geladen?** Laad het opnieuw; een koude start is een veelvoorkomende oorzaak van 'vastlopen'.
-- **Meldt de lokale server `terminated` of `ECONNRESET`, of sluit deze de stream halverwege een beurt?** OpenClaw registreert in de diagnostische gegevens een `model.call.error.failureKind` met lage cardinaliteit, plus een momentopname van het RSS- en heapgeheugen van het OpenClaw-proces. Vergelijk bij geheugendruk in LM Studio/Ollama die tijdstempel met het serverlogboek of een macOS-crash- of jetsamlogboek om te bevestigen of de modelserver is beëindigd.
-- **Contextfouten?** OpenClaw leidt de drempelwaarden voor de voorafgaande controle van het contextvenster af van het gedetecteerde modelvenster (of het begrensde venster wanneer `agents.defaults.contextTokens` dit verlaagt), met een waarschuwing onder 20% en een ondergrens van **8k**, en een harde blokkering onder 10% met een ondergrens van **4k** (begrensd tot het effectieve contextvenster, zodat te grote modelmetagegevens een geldige gebruikerslimiet niet kunnen afwijzen). Verlaag `contextWindow` of verhoog de contextlimiet van de server of het model.
-- **`messages[].content ... expected a string`?** Voeg `compat.requiresStringContent: true` toe aan de vermelding van dat model.
-- **`validation.keys`, of 'message entries only allow `role` and `content`'?** Voeg `compat.strictMessageKeys: true` toe aan de vermelding van dat model.
-- **Werken rechtstreekse aanroepen van `/v1/chat/completions`, maar mislukt `openclaw infer model run --local` bij Gemma of een ander lokaal model?** Controleer eerst de provider-URL, modelverwijzing, authenticatiemarkering en serverlogboeken — `model run` slaat agenttools volledig over. Als `model run` slaagt maar grotere agentbeurten mislukken, verklein dan het tooloppervlak met `localModelLean` of `compat.supportsTools: false`.
-- **Verschijnen toolaanroepen als onbewerkte JSON/XML/ReAct-tekst, of retourneert de provider een lege `tool_calls`-array?** Voeg geen proxy toe die assistenttekst blindelings omzet in tooluitvoering — corrigeer eerst de chatsjabloon of parser van de server. Als het model alleen werkt wanneer toolgebruik wordt afgedwongen, voeg dan de bovenstaande overschrijving `params.extra_body.tool_choice: "required"` toe en gebruik die modelvermelding alleen voor sessies waarin bij elke beurt een toolaanroep wordt verwacht.
-- **Veiligheid**: lokale modellen slaan filters aan de providerzijde over. Houd agents beperkt en laat Compaction ingeschakeld om de impact van promptinjectie te beperken.
+- **LM Studio-model niet meer geladen?** Laad het opnieuw; een koude start is een veelvoorkomende oorzaak van 'vastlopen'.
+- **Meldt de lokale server `terminated`, `ECONNRESET`, of sluit deze de stream halverwege een beurt?** OpenClaw registreert in de diagnostiek een `model.call.error.failureKind` met lage cardinaliteit plus een momentopname van het RSS-/heapgebruik van het OpenClaw-proces. Vergelijk bij geheugendruk in LM Studio/Ollama die tijdstempel met het serverlogboek of een macOS-crash-/jetsamlogboek om te bevestigen of de modelserver is beëindigd.
+- **Contextfouten?** OpenClaw leidt de drempelwaarden voor de preflightcontrole van het contextvenster af van het gedetecteerde modelvenster (of het begrensde venster wanneer `agents.defaults.contextTokens` dit verlaagt), met een waarschuwing onder 20% en een ondergrens van **8k**, en een harde blokkering onder 10% met een ondergrens van **4k** (begrensd tot het effectieve contextvenster, zodat te grote modelmetadata een geldige gebruikerslimiet niet kan afwijzen). Verlaag `contextWindow` of verhoog de contextlimiet van de server/het model.
+- **`messages[].content ... expected a string`?** Voeg `compat.requiresStringContent: true` toe aan die modelvermelding.
+- **`validation.keys`, of 'berichtvermeldingen staan alleen `role` en `content` toe'?** Voeg `compat.strictMessageKeys: true` toe aan die modelvermelding.
+- **Werken directe `/v1/chat/completions`-aanroepen, maar mislukt `openclaw infer model run --local` bij Gemma of een ander lokaal model?** Controleer eerst de provider-URL, de modelreferentie, de authenticatiemarkering en de serverlogboeken - `model run` slaat agenttools volledig over. Als `model run` slaagt, maar grotere agentbeurten mislukken, verklein dan het tooloppervlak met `localModelLean` of `compat.supportsTools: false`.
+- **Verschijnen toolaanroepen als onbewerkte JSON-/XML-/ReAct-tekst, of retourneert de provider een lege `tool_calls`-array?** Voeg geen proxy toe die assistenttekst blindelings omzet in tooluitvoering - herstel eerst het chatsjabloon/de parser van de server. Als het model alleen werkt wanneer toolgebruik wordt afgedwongen, voeg dan de bovenstaande `params.extra_body.tool_choice: "required"`-override toe en gebruik die modelvermelding alleen voor sessies waarin bij elke beurt een toolaanroep wordt verwacht.
+- **Veiligheid**: lokale modellen slaan filters aan de providerzijde over. Houd agents beperkt en laat Compaction ingeschakeld om het bereik van promptinjecties te beperken.
 
 ## Gerelateerd
 

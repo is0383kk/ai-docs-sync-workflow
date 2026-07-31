@@ -1,37 +1,38 @@
 ---
 read_when:
     - OpenClaw'da Xiaomi MiMo modellerini kullanmak istiyorsunuz
-    - Xiaomi MiMo kimlik doğrulaması veya Token Planı kurulumu gerekir
+    - Xiaomi MiMo kimlik doğrulaması veya Token Planı kurulumu gerekiyor
 summary: Xiaomi MiMo'nun kullandıkça öde ve Token Planı modellerini OpenClaw ile kullanın
 title: Xiaomi MiMo
 x-i18n:
-    generated_at: "2026-07-12T12:44:57Z"
+    generated_at: "2026-07-26T23:59:18Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: e6b91ead3e4a32a93bca7e02476b8de11137e8a5b5fa434bad8187bc1b204856
+    source_hash: ef79dea8332903c726f076c91b3b458e2d98534d402a412e7c156c06b2912a69
     source_path: providers/xiaomi.md
     workflow: 16
 ---
 
-Xiaomi MiMo, **MiMo** modelleri için API platformudur. Birlikte gelen `xiaomi`
-Plugin'i (`enabledByDefault: true`, kurulum adımı yok), iki metin
+Xiaomi MiMo, **MiMo** modellerine yönelik API platformudur. Birlikte gelen `xiaomi`
+plugin (`enabledByDefault: true`, kurulum adımı yoktur), iki metin
 sağlayıcısının yanı sıra bir konuşma (TTS) sağlayıcısını kaydeder:
 
 - `xiaomi` - kullandıkça öde anahtarları (`sk-...`)
 - `xiaomi-token-plan` - bölgesel uç nokta ön ayarlarına sahip Token Plan anahtarları (`tp-...`)
 
-| Özellik                  | Değer                                                                                                                                              |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sağlayıcı kimlikleri     | `xiaomi` (kullandıkça öde), `xiaomi-token-plan` (Token Plan)                                                                                       |
-| Kimlik doğrulama ortam değişkenleri | `XIAOMI_API_KEY`, `XIAOMI_TOKEN_PLAN_API_KEY`                                                                                           |
-| İlk kurulum bayrakları   | `--auth-choice xiaomi-api-key`, `--auth-choice xiaomi-token-plan-cn`, `--auth-choice xiaomi-token-plan-sgp`, `--auth-choice xiaomi-token-plan-ams` |
-| Doğrudan CLI bayrakları  | `--xiaomi-api-key <key>`, `--xiaomi-token-plan-api-key <key>`                                                                                      |
-| API                      | OpenAI uyumlu sohbet tamamlama (`openai-completions`)                                                                                              |
-| Konuşma sözleşmesi       | `speechProviders: ["xiaomi"]`                                                                                                                      |
-| Temel URL'ler            | Kullandıkça öde: `https://api.xiaomimimo.com/v1`; Token Plan: `token-plan-{cn,sgp,ams}.xiaomimimo.com/v1`                                           |
-| Varsayılan modeller      | `xiaomi/mimo-v2-flash`, `xiaomi-token-plan/mimo-v2.5-pro`                                                                                          |
-| TTS varsayılanı          | `mimo-v2.5-tts`, ses `mimo_default`; ses tasarımı modeli `mimo-v2.5-tts-voicedesign`                                                               |
+| Özellik          | Değer                                                                                                                                              |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sağlayıcı kimlikleri | `xiaomi` (kullandıkça öde), `xiaomi-token-plan` (Token Plan)                                                                                         |
+| Kimlik doğrulama ortam değişkenleri | `XIAOMI_API_KEY`, `XIAOMI_TOKEN_PLAN_API_KEY`                                                                                                      |
+| İlk kurulum bayrakları | `--auth-choice xiaomi-api-key`, `--auth-choice xiaomi-token-plan-cn`, `--auth-choice xiaomi-token-plan-sgp`, `--auth-choice xiaomi-token-plan-ams` |
+| Doğrudan CLI bayrakları | `--xiaomi-api-key <key>`, `--xiaomi-token-plan-api-key <key>`                                                                                      |
+| API              | OpenAI uyumlu sohbet tamamlamaları (`openai-completions`)                                                                                          |
+| Konuşma sözleşmesi | `speechProviders: ["xiaomi"]`                                                                                                                      |
+| Temel URL'ler    | Kullandıkça öde: `https://api.xiaomimimo.com/v1`; Token Plan: `token-plan-{cn,sgp,ams}.xiaomimimo.com/v1`                                            |
+| Varsayılan modeller | `xiaomi/mimo-v2.5`, `xiaomi-token-plan/mimo-v2.5-pro`                                                                                              |
+| TTS varsayılanı  | `mimo-v2.5-tts`, ses `mimo_default`; ses tasarımı modeli `mimo-v2.5-tts-voicedesign`                                                               |
 
 ## Başlarken
 
@@ -75,68 +76,64 @@ sağlayıcısının yanı sıra bir konuşma (TTS) sağlayıcısını kaydeder:
 
 ## Kullandıkça öde kataloğu
 
-| Model başvurusu         | Girdi       | Bağlam    | En fazla çıktı | Akıl yürütme | Notlar            |
-| ----------------------- | ----------- | --------- | --------------- | ------------- | ----------------- |
-| `xiaomi/mimo-v2-flash`  | metin       | 262,144   | 8,192           | Hayır         | Varsayılan model  |
-| `xiaomi/mimo-v2-pro`    | metin       | 1,048,576 | 32,000          | Evet          | Geniş bağlam      |
-| `xiaomi/mimo-v2-omni`   | metin, görsel | 262,144 | 32,000          | Evet          | Çok modlu         |
+| Model başvurusu       | Girdi       | Bağlam    | Azami çıktı | Akıl yürütme | Notlar            |
+| ---------------------- | ----------- | --------- | ---------- | --------- | ------------- |
+| `xiaomi/mimo-v2.5`     | metin, görsel | 1,048,576 | 131,072    | Evet      | Varsayılan model |
+| `xiaomi/mimo-v2.5-pro` | metin        | 1,048,576 | 131,072    | Evet      | Amiral gemisi   |
 
 ## Token Plan kataloğu
 
-Xiaomi'nin abonelik arayüzünde gösterilen bölgesel temel URL ile eşleşen Token Plan kimlik doğrulama seçeneğini belirleyin:
+Xiaomi'nin abonelik kullanıcı arayüzünde gösterilen bölgesel temel URL ile eşleşen Token Plan kimlik doğrulama seçeneğini belirleyin:
 
 | Kimlik doğrulama seçeneği | Temel URL                                  |
-| ------------------------- | ------------------------------------------ |
-| `xiaomi-token-plan-cn`    | `https://token-plan-cn.xiaomimimo.com/v1`  |
-| `xiaomi-token-plan-sgp`   | `https://token-plan-sgp.xiaomimimo.com/v1` |
-| `xiaomi-token-plan-ams`   | `https://token-plan-ams.xiaomimimo.com/v1` |
+| ----------------------- | ------------------------------------------ |
+| `xiaomi-token-plan-cn`  | `https://token-plan-cn.xiaomimimo.com/v1`  |
+| `xiaomi-token-plan-sgp` | `https://token-plan-sgp.xiaomimimo.com/v1` |
+| `xiaomi-token-plan-ams` | `https://token-plan-ams.xiaomimimo.com/v1` |
 
-| Model başvurusu                    | Girdi         | Bağlam    | En fazla çıktı | Akıl yürütme | Notlar           |
-| ---------------------------------- | ------------- | --------- | --------------- | ------------- | ---------------- |
-| `xiaomi-token-plan/mimo-v2.5-pro`  | metin         | 1,048,576 | 131,072         | Evet          | Varsayılan model |
-| `xiaomi-token-plan/mimo-v2.5`      | metin, görsel | 1,048,576 | 131,072         | Evet          | Çok modlu        |
+| Model başvurusu                  | Girdi       | Bağlam    | Azami çıktı | Akıl yürütme | Notlar            |
+| --------------------------------- | ----------- | --------- | ---------- | --------- | ------------- |
+| `xiaomi-token-plan/mimo-v2.5-pro` | metin        | 1,048,576 | 131,072    | Evet      | Varsayılan model |
+| `xiaomi-token-plan/mimo-v2.5`     | metin, görsel | 1,048,576 | 131,072    | Evet      | Çok kipli         |
 
-`xiaomi-token-plan` çözümlenebilmek için bölgesel bir temel URL gerektirir. Desteklenen
-yol, birlikte gelen bir Token Plan ilk kurulum seçeneği veya `baseUrl`
-ayarlanmış açık bir `models.providers.xiaomi-token-plan` yapılandırma bloğudur;
-bunlardan biri olmadan sağlayıcı sunulmaz.
+`xiaomi-token-plan` çözümlenmek için bölgesel bir temel URL gerektirir. Desteklenen yol,
+birlikte gelen bir Token Plan ilk kurulum seçeneği veya `baseUrl` ayarlanmış açık bir
+`models.providers.xiaomi-token-plan` yapılandırma bloğudur; bunlardan
+biri olmadan sağlayıcı sunulmaz.
 
 ## Akıl yürütme modelleri
 
-`mimo-v2-pro`, `mimo-v2-omni`, `mimo-v2.5` ve `mimo-v2.5-pro`,
+`mimo-v2.5` ve `mimo-v2.5-pro`,
 OpenClaw'ın [`/think` yönergesini](/tr/tools/thinking) `off`,
-`minimal`, `low`, `medium`, `high`, `xhigh` ve `max` düzeyleriyle destekler
-(varsayılan `high`). `mimo-v2-flash` akıl yürütmeyi desteklemez.
+`minimal`, `low`, `medium`, `high`, `xhigh` ve `max` düzeyleriyle (varsayılan `high`) destekler.
 
 ## Metinden konuşmaya
 
-Birlikte gelen `xiaomi` Plugin'i ayrıca Xiaomi MiMo'yu `messages.tts`
-için bir konuşma sağlayıcısı olarak kaydeder. Metni bir `assistant` mesajı,
-isteğe bağlı üslup yönlendirmesini ise bir `user` mesajı olarak kullanarak
-Xiaomi'nin sohbet tamamlama TTS sözleşmesini çağırır.
+Birlikte gelen `xiaomi` plugin ayrıca Xiaomi MiMo'yu
+`tts` için bir konuşma sağlayıcısı olarak kaydeder. Metni bir `assistant`
+iletisi, isteğe bağlı biçem yönlendirmesini ise bir `user`
+iletisi olarak kullanıp Xiaomi'nin sohbet tamamlamaları TTS sözleşmesini çağırır.
 
-| Özellik    | Değer                                      |
-| ---------- | ------------------------------------------ |
-| TTS kimliği | `xiaomi` (`mimo` diğer adı)               |
-| Kimlik doğrulama | `XIAOMI_API_KEY`                     |
-| API        | `audio` ile `POST /v1/chat/completions`    |
-| Varsayılan | `mimo-v2.5-tts`, ses `mimo_default`        |
-| Çıktı      | Varsayılan olarak MP3; yapılandırılırsa WAV |
+| Özellik | Değer                                    |
+| -------- | ---------------------------------------- |
+| TTS kimliği | `xiaomi` (`mimo` diğer adı)                  |
+| Kimlik doğrulama | `XIAOMI_API_KEY`                         |
+| API      | `audio` ile `POST /v1/chat/completions` |
+| Varsayılan | `mimo-v2.5-tts`, ses `mimo_default`    |
+| Çıktı    | Varsayılan olarak MP3; yapılandırıldığında WAV |
 
 ```json5
 {
-  messages: {
-    tts: {
-      auto: "always",
-      provider: "xiaomi",
-      providers: {
-        xiaomi: {
-          apiKey: "xiaomi_api_key",
-          model: "mimo-v2.5-tts",
-          speakerVoice: "mimo_default",
-          format: "mp3",
-          style: "Bright, natural, conversational tone.",
-        },
+  tts: {
+    auto: "always",
+    provider: "xiaomi",
+    providers: {
+      xiaomi: {
+        apiKey: "xiaomi_api_key",
+        model: "mimo-v2.5-tts",
+        speakerVoice: "mimo_default",
+        format: "mp3",
+        style: "Bright, natural, conversational tone.",
       },
     },
   },
@@ -144,42 +141,40 @@ Xiaomi'nin sohbet tamamlama TTS sözleşmesini çağırır.
 ```
 
 Yerleşik sesler: `mimo_default`, `default_zh`, `default_en`, `Mia`, `Chloe`,
-`Milo`, `Dean`. Ön ayarlı ses modelleri (`mimo-v2.5-tts`, `mimo-v2-tts`)
-`audio.voice` kullandığından OpenClaw bu modeller için `speakerVoice` gönderir.
+`Milo`, `Dean`. Ön ayarlı ses modeli `mimo-v2.5-tts`, `audio.voice` kullandığından
+OpenClaw bu model için `speakerVoice` gönderir.
 
-`mimo-v2.5-tts-voicedesign` ses tasarımı modeli, ön ayarlı bir ses kimliği
-yerine doğal dildeki bir üslup isteminden ses üretir. `style` değerini
-istenen ses açıklamasına ayarlayın; OpenClaw bunu `user` mesajı olarak,
-seslendirilecek metni `assistant` mesajı olarak gönderir ve bu model için
-`audio.voice` alanını çıkarır.
+Ses tasarımı modeli `mimo-v2.5-tts-voicedesign`, ön ayarlı bir ses kimliği yerine
+doğal dildeki bir biçem isteminden ses üretir. `style` değerini
+istenen ses açıklamasına ayarlayın; OpenClaw bunu `user` iletisi olarak, seslendirilecek
+metni `assistant` iletisi olarak gönderir ve bu
+model için `audio.voice` değerini dahil etmez.
 
 ```json5
 {
-  messages: {
-    tts: {
-      provider: "xiaomi",
-      providers: {
-        xiaomi: {
-          model: "mimo-v2.5-tts-voicedesign",
-          format: "wav",
-          style: "Warm, natural female voice with clear pronunciation.",
-        },
+  tts: {
+    provider: "xiaomi",
+    providers: {
+      xiaomi: {
+        model: "mimo-v2.5-tts-voicedesign",
+        format: "wav",
+        style: "Warm, natural female voice with clear pronunciation.",
       },
     },
   },
 }
 ```
 
-Sesli not sentezi hedefi isteyen kanallarda (Discord, Feishu,
-Matrix, Telegram ve WhatsApp), OpenClaw teslimattan önce Xiaomi çıktısını
-`ffmpeg` ile 48 kHz mono Opus biçimine dönüştürür.
+Sesli not sentezi hedefi isteyen kanallar (Discord, Feishu,
+Matrix, Telegram ve WhatsApp) için OpenClaw, Xiaomi çıktısını teslimattan önce
+`ffmpeg` kullanarak 48kHz tek kanallı Opus biçimine dönüştürür.
 
 ## Yapılandırma örneği
 
 ```json5
 {
   env: { XIAOMI_API_KEY: "your-key" },
-  agents: { defaults: { model: { primary: "xiaomi/mimo-v2-flash" } } },
+  agents: { defaults: { model: { primary: "xiaomi/mimo-v2.5" } } },
   models: {
     mode: "merge",
     providers: {
@@ -189,28 +184,20 @@ Matrix, Telegram ve WhatsApp), OpenClaw teslimattan önce Xiaomi çıktısını
         apiKey: "XIAOMI_API_KEY",
         models: [
           {
-            id: "mimo-v2-flash",
-            name: "Xiaomi MiMo V2 Flash",
-            reasoning: false,
-            input: ["text"],
-            contextWindow: 262144,
-            maxTokens: 8192,
+            id: "mimo-v2.5",
+            name: "Xiaomi MiMo V2.5",
+            reasoning: true,
+            input: ["text", "image"],
+            contextWindow: 1048576,
+            maxTokens: 131072,
           },
           {
-            id: "mimo-v2-pro",
-            name: "Xiaomi MiMo V2 Pro",
+            id: "mimo-v2.5-pro",
+            name: "Xiaomi MiMo V2.5 Pro",
             reasoning: true,
             input: ["text"],
             contextWindow: 1048576,
-            maxTokens: 32000,
-          },
-          {
-            id: "mimo-v2-omni",
-            name: "Xiaomi MiMo V2 Omni",
-            reasoning: true,
-            input: ["text", "image"],
-            contextWindow: 262144,
-            maxTokens: 32000,
+            maxTokens: 131072,
           },
         ],
       },
@@ -219,7 +206,7 @@ Matrix, Telegram ve WhatsApp), OpenClaw teslimattan önce Xiaomi çıktısını
 }
 ```
 
-Fiyatlandırma ve uyumluluk bayrakları birlikte gelen Plugin bildiriminden alındığından, çalışma zamanı davranışından sapmayı önlemek için yapılandırma örneğinde `cost` ve `compat` yer almaz.
+Fiyatlandırma ve uyumluluk bayrakları birlikte gelen plugin bildiriminden alındığından, yapılandırma örneği çalışma zamanı davranışından sapmayı önlemek için `cost` ve `compat` değerlerini içermez.
 
 Token Plan:
 
@@ -258,7 +245,7 @@ Token Plan:
 }
 ```
 
-Fiyatlandırma birlikte gelen bildirimden alınır (Token Plan modelleri kademeli önbellek okuma fiyatlandırması içerir), bu nedenle yapılandırma örneğinde `cost` yer almaz.
+Fiyatlandırma birlikte gelen bildirimden alındığından (Token Plan modelleri kademeli önbellek okuma fiyatlandırması içerir), yapılandırma örneği `cost` değerini içermez.
 
 <AccordionGroup>
   <Accordion title="Otomatik ekleme davranışı">
@@ -266,14 +253,11 @@ Fiyatlandırma birlikte gelen bildirimden alınır (Token Plan modelleri kademel
   </Accordion>
 
   <Accordion title="Model ayrıntıları">
-    - **mimo-v2-flash** - hafif ve hızlıdır; genel amaçlı metin görevleri için idealdir. Akıl yürütmeyi desteklemez.
-    - **mimo-v2-pro** - uzun belge iş yükleri için 1 milyon tokenlık bağlam penceresiyle akıl yürütmeyi destekler.
-    - **mimo-v2-omni** - hem metin hem de görsel girdilerini kabul eden, akıl yürütme özellikli çok modlu modeldir.
-    - **mimo-v2.5-pro** - Xiaomi'nin güncel V2.5 akıl yürütme yığınına sahip varsayılan Token Plan modelidir.
-    - **mimo-v2.5** - Token Plan'ın çok modlu V2.5 rotasıdır.
+    - **mimo-v2.5** - kullandıkça öde varsayılanı ve Token Plan çok kipli V2.5 rotası.
+    - **mimo-v2.5-pro** - amiral gemisi akıl yürütme modeli ve Token Plan varsayılanı.
 
     <Note>
-    Kullandıkça öde modelleri `xiaomi/` önekini kullanır. Token Plan modelleri `xiaomi-token-plan/` önekini kullanır.
+    Kullandıkça öde modelleri `xiaomi/` ön ekini kullanır. Token Plan modelleri `xiaomi-token-plan/` ön ekini kullanır.
     </Note>
 
   </Accordion>
@@ -281,28 +265,28 @@ Fiyatlandırma birlikte gelen bildirimden alınır (Token Plan modelleri kademel
   <Accordion title="Sorun giderme">
     - Modeller görünmüyorsa ilgili anahtar ortam değişkeninin veya kimlik doğrulama profilinin mevcut ve geçerli olduğunu doğrulayın.
     - Token Plan için seçilen ilk kurulum bölgesinin abonelik sayfasındaki temel URL ile eşleştiğini ve anahtarın `tp-` ile başladığını doğrulayın.
-    - Gateway bir arka plan hizmeti olarak çalıştığında anahtarın ilgili işlem tarafından kullanılabildiğinden emin olun (örneğin `~/.openclaw/.env` içinde veya `env.shellEnv` aracılığıyla).
+    - Gateway bir arka plan hizmeti olarak çalıştığında anahtarın bu işlem tarafından erişilebilir olduğundan emin olun (örneğin `~/.openclaw/.env` içinde veya `env.shellEnv` aracılığıyla).
 
     <Warning>
-    Yalnızca etkileşimli kabuğunuzda ayarlanan anahtarlar, arka plan hizmeti tarafından yönetilen Gateway işlemleri tarafından görülemez. Kalıcı kullanılabilirlik için `~/.openclaw/.env` veya `env.shellEnv` yapılandırmasını kullanın.
+    Yalnızca etkileşimli kabuğunuzda ayarlanan anahtarlar, arka plan hizmeti tarafından yönetilen Gateway işlemleri tarafından görülemez. Kalıcı erişilebilirlik için `~/.openclaw/.env` veya `env.shellEnv` yapılandırmasını kullanın.
     </Warning>
 
   </Accordion>
 </AccordionGroup>
 
-## İlgili konular
+## İlgili içerik
 
 <CardGroup cols={2}>
   <Card title="Model seçimi" href="/tr/concepts/model-providers" icon="layers">
     Sağlayıcıların, model başvurularının ve yük devretme davranışının seçilmesi.
   </Card>
   <Card title="Düşünme düzeyleri" href="/tr/tools/thinking" icon="brain">
-    `/think` yönergesi sözdizimi ve düzey eşlemesi.
+    `/think` yönergesi söz dizimi ve düzey eşlemesi.
   </Card>
   <Card title="Yapılandırma başvurusu" href="/tr/gateway/configuration-reference" icon="gear">
-    Eksiksiz OpenClaw yapılandırma başvurusu.
+    OpenClaw yapılandırmasının eksiksiz başvurusu.
   </Card>
   <Card title="Xiaomi MiMo konsolu" href="https://platform.xiaomimimo.com" icon="arrow-up-right-from-square">
-    Xiaomi MiMo kontrol paneli ve API anahtarı yönetimi.
+    Xiaomi MiMo panosu ve API anahtarı yönetimi.
   </Card>
 </CardGroup>

@@ -1,24 +1,25 @@
 ---
 read_when:
-    - चैनल ट्रांसपोर्ट जुड़ा हुआ बताता है, लेकिन जवाब विफल होते हैं
-    - गहन प्रदाता दस्तावेज़ों से पहले चैनल-विशिष्ट जाँचों की आवश्यकता है
-summary: प्रति-चैनल विफलता पैटर्न और सुधारों के साथ तेज़ चैनल-स्तरीय समस्या निवारण
+    - चैनल ट्रांसपोर्ट कनेक्टेड दिखाता है, लेकिन जवाब विफल हो जाते हैं
+    - गहन प्रदाता दस्तावेज़ों से पहले आपको चैनल-विशिष्ट जाँचों की आवश्यकता है
+summary: प्रति-चैनल विफलता संकेतों और सुधारों के साथ तेज़ चैनल-स्तरीय समस्या निवारण
 title: चैनल समस्या निवारण
 x-i18n:
-    generated_at: "2026-06-28T22:41:20Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:31:29Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 56b64030ec56553b4c2e156195806029f91bc8cc449588a242b0f45f8bbddb6e
+    source_hash: 3891595e4b5aca9de7997a6e908fa1c9246579032bfdfa1656a6992d644c3ecc
     source_path: channels/troubleshooting.md
     workflow: 16
 ---
 
-जब कोई चैनल कनेक्ट हो जाता है लेकिन व्यवहार गलत हो, तो इस पेज का उपयोग करें।
+जब कोई चैनल कनेक्ट हो जाता है, लेकिन उसका व्यवहार गलत हो, तो इस पेज का उपयोग करें।
 
 ## कमांड क्रम
 
-पहले इन्हें क्रम से चलाएं:
+पहले इन्हें इसी क्रम में चलाएँ:
 
 ```bash
 openclaw status
@@ -28,17 +29,16 @@ openclaw doctor
 openclaw channels status --probe
 ```
 
-स्वस्थ बेसलाइन:
+स्वस्थ आधारभूत स्थिति:
 
 - `Runtime: running`
 - `Connectivity probe: ok`
 - `Capability: read-only`, `write-capable`, या `admin-capable`
-- चैनल जांच दिखाती है कि ट्रांसपोर्ट कनेक्ट है और, जहां समर्थित हो, `works` या `audit ok`
+- चैनल जाँच दिखाती है कि ट्रांसपोर्ट कनेक्ट है और, जहाँ समर्थित हो, `works` या `audit ok`
 
 ## अपडेट के बाद
 
-इसका उपयोग तब करें जब Telegram, iMessage, BlueBubbles-युग के कॉन्फ़िग, या कोई अन्य Plugin
-चैनल अपडेट के बाद गायब हो जाए।
+अपडेट करने के बाद जब Telegram, iMessage, BlueBubbles-युग के कॉन्फ़िगरेशन या कोई अन्य Plugin चैनल गायब हो जाए, तो इसका उपयोग करें।
 
 ```bash
 openclaw status --all
@@ -47,119 +47,113 @@ openclaw gateway restart
 openclaw status --all
 ```
 
-`openclaw status --all` में `plugin load failed: dependency tree corrupted; run openclaw doctor
---fix` देखें। इसका अर्थ है कि चैनल कॉन्फ़िगर है, लेकिन
-Plugin सेटअप/लोड पाथ ने चैनल रजिस्टर करने के बजाय भ्रष्ट निर्भरता ट्री का सामना किया।
-`openclaw doctor --fix` पुराने Plugin निर्भरता स्टेजिंग
-डायरेक्टरी और पुराने auth शैडो हटाता है, फिर `openclaw gateway restart`
-स्वच्छ स्थिति को फिर से लोड करता है।
+`openclaw
+status --all` में `plugin load failed: dependency tree corrupted; run openclaw doctor --fix` खोजें। इसका अर्थ है कि चैनल कॉन्फ़िगर किया गया है, लेकिन Plugin सेटअप/लोड ने चैनल को पंजीकृत करने के बजाय एक दूषित निर्भरता ट्री का सामना किया। `openclaw doctor --fix` पुराने Plugin-रनटाइम निर्भरता सिमलिंक और पुराने प्रमाणीकरण शैडो साफ़ करता है, फिर `openclaw gateway restart` स्वच्छ स्थिति को फिर से लोड करता है।
 
 ## WhatsApp
 
 ### WhatsApp विफलता संकेत
 
-| लक्षण                             | सबसे तेज जांच                                       | समाधान                                                                                                                              |
+| लक्षण                                | सबसे तेज़ जाँच                                          | समाधान                                                                                                                                    |
 | ----------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| कनेक्ट है लेकिन DM जवाब नहीं मिलते         | `openclaw pairing list whatsapp`                    | भेजने वाले को मंजूरी दें या DM नीति/allowlist बदलें।                                                                                    |
-| समूह संदेश अनदेखे हो रहे हैं              | कॉन्फ़िग में `requireMention` + mention पैटर्न जांचें | बॉट को mention करें या उस समूह के लिए mention नीति ढीली करें।                                                                          |
-| QR लॉगिन 408 के साथ टाइम आउट होता है         | Gateway `HTTPS_PROXY` / `HTTP_PROXY` env जांचें      | पहुंच योग्य proxy सेट करें; `NO_PROXY` केवल bypass के लिए उपयोग करें।                                                                         |
-| यादृच्छिक डिस्कनेक्ट/रीलॉगिन लूप     | `openclaw channels status --probe` + लॉग           | हालिया reconnects को तब भी चिह्नित किया जाता है जब अभी कनेक्ट हो; लॉग देखें, Gateway restart करें, फिर flapping जारी रहे तो relink करें। |
-| `status=408 Request Time-out` लूप  | जांच, लॉग, doctor, फिर Gateway स्थिति            | पहले host connectivity/timing ठीक करें; लूप बना रहे तो auth का backup लें और account को फिर से link करें।                                   |
-| जवाब सेकंड/मिनट देर से आते हैं | `openclaw doctor --fix`                             | Doctor सत्यापित पुराने local TUI clients को रोकता है जब वे Gateway event loop को खराब कर रहे हों।                                    |
+| कनेक्ट है, लेकिन DM के उत्तर नहीं मिलते | `openclaw pairing list whatsapp`                    | प्रेषक को स्वीकृत करें या DM नीति/अनुमति-सूची बदलें।                                                                                    |
+| समूह संदेश अनदेखे किए जाते हैं             | कॉन्फ़िगरेशन में `requireMention` + उल्लेख पैटर्न जाँचें | बॉट का उल्लेख करें या उस समूह के लिए उल्लेख नीति को शिथिल करें।                                                                          |
+| QR लॉगिन का समय 408 के साथ समाप्त होता है         | Gateway `HTTPS_PROXY` / `HTTP_PROXY` परिवेश जाँचें      | पहुँच योग्य प्रॉक्सी सेट करें; `NO_PROXY` का उपयोग केवल बायपास के लिए करें।                                                                         |
+| अनियमित डिस्कनेक्ट/पुनः लॉगिन चक्र     | `openclaw channels status --probe` + लॉग           | वर्तमान में कनेक्ट होने पर भी हालिया पुनः कनेक्शन चिह्नित किए जाते हैं; लॉग देखें, Gateway पुनः आरंभ करें, फिर अस्थिरता जारी रहने पर दोबारा लिंक करें। |
+| `status=408 Request Time-out` चक्र  | जाँच, लॉग, डॉक्टर, फिर Gateway की स्थिति            | पहले होस्ट कनेक्टिविटी/समय-संबंधी समस्या ठीक करें; प्रमाणीकरण का बैकअप लें और चक्र जारी रहने पर खाते को दोबारा लिंक करें।                                   |
+| उत्तर सेकंड/मिनट देर से आते हैं | `openclaw doctor --fix`                             | जब सत्यापित पुराने स्थानीय TUI क्लाइंट Gateway इवेंट लूप को खराब कर रहे हों, तो डॉक्टर उन्हें रोक देता है।                                    |
 
-पूरा समस्या-निवारण: [WhatsApp समस्या-निवारण](/hi/channels/whatsapp#troubleshooting)
+सम्पूर्ण समस्या निवारण: [WhatsApp समस्या निवारण](/hi/channels/whatsapp#troubleshooting)
 
 ## Telegram
 
 ### Telegram विफलता संकेत
 
-| लक्षण                              | सबसे तेज जांच                                    | समाधान                                                                                                                        |
-| ------------------------------------ | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `/start` लेकिन उपयोगी reply flow नहीं    | `openclaw pairing list telegram`                 | pairing को मंजूरी दें या DM नीति बदलें।                                                                                       |
-| बॉट online है लेकिन group शांत रहता है    | mention आवश्यकता और bot privacy mode सत्यापित करें  | group visibility के लिए privacy mode अक्षम करें या bot को mention करें।                                                                  |
-| network errors के साथ send failures    | Telegram API call failures के लिए logs देखें      | `api.telegram.org` तक DNS/IPv6/proxy routing ठीक करें।                                                                          |
-| startup `getMe returned 401` बताता है | configured token source जांचें                    | BotFather token को फिर से copy या regenerate करें और `botToken`, `tokenFile`, या default-account `TELEGRAM_BOT_TOKEN` अपडेट करें।     |
-| polling stalls या reconnects धीरे होते हैं  | polling diagnostics के लिए `openclaw logs --follow` | Upgrade करें; यदि restarts false positives हैं, तो `pollingStallThresholdMs` tune करें। Persistent stalls अभी भी proxy/DNS/IPv6 की ओर इशारा करते हैं। |
-| startup पर `setMyCommands` rejected  | `BOT_COMMANDS_TOO_MUCH` के लिए logs देखें         | Plugin/skill/custom Telegram commands कम करें या native menus अक्षम करें।                                                      |
-| upgrade के बाद allowlist आपको block करती है    | `openclaw security audit` और config allowlists  | `openclaw doctor --fix` चलाएं या `@username` को numeric sender IDs से बदलें।                                                |
+| लक्षण                              | सबसे तेज़ जाँच                                    | समाधान                                                                                                                    |
+| ------------------------------------ | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `/start`, लेकिन उपयोग योग्य उत्तर प्रवाह नहीं है    | `openclaw pairing list telegram`                 | पेयरिंग स्वीकृत करें या DM नीति बदलें।                                                                                   |
+| बॉट ऑनलाइन है, लेकिन समूह मौन रहता है    | उल्लेख आवश्यकता और बॉट गोपनीयता मोड सत्यापित करें  | समूह दृश्यता के लिए गोपनीयता मोड अक्षम करें या बॉट का उल्लेख करें।                                                              |
+| नेटवर्क त्रुटियों के साथ भेजने में विफलता    | Telegram API कॉल विफलताओं के लिए लॉग देखें      | `api.telegram.org` तक DNS/IPv6/प्रॉक्सी रूटिंग ठीक करें।                                                                      |
+| स्टार्टअप पर `getMe returned 401` रिपोर्ट होता है | कॉन्फ़िगर किए गए टोकन स्रोत की जाँच करें                    | BotFather टोकन दोबारा कॉपी करें या पुनः बनाएँ और `botToken`, `tokenFile`, या डिफ़ॉल्ट-खाता `TELEGRAM_BOT_TOKEN` अपडेट करें। |
+| पोलिंग रुक जाती है या धीरे पुनः कनेक्ट होती है  | पोलिंग निदान के लिए `openclaw logs --follow` | अपग्रेड करें; लगातार रुकना सामान्यतः प्रॉक्सी/DNS/IPv6 की ओर संकेत करता है।                                                            |
+| स्टार्टअप पर `setMyCommands` अस्वीकृत  | `BOT_COMMANDS_TOO_MUCH` के लिए लॉग देखें         | Plugin/कौशल/कस्टम Telegram कमांड घटाएँ या मूल मेनू अक्षम करें।                                                  |
+| अपग्रेड के बाद अनुमति-सूची आपको अवरुद्ध करती है    | `openclaw security audit` और कॉन्फ़िगरेशन अनुमति-सूचियाँ  | `openclaw doctor --fix` चलाएँ या `@username` को संख्यात्मक प्रेषक ID से बदलें।                                            |
 
-पूरा समस्या-निवारण: [Telegram समस्या-निवारण](/hi/channels/telegram#troubleshooting)
+सम्पूर्ण समस्या निवारण: [Telegram समस्या निवारण](/hi/channels/telegram#troubleshooting)
 
 ## Discord
 
 ### Discord विफलता संकेत
 
-| लक्षण                                   | सबसे तेज जांच                                                                                                                | समाधान                                                                                                                                                                                                                                                                   |
+| लक्षण                                   | सबसे तेज़ जाँच                                                                                                                | समाधान                                                                                                                                                                                                                                                                   |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| बॉट online है लेकिन guild replies नहीं           | `openclaw channels status --probe`                                                                                           | guild/channel को allow करें और message content intent सत्यापित करें।                                                                                                                                                                                                                |
-| group messages अनदेखे हो रहे हैं                    | mention gating drops के लिए logs जांचें                                                                                          | bot को mention करें या guild/channel `requireMention: false` सेट करें।                                                                                                                                                                                                             |
-| Typing/token usage है लेकिन Discord message नहीं | जांचें कि यह ambient room event है या opted-in `message_tool` room है जहां model ने `message(action=send)` छोड़ दिया | suppressed final payload metadata के लिए Gateway verbose log देखें, `messages.groupChat.unmentionedInbound` सत्यापित करें, [Ambient room events](/hi/channels/ambient-room-events) पढ़ें, या सामान्य group requests के लिए `messages.groupChat.visibleReplies: "automatic"` रखें। |
-| DM replies गायब हैं                        | `openclaw pairing list discord`                                                                                              | DM pairing को मंजूरी दें या DM policy समायोजित करें।                                                                                                                                                                                                                               |
+| बॉट ऑनलाइन है, लेकिन गिल्ड के उत्तर नहीं आते           | `openclaw channels status --probe`                                                                                           | गिल्ड/चैनल की अनुमति दें और संदेश सामग्री इंटेंट सत्यापित करें।                                                                                                                                                                                                                |
+| समूह संदेश अनदेखे किए जाते हैं                    | उल्लेख गेटिंग के कारण छोड़े गए संदेशों के लिए लॉग जाँचें                                                                                          | बॉट का उल्लेख करें या गिल्ड/चैनल `requireMention: false` सेट करें।                                                                                                                                                                                                             |
+| टाइपिंग/टोकन उपयोग होता है, लेकिन Discord संदेश नहीं आता | जाँचें कि यह एम्बिएंट रूम इवेंट है या स्वैच्छिक `message_tool` रूम, जहाँ मॉडल ने `message(action=send)` छोड़ दिया | दबाए गए अंतिम पेलोड मेटाडेटा के लिए Gateway का विस्तृत लॉग देखें, `messages.groupChat.unmentionedInbound` सत्यापित करें, [एम्बिएंट रूम इवेंट](/hi/channels/ambient-room-events) पढ़ें, या सामान्य समूह अनुरोधों के लिए `messages.groupChat.visibleReplies: "automatic"` बनाए रखें। |
+| DM उत्तर नहीं मिलते                        | `openclaw pairing list discord`                                                                                              | DM पेयरिंग स्वीकृत करें या DM नीति समायोजित करें।                                                                                                                                                                                                                               |
 
-पूरा समस्या-निवारण: [Discord समस्या-निवारण](/hi/channels/discord#troubleshooting)
+सम्पूर्ण समस्या निवारण: [Discord समस्या निवारण](/hi/channels/discord#troubleshooting)
 
 ## Slack
 
 ### Slack विफलता संकेत
 
-| लक्षण                                | सबसे तेज जांच                             | समाधान                                                                                                                                                  |
+| लक्षण                                | सबसे तेज़ जाँच                             | समाधान                                                                                                                                                  |
 | -------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Socket mode connected है लेकिन responses नहीं | `openclaw channels status --probe`        | app token + bot token और आवश्यक scopes सत्यापित करें; SecretRef-backed setups पर `botTokenStatus` / `appTokenStatus = configured_unavailable` देखें। |
-| DMs blocked                            | `openclaw pairing list slack`             | pairing को मंजूरी दें या DM policy ढीली करें।                                                                                                                  |
-| Channel message ignored                | `groupPolicy` और channel allowlist जांचें | channel को allow करें या policy को `open` पर switch करें।                                                                                                        |
+| सॉकेट मोड कनेक्ट है, लेकिन उत्तर नहीं मिलते | `openclaw channels status --probe`        | ऐप टोकन + बॉट टोकन और आवश्यक स्कोप सत्यापित करें; SecretRef-समर्थित सेटअप में `botTokenStatus` / `appTokenStatus = configured_unavailable` पर नज़र रखें। |
+| DM अवरुद्ध हैं                            | `openclaw pairing list slack`             | पेयरिंग स्वीकृत करें या DM नीति शिथिल करें।                                                                                                                  |
+| चैनल संदेश अनदेखा किया जाता है                | `groupPolicy` और चैनल अनुमति-सूची जाँचें | चैनल की अनुमति दें या नीति को `open` पर बदलें।                                                                                                        |
 
-पूरा समस्या-निवारण: [Slack समस्या-निवारण](/hi/channels/slack#troubleshooting)
+सम्पूर्ण समस्या निवारण: [Slack समस्या निवारण](/hi/channels/slack#troubleshooting)
 
 ## iMessage
 
 ### iMessage विफलता संकेत
 
-| लक्षण                              | सबसे तेज जांच                                           | समाधान                                                                   |
+| लक्षण                              | सबसे तेज़ जाँच                                           | समाधान                                                                   |
 | ------------------------------------ | ------------------------------------------------------- | --------------------------------------------------------------------- |
-| `imsg` गायब है या non-macOS पर fail होता है | `openclaw channels status --probe --channel imessage`   | OpenClaw को Messages Mac पर चलाएं या `cliPath` के लिए SSH wrapper उपयोग करें। |
-| macOS पर send कर सकते हैं लेकिन receive नहीं     | Messages automation के लिए macOS privacy permissions जांचें | TCC permissions फिर से grant करें और channel process restart करें।                 |
-| DM sender blocked                    | `openclaw pairing list imessage`                        | pairing को मंजूरी दें या allowlist अपडेट करें।                                  |
+| `imsg` अनुपलब्ध है या गैर-macOS पर विफल होता है | `openclaw channels status --probe --channel imessage`   | Messages वाले Mac पर OpenClaw चलाएँ या `cliPath` के लिए SSH रैपर का उपयोग करें। |
+| macOS पर भेज सकते हैं, लेकिन प्राप्त नहीं कर सकते     | Messages स्वचालन के लिए macOS गोपनीयता अनुमतियाँ जाँचें | TCC अनुमतियाँ फिर से दें और चैनल प्रक्रिया पुनः आरंभ करें।                 |
+| DM प्रेषक अवरुद्ध है                    | `openclaw pairing list imessage`                        | पेयरिंग स्वीकृत करें या अनुमति-सूची अपडेट करें।                                  |
 
-पूरा समस्या-निवारण:
-
-- [iMessage समस्या-निवारण](/hi/channels/imessage#troubleshooting)
+सम्पूर्ण समस्या निवारण: [iMessage समस्या निवारण](/hi/channels/imessage#troubleshooting)
 
 ## Signal
 
 ### Signal विफलता संकेत
 
-| लक्षण                         | सबसे तेज जांच                              | समाधान                                                      |
+| लक्षण                         | सबसे तेज़ जाँच                              | समाधान                                                      |
 | ------------------------------- | ------------------------------------------ | -------------------------------------------------------- |
-| Daemon reachable है लेकिन bot silent | `openclaw channels status --probe`         | `signal-cli` daemon URL/account और receive mode सत्यापित करें। |
-| DM blocked                      | `openclaw pairing list signal`             | sender को मंजूरी दें या DM policy समायोजित करें।                      |
-| Group replies trigger नहीं होते    | group allowlist और mention patterns जांचें | sender/group जोड़ें या gating ढीली करें।                       |
+| डेमन तक पहुँचा जा सकता है, लेकिन बॉट मौन है | `openclaw channels status --probe`         | `signal-cli` डेमन URL/खाता और प्राप्ति मोड सत्यापित करें। |
+| DM अवरुद्ध है                      | `openclaw pairing list signal`             | प्रेषक को स्वीकृत करें या DM नीति समायोजित करें।                      |
+| समूह उत्तर ट्रिगर नहीं होते    | समूह अनुमति-सूची और उल्लेख पैटर्न जाँचें | प्रेषक/समूह जोड़ें या गेटिंग शिथिल करें।                       |
 
-पूरा समस्या-निवारण: [Signal समस्या-निवारण](/hi/channels/signal#troubleshooting)
+सम्पूर्ण समस्या निवारण: [Signal समस्या निवारण](/hi/channels/signal#troubleshooting)
 
 ## QQ Bot
 
 ### QQ Bot विफलता संकेत
 
-| लक्षण                         | सबसे तेज जांच                               | समाधान                                                             |
+| लक्षण                         | सबसे तेज़ जाँच                               | समाधान                                                             |
 | ------------------------------- | ------------------------------------------- | --------------------------------------------------------------- |
-| Bot replies "gone to Mars"      | config में `appId` और `clientSecret` सत्यापित करें | credentials सेट करें या Gateway restart करें।                         |
-| inbound messages नहीं             | `openclaw channels status --probe`          | QQ Open Platform पर credentials सत्यापित करें।                     |
-| Voice transcribed नहीं हुआ           | STT provider config जांचें                   | `channels.qqbot.stt` या `tools.media.audio` कॉन्फ़िगर करें।          |
-| Proactive messages नहीं आ रहे | QQ platform interaction requirements जांचें  | हालिया interaction के बिना QQ bot-initiated messages block कर सकता है। |
+| बॉट उत्तर देता है "मंगल ग्रह पर चला गया"      | कॉन्फ़िगरेशन में `appId` और `clientSecret` सत्यापित करें | क्रेडेंशियल सेट करें या Gateway पुनः आरंभ करें।                         |
+| आने वाले संदेश नहीं मिलते             | `openclaw channels status --probe`          | QQ Open Platform पर क्रेडेंशियल सत्यापित करें।                     |
+| आवाज़ का लिप्यंतरण नहीं होता           | STT प्रदाता कॉन्फ़िगरेशन जाँचें                   | `channels.qqbot.stt` या `tools.media.audio` कॉन्फ़िगर करें।          |
+| सक्रिय रूप से भेजे गए संदेश नहीं पहुँचते | QQ प्लेटफ़ॉर्म की इंटरैक्शन आवश्यकताएँ जाँचें  | हालिया इंटरैक्शन के बिना QQ बॉट द्वारा शुरू किए गए संदेशों को अवरुद्ध कर सकता है। |
 
-पूर्ण समस्या-निवारण: [QQ Bot समस्या-निवारण](/hi/channels/qqbot#troubleshooting)
+सम्पूर्ण समस्या निवारण: [QQ Bot समस्या निवारण](/hi/channels/qqbot#troubleshooting)
 
 ## Matrix
 
 ### Matrix विफलता संकेत
 
-| लक्षण                              | सबसे तेज़ जाँच                         | समाधान                                                                    |
+| लक्षण                                | सबसे तेज़ जाँच                         | समाधान                                                                      |
 | ----------------------------------- | -------------------------------------- | ------------------------------------------------------------------------- |
-| लॉग इन है लेकिन रूम संदेशों को अनदेखा करता है | `openclaw channels status --probe`     | `groupPolicy`, रूम अनुमति-सूची, और उल्लेख गेटिंग जाँचें।                  |
-| DM प्रोसेस नहीं होते               | `openclaw pairing list matrix`         | भेजने वाले को स्वीकृत करें या DM नीति समायोजित करें।                     |
-| एन्क्रिप्टेड रूम विफल होते हैं     | `openclaw matrix verify status`        | डिवाइस को फिर से सत्यापित करें, फिर `openclaw matrix verify backup status` जाँचें। |
-| बैकअप पुनर्स्थापन लंबित/टूटा हुआ है | `openclaw matrix verify backup status` | `openclaw matrix verify backup restore` चलाएँ या रिकवरी कुंजी के साथ फिर चलाएँ। |
-| क्रॉस-साइनिंग/बूटस्ट्रैप गलत दिखता है | `openclaw matrix verify bootstrap`     | सीक्रेट स्टोरेज, क्रॉस-साइनिंग, और बैकअप स्थिति को एक ही पास में सुधारें। |
+| लॉग इन है, लेकिन रूम संदेशों को अनदेखा करता है | `openclaw channels status --probe`     | `groupPolicy`, रूम अनुमति-सूची और उल्लेख गेटिंग की जाँच करें।                  |
+| निजी संदेश संसाधित नहीं होते हैं                  | `openclaw pairing list matrix`         | प्रेषक को स्वीकृति दें या निजी संदेश नीति समायोजित करें।                                       |
+| एन्क्रिप्ट किए गए रूम विफल होते हैं                | `openclaw matrix verify status`        | डिवाइस को फिर से सत्यापित करें, फिर `openclaw matrix verify backup status` की जाँच करें।  |
+| बैकअप पुनर्स्थापना लंबित/विफल है    | `openclaw matrix verify backup status` | `openclaw matrix verify backup restore` चलाएँ या पुनर्प्राप्ति कुंजी के साथ दोबारा चलाएँ। |
+| क्रॉस-साइनिंग/बूटस्ट्रैप गलत दिखता है | `openclaw matrix verify bootstrap`     | गुप्त भंडारण, क्रॉस-साइनिंग और बैकअप स्थिति को एक ही बार में सुधारें।       |
 
 पूर्ण सेटअप और कॉन्फ़िगरेशन: [Matrix](/hi/channels/matrix)
 
@@ -167,4 +161,4 @@ Plugin सेटअप/लोड पाथ ने चैनल रजिस्�
 
 - [पेयरिंग](/hi/channels/pairing)
 - [चैनल रूटिंग](/hi/channels/channel-routing)
-- [Gateway समस्या-निवारण](/hi/gateway/troubleshooting)
+- [Gateway समस्या निवारण](/hi/gateway/troubleshooting)

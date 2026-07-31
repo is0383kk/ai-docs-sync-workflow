@@ -1,32 +1,33 @@
 ---
 read_when:
     - Configuración inicial desde cero
-    - Quieres la forma más rápida de tener un chat funcionando
+    - Quieres la forma más rápida de poner en marcha un chat
 summary: Instala OpenClaw e inicia tu primer chat en cuestión de minutos.
 title: Primeros pasos
 x-i18n:
-    generated_at: "2026-07-11T23:31:38Z"
+    generated_at: "2026-07-26T04:53:59Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 308ca58b8a11832b5a4c0d4634d1c88ef44681ef755a18d675bcff60b5aba929
+    source_hash: 8f50073b059477636b94e128cec90b41dcc21c8bb132e34900e68409cacf70eb
     source_path: start/getting-started.md
     workflow: 16
 ---
 
 Instala OpenClaw, ejecuta la incorporación y conversa con tu asistente de IA en unos 5
-minutos. Al finalizar, tendrás un Gateway en ejecución, la autenticación configurada y una
-sesión de chat funcional.
+minutos. Al terminar, tendrás un Gateway en ejecución, la autenticación configurada y una
+sesión de chat operativa.
 
-## Lo que necesitas
+## Qué necesitas
 
-- **Node.js 22.19+, 23.11+ o 24+** (24 es la opción predeterminada recomendada)
+- **Node.js 22.22.3+, 24.15+ o 25.9+** (24 es la opción predeterminada recomendada)
 - **Una clave de API** de un proveedor de modelos (Anthropic, OpenAI, Google, etc.); la incorporación te la solicitará
 
 <Tip>
 Comprueba tu versión de Node con `node --version`.
-**Usuarios de Windows:** la aplicación nativa Windows Hub es la opción de escritorio más sencilla. También
-se admiten el instalador de PowerShell y las opciones de Gateway mediante WSL2. Consulta [Windows](/es/platforms/windows).
+**Usuarios de Windows:** la aplicación Hub nativa para Windows es la opción de escritorio más sencilla. También se admiten
+el instalador de PowerShell y las opciones de Gateway mediante WSL2. Consulta [Windows](/es/platforms/windows).
 ¿Necesitas instalar Node? Consulta [Configuración de Node](/es/install/node).
 </Tip>
 
@@ -63,12 +64,12 @@ se admiten el instalador de PowerShell y las opciones de Gateway mediante WSL2. 
     ```
 
     El asistente te guía para elegir un proveedor de modelos, establecer una clave de API
-    y configurar el Gateway. QuickStart normalmente solo tarda unos minutos, pero
-    el inicio de sesión con el proveedor, la vinculación de canales, la instalación del daemon, las descargas de red, las Skills
-    o los plugins opcionales pueden hacer que la incorporación completa tarde más. Omite los pasos
-    opcionales y vuelve más tarde con `openclaw configure`.
+    y configurar el Gateway. QuickStart suele tardar solo unos minutos, pero
+    el inicio de sesión en el proveedor, la vinculación de canales, la instalación del daemon, las descargas de red, las Skills
+    o los plugins opcionales pueden prolongar la incorporación completa. Omite los
+    pasos opcionales y vuelve más tarde con `openclaw configure`.
 
-    Consulta [Incorporación (CLI)](/es/start/wizard) para obtener la referencia completa.
+    Consulta [Incorporación (CLI)](/es/start/wizard) para ver la referencia completa.
 
   </Step>
   <Step title="Verificar que el Gateway esté en ejecución">
@@ -91,7 +92,7 @@ se admiten el instalador de PowerShell y las opciones de Gateway mediante WSL2. 
     Escribe un mensaje en el chat de la interfaz de control y deberías recibir una respuesta de la IA.
 
     ¿Prefieres conversar desde tu teléfono? El canal más rápido de configurar es
-    [Telegram](/es/channels/telegram) (solo necesitas un token de bot). Consulta [Canales](/es/channels)
+    [Telegram](/es/channels/telegram) (solo se necesita un token de bot). Consulta [Canales](/es/channels)
     para ver todas las opciones.
 
   </Step>
@@ -107,7 +108,7 @@ mkdir -p "$HOME/.openclaw/control-ui-custom"
 # Copia tus archivos estáticos compilados en ese directorio.
 ```
 
-A continuación, configura:
+A continuación, establece:
 
 ```json
 {
@@ -147,11 +148,11 @@ openclaw dashboard
 </Columns>
 
 <Accordion title="Avanzado: variables de entorno">
-  Si ejecutas OpenClaw como una cuenta de servicio o quieres usar rutas personalizadas:
+  Si ejecutas OpenClaw como una cuenta de servicio o deseas usar rutas personalizadas:
 
-- `OPENCLAW_HOME` — directorio de inicio para la resolución interna de rutas
-- `OPENCLAW_STATE_DIR` — sobrescribe el directorio de estado
-- `OPENCLAW_CONFIG_PATH` — sobrescribe la ruta del archivo de configuración
+- `OPENCLAW_HOME` — directorio de inicio para la resolución de rutas internas
+- `OPENCLAW_STATE_DIR` — sustituye el directorio de estado
+- `OPENCLAW_CONFIG_PATH` — sustituye la ruta del archivo de configuración
 
 Referencia completa: [Variables de entorno](/es/help/environment).
 </Accordion>

@@ -1,13 +1,14 @@
 ---
 read_when:
-    - Terminalden canlı OpenClaw belgelerinde arama yapmak istiyorsunuz
+    - Canlı OpenClaw belgelerinde terminalden arama yapmak istiyorsunuz
     - Dokümanlar CLI'sinin hangi barındırılan arama API'sini çağırdığını bilmeniz gerekir
-summary: '`openclaw docs` için CLI referansı (canlı dokümantasyon dizininde arama yapın)'
+summary: '`openclaw docs` için CLI başvurusu (canlı doküman dizininde arama yapın)'
 title: Belgeler
 x-i18n:
-    generated_at: "2026-07-12T11:34:54Z"
+    generated_at: "2026-07-26T23:53:41Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: b0b575f0b76d40a53dd4f79c55fd65969a24eae27e27bd1c46d395f61fe89e42
     source_path: cli/docs.md
@@ -25,11 +26,11 @@ openclaw docs                       # dokümantasyon giriş noktasını ve örne
 openclaw docs <query...>            # canlı dokümantasyon dizininde ara
 ```
 
-| Argüman      | Açıklama                                                                                              |
-| ------------ | ----------------------------------------------------------------------------------------------------- |
-| `[query...]` | Serbest biçimli arama sorgusu. Birden çok sözcüklü sorgular boşluklarla birleştirilip tek sorgu olarak gönderilir. |
+| Argüman     | Açıklama                                                                        |
+| ------------ | ---------------------------------------------------------------------------------- |
+| `[query...]` | Serbest biçimli arama sorgusu. Birden fazla sözcük içeren sorgular boşluklarla birleştirilip tek bir sorgu olarak gönderilir. |
 
-Sorgu verilmediğinde `openclaw docs`, arama çalıştırmak yerine dokümantasyon giriş noktası URL'sini ve örnek bir arama komutunu yazdırır.
+Sorgu verilmediğinde `openclaw docs`, arama çalıştırmak yerine dokümantasyon giriş noktasının URL'sini ve örnek bir arama komutunu yazdırır.
 
 ## Örnekler
 
@@ -41,13 +42,13 @@ openclaw docs gateway token secretref
 
 ## Nasıl çalışır?
 
-`openclaw docs`, `https://docs.openclaw.ai/api/search` adresini çağırır ve JSON sonuçlarını görüntüler. Arama isteği, sabit 30 saniyelik zaman aşımı kullanır.
+`openclaw docs`, `https://docs.openclaw.ai/api/search` çağrısını yapar ve JSON sonuçlarını işler. Arama isteği 30 saniyelik sabit bir zaman aşımı kullanır.
 
 ## Çıktı
 
-Zengin özellikli bir terminalde (TTY) sonuçlar, bir başlığın ardından madde işaretli liste olarak görüntülenir: sayfa başlığı, bağlantılı dokümantasyon URL'si ve sonraki satırda kısa bir alıntı. Sonuç yoksa "Sonuç yok." yazdırılır.
+Zengin (TTY) bir terminalde sonuçlar, bir başlığın ardından madde işaretli bir liste olarak işlenir: sayfa başlığı, bağlantılı dokümantasyon URL'si ve sonraki satırda kısa bir alıntı. Boş sonuçlarda "Sonuç yok." yazdırılır.
 
-Zengin olmayan çıktıda (boruya aktarıldığında, `--no-color` kullanıldığında veya betiklerde) aynı veriler Markdown olarak görüntülenir:
+Zengin olmayan çıktıda (veri yolu üzerinden aktarılan, `--no-color`, betikler) aynı veriler Markdown olarak işlenir:
 
 ```markdown
 # Dokümantasyon araması: <query>
@@ -58,12 +59,12 @@ Zengin olmayan çıktıda (boruya aktarıldığında, `--no-color` kullanıldı�
 
 ## Çıkış kodları
 
-| Kod | Anlam                                                                                       |
-| --- | ------------------------------------------------------------------------------------------- |
-| `0` | Sıfır sonuç dönen yanıtlar dâhil olmak üzere arama başarıyla tamamlandı.                    |
-| `1` | Barındırılan dokümantasyon arama API'si çağrısı başarısız oldu; hata iletisi stderr'e yazdırılır. |
+| Kod | Anlamı                                                                  |
+| ---- | ------------------------------------------------------------------------ |
+| `0`  | Sıfır sonuçlu yanıtlar dâhil olmak üzere arama başarılı oldu.                       |
+| `1`  | Barındırılan dokümantasyon arama API'si çağrısı başarısız oldu; stderr hata mesajını yazdırır. |
 
 ## İlgili
 
-- [CLI başvurusu](/tr/cli)
+- [CLI referansı](/tr/cli)
 - [Canlı dokümantasyon](https://docs.openclaw.ai)

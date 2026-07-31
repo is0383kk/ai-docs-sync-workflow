@@ -1,165 +1,162 @@
 ---
 read_when:
-    - आप एक नया कस्टम skill बना रहे हैं
-    - आपको SKILL.md-आधारित Skills के लिए एक त्वरित प्रारंभिक वर्कफ़्लो चाहिए
-    - आप एजेंट समीक्षा के लिए कोई skill प्रस्तावित करने हेतु Skill Workshop का उपयोग करना चाहते हैं
+    - आप एक नया कस्टम स्किल बना रहे हैं
+    - आपको SKILL.md-आधारित Skills के लिए एक त्वरित शुरुआती कार्यप्रवाह चाहिए
+    - आप एजेंट समीक्षा के लिए कोई स्किल प्रस्तावित करने हेतु Skill Workshop का उपयोग करना चाहते हैं
 sidebarTitle: Creating skills
-summary: अपने OpenClaw एजेंटों के लिए कस्टम SKILL.md workspace skills बनाएं, टेस्ट करें, और प्रकाशित करें।
+summary: अपने OpenClaw एजेंटों के लिए कस्टम SKILL.md वर्कस्पेस Skills बनाएँ, उनका परीक्षण करें और उन्हें प्रकाशित करें।
 title: Skills बनाना
 x-i18n:
-    generated_at: "2026-06-29T00:17:49Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:06:15Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 7a744e9010c66b8465449d24430520473717edde86711bbb59774519189b9e72
+    source_hash: cba2aa863ebd083d4592e8a764dbdc2c30a0dd8aff49d273927e82df0069bc81
     source_path: tools/creating-skills.md
     workflow: 16
 ---
 
-Skills एजेंट को सिखाते हैं कि टूल्स का उपयोग कैसे और कब करना है। हर skill एक डायरेक्टरी होती है
-जिसमें YAML frontmatter और markdown निर्देशों वाली `SKILL.md` फ़ाइल होती है।
-OpenClaw कई roots से skills को एक निर्धारित [precedence order](/hi/tools/skills#loading-order) में लोड करता है।
+Skills एजेंट को सिखाते हैं कि टूल्स का उपयोग कैसे और कब करना है। प्रत्येक Skill एक डायरेक्टरी है
+जिसमें YAML frontmatter और Markdown निर्देशों वाली `SKILL.md` फ़ाइल होती है।
+OpenClaw एक निर्धारित [प्राथमिकता क्रम](/hi/tools/skills#loading-order) में कई रूट से Skills लोड करता है।
 
-## अपनी पहली skill बनाएँ
+## अपना पहला Skill बनाएँ
 
 <Steps>
-  <Step title="Create the skill directory">
-    Skills आपके workspace के `skills/` फ़ोल्डर में रहती हैं। अपनी
-    नई skill के लिए एक डायरेक्टरी बनाएँ:
+  <Step title="Skill डायरेक्टरी बनाएँ">
+    Skills आपके वर्कस्पेस के `skills/` फ़ोल्डर में रहते हैं:
 
     ```bash
     mkdir -p ~/.openclaw/workspace/skills/hello-world
     ```
 
-    संगठन के लिए आप skills को subfolders में समूहित कर सकते हैं — फिर भी skill का नाम
-    `SKILL.md` frontmatter से तय होता है, फ़ोल्डर path से नहीं:
+    व्यवस्थित रखने के लिए आप Skills को सबफ़ोल्डर में समूहित कर सकते हैं — फिर भी Skill का
+    नाम फ़ोल्डर पथ से नहीं, बल्कि `SKILL.md` frontmatter से निर्धारित होता है:
 
     ```bash
     mkdir -p ~/.openclaw/workspace/skills/personal/hello-world
-    # skill name is still "hello-world", invoked as /hello-world
+    # Skill का नाम अब भी "hello-world" है, इसे /hello-world के रूप में चलाया जाता है
     ```
 
   </Step>
 
-  <Step title="Write SKILL.md">
-    डायरेक्टरी के अंदर `SKILL.md` बनाएँ। frontmatter metadata परिभाषित करता है;
-    body एजेंट को निर्देश देता है।
+  <Step title="SKILL.md लिखें">
+    frontmatter मेटाडेटा निर्धारित करता है; बॉडी एजेंट को निर्देश देती है।
 
     ```markdown
     ---
     name: hello-world
-    description: A simple skill that prints a greeting.
+    description: एक सरल Skill जो अभिवादन प्रिंट करता है।
     ---
 
-    # Hello World
+    # नमस्ते दुनिया
 
-    When the user asks for a greeting, use the `exec` tool to run:
+    जब उपयोगकर्ता अभिवादन माँगे, तो यह चलाने के लिए `exec` टूल का उपयोग करें:
 
     ```bash
-    echo "Hello from your custom skill!"
+    echo "आपके कस्टम Skill की ओर से नमस्ते!"
     ```
     ```
 
     नामकरण नियम:
-    - `name` के लिए lowercase अक्षर, अंक और hyphens का उपयोग करें।
-    - डायरेक्टरी नाम और frontmatter `name` को समान रखें।
-    - `description` एजेंट को और slash-command discovery में दिखाया जाता है —
-      इसे एक पंक्ति में और 160 वर्णों से कम रखें।
+    - `name` के लिए छोटे अक्षर, अंक और हाइफ़न उपयोग करें।
+    - डायरेक्टरी नाम और frontmatter के `name` को एक-समान रखें।
+    - `description` एजेंट और स्लैश-कमांड खोज में दिखाई देता है —
+      इसे एक पंक्ति में और 160 वर्णों से छोटा रखें।
 
   </Step>
 
-  <Step title="Verify the skill loaded">
+  <Step title="सत्यापित करें कि Skill लोड हो गया है">
     ```bash
     openclaw skills list
     ```
 
-    OpenClaw डिफ़ॉल्ट रूप से skills roots के अंतर्गत `SKILL.md` फ़ाइलों को देखता है। यदि
-    watcher अक्षम है या आप किसी मौजूदा session को जारी रख रहे हैं, तो एक नया
-    session शुरू करें ताकि एजेंट को refreshed सूची मिल सके:
+    OpenClaw डिफ़ॉल्ट रूप से Skills रूट के अंतर्गत `SKILL.md` फ़ाइलों पर नज़र रखता है। यदि
+    वॉचर अक्षम है या आप किसी मौजूदा सेशन को जारी रख रहे हैं, तो नया सेशन
+    शुरू करें ताकि एजेंट को ताज़ा सूची प्राप्त हो:
 
     ```bash
-    # From chat — archive current session and start fresh
+    # चैट से — मौजूदा सेशन को आर्काइव करके नया शुरू करें
     /new
 
-    # Or restart the gateway
+    # या Gateway को रीस्टार्ट करें
     openclaw gateway restart
     ```
 
   </Step>
 
-  <Step title="Test it">
-    ऐसा संदेश भेजें जिससे skill trigger होनी चाहिए:
-
+  <Step title="इसका परीक्षण करें">
     ```bash
-    openclaw agent --message "give me a greeting"
+    openclaw agent --message "मुझे एक अभिवादन दें"
     ```
 
-    या chat खोलें और एजेंट से सीधे पूछें। नाम से स्पष्ट रूप से invoke करने के लिए
-    `/skill hello-world` का उपयोग करें।
+    या चैट खोलकर एजेंट से सीधे पूछें। इसे नाम से स्पष्ट रूप से
+    चलाने के लिए `/skill hello-world` का उपयोग करें।
 
   </Step>
 </Steps>
 
 ## SKILL.md संदर्भ
 
-### आवश्यक fields
+### आवश्यक फ़ील्ड
 
-| Field         | Description                                                     |
+| फ़ील्ड         | विवरण                                                     |
 | ------------- | --------------------------------------------------------------- |
-| `name`        | lowercase अक्षरों, अंकों और hyphens वाला unique slug        |
-| `description` | एजेंट और discovery output में दिखाया जाने वाला एक-पंक्ति विवरण |
+| `name`        | छोटे अक्षरों, अंकों और हाइफ़न का उपयोग करने वाला अद्वितीय स्लग        |
+| `description` | एजेंट और खोज आउटपुट में दिखाई देने वाला एक-पंक्ति विवरण |
 
-### वैकल्पिक frontmatter keys
+### वैकल्पिक frontmatter कुंजियाँ
 
-| Field                      | Default | Description                                                                      |
+| फ़ील्ड                      | डिफ़ॉल्ट | विवरण                                                                      |
 | -------------------------- | ------- | -------------------------------------------------------------------------------- |
-| `user-invocable`           | `true`  | skill को user slash command के रूप में expose करें                                         |
-| `disable-model-invocation` | `false` | skill को एजेंट के system prompt से बाहर रखें (`/skill` के ज़रिए फिर भी चलता है)        |
-| `command-dispatch`         | —       | model को bypass करते हुए slash command को सीधे tool पर route करने के लिए `tool` पर set करें |
-| `command-tool`             | —       | `command-dispatch: tool` set होने पर invoke किया जाने वाला tool नाम                         |
-| `command-arg-mode`         | `raw`   | tool dispatch के लिए raw args string को tool तक forward करता है                      |
-| `homepage`                 | —       | macOS Skills UI में "Website" के रूप में दिखाया जाने वाला URL                                    |
+| `user-invocable`           | `true`  | Skill को उपयोगकर्ता स्लैश कमांड के रूप में उपलब्ध कराएँ                                         |
+| `disable-model-invocation` | `false` | Skill को एजेंट के सिस्टम प्रॉम्प्ट से बाहर रखें (यह फिर भी `/skill` के माध्यम से चलता है)        |
+| `command-dispatch`         | —       | मॉडल को बायपास करते हुए स्लैश कमांड को सीधे किसी टूल तक रूट करने के लिए `tool` पर सेट करें |
+| `command-tool`             | —       | `command-dispatch: tool` सेट होने पर चलाए जाने वाले टूल का नाम                         |
+| `command-arg-mode`         | `raw`   | टूल डिस्पैच के लिए, मूल आर्ग्स स्ट्रिंग टूल को फ़ॉरवर्ड करता है                      |
+| `homepage`                 | —       | macOS Skills UI में "Website" के रूप में दिखाई जाने वाली URL                                    |
 
-Gating fields (`requires.bins`, `requires.env`, आदि) के लिए देखें
-[Skills — Gating](/hi/tools/skills#gating)।
+गेटिंग फ़ील्ड (`requires.bins`, `requires.env` आदि) के लिए
+[Skills — गेटिंग](/hi/tools/skills#gating) देखें।
 
-### `{baseDir}` का उपयोग
+### `{baseDir}` का उपयोग करना
 
-skill body में `{baseDir}` का उपयोग करके hardcoded paths के बिना skill
-डायरेक्टरी के अंदर की फ़ाइलों को reference करें:
+पथों को हार्डकोड किए बिना Skill डायरेक्टरी के अंदर की फ़ाइलों को संदर्भित करें — एजेंट
+`{baseDir}` को Skill की अपनी डायरेक्टरी के सापेक्ष रिज़ॉल्व करता है:
 
 ```markdown
-Run the helper script at `{baseDir}/scripts/run.sh`.
+`{baseDir}/scripts/run.sh` पर स्थित सहायक स्क्रिप्ट चलाएँ।
 ```
 
-## conditional activation जोड़ना
+## सशर्त सक्रियण जोड़ना
 
-अपनी skill को gate करें ताकि वह केवल तब load हो जब उसकी dependencies उपलब्ध हों:
+अपने Skill को गेट करें ताकि वह केवल तभी लोड हो जब उसकी निर्भरताएँ उपलब्ध हों:
 
 ```markdown
 ---
 name: gemini-search
-description: Search using Gemini CLI.
+description: Gemini CLI का उपयोग करके खोजें।
 metadata: { "openclaw": { "requires": { "bins": ["gemini"] }, "primaryEnv": "GEMINI_API_KEY" } }
 ---
 ```
 
 <AccordionGroup>
-  <Accordion title="Gating options">
-    | Key | Description |
+  <Accordion title="गेटिंग विकल्प">
+    | कुंजी | विवरण |
     | --- | --- |
-    | `requires.bins` | सभी binaries `PATH` पर मौजूद होनी चाहिए |
-    | `requires.anyBins` | कम से कम एक binary `PATH` पर मौजूद होनी चाहिए |
-    | `requires.env` | हर env var process या config में मौजूद होना चाहिए |
-    | `requires.config` | हर `openclaw.json` path truthy होना चाहिए |
-    | `os` | Platform filter: `["darwin"]`, `["linux"]`, `["win32"]` |
-    | `always` | सभी gates छोड़ने और skill को हमेशा शामिल करने के लिए `true` set करें |
+    | `requires.bins` | सभी बाइनरी `PATH` पर मौजूद होनी चाहिए |
+    | `requires.anyBins` | कम-से-कम एक बाइनरी `PATH` पर मौजूद होनी चाहिए |
+    | `requires.env` | प्रत्येक एनवायरनमेंट वेरिएबल प्रोसेस या कॉन्फ़िग में मौजूद होना चाहिए |
+    | `requires.config` | प्रत्येक `openclaw.json` पथ का मान truthy होना चाहिए |
+    | `os` | प्लेटफ़ॉर्म फ़िल्टर: `["darwin"]`, `["linux"]`, `["win32"]` |
+    | `always` | सभी गेट छोड़कर Skill को हमेशा शामिल करने के लिए `true` सेट करें |
 
-    पूरा संदर्भ: [Skills — Gating](/hi/tools/skills#gating)।
+    पूरा संदर्भ: [Skills — गेटिंग](/hi/tools/skills#gating)।
 
   </Accordion>
-  <Accordion title="Environment and API keys">
-    `openclaw.json` में किसी skill entry से API key जोड़ें:
+  <Accordion title="एनवायरनमेंट और API कुंजियाँ">
+    `openclaw.json` में किसी Skill प्रविष्टि से API कुंजी जोड़ें:
 
     ```json5
     {
@@ -174,105 +171,107 @@ metadata: { "openclaw": { "requires": { "bins": ["gemini"] }, "primaryEnv": "GEM
     }
     ```
 
-    key केवल उस agent turn के लिए host process में inject की जाती है।
-    यह sandbox तक नहीं पहुँचती — देखें
-    [sandboxed env vars](/hi/tools/skills-config#sandboxed-skills-and-env-vars)।
+    कुंजी केवल उस एजेंट टर्न के लिए होस्ट प्रोसेस में इंजेक्ट की जाती है।
+    यह सैंडबॉक्स तक नहीं पहुँचती — देखें
+    [सैंडबॉक्स किए गए एनवायरनमेंट वेरिएबल](/hi/tools/skills-config#sandboxed-skills-and-env-vars)।
 
   </Accordion>
 </AccordionGroup>
 
-## Skill Workshop के ज़रिए प्रस्ताव दें
+## Skill Workshop के माध्यम से प्रस्तावित करें
 
-agent-drafted skills के लिए या जब आप किसी skill के live होने से पहले operator review चाहते हों,
-`SKILL.md` सीधे लिखने के बजाय [Skill Workshop](/hi/tools/skill-workshop) proposals का उपयोग करें।
+एजेंट द्वारा तैयार किए गए Skills के लिए या जब आप किसी Skill को
+लाइव करने से पहले ऑपरेटर समीक्षा चाहते हों, तो सीधे `SKILL.md` लिखने के बजाय
+[Skill Workshop](/hi/tools/skill-workshop) प्रस्तावों का उपयोग करें।
 
 ```bash
-# Propose a brand-new skill
+# बिल्कुल नया Skill प्रस्तावित करें
 openclaw skills workshop propose-create \
   --name "hello-world" \
-  --description "A simple skill that prints a greeting." \
+  --description "अभिवादन प्रिंट करने वाला एक सरल Skill।" \
   --proposal ./PROPOSAL.md
 
-# Propose an update to an existing skill
+# किसी मौजूदा Skill में अपडेट प्रस्तावित करें
 openclaw skills workshop propose-update hello-world \
   --proposal ./PROPOSAL.md \
-  --description "Updated greeting skill"
+  --description "अपडेट किया गया अभिवादन Skill"
 ```
 
-जब proposal में support files शामिल हों, तो `--proposal-dir` का उपयोग करें:
+जब प्रस्ताव में सहायक फ़ाइलें शामिल हों, तो `--proposal-dir` का उपयोग करें:
 
 ```bash
 openclaw skills workshop propose-create \
   --name "hello-world" \
-  --description "A simple skill that prints a greeting." \
+  --description "अभिवादन प्रिंट करने वाला एक सरल Skill।" \
   --proposal-dir ./hello-world-proposal/
 ```
 
-डायरेक्टरी में `PROPOSAL.md` होना चाहिए। Support files `assets/`,
-`examples/`, `references/`, `scripts/`, या `templates/` में जा सकती हैं।
+डायरेक्टरी के रूट में `PROPOSAL.md` होना आवश्यक है। सहायक फ़ाइलें
+`assets/`, `examples/`, `references/`, `scripts/`, या `templates/` के अंतर्गत रखें।
 
-review के बाद:
+समीक्षा के बाद:
 
 ```bash
 openclaw skills workshop inspect <proposal-id>
 openclaw skills workshop apply <proposal-id>
 ```
 
-पूरे proposal lifecycle के लिए [Skill Workshop](/hi/tools/skill-workshop) देखें।
+प्रस्ताव के पूरे जीवनचक्र के लिए [Skill Workshop](/hi/tools/skill-workshop) देखें।
 
-## ClawHub पर publish करना
+## ClawHub पर प्रकाशित करना
 
 <Steps>
-  <Step title="Ensure your SKILL.md is complete">
-    सुनिश्चित करें कि `name`, `description`, और कोई भी `metadata.openclaw` gating fields
-    set हैं। यदि आपके पास project page है तो `homepage` URL जोड़ें।
+  <Step title="सुनिश्चित करें कि आपका SKILL.md पूरा है">
+    सुनिश्चित करें कि `name`, `description`, और कोई भी `metadata.openclaw` गेटिंग फ़ील्ड
+    सेट हैं। यदि आपके पास प्रोजेक्ट पेज है, तो `homepage` URL जोड़ें।
   </Step>
-  <Step title="Install the ClawHub skill">
-    ClawHub skill current publish command shape और आवश्यक
-    metadata को document करती है:
-
+  <Step title="स्टैंडअलोन ClawHub CLI इंस्टॉल करें और लॉग इन करें">
     ```bash
-    openclaw skills install @openclaw/clawhub-publish
+    npm i -g clawhub
+    clawhub login
+    ```
+  </Step>
+  <Step title="प्रकाशित करें">
+    ```bash
+    clawhub skill publish ./path/to/hello-world
     ```
 
-  </Step>
-  <Step title="Publish">
-    ```bash
-    clawhub publish
-    ```
-
-    पूरे flow के लिए [ClawHub — Publishing](/hi/clawhub/publishing) देखें।
+    अनुमानित संस्करण को ओवरराइड करने या किसी विशिष्ट स्वामी के अंतर्गत प्रकाशित करने के लिए
+    `--version <version>` या `--owner <owner>` जोड़ें। पूरे प्रवाह, स्वामी-स्कोपिंग और अन्य
+    रखरखाव कमांड (`clawhub sync`, `clawhub skill rename`, ...) के लिए
+    [ClawHub — प्रकाशन](/hi/clawhub/publishing) और
+    [ClawHub CLI](/hi/clawhub/cli) देखें।
 
   </Step>
 </Steps>
 
-## Best practices
+## सर्वोत्तम अभ्यास
 
 <Tip>
-  - **संक्षिप्त रहें** — model को निर्देश दें कि *क्या* करना है, यह नहीं कि AI कैसे होना है।
-  - **Safety पहले** — यदि आपकी skill `exec` का उपयोग करती है, तो सुनिश्चित करें कि prompts untrusted input से
-    arbitrary command injection की अनुमति न दें।
-  - **स्थानीय रूप से test करें** — share करने से पहले `openclaw agent --message "..."` का उपयोग करें।
-  - **ClawHub का उपयोग करें** — scratch से बनाने से पहले [clawhub.ai](https://clawhub.ai) पर community skills
-    browse करें।
+  - **संक्षिप्त रहें** — मॉडल को यह निर्देश दें कि *क्या* करना है, न कि AI कैसे बनना है।
+  - **सुरक्षा पहले** — यदि आपका Skill `exec` का उपयोग करता है, तो सुनिश्चित करें कि प्रॉम्प्ट
+    अविश्वसनीय इनपुट से मनमाना कमांड इंजेक्शन न होने दें।
+  - **स्थानीय रूप से परीक्षण करें** — साझा करने से पहले `openclaw agent --message "..."` का उपयोग करें।
+  - **ClawHub का उपयोग करें** — शुरुआत से बनाने से पहले [clawhub.ai](https://clawhub.ai)
+    पर समुदाय के Skills ब्राउज़ करें।
 </Tip>
 
 ## संबंधित
 
 <CardGroup cols={2}>
-  <Card title="Skills reference" href="/hi/tools/skills" icon="puzzle-piece">
-    Loading order, gating, allowlists, और SKILL.md format।
+  <Card title="Skills संदर्भ" href="/hi/tools/skills" icon="puzzle-piece">
+    लोडिंग क्रम, गेटिंग, अनुमत-सूचियाँ और SKILL.md प्रारूप।
   </Card>
   <Card title="Skill Workshop" href="/hi/tools/skill-workshop" icon="flask">
-    agent-drafted skills के लिए proposal queue।
+    एजेंट द्वारा तैयार किए गए Skills के लिए प्रस्ताव कतार।
   </Card>
-  <Card title="Skills config" href="/hi/tools/skills-config" icon="gear">
-    पूरा `skills.*` config schema।
+  <Card title="Skills कॉन्फ़िग" href="/hi/tools/skills-config" icon="gear">
+    पूरा `skills.*` कॉन्फ़िग स्कीमा।
   </Card>
   <Card title="ClawHub" href="/hi/clawhub" icon="cloud">
-    public registry पर skills browse और publish करें।
+    सार्वजनिक रजिस्ट्री पर Skills ब्राउज़ और प्रकाशित करें।
   </Card>
-  <Card title="Building plugins" href="/hi/plugins/building-plugins" icon="plug">
-    Plugins उन tools के साथ skills ship कर सकते हैं जिन्हें वे document करते हैं।
+  <Card title="Plugins बनाना" href="/hi/plugins/building-plugins" icon="plug">
+    Plugins अपने द्वारा प्रलेखित टूल्स के साथ Skills प्रदान कर सकते हैं।
   </Card>
 </CardGroup>

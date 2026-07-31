@@ -1,21 +1,22 @@
 ---
 read_when:
-    - یادگیری نحوه پیکربندی OpenClaw
+    - آشنایی با نحوه پیکربندی OpenClaw
     - در جست‌وجوی نمونه‌های پیکربندی
     - راه‌اندازی OpenClaw برای نخستین بار
-summary: نمونه‌های پیکربندی منطبق با شِما برای راه‌اندازی‌های رایج OpenClaw
+summary: نمونه‌های پیکربندی منطبق با طرح‌واره برای راه‌اندازی‌های رایج OpenClaw
 title: نمونه‌های پیکربندی
 x-i18n:
-    generated_at: "2026-07-12T09:58:12Z"
+    generated_at: "2026-07-27T14:08:01Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c3ad82ccce62e0c8dbb72f81b0de62d60d8a6282f0a327ed1cbda7ffa3e47969
+    source_hash: ade743a23e24f2e927d1bb1e1828893e24d3d718ec321dd8fda3932830be8331
     source_path: gateway/configuration-examples.md
     workflow: 16
 ---
 
-نمونه‌های زیر با شِمای پیکربندی فعلی هماهنگ هستند. برای مرجع جامع و توضیحات مربوط به هر فیلد، به [پیکربندی](/fa/gateway/configuration) مراجعه کنید.
+نمونه‌های زیر با طرح‌وارهٔ پیکربندی فعلی هم‌راستا هستند. برای مرجع جامع و توضیحات هر فیلد، به [پیکربندی](/fa/gateway/configuration) مراجعه کنید.
 
 ## شروع سریع
 
@@ -39,16 +40,15 @@ x-i18n:
       workspace: "~/.openclaw/workspace",
       model: { primary: "anthropic/claude-sonnet-4-6" },
     },
-    list: [
-      {
-        id: "main",
+    entries: {
+      main: {
         identity: {
           name: "Clawd",
           theme: "helpful assistant",
           emoji: "🦞",
         },
       },
-    ],
+    },
   },
   channels: {
     whatsapp: {
@@ -59,20 +59,20 @@ x-i18n:
   messages: {
     visibleReplies: "automatic",
     groupChat: {
-      visibleReplies: "message_tool", // فعال‌سازی اختیاری؛ خروجی قابل مشاهده به message(action=send) نیاز دارد
+      visibleReplies: "message_tool", // نیازمند فعال‌سازی؛ خروجی قابل‌مشاهده مستلزم message(action=send) است
       unmentionedInbound: "room_event",
     },
   },
 }
 ```
 
-## نمونهٔ گسترش‌یافته (گزینه‌های اصلی)
+## نمونهٔ گسترده (گزینه‌های اصلی)
 
-> JSON5 امکان استفاده از توضیحات و ویرگول‌های پایانی را فراهم می‌کند. JSON معمولی نیز قابل استفاده است.
+> JSON5 امکان استفاده از توضیحات و ویرگول‌های انتهایی را فراهم می‌کند. JSON معمولی نیز قابل‌استفاده است.
 
 ```json5
 {
-  // Environment + shell
+  // محیط + پوسته
   env: {
     OPENROUTER_API_KEY: "sk-or-...",
     vars: {
@@ -84,7 +84,7 @@ x-i18n:
     },
   },
 
-  // Auth profile metadata (secrets live in auth-profiles.json)
+  // فرادادهٔ نمایهٔ احراز هویت (اسرار در auth-profiles.json نگهداری می‌شوند)
   auth: {
     profiles: {
       "anthropic:default": { provider: "anthropic", mode: "api_key" },
@@ -98,9 +98,9 @@ x-i18n:
     },
   },
 
-  // Identity is per agent — set it on agents.list[].identity below.
+  // هویت مختص هر عامل است — آن را در agents.entries.<id>.identity زیر تنظیم کنید.
 
-  // Logging
+  // گزارش‌گیری
   logging: {
     level: "info",
     file: "/tmp/openclaw/openclaw.log",
@@ -109,21 +109,19 @@ x-i18n:
     redactSensitive: "tools",
   },
 
-  // Message formatting
+  // قالب‌بندی پیام
   messages: {
-    messagePrefix: "[openclaw]",
     visibleReplies: "automatic",
     responsePrefix: ">",
     ackReaction: "👀",
     ackReactionScope: "group-mentions",
     groupChat: {
       historyLimit: 50,
-      visibleReplies: "message_tool", // opt in for shared rooms with tool-reliable models
+      visibleReplies: "message_tool", // برای اتاق‌های مشترک با مدل‌هایی که ابزارها را قابل‌اعتماد فراخوانی می‌کنند، فعال شود
       unmentionedInbound: "room_event",
     },
     queue: {
       mode: "followup",
-      debounceMs: 500,
       cap: 20,
       drop: "summarize",
       byChannel: {
@@ -138,31 +136,10 @@ x-i18n:
     },
   },
 
-  // Tooling
-  tools: {
-    media: {
-      audio: {
-        enabled: true,
-        maxBytes: 20971520,
-        models: [
-          { provider: "openai", model: "gpt-4o-transcribe" },
-          // Optional CLI fallback (Whisper binary):
-          // { type: "cli", command: "whisper", args: ["--model", "base", "{{MediaPath}}"] }
-        ],
-        timeoutSeconds: 120,
-      },
-      video: {
-        enabled: true,
-        maxBytes: 52428800,
-        models: [{ provider: "google", model: "gemini-3-flash-preview" }],
-      },
-    },
-  },
-
-  // Session behavior
+  // رفتار نشست
   session: {
     scope: "per-sender",
-    dmScope: "per-channel-peer", // recommended for multi-user inboxes
+    dmScope: "per-channel-peer", // برای صندوق‌های ورودی چندکاربره توصیه می‌شود
     reset: {
       mode: "daily",
       atHour: 4,
@@ -177,18 +154,17 @@ x-i18n:
       mode: "warn",
       pruneAfter: "30d",
       maxEntries: 500,
-      resetArchiveRetention: "30d", // duration or false
-      maxDiskBytes: "500mb", // optional
-      highWaterBytes: "400mb", // optional (defaults to 80% of maxDiskBytes)
+      resetArchiveRetention: "30d", // مدت‌زمان یا false
+      maxDiskBytes: "500mb", // اختیاری
+      highWaterBytes: "400mb", // اختیاری (مقدار پیش‌فرض 80% از maxDiskBytes است)
     },
-    typingIntervalSeconds: 5,
     sendPolicy: {
       default: "allow",
       rules: [{ action: "deny", match: { channel: "discord", chatType: "group" } }],
     },
   },
 
-  // Channels
+  // کانال‌ها
   channels: {
     whatsapp: {
       dmPolicy: "pairing",
@@ -210,7 +186,8 @@ x-i18n:
     discord: {
       enabled: true,
       token: "YOUR_DISCORD_BOT_TOKEN",
-      dm: { enabled: true, allowFrom: ["123456789012345678"] },
+      dmPolicy: "allowlist",
+      allowFrom: ["123456789012345678"],
       guilds: {
         "123456789012345678": {
           slug: "friends-of-openclaw",
@@ -230,7 +207,8 @@ x-i18n:
       channels: {
         "#general": { enabled: true, requireMention: true },
       },
-      dm: { enabled: true, allowFrom: ["U123"] },
+      dmPolicy: "allowlist",
+      allowFrom: ["U123"],
       slashCommand: {
         enabled: true,
         name: "openclaw",
@@ -240,7 +218,7 @@ x-i18n:
     },
   },
 
-  // Agent runtime
+  // محیط اجرای عامل
   agents: {
     defaults: {
       workspace: "~/.openclaw/workspace",
@@ -257,7 +235,7 @@ x-i18n:
         "anthropic/claude-sonnet-4-6": { alias: "sonnet" },
         "openai/gpt-5.4": { alias: "gpt" },
       },
-      skills: ["github", "weather"], // inherited by agents that omit list[].skills
+      skills: ["github", "weather"], // عامل‌هایی که list[].skills را مشخص نکرده‌اند، این مقدار را به ارث می‌برند
       thinkingDefault: "low",
       verboseDefault: "off",
       toolProgressDetail: "explain",
@@ -284,22 +262,14 @@ x-i18n:
         every: "30m",
         model: "anthropic/claude-sonnet-4-6",
         target: "last",
-        directPolicy: "allow", // allow (default) | block
+        directPolicy: "allow", // allow (پیش‌فرض) | block
         to: "+15555550123",
         prompt: "HEARTBEAT",
         ackMaxChars: 300,
       },
-      memorySearch: {
-        provider: "gemini",
-        model: "gemini-embedding-001",
-        remote: {
-          apiKey: "${GEMINI_API_KEY}",
-        },
-        extraPaths: ["../team-docs", "/srv/shared-notes"],
-      },
       sandbox: {
         mode: "non-main",
-        scope: "session", // preferred over legacy perSession: true
+        scope: "session", // بر perSession: true قدیمی ترجیح داده می‌شود
         workspaceRoot: "~/.openclaw/sandboxes",
         docker: {
           image: "openclaw-sandbox:bookworm-slim",
@@ -314,38 +284,55 @@ x-i18n:
         },
       },
     },
-    list: [
-      {
-        id: "main",
+    entries: {
+      main: {
         default: true,
         identity: {
           name: "Samantha",
           theme: "helpful sloth",
           emoji: "🦥",
         },
-        // inherits defaults.skills -> github, weather
+        // defaults.skills را به ارث می‌برد -> github، weather
         groupChat: {
           mentionPatterns: ["@openclaw", "openclaw"],
         },
-        thinkingDefault: "high", // per-agent thinking override
-        reasoningDefault: "on", // per-agent reasoning visibility
-        fastModeDefault: false, // per-agent fast mode
+        thinkingDefault: "high", // بازنویسی تنظیم تفکر برای هر عامل
+        reasoningDefault: "on", // قابلیت مشاهدهٔ استدلال برای هر عامل
+        fastModeDefault: false, // حالت سریع برای هر عامل
       },
-      {
-        id: "quick",
-        skills: [], // no skills for this agent
-        fastModeDefault: true, // this agent always runs fast
+      quick: {
+        skills: [], // این عامل هیچ مهارتی ندارد
+        fastModeDefault: true, // این عامل همیشه سریع اجرا می‌شود
         thinkingDefault: "off",
       },
-    ],
+    },
+  },
+
+  memory: {
+    search: {
+      provider: "gemini",
+      model: "gemini-embedding-001",
+      remote: {
+        apiKey: "${GEMINI_API_KEY}",
+      },
+      extraPaths: ["../team-docs", "/srv/shared-notes"],
+    },
   },
 
   tools: {
+    media: {
+      models: [
+        { provider: "openai", model: "gpt-4o-transcribe", capabilities: ["audio"] },
+        { provider: "google", model: "gemini-3-flash-preview", capabilities: ["video"] },
+      ],
+      audio: { enabled: true, maxBytes: 20971520, timeoutSeconds: 120 },
+      video: { enabled: true, maxBytes: 52428800 },
+    },
     allow: ["exec", "process", "read", "write", "edit", "apply_patch"],
     deny: ["browser", "canvas"],
     exec: {
       backgroundMs: 10000,
-      timeoutSec: 1800,
+      timeoutSeconds: 1800,
       cleanupMs: 1800000,
     },
     elevated: {
@@ -362,7 +349,7 @@ x-i18n:
     },
   },
 
-  // Custom model providers
+  // ارائه‌دهندگان مدل سفارشی
   models: {
     mode: "merge",
     providers: {
@@ -388,19 +375,14 @@ x-i18n:
     },
   },
 
-  // Cron jobs
+  // کارهای Cron
   cron: {
     enabled: true,
     store: "~/.openclaw/cron/jobs.json",
-    maxConcurrentRuns: 8, // default; cron dispatch + isolated cron agent-turn execution
     sessionRetention: "24h",
-    runLog: {
-      maxBytes: "2mb",
-      keepLines: 2000,
-    },
   },
 
-  // Webhooks
+  // Webhookها
   hooks: {
     enabled: true,
     path: "/hooks",
@@ -443,7 +425,7 @@ x-i18n:
     },
   },
 
-  // Gateway + networking
+  // Gateway + شبکه
   gateway: {
     mode: "local",
     port: 18789,
@@ -456,7 +438,7 @@ x-i18n:
     },
     tailscale: { mode: "serve", resetOnExit: false },
     remote: { url: "ws://gateway-host.ts.net:18789", token: "remote-token" },
-    reload: { mode: "hybrid", debounceMs: 300 },
+    reload: { mode: "hybrid" },
   },
 
   skills: {
@@ -482,9 +464,9 @@ x-i18n:
 }
 ```
 
-### مخزن هم‌ردهٔ Skills با پیوند نمادین
+### مخزن خواهرِ Skills با پیوند نمادین
 
-هنگامی از این روش استفاده کنید که ریشهٔ یکی از Skills داخلی شامل پیوندی نمادین به یک مخزن هم‌رده باشد؛ برای
+زمانی از این روش استفاده کنید که ریشهٔ یک Skills داخلی دارای پیوند نمادین به یک مخزن خواهر باشد؛ برای
 مثال `~/.agents/skills/manager -> ~/Projects/manager/skills`.
 
 ```json5
@@ -498,11 +480,11 @@ x-i18n:
 }
 ```
 
-- `extraDirs` مخزن هم‌رده را به‌عنوان یک ریشهٔ صریح Skills پویش می‌کند.
-- `allowSymlinkTargets` به پوشه‌های Skills دارای پیوند نمادین اجازه می‌دهد بدون مجازکردن خروج دلخواه پیوندهای نمادین، به
-  ریشهٔ مقصد واقعی و مورداعتماد وارد شوند.
-- برای اینکه Skill Workshop بتواند از طریق همان مقصد مورداعتماد پیوند نمادین عملیات نوشتن را انجام دهد،
-  مقدار `skills.workshop.allowSymlinkTargetWrites: true` را تنظیم کنید.
+- `extraDirs` مخزن هم‌جوار را به‌عنوان ریشه صریح Skills پویش می‌کند.
+- `allowSymlinkTargets` به پوشه‌های Skills دارای پیوند نمادین اجازه می‌دهد در آن ریشه مقصد واقعی و مورداعتماد تفکیک شوند،
+  بدون آنکه خروج دلخواه پیوندهای نمادین مجاز شود.
+- برای اینکه Skill Workshop بتواند عملیات نوشتن را از طریق همان مقصد مورداعتماد پیوند نمادین اعمال کند،
+  `skills.workshop.allowSymlinkTargetWrites: true` را تنظیم کنید.
 
 ## الگوهای رایج
 
@@ -515,17 +497,17 @@ x-i18n:
       workspace: "~/.openclaw/workspace",
       skills: ["github", "weather"],
     },
-    list: [
-      { id: "main", default: true },
-      { id: "docs", workspace: "~/.openclaw/workspace-docs", skills: ["docs-search"] },
-    ],
+    entries: {
+      main: { default: true },
+      docs: { workspace: "~/.openclaw/workspace-docs", skills: ["docs-search"] },
+    },
   },
 }
 ```
 
-- `agents.defaults.skills` خط‌مبنای مشترک است.
-- `agents.list[].skills` این خط‌مبنا را برای یک عامل جایگزین می‌کند.
-- وقتی یک عامل نباید هیچ Skillsی ببیند، از `skills: []` استفاده کنید.
+- `agents.defaults.skills` خط مبنای مشترک است.
+- `agents.entries.*.skills` آن خط مبنا را برای یک عامل جایگزین می‌کند.
+- وقتی یک عامل نباید هیچ Skillsی را ببیند، از `skills: []` استفاده کنید.
 
 ### راه‌اندازی چندسکویی
 
@@ -533,7 +515,7 @@ x-i18n:
 {
   agents: { defaults: { workspace: "~/.openclaw/workspace" } },
   channels: {
-    whatsapp: { allowFrom: ["+15555550123"] },
+    whatsapp: { allowFrom: ["+15555550123"], responsePrefix: "[openclaw]" },
     telegram: {
       enabled: true,
       botToken: "YOUR_TOKEN",
@@ -542,17 +524,17 @@ x-i18n:
     discord: {
       enabled: true,
       token: "YOUR_TOKEN",
-      dm: { allowFrom: ["123456789012345678"] },
+      allowFrom: ["123456789012345678"],
     },
   },
 }
 ```
 
-### تأیید خودکار در شبکهٔ مورداعتماد Node
+### تأیید خودکار شبکه مورداعتماد Node
 
 جفت‌سازی دستگاه را دستی نگه دارید، مگر اینکه مسیر شبکه را کنترل کنید. برای یک
-آزمایشگاه اختصاصی یا زیرشبکهٔ tailnet، می‌توانید تأیید خودکار نخستین جفت‌سازی دستگاه Node را
-با CIDRها یا نشانی‌های IP دقیق فعال کنید:
+آزمایشگاه اختصاصی یا زیرشبکه tailnet، می‌توانید با CIDRها یا IPهای دقیق،
+تأیید خودکار نخستین دستگاه Node را فعال کنید:
 
 ```json5
 {
@@ -566,40 +548,40 @@ x-i18n:
 }
 ```
 
-اگر تنظیم نشود، همچنان غیرفعال می‌ماند. این قابلیت فقط برای جفت‌سازی جدید `role: node`
+اگر تنظیم نشود، غیرفعال می‌ماند. این گزینه فقط برای جفت‌سازی جدید `role: node`
 بدون دامنه‌های درخواستی اعمال می‌شود. کلاینت‌های اپراتور/مرورگر و ارتقای نقش، دامنه، فراداده یا
 کلید عمومی همچنان به تأیید دستی نیاز دارند.
 
-### حالت امن پیام خصوصی (صندوق ورودی مشترک / پیام‌های خصوصی چندکاربره)
+### حالت امن پیام مستقیم (صندوق ورودی مشترک / پیام‌های مستقیم چندکاربره)
 
-اگر بیش از یک نفر می‌تواند به ربات شما پیام خصوصی بفرستد (چند ورودی در `allowFrom`، تأیید جفت‌سازی برای چند نفر، یا `dmPolicy: "open"`)، **حالت امن پیام خصوصی** را فعال کنید تا پیام‌های خصوصی فرستندگان مختلف به‌طور پیش‌فرض یک زمینهٔ مشترک نداشته باشند:
+اگر بیش از یک نفر می‌تواند به ربات شما پیام مستقیم بفرستد (چندین ورودی در `allowFrom`، تأیید جفت‌سازی برای چند نفر، یا `dmPolicy: "open"`)، **حالت امن پیام مستقیم** را فعال کنید تا پیام‌های مستقیم فرستندگان مختلف به‌طور پیش‌فرض یک زمینه مشترک نداشته باشند:
 
 ```json5
 {
-  // Secure DM mode (recommended for multi-user or sensitive DM agents)
+  // حالت امن پیام مستقیم (برای عامل‌های پیام مستقیم چندکاربره یا حساس توصیه می‌شود)
   session: { dmScope: "per-channel-peer" },
 
   channels: {
-    // Example: WhatsApp multi-user inbox
+    // نمونه: صندوق ورودی چندکاربره WhatsApp
     whatsapp: {
       dmPolicy: "allowlist",
       allowFrom: ["+15555550123", "+15555550124"],
     },
 
-    // Example: Discord multi-user inbox
+    // نمونه: صندوق ورودی چندکاربره Discord
     discord: {
       enabled: true,
       token: "YOUR_DISCORD_BOT_TOKEN",
-      dm: { enabled: true, allowFrom: ["123456789012345678", "987654321098765432"] },
+      allowFrom: ["123456789012345678", "987654321098765432"],
     },
   },
 }
 ```
 
 برای Discord/Google Chat/IRC/Mattermost/Microsoft Teams/Slack، مجوزدهی فرستنده به‌طور پیش‌فرض ابتدا بر اساس شناسه انجام می‌شود.
-تطبیق مستقیم نام/ایمیل/نام مستعارِ تغییرپذیر را با `dangerouslyAllowNameMatching: true` در هر کانال فقط زمانی فعال کنید که صراحتاً این خطر را می‌پذیرید.
+تطبیق مستقیم نام/ایمیل/نام مستعار تغییرپذیر را تنها زمانی با `dangerouslyAllowNameMatching: true` هر کانال فعال کنید که صراحتاً آن خطر را پذیرفته باشید.
 
-### کلید API ‏Anthropic و جایگزین MiniMax
+### کلید API Anthropic به‌همراه بازگشت جایگزین MiniMax
 
 ```json5
 {
@@ -644,15 +626,14 @@ x-i18n:
       workspace: "~/work-openclaw",
       elevatedDefault: "off",
     },
-    list: [
-      {
-        id: "main",
+    entries: {
+      main: {
         identity: {
           name: "WorkBot",
           theme: "professional assistant",
         },
       },
-    ],
+    },
   },
   channels: {
     slack: {
@@ -703,10 +684,10 @@ x-i18n:
 
 ## نکته‌ها
 
-- اگر `dmPolicy: "open"` را تنظیم کنید، فهرست متناظر `allowFrom` باید شامل `"*"` باشد.
-- شناسه‌های ارائه‌دهندگان متفاوت‌اند (شماره تلفن، شناسهٔ کاربر، شناسهٔ کانال). برای تأیید قالب، مستندات ارائه‌دهنده را بررسی کنید.
-- بخش‌های اختیاری برای افزودن در آینده: `web`، `browser`، `ui`، `discovery`، `plugins`، `talk`، `signal`، `imessage`.
-- برای نکات عمیق‌تر دربارهٔ راه‌اندازی، [ارائه‌دهندگان](/fa/providers) و [عیب‌یابی](/fa/gateway/troubleshooting) را ببینید.
+- اگر `dmPolicy: "open"` را تنظیم می‌کنید، فهرست متناظر `allowFrom` باید شامل `"*"` باشد.
+- شناسه‌های ارائه‌دهندگان متفاوت‌اند (شماره تلفن، شناسه کاربر، شناسه کانال). برای تأیید قالب، به مستندات ارائه‌دهنده مراجعه کنید.
+- بخش‌های اختیاری که می‌توانید بعداً اضافه کنید: `web`، `browser`، `ui`، `discovery`، `plugins`، `talk`، `signal`، `imessage`.
+- برای یادداشت‌های عمیق‌تر راه‌اندازی، [ارائه‌دهندگان](/fa/providers) و [عیب‌یابی](/fa/gateway/troubleshooting) را ببینید.
 
 ## مرتبط
 

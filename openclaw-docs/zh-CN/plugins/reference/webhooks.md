@@ -1,12 +1,13 @@
 ---
 read_when:
-    - 你正在安装、配置或审核 Webhooks 插件
-summary: 经过身份验证的入站 Webhook，用于将外部自动化绑定到 OpenClaw TaskFlow。
+    - 你正在安装、配置或审计 Webhooks 插件
+summary: 经过身份验证的入站 Webhooks，用于将外部自动化绑定到 OpenClaw TaskFlows。
 title: Webhooks 插件
 x-i18n:
-    generated_at: "2026-07-11T20:49:12Z"
+    generated_at: "2026-07-26T06:22:52Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 795f310f1cf1c8900ee06c232332ef25e953ca0e7c56a82437bd91b3319016a2
     source_path: plugins/reference/webhooks.md
@@ -19,10 +20,10 @@ x-i18n:
 
 ## 分发
 
-- 软件包：`@openclaw/webhooks`
-- 安装方式：随 OpenClaw 提供
+- 包：`@openclaw/webhooks`
+- 安装方式：OpenClaw 内置
 
-## 界面
+## 形态
 
 插件
 

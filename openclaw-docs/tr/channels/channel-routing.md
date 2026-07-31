@@ -4,91 +4,110 @@ read_when:
 summary: Kanal başına yönlendirme kuralları (WhatsApp, Telegram, Discord, Slack) ve paylaşılan bağlam
 title: Kanal yönlendirme
 x-i18n:
-    generated_at: "2026-05-06T09:02:03Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T22:37:46Z"
+    model: gpt-5.6
+    postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 92b14cf02b00312121bec2f0f8ec784f36364babd6085d684e71f425dd82715e
+    source_hash: aa03f04a55015bf17e0fe1f3a9bc422875124bb64af5891c898a98bc6917d9e8
     source_path: channels/channel-routing.md
     workflow: 16
-    postprocess_version: locale-links-v1
 ---
 
 # Kanallar ve yönlendirme
 
-OpenClaw yanıtları **mesajın geldiği kanala geri** yönlendirir. Model kanal seçmez; yönlendirme deterministiktir ve host yapılandırması tarafından kontrol edilir.
+OpenClaw, yanıtları **mesajın geldiği kanala geri** yönlendirir. Model bir kanal
+seçmez; yönlendirme deterministiktir ve ana makine yapılandırması tarafından
+kontrol edilir. Varsayılan DM kapsamında, her kanaldan gelen doğrudan mesajlar
+aracının [ana oturumunda](/concepts/main-session) birleşir.
 
 ## Temel terimler
 
-- **Kanal**: `telegram`, `whatsapp`, `discord`, `irc`, `googlechat`, `slack`, `signal`, `imessage`, `line` ve Plugin kanalları. `webchat`, dahili WebChat UI kanalıdır ve yapılandırılabilir bir giden kanal değildir.
-- **AccountId**: kanal başına hesap örneği (desteklendiğinde).
-- İsteğe bağlı kanal varsayılan hesabı: `channels.<channel>.defaultAccount`, giden yol `accountId` belirtmediğinde hangi hesabın kullanılacağını seçer.
-  - Çok hesaplı kurulumlarda, iki veya daha fazla hesap yapılandırıldığında açık bir varsayılan (`defaultAccount` veya `accounts.default`) ayarlayın. Bu olmadan, yedek yönlendirme ilk normalleştirilmiş hesap kimliğini seçebilir.
+- **Kanal**: `discord`, `googlechat`, `imessage`, `irc`, `line`, `signal`, `slack`, `telegram` veya `whatsapp` gibi paketle birlikte gelen bir kanal plugini ve ayrıca kurulu plugin kanalları. `webchat`, dahili WebChat kullanıcı arayüzü kanalıdır ve yapılandırılabilir bir giden kanal değildir.
+- **AccountId**: kanal başına hesap örneği (destekleniyorsa).
+- İsteğe bağlı varsayılan kanal hesabı: `channels.<channel>.defaultAccount`, bir giden yol `accountId` belirtmediğinde
+  hangi hesabın kullanılacağını seçer.
+  - Çok hesaplı kurulumlarda, iki veya daha fazla hesap yapılandırıldığında açık bir varsayılan (`defaultAccount` veya `default` adlı bir hesap) belirleyin. Bu olmadan geri dönüş yönlendirmesi, normalleştirilmiş ilk hesap kimliğini seçebilir.
 - **AgentId**: yalıtılmış bir çalışma alanı + oturum deposu ("beyin").
-- **SessionKey**: bağlamı depolamak ve eşzamanlılığı denetlemek için kullanılan kova anahtarı.
+- **SessionKey**: bağlamı depolamak ve eşzamanlılığı kontrol etmek için kullanılan bölüm anahtarı.
 
 ## Giden hedef önekleri
 
-Açık giden hedefler, `telegram:123` veya `tg:123` gibi bir sağlayıcı öneki içerebilir. Core bu öneki, yalnızca seçili kanal `last` olduğunda veya başka şekilde çözümlenmemiş olduğunda ve yalnızca yüklenen Plugin bu öneki duyurduğunda kanal seçimi ipucu olarak ele alır. Çağıran zaten açık bir kanal seçtiyse, sağlayıcı öneki bu kanalla eşleşmelidir; WhatsApp teslimatının `telegram:123` hedefine yapılması gibi kanallar arası birleşimler, Plugin'e özgü hedef normalleştirmesinden önce başarısız olur.
+Açık giden hedefler, `telegram:123` veya `tg:123` gibi bir sağlayıcı öneki içerebilir. Çekirdek, bu öneki yalnızca seçilen kanal `last` olduğunda veya başka şekilde çözümlenemediğinde ve yalnızca yüklenen plugin bu öneki bildirdiğinde kanal seçimi ipucu olarak değerlendirir. Çağıran zaten açık bir kanal seçmişse sağlayıcı öneki bu kanalla eşleşmelidir; `telegram:123` hedefine WhatsApp üzerinden teslimat gibi kanallar arası birleşimler, plugine özgü hedef normalleştirmesinden önce başarısız olur.
 
-`channel:<id>`, `user:<id>`, `room:<id>`, `thread:<id>`, `imessage:<handle>` ve `sms:<number>` gibi hedef türü ve hizmet önekleri seçili kanalın grameri içinde kalır. Sağlayıcıyı kendi başlarına seçmezler.
+`channel:<id>`, `user:<id>`, `room:<id>`, `thread:<id>`, `imessage:<handle>` ve `sms:<number>` gibi hedef türü ve hizmet önekleri, seçilen kanalın söz dizimi içinde kalır. Bunlar sağlayıcıyı kendi başlarına seçmez.
 
 ## Oturum anahtarı biçimleri (örnekler)
 
-Doğrudan mesajlar varsayılan olarak ajanın **main** oturumuna indirgenir:
+Doğrudan mesajlar varsayılan olarak aracının **ana** oturumunda birleştirilir:
 
 - `agent:<agentId>:<mainKey>` (varsayılan: `agent:main:main`)
 
-Doğrudan mesaj konuşma geçmişi main ile paylaşılsa bile, sandbox ve araç ilkesi harici DM'ler için hesap başına türetilmiş bir doğrudan sohbet çalışma zamanı anahtarı kullanır; böylece kanal kaynaklı mesajlar yerel main-session çalıştırmaları gibi ele alınmaz.
+`session.dmScope`, DM birleştirmesini kontrol eder: `main` (varsayılan) tek bir ana
+oturumu paylaşırken `per-peer`, `per-channel-peer` ve `per-account-channel-peer`
+DM'leri ayrı oturumlarda tutar. Bir yönlendirme bağlaması, eşleşen eşler için kapsamı
+`bindings[].session.dmScope` aracılığıyla geçersiz kılabilir.
+
+Doğrudan mesaj konuşma geçmişi ana oturumla paylaşılsa bile korumalı alan ve
+araç politikası, harici DM'ler için hesap başına türetilmiş bir doğrudan sohbet çalışma zamanı anahtarı kullanır;
+böylece kanaldan kaynaklanan mesajlar yerel ana oturum çalıştırmaları gibi değerlendirilmez.
 
 Gruplar ve kanallar, kanal başına yalıtılmış kalır:
 
 - Gruplar: `agent:<agentId>:<channel>:group:<id>`
 - Kanallar/odalar: `agent:<agentId>:<channel>:channel:<id>`
 
-Thread'ler:
+İleti dizileri:
 
-- Slack/Discord thread'leri temel anahtara `:thread:<threadId>` ekler.
-- Telegram forum konuları grup anahtarına `:topic:<topicId>` yerleştirir.
+- Slack/Discord ileti dizileri, temel anahtara `:thread:<threadId>` ekler.
+- Telegram forum konuları, grup anahtarına `:topic:<topicId>` yerleştirir.
 
 Örnekler:
 
 - `agent:main:telegram:group:-1001234567890:topic:42`
 - `agent:main:discord:channel:123456:thread:987654`
 
-## Ana DM rota sabitleme
+## Ana DM yönlendirmesini sabitleme
 
-`session.dmScope` değeri `main` olduğunda, doğrudan mesajlar tek bir main oturumunu paylaşabilir. Oturumun `lastRoute` değerinin sahip olmayan DM'ler tarafından üzerine yazılmasını önlemek için OpenClaw, aşağıdakilerin tümü doğru olduğunda `allowFrom` değerinden sabitlenmiş bir sahip çıkarır:
+`session.dmScope`, `main` olduğunda doğrudan mesajlar tek bir ana oturumu paylaşabilir.
+Oturumun `lastRoute` değerinin sahip olmayan kişilerin DM'leri tarafından üzerine yazılmasını önlemek için
+OpenClaw, aşağıdakilerin tümü doğru olduğunda `allowFrom` üzerinden sabitlenmiş bir sahip çıkarımı yapar:
 
-- `allowFrom` tam olarak bir joker olmayan girişe sahiptir.
-- Giriş, o kanal için somut bir gönderici kimliğine normalleştirilebilir.
-- Gelen DM göndericisi bu sabitlenmiş sahiple eşleşmez.
+- `allowFrom` tam olarak bir joker karakter içermeyen girdiye sahiptir.
+- Girdi, bu kanal için somut bir gönderen kimliğine normalleştirilebilir.
+- Gelen DM'nin göndereni, sabitlenmiş bu sahiple eşleşmez.
 
-Bu eşleşmeme durumunda OpenClaw yine gelen oturum meta verilerini kaydeder, ancak main oturum `lastRoute` değerini güncellemeyi atlar.
+Bu eşleşmeme durumunda OpenClaw, gelen oturum meta verilerini yine kaydeder ancak
+ana oturumun `lastRoute` değerini güncellemeyi atlar.
 
 ## Korumalı gelen kayıt
 
-Kanal Plugin'leri, korumalı bir yol yeni bir OpenClaw oturumu oluşturmamalıysa gelen oturum kaydını `createIfMissing: false` olarak işaretleyebilir. Bu modda OpenClaw, mevcut bir oturum için meta verileri ve `lastRoute` değerini güncelleyebilir, ancak yalnızca bir mesaj gözlemlendi diye sadece rota içeren bir oturum girdisi oluşturmaz.
+Kanal pluginleri, korumalı bir yolun yeni bir OpenClaw oturumu oluşturmaması gerektiğinde
+gelen oturum kaydını `createIfMissing: false` olarak işaretleyebilir. Bu modda
+OpenClaw, mevcut bir oturumun meta verilerini ve `lastRoute` değerini güncelleyebilir ancak
+yalnızca bir mesaj gözlemlendi diye yalnızca yönlendirmeye özgü bir oturum girdisi oluşturmaz.
 
-## Yönlendirme kuralları (ajan nasıl seçilir)
+## Yönlendirme kuralları (bir araç nasıl seçilir)
 
-Yönlendirme, her gelen mesaj için **bir ajan** seçer:
+Yönlendirme, her gelen mesaj için **bir araç** seçer:
 
-1. **Tam eş eşleşmesi** (`peer.kind` + `peer.id` ile `bindings`).
-2. **Üst eş eşleşmesi** (thread kalıtımı).
-3. **Guild + roller eşleşmesi** (Discord) `guildId` + `roles` aracılığıyla.
-4. **Guild eşleşmesi** (Discord) `guildId` aracılığıyla.
-5. **Takım eşleşmesi** (Slack) `teamId` aracılığıyla.
-6. **Hesap eşleşmesi** (kanaldaki `accountId`).
-7. **Kanal eşleşmesi** (o kanaldaki herhangi bir hesap, `accountId: "*"`).
-8. **Varsayılan ajan** (`agents.list[].default`, yoksa ilk liste girdisi, yedek olarak `main`).
+1. **Tam eş eşleşmesi** (`bindings` ile `peer.kind` + `peer.id`).
+2. **Üst eş eşleşmesi** (ileti dizisi devralımı).
+3. **Eş joker karakter eşleşmesi** (bir eş türü için `peer.id: "*"`).
+4. **Sunucu + roller eşleşmesi** (Discord), `guildId` + `roles` aracılığıyla.
+5. **Sunucu eşleşmesi** (Discord), `guildId` aracılığıyla.
+6. **Ekip eşleşmesi** (Slack), `teamId` aracılığıyla.
+7. **Hesap eşleşmesi** (kanaldaki `accountId`).
+8. **Kanal eşleşmesi** (o kanaldaki herhangi bir hesap, `accountId: "*"`).
+9. **Varsayılan araç** (`agents.entries.*.default`; yoksa listedeki ilk girdi, son çare olarak `main`).
 
-Bir binding birden fazla eşleşme alanı (`peer`, `guildId`, `teamId`, `roles`) içerdiğinde, o binding'in uygulanması için **sağlanan tüm alanlar eşleşmelidir**.
+Bir bağlama birden fazla eşleştirme alanı (`peer`, `guildId`, `teamId`, `roles`) içerdiğinde, bağlamanın uygulanması için **sağlanan tüm alanların eşleşmesi gerekir**.
 
-Eşleşen ajan hangi çalışma alanının ve oturum deposunun kullanılacağını belirler.
+Eşleşen araç, hangi çalışma alanının ve oturum deposunun kullanılacağını belirler.
 
-## Yayın grupları (birden fazla ajan çalıştırma)
+## Yayın grupları (birden fazla araç çalıştırma)
 
-Yayın grupları, aynı eş için **birden fazla ajan** çalıştırmanıza olanak tanır; bu, **OpenClaw normalde yanıt vereceğinde** gerçekleşir (örneğin: WhatsApp gruplarında, bahsetme/etkinleştirme geçidinden sonra).
+Yayın grupları, **OpenClaw'ın normalde yanıt vereceği durumlarda** aynı eş için **birden fazla araç** çalıştırmanıza olanak tanır (örneğin WhatsApp gruplarında, bahsetme/etkinleştirme denetiminden sonra).
 
 Yapılandırma:
 
@@ -102,12 +121,12 @@ Yapılandırma:
 }
 ```
 
-Bkz.: [Yayın Grupları](/tr/channels/broadcast-groups).
+Bkz. [Yayın Grupları](/tr/channels/broadcast-groups).
 
-## Yapılandırma özeti
+## Yapılandırmaya genel bakış
 
-- `agents.list`: adlandırılmış ajan tanımları (çalışma alanı, model vb.).
-- `bindings`: gelen kanalları/hesapları/eşleri ajanlara eşler.
+- `agents.entries`: adlandırılmış araç tanımları (çalışma alanı, model vb.).
+- `bindings`: gelen kanalları/hesapları/eşleri araçlarla eşleştirir.
 
 Örnek:
 
@@ -125,27 +144,39 @@ Bkz.: [Yayın Grupları](/tr/channels/broadcast-groups).
 
 ## Oturum depolama
 
-Oturum depoları durum dizininin altında bulunur (varsayılan `~/.openclaw`):
+Çalışma zamanı oturum satırları, durum dizini altındaki her aracının SQLite veritabanında
+bulunur (varsayılan `~/.openclaw`):
 
-- `~/.openclaw/agents/<agentId>/sessions/sessions.json`
-- JSONL transkriptleri de deponun yanında bulunur
+- `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`
 
-Depo yolunu `session.store` ve `{agentId}` şablonlaması ile geçersiz kılabilirsiniz.
+Eski kurulumlarda, `~/.openclaw/agents/<agentId>/sessions/` altında eski transkript JSONL dosyaları ve bir `sessions.json` satır
+deposu bulunabilir. Gateway başlatma işlemi ve
+`openclaw doctor --fix`, etkin eski satırları/geçmişi otomatik olarak SQLite'a aktarır.
+Açık geçiş kanıtına ihtiyaç duyduğunuzda `openclaw doctor --session-sqlite inspect
+--session-sqlite-all-agents` ve
+[Doctor](/tr/cli/doctor#session-sqlite-migration) doğrulama sırasını kullanın.
+Geçiş ve çevrimdışı bakım iş akışları için `session.store` ve `{agentId}`
+şablonlaması aracılığıyla eski bir depo yolu seçmeye devam edebilirsiniz.
 
-Gateway ve ACP oturum keşfi, varsayılan `agents/` kökü altında ve şablonlanmış `session.store` kökleri altında disk destekli ajan depolarını da tarar. Keşfedilen depolar, çözümlenen ajan kökünün içinde kalmalı ve normal bir `sessions.json` dosyası kullanmalıdır. Sembolik bağlantılar ve kök dışı yollar yok sayılır.
+Gateway ve ACP oturum keşfi ayrıca varsayılan `agents/` kökü ve şablonlanmış
+`session.store` kökleri altındaki disk destekli araç depolarını tarar. Keşfedilen
+depolar, çözümlenen araç kökü içinde kalmalı ve normal bir eski
+`sessions.json` dosyası kullanmalıdır. Sembolik bağlantılar ve kök dışındaki yollar yok sayılır.
 
 ## WebChat davranışı
 
-WebChat, **seçili ajana** bağlanır ve varsayılan olarak ajanın main oturumunu kullanır. Bu nedenle WebChat, o ajan için kanallar arası bağlamı tek yerde görmenizi sağlar.
+WebChat, **seçilen araca** bağlanır ve varsayılan olarak aracın ana
+oturumunu kullanır. Bu nedenle WebChat, söz konusu aracın kanallar arası bağlamını
+tek bir yerde görmenizi sağlar.
 
 ## Yanıt bağlamı
 
 Gelen yanıtlar şunları içerir:
 
 - Kullanılabilir olduğunda `ReplyToId`, `ReplyToBody` ve `ReplyToSender`.
-- Alıntılanan bağlam, `Body` öğesine `[Replying to ...]` bloğu olarak eklenir.
+- Alıntılanan bağlam, `Body` öğesine bir `[Replying to ...]` bloğu olarak eklenir.
 
-Bu, kanallar genelinde tutarlıdır.
+Bu, tüm kanallarda tutarlıdır.
 
 ## İlgili
 

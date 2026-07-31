@@ -1,15 +1,16 @@
 ---
 read_when:
-    - Skill, Plugin oder Paket melden
-    - Wiederherstellung nach einem zurückgehaltenen, ausgeblendeten oder blockierten Eintrag
-    - ClawHub-Moderation, Sperren oder Kontostatus verstehen
+    - Einen Skill, ein Plugin oder ein Paket melden
+    - Wiederherstellung eines zurückgehaltenen, ausgeblendeten oder blockierten Eintrags
+    - Informationen zu ClawHub-Moderation, Sperren oder Kontostatus
 sidebarTitle: Moderation and Account Safety
-summary: Wie ClawHub-Meldungen, Moderationssperren, ausgeblendete Einträge, Sperren und der Kontostatus funktionieren.
+summary: Funktionsweise von Meldungen, Moderationssperren, ausgeblendeten Einträgen, Ausschlüssen und dem Kontostatus in ClawHub.
 title: Moderation und Kontosicherheit
 x-i18n:
-    generated_at: "2026-07-04T20:28:11Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T17:41:25Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 54c1e0860411e6599923ef4d7db65d5cd5406ec63bf67c52968b4f99d893ffef
     source_path: clawhub/moderation.md
@@ -18,70 +19,73 @@ x-i18n:
 
 # Moderation und Kontosicherheit
 
-ClawHub ist offen für Veröffentlichungen, aber öffentliche Auffindbarkeits- und Installationsoberflächen benötigen weiterhin Schutzmaßnahmen. Meldungen, Moderationssperren, ausgeblendete Einträge und Kontomaßnahmen helfen, Benutzer zu schützen, wenn ein Release oder Konto unsicher, irreführend oder regelwidrig erscheint.
+ClawHub ermöglicht das freie Veröffentlichen, doch die öffentliche Auffindbarkeit und die Installationsoberflächen benötigen weiterhin Schutzmechanismen. Meldungen, Moderationssperren, ausgeblendete Einträge und Kontomaßnahmen tragen zum Schutz der Benutzer bei, wenn eine Veröffentlichung oder ein Konto unsicher, irreführend oder richtlinienwidrig erscheint.
 
-Diese Seite behandelt Moderation und Kontostatus. Für Audit-Labels wie `Pass`, `Review`, `Warn`, `Malicious` und Risikostufe siehe [Sicherheitsaudits](/clawhub/security-audits).
+Diese Seite behandelt Moderation und Kontostatus. Informationen zu Audit-Bezeichnungen wie `Pass`, `Review`, `Warn`, `Malicious` und zur Risikostufe finden Sie unter
+[Sicherheitsaudits](/de/clawhub/security-audits).
 
-Siehe auch [Sicherheit](/clawhub/security) und [Zulässige Nutzung](/clawhub/acceptable-usage). Bei Urheberrechts- oder anderen Bedenken zu Inhaltsrechten verwenden Sie [Anfragen zu Inhaltsrechten](/clawhub/content-rights).
+Siehe auch [Sicherheit](/de/clawhub/security) und
+[Zulässige Nutzung](/de/clawhub/acceptable-usage). Bei Bedenken hinsichtlich Urheberrechten oder anderen Inhaltsrechten verwenden Sie [Anfragen zu Inhaltsrechten](/de/clawhub/content-rights).
 
 ## Meldungen
 
 Angemeldete Benutzer können Skills, Plugins und Pakete melden.
 
-Verwenden Sie ClawHub-Meldungen nur für unsichere Marketplace-Inhalte, zum Beispiel:
+Verwenden Sie ClawHub-Meldungen ausschließlich für unsichere Marketplace-Inhalte, beispielsweise:
 
-- bösartige Einträge
+- schädliche Einträge
 - irreführende Metadaten
-- nicht deklarierte Zugangsdaten oder Berechtigungsanforderungen
+- nicht offengelegte Anmeldedaten oder Berechtigungsanforderungen
 - verdächtige Installationsanweisungen
-- Identitätsnachahmung
-- bösgläubige Registrierungen oder Markenmissbrauch
-- Inhalte, die gegen [Zulässige Nutzung](/clawhub/acceptable-usage) verstoßen
+- Identitätsvortäuschung
+- böswillige Registrierungen oder Markenmissbrauch
+- Inhalte, die gegen die [Zulässige Nutzung](/de/clawhub/acceptable-usage) verstoßen
 
-Verwenden Sie die Schaltfläche **Skill melden** auf einer Skill-Seite oder den Paketmeldebefehl bzw. die Paketmelde-API für Pakete.
+Verwenden Sie die Schaltfläche **Report skill** auf einer Skill-Seite oder den Befehl beziehungsweise die API zum Melden von Paketen.
 
-Verwenden Sie ClawHub-Meldungen nicht für Sicherheitslücken im eigenen Quellcode eines Drittanbieter-Skills oder -Plugins. Melden Sie diese direkt an den Publisher oder das Quell-Repository, das im Eintrag verlinkt ist. ClawHub wartet oder patcht keinen Drittanbieter-Skill- oder -Plugin-Code.
+Verwenden Sie ClawHub-Meldungen nicht für Schwachstellen im eigenen Quellcode eines Drittanbieter-Skills oder -Plugins. Melden Sie diese direkt dem Herausgeber oder dem im Eintrag verlinkten Quell-Repository. ClawHub wartet oder korrigiert keinen Skill- oder Plugin-Code von Drittanbietern.
 
-GitHub Security Advisories für `openclaw/clawhub` sind für Sicherheitslücken in ClawHub selbst vorgesehen. Beispiele umfassen Fehler in Website, API, CLI, Registry, Authentifizierung, Scanning, Moderation oder Vertrauensgrenzen beim Download bzw. bei der Installation. Verwenden Sie ClawHub-Advisories nicht für Sicherheitslücken in Drittanbieter-Skills oder -Plugins.
+GitHub Security Advisories für `openclaw/clawhub` sind für Schwachstellen in ClawHub selbst vorgesehen. Beispiele sind Fehler in der Website, API, CLI, Registry, Authentifizierung, Überprüfung, Moderation oder in den Vertrauensgrenzen für Download und Installation. Verwenden Sie ClawHub-Advisories nicht für Schwachstellen in Skills oder Plugins von Drittanbietern.
 
-Gute Meldungen sind konkret und umsetzbar. Missbrauch des Meldesystems kann selbst zu Kontomaßnahmen führen.
+Gute Meldungen sind konkret und umsetzbar. Der Missbrauch der Meldefunktion kann selbst zu Kontomaßnahmen führen.
 
-## Organisations- und Namespace-Ansprüche
+## Ansprüche auf Organisationen und Namespaces
 
-Streitfälle zu Organisations-, Marken-, Paket-Scope-, Owner-Handle- oder Namespace-Eigentum sollten den Prozess [Organisations- und Namespace-Ansprüche](/clawhub/namespace-claims) verwenden, nicht den produktinternen Meldefluss oder das Formular für Kontoeinsprüche.
+Streitigkeiten über die Inhaberschaft von Organisationen, Marken, Paketbereichen, Inhaber-Handles oder Namespaces sollten über das Verfahren für [Ansprüche auf Organisationen und Namespaces](/de/clawhub/namespace-claims) geklärt werden, nicht über den produktinternen Meldeablauf oder das Einspruchsformular für Konten.
 
-Verwenden Sie diesen Prozess, wenn ClawHub-Mitarbeiter nicht vertrauliche Nachweise prüfen sollen, dass ein Namespace reserviert, übertragen, umbenannt, ausgeblendet, quarantänisiert, mit einem Alias versehen oder anderweitig geprüft werden sollte. Fügen Sie in einem öffentlichen Issue keine Geheimnisse, privaten Dokumente, privaten Rechtsunterlagen, persönlichen Identitätsdokumente, API-Token oder DNS-Challenge-Token ein.
+Verwenden Sie dieses Verfahren, wenn ClawHub-Mitarbeiter nicht vertrauliche Nachweise prüfen sollen, dass ein Namespace reserviert, übertragen, umbenannt, ausgeblendet, unter Quarantäne gestellt, mit einem Alias versehen oder anderweitig überprüft werden sollte. Fügen Sie einem öffentlichen Issue keine Geheimnisse, privaten Dokumente, vertraulichen Rechtsunterlagen, persönlichen Identitätsdokumente, API-Tokens oder DNS-Challenge-Tokens bei.
 
 ## Moderationssperren
 
-Einige schwerwiegende Befunde oder Richtlinienprobleme können einen Publisher oder Eintrag unter eine Moderationssperre stellen. In diesem Fall können betroffene Inhalte aus der öffentlichen Auffindbarkeit ausgeblendet werden oder zukünftige Veröffentlichungen zunächst ausgeblendet starten, bis das Problem geprüft ist.
+Einige schwerwiegende Feststellungen oder Richtlinienverstöße können dazu führen, dass ein Herausgeber oder Eintrag einer Moderationssperre unterliegt. In diesem Fall können betroffene Inhalte aus der öffentlichen Auffindbarkeit ausgeblendet werden oder zukünftige Veröffentlichungen zunächst ausgeblendet erscheinen, bis das Problem überprüft wurde.
 
-Moderationssperren sollen Benutzer schützen, während ClawHub Hochrisikofälle klärt. Sie können auch aufgehoben werden, wenn ein falsch positives Ergebnis bestätigt wird.
+Moderationssperren sollen Benutzer schützen, während ClawHub Fälle mit hohem Risiko klärt. Sie können auch aufgehoben werden, wenn ein falsch positives Ergebnis bestätigt wird.
 
-## Ausgeblendete oder blockierte Einträge
+## Ausgeblendete oder gesperrte Einträge
 
-Ein Eintrag kann gesperrt, ausgeblendet, quarantänisiert, widerrufen oder anderweitig auf öffentlichen Installationsoberflächen nicht verfügbar sein.
+Ein Eintrag kann zurückgehalten, ausgeblendet, unter Quarantäne gestellt, widerrufen oder anderweitig auf öffentlichen Installationsoberflächen nicht verfügbar sein.
 
-Wenn Sie einen dieser Zustände sehen, installieren Sie das Release nicht, es sei denn, der Owner behebt das Problem oder die Moderation stellt es wieder her.
+Wenn einer dieser Zustände angezeigt wird, installieren Sie die Veröffentlichung nicht, solange der Inhaber das Problem nicht behoben oder die Moderation sie nicht wiederhergestellt hat.
 
-Owner können weiterhin Diagnosen für ihre eigenen gesperrten oder ausgeblendeten Einträge sehen. Diese Diagnosen helfen zu erklären, was passiert ist und was geändert werden muss, bevor der Eintrag auf öffentliche Oberflächen zurückkehren kann.
+Inhaber können weiterhin Diagnosedaten zu ihren eigenen zurückgehaltenen oder ausgeblendeten Einträgen einsehen. Diese Diagnosedaten erläutern, was geschehen ist und was geändert werden muss, bevor der Eintrag wieder auf öffentlichen Oberflächen erscheinen kann.
 
 ## Sperren und Kontostatus
 
-Konten, die gegen ClawHub-Richtlinien verstoßen, können den Veröffentlichungszugriff verlieren. Schwerer Missbrauch kann zu Kontosperren, Token-Widerruf, ausgeblendeten Inhalten oder entfernten Einträgen führen. Missbrauchsdrucksignale für Publisher werden täglich geprüft. Signale, die den Schwellenwert von ClawHub für mögliche Sperren erreichen, können eine automatische Warnung auslösen. Wenn der nächste berechtigte Scan nach Ablauf der Warnfrist den Publisher weiterhin in den Schwellenwert für mögliche Sperren einordnet, kann ClawHub die Kontomaßnahme automatisch anwenden. Signale mit geringerer Konfidenz und zeitlich begrenzte Prüfsignale bleiben von der automatischen Durchsetzung ausgeschlossen.
+Konten, die gegen die ClawHub-Richtlinien verstoßen, können den Veröffentlichungszugriff verlieren. Schwerwiegender Missbrauch kann zu Kontosperren, dem Widerruf von Tokens, ausgeblendeten Inhalten oder entfernten Einträgen führen. Belastungssignale für Missbrauch durch Herausgeber werden täglich überprüft. Signale, die den ClawHub-Schwellenwert für eine mögliche Sperre erreichen, können eine automatische Warnung auslösen. Wenn der nächste zulässige Scan nach Ablauf der Warnfrist den Herausgeber weiterhin dem Schwellenwert für eine mögliche Sperre zuordnet, kann ClawHub die Kontomaßnahme automatisch anwenden. Prüfsignale mit geringerer Konfidenz und zeitlich begrenztem Umfang werden nicht automatisch durchgesetzt.
 
-Gelöschte, gesperrte oder deaktivierte Konten können keine ClawHub-API-Token verwenden. Wenn die CLI-Authentifizierung nach einer Kontomaßnahme fehlschlägt, melden Sie sich in der Web-UI an, um den Kontostatus zu prüfen. Wenn Anmeldung oder normaler CLI-Zugriff durch eine Sperre oder ein deaktiviertes Konto blockiert sind, verwenden Sie das [ClawHub-Einspruchsformular](https://appeals.openclaw.ai/) für die Wiederherstellungsprüfung.
+Gelöschte, gesperrte oder deaktivierte Konten können keine ClawHub-API-Tokens verwenden. Wenn die CLI-Authentifizierung nach einer Kontomaßnahme fehlschlägt, melden Sie sich an der Weboberfläche an, um den Kontostatus zu überprüfen. Wenn die Anmeldung oder der normale CLI-Zugriff aufgrund einer Sperre oder eines deaktivierten Kontos blockiert ist, verwenden Sie für eine Wiederherstellungsprüfung das [ClawHub-Einspruchsformular](https://appeals.openclaw.ai/).
 
-Wenn eine scanner-ausgelöste E-Mail eine Skill- oder Plugin-Version als bösartig benennt, laden Sie die gespeicherten Scan-Ergebnisse für die blockierte eingereichte Version herunter:
-`clawhub scan download <slug> --version <version>`. Für Plugins fügen Sie `--kind plugin` hinzu. Prüfen Sie die Scan-Ausgabe, korrigieren Sie den Eintrag, erhöhen Sie die Versionsnummer und laden Sie die korrigierte Version hoch.
+Wenn eine durch einen Scanner ausgelöste E-Mail eine Skill- oder Plugin-Version als schädlich bezeichnet, laden Sie die gespeicherten Scanergebnisse für die gesperrte eingereichte Version herunter:
+`clawhub scan download <slug> --version <version>`. Fügen Sie bei Plugins
+`--kind plugin` hinzu. Prüfen Sie die Scanausgabe, korrigieren Sie den Eintrag, erhöhen Sie die Versionsnummer und laden Sie die korrigierte Version hoch.
 
-## Leitlinien für Publisher
+## Hinweise für Herausgeber
 
-Um falsch positive Ergebnisse zu reduzieren und das Vertrauen der Benutzer zu verbessern:
+So reduzieren Sie falsch positive Ergebnisse und stärken das Vertrauen der Benutzer:
 
-- halten Sie Namen, Zusammenfassungen, Tags und Changelogs korrekt
-- deklarieren Sie erforderliche Umgebungsvariablen und Berechtigungen
+- halten Sie Namen, Zusammenfassungen, Tags und Änderungsprotokolle korrekt
+- geben Sie erforderliche Umgebungsvariablen und Berechtigungen an
 - vermeiden Sie verschleierte Installationsbefehle
-- verlinken Sie nach Möglichkeit auf den Quellcode
-- verwenden Sie Probeläufe vor dem Veröffentlichen von Plugins
-- reagieren Sie klar, wenn Benutzer oder Moderatoren nach dem Release-Verhalten fragen
+- verlinken Sie nach Möglichkeit den Quellcode
+- verwenden Sie vor der Veröffentlichung von Plugins Testläufe
+- antworten Sie klar, wenn Benutzer oder Moderatoren nach dem Verhalten einer Veröffentlichung fragen

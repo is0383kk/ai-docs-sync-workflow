@@ -1,15 +1,16 @@
 ---
 read_when:
-    - 你想选择一个模型提供商
-    - 你需要关于 LLM 身份验证和模型选择的快速设置示例
+    - 你想选择模型提供商
+    - 你需要 LLM 身份验证和模型选择的快速设置示例
 summary: OpenClaw 支持的模型提供商（LLM）
 title: 模型提供商快速开始
 x-i18n:
-    generated_at: "2026-07-11T20:53:47Z"
+    generated_at: "2026-07-26T06:58:26Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c4f9add879b41fdb0b54edbbff2ea982957cd4f3bc5d438c43f8a8403a048338
+    source_hash: 3988d6985cbe203a6a3357d59160190990b1b53245ea25f1538dbc6f567afec1
     source_path: providers/models.md
     workflow: 16
 ---
@@ -29,9 +30,10 @@ x-i18n:
 
 ## 支持的提供商（入门集合）
 
-- [阿里云百炼](/zh-CN/providers/alibaba)
+- [Alibaba Model Studio](/zh-CN/providers/alibaba)
 - [Amazon Bedrock](/zh-CN/providers/bedrock)
 - [Anthropic（API + Claude CLI）](/zh-CN/providers/anthropic)
+- [Baseten（Inkling + Model APIs）](/providers/baseten)
 - [BytePlus（国际版）](/zh-CN/concepts/model-providers#byteplus-international)
 - [Chutes](/zh-CN/providers/chutes)
 - [Cloudflare AI Gateway](/zh-CN/providers/cloudflare-ai-gateway)
@@ -62,7 +64,7 @@ x-i18n:
 
 ## 其他提供商变体
 
-- `anthropic-vertex` - 安装 `@openclaw/anthropic-vertex-provider`，以便在 Vertex 凭据可用时支持通过 Google Vertex 隐式使用 Anthropic；无需单独选择新手引导身份验证方式
+- `anthropic-vertex` - 安装 `@openclaw/anthropic-vertex-provider`，即可在 Vertex 凭据可用时获得 Google Vertex 上的隐式 Anthropic 支持；无需单独选择新手引导身份验证方式
 - `copilot-proxy` - 本地 VS Code Copilot Proxy 桥接；使用 `openclaw onboard --auth-choice copilot-proxy`
 - `google-gemini-cli` - 非官方 Gemini CLI OAuth 流程；需要在本地安装 `gemini`（`brew install gemini-cli` 或 `npm install -g @google/gemini-cli`）；默认模型为 `google-gemini-cli/gemini-3-flash-preview`；使用 `openclaw onboard --auth-choice google-gemini-cli` 或 `openclaw models auth login --provider google-gemini-cli --set-default`
 

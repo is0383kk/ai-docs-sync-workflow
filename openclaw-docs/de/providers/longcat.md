@@ -5,30 +5,30 @@ read_when:
 summary: LongCat-API-Einrichtung für LongCat-2.0
 title: LongCat
 x-i18n:
-    generated_at: "2026-07-12T15:53:58Z"
+    generated_at: "2026-07-26T18:01:52Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 15
+    prompt_version: 32
     provider: openai
     source_hash: 7c447f9c42e6547a69d2124debcb685c32fe59de29bfc551e18e791d9f280584
     source_path: providers/longcat.md
     workflow: 16
 ---
 
-[LongCat](https://longcat.ai) stellt eine gehostete API für LongCat-2.0 bereit, ein
+[LongCat](https://longcat.ai) bietet eine gehostete API für LongCat-2.0, ein
 Reasoning-Modell für Coding- und agentische Workloads. OpenClaw stellt das
-offizielle `longcat`-Plugin für den OpenAI-kompatiblen Endpunkt von LongCat bereit.
+offizielle Plugin `longcat` für LongCats OpenAI-kompatiblen Endpunkt bereit.
 
-| Eigenschaft | Wert                                |
-| ----------- | ----------------------------------- |
-| Provider    | `longcat`                           |
-| Auth        | `LONGCAT_API_KEY`                   |
-| API         | OpenAI-kompatible Chat Completions  |
-| Basis-URL   | `https://api.longcat.chat/openai`   |
-| Modell      | `longcat/LongCat-2.0`               |
-| Kontext     | 1,048,576 Token                     |
-| Max. Ausgabe | 131,072 Token                      |
-| Eingabe     | Text                                |
+| Eigenschaft | Wert                               |
+| ----------- | ---------------------------------- |
+| Provider    | `longcat`                 |
+| Authentifizierung | `LONGCAT_API_KEY`           |
+| API         | OpenAI-kompatible Chat Completions |
+| Basis-URL   | `https://api.longcat.chat/openai`                 |
+| Modell      | `longcat/LongCat-2.0`                 |
+| Kontext     | 1,048,576 Token                    |
+| Maximale Ausgabe | 131,072 Token                 |
+| Eingabe     | Text                               |
 
 ## Plugin installieren
 
@@ -75,37 +75,37 @@ openclaw onboard --non-interactive \
 
 LongCat bietet eine binäre Steuerung des Denkprozesses. OpenClaw ordnet aktivierte Denkstufen
 `thinking: { type: "enabled" }` und `/think off`
-`thinking: { type: "disabled" }` zu. LongCat dokumentiert derzeit
-`reasoning_effort` nicht, daher sendet OpenClaw diesen Wert nicht.
+`thinking: { type: "disabled" }` zu. LongCat dokumentiert
+`reasoning_effort` derzeit nicht, daher sendet OpenClaw diesen Wert nicht.
 
 LongCat gibt Reasoning in `reasoning_content` zurück. OpenClaw behält dieses Feld
-bei der Wiedergabe von Assistant-Tool-Call-Turns bei, damit agentische Sitzungen mit mehreren Turns
+beim erneuten Abspielen von Assistenten-Turns mit Tool-Aufrufen bei, damit agentische Sitzungen mit mehreren Turns
 die vom Provider erwartete Nachrichtenstruktur beibehalten.
 
 ## Preise
 
-Der integrierte Katalog verwendet die nutzungsabhängigen Listenpreise von LongCat in USD pro Million
-Token: $0.75 für nicht zwischengespeicherte Eingaben, $0.015 für zwischengespeicherte Eingaben und $2.95 für Ausgaben. LongCat kann
-vorübergehende Rabatte anbieten; maßgeblich sind die [Preisseite](https://longcat.chat/platform/docs/Pricing/LongCat-2.0.html)
-und Ihre Abrechnungsunterlagen.
+Der integrierte Katalog verwendet LongCats nutzungsabhängige Listenpreise in USD pro Million
+Token: $0.75 für nicht zwischengespeicherte Eingaben, $0.015 für zwischengespeicherte Eingaben und $2.95 für Ausgaben. LongCat bietet möglicherweise
+vorübergehende Rabatte an; maßgeblich sind die [Preisseite](https://longcat.chat/platform/docs/Pricing/LongCat-2.0.html)
+und Ihre Abrechnungsdaten.
 
 ## Selbst gehostetes LongCat-2.0
 
-Der `longcat`-Provider ist auf die gehostete API von LongCat ausgerichtet. Um die offenen Gewichte auf
-[Hugging Face](https://huggingface.co/meituan-longcat/LongCat-2.0) zu verwenden, stellen Sie das
+Der Provider `longcat` ist für LongCats gehostete API vorgesehen. Stellen Sie für die offenen Gewichte auf
+[Hugging Face](https://huggingface.co/meituan-longcat/LongCat-2.0) das
 Modell über eine OpenAI-kompatible Runtime bereit und verwenden Sie stattdessen den bestehenden
 [vLLM](/de/providers/vllm)- oder [SGLang](/de/providers/sglang)-Provider von OpenClaw.
 
-Behalten Sie die exakte Modellkennung der Runtime im Katalog des selbst gehosteten Providers bei;
+Behalten Sie die exakte Modellkennung der Runtime im selbst gehosteten Provider-Katalog bei;
 leiten Sie eine lokale Bereitstellung nicht über `longcat/LongCat-2.0`.
 
 ## Fehlerbehebung
 
 <AccordionGroup>
   <Accordion title="Der Schlüssel funktioniert in einer Shell, aber nicht im Gateway">
-    Von einem Daemon verwaltete Gateway-Prozesse übernehmen nicht jede Variable der interaktiven Shell.
-    Hinterlegen Sie `LONGCAT_API_KEY` in `~/.openclaw/.env`, konfigurieren Sie ihn über das
-    Onboarding oder verwenden Sie eine genehmigte Secret-Referenz.
+    Von Daemons verwaltete Gateway-Prozesse übernehmen nicht jede Variable der interaktiven Shell.
+    Hinterlegen Sie `LONGCAT_API_KEY` in `~/.openclaw/.env`, konfigurieren Sie den Wert über
+    das Onboarding oder verwenden Sie eine genehmigte Secret-Referenz.
   </Accordion>
 
   <Accordion title="Anfragen schlagen mit 402 oder 429 fehl">
@@ -115,7 +115,7 @@ leiten Sie eine lokale Bereitstellung nicht über `longcat/LongCat-2.0`.
   </Accordion>
 
   <Accordion title="Das Modell wird nicht angezeigt">
-    Führen Sie `openclaw plugins list` aus und bestätigen Sie, dass das `longcat`-Plugin
+    Führen Sie `openclaw plugins list` aus und bestätigen Sie, dass das Plugin `longcat`
     aktiviert ist. Führen Sie anschließend `openclaw models list --provider longcat` aus.
   </Accordion>
 </AccordionGroup>
@@ -127,12 +127,12 @@ leiten Sie eine lokale Bereitstellung nicht über `longcat/LongCat-2.0`.
     Provider-Konfiguration, Modellreferenzen und Failover-Verhalten.
   </Card>
   <Card title="LongCat-API-Dokumentation" href="https://longcat.chat/platform/docs/" icon="arrow-up-right-from-square">
-    Gehostete API-Endpunkte, Authentifizierung, Beschränkungen und Beispiele.
+    Endpunkte der gehosteten API, Authentifizierung, Limits und Beispiele.
   </Card>
   <Card title="LongCat-2.0-Modellkarte" href="https://huggingface.co/meituan-longcat/LongCat-2.0" icon="arrow-up-right-from-square">
     Architektur, Bereitstellungshinweise und Modelldetails.
   </Card>
   <Card title="Secrets" href="/de/gateway/secrets" icon="key">
-    Speichern Sie Provider-Anmeldedaten, ohne Klartext in die Konfiguration einzubetten.
+    Provider-Anmeldedaten speichern, ohne Klartext in die Konfiguration einzubetten.
   </Card>
 </CardGroup>

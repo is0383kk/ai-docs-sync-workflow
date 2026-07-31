@@ -1,21 +1,22 @@
 ---
 read_when:
-    - Hostinger'da OpenClaw Kurulumu
-    - OpenClaw için yönetilen bir VPS arıyorsunuz
-    - Hostinger 1-Tık OpenClaw'ı Kullanma
-summary: OpenClaw'ı Hostinger'da barındırın
+    - Hostinger'da OpenClaw kurulumu
+    - OpenClaw için yönetilen bir VPS arıyorsanız
+    - Hostinger 1-Click OpenClaw'u Kullanma
+summary: OpenClaw'u Hostinger'da barındırın
 title: Hostinger
 x-i18n:
-    generated_at: "2026-07-12T12:22:15Z"
+    generated_at: "2026-07-27T00:02:58Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 7dc49e741f8581928553e2426ed91f92df6e7b0c31dd8780c0d6e891a07be263
     source_path: install/hostinger.md
     workflow: 16
 ---
 
-Kalıcı bir OpenClaw Gateway'i [Hostinger](https://www.hostinger.com/openclaw) üzerinde, **1-Click** yönetilen dağıtım olarak veya kendiniz yöneteceğiniz bir **VPS** kurulumu olarak çalıştırın.
+Kalıcı bir OpenClaw Gateway'i [Hostinger](https://www.hostinger.com/openclaw) üzerinde, **1-Click** yönetilen dağıtım olarak veya kendi yönettiğiniz bir **VPS** kurulumu olarak çalıştırın.
 
 ## Ön koşullar
 
@@ -28,10 +29,10 @@ Hostinger altyapıyı, Docker'ı ve otomatik güncellemeleri yönetir. Çalışa
 
 <Steps>
   <Step title="Satın alın ve başlatın">
-    1. [Hostinger OpenClaw sayfasından](https://www.hostinger.com/openclaw) bir Yönetilen OpenClaw planı seçin ve satın alma işlemini tamamlayın.
+    1. [Hostinger OpenClaw sayfasından](https://www.hostinger.com/openclaw) bir Managed OpenClaw planı seçin ve satın alma işlemini tamamlayın.
 
     <Note>
-    Satın alma sırasında, önceden satın alınmış ve OpenClaw'a anında entegre edilen **Ready-to-Use AI** kredilerini seçebilirsiniz; başka sağlayıcılarda harici hesaplara veya API anahtarlarına gerek yoktur. Hemen sohbet etmeye başlayabilirsiniz. Alternatif olarak kurulum sırasında Anthropic, OpenAI, Google Gemini veya xAI anahtarınızı sağlayabilirsiniz.
+    Satın alma sırasında, önceden satın alınmış ve OpenClaw'a anında entegre edilen **Ready-to-Use AI** kredilerini seçebilirsiniz. Böylece diğer sağlayıcılarda harici hesaplara veya API anahtarlarına gerek kalmaz. Hemen sohbet etmeye başlayabilirsiniz. Alternatif olarak kurulum sırasında Anthropic, OpenAI, Google Gemini veya xAI anahtarınızı sağlayabilirsiniz.
     </Note>
 
   </Step>
@@ -40,26 +41,26 @@ Hostinger altyapıyı, Docker'ı ve otomatik güncellemeleri yönetir. Çalışa
     Bağlanmak için bir veya daha fazla kanal seçin:
 
     - **WhatsApp** -- kurulum sihirbazında gösterilen QR kodunu tarayın.
-    - **Telegram** -- [BotFather](https://t.me/BotFather) tarafından verilen bot belirtecini yapıştırın.
+    - **Telegram** -- [BotFather](https://t.me/BotFather) tarafından verilen bot token'ını yapıştırın.
 
   </Step>
 
   <Step title="Kurulumu tamamlayın">
-    Örneği dağıtmak için **Finish** düğmesine tıklayın. Hazır olduğunda OpenClaw panosuna hPanel'deki **OpenClaw Overview** bölümünden erişin.
+    Örneği dağıtmak için **Finish** düğmesine tıklayın. Hazır olduğunda OpenClaw panosuna hPanel'deki **OpenClaw Overview** üzerinden erişin.
   </Step>
 
 </Steps>
 
 ## Seçenek B: VPS üzerinde OpenClaw
 
-Sunucu üzerinde daha fazla denetim sağlar. Hostinger, OpenClaw'ı VPS'nizde Docker aracılığıyla dağıtır; hPanel'deki **Docker Manager** üzerinden yönetirsiniz.
+Sunucu üzerinde daha fazla kontrol sağlar. Hostinger, OpenClaw'ı VPS'nize Docker aracılığıyla dağıtır; hPanel'deki **Docker Manager** üzerinden yönetirsiniz.
 
 <Steps>
   <Step title="Bir VPS satın alın">
-    1. [Hostinger OpenClaw sayfasından](https://www.hostinger.com/openclaw) bir VPS üzerinde OpenClaw planı seçin ve satın alma işlemini tamamlayın.
+    1. [Hostinger OpenClaw sayfasından](https://www.hostinger.com/openclaw) bir OpenClaw on VPS planı seçin ve satın alma işlemini tamamlayın.
 
     <Note>
-    Satın alma sırasında **Ready-to-Use AI** kredilerini seçebilirsiniz; bunlar önceden satın alınmış ve OpenClaw'a anında entegre edilmiştir. Böylece başka sağlayıcılarda harici hesaplara veya API anahtarlarına gerek kalmadan sohbet etmeye başlayabilirsiniz.
+    Satın alma sırasında **Ready-to-Use AI** kredilerini seçebilirsiniz. Bunlar önceden satın alınmış ve OpenClaw'a anında entegre edilmiştir; böylece diğer sağlayıcılarda harici hesaplara veya API anahtarlarına ihtiyaç duymadan sohbet etmeye başlayabilirsiniz.
     </Note>
 
   </Step>
@@ -67,32 +68,32 @@ Sunucu üzerinde daha fazla denetim sağlar. Hostinger, OpenClaw'ı VPS'nizde Do
   <Step title="OpenClaw'ı yapılandırın">
     VPS hazırlandıktan sonra yapılandırma alanlarını doldurun:
 
-    - **Gateway belirteci** -- otomatik olarak oluşturulur; daha sonra kullanmak üzere kaydedin.
-    - **WhatsApp numarası** -- ülke koduyla birlikte numaranız (isteğe bağlı).
-    - **Telegram bot belirteci** -- [BotFather](https://t.me/BotFather) tarafından sağlanır (isteğe bağlı).
-    - **API anahtarları** -- yalnızca satın alma sırasında Ready-to-Use AI kredilerini seçmediyseniz gereklidir.
+    - **Gateway token** -- otomatik oluşturulur; daha sonra kullanmak üzere kaydedin.
+    - **WhatsApp number** -- ülke koduyla birlikte numaranız (isteğe bağlı).
+    - **Telegram bot token** -- [BotFather](https://t.me/BotFather) tarafından verilen token (isteğe bağlı).
+    - **API keys** -- yalnızca satın alma sırasında Ready-to-Use AI kredilerini seçmediyseniz gereklidir.
 
   </Step>
 
   <Step title="OpenClaw'ı başlatın">
-    **Deploy** düğmesine tıklayın. Çalışmaya başladığında **Open** seçeneğine tıklayarak hPanel üzerinden OpenClaw panosunu açın.
+    **Deploy** düğmesine tıklayın. Çalışmaya başladıktan sonra **Open** düğmesine tıklayarak hPanel'den OpenClaw panosunu açın.
   </Step>
 
 </Steps>
 
-Günlükler, yeniden başlatmalar ve güncellemeler hPanel'deki Docker Manager arayüzünden yürütülür. Güncellemek ve en son imajı çekmek için Docker Manager'da **Update** düğmesine basın.
+Günlükler, yeniden başlatmalar ve güncellemeler hPanel'deki Docker Manager arayüzünden yürütülür. Güncellemek üzere en son imajı çekmek için Docker Manager'da **Update** düğmesine basın.
 
 ## Kurulumunuzu doğrulayın
 
-Bağladığınız kanaldan asistanınıza "Merhaba" gönderin. OpenClaw yanıt verir ve ilk tercihlerinizi ayarlama sürecinde size rehberlik eder.
+Bağladığınız kanalda asistanınıza "Merhaba" gönderin. OpenClaw yanıt verir ve ilk tercihlerinizi belirlemenize yardımcı olur.
 
 ## Sorun giderme
 
-**Pano yüklenmiyor** -- Kapsayıcının hazırlanmasını tamamlaması için birkaç dakika bekleyin, ardından hPanel'deki Docker Manager günlüklerini kontrol edin.
+**Pano yüklenmiyor** -- Kapsayıcının hazırlanmayı tamamlaması için birkaç dakika bekleyin, ardından hPanel'deki Docker Manager günlüklerini kontrol edin.
 
-**Docker kapsayıcısı sürekli yeniden başlatılıyor** -- Docker Manager günlüklerini açın ve yapılandırma hatalarını (eksik belirteçler, geçersiz API anahtarları) kontrol edin.
+**Docker kapsayıcısı sürekli yeniden başlıyor** -- Docker Manager günlüklerini açın ve yapılandırma hatalarını (eksik token'lar, geçersiz API anahtarları) arayın.
 
-**Telegram botu yanıt vermiyor** -- DM eşleştirmesi gerekiyorsa bilinmeyen bir göndericiye yanıt yerine kısa bir eşleştirme kodu gönderilir. Bunu OpenClaw panosundaki sohbetten veya kapsayıcıya kabuk erişiminiz varsa `openclaw pairing approve telegram <CODE>` komutuyla onaylayın. Bkz. [Eşleştirme](/tr/channels/pairing).
+**Telegram botu yanıt vermiyor** -- DM eşleştirmesi gerekiyorsa bilinmeyen bir gönderici yanıt yerine kısa bir eşleştirme kodu alır. Kodu OpenClaw panosundaki sohbetten veya kapsayıcıya kabuk erişiminiz varsa `openclaw pairing approve telegram <CODE>` ile onaylayın. Bkz. [Eşleştirme](/tr/channels/pairing).
 
 ## Sonraki adımlar
 

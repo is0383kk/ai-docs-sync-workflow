@@ -1,26 +1,27 @@
 ---
 read_when:
     - Altijd actieve groeps- of kanaalruimten configureren
-    - Je wilt dat de agent de gesprekken in de ruimte volgt zonder automatisch een definitieve tekst te plaatsen
-    - Typindicatie en tokengebruik debuggen zonder zichtbaar bericht in de ruimte
+    - Je wilt dat de agent de gesprekken in de ruimte volgt zonder automatisch definitieve tekst te plaatsen
+    - Fouten opsporen in typindicatie en tokengebruik zonder zichtbaar bericht in de ruimte
 sidebarTitle: Ambient room events
-summary: Laat ondersteunde groepsruimten stille context bieden, tenzij de agent iets verzendt met het berichtentool
-title: Omgevingsgebeurtenissen in de ruimte
+summary: Laat ondersteunde groepsruimtes stille context bieden, tenzij de agent via de berichtentool verzendt
+title: Omgevingsgebeurtenissen in ruimtes
 x-i18n:
-    generated_at: "2026-07-12T08:35:06Z"
+    generated_at: "2026-07-27T05:42:08Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 3f144b44c8ae0a78e756d741c7b4685632862c0eb15531185ddeb0c2ba801e1a
+    source_hash: 15c083c139058c9bd2c651794965bd8252d74691e536db2ad2a2ae0b4ac886e8
     source_path: channels/ambient-room-events.md
     workflow: 16
 ---
 
-Met omgevingsgebeurtenissen in ruimtes kan OpenClaw niet-vermelde gesprekken in groepen of kanalen als stille context verwerken. De agent kan het geheugen en de sessiestatus bijwerken, maar de ruimte blijft stil tenzij de agent expliciet de tool `message` aanroept.
+Omgevingsgebeurtenissen in ruimtes stellen OpenClaw in staat om niet-vermelde gesprekken in groepen of kanalen als stille context te verwerken. De agent kan het geheugen en de sessiestatus bijwerken, maar de ruimte blijft stil tenzij de agent expliciet de tool `message` aanroept.
 
-Combineer voor permanent actieve groepschats `messages.groupChat.unmentionedInbound: "room_event"` met `messages.groupChat.visibleReplies: "message_tool"`. De agent luistert, bepaalt wanneer een antwoord nuttig is en heeft het oude promptpatroon waarbij `NO_REPLY` wordt geantwoord nooit nodig.
+Combineer voor groepschats die altijd actief zijn `messages.groupChat.unmentionedInbound: "room_event"` met `messages.groupChat.visibleReplies: "message_tool"`. De agent luistert, beslist wanneer een antwoord nuttig is en heeft nooit het oude promptpatroon nodig waarbij met `NO_REPLY` wordt geantwoord.
 
-Momenteel ondersteund: Discord-serverkanalen, openbare en privékanalen van Slack, Slack-DM's met meerdere personen en groepen of supergroepen van Telegram. Andere groepskanalen behouden hun bestaande groepsgedrag, tenzij op hun kanaalpagina staat dat ze omgevingsgebeurtenissen in ruimtes ondersteunen.
+Momenteel ondersteund: Discord-gildekanalen, Slack-kanalen en privékanalen, Slack-DM's met meerdere personen en Telegram-groepen of -supergroepen. Andere groepskanalen behouden hun bestaande groepsgedrag, tenzij op hun kanaalpagina staat dat ze omgevingsgebeurtenissen in ruimtes ondersteunen.
 
 ## Aanbevolen configuratie
 
@@ -38,23 +39,23 @@ Stel het algemene gedrag voor groepschats in:
 }
 ```
 
-Maak de ruimte vervolgens permanent actief door de vermeldingsvereiste voor die ruimte uit te schakelen. De ruimte moet nog steeds voldoen aan het normale `groupPolicy`, de toelatingslijst voor ruimtes en de toelatingslijst voor afzenders.
+Maak de ruimte vervolgens altijd actief door de vermeldingsvereiste voor die ruimte uit te schakelen. De ruimte moet nog steeds voldoen aan de normale `groupPolicy`, de toelatingslijst voor ruimtes en de toelatingslijst voor afzenders.
 
-Na het opslaan van de configuratie past de Gateway de instellingen voor `messages` direct toe. Start alleen opnieuw op wanneer bestandsbewaking of het opnieuw laden van de configuratie is uitgeschakeld (`gateway.reload.mode: "off"`).
+Na het opslaan van de configuratie past de Gateway de instellingen voor `messages` direct toe. Start alleen opnieuw wanneer bestandsbewaking of het opnieuw laden van de configuratie is uitgeschakeld (`gateway.reload.mode: "off"`).
 
-## Wat er verandert
+## Wat verandert
 
 Met `messages.groupChat.unmentionedInbound: "room_event"`:
 
-- worden toegestane, niet-vermelde berichten in groepen of kanalen stille ruimtegebeurtenissen
-- blijven berichten met een vermelding gebruikersverzoeken
-- blijven tekstuele besturingsopdrachten en systeemeigen opdrachten gebruikersverzoeken
-- blijven verzoeken om af te breken of te stoppen gebruikersverzoeken
-- blijven directe berichten gebruikersverzoeken
+- toegestane groeps- of kanaalberichten zonder vermelding worden stille ruimtegebeurtenissen
+- berichten met een vermelding blijven gebruikersverzoeken
+- tekstuele besturingsopdrachten en systeemeigen opdrachten blijven gebruikersverzoeken
+- verzoeken om af te breken of te stoppen blijven gebruikersverzoeken
+- directe berichten blijven gebruikersverzoeken
 
-Ruimtegebeurtenissen gebruiken strikte zichtbare bezorging. De uiteindelijke assistenttekst is privé. De agent moet `message(action=send)` aanroepen om een bericht in de ruimte te plaatsen.
+Ruimtegebeurtenissen gebruiken strikte zichtbare aflevering. De uiteindelijke tekst van de assistent is privé. De agent moet `message(action=send)` aanroepen om iets in de ruimte te plaatsen.
 
-Typindicaties en statusreacties voor de levenscyclus blijven onderdrukt voor ruimtegebeurtenissen. De enige expliciete uitzondering voor ontvangstbevestigingen is `messages.ackReactionScope: "all"`, waarmee de geconfigureerde bevestigingsreactie wordt verzonden; gebruik een beperkter bereik of `"off"` wanneer de ruimte volledig stil moet blijven.
+Typindicaties en statusreacties voor de levenscyclus blijven onderdrukt voor ruimtegebeurtenissen. De enige expliciete uitzondering voor ontvangstbevestigingen is `messages.ackReactionScope: "all"`, waarmee de geconfigureerde bevestigingsreactie wordt verzonden; gebruik een beperktere reikwijdte of `"off"` wanneer de ruimte volledig stil moet blijven.
 
 ## Discord-voorbeeld
 
@@ -81,7 +82,7 @@ Typindicaties en statusreacties voor de levenscyclus blijven onderdrukt voor rui
 }
 ```
 
-Gebruik Discord-configuratie per kanaal wanneer slechts één kanaal als omgevingscontext moet dienen. Bij `groupPolicy: "allowlist"` wordt het kanaal toegestaan door het te vermelden (`enabled: false` schakelt een vermelding uit):
+Gebruik Discord-configuratie per kanaal wanneer slechts één kanaal als omgevingscontext moet dienen. Onder `groupPolicy: "allowlist"` wordt het kanaal toegestaan door het op te nemen (`enabled: false` schakelt een vermelding uit):
 
 ```json5
 {
@@ -104,7 +105,7 @@ Gebruik Discord-configuratie per kanaal wanneer slechts één kanaal als omgevin
 
 ## Slack-voorbeeld
 
-Toelatingslijsten voor Slack-kanalen gebruiken primair ID's. Gebruik kanaal-ID's zoals `C12345678`, niet `#channel-name`. Het kanaal wordt toegestaan door het onder `channels.slack.channels` te vermelden (`enabled: false` schakelt een vermelding uit):
+Toelatingslijsten voor Slack-kanalen werken primair met ID's. Gebruik kanaal-ID's zoals `C12345678`, niet `#channel-name`. Het kanaal wordt toegestaan door het onder `channels.slack.channels` op te nemen (`enabled: false` schakelt een vermelding uit):
 
 ```json5
 {
@@ -130,7 +131,7 @@ Toelatingslijsten voor Slack-kanalen gebruiken primair ID's. Gebruik kanaal-ID's
 
 ## Telegram-voorbeeld
 
-Voor Telegram-groepen moet de bot normale groepsberichten kunnen zien. Als `requireMention: false` is ingesteld, schakelt u de privacymodus van BotFather uit of gebruikt u een andere Telegram-configuratie waarmee al het groepsverkeer aan de bot wordt geleverd.
+Voor Telegram-groepen moet de bot normale groepsberichten kunnen zien. Als `requireMention: false`, schakel je de privacymodus van BotFather uit of gebruik je een andere Telegram-configuratie die al het groepsverkeer aan de bot doorgeeft.
 
 ```json5
 {
@@ -154,11 +155,11 @@ Voor Telegram-groepen moet de bot normale groepsberichten kunnen zien. Als `requ
 }
 ```
 
-Groeps-ID's van Telegram zijn meestal negatieve getallen, zoals `-1001234567890`. Lees `chat.id` uit `openclaw logs --follow`, stuur een groepsbericht door naar een bot die ID's opzoekt of controleer `getUpdates` van de Bot API.
+Telegram-groeps-ID's zijn meestal negatieve getallen, zoals `-1001234567890`. Lees `chat.id` uit `openclaw logs --follow`, stuur een groepsbericht door naar een bot die ID's opzoekt of inspecteer `getUpdates` van de Bot API.
 
 ## Agentspecifiek beleid
 
-Gebruik een overschrijving voor een agent wanneer meerdere agents dezelfde ruimte delen, maar slechts één agent niet-vermelde gesprekken als omgevingscontext moet behandelen:
+Gebruik een agentoverschrijving wanneer meerdere agents dezelfde ruimte delen, maar slechts één niet-vermelde gesprekken als omgevingscontext moet behandelen:
 
 ```json5
 {
@@ -181,35 +182,35 @@ Gebruik een overschrijving voor een agent wanneer meerdere agents dezelfde ruimt
 }
 ```
 
-De agentspecifieke waarde `agents.list[].groupChat.unmentionedInbound` overschrijft voor die agent `messages.groupChat.unmentionedInbound`.
+De agentspecifieke waarde `agents.entries.*.groupChat.unmentionedInbound` overschrijft `messages.groupChat.unmentionedInbound` voor die agent.
 
 ## Modi voor zichtbare antwoorden
 
-`messages.groupChat.visibleReplies` gebruikt standaard `"automatic"` voor normale gebruikersverzoeken in groepen of kanalen. Behoud deze standaardwaarde wanneer de uiteindelijke assistenttekst zichtbaar moet worden geplaatst zonder een expliciete aanroep van de berichtentool.
+`messages.groupChat.visibleReplies` is standaard ingesteld op `"automatic"` voor normale gebruikersverzoeken in groepen en kanalen. Behoud die standaard wanneer de uiteindelijke tekst van de assistent zichtbaar moet worden geplaatst zonder expliciete aanroep van de berichtentool.
 
-Voor permanent actieve omgevingsruimtes blijft `messages.groupChat.visibleReplies: "message_tool"` aanbevolen, vooral met modellen van de nieuwste generatie die betrouwbaar tools gebruiken, zoals GPT-5.6 Sol. Zo kan de agent bepalen wanneer hij spreekt door de berichtentool aan te roepen. Als het model uiteindelijke tekst retourneert zonder de tool aan te roepen, houdt OpenClaw die uiteindelijke tekst privé en registreert het metagegevens over de onderdrukte bezorging.
+Voor altijd actieve omgevingsruimtes blijft `messages.groupChat.visibleReplies: "message_tool"` aanbevolen, vooral met modellen van de nieuwste generatie die betrouwbaar tools gebruiken, zoals GPT-5.6 Sol. Hiermee kan de agent beslissen wanneer hij iets zegt door de berichtentool aan te roepen. Als het model uiteindelijke tekst retourneert zonder de tool aan te roepen, houdt OpenClaw die uiteindelijke tekst privé en registreert het metagegevens over de onderdrukte aflevering.
 
 Ruimtegebeurtenissen blijven strikt, zelfs wanneer andere groepsverzoeken automatische antwoorden gebruiken. Niet-vermelde omgevingsgebeurtenissen in ruimtes vereisen altijd `message(action=send)` voor zichtbare uitvoer.
 
 ## Geschiedenis
 
-`messages.groupChat.historyLimit` stelt de algemene standaardwaarde voor de groepsgeschiedenis in (50 wanneer niet ingesteld; moet een positief geheel getal zijn). Kanalen kunnen deze overschrijven met `channels.<channel>.historyLimit` en sommige kanalen ondersteunen ook geschiedenislijmieten per account. Stel `historyLimit: 0` op kanaalniveau in om context uit de groepsgeschiedenis voor dat kanaal uit te schakelen.
+`messages.groupChat.historyLimit` stelt de algemene standaard voor groepsgeschiedenis in (50 wanneer niet ingesteld; moet een positief geheel getal zijn). Kanalen kunnen deze overschrijven met `channels.<channel>.historyLimit`, en sommige kanalen ondersteunen ook geschiedenislimieten per account. Stel `historyLimit: 0` op kanaalniveau in om context uit de groepsgeschiedenis voor dat kanaal uit te schakelen.
 
-Ondersteunde kanalen voor ruimtegebeurtenissen bewaren recente omgevingsberichten uit de ruimte als context. Telegram bewaart een permanent actief, voortschrijdend venster per groep dat door `historyLimit` wordt begrensd; beurten met gebruikersverzoeken selecteren vermeldingen na het laatst geregistreerde antwoord van de bot, terwijl beurten met ruimtegebeurtenissen het volledige recente venster ontvangen, zodat het model zijn eigen recente berichten kan zien. De uitgefaseerde Telegram-modussleutel `includeGroupHistoryContext` wordt verwijderd door `openclaw doctor --fix`.
+Ondersteunde kanalen voor ruimtegebeurtenissen behouden recente omgevingsberichten in ruimtes als context. Telegram behoudt een altijd actief, voortschrijdend venster per groep dat wordt begrensd door `historyLimit`; beurten met gebruikersverzoeken selecteren vermeldingen na het laatst geregistreerde antwoord van de bot, terwijl beurten met ruimtegebeurtenissen het volledige recente venster ontvangen, zodat het model zijn eigen recente berichten kan zien. De buiten gebruik gestelde Telegram-modussleutel `includeGroupHistoryContext` wordt verwijderd door `openclaw doctor --fix`.
 
-## Probleemoplossing
+## Problemen oplossen
 
-Als in de ruimte typactiviteit of tokengebruik zichtbaar is, maar geen zichtbaar bericht verschijnt:
+Als de ruimte een typindicatie of tokengebruik toont, maar geen zichtbaar bericht:
 
 1. Controleer of de ruimte is toegestaan door de toelatingslijst voor kanalen en de toelatingslijst voor afzenders.
 2. Controleer of `requireMention: false` is ingesteld op het verwachte ruimteniveau.
-3. Controleer of `messages.groupChat.unmentionedInbound` of de overschrijving voor de agent is ingesteld op `"room_event"`.
-4. Controleer de logboeken op metagegevens van onderdrukte uiteindelijke nettoladingen of `didSendViaMessagingTool: false`.
-5. Behoud of herstel voor normale groepsverzoeken `messages.groupChat.visibleReplies: "automatic"` als u wilt dat uiteindelijke antwoorden automatisch worden geplaatst. Gebruik voor omgevingsruimtes met `message_tool` een model of runtime dat tools betrouwbaar aanroept.
+3. Controleer of `messages.groupChat.unmentionedInbound` of de agentoverschrijving is ingesteld op `"room_event"`.
+4. Controleer de logboeken op metagegevens van onderdrukte uiteindelijke payloads of `didSendViaMessagingTool: false`.
+5. Behoud of herstel voor normale groepsverzoeken `messages.groupChat.visibleReplies: "automatic"` als je wilt dat uiteindelijke antwoorden automatisch worden geplaatst. Gebruik voor omgevingsruimtes met `message_tool` een model/runtime dat betrouwbaar tools aanroept.
 
-Als omgevingsruimtes van Telegram helemaal niet worden geactiveerd, controleert u de privacymodus van BotFather en verifieert u dat de Gateway normale groepsberichten ontvangt.
+Als Telegram-omgevingsruimtes helemaal niet worden geactiveerd, controleer dan de privacymodus van BotFather en verifieer dat de Gateway normale groepsberichten ontvangt.
 
-Als omgevingsruimtes van Slack niet worden geactiveerd, controleert u of de kanaalsleutel het Slack-kanaal-ID is en of de app het geschiedenisbereik voor dat ruimtetype heeft: `channels:history` (openbaar), `groups:history` (privé) of `mpim:history` (DM's met meerdere personen).
+Als Slack-omgevingsruimtes niet worden geactiveerd, controleer dan of de kanaalsleutel het Slack-kanaal-ID is en of de app het geschiedenisbereik voor dat ruimtetype heeft: `channels:history` (openbaar), `groups:history` (privé) of `mpim:history` (DM's met meerdere personen).
 
 ## Gerelateerd
 
@@ -217,5 +218,5 @@ Als omgevingsruimtes van Slack niet worden geactiveerd, controleert u of de kana
 - [Discord](/nl/channels/discord)
 - [Slack](/nl/channels/slack)
 - [Telegram](/nl/channels/telegram)
-- [Probleemoplossing voor kanalen](/nl/channels/troubleshooting)
-- [Configuratiereferentie voor kanalen](/nl/gateway/config-channels)
+- [Problemen met kanalen oplossen](/nl/channels/troubleshooting)
+- [Referentie voor kanaalconfiguratie](/nl/gateway/config-channels)

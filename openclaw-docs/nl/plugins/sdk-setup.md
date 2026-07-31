@@ -2,24 +2,25 @@
 read_when:
     - Je voegt een installatiewizard toe aan een plugin
     - Je moet het verschil tussen setup-entry.ts en index.ts begrijpen
-    - U definieert configuratieschema's voor Plugins of OpenClaw-metadata in package.json
+    - Je definieert configuratieschema's voor plugins of OpenClaw-metadata in package.json
 sidebarTitle: Setup and config
 summary: Installatiewizards, setup-entry.ts, configuratieschema's en package.json-metadata
-title: Plugin-installatie en -configuratie
+title: Plugininstallatie en -configuratie
 x-i18n:
-    generated_at: "2026-07-12T09:15:52Z"
+    generated_at: "2026-07-27T06:01:42Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 3b47e1f18a92871c442980168e302c82d7aa9a38b38bbbeed4add9dd6479365b
+    source_hash: b07e3fa365939fa9c0885b31b7894f5e734313a7deef2297e316956063d97e45
     source_path: plugins/sdk-setup.md
     workflow: 16
 ---
 
-Referentie voor Plugin-packaging (`package.json`-metadata), manifests (`openclaw.plugin.json`), setup-ingangen en configuratieschema's.
+Naslaginformatie voor Plugin-verpakking (`package.json`-metadata), manifesten (`openclaw.plugin.json`), setup-items en configuratieschema's.
 
 <Tip>
-**Op zoek naar een stapsgewijze handleiding?** De praktische handleidingen behandelen packaging in context: [Kanaalplugins](/nl/plugins/sdk-channel-plugins#step-1-package-and-manifest) en [Providerplugins](/nl/plugins/sdk-provider-plugins#step-1-package-and-manifest).
+**Op zoek naar een stapsgewijze uitleg?** De how-to-handleidingen behandelen verpakking in context: [Kanaalplugins](/nl/plugins/sdk-channel-plugins#step-1-package-and-manifest) en [Providerplugins](/nl/plugins/sdk-provider-plugins#step-1-package-and-manifest).
 </Tip>
 
 ## Pakketmetadata
@@ -38,14 +39,14 @@ Je `package.json` heeft een `openclaw`-veld nodig dat het pluginsysteem vertelt 
         "setupEntry": "./setup-entry.ts",
         "channel": {
           "id": "my-channel",
-          "label": "My Channel",
-          "blurb": "Short description of the channel."
+          "label": "Mijn kanaal",
+          "blurb": "Korte beschrijving van het kanaal."
         }
       }
     }
     ```
   </Tab>
-  <Tab title="Providerplugin / ClawHub-basisconfiguratie">
+  <Tab title="Providerplugin / ClawHub-basis">
     ```json openclaw-clawhub-package.json
     {
       "name": "@myorg/openclaw-my-plugin",
@@ -80,25 +81,25 @@ Extern publiceren op ClawHub vereist `compat` en `build`. De canonieke publicati
 ### `openclaw`-velden
 
 <ParamField path="extensions" type="string[]">
-  Ingangspuntbestanden (relatief aan de pakketroot). Geldige broningangen voor ontwikkeling in een workspace en Git-checkout.
+  Entry-pointbestanden (relatief ten opzichte van de pakketroot). Geldige bronitems voor ontwikkeling in een workspace en Git-checkout.
 </ParamField>
 <ParamField path="runtimeExtensions" type="string[]">
-  Gebouwde JavaScript-tegenhangers voor `extensions`, waaraan de voorkeur wordt gegeven wanneer OpenClaw een geïnstalleerd npm-pakket laadt. Zie [SDK-ingangspunten](/nl/plugins/sdk-entrypoints) voor de oplossingsvolgorde voor bron- en gebouwde bestanden.
+  Gebouwde JavaScript-tegenhangers voor `extensions`, waaraan de voorkeur wordt gegeven wanneer OpenClaw een geïnstalleerd npm-pakket laadt. Zie [SDK-entry-points](/nl/plugins/sdk-entrypoints) voor de oplossingsvolgorde van bron en build.
 </ParamField>
 <ParamField path="setupEntry" type="string">
-  Lichtgewicht ingang uitsluitend voor setup (optioneel).
+  Lichtgewicht entry die alleen voor setup dient (optioneel).
 </ParamField>
 <ParamField path="runtimeSetupEntry" type="string">
   Gebouwde JavaScript-tegenhanger voor `setupEntry`. Vereist dat `setupEntry` ook is ingesteld.
 </ParamField>
 <ParamField path="plugin" type="object">
-  `{ id, label }`-terugvalidentiteit voor de Plugin, gebruikt wanneer een Plugin geen kanaal- of providermetadata heeft waaruit een id of label kan worden afgeleid.
+  `{ id, label }`-fallbackidentiteit van de Plugin, gebruikt wanneer een Plugin geen kanaal- of providermetadata heeft waaruit een id of label kan worden afgeleid.
 </ParamField>
 <ParamField path="channel" type="object">
-  Kanaalcatalogusmetadata voor setup, keuzelijsten, snelstart en statusweergaven.
+  Kanaalcatalogusmetadata voor setup-, keuze-, snelstart- en statusoppervlakken.
 </ParamField>
 <ParamField path="install" type="object">
-  Installatieaanwijzingen: `npmSpec`, `localPath`, `defaultChoice`, `minHostVersion`, `expectedIntegrity`, `allowInvalidConfigRecovery`, `requiredPlatformPackages`.
+  Installatiehints: `npmSpec`, `localPath`, `defaultChoice`, `minHostVersion`, `expectedIntegrity`, `allowInvalidConfigRecovery`, `requiredPlatformPackages`.
 </ParamField>
 <ParamField path="startup" type="object">
   Vlaggen voor opstartgedrag.
@@ -113,29 +114,87 @@ Provider-id's (`providers: string[]`) zijn manifestmetadata, geen pakketmetadata
 
 ### `openclaw.channel`
 
-`openclaw.channel` is lichtgewicht pakketmetadata voor kanaaldetectie en setupweergaven voordat de runtime wordt geladen.
+`openclaw.channel` is goedkope pakketmetadata voor kanaaldetectie en setup-oppervlakken voordat de runtime wordt geladen.
+
+### Setupvelden in beheer van het kanaal
+
+Kanaalplugins moeten setupvelden eenmaal definiëren in runtimecode met `defineChannelSetupContract(...)` en de bijbehorende serialiseerbare projectie publiceren onder `openclaw.channel.setup.fields`. De runtimedefinitie leidt het invoertype af dat lokaal is voor de Plugin, parseert zowel begeleide als niet-interactieve waarden en houdt kanaalspecifieke sleutels buiten kerntypen. Met pakketmetadata kunnen `openclaw channels add <channel-id> --help` en `openclaw channels add --channel <channel-id> --help` alleen de opties van het geselecteerde kanaal vinden zonder de Plugin te laden.
+
+```ts
+import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+
+export const setupContract = defineChannelSetupContract({
+  fields: {
+    endpoint: {
+      kind: "string",
+      cli: { flags: "--endpoint <url>", description: "Service-eindpunt" },
+    },
+    transport: {
+      kind: "choice",
+      choices: ["native", "container"],
+      cli: { flags: "--transport <kind>", description: "Transportbeheerder" },
+    },
+  },
+  adapter: {
+    applyAccountConfig: ({ cfg, input }) => ({
+      ...cfg,
+      channels: { ...cfg.channels, example: input },
+    }),
+  },
+});
+```
+
+```json
+{
+  "openclaw": {
+    "channel": {
+      "id": "example",
+      "setup": {
+        "fields": [
+          {
+            "key": "endpoint",
+            "kind": "string",
+            "cli": { "flags": "--endpoint <url>", "description": "Service-eindpunt" }
+          },
+          {
+            "key": "transport",
+            "kind": "choice",
+            "choices": ["native", "container"],
+            "cli": { "flags": "--transport <kind>", "description": "Transportbeheerder" }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+Ondersteunde veldtypen zijn `string`, `boolean`, `integer`, `string-list` en `choice`. Gebruik `sensitive: true` voor aanmeldgegevens. Elke veldsleutel moet gelijk zijn aan de camelCase-attribuutnaam van de lange CLI-vlag, inclusief een eventuele ontkennende vorm, zoals `apiToken` voor `--api-token`. Booleaanse velden kunnen `cli.negatedFlags` toevoegen wanneer zowel positieve als `--no-*`-vormen nodig zijn. `channel`, `account` en de accountweergave `name` blijven de gedeelde besturingsenvelop.
+
+De uitgebrachte `setup`/`ChannelSetupInput`-adapter blijft beschikbaar voor bestaande externe plugins. Nieuwe plugins moeten `setupContract` beschikbaar stellen; OpenClaw geeft hier altijd de voorkeur aan wanneer beide aanwezig zijn.
 
 | Veld                                   | Type       | Betekenis                                                                     |
 | -------------------------------------- | ---------- | ----------------------------------------------------------------------------- |
 | `id`                                   | `string`   | Canonieke kanaal-id.                                                          |
 | `label`                                | `string`   | Primair kanaallabel.                                                          |
-| `selectionLabel`                       | `string`   | Keuze-/setuplabel wanneer dit van `label` moet verschillen.                   |
-| `detailLabel`                          | `string`   | Secundair detaillabel voor uitgebreidere kanaalcatalogi en statusweergaven.   |
+| `selectionLabel`                       | `string`   | Keuze-/setuplabel wanneer dit moet verschillen van `label`.                  |
+| `detailLabel`                          | `string`   | Secundair detaillabel voor uitgebreidere kanaalcatalogi en statusoppervlakken. |
 | `docsPath`                             | `string`   | Documentatiepad voor setup- en selectielinks.                                 |
-| `docsLabel`                            | `string`   | Alternatief label voor documentatielinks wanneer dit van de kanaal-id moet verschillen. |
+| `docsLabel`                            | `string`   | Overschrijvend label voor documentatielinks wanneer dit moet verschillen van de kanaal-id. |
 | `blurb`                                | `string`   | Korte beschrijving voor onboarding/catalogus.                                 |
 | `order`                                | `number`   | Sorteervolgorde in kanaalcatalogi.                                             |
 | `aliases`                              | `string[]` | Extra opzoekaliassen voor kanaalselectie.                                      |
-| `preferOver`                           | `string[]` | Plugin-/kanaal-id's met lagere prioriteit waar dit kanaal boven moet staan.   |
-| `systemImage`                          | `string`   | Optionele pictogram-/systeemafbeeldingsnaam voor kanaalcatalogi in de gebruikersinterface. |
-| `selectionDocsPrefix`                  | `string`   | Voorvoegseltekst vóór documentatielinks in selectieweergaven.                 |
+| `preferOver`                           | `string[]` | Plugin-/kanaal-id's met lagere prioriteit die dit kanaal moet overtreffen.     |
+| `systemImage`                          | `string`   | Optionele pictogram-/systeemafbeeldingsnaam voor kanaalcatalogi in de UI.      |
+| `selectionDocsPrefix`                  | `string`   | Voorvoegseltekst vóór documentatielinks in selectieoppervlakken.               |
 | `selectionDocsOmitLabel`               | `boolean`  | Toon het documentatiepad rechtstreeks in plaats van een gelabelde documentatielink in selectietekst. |
-| `selectionExtras`                      | `string[]` | Extra korte tekenreeksen die aan de selectietekst worden toegevoegd.          |
+| `selectionExtras`                      | `string[]` | Extra korte tekenreeksen die aan selectietekst worden toegevoegd.              |
 | `markdownCapable`                      | `boolean`  | Markeert het kanaal als geschikt voor Markdown voor beslissingen over uitgaande opmaak. |
-| `exposure`                             | `object`   | Zichtbaarheidsinstellingen voor het kanaal in setup, geconfigureerde lijsten en documentatieweergaven. |
-| `quickstartAllowFrom`                  | `boolean`  | Neemt dit kanaal op in de standaard snelstartprocedure voor `allowFrom`-setup. |
-| `forceAccountBinding`                  | `boolean`  | Vereist expliciete accountkoppeling, zelfs wanneer er maar één account bestaat. |
-| `preferSessionLookupForAnnounceTarget` | `boolean`  | Geeft de voorkeur aan sessieopzoeking bij het bepalen van aankondigingsdoelen voor dit kanaal. |
+| `exposure`                             | `object`   | Zichtbaarheidsinstellingen voor het kanaal in setup-, geconfigureerde-lijst- en documentatieoppervlakken. |
+| `quickstartAllowFrom`                  | `boolean`  | Laat dit kanaal deelnemen aan de standaard snelstart-setupflow `allowFrom`.       |
+| `forceAccountBinding`                  | `boolean`  | Vereis expliciete accountkoppeling, zelfs wanneer er slechts één account bestaat. |
+| `preferSessionLookupForAnnounceTarget` | `boolean`  | Geef de voorkeur aan sessieopzoeking bij het oplossen van aankondigingsdoelen voor dit kanaal. |
+| `setup`                                | `object`   | Serialiseerbare setupvelden in beheer van het kanaal voor luie detectie van CLI-opties. |
 
 Voorbeeld:
 
@@ -144,16 +203,16 @@ Voorbeeld:
   "openclaw": {
     "channel": {
       "id": "my-channel",
-      "label": "My Channel",
-      "selectionLabel": "My Channel (self-hosted)",
-      "detailLabel": "My Channel Bot",
+      "label": "Mijn kanaal",
+      "selectionLabel": "Mijn kanaal (zelf gehost)",
+      "detailLabel": "Mijn kanaalbot",
       "docsPath": "/channels/my-channel",
       "docsLabel": "my-channel",
-      "blurb": "Webhook-based self-hosted chat integration.",
+      "blurb": "Zelfgehoste chatintegratie op basis van Webhooks.",
       "order": 80,
       "aliases": ["mc"],
       "preferOver": ["my-channel-legacy"],
-      "selectionDocsPrefix": "Guide:",
+      "selectionDocsPrefix": "Handleiding:",
       "selectionExtras": ["Markdown"],
       "markdownCapable": true,
       "exposure": {
@@ -169,35 +228,31 @@ Voorbeeld:
 
 `exposure` ondersteunt:
 
-- `configured`: neem het kanaal op in geconfigureerde lijsten en statusachtige weergaven
+- `configured`: neem het kanaal op in geconfigureerde/statusachtige lijstweergaven
 - `setup`: neem het kanaal op in interactieve setup-/configuratiekeuzelijsten
-- `docs`: markeer het kanaal als publiek zichtbaar in documentatie- en navigatieweergaven
-
-<Note>
-`showConfigured` en `showInSetup` blijven ondersteund als verouderde aliassen. Geef de voorkeur aan `exposure`.
-</Note>
+- `docs`: markeer het kanaal als openbaar zichtbaar in documentatie-/navigatieoppervlakken
 
 ### `openclaw.install`
 
 `openclaw.install` is pakketmetadata, geen manifestmetadata.
 
-| Veld                         | Type                                | Betekenis                                                                         |
+| Veld                         | Type                                | Wat het betekent                                                                  |
 | ---------------------------- | ----------------------------------- | --------------------------------------------------------------------------------- |
-| `clawhubSpec`                | `string`                            | Canonieke ClawHub-specificatie voor installatie/update en onboardingprocedures voor installatie op aanvraag. |
-| `npmSpec`                    | `string`                            | Canonieke npm-specificatie voor terugvalprocedures bij installatie/update.        |
+| `clawhubSpec`                | `string`                            | Canonieke ClawHub-specificatie voor installatie/bijwerken en install-on-demand-flows tijdens onboarding. |
+| `npmSpec`                    | `string`                            | Canonieke npm-specificatie voor terugvalflows bij installatie/bijwerken.          |
 | `localPath`                  | `string`                            | Lokaal ontwikkelpad of gebundeld installatiepad.                                  |
 | `defaultChoice`              | `"clawhub"` \| `"npm"` \| `"local"` | Voorkeursinstallatiebron wanneer meerdere bronnen beschikbaar zijn.               |
-| `minHostVersion`             | `string`                            | Minimaal ondersteunde OpenClaw-versie, `>=x.y.z` of `>=x.y.z-prerelease`.         |
-| `expectedIntegrity`          | `string`                            | Verwachte integriteitstekenreeks van de npm-distributie, doorgaans `sha512-...`, voor vastgezette installaties. |
-| `allowInvalidConfigRecovery` | `boolean`                           | Laat herinstallatieprocedures voor gebundelde plugins herstellen van specifieke fouten door verouderde configuratie. |
+| `minHostVersion`             | `string`                            | Minimaal ondersteunde OpenClaw-versie, `>=x.y.z` of `>=x.y.z-prerelease`.        |
+| `expectedIntegrity`          | `string`                            | Verwachte npm-dist-integriteitstekenreeks, doorgaans `sha512-...`, voor vastgezette installaties. |
+| `allowInvalidConfigRecovery` | `boolean`                           | Hiermee kunnen herinstallatieflows voor gebundelde plugins herstellen van specifieke fouten door verouderde configuratie. |
 | `requiredPlatformPackages`   | `string[]`                          | Vereiste platformspecifieke npm-aliassen die tijdens de npm-installatie worden geverifieerd. |
 
 <AccordionGroup>
   <Accordion title="Onboardinggedrag">
-    Interactieve onboarding gebruikt `openclaw.install` voor installatie-op-aanvraagweergaven: als je Plugin providerverificatiekeuzes of metadata voor kanaalsetup/-catalogus beschikbaar stelt voordat de runtime wordt geladen, kan onboarding vragen om installatie via ClawHub, npm of een lokale bron, de Plugin installeren of inschakelen en daarna de geselecteerde procedure voortzetten. ClawHub-keuzes gebruiken `clawhubSpec` en krijgen de voorkeur wanneer deze aanwezig is; npm-keuzes vereisen vertrouwde catalogusmetadata met een register-`npmSpec` (exacte versies en `expectedIntegrity` zijn optionele vastzettingen die bij installatie/update worden afgedwongen wanneer ze zijn ingesteld). Bewaar "wat moet worden weergegeven" in `openclaw.plugin.json` en "hoe het moet worden geïnstalleerd" in `package.json`.
+    Interactieve onboarding gebruikt `openclaw.install` voor install-on-demand-oppervlakken: als jouw plugin vóór het laden van de runtime keuzes voor providerauthenticatie of metadata voor kanaalconfiguratie/-catalogi beschikbaar stelt, kan onboarding vragen om installatie via ClawHub, npm of een lokale bron, de plugin installeren of inschakelen en daarna doorgaan met de geselecteerde flow. ClawHub-keuzes gebruiken `clawhubSpec` en hebben de voorkeur wanneer ze aanwezig zijn; npm-keuzes vereisen vertrouwde catalogusmetadata met een register-`npmSpec` (exacte versies en `expectedIntegrity` zijn optionele vastzettingen die, indien ingesteld, bij installatie/bijwerken worden afgedwongen). Bewaar „wat moet worden weergegeven” in `openclaw.plugin.json` en „hoe het moet worden geïnstalleerd” in `package.json`.
   </Accordion>
-  <Accordion title="Handhaving van minHostVersion">
-    Als `minHostVersion` is ingesteld, wordt deze zowel bij installatie als bij het laden van niet-gebundelde manifestregisters afgedwongen. Oudere hosts slaan externe plugins over; ongeldige versietekenreeksen worden geweigerd. Van gebundelde bronplugins wordt aangenomen dat ze dezelfde versie hebben als de host-checkout.
+  <Accordion title="Afdwinging van minHostVersion">
+    Als `minHostVersion` is ingesteld, wordt dit zowel bij installatie als bij het laden van niet-gebundelde manifestregisters afgedwongen. Oudere hosts slaan externe plugins over; ongeldige versietekenreeksen worden geweigerd. Van gebundelde bronplugins wordt aangenomen dat ze dezelfde versie hebben als de hostcheckout.
   </Accordion>
   <Accordion title="Vastgezette npm-installaties">
     Bewaar voor vastgezette npm-installaties de exacte versie in `npmSpec` en voeg de verwachte artefactintegriteit toe:
@@ -216,13 +271,13 @@ Voorbeeld:
 
   </Accordion>
   <Accordion title="Bereik van allowInvalidConfigRecovery">
-    `allowInvalidConfigRecovery` is geen algemene omzeiling voor defecte configuraties. Het is uitsluitend bedoeld voor beperkt herstel van gebundelde plugins, zodat herinstallatie/setup bekende restanten van upgrades kan herstellen, zoals een ontbrekend pad naar een gebundelde Plugin of een verouderde `channels.<id>`-ingang voor diezelfde Plugin. Als de configuratie om andere redenen defect is, mislukt de installatie nog steeds veilig en krijgt de beheerder de instructie om `openclaw doctor --fix` uit te voeren.
+    `allowInvalidConfigRecovery` is geen algemene omzeiling voor defecte configuraties. Het is uitsluitend bedoeld voor beperkt herstel van gebundelde plugins, zodat herinstallatie/configuratie bekende restanten van upgrades kan herstellen, zoals een ontbrekend pad naar een gebundelde plugin of een verouderde `channels.<id>`-vermelding voor diezelfde plugin. Als de configuratie om andere redenen defect is, mislukt de installatie nog steeds veilig en krijgt de beheerder de instructie om `openclaw doctor --fix` uit te voeren.
   </Accordion>
 </AccordionGroup>
 
 ### Uitgesteld volledig laden
 
-Kanaalplugins kunnen uitgesteld laden inschakelen met:
+Kanaalplugins kunnen kiezen voor uitgesteld laden met:
 
 ```json
 {
@@ -236,37 +291,37 @@ Kanaalplugins kunnen uitgesteld laden inschakelen met:
 }
 ```
 
-Wanneer dit is ingeschakeld, laadt OpenClaw tijdens de opstartfase vóór het luisteren alleen `setupEntry`, zelfs voor reeds geconfigureerde kanalen. De volledige ingang wordt geladen nadat de Gateway begint te luisteren.
+Wanneer dit is ingeschakeld, laadt OpenClaw tijdens de opstartfase vóór het luisteren alleen `setupEntry`, zelfs voor reeds geconfigureerde kanalen. De volledige ingang wordt geladen nadat de Gateway is begonnen met luisteren.
 
 <Warning>
-Schakel uitgesteld laden alleen in wanneer je `setupEntry` alles registreert wat de Gateway nodig heeft voordat deze begint te luisteren (kanaalregistratie, HTTP-routes, Gateway-methoden). Als de volledige ingang vereiste opstartmogelijkheden beheert, behoud dan het standaardgedrag.
+Schakel uitgesteld laden alleen in wanneer jouw `setupEntry` alles registreert wat de Gateway nodig heeft voordat deze begint met luisteren (kanaalregistratie, HTTP-routes, Gateway-methoden). Als de volledige ingang vereiste opstartmogelijkheden beheert, behoud dan het standaardgedrag.
 </Warning>
 
-Als je setup-/volledige ingang Gateway-RPC-methoden registreert, plaats deze dan onder een Plugin-specifiek voorvoegsel. Gereserveerde beheerdersnaamruimten van de kern (`config.*`, `exec.approvals.*`, `wizard.*`, `update.*`) blijven eigendom van de kern en worden altijd genormaliseerd naar `operator.admin`.
+Als jouw configuratie-/volledige ingang Gateway-RPC-methoden registreert, plaats deze dan onder een pluginspecifiek voorvoegsel. Gereserveerde kernbeheerdersnaamruimten (`config.*`, `exec.approvals.*`, `wizard.*`, `update.*`) blijven eigendom van de kern en worden altijd genormaliseerd naar `operator.admin`.
 
 ## Pluginmanifest
 
-Elke native Plugin moet een `openclaw.plugin.json` in de hoofdmap van het pakket bevatten. OpenClaw gebruikt dit om de configuratie te valideren zonder Plugincode uit te voeren.
+Elke native plugin moet een `openclaw.plugin.json` in de pakketroot bevatten. OpenClaw gebruikt dit om de configuratie te valideren zonder plugincode uit te voeren.
 
 ```json
 {
   "id": "my-plugin",
-  "name": "My Plugin",
-  "description": "Adds My Plugin capabilities to OpenClaw",
+  "name": "Mijn plugin",
+  "description": "Voegt mogelijkheden van Mijn plugin toe aan OpenClaw",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
     "properties": {
       "webhookSecret": {
         "type": "string",
-        "description": "Webhook verification secret"
+        "description": "Geheim voor Webhook-verificatie"
       }
     }
   }
 }
 ```
 
-Voeg voor kanaal-Plugins `channels` toe (en voor provider-Plugins `providers`):
+Voeg voor kanaalplugins `channels` toe (en voor providerplugins `providers`):
 
 ```json
 {
@@ -280,7 +335,7 @@ Voeg voor kanaal-Plugins `channels` toe (en voor provider-Plugins `providers`):
 }
 ```
 
-Zelfs Plugins zonder configuratie moeten een schema bevatten. Een leeg schema is geldig:
+Zelfs plugins zonder configuratie moeten een schema bevatten. Een leeg schema is geldig:
 
 ```json
 {
@@ -296,7 +351,7 @@ Zie [Pluginmanifest](/nl/plugins/manifest) voor de volledige schemareferentie.
 
 ## Publiceren op ClawHub
 
-Skills en Pluginpakketten gebruiken afzonderlijke ClawHub-publicatieopdrachten. Gebruik voor Pluginpakketten de pakketspecifieke opdracht:
+Skills en pluginpakketten gebruiken afzonderlijke ClawHub-publicatieopdrachten. Gebruik voor pluginpakketten de pakketspecifieke opdracht:
 
 ```bash
 clawhub package publish your-org/your-plugin --dry-run
@@ -304,12 +359,12 @@ clawhub package publish your-org/your-plugin
 ```
 
 <Note>
-`clawhub skill publish <path>` is een andere opdracht voor het publiceren van een Skillmap, niet van een Pluginpakket. Zie [Publiceren op ClawHub](/nl/clawhub/publishing).
+`clawhub skill publish <path>` is een andere opdracht voor het publiceren van een Skills-map, niet van een pluginpakket. Zie [Publiceren op ClawHub](/nl/clawhub/publishing).
 </Note>
 
-## Setup-ingangspunt
+## Configuratie-ingang
 
-`setup-entry.ts` is een lichtgewicht alternatief voor `index.ts` dat OpenClaw laadt wanneer alleen setup-oppervlakken nodig zijn (onboarding, configuratieherstel, inspectie van uitgeschakelde kanalen):
+`setup-entry.ts` is een lichtgewicht alternatief voor `index.ts` dat OpenClaw laadt wanneer alleen configuratieoppervlakken nodig zijn (onboarding, configuratieherstel, inspectie van uitgeschakelde kanalen):
 
 ```typescript
 // setup-entry.ts
@@ -319,26 +374,26 @@ import { myChannelPlugin } from "./src/channel.js";
 export default defineSetupPluginEntry(myChannelPlugin);
 ```
 
-Hierdoor wordt tijdens setupstromen geen zware runtimecode geladen (cryptografische bibliotheken, CLI-registraties, achtergrondservices).
+Hierdoor wordt tijdens configuratieflows geen zware runtimecode geladen (cryptografische bibliotheken, CLI-registraties, achtergrondservices).
 
-Gebundelde workspace-kanalen die setup-veilige exports in nevenmodules bewaren, kunnen `defineBundledChannelSetupEntry(...)` uit `openclaw/plugin-sdk/channel-entry-contract` gebruiken in plaats van `defineSetupPluginEntry(...)`. Dat gebundelde contract ondersteunt ook een optionele `runtime`-export, zodat runtimebedrading tijdens de setup lichtgewicht en expliciet kan blijven.
+Gebundelde werkruimtekanelen die configuratieveilige exports in nevenmodules bewaren, kunnen `defineBundledChannelSetupEntry(...)` uit `openclaw/plugin-sdk/channel-entry-contract` gebruiken in plaats van `defineSetupPluginEntry(...)`. Dat gebundelde contract ondersteunt ook een optionele `runtime`-export, zodat runtimebedrading tijdens de configuratie lichtgewicht en expliciet kan blijven.
 
 <AccordionGroup>
-  <Accordion title="When OpenClaw uses setupEntry instead of the full entry">
-    - Het kanaal is uitgeschakeld, maar heeft setup- of onboarding-oppervlakken nodig.
+  <Accordion title="Wanneer OpenClaw setupEntry gebruikt in plaats van de volledige ingang">
+    - Het kanaal is uitgeschakeld, maar heeft configuratie-/onboardingoppervlakken nodig.
     - Het kanaal is ingeschakeld, maar niet geconfigureerd.
     - Uitgesteld laden is ingeschakeld (`deferConfiguredChannelFullLoadUntilAfterListen`).
 
   </Accordion>
-  <Accordion title="What setupEntry must register">
-    - Het kanaal-Pluginobject (via `defineSetupPluginEntry`).
-    - Alle HTTP-routes die nodig zijn voordat de Gateway begint te luisteren.
+  <Accordion title="Wat setupEntry moet registreren">
+    - Het kanaalpluginobject (via `defineSetupPluginEntry`).
+    - Alle HTTP-routes die nodig zijn voordat de Gateway luistert.
     - Alle Gateway-methoden die tijdens het opstarten nodig zijn.
 
-    Deze Gateway-methoden voor het opstarten moeten nog steeds gereserveerde beheerdersnaamruimten van de kern vermijden, zoals `config.*` of `update.*`.
+    Deze Gateway-opstartmethoden moeten nog steeds gereserveerde kernbeheerdersnaamruimten zoals `config.*` of `update.*` vermijden.
 
   </Accordion>
-  <Accordion title="What setupEntry should NOT include">
+  <Accordion title="Wat setupEntry NIET mag bevatten">
     - CLI-registraties.
     - Achtergrondservices.
     - Zware runtime-imports (cryptografie, SDK's).
@@ -347,39 +402,86 @@ Gebundelde workspace-kanalen die setup-veilige exports in nevenmodules bewaren, 
   </Accordion>
 </AccordionGroup>
 
-### Gerichte imports van setuphelpers
+### Gerichte imports van configuratiehulpfuncties
 
-Geef voor intensief gebruikte paden die alleen voor setup dienen de voorkeur aan de gerichte setuphelperkoppelingen boven de bredere overkoepelende `plugin-sdk/setup`-koppeling wanneer je slechts een deel van het setup-oppervlak nodig hebt:
+Geef voor veelgebruikte paden die uitsluitend voor configuratie dienen de voorkeur aan de gerichte naden voor configuratiehulpfuncties boven de bredere `plugin-sdk/setup`-paraplu wanneer je slechts een deel van het configuratieoppervlak nodig hebt:
 
-| Importpad                          | Gebruik hiervoor                                                                           | Belangrijkste exports                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `plugin-sdk/setup-runtime`         | runtimehelpers voor setup die beschikbaar blijven in `setupEntry` / uitgesteld kanaalopstarten | `createSetupTranslator`, `createPatchedAccountSetupAdapter`, `createEnvPatchedAccountSetupAdapter`, `createSetupInputPresenceValidator`, `noteChannelLookupFailure`, `noteChannelLookupSummary`, `promptResolvedAllowFrom`, `splitSetupEntries`, `createAllowlistSetupWizardProxy`, `createDelegatedSetupWizardProxy` |
-| `plugin-sdk/setup-adapter-runtime` | verouderde compatibiliteitsalias; gebruik `plugin-sdk/setup-runtime`                         | `createEnvPatchedAccountSetupAdapter`                                                                                                                                                                                                                                                                                 |
-| `plugin-sdk/setup-tools`           | CLI-, archief- en documentatiehelpers voor setup/installatie                                | `formatCliCommand`, `detectBinary`, `extractArchive`, `resolveBrewExecutable`, `formatDocsLink`, `CONFIG_DIR`                                                                                                                                                                                                         |
+| Importpad                  | Gebruik dit voor                                                                          | Belangrijkste exports                                                                                                                                                                                                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plugin-sdk/setup-runtime` | runtimehulpfuncties tijdens configuratie die beschikbaar blijven in `setupEntry` / uitgesteld opstarten van kanalen | `createSetupTranslator`, `createPatchedAccountSetupAdapter`, `createEnvPatchedAccountSetupAdapter`, `createSetupInputPresenceValidator`, `noteChannelLookupFailure`, `noteChannelLookupSummary`, `promptResolvedAllowFrom`, `splitSetupEntries`, `createAllowlistSetupWizardProxy`, `createDelegatedSetupWizardProxy` |
+| `plugin-sdk/setup-tools`   | CLI-/archief-/documentatiehulpfuncties voor configuratie/installatie                     | `formatCliCommand`, `detectBinary`, `extractArchive`, `resolveBrewExecutable`, `formatDocsLink`, `CONFIG_DIR`                                                                                                                                                                                                         |
 
-Gebruik de bredere `plugin-sdk/setup`-koppeling wanneer je de volledige gedeelde set setupgereedschappen wilt, inclusief helpers voor configuratiepatches zoals `moveSingleAccountChannelSectionToDefaultAccount(...)`.
+Gebruik de bredere `plugin-sdk/setup`-naad wanneer je de volledige gedeelde configuratiegereedschapskist wilt, inclusief hulpfuncties voor configuratiepatches zoals `moveSingleAccountChannelSectionToDefaultAccount(...)`.
 
-Gebruik `createSetupTranslator(...)` voor vaste tekst in de setupwizard. Deze volgt de landinstelling van de CLI-wizard (`OPENCLAW_LOCALE`, daarna de systeemvariabelen voor de landinstelling) en valt terug op Engels. Bewaar Pluginspecifieke setuptekst in code die eigendom is van de Plugin en gebruik gedeelde catalogussleutels alleen voor algemene setuplabels, statustekst en setuptekst van officiële gebundelde Plugins.
+Gebruik `createSetupTranslator(...)` voor vaste tekst van de configuratiewizard. Deze gebruikt de eerste niet-lege waarde uit `OPENCLAW_LOCALE`, `LC_ALL`, `LC_MESSAGES` en `LANG`, in die volgorde, en valt vervolgens terug op Engels. Stel `OPENCLAW_LOCALE=en` in voor een expliciete Engelse overschrijving. Bewaar pluginspecifieke configuratietekst in code die eigendom is van de plugin en gebruik gedeelde catalogussleutels alleen voor algemene configuratielabels, statustekst en officiële configuratietekst voor gebundelde plugins.
 
-De adapters voor setup-patches blijven bij import veilig voor intensief gebruikte paden. Het opzoeken van het gebundelde contractoppervlak voor promotie van één account gebeurt lui, zodat het importeren van `plugin-sdk/setup-runtime` de detectie van gebundelde contractoppervlakken niet voortijdig laadt voordat de adapter daadwerkelijk wordt gebruikt.
+De adapters voor configuratiepatches blijven bij import veilig voor veelgebruikte paden. Hun opzoekactie voor het contractoppervlak voor gebundelde promotie naar één account is lui, zodat het importeren van `plugin-sdk/setup-runtime` de detectie van gebundelde contractoppervlakken niet voortijdig laadt voordat de adapter daadwerkelijk wordt gebruikt.
+
+### Invoervelden voor configuratie die eigendom zijn van het kanaal
+
+`ChannelSetupInput` is een generieke envelop die wordt gedeeld door configuratieaanroepers en kanaalplugins. De permanent getypeerde velden zijn `name`, `token`, `tokenFile`,
+`useEnv`, `allowFrom` en `defaultTo`. Aanvullende sleutels die eigendom zijn van de plugin kunnen nog steeds
+aanwezig zijn in het runtime-invoerobject, maar het gedeelde type declareert geen
+indexsignatuur. Elke plugin moet zijn eigen configuratievelden declareren en verfijnen of
+ze met een schema van de plugin valideren bij de adaptergrens:
+
+```typescript
+import type { ChannelSetupAdapter, ChannelSetupInput } from "openclaw/plugin-sdk/channel-setup";
+
+type AcmeSetupInput = ChannelSetupInput & {
+  workspaceId?: string;
+  webhookUrl?: string;
+};
+
+export const acmeSetupAdapter: ChannelSetupAdapter = {
+  applyAccountConfig: ({ cfg, input }) => {
+    const setupInput = input as AcmeSetupInput;
+    return {
+      ...cfg,
+      channels: {
+        ...cfg.channels,
+        acme: {
+          token: setupInput.token,
+          workspaceId: setupInput.workspaceId,
+          webhookUrl: setupInput.webhookUrl,
+        },
+      },
+    };
+  },
+};
+```
+
+Kanaalspecifieke velden die eerder rechtstreeks op
+`ChannelSetupInput` waren gedeclareerd, blijven tijdelijk getypeerd voor compatibiliteit met externe broncode.
+Ze zijn verouderd. Bij een registercontrole op 2026-07-22 van 426 gepubliceerde kanaalplugins van buiten de bronstructuur
+werden 21 velden zonder lezers verwijderd en 22 velden met bekende
+lezers behouden. Elk behouden veld wordt verwijderd zodra geen enkele gepubliceerde plugin het nog leest;
+er is geen versiegrens vereist. Nieuwe en gebundelde plugins mogen niet op deze
+laag vertrouwen; declareer de velden waarvan ze eigenaar zijn lokaal.
 
 ### Kanaalgestuurde promotie van één account
 
-Wanneer een kanaal wordt bijgewerkt van een configuratie met één account op het hoogste niveau naar `channels.<id>.accounts.*`, verplaatst het standaard gedeelde gedrag gepromoveerde accountgebonden waarden naar `accounts.default`.
+Wanneer een kanaal een configuratie op het hoogste niveau voor één account opwaardeert naar `channels.<id>.accounts.*`, verplaatst het standaard gedeelde gedrag gepromoveerde waarden met accountbereik naar `accounts.default`.
 
-Gebundelde kanalen kunnen die promotie beperken of overschrijven via hun setupcontractoppervlak:
+Elke kanaalplugin kan die promotie uitbreiden of beperken via zijn setupadapter:
 
-- `singleAccountKeysToMove`: aanvullende sleutels op het hoogste niveau die naar het gepromoveerde account moeten worden verplaatst
-- `namedAccountPromotionKeys`: wanneer benoemde accounts al bestaan, worden alleen deze sleutels naar het gepromoveerde account verplaatst; gedeelde beleids- en afleveringssleutels blijven in de kanaalhoofdstructuur
-- `resolveSingleAccountPromotionTarget(...)`: kies welk bestaand account de gepromoveerde waarden ontvangt
+- `singleAccountKeysToMove`: extra sleutels op het hoogste niveau die naar het gepromoveerde account moeten worden verplaatst
+- `namedAccountPromotionKeys`: wanneer benoemde accounts al bestaan, worden alleen deze sleutels naar het gepromoveerde account verplaatst; gedeelde beleids-/afleveringssleutels blijven op het hoofdniveau van het kanaal
+- `resolveSingleAccountPromotionTarget(...)`: kies welk bestaand account gepromoveerde waarden ontvangt
+
+De aanwezigheid van `singleAccountKeysToMove` geeft aan dat het promotiecontract volledig is. Declareer het veld ook wanneer het een lege array is om promotie van verouderde sleutels uit te schakelen. Adapters die het veld weglaten, behouden een door lezers ondersteunde promotielaag van vóór de declaratie voor reeds gepubliceerde plugins. Bij de registercontrole op 2026-07-22 werden 23 sleutels zonder gepubliceerde afhankelijken verwijderd en zes algemene sleutels plus de uitsluitend voor setup bestemde sleutel `rooms` behouden. Elke behouden sleutel wordt verwijderd zodra de gepubliceerde lezers ervan naar declaraties zijn gemigreerd; er is geen versiegrens vereist.
+
+Declareer `openclaw.setupFeatures.configPromotion: true` in het pakketmanifest van de plugin wanneer doctor deze declaraties uit het lichtgewicht gebundelde setup-artefact moet laden. Het uitsluitend voor setup bestemde pluginoppervlak en de volledige kanaalplugin moeten dezelfde declaraties beschikbaar stellen.
+
+Wanneer je `moveSingleAccountChannelSectionToDefaultAccount(...)` aanroept met een reeds opgeloste plugin, geef je de setupadapter ervan door als `setupSurface`. Door de aanroeper aangeleverde setupoppervlakken hebben voorrang op geladen en gebundelde opzoekmechanismen, waardoor plugins met een beperkt bereik of uitsluitend voor setup onafhankelijk blijven van globale registratie.
 
 <Note>
-Matrix is het huidige gebundelde voorbeeld. Als er precies één benoemd Matrix-account bestaat, of als `defaultAccount` verwijst naar een bestaande niet-canonieke sleutel zoals `Ops`, behoudt de promotie dat account in plaats van een nieuwe vermelding `accounts.default` te maken.
+Matrix is het huidige gebundelde voorbeeld. Als er precies één benoemd Matrix-account bestaat, of als `defaultAccount` naar een bestaande niet-canonieke sleutel zoals `Ops` verwijst, behoudt de promotie dat account in plaats van een nieuwe vermelding `accounts.default` te maken.
 </Note>
 
 ## Configuratieschema
 
-De Pluginconfiguratie wordt gevalideerd aan de hand van het JSON Schema in je manifest. Gebruikers configureren Plugins via:
+Pluginconfiguratie wordt gevalideerd aan de hand van het JSON Schema in je manifest. Gebruikers configureren plugins via:
 
 ```json5
 {
@@ -395,9 +497,9 @@ De Pluginconfiguratie wordt gevalideerd aan de hand van het JSON Schema in je ma
 }
 ```
 
-Je Plugin ontvangt deze configuratie tijdens de registratie als `api.pluginConfig`.
+Je plugin ontvangt deze configuratie tijdens de registratie als `api.pluginConfig`.
 
-Gebruik voor kanaalspecifieke configuratie in plaats daarvan de sectie voor kanaalconfiguratie:
+Gebruik voor kanaalspecifieke configuratie in plaats daarvan de kanaalconfiguratiesectie:
 
 ```json5
 {
@@ -412,7 +514,7 @@ Gebruik voor kanaalspecifieke configuratie in plaats daarvan de sectie voor kana
 
 ### Kanaalconfiguratieschema's bouwen
 
-Gebruik `buildChannelConfigSchema` om een Zod-schema om te zetten in de `ChannelConfigSchema`-wrapper die wordt gebruikt door configuratieartefacten die eigendom zijn van Plugins:
+Gebruik `buildChannelConfigSchema` om een Zod-schema om te zetten in de `ChannelConfigSchema`-wrapper die wordt gebruikt door configuratieartefacten waarvan de plugin eigenaar is:
 
 ```typescript
 import { z } from "zod";
@@ -428,7 +530,7 @@ const accountSchema = z.object({
 const configSchema = buildChannelConfigSchema(accountSchema);
 ```
 
-Als je het contract al opstelt als JSON Schema of TypeBox, gebruik dan de directe helper zodat OpenClaw de conversie van Zod naar JSON Schema op metadatapaden kan overslaan:
+Als je het contract al als JSON Schema of TypeBox opstelt, gebruik je de directe helper zodat OpenClaw de conversie van Zod naar JSON Schema op metadatapaden kan overslaan:
 
 ```typescript
 import { Type } from "typebox";
@@ -442,11 +544,11 @@ const configSchema = buildJsonChannelConfigSchema(
 );
 ```
 
-Voor Plugins van derden blijft het contract voor zelden gebruikte paden het Pluginmanifest: neem het gegenereerde JSON Schema over in `openclaw.plugin.json#channelConfigs`, zodat configuratieschema-, setup- en UI-oppervlakken `channels.<id>` kunnen inspecteren zonder runtimecode te laden.
+Voor plugins van derden blijft het pluginmanifest het contract voor het koude pad: neem het gegenereerde JSON Schema over in `openclaw.plugin.json#channelConfigs`, zodat configuratieschema-, setup- en UI-oppervlakken `channels.<id>` kunnen inspecteren zonder runtimecode te laden.
 
 ## Setupwizards
 
-Kanaal-Plugins kunnen interactieve setupwizards aanbieden voor `openclaw onboard`. De wizard is een `ChannelSetupWizard`-object op de `ChannelPlugin`:
+Kanaalplugins kunnen interactieve setupwizards voor `openclaw onboard` aanbieden. De wizard is een `ChannelSetupWizard`-object op de `ChannelPlugin`:
 
 ```typescript
 import type { ChannelSetupWizard } from "openclaw/plugin-sdk/channel-setup";
@@ -479,17 +581,17 @@ const setupWizard: ChannelSetupWizard = {
 };
 ```
 
-`ChannelSetupWizard` ondersteunt ook `textInputs`, `dmPolicy`, `allowFrom`, `groupAccess`, `prepare`, `finalize` en meer. Zie `src/setup-core.ts` van de Discord-Plugin voor een volledig gebundeld voorbeeld.
+`ChannelSetupWizard` ondersteunt ook `textInputs`, `dmPolicy`, `allowFrom`, `groupAccess`, `prepare`, `finalize` en meer. Zie `src/setup-core.ts` van de Discord-plugin voor een volledig gebundeld voorbeeld.
 
 <AccordionGroup>
-  <Accordion title="Shared allowFrom prompts">
-    Geef voor prompts voor DM-toestaanlijsten die alleen de standaardstroom `note -> prompt -> parse -> merge -> patch` nodig hebben de voorkeur aan de gedeelde setuphelpers uit `openclaw/plugin-sdk/setup`: `createPromptParsedAllowFromForAccount(...)`, `createTopLevelChannelParsedAllowFromPrompt(...)` en `createNestedChannelParsedAllowFromPrompt(...)`.
+  <Accordion title="Gedeelde allowFrom-prompts">
+    Geef voor prompts voor DM-toelatingslijsten die alleen de standaardflow `note -> prompt -> parse -> merge -> patch` nodig hebben de voorkeur aan de gedeelde setuphelpers uit `openclaw/plugin-sdk/setup`: `createPromptParsedAllowFromForAccount(...)` en `createTopLevelChannelParsedAllowFromPrompt(...)`.
   </Accordion>
-  <Accordion title="Standard channel setup status">
-    Geef voor statusblokken van kanaalsetup die alleen verschillen in labels, scores en optionele extra regels de voorkeur aan `createStandardChannelSetupStatus(...)` uit `openclaw/plugin-sdk/setup`, in plaats van in elke Plugin handmatig hetzelfde `status`-object te maken.
+  <Accordion title="Standaardstatus voor kanaalsetup">
+    Geef voor statusblokken voor kanaalsetup die alleen verschillen in labels, scores en optionele extra regels de voorkeur aan `createStandardChannelSetupStatus(...)` uit `openclaw/plugin-sdk/setup`, in plaats van in elke plugin hetzelfde `status`-object handmatig te maken.
   </Accordion>
-  <Accordion title="Optional channel setup surface">
-    Gebruik voor optionele setup-oppervlakken die alleen in bepaalde contexten moeten verschijnen `createOptionalChannelSetupSurface` uit `openclaw/plugin-sdk/channel-setup`:
+  <Accordion title="Optioneel oppervlak voor kanaalsetup">
+    Gebruik voor optionele setupoppervlakken die alleen in bepaalde contexten moeten verschijnen `createOptionalChannelSetupSurface` uit `openclaw/plugin-sdk/channel-setup`:
 
     ```typescript
     import { createOptionalChannelSetupSurface } from "openclaw/plugin-sdk/channel-setup";
@@ -503,25 +605,25 @@ const setupWizard: ChannelSetupWizard = {
     // Returns { setupAdapter, setupWizard }
     ```
 
-    `plugin-sdk/channel-setup` stelt ook de lager-niveau-bouwfuncties `createOptionalChannelSetupAdapter(...)` en `createOptionalChannelSetupWizard(...)` beschikbaar wanneer je slechts één helft van dat optionele installatieoppervlak nodig hebt.
+    `plugin-sdk/channel-setup` stelt ook de bouwers `createOptionalChannelSetupAdapter(...)` en `createOptionalChannelSetupWizard(...)` van een lager niveau beschikbaar wanneer je slechts één helft van dat optionele installatieoppervlak nodig hebt.
 
-    De gegenereerde optionele adapter/wizard weigert echte configuratiewijzigingen standaard veilig. Deze hergebruikt één bericht dat installatie vereist voor `validateInput`, `applyAccountConfig` en `finalize`, en voegt een documentatielink toe wanneer `docsPath` is ingesteld.
+    De gegenereerde optionele adapter/wizard weigert bij echte configuratieschrijfbewerkingen veilig verder te gaan. Ze hergebruiken één bericht dat installatie vereist voor `validateInput`, `applyAccountConfig` en `finalize`, en voegen een documentatielink toe wanneer `docsPath` is ingesteld.
 
   </Accordion>
-  <Accordion title="Installatiehelpers met binaire ondersteuning">
-    Geef voor installatie-UI's met binaire ondersteuning de voorkeur aan de gedeelde gedelegeerde helpers in plaats van dezelfde lijmcode voor binaire bestanden/statussen naar elk kanaal te kopiëren:
+  <Accordion title="Door binaire bestanden ondersteunde setuphelpers">
+    Geef voor setup-UI's die door binaire bestanden worden ondersteund de voorkeur aan de gedeelde gedelegeerde helpers, in plaats van dezelfde koppeling voor binaire bestanden/status naar elk kanaal te kopiëren:
 
     - `createDetectedBinaryStatus(...)` voor statusblokken die alleen verschillen in labels, hints, scores en detectie van binaire bestanden
     - `createCliPathTextInput(...)` voor tekstinvoer op basis van paden
-    - `createDelegatedSetupWizardStatusResolvers(...)`, `createDelegatedPrepare(...)`, `createDelegatedFinalize(...)` en `createDelegatedResolveConfigured(...)` wanneer `setupEntry` indien nodig moet doorsturen naar een uitgebreidere volledige wizard
-    - `createDelegatedTextInputShouldPrompt(...)` wanneer `setupEntry` alleen een beslissing voor `textInputs[*].shouldPrompt` hoeft te delegeren
+    - `createDelegatedSetupWizardProxy(...)` wanneer `setupEntry` status-, voorbereidings- of afrondingsgedrag lui moet doorsturen naar een zwaardere volledige wizard
+    - `createDelegatedTextInputShouldPrompt(...)` wanneer `setupEntry` alleen een `textInputs[*].shouldPrompt`-beslissing hoeft te delegeren
 
   </Accordion>
 </AccordionGroup>
 
 ## Publiceren en installeren
 
-**Externe plugins:** publiceer naar [ClawHub](/nl/clawhub) en installeer vervolgens:
+**Externe plugins:** publiceer naar [ClawHub](/clawhub) en installeer vervolgens:
 
 <Tabs>
   <Tab title="npm">
@@ -529,7 +631,7 @@ const setupWizard: ChannelSetupWizard = {
     openclaw plugins install @myorg/openclaw-my-plugin
     ```
 
-    Kale pakketspecificaties worden tijdens de overgang bij het starten vanuit npm geïnstalleerd, tenzij de naam overeenkomt met de id van een gebundelde of officiële plugin; in dat geval gebruikt OpenClaw in plaats daarvan die lokale/officiële kopie. Gebruik `clawhub:`, `npm:`, `git:` of `npm-pack:` voor een deterministische bronselectie — zie [Plugins beheren](/nl/plugins/manage-plugins).
+    Kale pakketspecificaties worden tijdens de overgang bij het starten vanaf npm geïnstalleerd, tenzij de naam overeenkomt met de id van een gebundelde of officiële plugin; in dat geval gebruikt OpenClaw in plaats daarvan die lokale/officiële kopie. Gebruik `clawhub:`, `npm:`, `git:` of `npm-pack:` voor deterministische bronselectie — zie [Plugins beheren](/nl/plugins/manage-plugins).
 
   </Tab>
   <Tab title="Alleen ClawHub">
@@ -538,8 +640,8 @@ const setupWizard: ChannelSetupWizard = {
     ```
   </Tab>
   <Tab title="npm-pakketspecificatie">
-    Gebruik npm wanneer een pakket nog niet naar ClawHub is verplaatst, of wanneer u tijdens de migratie een
-    rechtstreeks npm-installatiepad nodig hebt:
+    Gebruik npm wanneer een pakket nog niet naar ClawHub is verplaatst, of wanneer je tijdens de migratie een
+    direct npm-installatiepad nodig hebt:
 
     ```bash
     openclaw plugins install npm:@myorg/openclaw-my-plugin
@@ -548,20 +650,20 @@ const setupWizard: ChannelSetupWizard = {
   </Tab>
 </Tabs>
 
-**Plugins in de repository:** plaats deze onder de werkruimteboom voor gebundelde plugins; ze worden tijdens het bouwen automatisch gedetecteerd.
+**Plugins in de repository:** plaats ze onder de gebundelde pluginwerkruimtestructuur; ze worden tijdens het bouwen automatisch ontdekt.
 
 <Info>
-Voor installaties vanuit npm installeert `openclaw plugins install` het pakket in een project per plugin onder `~/.openclaw/npm/projects`, waarbij levenscyclusscripts zijn uitgeschakeld (`--ignore-scripts`). Houd afhankelijkheidsbomen van plugins volledig in JS/TS en vermijd pakketten waarvoor builds via `postinstall` nodig zijn.
+Voor installaties met npm als bron installeert `openclaw plugins install` het pakket in een project per plugin onder `~/.openclaw/npm/projects`, waarbij levenscyclusscripts zijn uitgeschakeld (`--ignore-scripts`). Houd afhankelijkheidsstructuren van plugins volledig in JS/TS en vermijd pakketten waarvoor `postinstall`-builds nodig zijn.
 </Info>
 
 <Note>
-Bij het starten installeert de Gateway geen plugin-afhankelijkheden. Installatiestromen via npm/git/ClawHub beheren de convergentie van afhankelijkheden; voor lokale plugins moeten de afhankelijkheden al zijn geïnstalleerd.
+Bij het starten installeert Gateway geen plugin-afhankelijkheden. De installatieflows voor npm/git/ClawHub beheren het convergeren van afhankelijkheden; voor lokale plugins moeten de afhankelijkheden al zijn geïnstalleerd.
 </Note>
 
-Metadata van gebundelde pakketten is expliciet en wordt bij het starten van de Gateway niet afgeleid uit gebouwde JavaScript. Runtimeafhankelijkheden horen thuis in het pluginpakket dat ze beheert; het starten van een verpakte OpenClaw-installatie repareert of spiegelt nooit plugin-afhankelijkheden.
+Gebundelde pakketmetadata is expliciet en wordt bij het starten van Gateway niet afgeleid van gebouwde JavaScript. Runtime-afhankelijkheden horen thuis in het pluginpakket dat er eigenaar van is; bij het starten herstelt of spiegelt de verpakte OpenClaw nooit plugin-afhankelijkheden.
 
 ## Gerelateerd
 
-- [Plugins bouwen](/nl/plugins/building-plugins) — stapsgewijze introductiegids
-- [Pluginmanifest](/nl/plugins/manifest) — volledige referentie voor het manifestschema
+- [Plugins bouwen](/nl/plugins/building-plugins) — stapsgewijze handleiding om aan de slag te gaan
+- [Pluginmanifest](/nl/plugins/manifest) — volledige schemareferentie voor het manifest
 - [SDK-ingangspunten](/nl/plugins/sdk-entrypoints) — `definePluginEntry` en `defineChannelPluginEntry`

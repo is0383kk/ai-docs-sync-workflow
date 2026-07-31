@@ -1,29 +1,30 @@
 ---
 read_when:
-    - 你想要使用 SenseAudio 將音訊附件轉為文字
+    - 你想要使用 SenseAudio 將音訊附件轉換為文字
     - 你需要 SenseAudio API 金鑰環境變數或音訊設定路徑
-summary: 使用 SenseAudio 批次將傳入的語音留言轉為文字
+summary: SenseAudio 批次語音轉文字，用於接收的語音留言
 title: SenseAudio
 x-i18n:
-    generated_at: "2026-07-11T21:46:16Z"
+    generated_at: "2026-07-26T08:46:39Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2d2b310982a9e0f1afe2f95ae92d1516d490314f40b4b0e4eded25c72dfca586
+    source_hash: c0ca4a31a32eed85c1d9dcd13ebc2eaea94be370d2b1013ae8b4677949bea91d
     source_path: providers/senseaudio.md
     workflow: 16
 ---
 
-SenseAudio 透過 OpenClaw 共用的 `tools.media.audio` 管線，轉錄傳入的音訊與語音留言附件。OpenClaw 會將多部分音訊傳送至與 OpenAI 相容的轉錄端點，並將傳回的文字以 `{{Transcript}}` 加上 `[Audio]` 區塊的形式注入。
+SenseAudio 透過 OpenClaw 的共用 `tools.media.audio` 流水線，轉錄傳入的音訊和語音留言附件。OpenClaw 將多部分音訊傳送至與 OpenAI 相容的轉錄端點，並將傳回的文字以 `{{Transcript}}` 加上 `[Audio]` 區塊的形式注入。
 
 | 屬性          | 值                                               |
 | ------------- | ------------------------------------------------ |
-| 提供者識別碼  | `senseaudio`                                     |
-| 外掛          | 內建，`enabledByDefault: true`                   |
-| 合約          | `mediaUnderstandingProviders`（音訊）            |
-| 驗證環境變數  | `SENSEAUDIO_API_KEY`                             |
-| 預設模型      | `senseaudio-asr-pro-1.5-260319`                  |
-| 預設網址      | `https://api.senseaudio.cn/v1`                   |
+| 提供者 ID     | `senseaudio`                               |
+| 外掛          | 內建，`enabledByDefault: true`                         |
+| 合約          | `mediaUnderstandingProviders`（音訊）                       |
+| 驗證環境變數  | `SENSEAUDIO_API_KEY`                               |
+| 預設模型      | `senseaudio-asr-pro-1.5-260319`                               |
+| 預設 URL      | `https://api.senseaudio.cn/v1`                               |
 | 網站          | [senseaudio.cn](https://senseaudio.cn)           |
 | 文件          | [senseaudio.cn/docs](https://senseaudio.cn/docs) |
 
@@ -51,19 +52,19 @@ SenseAudio 透過 OpenClaw 共用的 `tools.media.audio` 管線，轉錄傳入�
   </Step>
   <Step title="傳送語音留言">
     透過任何已連線的頻道傳送音訊訊息。OpenClaw 會將音訊上傳至
-    SenseAudio，並在回覆管線中使用轉錄文字。
+    SenseAudio，並在回覆流水線中使用轉錄文字。
   </Step>
 </Steps>
 
 ## 選項
 
-| 選項       | 路徑                                  | 說明                              |
-| ---------- | ------------------------------------- | --------------------------------- |
-| `model`    | `tools.media.audio.models[].model`    | SenseAudio ASR 模型識別碼         |
-| `language` | `tools.media.audio.models[].language` | 選用的語言提示                    |
-| `prompt`   | `tools.media.audio.prompt`            | 選用的轉錄提示                    |
-| `baseUrl`  | `tools.media.audio.baseUrl` 或模型    | 覆寫與 OpenAI 相容的基底網址      |
-| `headers`  | `tools.media.audio.request.headers`   | 額外的請求標頭                    |
+| 選項               | 路徑                 | 說明                         |
+| ------------------ | -------------------- | ---------------------------- |
+| `model` | `tools.media.models[].model`   | SenseAudio ASR 模型 ID        |
+| `language` | `tools.media.models[].language`   | 選用的語言提示               |
+| `prompt` | `tools.media.models[].prompt`   | 選用的轉錄提示               |
+| `baseUrl` | `tools.media.models[].baseUrl`   | 覆寫與 OpenAI 相容的基底位址 |
+| `headers` | `tools.media.models[].headers`   | 額外的請求標頭               |
 
 <Note>
 SenseAudio 在 OpenClaw 中僅支援批次語音轉文字。語音通話的即時轉錄

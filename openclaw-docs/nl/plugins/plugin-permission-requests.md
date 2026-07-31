@@ -1,48 +1,50 @@
 ---
 read_when:
-    - Je hebt een Plugin-hook of tool nodig om te vragen voordat een neveneffect wordt uitgevoerd
-    - Je moet configureren waar goedkeuringsprompts voor Plugins worden afgeleverd
-    - Je kiest tussen optionele tools, uitvoeringsgoedkeuringen en Plugin-goedkeuringen
+    - Je hebt een Plugin-hook of -tool nodig om toestemming te vragen voordat een neveneffect wordt uitgevoerd
+    - Je moet configureren waar goedkeuringsverzoeken voor plugins worden afgeleverd
+    - Je maakt een keuze tussen optionele tools, uitvoeringsgoedkeuringen en plugingoedkeuringen
 sidebarTitle: Permission requests
-summary: Vraag gebruikers om Plugin-toolaanroepen en toestemmingsprompts van Plugins goed te keuren
-title: Plugin-toestemmingsverzoeken
+summary: Vraag gebruikers om toolaanroepen van plugins en door plugins beheerde toestemmingsverzoeken goed te keuren
+title: Verzoeken om Plugin-machtigingen
 x-i18n:
-    generated_at: "2026-06-27T17:57:18Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T05:13:38Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 72b860e9f8ddef80c70e943ec05353cbc0a917577382289649432a58c3ce6bd0
+    source_hash: 675534212e70cc7b2e7bdc801955929c6a8156b08d620483edf0133afc3bfdaa
     source_path: plugins/plugin-permission-requests.md
     workflow: 16
 ---
 
-Plugin-toestemmingsaanvragen laten Plugin-code een toolaanroep of door de Plugin beheerde
-bewerking pauzeren totdat een gebruiker deze goedkeurt of weigert. Ze gebruiken de Gateway
-`plugin.approval.*`-flow en dezelfde goedkeurings-UI-oppervlakken die chatgoedkeuringsknoppen
-en `/approve`-opdrachten afhandelen.
+Pluginmachtigingsverzoeken laten Plugincode een toolaanroep of een door een Plugin beheerde
+bewerking onderbreken totdat een gebruiker deze goedkeurt of weigert. Ze gebruiken de Gateway-
+`plugin.approval.*`-flow en dezelfde goedkeuringsinterfaces die goedkeuringsknoppen in chats
+en `/approve`-opdrachten verwerken.
 
-Gebruik Plugin-toestemmingsaanvragen voor Plugin-/app-machtigingen. Ze vervangen geen
-host-exec-goedkeuringen, optionele tool-allowlists of de native toestemmingsreview van Codex.
+Gebruik Pluginmachtigingsverzoeken voor machtigingen van Plugins/apps. Ze vervangen
+goedkeuringen voor uitvoering op de host, optionele toestemmingslijsten voor tools of de systeemeigen
+machtigingscontrole van Codex niet.
 
-## Kies de juiste gate
+## Kies de juiste poort
 
-Kies de gate die past bij het beslismoment dat je nodig hebt:
+Kies de poort die past bij het beslismoment dat je nodig hebt:
 
-| Gate                             | Gebruik dit wanneer                                                       | Wat het beheert                                                                                                  |
-| -------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Optionele tools                  | Een tool pas zichtbaar mag zijn voor het model nadat de gebruiker zich aanmeldt. | Tool-blootstelling via `tools.allow`.                                                                          |
-| Plugin-toestemmingsaanvragen     | Een Plugin-hook of door de Plugin beheerde bewerking moet vragen voordat één actie wordt uitgevoerd. | Runtime-goedkeuring via `plugin.approval.*`.                                                                   |
-| Exec-goedkeuringen               | Een hostopdracht of shellachtige tool operatorgoedkeuring nodig heeft.     | Host-exec-beleid en duurzame exec-allowlists.                                                                  |
-| Native toestemmingsaanvragen van Codex | Codex vraagt vóór native shell-, bestands-, MCP- of app-serveracties. | Afhandeling van goedkeuringen voor de Codex app-server of native hook, gerouteerd via Plugin-goedkeuringen wanneer OpenClaw eigenaar is van de prompt. |
-| MCP-goedkeuringsuitlokkingen     | Een Codex MCP-server goedkeuring vraagt voor een toolaanroep.              | MCP-goedkeuringsreacties gekoppeld via OpenClaw Plugin-goedkeuringen.                                           |
+| Poort                            | Gebruik deze wanneer                                                       | Wat deze beheert                                                                                                          |
+| -------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Optionele tools                  | Een tool pas zichtbaar voor het model mag zijn nadat de gebruiker instemt.  | Beschikbaarstelling van tools via `tools.allow`.                                                                     |
+| Pluginmachtigingsverzoeken       | Een Pluginhook of door een Plugin beheerde bewerking vóór één actie toestemming moet vragen. | Goedkeuring tijdens runtime via `plugin.approval.*`.                                                        |
+| Uitvoeringsgoedkeuringen         | Een hostopdracht of shellachtige tool goedkeuring van de beheerder vereist. | Uitvoeringsbeleid van de host en permanente toestemmingslijsten voor uitvoering.                                          |
+| Systeemeigen machtigingsverzoeken van Codex | Codex toestemming vraagt vóór systeemeigen shell-, bestands-, MCP- of app-serveracties. | Goedkeuringsafhandeling door de Codex-app-server of systeemeigen hook, doorgestuurd via Plugingoedkeuringen wanneer OpenClaw de prompt beheert. |
+| MCP-goedkeuringsverzoeken        | Een Codex MCP-server goedkeuring voor een toolaanroep vraagt.               | MCP-goedkeuringsreacties die via OpenClaw-Plugingoedkeuringen worden doorgegeven.                                          |
 
-Optionele tools zijn een gate tijdens ontdekking. Plugin-toestemmingsaanvragen zijn een
-gate per aanroep. Gebruik beide wanneer een gevoelige tool expliciete aanmelding moet vereisen
-voordat het model deze kan zien en goedkeuring voordat de actie wordt uitgevoerd.
+Optionele tools vormen een poort tijdens de detectiefase. Pluginmachtigingsverzoeken vormen een
+poort per aanroep. Gebruik beide wanneer een gevoelige tool expliciete instemming moet vereisen
+voordat het model deze kan zien, plus goedkeuring voordat de actie wordt uitgevoerd.
 
-## Vraag goedkeuring aan vóór een toolaanroep
+## Vraag goedkeuring vóór een toolaanroep
 
-De meeste door Plugins geschreven prompts moeten starten in een `before_tool_call`-hook. De hook
+De meeste door Plugins opgestelde prompts moeten beginnen in een `before_tool_call`-hook. De hook
 wordt uitgevoerd nadat het model een tool selecteert en voordat OpenClaw deze uitvoert:
 
 ```typescript
@@ -50,7 +52,7 @@ import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 
 export default definePluginEntry({
   id: "deploy-policy",
-  name: "Deploy Policy",
+  name: "Implementatiebeleid",
   register(api) {
     api.on("before_tool_call", async (event) => {
       if (event.toolName !== "deploy_service") {
@@ -58,21 +60,20 @@ export default definePluginEntry({
       }
 
       const environment =
-        typeof event.params.environment === "string" ? event.params.environment : "unknown";
+        typeof event.params.environment === "string" ? event.params.environment : "onbekend";
 
       return {
         requireApproval: {
-          title: "Deploy service",
-          description: `Deploy service to ${environment}.`,
+          title: "Service implementeren",
+          description: `Service implementeren in ${environment}.`,
           severity: environment === "production" ? "critical" : "warning",
           allowedDecisions:
             environment === "production"
               ? ["allow-once", "deny"]
               : ["allow-once", "allow-always", "deny"],
           timeoutMs: 120_000,
-          timeoutBehavior: "deny",
           onResolution(decision) {
-            console.log(`deploy approval resolved: ${decision}`);
+            console.log(`implementatiegoedkeuring afgehandeld: ${decision}`);
           },
         },
       };
@@ -81,51 +82,58 @@ export default definePluginEntry({
 });
 ```
 
-Schrijf prompttekst voor de persoon die de actie zal goedkeuren:
+Schrijf de prompttekst voor degene die de actie zal goedkeuren:
 
-- Houd `title` kort en actiegericht. De Gateway accepteert maximaal 80
+- Houd `title` kort en actiegericht; de Gateway beperkt deze tot 80 tekens.
+- Houd `description` specifiek en afgebakend; de Gateway beperkt deze tot 512
   tekens.
-- Houd `description` specifiek en begrensd. De Gateway accepteert maximaal 256
-  tekens.
-- Neem de actie, het doel en het risico op. Neem geen geheimen, tokens of
-  privépayloads op die niet in chatgoedkeuringsoppervlakken mogen verschijnen.
-- Gebruik `severity: "critical"` alleen voor acties waarbij een verkeerde beslissing
-  productieschade of gegevensverlies kan veroorzaken.
-- Gebruik `allowedDecisions: ["allow-once", "deny"]` wanneer permanent vertrouwen
-  onveilig is voor die actie.
+- Vermeld de actie, het doel en het risico. Neem geen geheimen, tokens of
+  privépayloads op die niet in goedkeuringsinterfaces voor chats mogen verschijnen.
+- `severity` gebruikt standaard `"warning"` wanneer deze is weggelaten. Gebruik `"critical"` alleen voor
+  acties waarbij een verkeerde beslissing productieschade of gegevensverlies kan veroorzaken.
+- `allowedDecisions` gebruikt standaard `["allow-once", "allow-always", "deny"]` wanneer
+  deze is weggelaten. Geef `["allow-once", "deny"]` door wanneer permanent vertrouwen onveilig is voor
+  die actie.
+- `timeoutMs` is standaard 120000 (2 minuten) en wordt beperkt tot 600000 (10
+  minuten), ongeacht de aangevraagde waarde.
 
 ## Beslissingsgedrag
 
 OpenClaw maakt een wachtende goedkeuring met een `plugin:`-ID, levert deze aan de
-beschikbare goedkeuringsoppervlakken en wacht op een beslissing.
+beschikbare goedkeuringsinterfaces en wacht op een beslissing.
 
-| Beslissing        | Resultaat                                                                  |
-| ----------------- | -------------------------------------------------------------------------- |
-| `allow-once`      | De huidige aanroep gaat door.                                               |
-| `allow-always`    | De huidige aanroep gaat door en de beslissing wordt doorgegeven aan de Plugin. |
-| `deny`            | De aanroep wordt geblokkeerd met een geweigerd toolresultaat.              |
-| Time-out          | De aanroep wordt geblokkeerd tenzij `timeoutBehavior` `"allow"` is.         |
-| Annulering        | De aanroep wordt geblokkeerd wanneer de run wordt afgebroken.              |
-| Geen goedkeuringsroute | De aanroep wordt geblokkeerd omdat geen verbonden goedkeuringsoppervlak deze kan oplossen. |
+| Beslissing        | Resultaat                                                                 |
+| ----------------- | ------------------------------------------------------------------------- |
+| `allow-once`      | De huidige aanroep gaat door.                                             |
+| `allow-always`    | De huidige aanroep gaat door en de beslissing wordt aan de Plugin doorgegeven. |
+| `deny`            | De aanroep wordt geblokkeerd met een geweigerd toolresultaat.             |
+| Time-out          | De aanroep wordt geblokkeerd.                                             |
+| Annulering        | De aanroep wordt geblokkeerd wanneer de uitvoering wordt afgebroken.      |
+| Geen goedkeuringsroute | De aanroep wordt geblokkeerd omdat geen verbonden goedkeuringsinterface deze kan afhandelen. |
 
-`allow-always` is alleen duurzaam wanneer de aanvragende Plugin of runtime
-die persistentie implementeert. Voor gewone `before_tool_call.requireApproval`-hooks
+Alleen de exacte door het verzoek toegestane beslissingen `allow-once` en `allow-always`
+staan uitvoering toe. Onbekende, ongeldige, niet-overeenkomende, ontbrekende en verlopen
+beslissingen worden standaard geweigerd. Het verouderde veld `timeoutBehavior` blijft geaccepteerd voor
+Plugincompatibiliteit, maar is afgeschaft en wordt genegeerd; stel het niet in bij nieuwe hooks.
+
+`allow-always` is alleen permanent wanneer de aanvragende Plugin of runtime
+deze persistentie implementeert. Voor gewone `before_tool_call.requireApproval`-hooks
 behandelt OpenClaw `allow-once` en `allow-always` als goedkeuringsbeslissingen voor de
-huidige aanroep en geeft de opgeloste waarde door aan `onResolution`. Als je Plugin
-`allow-always` aanbiedt, documenteer en implementeer dan exact welke toekomstige aanroepen deze
-vertrouwt.
+huidige aanroep en geeft het de afgehandelde waarde door aan `onResolution`. Als je Plugin
+`allow-always` aanbiedt, documenteer en implementeer dan exact welke toekomstige aanroepen
+worden vertrouwd.
 
-Als de hook ook `params` retourneert, past OpenClaw die parameterwijzigingen alleen toe
-nadat de goedkeuring slaagt. Een hook met lagere prioriteit kan nog steeds blokkeren nadat een
-hook met hogere prioriteit goedkeuring heeft gevraagd.
+Als de hook ook `params` retourneert, past OpenClaw die parameterwijzigingen pas toe
+nadat de goedkeuring is geslaagd. Een hook met lagere prioriteit kan nog steeds blokkeren nadat een
+hook met hogere prioriteit om goedkeuring heeft gevraagd.
 
 `allowedDecisions` beperkt de knoppen en opdrachten die aan de gebruiker worden getoond. De
-Gateway weigert een oplossingspoging voor elke beslissing die de aanvraag niet aanbood.
+Gateway weigert een afhandelingspoging voor elke beslissing die niet door het verzoek werd aangeboden.
 
-## Routeer goedkeuringsprompts
+## Stuur goedkeuringsprompts door
 
-Goedkeuringsprompts kunnen worden opgelost in lokale UI-oppervlakken of in chatkanalen die
-goedkeuringsafhandeling ondersteunen. Configureer `approvals.plugin` om Plugin-goedkeuringsprompts
+Goedkeuringsprompts kunnen worden afgehandeld in lokale gebruikersinterfaces of in chatkanalen die
+goedkeuringsafhandeling ondersteunen. Configureer `approvals.plugin` om Plugingoedkeuringsprompts
 door te sturen naar expliciete chatdoelen:
 
 ```json5
@@ -141,11 +149,11 @@ door te sturen naar expliciete chatdoelen:
 }
 ```
 
-`approvals.plugin` staat los van `approvals.exec`. Het inschakelen van doorsturen van exec-goedkeuringen
-routeert geen Plugin-goedkeuringsprompts, en het inschakelen van doorsturen van Plugin-goedkeuringen
-wijzigt het host-exec-beleid niet.
+`approvals.plugin` staat los van `approvals.exec`. Het inschakelen van doorsturen van
+uitvoeringsgoedkeuringen stuurt geen Plugingoedkeuringsprompts door, en het inschakelen van
+doorsturen van Plugingoedkeuringen wijzigt het uitvoeringsbeleid van de host niet.
 
-Wanneer een prompt handmatige goedkeuringstekst bevat, los je deze op met een van de aangeboden
+Wanneer een prompt handmatige goedkeuringstekst bevat, handel je deze af met een van de aangeboden
 beslissingen:
 
 ```text
@@ -154,46 +162,49 @@ beslissingen:
 /approve <id> deny
 ```
 
-Zie [Geavanceerde exec-goedkeuringen](/nl/tools/exec-approvals-advanced#plugin-approval-forwarding)
-voor het volledige doorstuurmodel, goedkeuringsgedrag in dezelfde chat, native kanaallevering
-en kanaalspecifieke regels voor goedkeurders.
+Zie [Geavanceerde uitvoeringsgoedkeuringen](/nl/tools/exec-approvals-advanced#plugin-approval-forwarding)
+voor het volledige doorstuurmodel, goedkeuringsgedrag binnen dezelfde chat, systeemeigen
+kanaallevering en kanaalspecifieke regels voor goedkeurders.
 
-## Native toestemmingen van Codex
+## Systeemeigen Codex-machtigingen
 
-Native toestemmingsprompts van Codex kunnen ook via Plugin-goedkeuringen lopen, maar
-ze hebben ander eigenaarschap dan door Plugins geschreven hooks.
+Systeemeigen machtigingsprompts van Codex kunnen ook via Plugingoedkeuringen worden verzonden, maar
+ze hebben een andere eigenaar dan door Plugins opgestelde hooks.
 
-- Goedkeuringsaanvragen van de Codex app-server worden na Codex-review via OpenClaw gerouteerd.
-- De native hook `permission_request`-relay kan vragen via
-  `plugin.approval.request` wanneer die relay is ingeschakeld.
-- MCP-toolgoedkeuringsuitlokkingen worden via Plugin-goedkeuringen gerouteerd wanneer Codex
+- Goedkeuringsverzoeken van de Codex-app-server worden na controle door Codex via OpenClaw doorgestuurd.
+- De relay van de systeemeigen hook `permission_request` kan via
+  `plugin.approval.request` toestemming vragen wanneer die relay is ingeschakeld.
+- Goedkeuringsverzoeken voor MCP-tools worden via Plugingoedkeuringen doorgestuurd wanneer Codex
   `_meta.codex_approval_kind` markeert als `"mcp_tool_call"`.
 
-Zie [Codex-harnessruntime](/nl/plugins/codex-harness-runtime#native-permissions-and-mcp-elicitations)
-voor het Codex-specifieke gedrag en fallback-regels.
+Zie [Codex-harnasruntime](/nl/plugins/codex-harness-runtime#native-permissions-and-mcp-elicitations)
+voor het Codex-specifieke gedrag en de terugvalregels.
 
-## Probleemoplossing
+## Problemen oplossen
 
-**De tool zegt dat Plugin-goedkeuringen niet beschikbaar zijn.** Geen goedkeurings-UI of geconfigureerde
-goedkeuringsroute heeft de aanvraag geaccepteerd. Verbind een client met goedkeuringsmogelijkheden, gebruik een
-kanaal dat `/approve` in dezelfde chat ondersteunt, of configureer `approvals.plugin`.
+**De tool meldt dat Plugingoedkeuringen niet beschikbaar zijn.** Geen goedkeuringsinterface of
+geconfigureerde goedkeuringsroute heeft het verzoek geaccepteerd. Verbind een client die goedkeuringen
+ondersteunt, gebruik een kanaal dat `/approve` binnen dezelfde chat ondersteunt, of configureer
+`approvals.plugin`.
 
-**`allow-always` verschijnt, maar de volgende aanroep vraagt opnieuw.** De generieke Plugin-goedkeuringsflow
-bewaart vertrouwen niet automatisch voor willekeurige hooks. Bewaar door de Plugin beheerd vertrouwen
-in je Plugin na `onResolution("allow-always")`, of bied alleen `allow-once` en `deny` aan.
+**`allow-always` verschijnt, maar de volgende aanroep vraagt opnieuw om toestemming.** De algemene
+Plugingoedkeuringsflow slaat vertrouwen voor willekeurige hooks niet automatisch permanent op. Sla
+door de Plugin beheerd vertrouwen in je Plugin op na `onResolution("allow-always")`, of
+bied alleen `allow-once` en `deny` aan.
 
-**`/approve` weigert de beslissing.** De aanvraag beperkte
-`allowedDecisions`. Gebruik een van de beslissingen die in de prompt zijn afgedrukt.
+**`/approve` weigert de beslissing.** Het verzoek heeft
+`allowedDecisions` beperkt. Gebruik een van de beslissingen die in de prompt worden weergegeven.
 
-**Een Slack-, Discord-, Telegram- of Matrix-prompt wordt anders gerouteerd dan exec-goedkeuringen.** Plugin-goedkeuringen
-en exec-goedkeuringen gebruiken aparte configuratie en kunnen andere autorisatiecontroles gebruiken.
-Controleer `approvals.plugin` en de Plugin-goedkeuringsondersteuning van het kanaal in plaats van alleen
-`approvals.exec` te controleren.
+**Een prompt van Discord, Matrix, Slack of Telegram wordt anders doorgestuurd dan
+uitvoeringsgoedkeuringen.** Plugingoedkeuringen en uitvoeringsgoedkeuringen gebruiken afzonderlijke
+configuratie en kunnen verschillende autorisatiecontroles gebruiken. Controleer `approvals.plugin`
+en de ondersteuning voor Plugingoedkeuringen van het kanaal in plaats van alleen `approvals.exec`
+te controleren.
 
 ## Gerelateerd
 
-- [Plugin-hooks](/nl/plugins/hooks#tool-call-policy)
-- [Plugins bouwen](/nl/plugins/building-plugins#registering-agent-tools)
-- [Geavanceerde exec-goedkeuringen](/nl/tools/exec-approvals-advanced#plugin-approval-forwarding)
+- [Pluginhooks](/nl/plugins/hooks#tool-call-policy)
+- [Plugins bouwen](/nl/plugins/building-plugins#registering-tools)
+- [Geavanceerde uitvoeringsgoedkeuringen](/nl/tools/exec-approvals-advanced#plugin-approval-forwarding)
 - [Gateway-protocol](/nl/gateway/protocol)
-- [Codex-harnessruntime](/nl/plugins/codex-harness-runtime#native-permissions-and-mcp-elicitations)
+- [Codex-harnasruntime](/nl/plugins/codex-harness-runtime#native-permissions-and-mcp-elicitations)

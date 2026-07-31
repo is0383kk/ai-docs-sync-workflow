@@ -1,31 +1,32 @@
 ---
 read_when:
-    - आप google Plugin इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
-summary: OpenClaw में Google, Google Gemini CLI, Google Vertex मॉडल प्रदाता समर्थन जोड़ता है।
+    - आप google Plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
+summary: OpenClaw में Google, Google Gemini CLI और Google Vertex मॉडल प्रदाता समर्थन जोड़ता है।
 title: Google Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:44:55Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:18:22Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 24246ba7ebfd5c62a6f02ded8c555a5dbdeec3df128bf5863923d32f6424ea57
+    source_hash: 17d3ad5954ad5a993f06f6ac1623dc6d77b75ab9f56c70f9277bd2682dbcc55f
     source_path: plugins/reference/google.md
     workflow: 16
 ---
 
 # Google Plugin
 
-OpenClaw में Google, Google Gemini CLI, Google Vertex मॉडल प्रोवाइडर समर्थन जोड़ता है।
+OpenClaw में Google, Google Gemini CLI और Google Vertex मॉडल प्रदाता समर्थन जोड़ता है।
 
 ## वितरण
 
 - पैकेज: `@openclaw/google-plugin`
 - इंस्टॉल मार्ग: OpenClaw में शामिल
 
-## सतह
+## उपलब्ध सतह
 
-प्रोवाइडर: google, google-gemini-cli, google-vertex; अनुबंध: imageGenerationProviders, mediaUnderstandingProviders, memoryEmbeddingProviders, musicGenerationProviders, realtimeVoiceProviders, speechProviders, videoGenerationProviders, webSearchProviders
+प्रदाता: `google`, `google-gemini-cli`, `google-vertex`; अनुबंध: `imageGenerationProviders`, `mediaUnderstandingProviders`, `memoryEmbeddingProviders`, `musicGenerationProviders`, `realtimeVoiceProviders`, `speechProviders`, `usageProviders`, `videoGenerationProviders`, `webSearchProviders`
 
 ## संबंधित दस्तावेज़
 
-- [google](/hi/providers/google)
+- [Google](/hi/providers/google)

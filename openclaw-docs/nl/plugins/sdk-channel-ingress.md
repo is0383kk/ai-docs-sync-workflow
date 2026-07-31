@@ -1,30 +1,29 @@
 ---
 read_when:
     - Een Plugin voor een berichtenkanaal bouwen of migreren
-    - Allowlist, routepoorten, opdrachtverificatie, gebeurtenisverificatie of vermeldingsactivering voor DM's of groepen wijzigen
-    - Redactie van inkomende kanaalgegevens of SDK-compatibiliteitsgrenzen beoordelen
+    - DM- of groepslijsten met toegestane gebruikers, routepoorten, commando-authenticatie, gebeurtenis-authenticatie of activering via vermeldingen wijzigen
+    - Redactie van kanaalingang of SDK-compatibiliteitsgrenzen beoordelen
 sidebarTitle: Channel Ingress
-summary: Experimentele API voor kanaalingang voor de autorisatie van inkomende berichten
-title: API voor inkomend kanaalverkeer
+summary: Experimentele API voor kanaalingang voor autorisatie van inkomende berichten
+title: API voor kanaalingang
 x-i18n:
-    generated_at: "2026-07-12T09:14:36Z"
+    generated_at: "2026-07-27T05:17:21Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 9e7b7d16bb0d53cec824cb353f691a2e17b37ca648eaefe6c0cbbdcd68a4c155
+    source_hash: 60feecb7bcf203cf37d2543a7855e89b5bfb2eb9d8263d804219e140facb8fc6
     source_path: plugins/sdk-channel-ingress.md
     workflow: 16
 ---
 
 Channel-ingress is de experimentele toegangscontrolegrens voor inkomende
-kanaalgebeurtenissen. Plugins beheren platformspecifieke feiten en bijwerkingen; de kern beheert
-generiek beleid: toelatingslijsten voor privéberichten/groepen, privéberichtvermeldingen in de koppelingsopslag, routepoorten,
-opdrachtpoorten, gebeurtenisautorisatie, activering via vermeldingen, geredigeerde diagnostiek en
+channelgebeurtenissen. Plugins beheren platformfeiten en neveneffecten; de kern beheert
+generiek beleid: toelatingslijsten voor DM's/groepen, DM-vermeldingen in de pairing-store, routepoorten,
+opdrachtpoorten, gebeurtenisautorisatie, vermeldingsactivering, geredigeerde diagnostiek en
 toelating.
 
-Gebruik `openclaw/plugin-sdk/channel-ingress-runtime` voor nieuwe ontvangstpaden. Het
-oudere subpad `openclaw/plugin-sdk/channel-ingress` blijft geëxporteerd als een
-verouderde compatibiliteitsfacade voor Plugins van derden.
+Gebruik `openclaw/plugin-sdk/channel-ingress-runtime` voor ontvangstpaden.
 
 ## Runtime-resolver
 
@@ -62,26 +61,26 @@ const result = await resolveChannelMessageIngress({
 ```
 
 Bereken effectieve toelatingslijsten, opdrachteigenaren of opdrachtgroepen niet vooraf.
-De resolver leidt deze af uit onbewerkte toelatingslijsten, opslagcallbacks, routebeschrijvingen,
-toegangsgroepen, beleid en het soort gesprek.
+De resolver leidt deze af uit onbewerkte toelatingslijsten, store-callbacks, route-
+descriptors, toegangsgroepen, beleid en het gesprekstype.
 
 ## Resultaat
 
-Meegeleverde Plugins moeten moderne projecties rechtstreeks gebruiken:
+Gebundelde plugins moeten moderne projecties rechtstreeks gebruiken:
 
-| Veld               | Betekenis                                                                  |
-| ------------------ | -------------------------------------------------------------------------- |
-| `ingress`          | geordende poortbeslissing en toelating                                     |
-| `senderAccess`     | uitsluitend autorisatie van afzender/gesprek                               |
-| `routeAccess`      | projectie van route en routeafzender                                       |
+| Veld               | Betekenis                                                          |
+| ------------------ | ------------------------------------------------------------------ |
+| `ingress`          | geordende poortbeslissing en toelating                             |
+| `senderAccess`     | alleen autorisatie van afzender/gesprek                            |
+| `routeAccess`      | projectie van route en routeafzender                               |
 | `commandAccess`    | opdrachtautorisatie; `requested: false` wanneer geen opdrachtpoort is uitgevoerd |
-| `activationAccess` | resultaat van vermelding/activering                                        |
+| `activationAccess` | resultaat van vermelding/activering                                |
 
 Gebeurtenisautorisatie blijft beschikbaar in de geordende `ingress.graph` en de
-doorslaggevende `ingress.reasonCode`; er wordt geen afzonderlijke gebeurtenisprojectie gegenereerd.
+doorslaggevende `ingress.reasonCode`; er wordt geen afzonderlijke gebeurtenisprojectie uitgegeven.
 
-Verouderde SDK-helpers van derden mogen intern oudere structuren opnieuw opbouwen. Nieuwe
-meegeleverde ontvangstpaden mogen moderne resultaten niet terugvertalen naar lokale
+Verouderde SDK-helpers van derden mogen intern oudere structuren reconstrueren. Nieuwe
+gebundelde ontvangstpaden mogen moderne resultaten niet terugvertalen naar lokale
 DTO's.
 
 ## Toegangsgroepen
@@ -93,19 +92,19 @@ mislukte groepen worden standaard geweigerd.
 
 ## Gebeurtenismodi
 
-| `authMode`       | Betekenis                                                       |
-| ---------------- | --------------------------------------------------------------- |
-| `inbound`        | normale afzenderpoorten voor inkomende gebeurtenissen           |
-| `command`        | opdrachtpoorten voor callbacks of afgebakende knoppen            |
+| `authMode`       | Betekenis                                        |
+| ---------------- | ------------------------------------------------ |
+| `inbound`        | normale poorten voor inkomende afzenders         |
+| `command`        | opdrachtpoorten voor callbacks of afgebakende knoppen |
 | `origin-subject` | actor moet overeenkomen met het onderwerp van het oorspronkelijke bericht |
-| `route-only`     | uitsluitend routepoorten voor vertrouwde routegebonden gebeurtenissen |
-| `none`           | interne gebeurtenissen die door de Plugin worden beheerd, omzeilen gedeelde autorisatie |
+| `route-only`     | alleen routepoorten voor vertrouwde, routegebonden gebeurtenissen |
+| `none`           | interne gebeurtenissen van plugins omzeilen gedeelde autorisatie |
 
 Gebruik `mayPair: false` voor reacties, knoppen, callbacks en systeemeigen opdrachten.
 
 ## Routes en activering
 
-Gebruik routebeschrijvingen voor beleid voor ruimtes, onderwerpen, guilds, threads of geneste routes:
+Gebruik routedescriptors voor beleid voor ruimtes, onderwerpen, guilds, threads of geneste routes:
 
 ```ts
 route: {
@@ -118,24 +117,26 @@ route: {
 }
 ```
 
-Gebruik `channelIngressRoutes(...)` wanneer een Plugin meerdere optionele
-routebeschrijvingen heeft; deze functie filtert uitgeschakelde vertakkingen, terwijl routefeiten generiek
-blijven en worden geordend volgens de `precedence` van elke beschrijving.
+Gebruik `channelIngressRoutes(...)` wanneer een plugin meerdere optionele route-
+descriptors heeft; deze filtert uitgeschakelde vertakkingen terwijl routefeiten generiek
+blijven en volgens de `precedence` van elke descriptor worden geordend.
 
-Controle op vermeldingen is een activeringspoort. Een ontbrekende vermelding retourneert
-`admission: "skip"`, zodat de turn-kernel geen beurt verwerkt die alleen ter observatie dient.
-De meeste kanalen moeten activering na de afzender- en opdrachtpoorten laten plaatsvinden. Openbare
-chatoppervlakken die niet-vermeld verkeer moeten dempen voordat ruis van afzendertoelatingslijsten
-ontstaat, kunnen kiezen voor `activation.order: "before-sender"` wanneer het omzeilen via
-tekstopdrachten is uitgeschakeld. Kanalen met impliciete activering, zoals antwoorden in
-botthreads, kunnen `activation.allowedImplicitMentionKinds` doorgeven; de geprojecteerde
-`activationAccess.shouldBypassMention` meldt vervolgens wanneer een opdracht of impliciete
+Vermeldingscontrole is een activeringspoort. Een gemiste vermelding retourneert
+`admission: "skip"`, zodat de turn-kernel geen alleen-observerende beurt verwerkt.
+De meeste channels moeten activering na de afzender- en opdrachtpoorten laten plaatsvinden. Openbare
+chatoppervlakken die niet-vermeld verkeer moeten dempen voordat ruis van de afzendertoelatingslijst
+ontstaat, kunnen `activation.order: "before-sender"` gebruiken wanneer de omzeiling
+voor tekstopdrachten is uitgeschakeld. Channels met impliciete activering, zoals antwoorden in bot-
+threads, verwerken `channels.defaults.implicitMentions` plus channel- en account-
+overschrijvingen met `resolveChannelImplicitMentions(...)` en geven het resultaat vervolgens door als
+`activation.implicitMentions`. De geprojecteerde
+`activationAccess.shouldBypassMention` meldt wanneer een opdracht of impliciete
 activering een expliciete vermelding heeft omzeild.
 
 ## Redactie
 
-Onbewerkte afzenderwaarden en onbewerkte toelatingslijstvermeldingen dienen uitsluitend als invoer voor de resolver. Ze
-mogen niet voorkomen in opgeloste status, beslissingen, diagnostiek, momentopnamen of
+Onbewerkte afzenderwaarden en onbewerkte vermeldingen in toelatingslijsten dienen alleen als invoer voor de resolver. Ze
+mogen niet voorkomen in verwerkte status, beslissingen, diagnostiek, snapshots of
 compatibiliteitsfeiten. Gebruik ondoorzichtige onderwerp-id's, vermeldings-id's, route-id's en
 diagnostische id's.
 

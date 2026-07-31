@@ -1,47 +1,57 @@
 ---
 read_when:
-    - Fehlerbehebung bei Zustandsanzeigen der Mac-App
-summary: Wie die macOS-App den Status des Gateways und der Kanäle meldet
+    - Fehlerbehebung bei Statusanzeigen der Mac-App
+summary: Wie die macOS-App den Zustand von Gateway und Kanälen meldet
 title: Systemprüfungen (macOS)
 x-i18n:
-    generated_at: "2026-07-12T01:50:33Z"
+    generated_at: "2026-07-26T17:55:35Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: a086c527796dbe453bdee1cc9cbe1e0fc1157de710c8c6de186411fe9aa3bc7b
+    source_hash: 095abdbefa7db7c0d14435e2c5db7d1ebc03afa0c539555a7abdd9170d015fb8
     source_path: platforms/mac/health.md
     workflow: 16
 ---
 
-# Integritätsprüfungen unter macOS
+# Systemdiagnosen unter macOS
 
-So lesen Sie den Integritätsstatus verknüpfter Kanäle in der Menüleisten-App ab.
+So lesen Sie den Systemzustand verknüpfter Kanäle in der Menüleisten-App ab.
 
 ## Menüleiste
 
 Statuspunkt:
 
-- Grün: verknüpft und Prüfung erfolgreich.
-- Orange: verknüpft, aber eine Kanalprüfung meldet eine Beeinträchtigung oder fehlende Verbindung.
+- Grün: verknüpft und Diagnose erfolgreich.
+- Orange: verknüpft, aber eine Kanaldiagnose meldet einen eingeschränkten Zustand oder keine Verbindung.
 - Rot: noch nicht verknüpft.
 
 Die zweite Zeile lautet „verknüpft · Authentifizierung vor 12 Min.“ oder zeigt den Fehlergrund an.
-„Integritätsprüfung jetzt ausführen“ im Menü löst eine bedarfsgesteuerte Prüfung aus.
+„Run Health Check Now“ im Menü löst eine bedarfsgesteuerte Diagnose aus.
 
 ## Einstellungen
 
-- Die Registerkarte „Allgemein“ zeigt eine Integritätskarte mit Statuspunkt, Zusammenfassungszeile (Verknüpfungsstatus und Alter der Authentifizierung) und einer optionalen Zeile mit Fehlerdetails sowie den Schaltflächen **Jetzt erneut versuchen** und **Protokolle öffnen**.
-- Die **Registerkarte „Kanäle“** zeigt für WhatsApp und Telegram den jeweiligen Kanalstatus und Steuerelemente (QR-Code zur Anmeldung, Abmeldung, Prüfung, letzte Verbindungstrennung/letzter Fehler).
+- Die Registerkarte „Allgemein“ zeigt eine Karte zum Systemzustand: Statuspunkt, Zusammenfassungszeile (Verknüpfungsstatus +
+  Alter der Authentifizierung) und optional eine Zeile mit Fehlerdetails sowie die Schaltflächen **Jetzt erneut versuchen** und
+  **Protokolle öffnen**.
+- Die **Registerkarte „Kanäle“** zeigt für WhatsApp und Telegram den Status und die Steuerelemente der einzelnen Kanäle an (Anmelde-QR-Code,
+  Abmelden, Diagnose, letzte Trennung/letzter Fehler).
 
-## Funktionsweise der Prüfung
+## Funktionsweise der Diagnose
 
-Die App ruft etwa alle 60 Sekunden und bei Bedarf den RPC `health` des Gateways über ihre bestehende WebSocket-Verbindung auf (nicht durch Ausführung eines CLI-Befehls in einer Shell). Der RPC lädt die Anmeldedaten und meldet den Status, ohne Nachrichten zu senden. Die App speichert den letzten erfolgreichen Snapshot und den letzten Fehler getrennt zwischen, damit die Benutzeroberfläche sofort geladen wird und im Offlinebetrieb nicht flackert.
+Die App ruft alle ~60 Sekunden und bei Bedarf über ihre bestehende WebSocket-
+Verbindung (nicht durch Aufruf einer CLI-Shell) die RPC `health` des Gateways auf. Die RPC lädt
+Anmeldedaten und meldet den Status, ohne Nachrichten zu senden. Die App speichert den letzten
+erfolgreichen Snapshot und den letzten Fehler getrennt zwischen, sodass die Benutzeroberfläche sofort geladen wird und
+im Offlinebetrieb nicht flackert.
 
 ## Im Zweifelsfall
 
-Verwenden Sie den CLI-Ablauf unter [Gateway-Integrität](/de/gateway/health) (`openclaw status`, `openclaw status --deep`, `openclaw health --json`) und verfolgen Sie `/tmp/openclaw/openclaw-*.log`, gefiltert nach `web-heartbeat` / `web-reconnect`.
+Verwenden Sie den CLI-Ablauf unter [Gateway-Systemzustand](/de/gateway/health) (`openclaw status`,
+`openclaw status --deep`, `openclaw health --json`) und führen Sie
+`openclaw logs --follow` aus, gefiltert nach `web-heartbeat` / `web-reconnect`.
 
 ## Verwandte Themen
 
-- [Gateway-Integrität](/de/gateway/health)
+- [Gateway-Systemzustand](/de/gateway/health)
 - [macOS-App](/de/platforms/macos)

@@ -1,15 +1,16 @@
 ---
 read_when:
     - Bereitstellen des Gateways über LAN, Tailnet, Tailscale Serve, Funnel oder einen Reverse-Proxy
-    - Überprüfung einer Bereitstellung vor der Freigabe für echte Messaging-Benutzer
-    - Zurücksetzen einer riskanten Konfiguration für Fernzugriff oder Direktnachrichten
+    - Eine Bereitstellung überprüfen, bevor echte Messaging-Benutzer zugelassen werden
+    - Zurücksetzen einer riskanten Fernzugriffs- oder DM-Konfiguration
 sidebarTitle: Exposure runbook
-summary: Prüfliste für Vorabkontrollen und Rollback vor der Freigabe eines OpenClaw-Gateways über local loopback hinaus
-title: Runbook für die Gateway-Bereitstellung
+summary: Checkliste für Vorabprüfungen und Rollback, bevor ein OpenClaw Gateway über Loopback hinaus erreichbar gemacht wird
+title: Runbook zur Gateway-Exposition
 x-i18n:
-    generated_at: "2026-07-12T01:42:49Z"
+    generated_at: "2026-07-26T17:51:39Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: fb8e66af57e804325afc91281122b822183337177c734efe065c5fc18b175e72
     source_path: gateway/security/exposure-runbook.md
@@ -17,49 +18,49 @@ x-i18n:
 ---
 
 <Warning>
-Geben Sie den Gateway erst frei, wenn Sie erklären können, wer ihn erreichen kann, wie diese Personen
-authentifiziert werden, welche Agenten sie auslösen können und welche Werkzeuge diese Agenten
-verwenden können. Kehren Sie im Zweifelsfall zum reinen local-loopback-Zugriff zurück und führen Sie das Audit erneut aus.
+Geben Sie den Gateway erst frei, wenn Sie erklären können, wer darauf zugreifen kann, wie diese Personen
+authentifiziert werden, welche Agenten sie auslösen können und welche Tools diese Agenten
+verwenden können. Kehren Sie im Zweifelsfall zum reinen Loopback-Zugriff zurück und führen Sie das Audit erneut aus.
 </Warning>
 
 Dieses Runbook überführt die umfassenderen Hinweise unter [Sicherheit](/de/gateway/security) in eine
-Betriebscheckliste für Fernzugriff und die Freigabe von Messaging-Schnittstellen.
+Checkliste für Betreiber zur Freigabe von Remote-Zugriff und Messaging.
 
 ## Freigabemuster auswählen
 
-Bevorzugen Sie das engste Muster, das den Workflow erfüllt.
+Bevorzugen Sie das restriktivste Muster, das den Workflow erfüllt.
 
-| Muster                     | Empfohlen für                                   | Erforderliche Kontrollen                                                                                                                        |
-| -------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Loopback + SSH-Tunnel      | Persönliche Nutzung, Administratorzugriff, Debugging | `gateway.bind: "loopback"` beibehalten und `127.0.0.1:18789` tunneln                                                                         |
-| Loopback + Tailscale Serve | Persönlicher Tailnet-Zugriff auf Control UI/WebSocket | Gateway ausschließlich über Loopback erreichbar halten; Tailscale-Identitätsheader authentifizieren nur die WebSocket-Schnittstelle der Control UI, nicht andere Authentifizierungspfade |
-| Tailnet-/LAN-Bindung       | Dediziertes privates Netzwerk mit bekannten Geräten | Gateway-Authentifizierung, Firewall-Zulassungsliste, keine öffentliche Portweiterleitung                                                     |
+| Muster                     | Empfohlen für                                   | Erforderliche Kontrollen                                                                                                        |
+| -------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Loopback + SSH-Tunnel      | Persönliche Nutzung, Admin-Zugriff, Debugging   | `gateway.bind: "loopback"` beibehalten und `127.0.0.1:18789` tunneln                                                                    |
+| Loopback + Tailscale Serve | Persönlicher Tailnet-Zugriff auf Control UI/WebSocket | Gateway auf Loopback beschränken; Tailscale-Identitätsheader authentifizieren nur die WebSocket-Oberfläche der Control UI, nicht andere Authentifizierungspfade |
+| Tailnet-/LAN-Bindung       | Dediziertes privates Netzwerk mit bekannten Geräten | Gateway-Authentifizierung, Firewall-Zulassungsliste, keine öffentliche Portweiterleitung                                      |
 | Vertrauenswürdiger Reverse-Proxy | Organisationsweites SSO/OIDC vor dem Gateway | `trusted-proxy`-Authentifizierung, strikte `trustedProxies`, Regeln zum Überschreiben/Entfernen von Headern, ausdrücklich zugelassene Benutzer |
-| Öffentliches Internet     | Seltene Bereitstellungen mit hohem Risiko       | Identitätsbewusster Proxy, TLS, Ratenbegrenzungen, strikte Zulassungslisten, isolierte Nicht-Hauptsitzungen                                      |
+| Öffentliches Internet     | Seltene Bereitstellungen mit hohem Risiko       | Identitätsbasierter Proxy, TLS, Ratenbegrenzungen, strikte Zulassungslisten, isolierte Nicht-Hauptsitzungen                    |
 
 Vermeiden Sie eine direkte öffentliche Portweiterleitung zum Gateway. Wenn öffentlicher Zugriff
-erforderlich ist, schalten Sie einen identitätsbewussten Proxy davor und sorgen Sie dafür, dass der Proxy der
-einzige Netzwerkpfad zum Gateway ist.
+erforderlich ist, schalten Sie einen identitätsbasierten Proxy davor und machen Sie den Proxy zum
+einzigen Netzwerkpfad zum Gateway.
 
-## Bestandsaufnahme vorab
+## Bestandsaufnahme vor der Freigabe
 
-Dokumentieren Sie Folgendes, bevor Sie Bindung, Proxy, Tailscale oder Kanalrichtlinien ändern:
+Erfassen Sie Folgendes, bevor Sie Bindungs-, Proxy-, Tailscale- oder Kanalrichtlinien ändern:
 
 - Gateway-Host, Betriebssystembenutzer und Zustandsverzeichnis (Standard: `~/.openclaw`).
-- Gateway-URL und Bindungsmodus (`gateway.bind`; Standardport `18789`).
+- Gateway-URL und Bindungsmodus (`gateway.bind`; Standardport: `18789`).
 - Authentifizierungsmodus, Quelle für Token/Passwort oder Identitätsquelle des vertrauenswürdigen Proxys.
-- Jeden aktivierten Kanal und ob er Direktnachrichten, Gruppen oder Webhooks akzeptiert.
+- Jeder aktivierte Kanal und ob er Direktnachrichten, Gruppen oder Webhooks akzeptiert.
 - Agenten, die für nicht lokale Absender erreichbar sind.
-- Werkzeugprofil, Sandbox-Modus und Richtlinie für Werkzeuge mit erhöhten Rechten für jeden erreichbaren Agenten.
+- Tool-Profil, Sandbox-Modus und Richtlinie für privilegierte Tools für jeden erreichbaren Agenten.
 - Externe Anmeldedaten, die diesen Agenten zur Verfügung stehen.
 - Sicherungsort für `~/.openclaw/openclaw.json` und Anmeldedaten.
 
 Wenn mehr als eine Person dem Bot Nachrichten senden kann, behandeln Sie dies als gemeinsam delegierte
-Werkzeugberechtigung und nicht als Host-Isolation pro Benutzer.
+Tool-Berechtigung und nicht als Host-Isolation pro Benutzer.
 
 ## Grundlegende Prüfungen
 
-Führen Sie vor dem Öffnen des Zugriffs Folgendes aus:
+Führen Sie vor der Zugriffsfreigabe Folgendes aus:
 
 ```bash
 openclaw doctor
@@ -68,11 +69,11 @@ openclaw security audit --deep
 openclaw health
 ```
 
-Beheben Sie zuerst kritische Befunde. Akzeptieren Sie Warnungen nur, wenn sie für die Bereitstellung beabsichtigt und
-dokumentiert sind. Unter [Prüfungen des Sicherheitsaudits](/de/gateway/security/audit-checks)
-finden Sie die Bedeutung jeder `checkId` und den zugehörigen Korrekturschlüssel.
+Beheben Sie zuerst kritische Befunde. Akzeptieren Sie Warnungen nur, wenn sie für die Bereitstellung
+beabsichtigt und dokumentiert sind. Unter [Prüfungen des Sicherheitsaudits](/de/gateway/security/audit-checks)
+finden Sie die Bedeutung jedes `checkId` und den zugehörigen Korrekturschlüssel.
 
-Übergeben Sie für die Remote-Validierung per CLI die Anmeldedaten ausdrücklich:
+Übergeben Sie Anmeldedaten zur Remote-Validierung per CLI ausdrücklich:
 
 ```bash
 openclaw gateway probe --url ws://127.0.0.1:18789 --token "$OPENCLAW_GATEWAY_TOKEN"
@@ -80,7 +81,7 @@ openclaw gateway probe --url ws://127.0.0.1:18789 --token "$OPENCLAW_GATEWAY_TOK
 
 Gehen Sie nicht davon aus, dass Anmeldedaten aus der lokalen Konfiguration für eine ausdrücklich angegebene Remote-URL gelten.
 
-## Sichere Mindestgrundlage
+## Minimaler sicherer Ausgangszustand
 
 Verwenden Sie diese Struktur als Ausgangspunkt für freigegebene Bereitstellungen:
 
@@ -109,63 +110,62 @@ Verwenden Sie diese Struktur als Ausgangspunkt für freigegebene Bereitstellunge
 }
 ```
 
-Erweitern Sie jeweils nur eine Kontrolle: Fügen Sie eine spezifische Kanal-Zulassungsliste hinzu, bevor Sie
-schreibfähige Werkzeuge aktivieren, oder aktivieren Sie einen Reverse-Proxy, bevor Sie Remote-Datenverkehr zur Control UI
-akzeptieren.
+Lockern Sie jeweils nur eine Kontrolle: Fügen Sie eine spezifische Kanal-Zulassungsliste hinzu, bevor Sie
+schreibfähige Tools aktivieren, oder aktivieren Sie einen Reverse-Proxy, bevor Sie Remote-Datenverkehr der
+Control UI akzeptieren.
 
-`tools.exec.security: "deny"` blockiert alle Exec-Aufrufe, einschließlich harmloser
+`tools.exec.security: "deny"` blockiert alle Exec-Aufrufe, einschließlich unbedenklicher
 Diagnosen. Wenn Diagnosen oder Befehle mit geringem Risiko erforderlich sind, lockern Sie dies erst,
 nachdem Sie die konkreten Absender, Agenten, Befehle und den Genehmigungsmodus ausgewählt haben, die
-zu Ihrem Bedrohungsmodell passen.
+Ihrem Bedrohungsmodell entsprechen.
 
 ## Freigabe von Direktnachrichten und Gruppen
 
-Messaging-Kanäle sind nicht vertrauenswürdige Eingabeschnittstellen. Bevor Sie Direktnachrichten oder
+Messaging-Kanäle sind Oberflächen für nicht vertrauenswürdige Eingaben. Bevor Sie Direktnachrichten oder
 Gruppen zulassen:
 
 - Bevorzugen Sie `dmPolicy: "pairing"` oder eine strikte `allowFrom`-Liste gegenüber `dmPolicy: "open"`.
-- Kombinieren Sie `"*"`-Zulassungslisten nicht mit umfassendem Werkzeugzugriff.
-- Fordern Sie in Gruppen Erwähnungen an, sofern der Raum nicht streng kontrolliert wird.
-- Setzen Sie `session.dmScope: "per-channel-peer"` (oder `"per-account-channel-peer"` für
-  Kanäle mit mehreren Konten), wenn mehrere Personen dem Bot Direktnachrichten senden können, damit Direktnachrichtensitzungen
-  keinen gemeinsamen Kontext verwenden.
-- Leiten Sie gemeinsam genutzte Kanäle an Agenten mit minimalen Werkzeugen und ohne persönliche
+- Kombinieren Sie `"*"`-Zulassungslisten nicht mit umfassendem Tool-Zugriff.
+- Verlangen Sie Erwähnungen in Gruppen, sofern der Raum nicht streng kontrolliert wird.
+- Legen Sie `session.dmScope: "per-channel-peer"` (oder `"per-account-channel-peer"` für
+  Kanäle mit mehreren Konten) fest, wenn mehrere Personen dem Bot Direktnachrichten senden können, damit Direktnachrichtensitzungen
+  keinen Kontext gemeinsam nutzen.
+- Leiten Sie gemeinsam genutzte Kanäle an Agenten mit minimalen Tools und ohne persönliche
   Anmeldedaten weiter.
 
-Durch die Kopplung wird der Absender berechtigt, den Bot auszulösen. Sie macht diesen Absender nicht zu einer
-separaten Host-Sicherheitsgrenze.
+Durch die Kopplung wird der Absender berechtigt, den Bot auszulösen. Sie macht diesen Absender nicht zu
+einer separaten Host-Sicherheitsgrenze.
 
 ## Prüfungen für Reverse-Proxys
 
-Für identitätsbewusste Proxys gilt:
+Für identitätsbasierte Proxys:
 
 - Der Proxy muss Benutzer authentifizieren, bevor er Anfragen an den Gateway weiterleitet.
-- Eine Firewall oder Netzwerkrichtlinie muss den direkten Zugriff auf den Gateway-Port blockieren.
-- `gateway.trustedProxies` darf nur die Quell-IP-Adressen des Proxys enthalten.
+- Eine Firewall- oder Netzwerkrichtlinie muss den direkten Zugriff auf den Gateway-Port blockieren.
+- `gateway.trustedProxies` darf ausschließlich die Quell-IP-Adressen des Proxys enthalten.
 - Der Proxy muss vom Client bereitgestellte Identitäts- und Weiterleitungsheader entfernen oder
   überschreiben.
-- Setzen Sie `gateway.auth.trustedProxy.allowUsers`, wenn der Proxy mehr als
+- Legen Sie `gateway.auth.trustedProxy.allowUsers` fest, wenn der Proxy mehr als
   eine Zielgruppe bedient.
-- Verwenden Sie `gateway.auth.trustedProxy.allowLoopback` nur für einen Proxy auf demselben Host,
-  wenn lokalen Prozessen vertraut wird und der Proxy für die Identitätsheader verantwortlich ist.
+- Verwenden Sie `gateway.auth.trustedProxy.allowLoopback` nur für einen Proxy
+  auf demselben Host, wenn lokalen Prozessen vertraut wird und der Proxy die Identitätsheader kontrolliert.
 
 Führen Sie nach Proxy-Änderungen `openclaw security audit --deep` aus. Befunde zu vertrauenswürdigen Proxys
-sind besonders aussagekräftig, da der Proxy zur Authentifizierungsgrenze
-wird.
+sind besonders aussagekräftig, da der Proxy zur Authentifizierungsgrenze wird.
 
-## Überprüfung von Werkzeugen und Sandbox
+## Überprüfung von Tools und Sandbox
 
 Bevor Sie einen Agenten für Remote-Absender freigeben:
 
 - Prüfen Sie, welche Sitzungen auf dem Host und welche in der Sandbox ausgeführt werden.
 - Verweigern Sie die Ausführung auf dem Host oder verlangen Sie dafür eine Genehmigung.
-- Lassen Sie Werkzeuge mit erhöhten Rechten deaktiviert, sofern sie nicht von einem bestimmten vertrauenswürdigen Absender benötigt werden.
-- Vermeiden Sie Browser-, Canvas-, Node-, Cron-, Gateway- und Werkzeuge zum Erzeugen von Sitzungen für offene
-  oder teilweise offene Messaging-Schnittstellen.
-- Halten Sie Bind-Mounts eng begrenzt; vermeiden Sie Pfade für Anmeldedaten, Benutzerverzeichnisse, Docker-Sockets und Systemdateien.
+- Lassen Sie privilegierte Tools deaktiviert, sofern sie nicht von einem bestimmten vertrauenswürdigen Absender benötigt werden.
+- Vermeiden Sie Browser-, Canvas-, Node-, Cron-, Gateway- und Tools zum Erzeugen von Sitzungen für offene
+  oder teilweise offene Messaging-Oberflächen.
+- Beschränken Sie Bind-Mounts eng; vermeiden Sie Pfade zu Anmeldedaten, Home-Verzeichnissen, Docker-Sockets und Systempfaden.
 - Verwenden Sie separate Gateways, Betriebssystembenutzer oder Hosts für wesentlich unterschiedliche Vertrauensgrenzen.
 
-Wenn Remote-Benutzer nicht vollständig vertrauenswürdig sind, muss die Isolation durch separate
+Wenn Remote-Benutzern nicht vollständig vertraut wird, muss die Isolation durch separate
 Bereitstellungen erfolgen, nicht nur durch Prompts oder Sitzungsbezeichnungen.
 
 ## Validierung nach Änderungen
@@ -173,14 +173,14 @@ Bereitstellungen erfolgen, nicht nur durch Prompts oder Sitzungsbezeichnungen.
 Nach jeder Änderung der Freigabe:
 
 1. Führen Sie `openclaw security audit --deep` erneut aus.
-2. Prüfen Sie, dass eine autorisierte Verbindung erfolgreich hergestellt wird.
-3. Prüfen Sie, dass ein nicht autorisierter Absender oder eine nicht autorisierte Browsersitzung abgewiesen wird.
-4. Prüfen Sie, dass Protokolle Geheimnisse unkenntlich machen.
-5. Prüfen Sie, dass die Weiterleitung von Direktnachrichten/Gruppen nur den vorgesehenen Agenten erreicht.
-6. Prüfen Sie, dass Werkzeuge mit hohen Auswirkungen eine Genehmigung anfordern oder verweigert werden.
+2. Bestätigen Sie, dass eine autorisierte Verbindung erfolgreich hergestellt wird.
+3. Bestätigen Sie, dass ein nicht autorisierter Absender oder eine nicht autorisierte Browsersitzung abgewiesen wird.
+4. Bestätigen Sie, dass Geheimnisse in Protokollen unkenntlich gemacht werden.
+5. Bestätigen Sie, dass die Weiterleitung von Direktnachrichten und Gruppen nur den vorgesehenen Agenten erreicht.
+6. Bestätigen Sie, dass Tools mit hohen Auswirkungen eine Genehmigung anfordern oder abgewiesen werden.
 7. Dokumentieren Sie die akzeptierten verbleibenden Warnungen.
 
-Fahren Sie mit der nächsten Freigabeänderung erst fort, wenn die aktuelle
+Fahren Sie erst mit der nächsten Freigabeänderung fort, wenn die aktuelle Änderung
 verstanden ist.
 
 ## Rücksetzplan
@@ -210,20 +210,20 @@ Anschließend:
 1. Beenden Sie öffentliche Weiterleitungen, Tailscale Funnel oder Reverse-Proxy-Routen.
 2. Rotieren Sie Gateway-Token/-Passwörter und betroffene Integrationsanmeldedaten.
 3. Entfernen Sie `"*"` und unerwartete Absender aus Zulassungslisten.
-4. Überprüfen Sie aktuelle Audit-Protokolle, Ausführungsverläufe, Werkzeugaufrufe und Konfigurationsänderungen.
+4. Überprüfen Sie aktuelle Audit-Protokolle, den Ausführungsverlauf, Tool-Aufrufe und Konfigurationsänderungen.
 5. Führen Sie `openclaw security audit --deep` erneut aus.
-6. Aktivieren Sie den Zugriff wieder mit dem engsten Muster, das den Workflow erfüllt.
+6. Aktivieren Sie den Zugriff erneut mit dem restriktivsten Muster, das den Workflow erfüllt.
 
-## Prüfcheckliste
+## Prüfliste
 
-- Der Gateway bleibt ausschließlich über Loopback erreichbar, sofern kein dokumentierter Grund dagegenspricht.
+- Der Gateway bleibt auf Loopback beschränkt, sofern kein dokumentierter Grund dagegen spricht.
 - Zugriff außerhalb von Loopback verfügt über Authentifizierung und Firewall-Schutz sowie keinen direkten öffentlichen Pfad.
-- Bereitstellungen mit vertrauenswürdigem Proxy verfügen über strikte Proxy-IP-Adressen und Header-Kontrollen.
-- Direktnachrichten verwenden standardmäßig Kopplung oder Zulassungslisten statt offenen Zugriff.
+- Bereitstellungen mit vertrauenswürdigen Proxys verfügen über strikte Proxy-IP-Adressen und Header-Kontrollen.
+- Direktnachrichten verwenden standardmäßig Kopplung oder Zulassungslisten statt offenen Zugriffs.
 - Gruppen erfordern Erwähnungen oder ausdrückliche Zulassungslisten.
-- Gemeinsam genutzte Kanäle haben keinen Zugriff auf persönliche Anmeldedaten.
+- Gemeinsam genutzte Kanäle können nicht auf persönliche Anmeldedaten zugreifen.
 - Nicht-Hauptsitzungen werden im Sandbox-Modus ausgeführt.
-- Host-Ausführung und Werkzeuge mit erhöhten Rechten werden verweigert oder erfordern eine Genehmigung.
-- Protokolle machen Geheimnisse unkenntlich.
+- Die Ausführung auf dem Host und privilegierte Tools werden verweigert oder unterliegen einer Genehmigung.
+- Geheimnisse werden in Protokollen unkenntlich gemacht.
 - Kritische Audit-Befunde sind behoben.
 - Rücksetzschritte sind getestet und dokumentiert.

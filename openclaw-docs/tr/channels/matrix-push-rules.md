@@ -1,32 +1,33 @@
 ---
 read_when:
     - Kendi barındırdığınız Synapse veya Tuwunel için Matrix sessiz akışını ayarlama
-    - Kullanıcılar her önizleme düzenlemesinde değil, yalnızca bloklar tamamlandığında bildirim almak istiyor.
-summary: Sessiz, tamamlanmış önizleme düzenlemeleri için alıcıya özel Matrix anlık bildirim kuralları
-title: Sessiz önizlemeler için Matrix gönderim kuralları
+    - Kullanıcılar her önizleme düzenlemesinde değil, yalnızca bloklar tamamlandığında bildirim almak istiyor
+summary: Sessiz tamamlanmış önizleme düzenlemeleri için alıcı başına Matrix anlık bildirim kuralları
+title: Sessiz önizlemeler için Matrix push kuralları
 x-i18n:
-    generated_at: "2026-07-12T12:04:32Z"
+    generated_at: "2026-07-26T23:12:39Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 3f2260b4cc68f82cbe1aef86b8963b6b40e93f089b31991964fc9282b2c121fb
+    source_hash: 1c58e7e796c3ae6d1ee25de229e4592ab8b4fb4d0d50a9cf868ab5ef35b1dab5
     source_path: channels/matrix-push-rules.md
     workflow: 16
 ---
 
-`channels.matrix.streaming` değeri `"quiet"` olduğunda OpenClaw, tek bir önizleme olayını yerinde düzenleyerek yanıtı akış halinde iletir. Önizlemeler, bildirim oluşturmayan `m.notice` olayları olarak gönderilir ve sonlandırılmış düzenleme `content["com.openclaw.finalized_preview"] = true` ile işaretlenir. Matrix istemcileri, yalnızca kullanıcıya özel bir anlık bildirim kuralı işaretleyiciyle eşleşirse bu son düzenleme için bildirim gönderir. Bu sayfa, Matrix'i kendi altyapısında barındıran ve bu kuralı her alıcı hesabı için yüklemek isteyen operatörlere yöneliktir.
+`channels.matrix.streaming.mode`, `"quiet"` olduğunda OpenClaw, tek bir önizleme olayını yerinde düzenleyerek yanıtı akış halinde iletir. Önizlemeler, bildirim oluşturmayan `m.notice` olayları olarak gönderilir ve tamamlanan düzenleme `content["com.openclaw.finalized_preview"] = true` ile işaretlenir. Matrix istemcileri, yalnızca kullanıcıya özel bir anında bildirim kuralı işaretleyiciyle eşleşirse bu son düzenleme için bildirim gönderir. Bu sayfa, Matrix'i kendi sunucusunda barındıran ve her alıcı hesabı için bu kuralı yüklemek isteyen operatörlere yöneliktir.
 
-`streaming: "progress"` taslaklarını aynı yol üzerinden sonlandırdığından, aynı kural ilerleme modunda sonlandırılan düzenlemeler için de tetiklenir.
+`streaming.mode: "progress"`, taslaklarını aynı yol üzerinden tamamlar; dolayısıyla aynı kural, ilerleme modunda tamamlanan düzenlemeler için de tetiklenir.
 
-Yalnızca standart Matrix bildirim davranışını istiyorsanız `streaming: "partial"` kullanın veya akışı kapalı bırakın. Bkz. [Matrix kanal kurulumu](/tr/channels/matrix#streaming-previews).
+Yalnızca standart Matrix bildirim davranışını istiyorsanız `streaming.mode: "partial"` kullanın veya akışı kapalı bırakın. Bkz. [Matrix kanal kurulumu](/tr/channels/matrix#streaming-previews).
 
 ## Ön koşullar
 
 - alıcı kullanıcı = bildirimi alması gereken kişi
 - bot kullanıcısı = yanıtı gönderen OpenClaw Matrix hesabı
 - aşağıdaki API çağrıları için alıcı kullanıcının erişim belirtecini kullanın
-- anlık bildirim kuralındaki `sender` alanını bot kullanıcısının tam MXID'siyle eşleştirin
-- alıcı hesabında çalışan anlık bildirim göndericileri zaten bulunmalıdır; sessiz önizleme kuralları yalnızca normal Matrix anlık bildirim teslimatı sağlıklı çalıştığında işler
+- anında bildirim kuralındaki `sender` değerini bot kullanıcısının tam MXID'siyle eşleştirin
+- alıcı hesabında çalışan anında bildirim göndericileri zaten bulunmalıdır; sessiz önizleme kuralları yalnızca normal Matrix anında bildirim teslimi sağlıklı olduğunda çalışır
 
 ## Adımlar
 
@@ -37,7 +38,7 @@ Yalnızca standart Matrix bildirim davranışını istiyorsanız `streaming: "pa
 {
   channels: {
     matrix: {
-      streaming: "quiet",
+      streaming: { mode: "quiet" },
     },
   },
 }
@@ -46,7 +47,7 @@ Yalnızca standart Matrix bildirim davranışını istiyorsanız `streaming: "pa
   </Step>
 
   <Step title="Alıcının erişim belirtecini alın">
-    Mümkünse mevcut bir istemci oturumu belirtecini yeniden kullanın. Yeni bir belirteç oluşturmak için:
+    Mümkün olduğunda mevcut bir istemci oturumu belirtecini yeniden kullanın. Yeni bir tane oluşturmak için:
 
 ```bash
 curl -sS -X POST \
@@ -61,7 +62,7 @@ curl -sS -X POST \
 
   </Step>
 
-  <Step title="Anlık bildirim göndericilerinin bulunduğunu doğrulayın">
+  <Step title="Anında bildirim göndericilerinin mevcut olduğunu doğrulayın">
 
 ```bash
 curl -sS \
@@ -69,12 +70,12 @@ curl -sS \
   "https://matrix.example.org/_matrix/client/v3/pushers"
 ```
 
-Hiçbir anlık bildirim göndericisi döndürülmezse devam etmeden önce bu hesap için normal Matrix anlık bildirim teslimatını düzeltin.
+Hiçbir anında bildirim göndericisi dönmezse devam etmeden önce bu hesap için normal Matrix anında bildirim teslimini düzeltin.
 
   </Step>
 
-  <Step title="Geçersiz kılma anlık bildirim kuralını yükleyin">
-    Sonlandırılmış önizleme işaretleyicisiyle ve gönderici olarak bot MXID'siyle eşleşen bir kural yükleyin:
+  <Step title="Geçersiz kılan anında bildirim kuralını yükleyin">
+    Tamamlanan önizleme işaretleyicisiyle ve gönderen olarak bot MXID'siyle eşleşen bir kural yükleyin:
 
 ```bash
 curl -sS -X PUT \
@@ -108,7 +109,7 @@ curl -sS -X PUT \
 
     - `https://matrix.example.org`: ana sunucunuzun temel URL'si
     - `$USER_ACCESS_TOKEN`: alıcı kullanıcının erişim belirteci
-    - `openclaw-finalized-preview-botname`: alıcı ve bot birleşimi başına benzersiz bir kural kimliği (kalıp: `openclaw-finalized-preview-<botname>`)
+    - `openclaw-finalized-preview-botname`: alıcı başına her bot için benzersiz bir kural kimliği (kalıp: `openclaw-finalized-preview-<botname>`)
     - `@bot:example.org`: alıcının değil, OpenClaw botunuzun MXID'si
 
   </Step>
@@ -121,35 +122,35 @@ curl -sS \
   "https://matrix.example.org/_matrix/client/v3/pushrules/global/override/openclaw-finalized-preview-botname"
 ```
 
-Ardından akış halinde iletilen bir yanıtı test edin. Sessiz modda oda, sessiz bir taslak önizlemesi gösterir ve blok veya tur tamamlandığında bir kez bildirim gönderir.
+Ardından akış halinde iletilen bir yanıtı test edin. Sessiz modda oda, sessiz bir taslak önizlemesi gösterir ve blok veya tur tamamlandığında bildirim gönderir.
 
   </Step>
 </Steps>
 
-Kuralı daha sonra kaldırmak için aynı kural URL'sine alıcının belirteciyle `DELETE` isteği gönderin.
+Kuralı daha sonra kaldırmak için alıcının belirteciyle aynı kural URL'sine `DELETE` isteği gönderin.
 
-## Birden çok botla ilgili notlar
+## Çoklu bot notları
 
-Anlık bildirim kuralları `ruleId` ile anahtarlanır: aynı kimliğe yeniden `PUT` isteği göndermek tek bir kuralı günceller. Aynı alıcıya bildirim gönderen birden fazla OpenClaw botu için her bot adına farklı bir gönderici eşleşmesine sahip ayrı bir kural oluşturun.
+Anında bildirim kuralları `ruleId` ile anahtarlanır: aynı kimlik için `PUT` çağrısını yeniden çalıştırmak tek bir kuralı günceller. Aynı alıcıya bildirim gönderen birden fazla OpenClaw botu için, her bot adına farklı bir gönderen eşleşmesine sahip bir kural oluşturun.
 
-Kullanıcı tarafından tanımlanan yeni `override` kuralları, sunucunun varsayılan engelleme kurallarının önüne eklendiğinden ek bir sıralama parametresi gerekmez. Kural yalnızca yerinde sonlandırılabilen salt metin önizleme düzenlemelerini etkiler; medya yanıtları, eski önizleme geri dönüşleri ve Matrix bahsetmelerini etkinleştirecek son metinler bunun yerine normal bildirim oluşturan mesajlar olarak teslim edilir.
+Kullanıcı tanımlı yeni `override` kuralları, sunucunun varsayılan engelleme kurallarının önüne eklenir; dolayısıyla ek bir sıralama parametresi gerekmez. Kural yalnızca yerinde tamamlanabilen salt metin önizleme düzenlemelerini etkiler; medya yanıtları, geçerliliğini yitirmiş önizleme için geri dönüşler ve Matrix bahsetmelerini etkinleştirecek son metinler bunun yerine normal bildirim oluşturan mesajlar olarak teslim edilir.
 
 ## Ana sunucu notları
 
 <AccordionGroup>
   <Accordion title="Synapse">
-    Özel bir `homeserver.yaml` değişikliği gerekmez. Normal Matrix bildirimleri bu kullanıcıya zaten ulaşıyorsa alıcı belirteci ve yukarıdaki `pushrules` çağrısı temel kurulum adımıdır.
+    Özel bir `homeserver.yaml` değişikliği gerekmez. Normal Matrix bildirimleri bu kullanıcıya zaten ulaşıyorsa alıcı belirteci ve yukarıdaki `pushrules` çağrısı ana kurulum adımıdır.
 
-    Synapse'i ters vekil veya işçi süreçlerinin arkasında çalıştırıyorsanız `/_matrix/client/.../pushrules/` yolunun Synapse'e doğru şekilde ulaştığından emin olun. Anlık bildirim teslimatı ana süreç ya da `synapse.app.pusher` / yapılandırılmış anlık bildirim gönderici işçileri tarafından gerçekleştirilir; bunların sağlıklı çalıştığından emin olun.
+    Synapse'i bir ters proxy veya worker'ların arkasında çalıştırıyorsanız `/_matrix/client/.../pushrules/` isteğinin Synapse'e doğru şekilde ulaştığından emin olun. Anında bildirim teslimi ana süreç veya `synapse.app.pusher` / yapılandırılmış anında bildirim worker'ları tarafından gerçekleştirilir; bunların sağlıklı olduğundan emin olun.
 
-    Kural, 2023'te Synapse'e eklenen `event_property_is` anlık bildirim kuralı koşulunu (MSC3758, anlık bildirim kuralı v1.10) kullanır. Eski Synapse sürümleri `PUT pushrules/...` çağrısını kabul eder ancak koşulu sessizce hiçbir zaman eşleştirmez; sonlandırılmış bir önizleme düzenlemesinde bildirim gelmezse Synapse'i yükseltin.
+    Kural, 2023'te Synapse'e eklenen `event_property_is` anında bildirim kuralı koşulunu (MSC3758, anında bildirim kuralı v1.10) kullanır. Eski Synapse sürümleri `PUT pushrules/...` çağrısını kabul eder ancak koşulu hiçbir zaman eşleştirmeden sessizce geçer; tamamlanan bir önizleme düzenlemesinde bildirim gelmezse Synapse'i yükseltin.
 
   </Accordion>
 
   <Accordion title="Tuwunel">
-    Synapse ile aynı akış geçerlidir; sonlandırılmış önizleme işaretleyicisi için Tuwunel'e özgü bir yapılandırma gerekmez.
+    Synapse ile aynı akış geçerlidir; tamamlanan önizleme işaretleyicisi için Tuwunel'e özgü bir yapılandırma gerekmez.
 
-    Kullanıcı başka bir cihazda etkinken bildirimler kayboluyorsa `suppress_push_when_active` seçeneğinin etkin olup olmadığını kontrol edin. Tuwunel bu seçeneği 1.4.2 sürümünde (Eylül 2025) ekledi ve bir cihaz etkinken diğer cihazlara gönderilen anlık bildirimleri bilinçli olarak engelleyebilir.
+    Kullanıcı başka bir cihazda etkin durumdayken bildirimler kayboluyorsa `suppress_push_when_active` seçeneğinin etkin olup olmadığını kontrol edin. Tuwunel bu seçeneği 1.4.2 (Eylül 2025) sürümünde ekledi ve bu seçenek, bir cihaz etkinken diğer cihazlara gönderilen anında bildirimleri kasıtlı olarak engelleyebilir.
 
   </Accordion>
 </AccordionGroup>

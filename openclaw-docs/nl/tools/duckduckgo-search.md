@@ -1,29 +1,30 @@
 ---
 read_when:
-    - U wilt een webzoekprovider waarvoor geen API-sleutel nodig is
+    - Je wilt een webzoekprovider waarvoor geen API-sleutel nodig is
     - Je wilt DuckDuckGo gebruiken voor web_search
-    - U wilt een expliciet geselecteerde zoekprovider zonder sleutel
-summary: DuckDuckGo-zoekopdracht op het web -- provider zonder sleutel (experimenteel, op HTML gebaseerd)
+    - Je wilt een expliciet geselecteerde zoekprovider zonder sleutel
+summary: DuckDuckGo-webzoekfunctie -- provider zonder sleutel (experimenteel, op HTML gebaseerd)
 title: DuckDuckGo-zoekopdracht
 x-i18n:
-    generated_at: "2026-07-12T09:28:50Z"
+    generated_at: "2026-07-27T06:15:28Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 84e90532de276dcb3f73c67015dffe5f5a62be673e44a19053b2b1dfcb0986ac
     source_path: tools/duckduckgo-search.md
     workflow: 16
 ---
 
-OpenClaw ondersteunt DuckDuckGo als **sleutelvrije** `web_search`-provider. Er is geen API-sleutel of account vereist.
+OpenClaw ondersteunt DuckDuckGo als een **sleutelvrije** `web_search`-provider. Er is geen API-sleutel of account vereist.
 
 <Warning>
-  DuckDuckGo is een **experimentele, niet-officiële** integratie die de HTML-zoekpagina's zonder JavaScript van DuckDuckGo uitleest; het is geen officiële API. Houd rekening met incidentele uitval door pagina's met botcontroles of wijzigingen in de HTML.
+  DuckDuckGo is een **experimentele, niet-officiële** integratie die de HTML-zoekpagina's zonder JavaScript van DuckDuckGo scrapt -- het is geen officiële API. Houd rekening met incidentele uitval door pagina's met botcontroles of HTML-wijzigingen.
 </Warning>
 
-## Installatie
+## Instellen
 
-DuckDuckGo wordt nooit automatisch geselecteerd, omdat de automatische detectie alleen providers met bruikbare referenties in aanmerking neemt. Stel de provider expliciet in:
+DuckDuckGo wordt nooit automatisch geselecteerd, omdat automatische detectie alleen rekening houdt met providers met bruikbare referenties. Stel de provider expliciet in:
 
 <Steps>
   <Step title="Configureren">
@@ -80,7 +81,7 @@ Aantal te retourneren resultaten (1-10).
 </ParamField>
 
 <ParamField path="region" type="string">
-DuckDuckGo-regiocode (bijvoorbeeld `us-en`, `uk-en`, `de-de`).
+DuckDuckGo-regiocode (bijv. `us-en`, `uk-en`, `de-de`).
 </ParamField>
 
 <ParamField path="safeSearch" type="'strict' | 'moderate' | 'off'" default="moderate">
@@ -92,13 +93,13 @@ De toolparameters `region` en `safeSearch` overschrijven per zoekopdracht de bov
 ## Opmerkingen
 
 - **Geen API-sleutel** -- werkt zodra DuckDuckGo als `web_search`-provider is geselecteerd.
-- **Experimenteel** -- leest de HTML-zoekpagina's zonder JavaScript van DuckDuckGo uit en gebruikt geen officiële API of SDK. De resultaten zijn afhankelijk van de paginastructuur, die zonder voorafgaande kennisgeving kan veranderen.
+- **Experimenteel** -- scrapt de HTML-zoekpagina's zonder JavaScript van DuckDuckGo en gebruikt geen officiële API of SDK. Resultaten zijn afhankelijk van de paginastructuur, die zonder voorafgaande kennisgeving kan veranderen.
 - **Risico op botcontroles** -- DuckDuckGo kan CAPTCHA's tonen of verzoeken blokkeren bij intensief of geautomatiseerd gebruik.
-- **Alleen expliciete selectie** -- de automatische detectie van OpenClaw neemt alleen providers met bruikbare referenties in aanmerking. Daarom wordt een sleutelvrije provider zoals DuckDuckGo nooit automatisch gekozen; u moet `provider: "duckduckgo"` instellen.
-- **SafeSearch is standaard ingesteld op `moderate`** wanneer dit niet is geconfigureerd.
+- **Alleen expliciete selectie** -- de automatische detectie van OpenClaw houdt alleen rekening met providers met bruikbare referenties. Daarom wordt een sleutelvrije provider zoals DuckDuckGo nooit automatisch gekozen; je moet `provider: "duckduckgo"` instellen.
+- **SafeSearch gebruikt standaard `moderate`** wanneer dit niet is geconfigureerd.
 
 <Tip>
-  Overweeg voor productiegebruik [Brave Search](/nl/tools/brave-search) (gratis niveau beschikbaar) of een andere provider met een API.
+  Overweeg voor productiegebruik [Brave Search](/nl/tools/brave-search) (gratis niveau beschikbaar) of een andere provider op basis van een API.
 </Tip>
 
 ## Gerelateerd

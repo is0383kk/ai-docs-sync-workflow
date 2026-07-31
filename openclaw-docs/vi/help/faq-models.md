@@ -4,24 +4,25 @@ read_when:
     - Gỡ lỗi chuyển đổi dự phòng mô hình / "Tất cả mô hình đều thất bại"
     - Tìm hiểu về hồ sơ xác thực và cách quản lý chúng
 sidebarTitle: Models FAQ
-summary: 'Câu hỏi thường gặp: mặc định mô hình, lựa chọn, bí danh, chuyển đổi, dự phòng khi lỗi và hồ sơ xác thực'
+summary: 'Câu hỏi thường gặp: mô hình mặc định, lựa chọn, bí danh, chuyển đổi, chuyển đổi dự phòng và hồ sơ xác thực'
 title: 'Câu hỏi thường gặp: mô hình và xác thực'
 x-i18n:
-    generated_at: "2026-07-12T07:59:02Z"
+    generated_at: "2026-07-20T04:39:06Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 071e89c01120849179d3bc372153eb2c76a0fa4e93846df42920f0d961d597df
+    source_hash: 73272916f3db17d101c777639c5a5153bfbcfa887929a5726f3c94c3cb29aaf9
     source_path: help/faq-models.md
     workflow: 16
 ---
 
-  Hỏi đáp về mô hình và hồ sơ xác thực. Để biết về thiết lập, phiên, Gateway, kênh và
-  khắc phục sự cố, hãy xem [Câu hỏi thường gặp](/vi/help/faq) chính.
+Hỏi đáp về mô hình và hồ sơ xác thực. Để biết về thiết lập, phiên, gateway, kênh và
+khắc phục sự cố, hãy xem [Câu hỏi thường gặp](/vi/help/faq) chính.
 
-  ## Mô hình: mặc định, lựa chọn, bí danh, chuyển đổi
+## Mô hình: mặc định, lựa chọn, bí danh, chuyển đổi
 
-  <AccordionGroup>
+<AccordionGroup>
   <Accordion title='"Mô hình mặc định" là gì?'>
     Thiết lập bằng:
 
@@ -29,27 +30,28 @@ x-i18n:
     agents.defaults.model.primary
     ```
 
-    Mô hình là các tham chiếu `provider/model` (ví dụ: `openai/gpt-5.5`,
-    `anthropic/claude-sonnet-4-6`). Luôn thiết lập `provider/model` một cách tường minh. Nếu
-    bạn bỏ qua nhà cung cấp, OpenClaw trước tiên thử khớp bí danh, sau đó tìm một
-    kết quả khớp duy nhất trong các nhà cung cấp đã cấu hình cho mã định danh mô hình đó, rồi chuyển về
-    nhà cung cấp mặc định đã cấu hình (đường dẫn tương thích đã lỗi thời). Nếu
-    nhà cung cấp đó không còn mô hình mặc định đã cấu hình, OpenClaw sẽ chuyển sang
-    nhà cung cấp/mô hình đầu tiên đã cấu hình thay vì dùng giá trị mặc định lỗi thời.
+    Các mô hình là các tham chiếu `provider/model` (ví dụ: `openai/gpt-5.5`,
+    `anthropic/claude-sonnet-4-6`). Luôn đặt `provider/model` một cách tường minh. Nếu
+    bạn bỏ qua nhà cung cấp, OpenClaw trước tiên thử khớp bí danh, sau đó khớp
+    duy nhất với nhà cung cấp đã cấu hình cho id mô hình đó, rồi chuyển về nhà
+    cung cấp mặc định đã cấu hình (đường dẫn tương thích đã lỗi thời). Nếu nhà
+    cung cấp đó không còn có mô hình mặc định đã cấu hình, OpenClaw sẽ chuyển
+    sang nhà cung cấp/mô hình đầu tiên đã cấu hình thay vì dùng giá trị mặc định cũ.
 
   </Accordion>
 
-  <Accordion title="Bạn khuyên dùng mô hình nào?">
-    Hãy dùng mô hình thế hệ mới nhất và mạnh nhất mà hệ thống nhà cung cấp của bạn cung cấp,
-    đặc biệt đối với tác tử có quyền dùng công cụ hoặc nhận đầu vào không đáng tin cậy — các mô hình yếu hơn hoặc
-    bị lượng tử hóa quá mức dễ bị chèn lời nhắc và có hành vi không an toàn hơn
-    (xem [Bảo mật](/vi/gateway/security)). Định tuyến các mô hình rẻ hơn cho
-    trò chuyện thường lệ/ít rủi ro theo vai trò tác tử.
+  <Accordion title="Bạn đề xuất mô hình nào?">
+    Sử dụng mô hình thế hệ mới nhất và mạnh nhất mà hệ thống nhà cung cấp của
+    bạn cung cấp, đặc biệt cho các tác nhân có bật công cụ hoặc xử lý đầu vào
+    không đáng tin cậy — các mô hình yếu hơn hoặc bị lượng tử hóa quá mức dễ bị
+    chèn prompt và có hành vi không an toàn hơn (xem [Bảo mật](/vi/gateway/security)).
+    Định tuyến các mô hình rẻ hơn đến những cuộc trò chuyện thường lệ/ít rủi ro
+    theo vai trò tác nhân.
 
-    Định tuyến mô hình theo từng tác tử và dùng tác tử con để xử lý song song các tác vụ dài (mỗi
-    tác tử con tiêu thụ lượng token riêng). Xem [Mô hình](/vi/concepts/models),
-    [Tác tử con](/vi/tools/subagents), [MiniMax](/vi/providers/minimax) và
-    [Mô hình cục bộ](/vi/gateway/local-models).
+    Định tuyến mô hình theo từng tác nhân và dùng tác nhân con để song song hóa
+    các tác vụ dài (mỗi tác nhân con tiêu thụ token riêng). Xem
+    [Mô hình](/vi/concepts/models), [Tác nhân con](/vi/tools/subagents),
+    [MiniMax](/vi/providers/minimax) và [Mô hình cục bộ](/vi/gateway/local-models).
 
   </Accordion>
 
@@ -61,12 +63,13 @@ x-i18n:
     - `openclaw configure --section model` (tương tác)
     - chỉnh sửa trực tiếp `agents.defaults.model` trong `~/.openclaw/openclaw.json`
 
-    Đối với chỉnh sửa qua RPC, trước tiên hãy kiểm tra bằng `config.schema.lookup` (đường dẫn
-    đã chuẩn hóa, tài liệu lược đồ cấp nông, bản tóm tắt phần tử con), sau đó ưu tiên `config.patch`
-    thay vì `config.apply` với một đối tượng không đầy đủ. Nếu bạn đã ghi đè cấu hình,
-    hãy khôi phục từ bản sao lưu hoặc chạy `openclaw doctor` để sửa chữa.
+    Đối với chỉnh sửa RPC, trước tiên hãy kiểm tra bằng `config.schema.lookup`
+    (đường dẫn đã chuẩn hóa, tài liệu schema nông, phần tóm tắt mục con), sau đó
+    ưu tiên `config.patch` thay vì `config.apply` với một đối tượng một
+    phần. Nếu bạn đã ghi đè cấu hình, hãy khôi phục từ bản sao lưu hoặc chạy
+    `openclaw doctor` để sửa chữa.
 
-    Tài liệu: [Mô hình](/vi/concepts/models), [Cấu hình tương tác](/vi/cli/configure),
+    Tài liệu: [Mô hình](/vi/concepts/models), [Cấu hình](/vi/cli/configure),
     [Cấu hình](/vi/cli/config), [Doctor](/vi/gateway/doctor).
 
   </Accordion>
@@ -75,30 +78,31 @@ x-i18n:
     Có — Ollama là cách dễ nhất. Thiết lập nhanh:
 
     1. Cài đặt Ollama từ `https://ollama.com/download`
-    2. Tải một mô hình cục bộ, ví dụ `ollama pull gemma4`
-    3. Để dùng cả các mô hình đám mây, hãy chạy `ollama signin`
+    2. Kéo một mô hình cục bộ, ví dụ `ollama pull gemma4`
+    3. Để dùng cả mô hình đám mây, hãy chạy `ollama signin`
     4. Chạy `openclaw onboard`, chọn `Ollama`, sau đó chọn `Local` hoặc `Cloud + Local`
 
-    `Cloud + Local` cung cấp cho bạn các mô hình đám mây cùng với các mô hình Ollama cục bộ;
-    các mô hình đám mây như `kimi-k2.5:cloud` không cần tải về cục bộ. Để chuyển đổi
-    thủ công: `openclaw models list`, sau đó `openclaw models set ollama/<model>`.
+    `Cloud + Local` cung cấp cho bạn các mô hình đám mây cùng với các mô
+    hình Ollama cục bộ; các mô hình đám mây như `kimi-k2.5:cloud` không cần
+    kéo về cục bộ. Để chuyển thủ công: `openclaw models list`, sau đó
+    `openclaw models set ollama/<model>`.
 
-    Các mô hình nhỏ hơn/bị lượng tử hóa mạnh dễ bị chèn lời nhắc hơn.
-    Hãy dùng mô hình lớn cho mọi bot có quyền truy cập công cụ; nếu vẫn dùng mô hình nhỏ,
-    hãy bật chế độ hộp cát và danh sách cho phép công cụ nghiêm ngặt.
+    Các mô hình nhỏ hơn/bị lượng tử hóa mạnh dễ bị chèn prompt hơn. Hãy dùng
+    mô hình lớn cho mọi bot có quyền truy cập công cụ; nếu vẫn dùng mô hình nhỏ,
+    hãy bật sandbox và danh sách cho phép công cụ nghiêm ngặt.
 
     Tài liệu: [Ollama](/vi/providers/ollama), [Mô hình cục bộ](/vi/gateway/local-models),
     [Nhà cung cấp mô hình](/vi/concepts/model-providers), [Bảo mật](/vi/gateway/security),
-    [Chế độ hộp cát](/vi/gateway/sandboxing).
+    [Sandbox](/vi/gateway/sandboxing).
 
   </Accordion>
 
-  <Accordion title="Làm cách nào để chuyển mô hình tức thời (không cần khởi động lại)?">
+  <Accordion title="Làm cách nào để chuyển mô hình tức thời (mà không khởi động lại)?">
     Gửi `/model <name>` dưới dạng một tin nhắn độc lập. Xem
     [Lệnh dấu gạch chéo](/vi/tools/slash-commands) để biết
-    danh sách lệnh đầy đủ, bao gồm bộ chọn được đánh số (`/model`, `/model
-    list`, `/model 3`), `/model default` để xóa giá trị ghi đè của phiên và
-    `/model status` để xem chi tiết điểm cuối/chế độ API.
+    danh sách lệnh đầy đủ, bao gồm bộ chọn đánh số (`/model`, `/model
+    list`, `/model 3`), `/model default` để xóa ghi đè phiên và
+    `/model status` để biết chi tiết về endpoint/chế độ API.
 
     Buộc dùng một hồ sơ xác thực cụ thể cho từng phiên bằng `@profile`:
 
@@ -107,44 +111,46 @@ x-i18n:
     /model opus@anthropic:work
     ```
 
-    Để bỏ ghim hồ sơ đã thiết lập bằng `@profile`, hãy chạy lại `/model` mà không có
-    hậu tố (ví dụ: `/model anthropic/claude-opus-4-6`), hoặc chọn giá trị mặc định từ
-    `/model`. Dùng `/model status` để xác nhận hồ sơ xác thực đang hoạt động.
+    Để bỏ ghim hồ sơ đã đặt bằng `@profile`, hãy chạy lại
+    `/model` mà không có hậu tố (ví dụ `/model anthropic/claude-opus-4-6`), hoặc chọn
+    giá trị mặc định từ `/model`. Dùng `/model status` để xác nhận
+    hồ sơ xác thực đang hoạt động.
 
   </Accordion>
 
-  <Accordion title="Nếu hai nhà cung cấp cung cấp cùng một mã định danh mô hình, /model sẽ dùng nhà cung cấp nào?">
-    `/model provider/model` chọn chính xác tuyến nhà cung cấp đó. Ví dụ:
+  <Accordion title="Nếu hai nhà cung cấp cung cấp cùng một id mô hình, /model sẽ dùng nhà cung cấp nào?">
+    `/model provider/model` chọn chính xác tuyến nhà cung cấp đó. Ví dụ,
     `qianfan/deepseek-v4-flash` và `deepseek/deepseek-v4-flash` là các tham chiếu khác nhau
-    dù có cùng mã định danh mô hình — OpenClaw không âm thầm chuyển đổi
-    nhà cung cấp khi chỉ khớp mã định danh trần.
+    dù id mô hình giống nhau — OpenClaw không âm thầm chuyển nhà cung cấp khi
+    chỉ khớp id đơn thuần.
 
-    Tham chiếu `/model` do người dùng chọn áp dụng nghiêm ngặt đối với chuyển đổi dự phòng: nếu
-    nhà cung cấp/mô hình đó không còn khả dụng, phản hồi sẽ thất bại một cách rõ ràng thay vì
-    chuyển về `agents.defaults.model.fallbacks`. Các chuỗi dự phòng đã cấu hình
-    vẫn áp dụng cho giá trị mặc định đã cấu hình, mô hình chính của tác vụ Cron và
-    trạng thái dự phòng được chọn tự động. Khi một lượt chạy không có giá trị ghi đè theo phiên
-    được phép dùng phương án dự phòng, OpenClaw sẽ thử nhà cung cấp/mô hình được yêu cầu trước, sau đó
-    thử các phương án dự phòng đã cấu hình, rồi đến mô hình chính đã cấu hình — vì vậy các
-    mã định danh mô hình trần trùng nhau không bao giờ chuyển thẳng trở lại nhà cung cấp mặc định.
+    Tham chiếu `/model` do người dùng chọn áp dụng nghiêm ngặt cho
+    việc dự phòng: nếu nhà cung cấp/mô hình đó không còn khả dụng, phản hồi sẽ
+    thất bại rõ ràng thay vì chuyển về `agents.defaults.model.fallbacks`. Các chuỗi dự phòng
+    đã cấu hình vẫn áp dụng cho giá trị mặc định đã cấu hình, mô hình chính của
+    công việc cron và trạng thái dự phòng được chọn tự động. Khi một lượt chạy
+    không ghi đè phiên được phép dùng dự phòng, OpenClaw trước tiên thử nhà
+    cung cấp/mô hình được yêu cầu, sau đó các lựa chọn dự phòng đã cấu hình, rồi
+    đến mô hình chính đã cấu hình — vì vậy các id mô hình đơn thuần trùng nhau
+    không bao giờ chuyển thẳng về nhà cung cấp mặc định.
 
     Xem [Mô hình](/vi/concepts/models) và [Chuyển đổi dự phòng mô hình](/vi/concepts/model-failover).
 
   </Accordion>
 
   <Accordion title="Tôi có thể dùng GPT 5.5 cho tác vụ hằng ngày và Codex 5.5 để lập trình không?">
-    Có — lựa chọn mô hình và lựa chọn môi trường thực thi là hai việc riêng biệt:
+    Có — lựa chọn mô hình và lựa chọn runtime là hai việc riêng biệt:
 
-    - **Tác tử lập trình Codex nguyên bản:** đặt `agents.defaults.model.primary` thành
+    - **Tác nhân lập trình Codex gốc:** đặt `agents.defaults.model.primary` thành
       `openai/gpt-5.5`. Đăng nhập bằng `openclaw models auth login --provider
       openai` để xác thực bằng gói đăng ký ChatGPT/Codex.
-    - **Tác vụ OpenAI API trực tiếp ngoài vòng lặp tác tử:** cấu hình
-      `OPENAI_API_KEY` cho hình ảnh, embedding, giọng nói, thời gian thực và các
-      bề mặt OpenAI API không thuộc tác tử khác.
-    - **Xác thực tác tử OpenAI bằng khóa API:** `/model openai/gpt-5.5` với một
-      hồ sơ khóa API `openai` có thứ tự ưu tiên.
-    - **Tác tử con:** định tuyến các tác vụ lập trình đến một tác tử tập trung vào Codex với
-      mô hình `openai/gpt-5.5` riêng.
+    - **Tác vụ OpenAI API trực tiếp bên ngoài vòng lặp tác nhân:** cấu hình
+      `OPENAI_API_KEY` cho hình ảnh, embedding, giọng nói, thời gian thực và
+      các bề mặt OpenAI API không dành cho tác nhân khác.
+    - **Xác thực tác nhân OpenAI bằng khóa API:** `/model openai/gpt-5.5` với một
+      hồ sơ khóa API `openai` có thứ tự.
+    - **Tác nhân con:** định tuyến tác vụ lập trình đến một tác nhân chuyên
+      về Codex với mô hình `openai/gpt-5.5` riêng.
 
     Xem [Mô hình](/vi/concepts/models) và [Lệnh dấu gạch chéo](/vi/tools/slash-commands).
 
@@ -154,10 +160,11 @@ x-i18n:
     - **Theo từng phiên:** gửi `/fast on` khi đang dùng `openai/gpt-5.5`.
     - **Mặc định theo từng mô hình:** đặt
       `agents.defaults.models["openai/gpt-5.5"].params.fastMode` thành `true`.
-    - **Ngưỡng tự động:** `/fast auto` hoặc `params.fastMode: "auto"` chạy nhanh các
-      lệnh gọi mô hình mới cho đến ngưỡng, sau đó chạy các lệnh gọi thử lại, dự phòng,
-      kết quả công cụ hoặc tiếp tục mà không dùng chế độ nhanh. Ngưỡng mặc định là
-      60 giây; ghi đè bằng `params.fastAutoOnSeconds` trên mô hình.
+    - **Ngưỡng ngắt tự động:** `/fast auto` hoặc `params.fastMode: "auto"` chạy
+      nhanh các lệnh gọi mô hình mới cho đến ngưỡng ngắt, sau đó chạy các lệnh
+      gọi thử lại, dự phòng, kết quả công cụ hoặc tiếp tục về sau mà không có
+      chế độ nhanh. Ngưỡng ngắt mặc định là 60 giây; ghi đè bằng
+      `params.fastAutoOnSeconds` trên mô hình.
 
     ```json5
     {
@@ -176,50 +183,53 @@ x-i18n:
     }
     ```
 
-    Chế độ nhanh ánh xạ thành `service_tier = "priority"` trên các yêu cầu OpenAI Responses
-    nguyên bản; các giá trị `service_tier` hiện có được giữ nguyên và chế độ nhanh không
-    ghi lại `reasoning` hoặc `text.verbosity`. Giá trị ghi đè `/fast` của phiên được ưu tiên hơn
-    giá trị mặc định trong cấu hình.
+    Chế độ nhanh ánh xạ đến `service_tier = "priority"` trên các yêu cầu OpenAI
+    Responses gốc; các giá trị `service_tier` hiện có được giữ nguyên và
+    chế độ nhanh không ghi lại `reasoning` hoặc `text.verbosity`. Các
+    ghi đè `/fast` của phiên được ưu tiên hơn giá trị mặc định trong
+    cấu hình.
 
-    Xem [Chế độ suy nghĩ và chế độ nhanh](/vi/tools/thinking) và phần Chế độ nhanh
-    trong mục Cấu hình nâng cao trên trang nhà cung cấp [OpenAI](/vi/providers/openai).
+    Xem [Suy luận và chế độ nhanh](/vi/tools/thinking) và phần Chế độ nhanh
+    trong Cấu hình nâng cao trên trang nhà cung cấp [OpenAI](/vi/providers/openai).
 
   </Accordion>
 
   <Accordion title='Tại sao tôi thấy "Model ... is not allowed" rồi không có phản hồi?'>
-    Nếu `agents.defaults.models` được thiết lập, nó sẽ trở thành **danh sách cho phép** cho
-    `/model` và các giá trị ghi đè của phiên. Việc chọn một mô hình ngoài danh sách đó sẽ trả về
-    nội dung này thay vì phản hồi thông thường:
+    Nếu `agents.defaults.modelPolicy.allow` không rỗng, nó trở thành
+    **danh sách cho phép** cho `/model`, các ghi đè phiên và
+    `--model`. Việc chọn một mô hình ngoài danh sách đó sẽ trả về nội
+    dung sau thay vì phản hồi thông thường:
 
     ```text
-    Model "provider/model" is not allowed. Use /models to list providers, or /models <provider> to list models.
-    Add it with: openclaw config set agents.defaults.models '{"provider/model":{}}' --strict-json --merge
+    Model override "provider/model" is not allowed by agents.defaults.modelPolicy.allow.
     ```
 
-    Cách khắc phục: thêm chính xác mô hình vào `agents.defaults.models`, thêm ký tự đại diện
-    cho nhà cung cấp như `"provider/*": {}` đối với danh mục động, xóa
-    danh sách cho phép hoặc chọn một mô hình từ `/model list`. Nếu lệnh cũng
-    bao gồm `--runtime codex`, trước tiên hãy cập nhật danh sách cho phép, sau đó thử lại
-    cùng lệnh `/model provider/model --runtime codex`.
+    Cách khắc phục: thêm chính xác mô hình hoặc ký tự đại diện nhà cung cấp như
+    `"provider/*"` vào danh sách `modelPolicy.allow` được nêu tên, xóa/làm
+    rỗng danh sách đó hoặc chọn một mô hình từ `/model list`. Nếu lệnh
+    cũng bao gồm `--runtime codex`, trước tiên hãy cập nhật danh sách cho
+    phép, sau đó thử lại cùng lệnh `/model provider/model --runtime codex`.
 
   </Accordion>
 
   <Accordion title='Tại sao tôi thấy "Unknown model: minimax/MiniMax-M3"?'>
-    Nếu bạn đang dùng một bản phát hành OpenClaw cũ, trước tiên hãy nâng cấp (hoặc chạy từ mã nguồn
-    `main`) và khởi động lại Gateway — `MiniMax-M3` có thể chưa có trong
-    danh mục của bản phát hành đã cài đặt. Nếu không, nhà cung cấp MiniMax chưa được
-    cấu hình (không tìm thấy mục nhà cung cấp hoặc hồ sơ xác thực), nên không thể
-    phân giải mô hình. Xem phần Khắc phục sự cố trên
-    trang nhà cung cấp [MiniMax](/vi/providers/minimax) để biết danh sách kiểm tra khắc phục đầy đủ,
-    bảng mã định danh nhà cung cấp/mô hình và ví dụ khối cấu hình.
+    Nếu bạn đang dùng một bản phát hành OpenClaw cũ, trước tiên hãy nâng cấp
+    (hoặc chạy từ mã nguồn `main`) và khởi động lại Gateway —
+    `MiniMax-M3` có thể chưa có trong danh mục của bản phát hành đã cài
+    đặt. Nếu không, nhà cung cấp MiniMax chưa được cấu hình (không tìm thấy mục
+    nhà cung cấp hoặc hồ sơ xác thực), nên không thể phân giải mô hình. Xem
+    phần Khắc phục sự cố trên trang nhà cung cấp
+    [MiniMax](/vi/providers/minimax) để biết danh sách kiểm tra khắc phục đầy đủ,
+    bảng id nhà cung cấp/mô hình và ví dụ khối cấu hình.
 
   </Accordion>
 
   <Accordion title="Tôi có thể dùng MiniMax làm mặc định và OpenAI cho các tác vụ phức tạp không?">
-    Có. Dùng MiniMax làm mặc định và chuyển mô hình theo từng phiên — phương án dự phòng
-    dành cho lỗi, không phải "tác vụ khó", vì vậy hãy dùng `/model` hoặc một tác tử riêng.
+    Có. Dùng MiniMax làm mặc định và chuyển mô hình theo từng phiên — các lựa
+    chọn dự phòng dành cho lỗi, không phải "tác vụ khó", vì vậy hãy dùng
+    `/model` hoặc một tác nhân riêng.
 
-    **Phương án A: chuyển theo từng phiên**
+    **Tùy chọn A: chuyển theo từng phiên**
 
     ```json5
     {
@@ -236,19 +246,20 @@ x-i18n:
     }
     ```
 
-    Sau đó dùng `/model gpt`.
+    Sau đó `/model gpt`.
 
-    **Phương án B: các tác tử riêng biệt** — Tác tử A mặc định dùng MiniMax, Tác tử B
-    mặc định dùng OpenAI; định tuyến theo tác tử hoặc dùng `/agent` để chuyển đổi.
+    **Tùy chọn B: các tác nhân riêng biệt** — Tác nhân A mặc định dùng MiniMax,
+    Tác nhân B mặc định dùng OpenAI; định tuyến theo tác nhân hoặc dùng
+    `/agent` để chuyển đổi.
 
-    Tài liệu: [Mô hình](/vi/concepts/models), [Định tuyến đa tác tử](/vi/concepts/multi-agent),
+    Tài liệu: [Mô hình](/vi/concepts/models), [Định tuyến đa tác nhân](/vi/concepts/multi-agent),
     [MiniMax](/vi/providers/minimax), [OpenAI](/vi/providers/openai).
 
   </Accordion>
 
   <Accordion title="opus / sonnet / gpt có phải là lối tắt tích hợp sẵn không?">
-    Có — đây là các dạng viết tắt tích hợp sẵn, chỉ được áp dụng khi mô hình đích tồn tại trong
-    `agents.defaults.models`:
+    Có — đây là các dạng viết tắt tích hợp sẵn, chỉ được áp dụng khi mô hình
+    đích tồn tại trong `agents.defaults.models`:
 
     | Bí danh | Phân giải thành |
     | --- | --- |
@@ -266,7 +277,7 @@ x-i18n:
   </Accordion>
 
   <Accordion title="Làm cách nào để định nghĩa/ghi đè lối tắt mô hình (bí danh)?">
-    Bí danh nằm tại `agents.defaults.models.<modelId>.alias`:
+    Các bí danh nằm tại `agents.defaults.models.<modelId>.alias`:
 
     ```json5
     {
@@ -282,8 +293,8 @@ x-i18n:
     }
     ```
 
-    Sau đó `/model sonnet` (hoặc `/<alias>` khi được hỗ trợ) sẽ phân giải thành
-    mã định danh mô hình đó.
+    Sau đó `/model sonnet` (hoặc `/<alias>` khi được hỗ trợ) sẽ
+    phân giải thành id mô hình đó.
 
   </Accordion>
 
@@ -316,22 +327,23 @@ x-i18n:
     }
     ```
 
-    Thiếu khóa nhà cung cấp cho một nhà cung cấp/mô hình được tham chiếu sẽ gây ra lỗi
-    xác thực khi chạy (ví dụ: `No API key found for provider "zai"`).
+    Thiếu khóa nhà cung cấp cho một nhà cung cấp/mô hình được tham chiếu sẽ gây
+    ra lỗi xác thực runtime (ví dụ `No API key found for provider "zai"`).
 
-    **Không tìm thấy khóa API cho nhà cung cấp sau khi thêm tác tử mới**
+    **Không tìm thấy khóa API cho nhà cung cấp sau khi thêm tác nhân mới**
 
-    Một tác tử mới có kho xác thực trống — xác thực được lưu riêng theo từng tác tử tại:
+    Tác nhân mới có kho xác thực trống — xác thực được lưu riêng theo từng tác
+    nhân tại:
 
     ```text
     ~/.openclaw/agents/<agentId>/agent/auth-profiles.json
     ```
 
-    Cách khắc phục: chạy `openclaw agents add <id>` và cấu hình xác thực trong trình hướng dẫn, hoặc
-    chỉ sao chép các hồ sơ `api_key`/`token` tĩnh có tính di động từ kho của
-    tác nhân chính. Với OAuth, hãy đăng nhập từ tác nhân mới khi tác nhân đó cần
-    tài khoản riêng. Xem [Định tuyến đa tác nhân](/vi/concepts/multi-agent) để biết
-    đầy đủ các quy tắc tái sử dụng `agentDir` và chia sẻ thông tin xác thực — tuyệt đối không tái sử dụng
+    Khắc phục: chạy `openclaw agents add <id>` và cấu hình xác thực trong trình hướng dẫn, hoặc
+    chỉ sao chép các hồ sơ tĩnh có tính di động `api_key`/`token` từ kho của
+    tác nhân chính. Đối với OAuth, hãy đăng nhập từ tác nhân mới khi tác nhân đó cần
+    tài khoản riêng. Xem [Định tuyến đa tác nhân](/vi/concepts/multi-agent) để biết đầy đủ
+    các quy tắc tái sử dụng `agentDir` và chia sẻ thông tin xác thực — tuyệt đối không tái sử dụng
     `agentDir` giữa các tác nhân.
 
   </Accordion>
@@ -341,96 +353,96 @@ x-i18n:
 
 <AccordionGroup>
   <Accordion title="Cơ chế chuyển đổi dự phòng hoạt động như thế nào?">
-    Gồm hai giai đoạn:
+    Hai giai đoạn:
 
-    1. **Luân chuyển hồ sơ xác thực** trong cùng một nhà cung cấp.
+    1. **Luân phiên hồ sơ xác thực** trong cùng một nhà cung cấp.
     2. **Dự phòng mô hình** sang mô hình tiếp theo trong `agents.defaults.model.fallbacks`.
 
     Thời gian tạm ngưng được áp dụng cho các hồ sơ gặp lỗi (thời gian chờ tăng theo cấp số nhân), nhờ đó OpenClaw
-    tiếp tục phản hồi khi nhà cung cấp giới hạn tốc độ hoặc tạm thời gặp sự cố.
+    tiếp tục phản hồi khi nhà cung cấp giới hạn tốc độ hoặc tạm thời gặp lỗi.
 
-    Nhóm giới hạn tốc độ không chỉ bao gồm mã `429`: `Too many concurrent
+    Nhóm giới hạn tốc độ bao gồm nhiều trường hợp hơn `429` thông thường: `Too many concurrent
     requests`, `ThrottlingException`, `concurrency limit reached`, `workers_ai
     ... quota limit exceeded`, `resource exhausted` và các giới hạn
     cửa sổ sử dụng định kỳ (`weekly/monthly limit reached`) đều được tính là
-    giới hạn tốc độ cần chuyển đổi dự phòng.
+    giới hạn tốc độ đủ điều kiện để chuyển đổi dự phòng.
 
-    Phản hồi thanh toán không phải lúc nào cũng là `402`, và một số mã `402` vẫn thuộc
-    nhóm tạm thời/giới hạn tốc độ thay vì luồng thanh toán. Nội dung
-    thanh toán rõ ràng trong `401`/`403` vẫn có thể được định tuyến sang luồng thanh toán; các
-    bộ so khớp nội dung dành riêng cho nhà cung cấp (ví dụ: `Key limit exceeded` của OpenRouter) vẫn chỉ áp dụng cho
-    chính nhà cung cấp đó. Mã `402` có nội dung giống giới hạn cửa sổ sử dụng có thể thử lại hoặc
+    Phản hồi thanh toán không phải lúc nào cũng là `402`, và một số `402` vẫn nằm trong
+    nhóm tạm thời/giới hạn tốc độ thay vì luồng thanh toán. Nội dung thanh toán rõ ràng trên
+    `401`/`403` vẫn có thể được định tuyến sang luồng thanh toán; các bộ so khớp
+    văn bản dành riêng cho nhà cung cấp (ví dụ: OpenRouter `Key limit exceeded`) vẫn chỉ áp dụng cho
+    chính nhà cung cấp đó. Một `402` có nội dung giống giới hạn cửa sổ sử dụng có thể thử lại hoặc
     giới hạn chi tiêu của tổ chức/không gian làm việc (`daily limit reached, resets tomorrow`,
-    `organization spending limit exceeded`) được xử lý là `rate_limit`, không phải
-    vô hiệu hóa dài hạn do thanh toán.
+    `organization spending limit exceeded`) được xử lý là `rate_limit`, chứ không phải
+    trạng thái vô hiệu hóa dài hạn do thanh toán.
 
     Lỗi tràn ngữ cảnh hoàn toàn không đi theo đường dẫn dự phòng — các dấu hiệu
     như `request_too_large`, `input exceeds the maximum number of tokens`,
     `input token count exceeds the maximum number of input tokens`, `input is
     too long for the model` hoặc `ollama error: context length exceeded` sẽ chuyển sang
-    Compaction/thử lại thay vì chuyển tiếp sang mô hình dự phòng.
+    Compaction/thử lại thay vì chuyển sang mô hình dự phòng tiếp theo.
 
-    Nội dung lỗi máy chủ chung có phạm vi hẹp hơn "bất kỳ nội dung nào chứa unknown/error".
-    Các dạng lỗi tạm thời theo phạm vi nhà cung cấp được tính là tín hiệu chuyển đổi dự phòng
-    gồm: lỗi trần `An unknown error occurred` của Anthropic, lỗi trần
-    `Provider returned error` của OpenRouter, lỗi lý do dừng như `Unhandled stop reason:
-    error`, tải trọng JSON `api_error` có nội dung lỗi máy chủ tạm thời (`internal
+    Văn bản lỗi máy chủ chung có phạm vi hẹp hơn "bất kỳ nội dung nào chứa unknown/error".
+    Các dạng lỗi tạm thời theo từng nhà cung cấp được tính là tín hiệu chuyển đổi dự phòng:
+    `An unknown error occurred` độc lập của Anthropic, `Provider returned error` độc lập của
+    OpenRouter, lỗi lý do dừng như `Unhandled stop reason:
+    error`, tải trọng JSON `api_error` chứa văn bản lỗi máy chủ tạm thời (`internal
     server error`, `unknown error, 520`, `upstream error`, `backend error`)
     và lỗi nhà cung cấp đang bận như `ModelNotReadyException` khi ngữ cảnh nhà cung cấp
-    khớp. Nội dung dự phòng nội bộ chung như `LLM request failed
-    with an unknown error.` được xử lý thận trọng và bản thân nó không kích hoạt chuyển đổi dự phòng.
+    khớp. Văn bản dự phòng nội bộ chung như `LLM request failed
+    with an unknown error.` được xử lý thận trọng và tự nó không kích hoạt chuyển đổi dự phòng.
 
   </Accordion>
 
-  <Accordion title='"No credentials found for profile anthropic:default" có nghĩa là gì?'>
+  <Accordion title='Thông báo "No credentials found for profile anthropic:default" có nghĩa là gì?'>
     ID hồ sơ xác thực `anthropic:default` không có thông tin xác thực trong
     kho xác thực dự kiến.
 
-    **Danh sách kiểm tra khắc phục:**
+    **Danh sách kiểm tra để khắc phục:**
 
     - Xác nhận vị trí lưu hồ sơ — hiện tại:
-      `~/.openclaw/agents/<agentId>/agent/auth-profiles.json`; kiểu cũ:
-      `~/.openclaw/agent/*` (được `openclaw doctor` di chuyển).
+      `~/.openclaw/agents/<agentId>/agent/auth-profiles.json`; cũ:
+      `~/.openclaw/agent/*` (được di chuyển bởi `openclaw doctor`).
     - Xác nhận Gateway tải biến môi trường của bạn. `ANTHROPIC_API_KEY` chỉ được đặt trong
-      shell sẽ không được truyền đến Gateway chạy qua systemd/launchd — hãy đặt nó trong
+      shell của bạn sẽ không đến được Gateway chạy qua systemd/launchd — hãy đặt biến đó trong
       `~/.openclaw/.env` hoặc bật `env.shellEnv`.
-    - Xác nhận bạn đang chỉnh sửa đúng tác nhân — thiết lập đa tác nhân có
+    - Xác nhận bạn đang chỉnh sửa đúng tác nhân — cấu hình đa tác nhân có
       nhiều tệp `auth-profiles.json`.
     - Chạy `openclaw models status` để xem các mô hình đã cấu hình và trạng thái
       xác thực của nhà cung cấp.
 
     **Đối với "No credentials found for profile anthropic" (không có hậu tố email):**
 
-    Lượt chạy được ghim vào một hồ sơ Anthropic mà Gateway không thể tìm thấy.
+    Lần chạy được ghim vào một hồ sơ Anthropic mà Gateway không thể tìm thấy.
 
-    - Sử dụng Claude CLI: chạy `openclaw models auth login --provider anthropic
+    - Dùng Claude CLI: chạy `openclaw models auth login --provider anthropic
       --method cli --set-default` trên máy chủ Gateway.
-    - Nếu muốn dùng khóa API, hãy đặt `ANTHROPIC_API_KEY` trong
-      `~/.openclaw/.env` trên máy chủ Gateway, sau đó xóa mọi thứ tự ghim
-      buộc sử dụng hồ sơ bị thiếu:
+    - Nếu ưu tiên khóa API: đặt `ANTHROPIC_API_KEY` trong
+      `~/.openclaw/.env` trên máy chủ Gateway, sau đó xóa mọi thứ tự đã ghim
+      đang buộc sử dụng hồ sơ bị thiếu:
 
       ```bash
       openclaw models auth order clear --provider anthropic
       ```
 
     - Chế độ từ xa: hồ sơ xác thực nằm trên máy Gateway, không phải
-      máy tính xách tay của bạn — hãy xác nhận bạn đang chạy lệnh tại đó.
+      máy tính xách tay của bạn — hãy xác nhận bạn đang chạy các lệnh tại đó.
 
   </Accordion>
 
-  <Accordion title="Tại sao hệ thống cũng thử Google Gemini rồi thất bại?">
+  <Accordion title="Tại sao hệ thống cũng thử Google Gemini và thất bại?">
     Nếu cấu hình mô hình của bạn bao gồm Google Gemini làm phương án dự phòng (hoặc bạn
-    đã chuyển sang tên viết tắt Gemini), OpenClaw sẽ thử mô hình đó trong quá trình chuyển đổi dự phòng. Nếu không
-    cấu hình thông tin xác thực Google, hệ thống sẽ báo `No API key found for provider
-    "google"`. Cách khắc phục: thêm xác thực Google hoặc xóa các mô hình Google khỏi
+    đã chuyển sang dạng viết tắt của Gemini), OpenClaw sẽ thử mô hình đó trong quá trình chuyển đổi dự phòng. Nếu không
+    cấu hình thông tin xác thực Google, hệ thống sẽ trả về `No API key found for provider
+    "google"`. Khắc phục: thêm xác thực Google hoặc xóa các mô hình Google khỏi
     `agents.defaults.model.fallbacks`/bí danh.
 
     **Yêu cầu LLM bị từ chối: bắt buộc có chữ ký suy luận (Google Antigravity)**
 
-    Nguyên nhân: lịch sử phiên có các khối suy luận không có chữ ký (thường
-    do luồng bị hủy/dở dang); Google Antigravity yêu cầu chữ ký
+    Nguyên nhân: lịch sử phiên có các khối suy luận không kèm chữ ký (thường
+    do luồng bị hủy hoặc chỉ hoàn tất một phần); Google Antigravity yêu cầu chữ ký
     trên các khối suy luận. OpenClaw loại bỏ các khối suy luận không có chữ ký đối với Google
-    Antigravity Claude; nếu lỗi vẫn xuất hiện, hãy bắt đầu phiên mới hoặc đặt
+    Antigravity Claude; nếu lỗi vẫn xuất hiện, hãy bắt đầu một phiên mới hoặc đặt
     `/thinking off` cho tác nhân đó.
 
   </Accordion>
@@ -438,12 +450,11 @@ x-i18n:
 
 ## Hồ sơ xác thực: khái niệm và cách quản lý
 
-Liên quan: [/concepts/oauth](/vi/concepts/oauth) (luồng OAuth, lưu trữ token, mô hình sử dụng nhiều tài khoản)
+Liên quan: [/concepts/oauth](/vi/concepts/oauth) (luồng OAuth, lưu trữ token, mẫu sử dụng nhiều tài khoản)
 
 <AccordionGroup>
   <Accordion title="Hồ sơ xác thực là gì?">
-    Một bản ghi thông tin xác thực có tên (OAuth hoặc khóa API) được liên kết với một nhà cung cấp, được lưu
-    tại:
+    Một bản ghi thông tin xác thực có tên (OAuth hoặc khóa API) được liên kết với một nhà cung cấp, lưu tại:
 
     ```text
     ~/.openclaw/agents/<agentId>/agent/auth-profiles.json
@@ -455,61 +466,60 @@ Liên quan: [/concepts/oauth](/vi/concepts/oauth) (luồng OAuth, lưu trữ tok
 
   </Accordion>
 
-  <Accordion title="Các ID hồ sơ điển hình là gì?">
-    Có tiền tố nhà cung cấp: `anthropic:default` (phổ biến khi không có danh tính email),
-    `anthropic:<email>` cho danh tính OAuth hoặc một ID tùy chỉnh do bạn
+  <Accordion title="Các ID hồ sơ thường gặp là gì?">
+    Có tiền tố nhà cung cấp: `anthropic:default` (thường dùng khi không có danh tính
+    email), `anthropic:<email>` cho danh tính OAuth hoặc một ID tùy chỉnh do bạn
     chọn (ví dụ: `anthropic:work`).
 
   </Accordion>
 
-  <Accordion title="Tôi có thể kiểm soát hồ sơ xác thực nào được thử trước không?">
-    Có. Cấu hình `auth.order.<provider>` đặt thứ tự luân chuyển cho từng nhà cung cấp
+  <Accordion title="Có thể kiểm soát hồ sơ xác thực nào được thử trước không?">
+    Có. Cấu hình `auth.order.<provider>` đặt thứ tự luân phiên theo từng nhà cung cấp
     (chỉ là siêu dữ liệu — không lưu bí mật).
 
-    OpenClaw có thể bỏ qua một hồ sơ đang trong trạng thái **tạm ngưng** ngắn hạn (giới hạn tốc độ,
+    OpenClaw có thể bỏ qua một hồ sơ đang trong thời gian **tạm ngưng** ngắn (giới hạn tốc độ,
     hết thời gian chờ, lỗi xác thực) hoặc trạng thái **vô hiệu hóa** dài hơn
     (thanh toán/không đủ tín dụng). Kiểm tra bằng `openclaw models status
-    --json` và xem `auth.unusableProfiles`. Điều chỉnh bằng
-    `auth.cooldowns.billingBackoffHours*`. Thời gian tạm ngưng do giới hạn tốc độ có thể
-    chỉ áp dụng cho một mô hình — hồ sơ đang tạm ngưng đối với một mô hình vẫn có thể phục vụ
-    mô hình cùng nhóm trên cùng nhà cung cấp; khoảng thời gian thanh toán/vô hiệu hóa sẽ chặn
+    --json` và xem `auth.unusableProfiles`. Thời gian tạm ngưng do giới hạn tốc độ có thể
+    áp dụng theo từng mô hình — một hồ sơ đang tạm ngưng đối với một mô hình vẫn có thể phục vụ
+    mô hình cùng nhóm trên chính nhà cung cấp đó; cửa sổ thanh toán/vô hiệu hóa sẽ chặn
     toàn bộ hồ sơ.
 
-    Đặt ghi đè thứ tự theo từng tác nhân (được lưu trong `auth-state.json` của tác nhân đó):
+    Đặt thứ tự ghi đè theo từng tác nhân (được lưu trong `auth-state.json` của tác nhân đó):
 
     ```bash
-    # Defaults to the configured default agent (omit --agent)
+    # Mặc định dùng tác nhân mặc định đã cấu hình (bỏ qua --agent)
     openclaw models auth order get --provider anthropic
 
-    # Lock rotation to a single profile
+    # Khóa việc luân phiên vào một hồ sơ duy nhất
     openclaw models auth order set --provider anthropic anthropic:default
 
-    # Or set an explicit order (fallback within provider)
+    # Hoặc đặt thứ tự rõ ràng (dự phòng trong cùng nhà cung cấp)
     openclaw models auth order set --provider anthropic anthropic:work anthropic:default
 
-    # Clear override (fall back to config auth.order / round-robin)
+    # Xóa ghi đè (quay về auth.order trong cấu hình / luân phiên vòng tròn)
     openclaw models auth order clear --provider anthropic
 
-    # Target a specific agent
+    # Nhắm đến một tác nhân cụ thể
     openclaw models auth order set --provider anthropic --agent main anthropic:default
     ```
 
-    Xác minh những gì thực sự sẽ được thử: `openclaw models status --probe`. Một
-    hồ sơ đã lưu nhưng bị loại khỏi thứ tự tường minh sẽ báo
-    `excluded_by_auth_order` thay vì bị âm thầm thử.
+    Xác minh những hồ sơ thực sự sẽ được thử: `openclaw models status --probe`. Một
+    hồ sơ đã lưu nhưng bị loại khỏi thứ tự rõ ràng sẽ báo cáo
+    `excluded_by_auth_order` thay vì được thử một cách âm thầm.
 
   </Accordion>
 
   <Accordion title="OAuth và khóa API khác nhau như thế nào?">
-    - **OAuth / đăng nhập CLI** thường sử dụng quyền truy cập theo gói đăng ký khi
+    - **Đăng nhập bằng OAuth / CLI** thường sử dụng quyền truy cập theo gói đăng ký khi
       nhà cung cấp hỗ trợ. Đối với Anthropic, phần phụ trợ Claude CLI của OpenClaw
-      sử dụng `claude -p` của Claude Code, hiện được Anthropic xem là
-      hoạt động sử dụng Agent SDK/lập trình và được tính vào giới hạn sử dụng của gói đăng ký —
+      sử dụng Claude Code `claude -p`, hiện được Anthropic xem là
+      hoạt động sử dụng Agent SDK/lập trình, được tính vào giới hạn sử dụng của gói đăng ký —
       xem [Anthropic](/vi/providers/anthropic) để biết trạng thái tạm dừng thanh toán
       hiện tại và các liên kết nguồn.
-    - **Khóa API** sử dụng hình thức thanh toán theo token.
+    - **Khóa API** sử dụng cơ chế tính phí theo token.
 
-    Trình hướng dẫn hỗ trợ Anthropic Claude CLI, OAuth của OpenAI Codex và khóa
+    Trình hướng dẫn hỗ trợ Anthropic Claude CLI, OpenAI Codex OAuth và khóa
     API.
 
   </Accordion>

@@ -3,122 +3,901 @@ read_when:
     - Je ziet de waarschuwing OPENCLAW_PLUGIN_SDK_COMPAT_DEPRECATED
     - Je ziet de waarschuwing OPENCLAW_EXTENSION_API_DEPRECATED
     - Je gebruikte api.registerEmbeddedExtensionFactory vóór OpenClaw 2026.4.25
-    - Je werkt een Plugin bij naar de moderne Plugin-architectuur
-    - Je onderhoudt een externe OpenClaw Plugin
+    - Je werkt een plugin bij naar de moderne pluginarchitectuur
+    - Je onderhoudt een externe OpenClaw-plugin
 sidebarTitle: Migrate to SDK
-summary: Migreer van de verouderde achterwaartse-compatibiliteitslaag naar de moderne plugin-SDK
-title: Plugin SDK-migratie
+summary: Migreer van de verouderde achterwaartse-compatibiliteitslaag naar de moderne Plugin-SDK
+title: Migratie van de Plugin SDK
 x-i18n:
-    generated_at: "2026-07-04T10:50:53Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T05:10:51Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 7873de40aea56f456781ecf8ac9a4705c958030f7c68f8a112ad3f0fce62f078
+    source_hash: a483f9c0f8409505fc2688872995382944e002520ceb651214dbc5ad8e3554fb
     source_path: plugins/sdk-migration.md
     workflow: 16
 ---
 
-OpenClaw is overgestapt van een brede laag voor achterwaartse compatibiliteit naar een moderne Plugin-
-architectuur met gerichte, gedocumenteerde imports. Als je Plugin is gebouwd vóór
-de nieuwe architectuur, helpt deze gids je met migreren.
+OpenClaw heeft een brede laag voor achterwaartse compatibiliteit vervangen door een moderne Plugin-
+architectuur die is opgebouwd uit kleine, gerichte imports. Als jouw Plugin van vóór die
+wijziging dateert, helpt deze handleiding je om over te stappen op de huidige contracten.
 
-## Wat verandert er
+## Wat is er gewijzigd
 
-Het oude Plugin-systeem bood twee volledig open oppervlakken waarmee Plugins
-alles wat ze nodig hadden vanuit één enkel ingangspunt konden importeren:
+Verschillende zeer ruime importoppervlakken gaven Plugins voorheen vanuit één toegangspunt
+toegang tot vrijwel alles:
 
-- **`openclaw/plugin-sdk/compat`** - één import die tientallen helpers opnieuw
-  exporteerde. Deze werd geïntroduceerd om oudere hook-gebaseerde Plugins te
-  laten werken terwijl de nieuwe Plugin-architectuur werd gebouwd.
-- **`openclaw/plugin-sdk/infra-runtime`** - een brede runtime-helperbarrel die
-  systeemgebeurtenissen, Heartbeat-status, afleverwachtrijen, fetch/proxy-helpers,
-  bestandshelpers, goedkeuringstypen en niet-gerelateerde hulpprogramma's combineerde.
-- **`openclaw/plugin-sdk/config-runtime`** - een brede configuratiecompatibiliteitsbarrel
-  die tijdens het migratievenster nog verouderde directe laad-/schrijfhelpers bevat.
-- **`openclaw/extension-api`** - een brug die Plugins directe toegang gaf tot
-  host-side helpers zoals de ingebouwde agent-runner.
-- **`api.registerEmbeddedExtensionFactory(...)`** - een verwijderde, alleen voor de embedded runner bestemde
-  gebundelde extensie-hook die embedded-runner-gebeurtenissen zoals
-  `tool_result` kon observeren.
+- **`openclaw/plugin-sdk`** en **`openclaw/plugin-sdk/compat`** - exporteerden
+  tientallen helpers opnieuw terwijl de gerichte SDK werd gebouwd. Beide hoofdpaden zijn nu
+  verwijderd; importeer in plaats daarvan een gedocumenteerd subpad.
+- **`openclaw/plugin-sdk/infra-runtime`** - een brede barrel die systeem-
+  gebeurtenissen, Heartbeat-status, afleveringswachtrijen, fetch-/proxyhelpers, bestandshelpers,
+  goedkeuringstypen en niet-gerelateerde hulpprogramma's combineerde.
+- **`openclaw/plugin-sdk/config-runtime`** - een brede configuratiebarrel die
+  alleen behouden bleef voor het latere compatibiliteitsvenster; directe runtimehelpers voor
+  laden/schrijven zijn verwijderd.
+- **`openclaw/extension-api`** - een verwijderde brug die Plugins directe
+  toegang gaf tot helpers aan de hostzijde, zoals de ingebedde agentrunner.
+- **`api.registerEmbeddedExtensionFactory(...)`** - een verwijderde hook die uitsluitend voor
+  de ingebedde runner was bedoeld en gebeurtenissen daarvan observeerde, zoals `tool_result`. Gebruik in plaats
+  daarvan middleware voor agenttoolresultaten (zie [Ingebedde extensies voor toolresultaten
+  migreren naar middleware](#how-to-migrate)).
 
-De brede importoppervlakken zijn nu **verouderd**. Ze werken nog steeds tijdens runtime,
-maar nieuwe Plugins mogen ze niet gebruiken, en bestaande Plugins moeten migreren voordat
-de volgende major release ze verwijdert. De API voor registratie van extensiefactory's
-die alleen voor de embedded runner was bedoeld, is verwijderd; gebruik in plaats daarvan tool-result-middleware.
-
-OpenClaw verwijdert of herinterpreteert gedocumenteerd Plugin-gedrag niet in dezelfde
-wijziging die een vervanging introduceert. Brekende contractwijzigingen moeten eerst
-via een compatibiliteitsadapter, diagnostiek, documentatie en een deprecatievenster verlopen.
-Dat geldt voor SDK-imports, manifestvelden, setup-API's, hooks en runtime-
-registratiegedrag.
+De hoofd-SDK, compatibiliteitsbarrel, extensiebrug en fabriek voor ingebedde extensies
+zijn verwijderd. `infra-runtime` en `config-runtime` blijven alleen bestaan voor hun
+afzonderlijk vastgelegde latere vensters; nieuwe Plugins moeten gerichte subpaden gebruiken.
 
 <Warning>
-  De laag voor achterwaartse compatibiliteit wordt in een toekomstige major release verwijderd.
-  Plugins die nog steeds uit deze oppervlakken importeren, zullen dan niet meer werken.
-  Verouderde registraties van embedded extensiefactory's laden nu al niet meer.
+  Plugins die de verwijderde hoofd-, compatibiliteits- of extensieoppervlakken importeren, worden niet meer
+  geladen. Volg vóór het upgraden de onderstaande omzettingen.
 </Warning>
 
-## Waarom dit is gewijzigd
+OpenClaw verwijdert of herinterpreteert gedocumenteerd Plugingedrag niet in dezelfde
+wijziging waarin een vervanging wordt geïntroduceerd. Incompatibele contractwijzigingen doorlopen
+eerst een compatibiliteitsadapter, diagnostiek, documentatie en een uitfaseringsvenster. Dat
+geldt voor SDK-imports, manifestvelden, installatie-API's, hooks en runtimegedrag
+voor registratie.
 
-De oude aanpak veroorzaakte problemen:
+### Waarom
 
-- **Trage start** - het importeren van één helper laadde tientallen niet-gerelateerde modules
-- **Circulaire afhankelijkheden** - brede herexports maakten het makkelijk om importcycli te creëren
-- **Onduidelijk API-oppervlak** - geen manier om te zien welke exports stabiel waren versus intern
+- **Langzaam opstarten** - door één helper te importeren, werden tientallen niet-gerelateerde modules geladen.
+- **Circulaire afhankelijkheden** - brede herexports maakten het eenvoudig om importcycli
+  te creëren.
+- **Onduidelijk API-oppervlak** - er was geen manier om stabiele exports van interne exports te onderscheiden.
 
-De moderne Plugin-SDK lost dit op: elk importpad (`openclaw/plugin-sdk/\<subpath\>`)
-is een kleine, zelfstandige module met een duidelijk doel en een gedocumenteerd contract.
+Elke `openclaw/plugin-sdk/<subpath>` is nu een kleine, zelfstandige module met
+een gedocumenteerd contract.
 
-Verouderde gemaksovergangen voor providers voor gebundelde kanalen zijn ook verdwenen.
-Kanaalbranded helperovergangen waren private mono-repo-snelkoppelingen, geen stabiele
-Plugin-contracten. Gebruik in plaats daarvan smalle generieke SDK-subpaden. Houd binnen de gebundelde
-Plugin-werkruimte provider-owned helpers in de eigen `api.ts` of
-`runtime-api.ts` van die Plugin.
+Verouderde gemaksinterfaces voor providers van gebundelde kanalen zijn ook verdwenen -
+helpersnelkoppelingen met kanaalnamen waren private gemakken voor de monorepo, geen
+stabiele Plugincontracten. Gebruik in plaats daarvan smalle, algemene SDK-subpaden. Houd binnen de
+werkruimte van de gebundelde Plugin helpers die eigendom zijn van de provider in de eigen
+`api.ts` of `runtime-api.ts` van die Plugin:
 
-Huidige voorbeelden van gebundelde providers:
+- Anthropic bewaart Claude-specifieke streamhelpers in zijn eigen `api.ts` /
+  `contract-api.ts`-interface.
+- OpenAI bewaart providerbouwers, helpers voor standaardmodellen en realtime
+  providerbouwers in zijn eigen `api.ts`.
+- OpenRouter bewaart de providerbouwer en helpers voor onboarding/configuratie in zijn eigen
+  `api.ts`.
 
-- Anthropic houdt Claude-specifieke streamhelpers in zijn eigen `api.ts` /
-  `contract-api.ts`-overgang
-- OpenAI houdt provider-builders, default-model-helpers en realtime-provider-
-  builders in zijn eigen `api.ts`
-- OpenRouter houdt provider-builder- en onboarding-/configuratiehelpers in zijn eigen
-  `api.ts`
+## Compatibiliteitsbeleid
 
-## Migratieplan voor Talk en realtime spraak
+Compatibiliteitswerk voor externe Plugins volgt deze volgorde:
 
-Realtime spraak-, telefonie-, meeting- en browser-Talk-code verhuist van
-oppervlaklokale beurtboekhouding naar een gedeelde Talk-sessiecontroller die wordt geëxporteerd door
-`openclaw/plugin-sdk/realtime-voice`. De nieuwe controller beheert de gemeenschappelijke Talk-
-gebeurtenisenvelop, actieve beurtstatus, capture-status, output-audio-status, recente
-gebeurtenisgeschiedenis en afwijzing van verouderde beurten. Provider-Plugins moeten vendor-
-specifieke realtime-sessies blijven beheren; surface-Plugins moeten capture,
-playback, telefonie- en meeting-eigenaardigheden blijven beheren.
+1. Voeg het nieuwe contract toe.
+2. Behoud het oude gedrag via een compatibiliteitsadapter.
+3. Geef een diagnostisch bericht of waarschuwing weer waarin het oude pad en de vervanging worden genoemd.
+4. Dek beide paden af met tests.
+5. Documenteer de uitfasering en het migratiepad.
+6. Verwijder pas na het aangekondigde migratievenster, meestal in een hoofd-
+   release.
 
-Deze Talk-migratie is bewust brekend schoon:
+Als een manifestveld nog wordt geaccepteerd, blijf het dan gebruiken totdat de documentatie en
+diagnostiek anders aangeven. Nieuwe code moet de gedocumenteerde vervanging gebruiken;
+bestaande Plugins mogen niet defect raken tijdens normale kleinere releases.
 
-1. Houd de gedeelde controller-/runtime-primitieven in
-   `plugin-sdk/realtime-voice`.
-2. Zet gebundelde oppervlakken over naar de gedeelde controller: browserrelay,
-   managed-room-handoff, realtime voice-call, streaming STT voor voice-call, Google
-   Meet realtime en native push-to-talk.
-3. Vervang oude Talk-RPC-families door de definitieve `talk.session.*`- en
-   `talk.client.*`-API.
-4. Adverteer één live Talk-gebeurteniskanaal in Gateway
-   `hello-ok.features.events`: `talk.event`.
-5. Verwijder het oude realtime HTTP-endpoint en elk request-time pad voor
-   instructie-override.
+### Compatibiliteit voor installatie van gepubliceerde kanalen
 
-Nieuwe code mag `createTalkEventSequencer(...)` niet rechtstreeks aanroepen, tenzij deze
-een low-level adapter of testfixture implementeert. Geef de voorkeur aan de gedeelde controller
-zodat beurtgebonden gebeurtenissen niet zonder turn id kunnen worden uitgezonden, verouderde `turnEnd`- /
-`turnCancel`-aanroepen geen nieuwere actieve beurt kunnen wissen, en output-audio-lifecycle-
-gebeurtenissen consistent blijven tussen telefonie, meetings, browserrelay, managed-room-
-handoff en native Talk-clients.
+Slack-, Discord-, Signal- en Microsoft Teams-pakketten die via
+`2026.7.1` worden gepubliceerd, importeren kanaalspecifieke configuratieschema's uit
+`openclaw/plugin-sdk/bundled-channel-config-schema`. De gepubliceerde Slack- en
+Discord-pakketten importeren ook `createLegacyCompatChannelDmPolicy` en
+`promptLegacyChannelAllowFromForAccount` uit
+`openclaw/plugin-sdk/setup-runtime`.
 
-De beoogde vorm van de publieke API is:
+Die exports blijven beschikbaar als verouderde runtimecompatibiliteitsadapters.
+Nieuwe en opnieuw gepubliceerde Plugins moeten hun configuratieschema's en installatiebeleid
+lokaal beheren, met algemene primitieve onderdelen uit `channel-config-schema` en
+`setup-runtime`. De compatibiliteitsexports kunnen pas worden verwijderd wanneer de
+minimaal ondersteunde versies van gepubliceerde pakketten ze niet meer importeren.
+
+### Compatibiliteit van invoervelden voor kanaalinstallatie
+
+`ChannelSetupInput` houdt nu alleen de kanaaloverstijgende installatie-envelop permanent
+getypeerd. Kanaalspecifieke velden blijven getypeerd in een verouderde compatibiliteits-
+laag, zodat bestaande externe Plugins blijven compileren terwijl Pluginauteurs die
+velden verplaatsen naar lokale invoertypen voor de installatie van hun Plugin.
+
+OpenClaw brengt geen hoofdreleases uit. Bij een registersweep op 2026-07-22 werden
+426 gepubliceerde externe kanaal-Plugins geïnspecteerd en 21 velden zonder lezers verwijderd.
+De 22 behouden velden hebben elk een bekende gepubliceerde lezer. Elk volgend veld wordt
+verwijderd zodra geen gepubliceerde Plugin het meer leest; de behouden verzameling krimpt
+naarmate Pluginauteurs migreren naar lokale invoertypen voor Plugininstallatie.
+
+Dezelfde sweep verwijderde 23 verouderde promotiesleutels voor niet-gedeclareerde adapters zonder
+gepubliceerde afhankelijken. Zes algemene sleutels en de uitsluitend voor installatie bedoelde sleutel `rooms` blijven bestaan.
+Ook die verzameling krimpt naarmate gepubliceerde Plugins `singleAccountKeysToMove` declareren.
+
+Het gedeelde type heeft geen indexsignatuur. Sleutels die eigendom zijn van Plugins kunnen nog steeds aanwezig zijn
+in runtime-invoerobjecten; declareer ze in een lokale intersectie voor de Plugin of beperk
+ze via het installatieschema van de eigenaar-Plugin.
+
+| `code`                                  | `owner`   | `replacement`                                                                                    | Voorwaarde voor verwijdering                                           |
+| --------------------------------------- | --------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `plugin-sdk-channel-setup-input-fields` | `channel` | Combineer `ChannelSetupInput` met een lokaal type voor de Plugin dat de velden van het betreffende kanaal declareert | Verwijder een veld wanneer de registersweep van gepubliceerde Plugins geen lezer vindt |
+
+De verouderde promotielaag voor niet-gedeclareerde adapters volgt hetzelfde
+beleid op basis van lezers. Declareer `singleAccountKeysToMove`, inclusief een lege array wanneer de
+Plugin geen extra promotiesleutels nodig heeft, zodat de gedeelde fallback sleutel voor sleutel kan worden uitgefaseerd.
+
+#### Lezers verifiëren
+
+1. Doorloop `https://clawhub.ai/api/v1/packages?family=code-plugin&limit=100` pagina voor pagina met elke `nextCursor` en behoud pakketten waarvan de `categories` `channels` bevatten.
+2. Voeg npm-kandidaten uit `npm search --json --searchlimit=1000 "openclaw channel plugin"` toe. Voeg kandidaten toe die alleen als bron beschikbaar zijn via GitHub-codezoekopdrachten naar `openclaw/plugin-sdk/channel-setup`, `openclaw/plugin-sdk/setup` en `openclaw/plugin-sdk/core`.
+3. Bepaal voor elke kandidaat de laatst gepubliceerde versie. Voer `npm pack <package>@<version> --json --pack-destination <temp-dir>` uit, pak het pakket uit en inspecteer de meegeleverde `dist`-JavaScript en declaraties op directe of gedestructureerde leesbewerkingen van velden. Download het ClawHub-artefact wanneer een pakket geen npm-release heeft.
+4. Leg pakket, versie, veld of promotiesleutel en overeenkomend bestand vast. Een veld of sleutel kan alleen worden verwijderd wanneer geen gepubliceerd Pluginartefact het leest. Houd de namen van lezers in de codeopmerkingen naast de lijsten met behouden velden en sleutels gesynchroniseerd met de sweep.
+
+Dit is uitsluitend een compatibiliteitsregistratie voor broncode/typen. Er is geen runtimeadapter of
+vermelding in het compatibiliteitsregister, omdat runtime-invoerobjecten voor installatie en het installatiegedrag
+ongewijzigd zijn.
+
+Controleer de huidige migratiewachtrij met `pnpm plugins:boundary-report`:
+
+| Vlag                                                    | Effect                                                                         |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `--summary` (of `pnpm plugins:boundary-report:summary`) | Compacte aantallen in plaats van volledige details.                            |
+| `--json`                                                | Machineleesbaar rapport.                                                       |
+| `--owner <id>`                                          | Filter op één Plugin of compatibiliteitseigenaar.                              |
+| `--fail-on-cross-owner`                                 | Sluit af met een niet-nulstatus bij gereserveerde SDK-imports tussen eigenaren. |
+| `--fail-on-eligible-compat`                             | Sluit af met een niet-nulstatus wanneer de datum `removeAfter` van een verouderde compatibiliteitsregistratie is verstreken. |
+| `--fail-on-unclassified-unused-reserved`                | Sluit af met een niet-nulstatus bij ongebruikte gereserveerde SDK-shims.       |
+
+`pnpm plugins:boundary-report:ci` wordt uitgevoerd met alle drie foutvlaggen. Verouderde
+registraties hebben normaal gesproken een expliciete datum `removeAfter` in plaats van een vage 'volgende
+hoofdrelease'. Bij een registratie waarvan de eigenaar geen datum heeft goedgekeurd, ontbreekt
+`removeAfter`, wordt `no-date` weergegeven en is verwijdering nooit toegestaan.
+Het rapport groepeert verouderde registraties op datum, telt lokale verwijzingen in code/documentatie,
+toont gereserveerde SDK-imports tussen eigenaren en vat de private
+SDK-brug voor de geheugenhost samen. Gereserveerde SDK-subpaden moeten bijgehouden gebruik door eigenaren hebben;
+ongebruikte gereserveerde exports moeten uit de openbare SDK worden verwijderd.
+
+### Verouderde mediaprojectie
+
+De compatibiliteitsregistratie `media-legacy-projection` omvat de oude parallelle
+mediavelden, payloadbouwers, aliassen voor hookmetadata en namen van mediasjablonen.
+De goedgekeurde datum `removeAfter` is **2026-10-01** (twee releasetreinen
+nadat de op feiten gebaseerde vervangingen zijn uitgebracht). Voor verwijdering is daarnaast
+op dat moment een schone sweep van gepubliceerde Pluginartefacten vereist; migreer vóór die datum.
+
+Vervang voor binnenkomende kanaalgegevens de enkelvoudige/meervoudige `MediaPath`, `MediaUrl`,
+`MediaType`, `MediaPaths`, `MediaUrls`, `MediaTypes`,
+`MediaTranscribedIndexes`, `MediaWorkspaceDir` en `MediaStaged` door geordende
+feiten:
+
+```ts
+import { toInboundMediaFacts } from "openclaw/plugin-sdk/channel-inbound";
+
+const media = toInboundMediaFacts([
+  { path: saved.path, url: nativeUrl, contentType: saved.contentType, messageId },
+]);
+
+const ctx = finalizeInboundContext({ Body: caption, media });
+```
+
+Gebruik `event.media` in de hooks `inbound_claim` en `message_received`. Als externe
+media niet lokaal zijn klaargezet, gebruik dan `event.originalMedia` voor identiteit/diagnostiek
+en wacht op `event.media`; `event.mediaStagingPending` onderscheidt die
+status. Lees de verouderde enkelvoudige/meervoudige eigenschappen niet uit
+`event.metadata`.
+
+Vervang voor CLI-mediamodellen `{{MediaPath}}`, `{{MediaUrl}}`, `{{MediaType}}`
+en `{{MediaDir}}` door `{{AttachmentPath}}`, `{{AttachmentUrl}}`,
+`{{AttachmentContentType}}` en `{{AttachmentDir}}`. Gebruik
+`{{AttachmentIndex}}` wanneer de positie van de bijlage van belang is.
+
+Importeer voor lokaal beleid voor het lezen van media `getAgentScopedMediaLocalRoots(...)` of
+`getAgentScopedMediaLocalRootsForSources(...)` uit
+`openclaw/plugin-sdk/media-local-roots`. De
+`openclaw/plugin-sdk/agent-media-payload`-facade en de bijbehorende
+`buildAgentMediaPayload(...)`-projectie zijn verouderd.
+
+## Migreren
+
+<Steps>
+  <Step title="Runtimehelpers voor laden/schrijven van configuratie migreren">
+    Gebundelde Plugins mogen `api.runtime.config.loadConfig()` en
+    `api.runtime.config.writeConfigFile(...)` niet meer rechtstreeks aanroepen. Gebruik bij voorkeur de configuratie die al
+    aan het actieve aanroeppad is doorgegeven. Langlevende handlers die de
+    huidige processnapshot nodig hebben, kunnen `api.runtime.config.current()` gebruiken. Langlevende
+    agenttools moeten `ctx.getRuntimeConfig()` binnen `execute` lezen, zodat een tool
+    die vóór een configuratieschrijfactie is gemaakt, toch de vernieuwde configuratie ziet.
+
+    Configuratieschrijfacties verlopen via de transactionele helper met een expliciet
+    beleid voor na het schrijven:
+
+    ```typescript
+    await api.runtime.config.mutateConfigFile({
+      afterWrite: { mode: "auto" },
+      mutate(draft) {
+        draft.plugins ??= {};
+      },
+    });
+    ```
+
+    Gebruik `afterWrite: { mode: "restart", reason: "..." }` wanneer de wijziging
+    een schone herstart van de Gateway vereist, en `afterWrite: { mode: "none", reason: "..." }`
+    alleen wanneer de aanroeper verantwoordelijk is voor de vervolgactie en de
+    herlaadplanner bewust onderdrukt. Mutatieresultaten bevatten een getypeerd `followUp`-overzicht voor
+    tests en logboekregistratie; de Gateway blijft verantwoordelijk voor het toepassen of
+    plannen van de herstart.
+
+    `loadConfig` en `writeConfigFile` zijn verwijderd uit de Plugin-
+    runtime. Gebundelde plugins en runtimecode van de repository worden bewaakt door
+    `pnpm check:deprecated-api-usage` en
+    `pnpm check:no-runtime-action-load-config`: nieuw productiegebruik door plugins
+    mislukt direct, rechtstreekse configuratieschrijfbewerkingen mislukken, Gateway-servermethoden moeten
+    de runtime-snapshot van het verzoek gebruiken, runtimehelpers voor verzenden/acties/clients van kanalen
+    moeten configuratie vanuit hun grens ontvangen en langlevende runtimemodules
+    staan nul omgevingsaanroepen naar `loadConfig()` toe.
+
+    Nieuwe plugincode moet de brede `openclaw/plugin-sdk/config-runtime`-
+    barrel vermijden. Gebruik het specifieke subpad voor de taak:
+
+    | Behoefte | Import |
+    | --- | --- |
+    | Configuratietypen zoals `OpenClawConfig` | `openclaw/plugin-sdk/config-contracts` |
+    | Configuratieopzoeking bij Plugin-invoer | `api.pluginConfig` |
+    | Configuratie samenvoegen | Plugin-lokale logica bij de configuratiegrens |
+    | Huidige runtime-snapshot lezen | `openclaw/plugin-sdk/runtime-config-snapshot` |
+    | Configuratie schrijven | `openclaw/plugin-sdk/config-mutation` |
+    | Helpers voor sessieopslag | `openclaw/plugin-sdk/session-store-runtime` |
+    | Configuratie voor Markdown-tabellen | `openclaw/plugin-sdk/markdown-table-runtime` |
+    | Runtimehelpers voor groepsbeleid | `openclaw/plugin-sdk/runtime-group-policy` |
+    | Geheime invoer oplossen | `openclaw/plugin-sdk/secret-input-runtime` |
+    | Model-/sessieoverschrijvingen | `openclaw/plugin-sdk/model-session-runtime` |
+
+    Gebundelde plugins en hun tests worden door scanners beschermd tegen de brede
+    barrel, zodat imports en mocks lokaal blijven voor het gedrag dat ze nodig hebben. De
+    barrel bestaat nog steeds voor externe compatibiliteit, maar nieuwe code mag er niet
+    van afhankelijk zijn.
+
+  </Step>
+
+  <Step title="Ingebedde extensies voor toolresultaten naar middleware migreren">
+    Gebundelde plugins moeten de uitsluitend voor ingebedde runners bedoelde
+    `api.registerEmbeddedExtensionFactory(...)`-handlers voor toolresultaten vervangen door
+    runtime-neutrale middleware:
+
+    ```typescript
+    // OpenClaw-runtimetools en dynamische tools van de Codex-runtime (resultaat kan worden
+    // getransformeerd). Codex-native toolresultaten worden ook doorgestuurd voor observatie,
+    // maar hun getransformeerde uitvoer bereikt het model nooit: het contract van de Codex-
+    // PostToolUse-hook kan een native toolantwoord niet vervangen.
+    api.registerAgentToolResultMiddleware(async (event) => {
+      return compactToolResult(event);
+    }, {
+      runtimes: ["openclaw", "codex"],
+    });
+    ```
+
+    Werk tegelijkertijd het Plugin-manifest bij:
+
+    ```json
+    {
+      "contracts": {
+        "agentToolResultMiddleware": ["openclaw", "codex"]
+      }
+    }
+    ```
+
+    Geïnstalleerde plugins kunnen ook middleware voor toolresultaten registreren wanneer dit expliciet
+    is ingeschakeld en elke beoogde runtime is gedeclareerd in
+    `contracts.agentToolResultMiddleware`. Niet-gedeclareerde middleware-
+    registraties van geïnstalleerde plugins worden geweigerd.
+
+  </Step>
+
+  <Step title="Native goedkeuringshandlers naar capaciteitsfeiten migreren">
+    Kanaalplugins met ondersteuning voor goedkeuring stellen native goedkeuringsgedrag beschikbaar via
+    `approvalCapability.nativeRuntime` plus het gedeelde register voor
+    runtimecontext:
+
+    - Vervang `approvalCapability.handler.loadRuntime(...)` door
+      `approvalCapability.nativeRuntime`.
+    - Verplaats goedkeuringsspecifieke authenticatie/bezorging van de verouderde `plugin.auth`-/
+      `plugin.approvals`-bedrading naar `approvalCapability`.
+    - `ChannelPlugin.approvals` is verwijderd uit het openbare
+      kanaalplugincontract; verplaats bezorgings-, native en renderingsvelden naar
+      `approvalCapability`.
+    - `plugin.auth` blijft alleen voor aanmeld-/afmeldflows van kanalen; de kern
+      leest daar geen authenticatiehooks voor goedkeuring meer.
+    - Registreer runtimeobjecten die eigendom zijn van het kanaal (clients, tokens, Bolt-apps)
+      via `openclaw/plugin-sdk/channel-runtime-context`.
+    - Verzend geen omleidingsmeldingen die eigendom zijn van de Plugin vanuit native goedkeuringshandlers;
+      de kern beheert meldingen over routering naar elders op basis van werkelijke bezorgingsresultaten.
+    - Wanneer je `channelRuntime` doorgeeft aan `createChannelManager(...)`, geef dan een
+      echte `createPluginRuntime().channel`-interface op; gedeeltelijke stubs worden
+      geweigerd.
+
+    Zie [Kanaalplugins](/nl/plugins/sdk-channel-plugins) voor de huidige
+    indeling van goedkeuringscapaciteiten.
+
+  </Step>
+
+  <Step title="Fallbackgedrag van Windows-wrappers controleren">
+    Als je Plugin `openclaw/plugin-sdk/windows-spawn` gebruikt, mislukken niet-opgeloste Windows-
+    wrappers voor `.cmd`/`.bat` nu standaard veilig, tenzij je expliciet
+    `allowShellFallback: true` doorgeeft:
+
+    ```typescript
+    // Voorheen
+    const program = applyWindowsSpawnProgramPolicy({ candidate });
+
+    // Nu
+    const program = applyWindowsSpawnProgramPolicy({
+      candidate,
+      // Stel dit alleen in voor vertrouwde compatibiliteitsaanroepers die bewust
+      // een door de shell bemiddelde fallback accepteren.
+      allowShellFallback: true,
+    });
+    ```
+
+    Als je aanroeper niet bewust afhankelijk is van een shellfallback, stel
+    `allowShellFallback` dan niet in en handel in plaats daarvan de gegenereerde fout af.
+
+  </Step>
+
+  <Step title="Verouderde imports zoeken">
+    ```bash
+    grep -r "plugin-sdk/compat" my-plugin/
+    grep -r "plugin-sdk/infra-runtime" my-plugin/
+    grep -r "plugin-sdk/config-runtime" my-plugin/
+    grep -r "openclaw/extension-api" my-plugin/
+    ```
+  </Step>
+
+  <Step title="Vervangen door gerichte imports">
+    Elke export van de oude interface correspondeert met een specifiek modern importpad:
+
+    ```typescript
+    // Voorheen (verouderde laag voor achterwaartse compatibiliteit)
+    import {
+      createChannelReplyPipeline,
+      createPluginRuntimeStore,
+      resolveControlCommandGate,
+    } from "openclaw/plugin-sdk/compat";
+
+    // Nu (moderne gerichte imports)
+    import { createChannelReplyPipeline } from "openclaw/plugin-sdk/channel-reply-pipeline";
+    import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
+    import { resolveControlCommandGate } from "openclaw/plugin-sdk/command-auth";
+    ```
+
+    Gebruik voor helpers aan de hostzijde de geïnjecteerde Plugin-runtime in plaats van
+    rechtstreeks te importeren:
+
+    ```typescript
+    // Voorheen (verouderde extension-api-brug)
+    import { runEmbeddedAgent } from "openclaw/extension-api";
+    const result = await runEmbeddedAgent({ sessionId, prompt });
+
+    // Nu (geïnjecteerde runtime)
+    const result = await api.runtime.agent.runEmbeddedAgent({ sessionId, prompt });
+    ```
+
+    Hetzelfde patroon geldt voor andere verouderde brughelpers:
+
+    | Oude import | Modern equivalent |
+    | --- | --- |
+    | `resolveAgentDir` | `api.runtime.agent.resolveAgentDir` |
+    | `resolveAgentWorkspaceDir` | `api.runtime.agent.resolveAgentWorkspaceDir` |
+    | `resolveAgentIdentity` | `api.runtime.agent.resolveAgentIdentity` |
+    | `resolveThinkingDefault` | `api.runtime.agent.resolveThinkingDefault` |
+    | `resolveAgentTimeoutMs` | `api.runtime.agent.resolveAgentTimeoutMs` |
+    | `ensureAgentWorkspace` | `api.runtime.agent.ensureAgentWorkspace` |
+    | helpers voor sessieopslag | `api.runtime.agent.session.*` |
+
+  </Step>
+
+  <Step title="Brede infra-runtime-imports vervangen">
+    `openclaw/plugin-sdk/infra-runtime` bestaat nog steeds voor externe
+    compatibiliteit, maar nieuwe code moet de gerichte interface importeren die daadwerkelijk
+    nodig is:
+
+    | Behoefte | Import |
+    | --- | --- |
+    | Helpers voor de wachtrij met systeemgebeurtenissen | `openclaw/plugin-sdk/system-event-runtime` |
+    | Helpers voor Heartbeat-activering, gebeurtenissen en zichtbaarheid | `openclaw/plugin-sdk/heartbeat-runtime` |
+    | Wachtrij met wachtende bezorgingen leegmaken | `openclaw/plugin-sdk/delivery-queue-runtime` |
+    | Telemetrie voor kanaalactiviteit | `openclaw/plugin-sdk/channel-activity-runtime` |
+    | Dedupe-caches in het geheugen en met persistente opslag | `openclaw/plugin-sdk/dedupe-runtime` |
+    | Veilige helpers voor lokale bestands-/mediapaden | `openclaw/plugin-sdk/file-access-runtime` |
+    | Dispatcherbewuste fetch | `openclaw/plugin-sdk/runtime-fetch` |
+    | Helpers voor proxy-fetch en beveiligde fetch | `openclaw/plugin-sdk/fetch-runtime` |
+    | Beleidstypen voor SSRF-dispatchers | `openclaw/plugin-sdk/ssrf-dispatcher` |
+    | Typen voor goedkeuringsverzoeken/-afhandelingen | `openclaw/plugin-sdk/approval-runtime` |
+    | Helpers voor antwoordpayloads en opdrachten bij goedkeuring | `openclaw/plugin-sdk/approval-reply-runtime` |
+    | Helpers voor foutopmaak | `openclaw/plugin-sdk/error-runtime` |
+    | Wachten op transportgereedheid | `openclaw/plugin-sdk/transport-ready-runtime` |
+    | Helpers voor veilige tokens | `openclaw/plugin-sdk/secure-random-runtime` |
+    | Begrensde gelijktijdigheid van asynchrone taken | `openclaw/plugin-sdk/concurrency-runtime` |
+    | Vereiste-waardecontroles voor bewijsbare invarianten | `openclaw/plugin-sdk/expect-runtime` |
+    | Numerieke conversie | `openclaw/plugin-sdk/number-runtime` |
+    | Proceslokale asynchrone vergrendeling | `openclaw/plugin-sdk/async-lock-runtime` |
+    | Bestandsvergrendelingen | `openclaw/plugin-sdk/file-lock` |
+
+    Gebundelde plugins worden door scanners beschermd tegen `infra-runtime`, zodat repositorycode
+    niet kan terugvallen op de brede barrel.
+
+  </Step>
+
+  <Step title="Helpers voor kanaalroutes migreren">
+    Nieuwe code voor kanaalroutes gebruikt `openclaw/plugin-sdk/channel-route`. De oudere
+    route-sleutelnamen blijven beschikbaar als compatibiliteitsaliassen:
+
+    | Oude helper | Moderne helper |
+    | --- | --- |
+    | `channelRouteIdentityKey(...)` | `channelRouteDedupeKey(...)` |
+    | `channelRouteKey(...)` | `channelRouteCompactKey(...)` |
+
+    De moderne routehelpers normaliseren `{ channel, to, accountId, threadId }`
+    consistent voor native goedkeuringen, onderdrukking van antwoorden, deduplicatie van inkomende berichten,
+    Cron-bezorging en sessieroutering.
+
+    Voeg geen nieuw gebruik toe van `ChannelMessagingAdapter.parseExplicitTarget` of
+    `resolveChannelRouteTargetWithParser(...)` uit
+    `plugin-sdk/channel-route`; deze zijn verouderd en blijven alleen voor oudere
+    plugins bestaan. Nieuwe kanaalplugins moeten
+    `messaging.targetResolver.resolveTarget(...)` gebruiken voor normalisatie van doel-id's
+    en fallback bij ontbrekende directoryvermeldingen,
+    `messaging.inferTargetChatType(...)` wanneer de kern vroegtijdig een peertype nodig heeft,
+    en `messaging.resolveOutboundSessionRoute(...)` voor provider-native
+    sessie- en threadidentiteit.
+
+  </Step>
+
+  <Step title="Bouwen en testen">
+    ```bash
+    pnpm build
+    pnpm test my-plugin/
+    ```
+  </Step>
+</Steps>
+
+## Naslag voor importpaden
+
+De exportmap van het openbare pakket is de gezaghebbende bron voor importeerbare SDK-
+subpaden. Gebruik de thematische SDK-handleidingen waarnaar wordt verwezen vanuit het [SDK-overzicht](/nl/plugins/sdk-overview)
+en geef de voorkeur aan het specifiekste gedocumenteerde openbare subpad. De compilerinventaris in
+`scripts/lib/plugin-sdk-entrypoints.json` bevat ook privé-lokale vermeldingen die worden gebruikt
+om gebundelde plugins te bouwen; hun aanwezigheid daarin maakt ze niet tot openbare pakketexports.
+
+Deze tabel is de gebruikelijke migratiesubset, niet de volledige SDK-interface. De
+inventaris met compilerinvoerpunten staat in `scripts/lib/plugin-sdk-entrypoints.json`;
+pakketexports worden gegenereerd uit de openbare subset.
+
+Gereserveerde helperinterfaces voor gebundelde plugins zijn uit de openbare SDK-
+exportmap verwijderd, met uitzondering van expliciet gedocumenteerde compatibiliteitsfacades zoals de
+verouderde `plugin-sdk/discord`-shim die behouden blijft voor externe plugins die nog steeds
+rechtstreeks het gepubliceerde pakket `@openclaw/discord` importeren. Eigenaarsspecifieke
+helpers bevinden zich in het pakket van de eigenaar; gedeeld hostgedrag verloopt
+via generieke SDK-contracten zoals `plugin-sdk/gateway-runtime`,
+`plugin-sdk/security-runtime` en de geïnjecteerde Plugin-API.
+
+Gebruik de specifiekste import die bij de taak past. Als je geen export kunt vinden,
+controleer dan de bron in `src/plugin-sdk/` of vraag de beheerders welk generiek
+contract er eigenaar van moet zijn.
+
+## Verwijderde compatibiliteitsinterfaces
+
+Tijdens de opschoningsronde van juli 2026 zijn de root-SDK- en compat-barrels, de extension API-
+brug, de verlopen aliassen voor SDK-subpaden, ongebruikte SDK-subpaden en de openbare
+exports voor uitsluitend gebundelde SDK-modules verwijderd. Uitsluitend gebundelde modules blijven voor
+hun repository-eigenaren beschikbaar via privé-lokale bouwtoewijzingen; ze zijn niet
+importeerbaar vanuit het gepubliceerde pakket.
+
+### Procesglobale publicatie van API-providers
+
+`registerApiProvider(...)` en `unregisterApiProviders(...)` zijn verwijderd uit
+`openclaw/plugin-sdk/llm`. Ze publiceerden API-transporten in procesglobale
+status, die modelruntimes met een eigen levenscyclus vervolgens naar elk voorbereid
+register moesten kopiëren.
+
+Providerplugins moeten providers voor tekstinferentie registreren via
+`api.registerProvider(...)`. Code en tests die eigendom zijn van de host en een
+`ApiRegistry` aanmaken, moeten rechtstreeks in dat register registreren, zodat providereigendom
+en afbouw beperkt blijven tot de voorbereide runtime.
+
+### Privétestbarrel
+
+`openclaw/plugin-sdk/testing` was repository-lokaal en uitgesloten van uitgebrachte pakket-
+artefacten, en is daarom vóór de `removeAfter`-datum van 2026-07-28 verwijderd. Repository-
+tests gebruiken gerichte subpaden zoals `plugin-sdk/plugin-test-runtime`,
+`plugin-sdk/channel-test-helpers`, `plugin-sdk/channel-target-testing`,
+`plugin-sdk/test-env` en `plugin-sdk/test-fixtures`.
+
+## Migratienaslag
+
+  Deze toewijzingen omvatten zowel in juli 2026 verwijderde oppervlakken als actieve afschrijvingen met een latere termijn. Een toewijzing is migratierichtlijn, geen bewijs dat het oude oppervlak beschikbaar blijft; raadpleeg het compatibiliteitsregister en de verwijderingstijdlijn voor de huidige status.
+
+  <AccordionGroup>
+  <Accordion title="Helpers voor command-auth-help -> command-status">
+    **Oud (`openclaw/plugin-sdk/command-auth`)**: `buildCommandsMessage`,
+    `buildCommandsMessagePaginated`, `buildHelpMessage`.
+
+    **Nieuw (`openclaw/plugin-sdk/command-status`)**: dezelfde signaturen, geïmporteerd
+    vanuit het specifiekere subpad. De compatibiliteitsherexports van
+    `command-auth` zijn verwijderd.
+
+    ```typescript
+    // Voorheen
+    import { buildHelpMessage } from "openclaw/plugin-sdk/command-auth";
+
+    // Nu
+    import { buildHelpMessage } from "openclaw/plugin-sdk/command-status";
+    ```
+
+  </Accordion>
+
+  <Accordion title="Helpers voor vermeldingscontrole -> resolveInboundMentionDecision">
+    **Oud**: `resolveMentionGating(params)` en
+    `resolveMentionGatingWithBypass(params)` uit
+    `openclaw/plugin-sdk/channel-inbound` of
+    `openclaw/plugin-sdk/channel-mention-gating`.
+
+    **Nieuw**: `resolveInboundMentionDecision({ facts, policy })` — één beslissingsobject
+    in plaats van twee afzonderlijke aanroepvormen.
+
+    In gebruik genomen voor Discord, iMessage, Matrix, MS Teams, QQBot, Signal,
+    Telegram, WhatsApp en Zalo. Slacks eigen `app_mention`-gebeurtenismodel
+    gebruikt deze helper niet.
+
+  </Accordion>
+
+  <Accordion title="Shim voor de kanaalruntime en helpers voor kanaalacties">
+    `openclaw/plugin-sdk/channel-runtime` is verwijderd. Gebruik
+    `openclaw/plugin-sdk/channel-runtime-context` om runtimeobjecten te registreren.
+
+    De helpers voor het systeemeigen berichtschema in `openclaw/plugin-sdk/channel-actions`
+    zijn samen met de onbewerkte kanaalexports voor "actions" verwijderd. Stel
+    mogelijkheden in plaats daarvan beschikbaar via het semantische
+    `presentation`-oppervlak — kanaalplugins geven aan wat ze weergeven
+    (kaarten, knoppen, selecties) in plaats van welke onbewerkte actienamen ze
+    accepteren.
+
+  </Accordion>
+
+  <Accordion title="Webzoekproviderhelper tool() -> createTool() op de plugin">
+    **Oud**: `tool()`-factory uit `openclaw/plugin-sdk/provider-web-search`.
+
+    **Nieuw**: implementeer `createTool(...)` rechtstreeks op de providerplugin.
+    OpenClaw heeft de SDK-helper niet langer nodig om de toolwrapper te registreren.
+
+  </Accordion>
+
+  <Accordion title="Plattetekst-enveloppen voor kanalen -> BodyForAgent">
+    **Oud**: `api.runtime.channel.reply.formatInboundEnvelope(...)` (en het
+    `channelEnvelope`-veld op inkomende berichtobjecten) om van inkomende
+    kanaalberichten een platte plattetekst-promptenvelop te maken.
+
+    **Nieuw**: `BodyForAgent` plus gestructureerde gebruikerscontextblokken.
+    Kanaalplugins voegen routeringsmetadata (thread, onderwerp, antwoord-op,
+    reacties) toe als getypeerde velden in plaats van ze samen te voegen tot een
+    prompttekenreeks. De helper `formatAgentEnvelope(...)` wordt nog steeds ondersteund
+    voor gegenereerde, op de assistent gerichte enveloppen, maar inkomende
+    plattetekst-enveloppen worden uitgefaseerd.
+
+    Betrokken gebieden: `inbound_claim`, `message_received` en elke aangepaste
+    kanaalplugin die de oude enveloptekst nabewerkte.
+
+  </Accordion>
+
+  <Accordion title="deactivate-hook -> gateway_stop">
+    **Oud**: `api.on("deactivate", handler)`.
+
+    **Nieuw**: `api.on("gateway_stop", handler)`. Hetzelfde contract voor opschoning bij
+    afsluiten; alleen de hooknaam verandert.
+
+    ```typescript
+    // Voorheen
+    api.on("deactivate", async (event, ctx) => {
+      await stopPluginService(ctx);
+    });
+
+    // Nu
+    api.on("gateway_stop", async (event, ctx) => {
+      await stopPluginService(ctx);
+    });
+    ```
+
+    `deactivate` blijft als afgeschreven compatibiliteitsalias gekoppeld
+    totdat deze na 2026-08-16 wordt verwijderd.
+
+  </Accordion>
+
+  <Accordion title="subagent_spawning-hook -> kernbinding van threads">
+    **Oud**: `api.on("subagent_spawning", handler)` retourneert
+    `threadBindingReady` of `deliveryOrigin`.
+
+    **Nieuw**: laat de kern `thread: true`-subagentbindingen voorbereiden via
+    de adapter voor kanaalsessiebindingen. Gebruik `api.on("subagent_spawned", handler)` alleen voor
+    observatie na het starten.
+
+    ```typescript
+    // Voorheen
+    api.on("subagent_spawning", async () => ({
+      status: "ok",
+      threadBindingReady: true,
+      deliveryOrigin: { channel: "discord", to: "channel:123", threadId: "456" },
+    }));
+
+    // Nu
+    api.on("subagent_spawned", async (event) => {
+      await observeSubagentLaunch(event);
+    });
+    ```
+
+    `subagent_spawning`, `PluginHookSubagentSpawningEvent`,
+    `PluginHookSubagentSpawningResult` en
+    `SubagentLifecycleHookRunner.runSubagentSpawning(...)` blijven alleen bestaan als
+    afgeschreven compatibiliteitsoppervlakken terwijl externe plugins migreren,
+    en worden na 2026-08-30 verwijderd.
+
+  </Accordion>
+
+  <Accordion title="Typen voor providerdetectie -> typen voor providercatalogi">
+    Vier typealiassen voor detectie zijn nu dunne wrappers rond de typen uit het
+    catalogustijdperk:
+
+    | Oude alias                | Nieuw type                 |
+    | ------------------------- | -------------------------- |
+    | `ProviderDiscoveryOrder`        | `ProviderCatalogOrder`         |
+    | `ProviderDiscoveryContext`        | `ProviderCatalogContext`         |
+    | `ProviderDiscoveryResult`        | `ProviderCatalogResult`         |
+    | `ProviderPluginDiscovery`        | `ProviderPluginCatalog`         |
+
+    De aliassen en de verouderde statische verzameling `ProviderCapabilities` zijn
+    verwijderd. Providerplugins moeten expliciete providerhooks gebruiken, zoals
+    `buildReplayPolicy`, `normalizeToolSchemas` en `wrapStreamFn`, in plaats van
+    een statisch object.
+
+  </Accordion>
+
+  <Accordion title="Hooks voor denkbeleid -> resolveThinkingProfile">
+    **Oud** (drie afzonderlijke hooks op `ProviderThinkingPolicy`):
+    `isBinaryThinking(ctx)`, `supportsXHighThinking(ctx)` en
+    `resolveDefaultThinkingLevel(ctx)`.
+
+    **Nieuw**: één `resolveThinkingProfile(ctx)` die een
+    `ProviderThinkingProfile` retourneert met de canonieke `id`, een
+    optionele `label` en een gerangschikte niveaulijst. OpenClaw
+    verlaagt verouderde opgeslagen waarden automatisch op basis van de
+    profielrang.
+
+    De context bevat `provider`, `modelId`, optionele
+    samengevoegde `reasoning`-feiten en optionele samengevoegde
+    `compat`-feiten over het model. Providerplugins kunnen die
+    catalogusfeiten gebruiken om alleen een modelspecifiek profiel beschikbaar
+    te stellen wanneer het geconfigureerde aanvraagcontract dit ondersteunt.
+
+    Implementeer één hook in plaats van drie. De verouderde hooks zijn verwijderd.
+
+  </Accordion>
+
+  <Accordion title="Externe authenticatieproviders -> contracts.externalAuthProviders">
+    **Oud**: externe authenticatiehooks implementeren zonder de provider in het
+    pluginmanifest te declareren.
+
+    **Nieuw**: declareer `contracts.externalAuthProviders` in het pluginmanifest
+    **en** implementeer `resolveExternalAuthProfiles(...)`.
+
+    ```json
+    {
+      "contracts": {
+        "externalAuthProviders": ["anthropic", "openai"]
+      }
+    }
+    ```
+
+  </Accordion>
+
+  <Accordion title="Opzoeken van provideromgevingsvariabelen -> setup.providers[].envVars">
+    **Oud** manifestveld: `providerAuthEnvVars: { anthropic: ["ANTHROPIC_API_KEY"] }`.
+
+    **Nieuw**: spiegel dezelfde opzoekactie voor omgevingsvariabelen naar
+    `setup.providers[].envVars` in het manifest. Dit brengt omgevingsmetadata voor
+    installatie en status op één plaats samen en voorkomt dat de pluginruntime
+    alleen voor het opzoeken van omgevingsvariabelen moet worden gestart.
+
+    `providerAuthEnvVars` wordt niet langer geaccepteerd.
+
+  </Accordion>
+
+  <Accordion title="Registratie van geheugenplugins -> registerMemoryCapability">
+    **Oud**: drie afzonderlijke aanroepen — `api.registerMemoryPromptSection(...)`,
+    `api.registerMemoryFlushPlan(...)`, `api.registerMemoryRuntime(...)`.
+
+    **Nieuw**: één aanroep op de API voor geheugenstatus —
+    `registerMemoryCapability(pluginId, { promptBuilder, flushPlanResolver, runtime })`.
+
+    Dezelfde posities, één registratieaanroep. Aanvullende helpers voor prompts
+    en corpora (`registerMemoryPromptSupplement`, `registerMemoryCorpusSupplement`) worden niet beïnvloed.
+
+  </Accordion>
+
+  <Accordion title="API voor providers van geheugeninsluitingen">
+    **Oud**: `api.registerMemoryEmbeddingProvider(...)` plus
+    `contracts.memoryEmbeddingProviders`.
+
+    **Nieuw**: `api.registerEmbeddingProvider(...)` plus
+    `contracts.embeddingProviders`.
+
+    Het generieke contract voor providers van insluitingen is buiten het
+    geheugen herbruikbaar en vormt het ondersteunde pad voor nieuwe providers.
+    De geheugenspecifieke registratie-API blijft als afgeschreven
+    compatibiliteitslaag gekoppeld terwijl bestaande providers migreren.
+    Plugininspectie rapporteert niet-gebundeld gebruik als compatibiliteitsschuld.
+
+  </Accordion>
+
+  <Accordion title="Onbewerkte kanaalverzendresultaten -> OutboundDeliveryResult">
+    **Oud**: retourneer `{ ok, messageId, error }` via
+    `ChannelSendRawResult` en normaliseer het met
+    `createRawChannelSendResultAdapter(...)`.
+
+    **Nieuw**: retourneer `OutboundDeliveryResult`-velden en voeg het kanaal toe met
+    `createAttachedChannelResultAdapter(...)`. Mislukte verzendingen moeten een uitzondering genereren
+    in plaats van een fouttekenreeks te retourneren. Het onbewerkte resultaattype
+    blijft beschikbaar tot de volgende hoofdversie van de plugin-SDK.
+
+  </Accordion>
+
+  <Accordion title="Typen voor subagentsessieberichten hernoemd">
+    Twee verouderde typealiassen worden nog steeds geëxporteerd vanuit
+    `src/plugins/runtime/types.ts`:
+
+    | Oud                           | Nieuw                           |
+    | ----------------------------- | ------------------------------- |
+    | `SubagentReadSessionParams`            | `SubagentGetSessionMessagesParams`              |
+    | `SubagentReadSessionResult`            | `SubagentGetSessionMessagesResult`              |
+
+    De runtimemethode `readSession` is afgeschreven ten gunste van
+    `getSessionMessages`. Dezelfde signatuur; de oude methode roept de nieuwe aan.
+
+  </Accordion>
+
+  <Accordion title="Verwijderde API's voor sessie- en transcriptbestanden">
+    De omschakeling van sessies en transcripten naar SQLite verwijdert of
+    schrijft plugingerichte API's af die actieve `sessions.json`-opslagen,
+    paden naar JSONL-transcripten of lijsten met sessiebestanden beschikbaar
+    stelden. Runtimeplugins moeten sessie-identiteit en SDK-runtimehelpers
+    gebruiken in plaats van actieve bestanden op te zoeken of te wijzigen.
+
+    | Te migreren oppervlak | Vervanging |
+    | --------------------- | ---------- |
+    | Afgeschreven `loadSessionStore(...)`, `updateSessionStore(...)` en `resolveSessionStoreEntry(...)` | `getSessionEntry(...)`, `listSessionEntries(...)` en sessiewijzigingen op rijniveau. |
+    | Afgeschreven `resolveSessionFilePath(...)` | Sessie-identiteit (`sessionKey`, `sessionId` en SDK-runtimehelpers voor doelen) plus Gateway-methoden die op de huidige sessie werken. |
+    | Verwijderd `saveSessionStore(...)` | Door de Gateway beheerde sessieruntime-API's; plugincode moet sessiestatus aanvragen of wijzigen via gedocumenteerde runtime-/contexthelpers in plaats van naar het actieve opslagbestand te schrijven. |
+    | Verwijderd `resolveSessionTranscriptPathInDir(...)` en `resolveAndPersistSessionFile(...)` | Sessie-identiteit en Gateway-methoden die op de huidige sessie werken. |
+    | `readLatestAssistantTextFromSessionTranscript(...)` | Op identiteit gebaseerde transcriptlezers die door de huidige runtimecontext beschikbaar worden gesteld, of Gateway-methoden voor geschiedenis/sessies wanneer de plugin zich buiten het eigenaarspad van het transcript bevindt. |
+    | `SessionTranscriptUpdate.sessionFile` | `SessionTranscriptUpdate.target` met `agentId`, `sessionKey` en `sessionId`. |
+    | Invoer voor geheugensynchronisatie, zoals `sessionFiles` | Door de host geleverde, op identiteit gebaseerde transcript-/sessiebronnen; doorzoek geen actieve JSONL-bestanden voor live sessies. |
+    | Runtimeopties met de naam `transcriptPath` of `sessionFile` voor actieve sessies | `sessionTarget`/runtimedoelobjecten die opslagneutrale sessie-identiteit bevatten. |
+
+    Verouderde JSONL-transcriptbestanden blijven geldig als import-, archief-,
+    export- en ondersteuningsartefacten. Ze vormen niet langer het permanente
+    runtimecontract voor actieve sessies.
+
+    Officiële plugins die met `v2026.7.1-beta.5` zijn uitgebracht, importeerden
+    de vier bovenstaande afgeschreven helpers. `openclaw/plugin-sdk/session-store-runtime` behoudt
+    precies die brug tot en met 2026-10-12; nieuwe plugins moeten de vervangingen
+    gebruiken. `resolveStorePath(...)` blijft een ondersteunde SDK-helper en maakt
+    geen deel uit van deze afschrijving.
+
+    `openclaw plugins inspect --all --runtime` rapporteert niet-gebundelde plugins waarvan laadfouten of
+    diagnostiek nog naar deze verwijderde bestands-API's verwijzen. De adviserende
+    controle van `@openclaw/plugin-inspector` moet versie `0.3.17` of nieuwer
+    gebruiken, zodat scans van externe pakketten vóór een release ook helpers
+    voor volledige sessieopslagen, helpers voor sessiebestandspaden, verouderde
+    transcriptbestandsdoelen en laag-niveau-transcripthelpers markeren.
+
+  </Accordion>
+
+  <Accordion title="runtime.tasks.flow -> runtime.tasks.managedFlows">
+    **Oud**: `runtime.tasks.flow` (enkelvoud) retourneerde een live accessor voor
+    taakstromen.
+
+    **Nieuw**: `runtime.tasks.managedFlows` behoudt de beheerde TaskFlow-mutatie-runtime
+    voor plugins die vanuit een stroom onderliggende taken maken, bijwerken,
+    annuleren of uitvoeren. Gebruik `runtime.tasks.flows` wanneer de plugin alleen
+    op DTO's gebaseerde leesbewerkingen nodig heeft.
+
+    ```typescript
+    // Voor
+    const flow = api.runtime.tasks.flow.fromToolContext(ctx);
+    // Na
+    const flow = api.runtime.tasks.managedFlows.fromToolContext(ctx);
+    ```
+
+    De verouderde aliassen zijn in juli 2026 verwijderd.
+
+  </Accordion>
+
+  <Accordion title="Ingebedde extensiefabrieken -> middleware voor agenttoolresultaten">
+    Hierboven behandeld in [Migreren](#how-to-migrate). Voor de
+    volledigheid hier opgenomen: het verwijderde, uitsluitend voor de ingebedde runner bestemde
+    pad `api.registerEmbeddedExtensionFactory(...)` is vervangen door
+    `api.registerAgentToolResultMiddleware(...)` met een expliciete runtimelijst
+    in `contracts.agentToolResultMiddleware`.
+  </Accordion>
+
+  <Accordion title="Alias OpenClawSchemaType -> OpenClawConfig">
+    De root-SDK-alias `OpenClawSchemaType` is verwijderd. Gebruik de canonieke
+    naam `OpenClawConfig`.
+
+    ```typescript
+    // Voor
+    import type { OpenClawSchemaType } from "openclaw/plugin-sdk";
+    // Na
+    import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+    ```
+
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+Verouderingen op extensieniveau (binnen gebundelde kanaal-/providerplugins onder
+`extensions/`) worden bijgehouden in hun eigen `api.ts`- en `runtime-api.ts`-
+barrels. Ze hebben geen invloed op contracten van plugins van derden en worden
+hier niet vermeld. Als je rechtstreeks de lokale barrel van een gebundelde plugin gebruikt,
+lees dan vóór het upgraden de opmerkingen over veroudering in die barrel.
+</Note>
+
+## Migratie van Talk en realtime-spraak
+
+Code voor realtime-spraak, telefonie, vergaderingen en browser-Talk gebruikt één Talk-
+sessiecontroller die wordt geëxporteerd door `openclaw/plugin-sdk/realtime-voice`. De
+controller beheert de algemene Talk-eventenvelop, de status van de actieve beurt, de opname-
+status, de status van uitgaande audio, de recente eventgeschiedenis en het weigeren van verouderde beurten.
+Providerplugins beheren leveranciersspecifieke realtime-sessies. Plugins voor browservergaderingen
+gebruiken `openclaw/plugin-sdk/meeting-runtime` voor sessie-, browser-, audio-, nodehost-,
+agentconsultatie- en spraakoproepmechanismen en implementeren vervolgens `MeetingPlatformAdapter`
+voor URL-regels, DOM-scripts, het koppelen van handmatige acties, ondertiteling, het aanmaken en inbel-
+plannen. REST-API's van platforms, OAuth, artefacten, selectors en namen voor overdracht blijven in
+de plugin. Browsermachtigingsplannen ontvangen de aangevraagde vergader-URL, zodat elk
+platform alleen zijn exact ondersteunde origins kan toestaan. Sessieruntimes moeten ook
+platformspecifieke live-status normaliseren nadat het verlaten van de browser is bevestigd;
+historische transcriptvelden mogen behouden blijven, maar de gereedheid van ondertiteling en audio mag
+na het verlaten niet actief blijven.
+
+Alle gebundelde oppervlakken draaien op de gedeelde controller: browserrelay,
+overdracht van beheerde ruimtes, realtime-spraakoproepen, streaming-STT voor spraakoproepen, realtime van Google
+Meet en native push-to-talk. Gateway maakt één live Talk-eventkanaal
+bekend in `hello-ok.features.events`: `talk.event`.
+
+Nieuwe code hoort `createTalkEventSequencer(...)` niet rechtstreeks aan te roepen, tenzij
+een adapter op laag niveau of testfixture wordt geïmplementeerd. Gebruik de gedeelde controller, zodat
+events die aan een beurt zijn gekoppeld niet zonder beurt-id kunnen worden uitgezonden, verouderde aanroepen van `turnEnd` /
+`turnCancel` een nieuwere actieve beurt niet kunnen wissen en lifecycle-events voor uitgaande audio
+consistent blijven voor telefonie, vergaderingen, browserrelay,
+overdracht van beheerde ruimtes en native Talk-clients.
+
+De vorm van de openbare API:
 
 ```typescript
-// Gateway-owned Talk session API.
+// Door Gateway beheerde Talk-sessie-API.
 await gateway.request("talk.session.create", {
   mode: "realtime",
   transport: "gateway-relay",
@@ -142,7 +921,7 @@ await gateway.request("talk.session.submitToolResult", {
 await gateway.request("talk.session.submitToolResult", { sessionId, callId, result });
 await gateway.request("talk.session.close", { sessionId });
 
-// Client-owned provider session API.
+// Providersessie-API die door de client wordt beheerd.
 await gateway.request("talk.client.create", {
   mode: "realtime",
   transport: "webrtc",
@@ -153,26 +932,27 @@ await gateway.request("talk.client.toolCall", { sessionKey, callId, name, args }
 await gateway.request("talk.client.steer", { sessionKey, text, mode: "steer" });
 ```
 
-Browser-owned WebRTC/provider-websocket-sessies gebruiken `talk.client.create`,
-omdat de browser de provideronderhandeling en mediatransport beheert terwijl de
-Gateway referenties, instructies en toolbeleid beheert. `talk.session.*` is het
-gemeenschappelijke door Gateway beheerde oppervlak voor gateway-relay-realtime, gateway-relay-
-transcriptie en managed-room native STT/TTS-sessies.
+WebRTC-/provider-websocketsessies die door de browser worden beheerd, gebruiken `talk.client.create`,
+omdat de browser de provideronderhandeling en het mediatransport beheert, terwijl de
+Gateway de inloggegevens, instructies en het toolbeleid beheert. `talk.session.*` is
+het algemene, door Gateway beheerde oppervlak voor realtime via gatewayrelay, transcriptie via gatewayrelay
+en native STT/TTS-sessies in beheerde ruimtes.
 
 Verouderde configuraties die realtime-selectors naast `talk.provider` /
-`talk.providers` plaatsten, moeten worden gerepareerd met `openclaw doctor --fix`; runtime Talk
-herinterpreteert spraak-/TTS-providerconfiguratie niet als realtime-providerconfiguratie.
+`talk.providers` plaatsen, moeten worden gerepareerd met `openclaw doctor --fix`; Talk in de runtime
+interpreteert providerconfiguratie voor spraak/TTS niet opnieuw als providerconfiguratie voor realtime.
 
-De ondersteunde combinaties voor `talk.session.create` zijn bewust klein:
+De ondersteunde combinaties voor `talk.session.create` zijn bewust beperkt:
 
-| Modus           | Transport       | Brain           | Eigenaar           | Opmerkingen                                                                                                        |
+| Modus            | Transport       | Brein           | Beheerder          | Opmerkingen                                                                                                        |
 | --------------- | --------------- | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `realtime`      | `gateway-relay` | `agent-consult` | Gateway            | Full-duplex provider-audio overbrugd via de Gateway; toolaanroepen worden via de agent-consult-tool gerouteerd.    |
-| `transcription` | `gateway-relay` | `none`          | Gateway            | Alleen streaming-STT; callers sturen invoeraudio en ontvangen transcriptgebeurtenissen.                            |
-| `stt-tts`       | `managed-room`  | `agent-consult` | Native/client room | Push-to-talk- en walkie-talkie-achtige rooms waarbij de client capture/playback beheert en de Gateway beurtstatus beheert. |
-| `stt-tts`       | `managed-room`  | `direct-tools`  | Native/client room | Admin-only roommodus voor vertrouwde first-party oppervlakken die Gateway-toolacties rechtstreeks uitvoeren.        |
+| `realtime`      | `gateway-relay` | `agent-consult` | Gateway            | Full-duplex provideraudio die via de Gateway wordt overbrugd; toolaanroepen worden via de agentconsultatietool gerouteerd. |
+| `transcription` | `gateway-relay` | `none`          | Gateway            | Alleen streaming-STT; aanroepers sturen invoeraudio en ontvangen transcriptevents.                                 |
+| `stt-tts`       | `managed-room`  | `agent-consult` | Native/clientruimte | Ruimtes in push-to-talk- en walkietalkiestijl waarin de client opname/afspelen beheert en de Gateway de beurtstatus beheert. |
+| `stt-tts`       | `managed-room`  | `direct-tools`  | Native/clientruimte | Ruimtemodus uitsluitend voor beheerders, voor vertrouwde eigen oppervlakken die Gateway-toolacties rechtstreeks uitvoeren. |
 
-Kaart met verwijderde methoden:
+Methodetoewijzing voor lezers die migreren van de oudere families `talk.realtime.*` /
+`talk.transcription.*` / `talk.handoff.*` (allemaal verwijderd):
 
 | Oud                              | Nieuw                                                    |
 | -------------------------------- | -------------------------------------------------------- |
@@ -190,814 +970,49 @@ Kaart met verwijderde methoden:
 | `talk.handoff.join`              | `talk.session.join`                                      |
 | `talk.handoff.revoke`            | `talk.session.close`                                     |
 
-De uniforme controlevocabulaire is ook bewust smal:
-
-  | Methode                        | Van toepassing op                                      | Contract                                                                                                                                                                                 |
-  | ------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | `talk.session.appendAudio`      | `realtime/gateway-relay`, `transcription/gateway-relay` | Voeg een base64 PCM-audiofragment toe aan de providersessie die eigendom is van dezelfde Gateway-verbinding.                                                                              |
-  | `talk.session.startTurn`        | `stt-tts/managed-room`                                  | Start een gebruikersbeurt in een beheerde ruimte.                                                                                                                                        |
-  | `talk.session.endTurn`          | `stt-tts/managed-room`                                  | Beëindig de actieve beurt na validatie van een verouderde beurt.                                                                                                                         |
-  | `talk.session.cancelTurn`       | alle sessies die eigendom zijn van Gateway              | Annuleer actief opname-, provider-, agent- en TTS-werk voor een beurt.                                                                                                                   |
-  | `talk.session.cancelOutput`     | `realtime/gateway-relay`                                | Stop de audio-uitvoer van de assistent zonder noodzakelijkerwijs de gebruikersbeurt te beëindigen.                                                                                       |
-  | `talk.session.submitToolResult` | `realtime/gateway-relay`                                | Voltooi een provider-toolaanroep die door de relay is uitgegeven; geef `options.willContinue` door voor tussentijdse uitvoer of `options.suppressResponse` om aan de aanroep te voldoen zonder nog een assistentantwoord. |
-  | `talk.session.steer`            | Talk-sessies met agent-ondersteuning                    | Stuur gesproken `status`-, `steer`-, `cancel`- of `followup`-besturing naar de actieve ingesloten run die vanuit de Talk-sessie is opgelost.                                             |
-  | `talk.session.close`            | alle uniforme sessies                                   | Stop relay-sessies of trek de status van de beheerde ruimte in, en vergeet daarna de uniforme sessie-id.                                                                                 |
-
-  Introduceer geen provider- of platformspecifieke uitzonderingen in core om dit te laten werken.
-  Core beheert de semantiek van Talk-sessies. Provider-plugins beheren het instellen van leverancierssessies.
-  Spraakoproepen en Google Meet beheren telefonie- en vergaderadapters. Browser- en native
-  apps beheren de UX voor apparaatopname en -weergave.
-
-  ## Compatibiliteitsbeleid
-
-  Voor externe plugins volgt compatibiliteitswerk deze volgorde:
-
-  1. voeg het nieuwe contract toe
-  2. houd het oude gedrag aangesloten via een compatibiliteitsadapter
-  3. geef een diagnose of waarschuwing uit die het oude pad en de vervanging noemt
-  4. dek beide paden af in tests
-  5. documenteer de veroudering en het migratiepad
-  6. verwijder pas na het aangekondigde migratievenster, meestal in een major release
-
-  Maintainers kunnen de huidige migratiewachtrij controleren met
-  `pnpm plugins:boundary-report`. Gebruik `pnpm plugins:boundary-report:summary` voor
-  compacte aantallen, `--owner <id>` voor één plugin of compatibiliteitseigenaar, en
-  `pnpm plugins:boundary-report:ci` wanneer een CI-gate moet falen op verlopen
-  compatibiliteitsrecords, cross-owner gereserveerde SDK-imports of ongebruikte gereserveerde SDK-
-  subpaden. Het rapport groepeert verouderde
-  compatibiliteitsrecords op verwijderdatum, telt lokale code-/docs-verwijzingen,
-  brengt cross-owner gereserveerde SDK-imports naar boven en vat de private
-  memory-host SDK-bridge samen, zodat compatibiliteitsopschoning expliciet blijft in plaats van
-  te vertrouwen op ad-hoczoekopdrachten. Gereserveerde SDK-subpaden moeten bijgehouden eigenaarsgebruik hebben;
-  ongebruikte gereserveerde helper-exports moeten uit de publieke SDK worden verwijderd.
-
-  Als een manifestveld nog steeds wordt geaccepteerd, kunnen pluginauteurs het blijven gebruiken totdat
-  de docs en diagnoses anders aangeven. Nieuwe code moet de gedocumenteerde
-  vervanging verkiezen, maar bestaande plugins mogen niet breken tijdens gewone minor
-  releases.
-
-  ## Migreren
-
-  <Steps>
-  <Step title="Migrate runtime config load/write helpers">
-    Gebundelde plugins moeten stoppen met het rechtstreeks aanroepen van
-    `api.runtime.config.loadConfig()` en
-    `api.runtime.config.writeConfigFile(...)`. Geef de voorkeur aan configuratie die al
-    aan het actieve aanroeppad is doorgegeven. Langlevende handlers die de
-    huidige processnapshot nodig hebben, kunnen `api.runtime.config.current()` gebruiken. Langlevende
-    agenttools moeten `ctx.getRuntimeConfig()` van de toolcontext binnen
-    `execute` gebruiken, zodat een tool die vóór een configuratieschrijving is gemaakt nog steeds de vernieuwde
-    runtimeconfiguratie ziet.
-
-    Configuratieschrijvingen moeten via de transactionele helpers lopen en een
-    beleid voor na het schrijven kiezen:
-
-    ```typescript
-    await api.runtime.config.mutateConfigFile({
-      afterWrite: { mode: "auto" },
-      mutate(draft) {
-        draft.plugins ??= {};
-      },
-    });
-    ```
-
-    Gebruik `afterWrite: { mode: "restart", reason: "..." }` wanneer de aanroeper weet
-    dat de wijziging een schone gateway-herstart vereist, en
-    `afterWrite: { mode: "none", reason: "..." }` alleen wanneer de aanroeper eigenaar is van de
-    follow-up en bewust de herlaadplanner wil onderdrukken.
-    Mutatieresultaten bevatten een getypeerde `followUp`-samenvatting voor tests en logging;
-    de gateway blijft verantwoordelijk voor het toepassen of plannen van de herstart.
-    `loadConfig` en `writeConfigFile` blijven als verouderde compatibiliteits-
-    helpers voor externe plugins bestaan tijdens het migratievenster en waarschuwen één keer met
-    de compatibiliteitscode `runtime-config-load-write`. Gebundelde plugins en runtimecode in de repo
-    worden beschermd door scanner-guardrails in
-    `pnpm check:deprecated-api-usage` en
-    `pnpm check:no-runtime-action-load-config`: nieuw gebruik in productieplugins
-    faalt direct, directe configuratieschrijvingen falen, gatewayservermethoden moeten de
-    request-runtime-snapshot gebruiken, runtimehelpers voor channel send/action/client
-    moeten configuratie van hun boundary ontvangen, en langlevende runtimemodules hebben
-    nul toegestane ambient `loadConfig()`-aanroepen.
-
-    Nieuwe plugincode moet ook vermijden de brede
-    `openclaw/plugin-sdk/config-runtime`-compatibiliteitsbarrel te importeren. Gebruik het smalle
-    SDK-subpad dat bij de taak past:
-
-    | Behoefte | Import |
-    | --- | --- |
-    | Configuratietypen zoals `OpenClawConfig` | `openclaw/plugin-sdk/config-contracts` |
-    | Al geladen configuratieasserties en configuratieopzoeking voor plugin-entry | `openclaw/plugin-sdk/plugin-config-runtime` |
-    | Lezingen van de huidige runtimesnapshot | `openclaw/plugin-sdk/runtime-config-snapshot` |
-    | Configuratieschrijvingen | `openclaw/plugin-sdk/config-mutation` |
-    | Helpers voor sessieopslag | `openclaw/plugin-sdk/session-store-runtime` |
-    | Markdown-tabelconfiguratie | `openclaw/plugin-sdk/markdown-table-runtime` |
-    | Runtimehelpers voor groepsbeleid | `openclaw/plugin-sdk/runtime-group-policy` |
-    | Oplossing van geheime invoer | `openclaw/plugin-sdk/secret-input-runtime` |
-    | Model-/sessie-overschrijvingen | `openclaw/plugin-sdk/model-session-runtime` |
-
-    Gebundelde plugins en hun tests worden door scanners beschermd tegen de brede
-    barrel, zodat imports en mocks lokaal blijven voor het gedrag dat ze nodig hebben. De brede
-    barrel bestaat nog steeds voor externe compatibiliteit, maar nieuwe code mag er niet
-    van afhankelijk zijn.
-
-  </Step>
-
-  <Step title="Migrate embedded tool-result extensions to middleware">
-    Gebundelde plugins moeten embedded-runner-only
-    `api.registerEmbeddedExtensionFactory(...)`-handlers voor toolresultaten vervangen door
-    runtime-neutrale middleware.
-
-    ```typescript
-    // OpenClaw and Codex runtime dynamic tools
-    api.registerAgentToolResultMiddleware(async (event) => {
-      return compactToolResult(event);
-    }, {
-      runtimes: ["openclaw", "codex"],
-    });
-    ```
-
-    Werk tegelijk het pluginmanifest bij:
-
-    ```json
-    {
-      "contracts": {
-        "agentToolResultMiddleware": ["openclaw", "codex"]
-      }
-    }
-    ```
-
-    Geïnstalleerde plugins kunnen ook middleware voor toolresultaten registreren wanneer ze
-    expliciet zijn ingeschakeld en elke beoogde runtime declareren in
-    `contracts.agentToolResultMiddleware`. Niet-gedeclareerde geïnstalleerde middleware-
-    registraties worden geweigerd.
-
-  </Step>
-
-  <Step title="Migrate approval-native handlers to capability facts">
-    Channel-plugins met approval-ondersteuning stellen native approvalgedrag nu beschikbaar via
-    `approvalCapability.nativeRuntime` plus het gedeelde runtime-contextregister.
-
-    Belangrijkste wijzigingen:
-
-    - Vervang `approvalCapability.handler.loadRuntime(...)` door
-      `approvalCapability.nativeRuntime`
-    - Verplaats approval-specifieke auth/delivery van legacy `plugin.auth` /
-      `plugin.approvals`-bedrading naar `approvalCapability`
-    - `ChannelPlugin.approvals` is verwijderd uit het publieke channel-plugin-
-      contract; verplaats delivery/native/render-velden naar `approvalCapability`
-    - `plugin.auth` blijft alleen voor channel-login-/logoutflows; approval-auth-
-      hooks daar worden niet langer door core gelezen
-    - Registreer runtimeobjecten die eigendom zijn van het channel, zoals clients, tokens of Bolt-
-      apps, via `openclaw/plugin-sdk/channel-runtime-context`
-    - Verstuur geen reroute-meldingen die eigendom zijn van de plugin vanuit native approvalhandlers;
-      core beheert nu elders-gerouteerde meldingen vanuit daadwerkelijke bezorgresultaten
-    - Wanneer je `channelRuntime` doorgeeft aan `createChannelManager(...)`, lever dan een
-      echt `createPluginRuntime().channel`-oppervlak. Gedeeltelijke stubs worden geweigerd.
-
-    Zie `/plugins/sdk-channel-plugins` voor de huidige indeling van approval-capabilities.
-
-  </Step>
-
-  <Step title="Audit Windows wrapper fallback behavior">
-    Als je plugin `openclaw/plugin-sdk/windows-spawn` gebruikt, falen niet-opgeloste Windows
-    `.cmd`/`.bat`-wrappers nu gesloten, tenzij je expliciet
-    `allowShellFallback: true` doorgeeft.
-
-    ```typescript
-    // Before
-    const program = applyWindowsSpawnProgramPolicy({ candidate });
-
-    // After
-    const program = applyWindowsSpawnProgramPolicy({
-      candidate,
-      // Only set this for trusted compatibility callers that intentionally
-      // accept shell-mediated fallback.
-      allowShellFallback: true,
-    });
-    ```
-
-    Als je aanroeper niet bewust vertrouwt op shell-fallback, stel dan
-    `allowShellFallback` niet in en handel in plaats daarvan de gegooide fout af.
-
-  </Step>
-
-  <Step title="Find deprecated imports">
-    Zoek in je plugin naar imports uit een van beide verouderde oppervlakken:
-
-    ```bash
-    grep -r "plugin-sdk/compat" my-plugin/
-    grep -r "plugin-sdk/infra-runtime" my-plugin/
-    grep -r "plugin-sdk/config-runtime" my-plugin/
-    grep -r "openclaw/extension-api" my-plugin/
-    ```
-
-  </Step>
-
-  <Step title="Replace with focused imports">
-    Elke export uit het oude oppervlak verwijst naar een specifiek modern importpad:
-
-    ```typescript
-    // Before (deprecated backwards-compatibility layer)
-    import {
-      createChannelReplyPipeline,
-      createPluginRuntimeStore,
-      resolveControlCommandGate,
-    } from "openclaw/plugin-sdk/compat";
-
-    // After (modern focused imports)
-    import { createChannelReplyPipeline } from "openclaw/plugin-sdk/channel-reply-pipeline";
-    import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
-    import { resolveControlCommandGate } from "openclaw/plugin-sdk/command-auth";
-    ```
-
-    Gebruik voor host-side helpers de geïnjecteerde pluginruntime in plaats van rechtstreeks te importeren:
-
-    ```typescript
-    // Before (deprecated extension-api bridge)
-    import { runEmbeddedAgent } from "openclaw/extension-api";
-    const result = await runEmbeddedAgent({ sessionId, prompt });
-
-    // After (injected runtime)
-    const result = await api.runtime.agent.runEmbeddedAgent({ sessionId, prompt });
-    ```
-
-    Hetzelfde patroon geldt voor andere verouderde bridge-helpers:
-
-    | Oude import | Moderne equivalent |
-    | --- | --- |
-    | `resolveAgentDir` | `api.runtime.agent.resolveAgentDir` |
-    | `resolveAgentWorkspaceDir` | `api.runtime.agent.resolveAgentWorkspaceDir` |
-    | `resolveAgentIdentity` | `api.runtime.agent.resolveAgentIdentity` |
-    | `resolveThinkingDefault` | `api.runtime.agent.resolveThinkingDefault` |
-    | `resolveAgentTimeoutMs` | `api.runtime.agent.resolveAgentTimeoutMs` |
-    | `ensureAgentWorkspace` | `api.runtime.agent.ensureAgentWorkspace` |
-    | sessieopslaghelpers | `api.runtime.agent.session.*` |
-
-  </Step>
-
-  <Step title="Replace broad infra-runtime imports">
-    `openclaw/plugin-sdk/infra-runtime` bestaat nog steeds voor externe
-    compatibiliteit, maar nieuwe code moet het gerichte helperoppervlak importeren dat
-    daadwerkelijk nodig is:
-
-    | Behoefte | Import |
-    | --- | --- |
-    | Helpers voor systeemgebeurteniswachtrij | `openclaw/plugin-sdk/system-event-runtime` |
-    | Helpers voor Heartbeat-wake, gebeurtenissen en zichtbaarheid | `openclaw/plugin-sdk/heartbeat-runtime` |
-    | Leegmaken van wachtrij voor openstaande levering | `openclaw/plugin-sdk/delivery-queue-runtime` |
-    | Telemetrie voor kanaalactiviteit | `openclaw/plugin-sdk/channel-activity-runtime` |
-    | In-memory en persistentie-ondersteunde dedupe-caches | `openclaw/plugin-sdk/dedupe-runtime` |
-    | Helpers voor veilige lokale bestands-/mediapaden | `openclaw/plugin-sdk/file-access-runtime` |
-    | Dispatcher-bewuste fetch | `openclaw/plugin-sdk/runtime-fetch` |
-    | Helpers voor proxy en bewaakte fetch | `openclaw/plugin-sdk/fetch-runtime` |
-    | Beleidstypen voor SSRF-dispatcher | `openclaw/plugin-sdk/ssrf-dispatcher` |
-    | Typen voor goedkeuringsverzoek/-afhandeling | `openclaw/plugin-sdk/approval-runtime` |
-    | Helpers voor payload en opdracht van goedkeuringsantwoord | `openclaw/plugin-sdk/approval-reply-runtime` |
-    | Helpers voor foutopmaak | `openclaw/plugin-sdk/error-runtime` |
-    | Wachten op transportgereedheid | `openclaw/plugin-sdk/transport-ready-runtime` |
-    | Helpers voor veilige tokens | `openclaw/plugin-sdk/secure-random-runtime` |
-    | Begrensde gelijktijdigheid van async taken | `openclaw/plugin-sdk/concurrency-runtime` |
-    | Numerieke coercie | `openclaw/plugin-sdk/number-runtime` |
-    | Proces-lokaal async-slot | `openclaw/plugin-sdk/async-lock-runtime` |
-    | Bestandssloten | `openclaw/plugin-sdk/file-lock` |
-
-    Gebundelde plugins worden door de scanner beschermd tegen `infra-runtime`, zodat repocode
-    niet kan terugvallen naar de brede barrel.
-
-  </Step>
-
-  <Step title="Migrate channel route helpers">
-    Nieuwe kanaalroutecode moet `openclaw/plugin-sdk/channel-route` gebruiken.
-    De oudere route-key- en comparable-target-namen blijven als compatibiliteitsaliassen
-    bestaan tijdens de migratieperiode, maar nieuwe plugins moeten de routenamen gebruiken
-    die het gedrag direct beschrijven:
-
-    | Oude helper | Moderne helper |
-    | --- | --- |
-    | `channelRouteIdentityKey(...)` | `channelRouteDedupeKey(...)` |
-    | `channelRouteKey(...)` | `channelRouteCompactKey(...)` |
-    | `ComparableChannelTarget` | `ChannelRouteParsedTarget` |
-    | `comparableChannelTargetsMatch(...)` | `channelRouteTargetsMatchExact(...)` |
-    | `comparableChannelTargetsShareRoute(...)` | `channelRouteTargetsShareConversation(...)` |
-
-    De moderne routehelpers normaliseren `{ channel, to, accountId, threadId }`
-    consistent voor native goedkeuringen, onderdrukking van antwoorden, inkomende dedupe,
-    cronlevering en sessierouting.
-
-    Voeg geen nieuwe toepassingen toe van `ChannelMessagingAdapter.parseExplicitTarget` of
-    de parser-ondersteunde geladen-routehelpers (`parseExplicitTargetForLoadedChannel`
-    of `resolveRouteTargetForLoadedChannel`) of
-    `resolveChannelRouteTargetWithParser(...)` uit `plugin-sdk/channel-route`.
-    Die hooks zijn verouderd en blijven alleen voor oudere plugins bestaan tijdens de
-    migratieperiode. Nieuwe kanaalplugins moeten
-    `messaging.targetResolver.resolveTarget(...)` gebruiken voor normalisatie van doel-id's
-    en fallback bij ontbrekende directoryvermeldingen, `messaging.inferTargetChatType(...)` wanneer core
-    vroeg een peer-soort nodig heeft, en `messaging.resolveOutboundSessionRoute(...)`
-    voor provider-native sessie- en threadidentiteit.
-
-  </Step>
-
-  <Step title="Build and test">
-    ```bash
-    pnpm build
-    pnpm test -- my-plugin/
-    ```
-  </Step>
-</Steps>
-
-## Referentie voor importpaden
-
-  <Accordion title="Common import path table">
-  | Importpad | Doel | Belangrijkste exports |
-  | --- | --- | --- |
-  | `plugin-sdk/plugin-entry` | Canonieke invoerhulpfunctie voor Plugin | `definePluginEntry` |
-  | `plugin-sdk/core` | Verouderde overkoepelende her-export voor kanaalinvoerdefinities/-bouwers | `defineChannelPluginEntry`, `createChatChannelPlugin` |
-  | `plugin-sdk/config-schema` | Export van rootconfiguratieschema | `OpenClawSchema` |
-  | `plugin-sdk/provider-entry` | Invoerhulpfunctie voor één provider | `defineSingleProviderPluginEntry` |
-  | `plugin-sdk/channel-core` | Gerichte kanaalinvoerdefinities en -bouwers | `defineChannelPluginEntry`, `defineSetupPluginEntry`, `createChatChannelPlugin`, `createChannelPluginBase` |
-  | `plugin-sdk/setup` | Gedeelde hulpfuncties voor de configuratiewizard | Configuratievertaler, prompts voor toegestane lijsten, bouwers voor configuratiestatus |
-  | `plugin-sdk/setup-runtime` | Runtime-hulpfuncties tijdens configuratie | `createSetupTranslator`, importveilige configuratiepatchadapters, hulpfuncties voor opzoeknotities, `promptResolvedAllowFrom`, `splitSetupEntries`, gedelegeerde configuratieproxy's |
-  | `plugin-sdk/setup-adapter-runtime` | Verouderde alias voor configuratieadapter | Gebruik `plugin-sdk/setup-runtime` |
-  | `plugin-sdk/setup-tools` | Hulpfuncties voor configuratietooling | `formatCliCommand`, `detectBinary`, `extractArchive`, `resolveBrewExecutable`, `formatDocsLink`, `CONFIG_DIR` |
-  | `plugin-sdk/account-core` | Hulpfuncties voor meerdere accounts | Hulpfuncties voor accountlijst/configuratie/actiepoort |
-  | `plugin-sdk/account-id` | Hulpfuncties voor account-ID's | `DEFAULT_ACCOUNT_ID`, normalisatie van account-ID's |
-  | `plugin-sdk/account-resolution` | Hulpfuncties voor accountopzoeking | Hulpfuncties voor accountopzoeking + standaard-terugval |
-  | `plugin-sdk/account-helpers` | Smalle accounthulpfuncties | Hulpfuncties voor accountlijst/accountacties |
-  | `plugin-sdk/channel-setup` | Adapters voor de configuratiewizard | `createOptionalChannelSetupSurface`, `createOptionalChannelSetupAdapter`, `createOptionalChannelSetupWizard`, plus `DEFAULT_ACCOUNT_ID`, `createTopLevelChannelDmPolicy`, `setSetupChannelEnabled`, `splitSetupEntries` |
-  | `plugin-sdk/channel-pairing` | Primitieven voor DM-koppeling | `createChannelPairingController` |
-  | `plugin-sdk/channel-reply-pipeline` | Bekabeling voor antwoordprefix, typen en bronlevering | `createChannelReplyPipeline`, `resolveChannelSourceReplyDeliveryMode` |
-  | `plugin-sdk/channel-config-helpers` | Fabrieken voor configuratieadapters en hulpfuncties voor DM-toegang | `createHybridChannelConfigAdapter`, `resolveChannelDmAccess`, `resolveChannelDmAllowFrom`, `resolveChannelDmPolicy`, `normalizeChannelDmPolicy`, `normalizeLegacyDmAliases` |
-  | `plugin-sdk/channel-config-schema` | Bouwers voor configuratieschema's | Gedeelde kanaalconfiguratieschema-primitieven en alleen de generieke bouwer |
-  | `plugin-sdk/bundled-channel-config-schema` | Gebundelde configuratieschema's | Alleen door OpenClaw onderhouden gebundelde plugins; nieuwe plugins moeten pluginlokale schema's definiëren |
-  | `plugin-sdk/channel-config-schema-legacy` | Verouderde gebundelde configuratieschema's | Alleen compatibiliteitsalias; gebruik `plugin-sdk/bundled-channel-config-schema` voor onderhouden gebundelde plugins |
-  | `plugin-sdk/telegram-command-config` | Hulpfuncties voor Telegram-opdrachtconfiguratie | Normalisatie van opdrachtnamen, inkorten van beschrijvingen, validatie van duplicaten/conflicten |
-  | `plugin-sdk/channel-policy` | Beleidsresolutie voor groep/DM | `resolveChannelGroupRequireMention` |
-  | `plugin-sdk/channel-lifecycle` | Verouderde compatibiliteitsfacade | Gebruik `plugin-sdk/channel-outbound` |
-  | `plugin-sdk/inbound-envelope` | Hulpfuncties voor inkomende enveloppen | Gedeelde route- + envelopbouwhulpfuncties |
-  | `plugin-sdk/channel-inbound` | Hulpfuncties voor inkomende ontvangst | Contextopbouw, opmaak, roots, runners, voorbereide antwoordverzending en dispatchpredicaten |
-  | `plugin-sdk/messaging-targets` | Verouderd importpad voor doelparsering | Gebruik `plugin-sdk/channel-targets` voor generieke hulpfuncties voor doelparsering, `plugin-sdk/channel-route` voor routevergelijking en plugin-eigen `messaging.targetResolver` / `messaging.resolveOutboundSessionRoute` voor provider-specifieke doelresolutie |
-  | `plugin-sdk/outbound-media` | Hulpfuncties voor uitgaande media | Gedeeld laden van uitgaande media |
-  | `plugin-sdk/outbound-send-deps` | Verouderde compatibiliteitsfacade | Gebruik `plugin-sdk/channel-outbound` |
-  | `plugin-sdk/channel-outbound` | Hulpfuncties voor levenscyclus van uitgaande berichten | Berichtadapters, ontvangstbewijzen, duurzame verzendhulpfuncties, livevoorbeeld-/streaminghulpfuncties, antwoordopties, levenscyclushulpfuncties, uitgaande identiteit en payloadplanning |
-  | `plugin-sdk/channel-streaming` | Verouderde compatibiliteitsfacade | Gebruik `plugin-sdk/channel-outbound` |
-  | `plugin-sdk/outbound-runtime` | Verouderde compatibiliteitsfacade | Gebruik `plugin-sdk/channel-outbound` |
-  | `plugin-sdk/thread-bindings-runtime` | Hulpfuncties voor threadbinding | Levenscyclus- en adapterhulpfuncties voor threadbinding |
-  | `plugin-sdk/agent-media-payload` | Hulpfuncties voor verouderde mediapayloads | Bouwer voor agent-mediapayloads voor verouderde veldindelingen |
-  | `plugin-sdk/channel-runtime` | Verouderde compatibiliteitslaag | Alleen verouderde kanaalruntimehulpmiddelen |
-  | `plugin-sdk/channel-send-result` | Verzendresultaattypen | Antwoordresultaattypen |
-  | `plugin-sdk/runtime-store` | Persistente Plugin-opslag | `createPluginRuntimeStore` |
-  | `plugin-sdk/runtime` | Brede runtime-hulpfuncties | Runtime-/logging-/back-up-/Plugin-installatiehulpfuncties |
-  | `plugin-sdk/runtime-env` | Smalle runtime-omgevingshulpfuncties | Logger-/runtime-omgeving, timeout-, retry- en backoff-hulpfuncties |
-  | `plugin-sdk/plugin-runtime` | Gedeelde Plugin-runtimehulpfuncties | Plugin-opdrachten/-hooks/-HTTP-/interactieve hulpfuncties |
-  | `plugin-sdk/hook-runtime` | Hulpfuncties voor hookpijplijnen | Gedeelde Webhook-/interne hookpijplijnhulpfuncties |
-  | `plugin-sdk/lazy-runtime` | Luie runtime-hulpfuncties | `createLazyRuntimeModule`, `createLazyRuntimeMethod`, `createLazyRuntimeMethodBinder`, `createLazyRuntimeNamedExport`, `createLazyRuntimeSurface` |
-  | `plugin-sdk/process-runtime` | Proceshulpfuncties | Gedeelde uitvoeringshulpfuncties |
-  | `plugin-sdk/cli-runtime` | CLI-runtimehulpfuncties | Opdrachtopmaak, wachttijden, versiehulpfuncties |
-  | `plugin-sdk/gateway-runtime` | Gateway-hulpfuncties | Gateway-client, starthulpfunctie voor gereedheid van eventloop, resolutie van geadverteerde LAN-host en hulpfuncties voor kanaalstatuspatches |
-  | `plugin-sdk/config-runtime` | Verouderde compatibiliteitslaag voor configuratie | Geef de voorkeur aan `config-contracts`, `plugin-config-runtime`, `runtime-config-snapshot` en `config-mutation` |
-  | `plugin-sdk/telegram-command-config` | Hulpfuncties voor Telegram-opdrachten | Terugvalstabiele hulpfuncties voor validatie van Telegram-opdrachten wanneer het gebundelde Telegram-contractoppervlak niet beschikbaar is |
-  | `plugin-sdk/approval-runtime` | Hulpfuncties voor goedkeuringsprompts | Payload voor goedkeuring van uitvoering/Plugin, hulpfuncties voor goedkeuringsmogelijkheden/-profielen, native routerings-/runtimehulpfuncties voor goedkeuringen en gestructureerde opmaak van weergavepaden voor goedkeuringen |
-  | `plugin-sdk/approval-auth-runtime` | Hulpfuncties voor goedkeuringsauthenticatie | Oplossing van goedkeurders, autorisatie van acties in dezelfde chat |
-  | `plugin-sdk/approval-client-runtime` | Hulpfuncties voor goedkeuringsclients | Native profiel-/filterhulpfuncties voor uitvoeringsgoedkeuring |
-  | `plugin-sdk/approval-delivery-runtime` | Hulpfuncties voor goedkeuringslevering | Native mogelijkheid-/leveringsadapters voor goedkeuringen |
-  | `plugin-sdk/approval-gateway-runtime` | Gateway-hulpfuncties voor goedkeuringen | Gedeelde hulpfunctie voor Gateway-resolutie van goedkeuringen |
-  | `plugin-sdk/approval-handler-adapter-runtime` | Adapterhulpfuncties voor goedkeuringen | Lichtgewicht hulpfuncties voor het laden van native goedkeuringsadapters voor snelle kanaalingangspunten |
-  | `plugin-sdk/approval-handler-runtime` | Handlerhulpfuncties voor goedkeuringen | Bredere runtime-hulpfuncties voor goedkeuringshandlers; geef de voorkeur aan de smallere adapter-/Gateway-randen wanneer die voldoende zijn |
-  | `plugin-sdk/approval-native-runtime` | Doelhulpfuncties voor goedkeuringen | Native hulpfuncties voor goedkeuringsdoelen/accountbinding |
-  | `plugin-sdk/approval-reply-runtime` | Antwoordhulpfuncties voor goedkeuringen | Hulpfuncties voor antwoordpayloads voor uitvoering-/Plugin-goedkeuringen |
-  | `plugin-sdk/channel-runtime-context` | Hulpfuncties voor kanaalruntimecontext | Generieke hulpfuncties voor registreren/ophalen/bekijken van kanaalruntimecontext |
-  | `plugin-sdk/security-runtime` | Beveiligingshulpfuncties | Gedeelde hulpfuncties voor vertrouwen, DM-poorten, root-begrensde bestanden/paden, externe content en geheimverzameling |
-  | `plugin-sdk/ssrf-policy` | SSRF-beleidshulpfuncties | Hulpfuncties voor toegestane-hostlijst en privé-netwerkbeleid |
-  | `plugin-sdk/ssrf-runtime` | SSRF-runtimehulpfuncties | Vastgepinde dispatcher, bewaakte fetch, SSRF-beleidshulpfuncties |
-  | `plugin-sdk/system-event-runtime` | Hulpfuncties voor systeemgebeurtenissen | `enqueueSystemEvent`, `peekSystemEventEntries` |
-  | `plugin-sdk/heartbeat-runtime` | Heartbeat-hulpfuncties | Hulpfuncties voor Heartbeat-wake, gebeurtenis en zichtbaarheid |
-  | `plugin-sdk/delivery-queue-runtime` | Hulpfuncties voor leveringswachtrijen | `drainPendingDeliveries` |
-  | `plugin-sdk/channel-activity-runtime` | Hulpfuncties voor kanaalactiviteit | `recordChannelActivity` |
-  | `plugin-sdk/dedupe-runtime` | Dedupe-hulpfuncties | In-memory en persistentie-ondersteunde dedupe-caches |
-  | `plugin-sdk/file-access-runtime` | Hulpfuncties voor bestandstoegang | Hulpfuncties voor veilige lokale bestands-/mediapaden |
-  | `plugin-sdk/transport-ready-runtime` | Hulpfuncties voor transportgereedheid | `waitForTransportReady` |
-  | `plugin-sdk/exec-approvals-runtime` | Beleidshulpfuncties voor uitvoeringsgoedkeuring | `loadExecApprovals`, `resolveExecApprovalsFromFile`, `ExecApprovalsFile` |
-  | `plugin-sdk/collection-runtime` | Hulpfuncties voor begrensde caches | `pruneMapToMaxSize` |
-  | `plugin-sdk/diagnostic-runtime` | Hulpfuncties voor diagnostische poorten | `isDiagnosticFlagEnabled`, `isDiagnosticsEnabled` |
-  | `plugin-sdk/error-runtime` | Hulpfuncties voor foutopmaak | `formatUncaughtError`, `isApprovalNotFoundError`, hulpfuncties voor foutgrafen |
-  | `plugin-sdk/fetch-runtime` | Hulpfuncties voor ingepakte fetch/proxy | `resolveFetch`, proxyhulpfuncties, optiehulpfuncties voor EnvHttpProxyAgent |
-  | `plugin-sdk/host-runtime` | Hulpfuncties voor hostnormalisatie | `normalizeHostname`, `normalizeScpRemoteHost` |
-  | `plugin-sdk/retry-runtime` | Retry-hulpfuncties | `RetryConfig`, `retryAsync`, beleidsrunners |
-  | `plugin-sdk/allow-from` | Opmaak van toegestane lijsten en invoermapping | `formatAllowFromLowercase`, `mapAllowlistResolutionInputs` |
-  | `plugin-sdk/command-auth` | Hulpfuncties voor opdrachtpoorten en opdrachtoppervlakken | `resolveControlCommandGate`, hulpfuncties voor afzenderautorisatie, hulpfuncties voor opdrachtregisters inclusief opmaak van dynamische argumentmenu's |
-  | `plugin-sdk/command-status` | Renderers voor opdrachtstatus/-hulp | `buildCommandsMessage`, `buildCommandsMessagePaginated`, `buildHelpMessage` |
-  | `plugin-sdk/secret-input` | Parsering van geheime invoer | Hulpfuncties voor geheime invoer |
-  | `plugin-sdk/webhook-ingress` | Hulpfuncties voor Webhook-verzoeken | Hulpmiddelen voor Webhook-doelen |
-  | `plugin-sdk/webhook-request-guards` | Guard-hulpfuncties voor Webhook-body's | Hulpfuncties voor lezen/beperken van requestbody's |
-  | `plugin-sdk/reply-runtime` | Gedeelde antwoordruntime | Inkomende dispatch, Heartbeat, antwoordplanner, opdelen in chunks |
-  | `plugin-sdk/reply-dispatch-runtime` | Smalle hulpfuncties voor antwoorddispatch | Afronden, providerdispatch en hulpfuncties voor gesprekslabels |
-  | `plugin-sdk/reply-history` | Hulpfuncties voor antwoordgeschiedenis | `createChannelHistoryWindow`; verouderde compatibiliteitsexports voor maphulpfuncties zoals `buildPendingHistoryContextFromMap`, `recordPendingHistoryEntry` en `clearHistoryEntriesIfEnabled` |
-  | `plugin-sdk/reply-reference` | Planning van antwoordverwijzingen | `createReplyReferencePlanner` |
-  | `plugin-sdk/reply-chunking` | Hulpfuncties voor antwoordchunks | Hulpfuncties voor opdelen van tekst/markdown in chunks |
-  | `plugin-sdk/session-store-runtime` | Hulpfuncties voor sessiestores | Storepad + hulpfuncties voor bijgewerkt-op |
-  | `plugin-sdk/state-paths` | Hulpfuncties voor statuspaden | Hulpfuncties voor status- en OAuth-mappen |
-  | `plugin-sdk/routing` | Routing-/sessiesleutelhulpfuncties | `resolveAgentRoute`, `buildAgentSessionKey`, `resolveDefaultAgentBoundAccountId`, hulpfuncties voor sessiesleutelnormalisatie |
-  | `plugin-sdk/status-helpers` | Hulpfuncties voor kanaalstatus | Bouwers voor kanaal-/accountstatussamenvattingen, standaardwaarden voor runtimestatus, hulpfuncties voor probleemmetadata |
-  | `plugin-sdk/target-resolver-runtime` | Hulpfuncties voor doelresolver | Gedeelde hulpfuncties voor doelresolver |
-  | `plugin-sdk/string-normalization-runtime` | Hulpfuncties voor tekenreeksnormalisatie | Hulpfuncties voor slug-/tekenreeksnormalisatie |
-  | `plugin-sdk/request-url` | Hulpfuncties voor aanvraag-URL's | Tekenreeks-URL's extraheren uit aanvraagachtige invoer |
-  | `plugin-sdk/run-command` | Hulpfuncties voor getimede opdrachten | Getimede opdrachtuitvoerder met genormaliseerde stdout/stderr |
-  | `plugin-sdk/param-readers` | Parameterlezers | Algemene parameterlezers voor tools/CLI |
-  | `plugin-sdk/tool-payload` | Extractie van toolpayload | Genormaliseerde payloads extraheren uit toolresultaatobjecten |
-  | `plugin-sdk/tool-send` | Extractie van toolverzending | Canonieke velden voor verzenddoelen extraheren uit toolargumenten |
-  | `plugin-sdk/temp-path` | Hulpfuncties voor tijdelijke paden | Gedeelde hulpfuncties voor tijdelijke downloadpaden |
-  | `plugin-sdk/logging-core` | Loghulpfuncties | Subsystemlogger en redactiehulpfuncties |
-  | `plugin-sdk/markdown-table-runtime` | Hulpfuncties voor Markdown-tabellen | Hulpfuncties voor Markdown-tabelmodi |
-  | `plugin-sdk/reply-payload` | Typen voor berichtantwoorden | Typen voor antwoordpayloads |
-  | `plugin-sdk/provider-setup` | Samengestelde hulpfuncties voor lokale/zelfgehoste providerinstelling | Hulpfuncties voor ontdekking/configuratie van zelfgehoste providers |
-  | `plugin-sdk/self-hosted-provider-setup` | Gerichte hulpfuncties voor OpenAI-compatibele zelfgehoste providerinstelling | Dezelfde hulpfuncties voor ontdekking/configuratie van zelfgehoste providers |
-  | `plugin-sdk/provider-auth-runtime` | Hulpfuncties voor providerruntime-authenticatie | Hulpfuncties voor runtime-resolutie van API-sleutels |
-  | `plugin-sdk/provider-auth-api-key` | Hulpfuncties voor provider-API-sleutelinstelling | Hulpfuncties voor API-sleutelonboarding/profielschrijven |
-  | `plugin-sdk/provider-auth-result` | Hulpfuncties voor provider-auth-resultaten | Standaardbouwer voor OAuth-auth-resultaten |
-  | `plugin-sdk/provider-selection-runtime` | Hulpfuncties voor providerselectie | Selectie van geconfigureerde of automatische provider en samenvoeging van onbewerkte providerconfiguratie |
-  | `plugin-sdk/provider-env-vars` | Hulpfuncties voor provideromgevingsvariabelen | Hulpfuncties voor het opzoeken van provider-authenticatieomgevingsvariabelen |
-  | `plugin-sdk/provider-model-shared` | Gedeelde hulpfuncties voor providermodel/herhaling | `ProviderReplayFamily`, `buildProviderReplayFamilyHooks`, `normalizeModelCompat`, gedeelde bouwers voor herhalingsbeleid, hulpfuncties voor provider-eindpunten en hulpfuncties voor model-id-normalisatie |
-  | `plugin-sdk/provider-catalog-shared` | Gedeelde hulpfuncties voor providercatalogus | `findCatalogTemplate`, `buildSingleProviderApiKeyCatalog`, `buildManifestModelProviderConfig`, `supportsNativeStreamingUsageCompat`, `applyProviderNativeStreamingUsageCompat` |
-  | `plugin-sdk/provider-onboard` | Patches voor provideronboarding | Hulpfuncties voor onboardingconfiguratie |
-  | `plugin-sdk/provider-http` | Provider-HTTP-hulpfuncties | Algemene hulpfuncties voor provider-HTTP/eindpuntmogelijkheden, inclusief hulpfuncties voor multipartformulieren voor audiotranscriptie |
-  | `plugin-sdk/provider-web-fetch` | Hulpfuncties voor provider-webfetch | Hulpfuncties voor registratie/cache van webfetchproviders |
-  | `plugin-sdk/provider-web-search-config-contract` | Hulpfuncties voor provider-webzoekconfiguratie | Smalle webzoekconfiguratie-/referentiehulpfuncties voor providers die geen Plugin-inschakelbedrading nodig hebben |
-  | `plugin-sdk/provider-web-search-contract` | Hulpfuncties voor provider-webzoekcontract | Smalle webzoekconfiguratie-/referentiecontracthulpfuncties zoals `createWebSearchProviderContractFields`, `enablePluginInConfig`, `resolveProviderWebSearchPluginConfig` en scoped setters/getters voor referenties |
-  | `plugin-sdk/provider-web-search` | Hulpfuncties voor provider-webzoek | Hulpfuncties voor registratie/cache/runtime van webzoekproviders |
-  | `plugin-sdk/provider-tools` | Hulpfuncties voor provider-tool-/schemacompatibiliteit | `ProviderToolCompatFamily`, `buildProviderToolCompatFamilyHooks` en opschoning + diagnostiek voor DeepSeek/Gemini/OpenAI-schema's |
-  | `plugin-sdk/provider-usage` | Hulpfuncties voor providergebruik | `fetchClaudeUsage`, `fetchGeminiUsage`, `fetchGithubCopilotUsage` en andere hulpfuncties voor providergebruik |
-  | `plugin-sdk/provider-stream` | Hulpfuncties voor providerstreamwrappers | `ProviderStreamFamily`, `buildProviderStreamFamilyHooks`, `composeProviderStreamWrappers`, typen voor streamwrappers en gedeelde wrapperhulpfuncties voor Anthropic/Bedrock/DeepSeek V4/Google/Kilocode/Moonshot/OpenAI/OpenRouter/Z.A.I/MiniMax/Copilot |
-  | `plugin-sdk/provider-transport-runtime` | Hulpfuncties voor providertransport | Native providertransporthulpfuncties zoals bewaakte fetch, tekstextractie van toolresultaten, transportberichttransformaties en schrijfbare transportgebeurtenisstreams |
-  | `plugin-sdk/keyed-async-queue` | Geordende async-wachtrij | `KeyedAsyncQueue` |
-  | `plugin-sdk/media-runtime` | Gedeelde mediahulpfuncties | Hulpfuncties voor media ophalen/transformeren/opslaan, door ffprobe ondersteunde detectie van videodimensies en bouwers voor mediapayloads |
-  | `plugin-sdk/media-generation-runtime` | Gedeelde hulpfuncties voor mediageneratie | Gedeelde failoverhulpfuncties, kandidaatselectie en meldingen voor ontbrekende modellen voor beeld-/video-/muziekgeneratie |
-  | `plugin-sdk/media-understanding` | Hulpfuncties voor mediabegrip | Providertypen voor mediabegrip plus providergerichte exports van beeld-/audiohulpfuncties |
-  | `plugin-sdk/text-runtime` | Verouderde brede export voor tekstcompatibiliteit | Gebruik `string-coerce-runtime`, `text-chunking`, `text-utility-runtime` en `logging-core` |
-  | `plugin-sdk/text-chunking` | Hulpfuncties voor tekstopdeling | Hulpfunctie voor uitgaande tekstopdeling |
-  | `plugin-sdk/speech` | Spraakhulpfuncties | Spraakprovidertypen plus providergerichte hulpfuncties voor richtlijnen, register, validatie en OpenAI-compatibele TTS-bouwer |
-  | `plugin-sdk/speech-core` | Gedeelde spraakkern | Spraakprovidertypen, register, richtlijnen, normalisatie |
-  | `plugin-sdk/realtime-transcription` | Hulpfuncties voor realtime transcriptie | Providertypen, registerhulpfuncties en gedeelde WebSocket-sessiehulpfunctie |
-  | `plugin-sdk/realtime-voice` | Hulpfuncties voor realtime spraak | Providertypen, register-/resolutiehulpfuncties, brugsessiehulpfuncties, gedeelde terugspreekwachtrijen voor agents, spraakbesturing voor actieve runs, gezondheid van transcript/gebeurtenissen, echo-onderdrukking, matching van consultvragen, coördinatie van geforceerde consults, tracking van beurtcontext, tracking van uitvoeractiviteit en snelle contextconsult-hulpfuncties |
-  | `plugin-sdk/image-generation` | Hulpfuncties voor beeldgeneratie | Providertypen voor beeldgeneratie plus hulpfuncties voor beeldassets/data-URL's en de OpenAI-compatibele beeldproviderbouwer |
-  | `plugin-sdk/image-generation-core` | Gedeelde kern voor beeldgeneratie | Typen voor beeldgeneratie, failover, authenticatie en registerhulpfuncties |
-  | `plugin-sdk/music-generation` | Hulpfuncties voor muziekgeneratie | Provider-/aanvraag-/resultaattypen voor muziekgeneratie |
-  | `plugin-sdk/music-generation-core` | Gedeelde kern voor muziekgeneratie | Typen voor muziekgeneratie, failoverhulpfuncties, provideropzoeking en model-ref-parsing |
-  | `plugin-sdk/video-generation` | Hulpfuncties voor videogeneratie | Provider-/aanvraag-/resultaattypen voor videogeneratie |
-  | `plugin-sdk/video-generation-core` | Gedeelde kern voor videogeneratie | Typen voor videogeneratie, failoverhulpfuncties, provideropzoeking en model-ref-parsing |
-  | `plugin-sdk/interactive-runtime` | Hulpfuncties voor interactieve antwoorden | Normalisatie/reductie van interactieve antwoordpayloads |
-  | `plugin-sdk/channel-config-primitives` | Primitieven voor kanaalconfiguratie | Smalle primitieve waarden voor kanaalconfiguratieschema's |
-  | `plugin-sdk/channel-config-writes` | Hulpfuncties voor schrijven van kanaalconfiguratie | Hulpfuncties voor autorisatie van schrijven naar kanaalconfiguratie |
-  | `plugin-sdk/channel-plugin-common` | Gedeelde kanaalprelude | Gedeelde prelude-exports voor kanaal-Plugins |
-  | `plugin-sdk/channel-status` | Hulpfuncties voor kanaalstatus | Gedeelde hulpfuncties voor kanaalstatussnapshots/-samenvattingen |
-  | `plugin-sdk/allowlist-config-edit` | Hulpfuncties voor allowlistconfiguratie | Hulpfuncties voor bewerken/lezen van allowlistconfiguratie |
-  | `plugin-sdk/group-access` | Hulpfuncties voor groepstoegang | Gedeelde beslissingshulpfuncties voor groepstoegang |
-  | `plugin-sdk/direct-dm`, `plugin-sdk/direct-dm-access` | Verouderde compatibiliteitsfacades | Gebruik `plugin-sdk/channel-inbound` |
-  | `plugin-sdk/direct-dm-guard-policy` | Hulpfuncties voor Direct-DM-bewaking | Smalle beleidshelpers voor bewaking vóór crypto |
-  | `plugin-sdk/extension-shared` | Gedeelde extensiehulpfuncties | Primitieven voor passief kanaal/status en ambient-proxyhulpfuncties |
-  | `plugin-sdk/webhook-targets` | Hulpfuncties voor Webhook-doelen | Webhook-doelregister en hulpfuncties voor route-installatie |
-  | `plugin-sdk/webhook-path` | Verouderde alias voor Webhook-pad | Gebruik `plugin-sdk/webhook-ingress` |
-  | `plugin-sdk/web-media` | Gedeelde webmediahulpfuncties | Hulpfuncties voor laden van externe/lokale media |
-  | `plugin-sdk/zod` | Verouderde herexport voor Zod-compatibiliteit | Importeer `zod` rechtstreeks uit `zod` |
-  | `plugin-sdk/memory-core` | Gebundelde memory-core-hulpfuncties | Hulpoppervlak voor geheugenbeheerder/configuratie/bestand/CLI |
-  | `plugin-sdk/memory-core-engine-runtime` | Runtimefacade voor geheugenengine | Runtimefacade voor geheugenindex/-zoekfunctie |
-  | `plugin-sdk/memory-core-host-embedding-registry` | Register voor geheugenembeddings | Lichtgewicht registerhulpfuncties voor provider van geheugenembeddings |
-  | `plugin-sdk/memory-core-host-engine-foundation` | Geheugenhost-foundation-engine | Exports voor geheugenhost-foundation-engine |
-  | `plugin-sdk/memory-core-host-engine-embeddings` | Geheugenhost-embeddingengine | Contracten voor geheugenembeddings, registertoegang, lokale provider en algemene batch-/externe hulpfuncties; concrete externe providers staan in hun eigen Plugins |
-  | `plugin-sdk/memory-core-host-engine-qmd` | Geheugenhost-QMD-engine | Exports voor geheugenhost-QMD-engine |
-  | `plugin-sdk/memory-core-host-engine-storage` | Opslagengine voor geheugenhost | Exports voor opslagengine van geheugenhost |
-  | `plugin-sdk/memory-core-host-multimodal` | Multimodale hulpfuncties voor geheugenhost | Multimodale hulpfuncties voor geheugenhost |
-  | `plugin-sdk/memory-core-host-query` | Queryhulpfuncties voor geheugenhost | Queryhulpfuncties voor geheugenhost |
-  | `plugin-sdk/memory-core-host-secret` | Geheimhulpfuncties voor geheugenhost | Geheimhulpfuncties voor geheugenhost |
-  | `plugin-sdk/memory-core-host-events` | Verouderde alias voor geheugengebeurtenissen | Gebruik `plugin-sdk/memory-host-events` |
-  | `plugin-sdk/memory-core-host-status` | Statushulpfuncties voor geheugenhost | Statushulpfuncties voor geheugenhost |
-  | `plugin-sdk/memory-core-host-runtime-cli` | CLI-runtime voor geheugenhost | Hulpfuncties voor CLI-runtime van geheugenhost |
-  | `plugin-sdk/memory-core-host-runtime-core` | Kernruntime voor geheugenhost | Hulpfuncties voor kernruntime van geheugenhost |
-  | `plugin-sdk/memory-core-host-runtime-files` | Bestands-/runtimehulpfuncties voor geheugenhost | Bestands-/runtimehulpfuncties voor geheugenhost |
-  | `plugin-sdk/memory-host-core` | Alias voor kernruntime van geheugenhost | Leverancieronafhankelijke alias voor hulpfuncties van kernruntime van geheugenhost |
-  | `plugin-sdk/memory-host-events` | Alias voor gebeurtenisjournaal van geheugenhost | Leverancieronafhankelijke alias voor hulpfuncties van gebeurtenisjournaal van geheugenhost |
-  | `plugin-sdk/memory-host-files` | Verouderde alias voor geheugenbestand/-runtime | Gebruik `plugin-sdk/memory-core-host-runtime-files` |
-  | `plugin-sdk/memory-host-markdown` | Hulpfuncties voor beheerde Markdown | Gedeelde hulpfuncties voor beheerde Markdown voor geheugenverwante Plugins |
-  | `plugin-sdk/memory-host-search` | Active Memory-zoekfacade | Luie runtimefacade voor Active Memory-zoekbeheerder |
-  | `plugin-sdk/memory-host-status` | Verouderde alias voor geheugenhoststatus | Gebruik `plugin-sdk/memory-core-host-status` |
-  | `plugin-sdk/testing` | Testhulpmiddelen | Repo-lokale verouderde compatibiliteitsbarrel; gebruik gerichte repo-lokale testsubpaden zoals `plugin-sdk/plugin-test-runtime`, `plugin-sdk/channel-test-helpers`, `plugin-sdk/channel-target-testing`, `plugin-sdk/test-env` en `plugin-sdk/test-fixtures` |
-</Accordion>
-
-Deze tabel is bewust de gemeenschappelijke migratiesubset, niet het volledige SDK-
-oppervlak. De inventaris van compiler-entrypoints staat in
-`scripts/lib/plugin-sdk-entrypoints.json`; package-exports worden gegenereerd uit
-de publieke subset.
-
-Gereserveerde helper-seams voor gebundelde Plugins zijn uit de publieke SDK-
-exportmap gehaald, behalve expliciet gedocumenteerde compatibiliteitsfacades zoals de
-verouderde `plugin-sdk/discord`-shim die behouden blijft voor het gepubliceerde
-pakket `@openclaw/discord@2026.3.13`. Eigenaarsspecifieke helpers staan binnen het
-eigenaarspakket van de Plugin; gedeeld hostgedrag moet via generieke SDK-
-contracten lopen, zoals `plugin-sdk/gateway-runtime`, `plugin-sdk/security-runtime`
-en `plugin-sdk/plugin-config-runtime`.
-
-Gebruik de smalste import die bij de taak past. Als je geen export kunt vinden,
-controleer dan de bron in `src/plugin-sdk/` of vraag maintainers welk generiek contract
-er eigenaar van moet zijn.
-
-## Actieve deprecaties
-
-Smalere deprecaties die gelden voor de plugin-SDK, het providercontract,
-runtime-oppervlak en manifest. Ze werken vandaag nog allemaal, maar worden in
-een toekomstige major release verwijderd. De vermelding onder elk item koppelt de oude API
-aan de canonieke vervanging.
-
-<AccordionGroup>
-  <Accordion title="command-auth-helpbuilders → command-status">
-    **Oud (`openclaw/plugin-sdk/command-auth`)**: `buildCommandsMessage`,
-    `buildCommandsMessagePaginated`, `buildHelpMessage`.
-
-    **Nieuw (`openclaw/plugin-sdk/command-status`)**: dezelfde signatures, dezelfde
-    exports - alleen geïmporteerd vanuit het smallere subpad. `command-auth`
-    exporteert ze opnieuw als compat-stubs.
-
-    ```typescript
-    // Before
-    import { buildHelpMessage } from "openclaw/plugin-sdk/command-auth";
-
-    // After
-    import { buildHelpMessage } from "openclaw/plugin-sdk/command-status";
-    ```
-
-  </Accordion>
-
-  <Accordion title="Mention-gatinghelpers → resolveInboundMentionDecision">
-    **Oud**: `resolveInboundMentionRequirement({ facts, policy })` en
-    `shouldDropInboundForMention(...)` uit
-    `openclaw/plugin-sdk/channel-inbound` of
-    `openclaw/plugin-sdk/channel-mention-gating`.
-
-    **Nieuw**: `resolveInboundMentionDecision({ facts, policy })` - retourneert één
-    beslissingsobject in plaats van twee gesplitste calls.
-
-    Downstream channel-Plugins (Slack, Discord, Matrix, MS Teams) zijn al
-    overgestapt.
-
-  </Accordion>
-
-  <Accordion title="Channel-runtime-shim en channel-actionshelpers">
-    `openclaw/plugin-sdk/channel-runtime` is een compatibiliteitsshim voor oudere
-    channel-Plugins. Importeer dit niet vanuit nieuwe code; gebruik
-    `openclaw/plugin-sdk/channel-runtime-context` voor het registreren van runtime-
-    objecten.
-
-    `channelActions*`-helpers in `openclaw/plugin-sdk/channel-actions` zijn
-    verouderd naast ruwe "actions"-channel-exports. Stel capabilities
-    in plaats daarvan beschikbaar via het semantische `presentation`-oppervlak -
-    channel-Plugins declareren wat ze renderen (cards, buttons, selects) in plaats van welke ruwe
-    action-namen ze accepteren.
-
-  </Accordion>
-
-  <Accordion title="Webzoekprovider-tool()-helper → createTool() op de Plugin">
-    **Oud**: `tool()`-factory uit `openclaw/plugin-sdk/provider-web-search`.
-
-    **Nieuw**: implementeer `createTool(...)` rechtstreeks op de provider-Plugin.
-    OpenClaw heeft de SDK-helper niet langer nodig om de tool-wrapper te registreren.
-
-  </Accordion>
-
-  <Accordion title="Plaintext-channel-envelopes → BodyForAgent">
-    **Oud**: `formatInboundEnvelope(...)` (en
-    `ChannelMessageForAgent.channelEnvelope`) om een platte plaintext prompt-
-    envelope te bouwen uit inkomende channel-berichten.
-
-    **Nieuw**: `BodyForAgent` plus gestructureerde gebruikerscontextblokken. Channel-
-    Plugins koppelen routeringsmetadata (thread, topic, reply-to, reactions) als
-    getypeerde velden in plaats van ze samen te voegen tot een promptstring. De
-    helper `formatAgentEnvelope(...)` wordt nog steeds ondersteund voor gesynthetiseerde
-    assistant-facing envelopes, maar inkomende plaintext-envelopes worden
-    uitgefaseerd.
-
-    Betrokken gebieden: `inbound_claim`, `message_received` en elke aangepaste
-    channel-Plugin die `channelEnvelope`-tekst nabewerkte.
-
-  </Accordion>
-
-  <Accordion title="deactivate-hook → gateway_stop">
-    **Oud**: `api.on("deactivate", handler)`.
-
-    **Nieuw**: `api.on("gateway_stop", handler)`. De event en context zijn hetzelfde
-    shutdown-cleanupcontract; alleen de hooknaam verandert.
-
-    ```typescript
-    // Before
-    api.on("deactivate", async (event, ctx) => {
-      await stopPluginService(ctx);
-    });
-
-    // After
-    api.on("gateway_stop", async (event, ctx) => {
-      await stopPluginService(ctx);
-    });
-    ```
-
-    `deactivate` blijft tot na 2026-08-16 gekoppeld als een verouderde
-    compatibiliteitsalias.
-
-  </Accordion>
-
-  <Accordion title="subagent_spawning-hook → core-threadbinding">
-    **Oud**: `api.on("subagent_spawning", handler)` retourneert
-    `threadBindingReady` of `deliveryOrigin`.
-
-    **Nieuw**: laat core `thread: true`-subagentbindings voorbereiden via de
-    channel session-bindingadapter. Gebruik `api.on("subagent_spawned", handler)`
-    alleen voor observatie na de start.
-
-    ```typescript
-    // Before
-    api.on("subagent_spawning", async () => ({
-      status: "ok",
-      threadBindingReady: true,
-      deliveryOrigin: { channel: "discord", to: "channel:123", threadId: "456" },
-    }));
-
-    // After
-    api.on("subagent_spawned", async (event) => {
-      await observeSubagentLaunch(event);
-    });
-    ```
-
-    `subagent_spawning`, `PluginHookSubagentSpawningEvent`,
-    `PluginHookSubagentSpawningResult` en
-    `SubagentLifecycleHookRunner.runSubagentSpawning(...)` blijven alleen bestaan als
-    verouderde compatibiliteitsoppervlakken terwijl externe Plugins migreren.
-
-  </Accordion>
-
-  <Accordion title="Provider-discoverytypes → provider-catalogustypes">
-    Vier discovery-typealiases zijn nu dunne wrappers rond de
-    catalog-era types:
-
-    | Oude alias                | Nieuw type                |
-    | ------------------------- | ------------------------- |
-    | `ProviderDiscoveryOrder`  | `ProviderCatalogOrder`    |
-    | `ProviderDiscoveryContext`| `ProviderCatalogContext`  |
-    | `ProviderDiscoveryResult` | `ProviderCatalogResult`   |
-    | `ProviderPluginDiscovery` | `ProviderPluginCatalog`   |
-
-    Plus de verouderde statische `ProviderCapabilities`-bag - provider-Plugins
-    moeten expliciete providerhooks gebruiken, zoals `buildReplayPolicy`,
-    `normalizeToolSchemas` en `wrapStreamFn`, in plaats van een statisch object.
-
-  </Accordion>
-
-  <Accordion title="Thinking-policyhooks → resolveThinkingProfile">
-    **Oud** (drie afzonderlijke hooks op `ProviderThinkingPolicy`):
-    `isBinaryThinking(ctx)`, `supportsXHighThinking(ctx)` en
-    `resolveDefaultThinkingLevel(ctx)`.
-
-    **Nieuw**: één `resolveThinkingProfile(ctx)` die een
-    `ProviderThinkingProfile` retourneert met de canonieke `id`, optionele `label` en
-    gerangschikte niveaulijst. OpenClaw verlaagt verouderde opgeslagen waarden automatisch
-    op basis van profielrang.
-
-    De context bevat `provider`, `modelId`, optioneel samengevoegde `reasoning`
-    en optioneel samengevoegde model-`compat`-feiten. Provider-Plugins kunnen die
-    catalogusfeiten gebruiken om een modelspecifiek profiel alleen beschikbaar te stellen wanneer het geconfigureerde
-    requestcontract dit ondersteunt.
-
-    Implementeer één hook in plaats van drie. De legacy hooks blijven werken tijdens
-    de deprecationperiode, maar worden niet gecombineerd met het profielresultaat.
-
-  </Accordion>
-
-  <Accordion title="Externe authproviders → contracts.externalAuthProviders">
-    **Oud**: externe authhooks implementeren zonder de provider
-    in het Plugin-manifest te declareren.
-
-    **Nieuw**: declareer `contracts.externalAuthProviders` in het Plugin-manifest
-    **en** implementeer `resolveExternalAuthProfiles(...)`.
-
-    ```json
-    {
-      "contracts": {
-        "externalAuthProviders": ["anthropic", "openai"]
-      }
-    }
-    ```
-
-  </Accordion>
-
-  <Accordion title="Provider-env-var-lookup → setup.providers[].envVars">
-    **Oud** manifestveld: `providerAuthEnvVars: { anthropic: ["ANTHROPIC_API_KEY"] }`.
-
-    **Nieuw**: spiegel dezelfde env-var-lookup naar `setup.providers[].envVars`
-    op het manifest. Dit consolideert setup/status-env-metadata op één
-    plek en voorkomt dat de Plugin-runtime alleen hoeft te starten om env-var-
-    lookups te beantwoorden.
-
-    `providerAuthEnvVars` blijft ondersteund via een compatibiliteitsadapter
-    totdat de deprecationperiode sluit.
-
-  </Accordion>
-
-  <Accordion title="Memory-Pluginregistratie → registerMemoryCapability">
-    **Oud**: drie afzonderlijke calls -
-    `api.registerMemoryPromptSection(...)`,
-    `api.registerMemoryFlushPlan(...)`,
-    `api.registerMemoryRuntime(...)`.
-
-    **Nieuw**: één call op de memory-state-API -
-    `registerMemoryCapability(pluginId, { promptBuilder, flushPlanResolver, runtime })`.
-
-    Dezelfde slots, één registratiecall. Additieve prompt- en corpushelpers
-    (`registerMemoryPromptSupplement`, `registerMemoryCorpusSupplement`) worden
-    niet beïnvloed.
-
-  </Accordion>
-
-  <Accordion title="Memory-embeddingprovider-API">
-    **Oud**: `api.registerMemoryEmbeddingProvider(...)` plus
-    `contracts.memoryEmbeddingProviders`.
-
-    **Nieuw**: `api.registerEmbeddingProvider(...)` plus
-    `contracts.embeddingProviders`.
-
-    Het generieke embeddingprovidercontract is buiten memory herbruikbaar en is
-    het ondersteunde pad voor nieuwe providers. De memory-specifieke registratie-API
-    blijft gekoppeld als verouderde compatibiliteit terwijl bestaande providers migreren.
-    Plugin-inspectie rapporteert niet-gebundeld gebruik als compatibiliteitsschuld.
-
-  </Accordion>
-
-  <Accordion title="Subagent-sessionberichttypes hernoemd">
-    Twee legacy typealiases worden nog steeds geëxporteerd uit `src/plugins/runtime/types.ts`:
-
-    | Oud                           | Nieuw                           |
-    | ----------------------------- | ------------------------------- |
-    | `SubagentReadSessionParams`   | `SubagentGetSessionMessagesParams` |
-    | `SubagentReadSessionResult`   | `SubagentGetSessionMessagesResult` |
-
-    De runtimemethode `readSession` is verouderd ten gunste van
-    `getSessionMessages`. Dezelfde signature; de oude methode roept door naar de
-    nieuwe.
-
-  </Accordion>
-
-  <Accordion title="runtime.tasks.flow → runtime.tasks.managedFlows">
-    **Oud**: `runtime.tasks.flow` (enkelvoud) retourneerde een live task-flow-accessor.
-
-    **Nieuw**: `runtime.tasks.managedFlows` behoudt de beheerde TaskFlow-mutatie-
-    runtime voor Plugins die child-taken vanuit een flow maken, bijwerken, annuleren of uitvoeren.
-    Gebruik `runtime.tasks.flows` wanneer de Plugin alleen DTO-gebaseerde reads nodig heeft.
-
-    ```typescript
-    // Before
-    const flow = api.runtime.tasks.flow.fromToolContext(ctx);
-    // After
-    const flow = api.runtime.tasks.managedFlows.fromToolContext(ctx);
-    ```
-
-  </Accordion>
-
-  <Accordion title="Ingebedde extensiefactories → agent tool-result-middleware">
-    Behandeld in "Migreren → Ingebedde tool-result-extensies migreren naar
-    middleware" hierboven. Hier opgenomen voor volledigheid: het verwijderde embedded-runner-only
-    pad `api.registerEmbeddedExtensionFactory(...)` wordt vervangen door
-    `api.registerAgentToolResultMiddleware(...)` met een expliciete runtimelijst
-    in `contracts.agentToolResultMiddleware`.
-  </Accordion>
-
-  <Accordion title="OpenClawSchemaType-alias → OpenClawConfig">
-    `OpenClawSchemaType`, opnieuw geëxporteerd vanuit `openclaw/plugin-sdk`, is nu een
-    alias van één regel voor `OpenClawConfig`. Geef de voorkeur aan de canonieke naam.
-
-    ```typescript
-    // Before
-    import type { OpenClawSchemaType } from "openclaw/plugin-sdk";
-    // After
-    import type { OpenClawConfig } from "openclaw/plugin-sdk/config-schema";
-    ```
-
-  </Accordion>
-</AccordionGroup>
-
-<Note>
-Deprecaties op extensieniveau (binnen gebundelde channel/provider-Plugins onder
-`extensions/`) worden bijgehouden in hun eigen `api.ts`- en `runtime-api.ts`-
-barrels. Ze hebben geen invloed op Plugin-contracten van derden en worden hier niet
-vermeld. Als je de lokale barrel van een gebundelde Plugin rechtstreeks gebruikt, lees dan de
-deprecationcomments in die barrel voordat je upgradet.
-</Note>
-
-## Verwijderingstijdlijn
-
-| Wanneer                | Wat er gebeurt                                                         |
-| ---------------------- | ---------------------------------------------------------------------- |
-| **Nu**                 | Verouderde oppervlakken geven runtime-waarschuwingen                   |
-| **Volgende major release** | Verouderde oppervlakken worden verwijderd; plugins die ze nog gebruiken falen |
-
-Alle core-plugins zijn al gemigreerd. Externe plugins moeten migreren
-vóór de volgende major release.
+Het uniforme besturingsvocabulaire is eveneens bewust beperkt:
+
+| Methode                         | Van toepassing op                                       | Contract                                                                                                                                                                                                                  |
+| ------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `talk.session.appendAudio`      | `realtime/gateway-relay`, `transcription/gateway-relay` | Voeg een base64-PCM-audiofragment toe aan de providersessie die door dezelfde Gateway-verbinding wordt beheerd.                                                                                                           |
+| `talk.session.startTurn`        | `stt-tts/managed-room`                                  | Start een gebruikersbeurt in een beheerde ruimte.                                                                                                                                                                        |
+| `talk.session.endTurn`          | `stt-tts/managed-room`                                  | Beëindig de actieve beurt na validatie op een verouderde beurt.                                                                                                                                                           |
+| `talk.session.cancelTurn`       | alle door Gateway beheerde sessies                       | Annuleer actieve opname/provider-/agent-/TTS-werkzaamheden voor een beurt.                                                                                                                                                |
+| `talk.session.cancelOutput`     | `realtime/gateway-relay`                                | Stop de audio-uitvoer van de assistent zonder noodzakelijkerwijs de gebruikersbeurt te beëindigen.                                                                                                                        |
+| `talk.session.submitToolResult` | `realtime/gateway-relay`                                | Voltooi een providertoolaanroep na elke asynchrone voltooiing die door de bridge beschikbaar wordt gemaakt; geef `options.willContinue` door voor tussentijdse uitvoer of, indien ondersteund, `options.suppressResponse` om nog een assistentantwoord te voorkomen. |
+| `talk.session.steer`            | door een agent ondersteunde Talk-sessies                  | Stuur gesproken besturing via `status`, `steer`, `cancel` of `followup` naar de actieve ingebedde uitvoering die vanuit de Talk-sessie is bepaald.                                  |
+| `talk.session.close`            | alle uniforme sessies                                     | Stop relaysessies of trek de status van beheerde ruimtes in en vergeet vervolgens de uniforme sessie-id.                                                                                                                 |
+
+Voer geen speciale gevallen voor providers of platforms in de kern in om dit te laten werken.
+De kern beheert de semantiek van Talk-sessies. Providerplugins beheren het opzetten van leverancierssessies.
+Spraakoproepen en Google Meet beheren telefonie-/vergaderadapters. Browser- en native
+apps beheren de UX voor opname/afspelen op het apparaat.
+
+## Tijdlijn voor verwijdering
+
+| Wanneer                                     | Wat gebeurt er                                                                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Nu**                                      | Verouderde oppervlakken die waarschuwingen ondersteunen, geven runtimewaarschuwingen; repositorycontroles weigeren verouderde SDK-imports vanuit de core en gebundelde plugins. |
+| **In afwachting van beslissing van de eigenaar** | Records zonder datum blijven verouderd en komen niet in aanmerking voor verwijdering totdat hun eigenaar een `removeAfter`-datum publiceert. |
+| **De `removeAfter`-datum van elk compatibiliteitsrecord** | Dat specifieke oppervlak komt in aanmerking voor verwijdering; `pnpm plugins:boundary-report --fail-on-eligible-compat` laat CI mislukken zodra de datum is verstreken. |
+| **Volgende hoofdrelease**                   | Oppervlakken met een datum mogen pas na hun `removeAfter`-datum worden verwijderd; records zonder datum vereisen nog steeds goedkeuring van de eigenaar en een gepubliceerde datum. |
+
+De resterende openbare SDK-subpaden hieronder hebben registergestuurde verwijderingsvensters.
+De rijen van 30 juli zijn verwijderd na hun vroege, door onderhouders goedgekeurde opschoningsronde:
+ongebruikte subpaden zijn verwijderd, eerdere compatibiliteitsaliassen zijn verwijderd en
+uitsluitend gebundelde modules zijn gedegradeerd tot privé-lokale buildtoewijzingen.
+
+| `removeAfter` | Niveau                            | SDK-subpaden                                                                                                                                                                         |
+| ------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `2026-08-15`  | Eerdere compatibiliteitsverouderingen | `agent-config-primitives`, `channel-logging`, `channel-secret-runtime`, `channel-streaming`, `group-access`, `inbound-reply-dispatch`, `matrix`, `text-runtime`, `zod` |
+| `2026-09-01`  | Eerdere compatibiliteitsverouderingen | `channel-lifecycle`, `channel-message`, `channel-reply-pipeline`, `config-runtime`, `infra-runtime`                                                                                  |
+| `2026-10-01`  | Verouderde mediaprojectie         | `agent-media-payload`, plus de niet-subpadvelden van `MsgContext Media*`, builders voor inkomende mediapayloads van kanalen, `buildMediaPayload`, media-aliassen voor hooks en `{{Media*}}`-sjablonen |
+
+Alle coreplugins zijn al gemigreerd. Externe plugins moeten migreren
+vóór de volgende hoofdrelease. Voer `pnpm plugins:boundary-report` uit om te zien welke
+compatibiliteitsrecords het eerst verlopen voor de oppervlakken die jouw plugin gebruikt.
 
 ## De waarschuwingen tijdelijk onderdrukken
-
-Stel deze omgevingsvariabelen in terwijl je aan de migratie werkt:
 
 ```bash
 OPENCLAW_SUPPRESS_PLUGIN_SDK_COMPAT_WARNING=1 openclaw gateway run
@@ -1009,8 +1024,8 @@ Dit is een tijdelijke uitweg, geen permanente oplossing.
 ## Gerelateerd
 
 - [Aan de slag](/nl/plugins/building-plugins) - bouw je eerste plugin
-- [SDK-overzicht](/nl/plugins/sdk-overview) - volledige importreferentie voor subpaden
+- [SDK-overzicht](/nl/plugins/sdk-overview) - volledige referentie voor imports van subpaden
 - [Kanaalplugins](/nl/plugins/sdk-channel-plugins) - kanaalplugins bouwen
-- [Provider-plugins](/nl/plugins/sdk-provider-plugins) - provider-plugins bouwen
-- [Plugin-internals](/nl/plugins/architecture) - diepgaande architectuurverkenning
-- [Pluginmanifest](/nl/plugins/manifest) - referentie voor manifestschema
+- [Providerplugins](/nl/plugins/sdk-provider-plugins) - providerplugins bouwen
+- [Interne werking van plugins](/nl/plugins/architecture) - diepgaande architectuurbeschrijving
+- [Pluginmanifest](/nl/plugins/manifest) - referentie voor het manifestschema

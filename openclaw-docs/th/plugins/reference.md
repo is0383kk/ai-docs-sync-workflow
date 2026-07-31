@@ -1,15 +1,16 @@
 ---
 read_when:
-    - คุณต้องมีหน้าอ้างอิงสำหรับ Plugin เฉพาะของ OpenClaw
+    - คุณต้องมีหน้าอ้างอิงสำหรับ Plugin ของ OpenClaw ที่เฉพาะเจาะจง
     - คุณกำลังตรวจสอบความครอบคลุมของเอกสาร Plugin
-summary: ดัชนีหน้าข้อมูลอ้างอิง Plugin ของ OpenClaw ที่สร้างขึ้น
+summary: ดัชนีที่สร้างขึ้นของหน้าอ้างอิง Plugin สำหรับ OpenClaw
 title: ข้อมูลอ้างอิง Plugin
 x-i18n:
-    generated_at: "2026-07-12T16:25:49Z"
+    generated_at: "2026-07-22T03:44:01Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 03099acfb0bcbe9814fa53f5d2d893a08a39f42bf713ff140e9604783f9cef0e
+    source_hash: 2f8dfd157054a2af95c5e0a9406c471c9565e80d30e1472b6de6cb71cb6069fd
     source_path: plugins/reference.md
     workflow: 16
 ---
@@ -23,5 +24,5 @@ x-i18n:
 pnpm plugins:inventory:gen
 ```
 
-ใช้ [รายการ Plugin](/th/plugins/plugin-inventory) เพื่อเรียกดูหน้าอ้างอิง Plugin
-ที่สร้างขึ้นทั้งหมด 136 หน้า โดยจำแนกตามช่องทางการเผยแพร่ แพ็กเกจ และคำอธิบาย
+ใช้ [รายการ Plugin](/th/plugins/plugin-inventory) เพื่อเรียกดูหน้าข้อมูลอ้างอิง Plugin ที่สร้างขึ้นทั้งหมด 143 หน้า
+โดยแยกตามการเผยแพร่ แพ็กเกจ และคำอธิบาย

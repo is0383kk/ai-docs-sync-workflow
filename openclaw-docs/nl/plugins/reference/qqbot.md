@@ -1,19 +1,20 @@
 ---
 read_when:
-    - U installeert, configureert of controleert de qqbot-plugin
-summary: OpenClaw QQ Bot-kanaalplugin voor workflows met groepen en privéberichten.
+    - Je installeert, configureert of controleert de qqbot-plugin
+summary: OpenClaw QQ Bot-kanaalplugin voor groeps- en privéberichtworkflows.
 title: QQ Bot-plugin
 x-i18n:
-    generated_at: "2026-07-12T09:13:43Z"
+    generated_at: "2026-07-27T06:28:33Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 10e67c8c8bd01a2fcd3ca55c32f6941cd52551ad241cb16a2ea38c62d80cfeb9
+    source_hash: afc0633399e0fe6d37bf233fabbac0806e32a5e8151b5b841a3d9f51d1cde455
     source_path: plugins/reference/qqbot.md
     workflow: 16
 ---
 
-# QQ Bot-Plugin
+# QQ Bot-plugin
 
 OpenClaw QQ Bot-kanaalplugin voor workflows met groepen en privéberichten.
 
@@ -24,7 +25,7 @@ OpenClaw QQ Bot-kanaalplugin voor workflows met groepen en privéberichten.
 
 ## Oppervlak
 
-kanalen: qqbot; contracten: tools; Skills
+kanalen: `qqbot`; contracten: `tools`; Skills
 
 ## Gerelateerde documentatie
 

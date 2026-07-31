@@ -1,14 +1,15 @@
 ---
 read_when:
-    - आप github-copilot plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
-summary: OpenClaw में GitHub Copilot मॉडल प्रदाता समर्थन जोड़ता है।
+    - आप github-copilot Plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
+summary: OpenClaw में GitHub Copilot मॉडल प्रदाता का समर्थन जोड़ता है।
 title: GitHub Copilot Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:44:35Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:13:01Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2845e2575d30865b06f318873da6da8085f4928d059176b514c3195a29a87e36
+    source_hash: 3ed5a9098ac15afb0ecb77a0c723e178819a4f83e7da9728342d985e0f51f4c8
     source_path: plugins/reference/github-copilot.md
     workflow: 16
 ---
@@ -24,7 +25,7 @@ OpenClaw में GitHub Copilot मॉडल प्रदाता समर�
 
 ## सतह
 
-प्रदाता: github-copilot; अनुबंध: memoryEmbeddingProviders
+प्रदाता: `github-copilot`; अनुबंध: `memoryEmbeddingProviders`, `usageProviders`
 
 ## संबंधित दस्तावेज़
 

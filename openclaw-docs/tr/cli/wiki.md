@@ -1,22 +1,28 @@
 ---
 read_when:
-    - memory-wiki CLI'ını kullanmak istiyorsunuz
-    - '`openclaw wiki` belgeliyorsunuz veya değiştiriyorsunuz'
+    - memory-wiki CLI'yi kullanmak istiyorsunuz
+    - '`openclaw wiki` öğesini belgeliyor veya değiştiriyorsunuz'
 summary: '`openclaw wiki` için CLI referansı (memory-wiki kasası durumu, arama, derleme, lint, uygulama, köprü, ChatGPT içe aktarma ve Obsidian yardımcıları)'
 title: Viki
 x-i18n:
-    generated_at: "2026-07-12T12:12:03Z"
+    generated_at: "2026-07-26T23:55:18Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 0e817fdd101c3fbe8c3c2aa51ab6a5e8e3bc35ce61376e746b7fceb0b87d0154
+    source_hash: 1f793d52de270068cf3a06b13f52242bb66738235718639486e090a2de213e73
     source_path: cli/wiki.md
     workflow: 16
 ---
 
 # `openclaw wiki`
 
-`memory-wiki` kasasını inceleyin ve bakımını yapın. Birlikte gelen `memory-wiki` plugin'i tarafından sağlanır.
+`memory-wiki` kasasını inceleyin ve yönetin. Birlikte sunulan isteğe bağlı `memory-wiki` plugin'i tarafından sağlanır. İlk kullanımdan önce etkinleştirin:
+
+```bash
+openclaw plugins enable memory-wiki
+openclaw gateway restart
+```
 
 İlgili: [Memory Wiki plugin'i](/tr/plugins/memory-wiki), [Belleğe Genel Bakış](/tr/concepts/memory), [CLI: bellek](/tr/cli/memory)
 
@@ -31,17 +37,17 @@ openclaw wiki okf import ./knowledge-catalog/okf/bundles/ga4
 openclaw wiki compile
 openclaw wiki lint
 openclaw wiki search "alpha"
-openclaw wiki search "who should I ask about Teams?" --mode route-question
+openclaw wiki search "Teams hakkında kime danışmalıyım?" --mode route-question
 openclaw wiki get entity.alpha --from 1 --lines 80
 
-openclaw wiki apply synthesis "Alpha Summary" \
-  --body "Short synthesis body" \
+openclaw wiki apply synthesis "Alpha Özeti" \
+  --body "Kısa sentez metni" \
   --source-id source.alpha
 
 openclaw wiki apply metadata entity.alpha \
   --source-id source.alpha \
   --status review \
-  --question "Still active?"
+  --question "Hâlâ etkin mi?"
 
 openclaw wiki bridge import
 openclaw wiki unsafe-local import
@@ -55,34 +61,41 @@ openclaw wiki obsidian command workspace:quick-switcher
 openclaw wiki obsidian daily
 ```
 
-## Ajan seçimi
+## Aracı seçimi
 
 `plugins.entries.memory-wiki.config.vault.scope`, `agent` olduğunda kasayı
-üst düzey `--agent <id>` seçeneğiyle belirleyin:
+üst düzey `--agent <id>` seçeneğiyle seçin:
 
 ```bash
 openclaw wiki --agent support status
-openclaw wiki --agent support search "refund policy"
+openclaw wiki --agent support search "iade politikası"
 openclaw wiki --agent marketing ingest ./campaign-notes.md
 ```
 
-Birden fazla yapılandırılmış ajanın bulunduğu bir kurulumda, bir komutun rastgele bir varsayılan kasayı okuyamaması veya yazamaması için CLI işlemlerinde `--agent` zorunludur. Yalnızca bir ajan yapılandırılmışsa bu ajan varsayılan olarak kalır. Bilinmeyen ajan kimlikleri, kasa işlemi başlamadan önce hataya neden olur. `vault.scope`, `global` olduğunda bu seçenek belirlenen yolu değiştirmez.
+Birden fazla yapılandırılmış aracının bulunduğu bir kurulumda, bir komutun herhangi bir varsayılan kasayı okuyamaması veya kasaya yazamaması için CLI
+işlemlerinde `--agent` gereklidir. Yalnızca
+bir aracı yapılandırılmışsa bu aracı varsayılan olarak kalır. Bilinmeyen aracı kimlikleri,
+kasa işlemi başlamadan önce hataya neden olur. `vault.scope`, `global` olduğunda seçenek, seçili
+yolu değiştirmez.
 
-Gateway istemcileri de aynı kuralı izler: ajan kapsamlı, çok ajanlı bir kurulumda kasa destekli `wiki.*` isteklerinde `agentId` iletin. Eksik veya bilinmeyen kimlik hatadır. Ajan turları, wiki araçları, bellek derlemi ekleri ve derlenmiş istem özetleri etkin çalışma zamanı ajan bağlamını zaten taşır.
+Gateway istemcileri de aynı kurala uyar: aracı kapsamlı çok aracılı bir kurulumda kasa destekli `wiki.*`
+isteklerinde `agentId` iletin. Eksik veya bilinmeyen kimlik
+hatadır. Aracı turları, wiki araçları, bellek külliyatı ekleri ve derlenmiş istem
+özetleri etkin çalışma zamanı aracısı bağlamını zaten taşır.
 
 ## Komutlar
 
 ### `wiki status`
 
-Kasa modunu ve kapsamını, çözümlenen ajanı, sistem durumunu ve Obsidian CLI kullanılabilirliğini gösterir. Hedeflenen kasanın başlatılıp başlatılmadığını, köprü modunun sağlıklı olup olmadığını veya Obsidian entegrasyonunun kullanılabilirliğini kontrol etmek için önce bunu kullanın.
+Kasa modunu ve kapsamını, çözümlenen aracıyı, sistem durumunu ve Obsidian CLI kullanılabilirliğini gösterir. Amaçlanan kasanın başlatılıp başlatılmadığını, köprü modunun sağlıklı olup olmadığını veya Obsidian entegrasyonunun kullanılabilirliğini kontrol etmek için önce bunu kullanın.
 
-Köprü modu etkinken ve bellek yapıtlarını okuyacak şekilde yapılandırıldığında bu komut, ajan/çalışma zamanı belleğiyle aynı etkin bellek plugin'i bağlamını görebilmek için çalışan Gateway'i sorgular.
+Köprü modu etkinken ve bellek yapıtlarını okuyacak şekilde yapılandırıldığında bu komut, aracı/çalışma zamanı belleğiyle aynı etkin bellek plugin'i bağlamını görebilmek için çalışan Gateway'i sorgular.
 
 ### `wiki doctor`
 
-Wiki sistem durumu kontrollerini çalıştırır ve uygulanabilir düzeltmeleri bildirir. Sistem sağlıklı değilse sıfırdan farklı bir kodla çıkar.
+Wiki sistem durumu kontrollerini çalıştırır ve uygulanabilir düzeltmeleri bildirir. Sistem sağlıksızsa sıfır olmayan kodla çıkar.
 
-Köprü modu etkinken ve bellek yapıtlarını okuyacak şekilde yapılandırıldığında bu komut, raporu oluşturmadan önce çalışan Gateway'i sorgular. Devre dışı bırakılmış köprü içe aktarımları ve bellek yapıtlarını okumayan köprü yapılandırmaları yerel/çevrimdışı kalır.
+Köprü modu etkinken ve bellek yapıtlarını okuyacak şekilde yapılandırıldığında bu komut, raporu oluşturmadan önce çalışan Gateway'i sorgular. Devre dışı bırakılan köprü içe aktarımları ve bellek yapıtlarını okumayan köprü yapılandırmaları yerel/çevrimdışı kalır.
 
 Tipik sorunlar:
 
@@ -96,50 +109,47 @@ Tipik sorunlar:
 
 ### `wiki ingest <path>`
 
-Yerel bir Markdown veya metin dosyasını kaynak sayfası olarak wiki `sources/` klasörüne aktarır. `<path>` yerel bir dosya yolu olmalıdır; şu anda URL'den içe aktarma yoktur. İkili dosyaları reddeder.
+Yerel bir Markdown veya metin dosyasını kaynak sayfası olarak wiki `sources/` klasörüne aktarır. `<path>` yerel bir dosya yolu olmalıdır; şu anda URL'den veri alma desteklenmez. İkili dosyaları reddeder.
 
-İçe aktarılan kaynak sayfaları kaynak bilgisi frontmatter'ı (`sourceType: local-file`, `sourcePath`, `ingestedAt`) taşır. İçe aktarma sonrasında kasa her zaman yeniden derlenir.
+İçe aktarılan kaynak sayfalar köken bilgisi frontmatter'ı (`sourceType: local-file`, `sourcePath`, `ingestedAt`) taşır. Veri alma işlemi sonrasında kasa her zaman yeniden derlenir.
 
-Bayraklar: `--title <title>`, kaynak başlığını geçersiz kılar (varsayılan: dosya adından türetilir).
+Bayraklar: `--title <title>` kaynak başlığını geçersiz kılar (varsayılan: dosya adından türetilir).
 
 ### `wiki okf import <path>`
 
 Paketinden çıkarılmış bir Open Knowledge Format paketini wiki kavram sayfalarına aktarır.
 
-İçe aktarıcı, OKF dizin ağacındaki ayrılmamış her `.md` kavram belgesini okur, boş olmayan bir `type` alanı gerektirir ve bilinmeyen OKF `type` değerlerini genel kavramlar olarak ele alır. Ayrılmış OKF `index.md` ve `log.md` dosyaları kavram olarak içe aktarılmaz.
+İçe aktarıcı, OKF dizin ağacındaki ayrılmış olmayan her `.md` kavram belgesini okur, boş olmayan bir `type` alanı gerektirir ve bilinmeyen OKF `type` değerlerini genel kavramlar olarak ele alır. Ayrılmış OKF `index.md` ve `log.md` dosyaları kavram olarak içe aktarılmaz.
 
-İçe aktarılan sayfalar `concepts/` altında düzleştirilir; böylece mevcut wiki derleme, arama, alma, özet ve pano akışları bunları hemen görür. Özgün OKF kavram kimliği, `type`, `resource`, `tags`, zaman damgası, kaynak yolu ve tam frontmatter, sayfa frontmatter'ında korunur. Dâhilî OKF Markdown bağlantıları oluşturulan wiki sayfalarına yönlendirilecek şekilde yeniden yazılır; bozuk veya harici bağlantılar değiştirilmeden bırakılır. İçe aktarma sonrasında kasa her zaman yeniden derlenir.
+İçe aktarılan sayfalar `concepts/` altında düzleştirilir; böylece mevcut wiki derleme, arama, alma, özet ve pano akışları bunları hemen görür. Özgün OKF kavram kimliği, `type`, `resource`, `tags`, zaman damgası, kaynak yolu ve frontmatter'ın tamamı sayfa frontmatter'ında korunur. Dahili OKF Markdown bağlantıları oluşturulan wiki sayfalarına yönlendirilir; bozuk veya harici bağlantılar değiştirilmeden bırakılır. İçe aktarma sonrasında kasa her zaman yeniden derlenir.
 
 Örnekler:
 
 ```bash
 openclaw wiki okf import ./bundles/ga4
 openclaw wiki okf import ./bundles/ga4 --json
-openclaw wiki search "BigQuery Table" --mode source-evidence --json
+openclaw wiki search "BigQuery Tablosu" --mode source-evidence --json
 openclaw wiki get <path-from-json-result>
 ```
 
 ### `wiki compile`
 
-Dizinleri, ilgili blokları, panoları ve derlenmiş özetleri yeniden oluşturur. Kararlı, makineye yönelik yapıtları şuraya yazar:
-
-- `.openclaw-wiki/cache/agent-digest.json`
-- `.openclaw-wiki/cache/claims.jsonl`
+Dizinleri, ilgili blokları, panoları ve derlenmiş sorgu/istem anlık görüntüsünü yeniden oluşturur. Anlık görüntü, OpenClaw'ın paylaşılan SQLite plugin durumunda kalıcılaştırılır ve eşzamanlı istem izdüşümü için bellekte tutulur; kasada önbellek dosyaları oluşturmaz.
 
 `render.createDashboards` etkinse derleme, rapor sayfalarını da yeniler.
 
 ### `wiki lint`
 
-Kasayı denetler ve şunları kapsayan bir rapor yazar:
+Kasayı denetler ve aşağıdakileri kapsayan bir rapor yazar:
 
 - yapısal sorunlar (bozuk bağlantılar, eksik/yinelenen kimlikler, eksik sayfa türü veya başlığı, geçersiz frontmatter)
-- kaynak bilgisi eksiklikleri (eksik kaynak kimlikleri, eksik içe aktarma kaynak bilgisi)
-- çelişkiler (işaretlenmiş çelişkiler, birbiriyle çatışan iddialar)
+- köken bilgisi eksiklikleri (eksik kaynak kimlikleri, eksik içe aktarma köken bilgisi)
+- çelişkiler (işaretlenmiş çelişkiler, birbiriyle uyuşmayan iddialar)
 - açık sorular
-- düşük güvenilirlikli sayfalar ve iddialar
+- düşük güven düzeyli sayfalar ve iddialar
 - güncelliğini yitirmiş sayfalar ve iddialar
 
-Bunu anlamlı wiki güncellemelerinden sonra çalıştırın.
+Bunu önemli wiki güncellemelerinden sonra çalıştırın.
 
 ### `wiki search <query>`
 
@@ -149,29 +159,29 @@ Wiki içeriğinde arama yapar. Davranış yapılandırmaya bağlıdır:
 - `search.corpus`: `wiki`, `memory` veya `all`
 - `--mode`: `auto`, `find-person`, `route-question`, `source-evidence` veya `raw-claim`
 
-Wiki'ye özgü sıralama ve kaynak bilgisi için `wiki search` kullanın. Etkin bellek plugin'i paylaşılan aramayı sunuyorsa tek bir geniş, paylaşılan hatırlama geçişi için `openclaw memory search` komutunu tercih edin.
+Wiki'ye özgü sıralama ve köken bilgisi için `wiki search` kullanın. Etkin bellek plugin'i paylaşılan arama sunuyorsa tek ve geniş kapsamlı bir ortak hatırlama geçişi için `openclaw memory search` tercih edin.
 
 Arama modları:
 
-- `find-person`: diğer adlar, kullanıcı adları, sosyal hesaplar, kurallı kimlikler ve kişi sayfaları
-- `route-question`: kime-sorulmalı/en-iyi-ne-için-kullanılır ipuçları ve ilişki bağlamı
+- `find-person`: diğer adlar, kullanıcı adları, sosyal hesaplar, standart kimlikler ve kişi sayfaları
+- `route-question`: danışılacak/en uygun kullanım ipuçları ve ilişki bağlamı
 - `source-evidence`: kaynak sayfaları ve yapılandırılmış kanıt alanları
-- `raw-claim`: iddia/kanıt meta verileriyle birlikte yapılandırılmış iddia metni
+- `raw-claim`: iddia/kanıt meta verileriyle yapılandırılmış iddia metni
 
 Örnekler:
 
 ```bash
 openclaw wiki search "bgroux" --mode find-person
-openclaw wiki search "who knows Teams rollout?" --mode route-question
+openclaw wiki search "Teams dağıtımını kim biliyor?" --mode route-question
 openclaw wiki search "maintainer-whois" --mode source-evidence
-openclaw wiki search "strong route Teams" --mode raw-claim --json
+openclaw wiki search "güçlü rota Teams" --mode raw-claim --json
 ```
 
-Bir sonuç yapılandırılmış bir iddiayla eşleştiğinde metin çıktısı `Claim:` ve `Evidence:` satırlarını içerir. JSON çıktısı, ajan tarafında ayrıntılı inceleme için ayrıca `matchedClaimId`, `matchedClaimStatus`, `matchedClaimConfidence`, `evidenceKinds` ve `evidenceSourceIds` alanlarını sunar.
+Bir sonuç yapılandırılmış bir iddiayla eşleştiğinde metin çıktısı `Claim:` ve `Evidence:` satırlarını içerir. JSON çıktısı, aracı tarafında ayrıntılı inceleme için ayrıca `matchedClaimId`, `matchedClaimStatus`, `matchedClaimConfidence`, `evidenceKinds` ve `evidenceSourceIds` değerlerini sunar.
 
 ### `wiki get <lookup>`
 
-Bir wiki sayfasını kimliğine veya göreli yoluna göre okur.
+Bir wiki sayfasını kimliğe veya göreli yola göre okur.
 
 ```bash
 openclaw wiki get entity.alpha
@@ -180,22 +190,22 @@ openclaw wiki get syntheses/alpha-summary.md --from 1 --lines 80
 
 ### `wiki apply`
 
-Serbest biçimli sayfa düzenlemesi yapmadan dar kapsamlı değişiklikler uygular:
+Serbest biçimli sayfa düzenlemesi yapmadan sınırlı değişiklikler uygular:
 
-- `apply synthesis <title>`: yönetilen bir özet gövdesiyle bir sentez sayfası oluşturur veya yeniler
+- `apply synthesis <title>`: yönetilen özet gövdesine sahip bir sentez sayfası oluşturur veya yeniler
 - `apply metadata <lookup>`: mevcut bir sayfadaki meta verileri günceller
 
-Her ikisi de `--source-id`, `--contradiction`, `--question` (her biri tekrarlanabilir), `--confidence <n>` (0-1) ve `--status <status>` seçeneklerini kabul eder. `apply metadata`, saklanan bir güvenilirlik değerini kaldırmak için ayrıca `--clear-confidence` seçeneğini kabul eder. Yönetilen, oluşturulmuş blokları bozmadan wiki sayfalarını geliştirmek için desteklenen yöntem budur.
+Her ikisi de `--source-id`, `--contradiction`, `--question` (her biri yinelenebilir), `--confidence <n>` (0-1) ve `--status <status>` kabul eder. `apply metadata`, saklanan bir güven değerini kaldırmak için ayrıca `--clear-confidence` kabul eder. Yönetilen ve oluşturulmuş blokları bozmadan wiki sayfalarını geliştirmek için desteklenen yöntem budur.
 
 ### `wiki bridge import`
 
-Etkin bellek plugin'indeki herkese açık bellek yapıtlarını, köprü destekli kaynak sayfalarına aktarır. Dışa aktarılan en son bellek yapıtlarını wiki kasasına çekmek için bunu `bridge` modunda kullanın.
+Etkin bellek plugin'indeki herkese açık bellek yapıtlarını köprü destekli kaynak sayfalarına aktarır. En son dışa aktarılan bellek yapıtlarını wiki kasasına çekmek için bunu `bridge` modunda kullanın.
 
-Etkin köprü yapıtı okumalarında CLI, çalışma zamanı bellek plugin'i bağlamını kullanması için içe aktarmayı Gateway RPC üzerinden yönlendirir. Köprü içe aktarımları devre dışıysa veya yapıt okumaları kapalıysa komut yerel/çevrimdışı sıfır içe aktarma davranışını korur. İçe aktarmadan sonraki dizin yenilemesi `ingest.autoCompile` tarafından denetlenir.
+Etkin köprü yapıtı okumalarında CLI, çalışma zamanı bellek plugin'i bağlamını kullanması için içe aktarmayı Gateway RPC üzerinden yönlendirir. Köprü içe aktarımları devre dışıysa veya yapıt okumaları kapalıysa komut, yerel/çevrimdışı sıfır içe aktarma davranışını korur. İçe aktarma sonrasındaki dizin yenilemesi `ingest.autoCompile` tarafından denetlenir.
 
 ### `wiki unsafe-local import`
 
-`unsafe-local` modunda açıkça yapılandırılmış yerel yollardan (`unsafeLocal.paths`) içe aktarır. Bilinçli olarak deneyseldir ve yalnızca aynı makinede çalışır. İçe aktarmadan sonraki dizin yenilemesi `ingest.autoCompile` tarafından denetlenir.
+`unsafe-local` modunda açıkça yapılandırılmış yerel yollardan (`unsafeLocal.paths`) içe aktarır. Bilinçli olarak deneyseldir ve yalnızca aynı makinede çalışır. İçe aktarma sonrasındaki dizin yenilemesi `ingest.autoCompile` tarafından denetlenir.
 
 ### `wiki chatgpt import`
 
@@ -206,35 +216,38 @@ openclaw wiki chatgpt import --export ./chatgpt-export
 openclaw wiki chatgpt import --export ./conversations.json --dry-run
 ```
 
-| Bayrak            | Varsayılan | Açıklama                                                        |
-| ----------------- | ---------- | --------------------------------------------------------------- |
-| `--export <path>` | (zorunlu)  | ChatGPT dışa aktarma dizini veya `conversations.json` yolu.      |
-| `--dry-run`       | `false`    | Sayfaları yazmadan oluşturulan/güncellenen/atlanan sayıları gösterir. |
+| Bayrak              | Varsayılan    | Açıklama                                                   |
+| ----------------- | ---------- | ------------------------------------------------------------- |
+| `--export <path>` | (gerekli) | ChatGPT dışa aktarma dizini veya `conversations.json` yolu.        |
+| `--dry-run`       | `false`    | Sayfaları yazmadan oluşturulan/güncellenen/atlanan sayılarını önizler. |
 
-Deneme çalıştırması olmayan ve herhangi bir sayfayı değiştiren içe aktarma, geri alma için gereken bir içe aktarma çalıştırma kimliğini kaydeder ve özette yazdırır.
+Herhangi bir sayfayı değiştiren deneme dışı bir içe aktarma, geri alma için gereken ve özette yazdırılan bir içe aktarma çalıştırma kimliği kaydeder.
 
 ### `wiki chatgpt rollback <run-id>`
 
-Daha önce uygulanmış bir ChatGPT içe aktarma çalıştırmasını geri alır; oluşturduğu sayfaları kaldırır ve üzerine yazdığı sayfaları geri yükler. Çalıştırma zaten geri alınmışsa hiçbir işlem yapmaz (ve `alreadyRolledBack` bildirir).
+Daha önce uygulanmış bir ChatGPT içe aktarma çalıştırmasını geri alır; oluşturduğu sayfaları kaldırır ve üzerine yazdığı sayfaları geri yükler. Çalıştırma zaten geri alınmışsa işlem yapmaz (ve `alreadyRolledBack` bildirir).
 
 ### `wiki obsidian ...`
 
-Obsidian uyumlu modda çalışan kasalar için Obsidian yardımcı komutları: `status`, `search`, `open`, `command`, `daily`. `obsidian.useOfficialCli` etkin olduğunda bunlar `PATH` üzerinde resmî `obsidian` CLI'ını gerektirir.
+Obsidian uyumlu modda çalışan kasalar için Obsidian yardımcı komutları: `status`, `search`, `open`, `command`, `daily`. `obsidian.useOfficialCli` etkinken bunlar, `PATH` üzerinde resmî `obsidian` CLI'ı gerektirir.
 
-Yapılandırma doğrulaması, `obsidian.vaultName` ajan başına eşleme değil, tek bir genel ayar olduğundan `vault.scope`, `agent` iken `obsidian.useOfficialCli: true` değerini reddeder. Obsidian uyumlu Markdown oluşturma kullanılabilir kalır.
+Yapılandırma doğrulaması, `vault.scope`, `agent` olduğunda
+`obsidian.useOfficialCli: true` değerini reddeder; çünkü `obsidian.vaultName` aracı başına bir eşleme değil,
+tek bir genel ayardır. Obsidian uyumlu Markdown oluşturma kullanılabilir
+kalmaya devam eder.
 
-## Pratik kullanım rehberi
+## Pratik kullanım kılavuzu
 
-- Kaynak bilgisi ve sayfa kimliği önemli olduğunda `wiki search` + `wiki get` kullanın.
-- Yönetilen, oluşturulmuş bölümleri elle düzenlemek yerine `wiki apply` kullanın.
-- Çelişkili veya düşük güvenilirlikli içeriğe güvenmeden önce `wiki lint` kullanın.
+- Köken bilgisi ve sayfa kimliği önemli olduğunda `wiki search` + `wiki get` kullanın.
+- Yönetilen ve oluşturulmuş bölümleri elle düzenlemek yerine `wiki apply` kullanın.
+- Çelişkili veya düşük güven düzeyli içeriğe güvenmeden önce `wiki lint` kullanın.
 - Yeni panoları ve derlenmiş özetleri hemen istediğinizde toplu içe aktarmalardan veya kaynak değişikliklerinden sonra `wiki compile` kullanın.
-- Bir veri kataloğu, dokümantasyon dışa aktarımı veya ajan zenginleştirme işlem hattı zaten OKF Markdown paketleri üretiyorsa `wiki okf import` kullanın.
-- Köprü modu yeni dışa aktarılmış bellek yapıtlarına bağlı olduğunda `wiki bridge import` kullanın.
+- Bir veri kataloğu, belge dışa aktarımı veya aracı zenginleştirme işlem hattı zaten OKF Markdown paketleri üretiyorsa `wiki okf import` kullanın.
+- Köprü modu yeni dışa aktarılan bellek yapıtlarına bağlı olduğunda `wiki bridge import` kullanın.
 
 ## Yapılandırma bağlantıları
 
-`openclaw wiki` davranışını şunlar şekillendirir:
+`openclaw wiki` davranışı aşağıdakiler tarafından belirlenir:
 
 - `plugins.entries.memory-wiki.config.vaultMode`
 - `plugins.entries.memory-wiki.config.vault.scope`
@@ -247,9 +260,9 @@ Yapılandırma doğrulaması, `obsidian.vaultName` ajan başına eşleme değil,
 - `plugins.entries.memory-wiki.config.render.*`
 - `plugins.entries.memory-wiki.config.context.includeCompiledDigestPrompt`
 
-Tam yapılandırma modeli için [Memory Wiki plugin'i](/tr/plugins/memory-wiki) sayfasına bakın.
+Tam yapılandırma modeli için [Memory Wiki plugin'i](/tr/plugins/memory-wiki) bölümüne bakın.
 
 ## İlgili
 
-- [CLI başvurusu](/tr/cli)
+- [CLI referansı](/tr/cli)
 - [Bellek wiki'si](/tr/plugins/memory-wiki)

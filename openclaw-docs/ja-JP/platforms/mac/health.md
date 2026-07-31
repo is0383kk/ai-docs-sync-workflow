@@ -1,54 +1,55 @@
 ---
 read_when:
-    - Macアプリのヘルスインジケーターのデバッグ
-summary: macOS アプリでの Gateway／チャンネルの稼働状態の表示方法
+    - Mac アプリのヘルスインジケーターのデバッグ
+summary: macOS アプリが Gateway／チャンネルの正常性状態を報告する仕組み
 title: ヘルスチェック（macOS）
 x-i18n:
-    generated_at: "2026-07-11T22:24:38Z"
+    generated_at: "2026-07-26T09:08:56Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: a086c527796dbe453bdee1cc9cbe1e0fc1157de710c8c6de186411fe9aa3bc7b
+    source_hash: 095abdbefa7db7c0d14435e2c5db7d1ebc03afa0c539555a7abdd9170d015fb8
     source_path: platforms/mac/health.md
     workflow: 16
 ---
 
-# macOS のヘルスチェック
+# macOS でのヘルスチェック
 
-メニューバーアプリで、リンク済みチャネルのヘルス状態を確認する方法です。
+メニューバーアプリからリンク済みチャンネルのヘルス状態を確認する方法です。
 
 ## メニューバー
 
 ステータスドット：
 
-- 緑：リンク済みで、プローブは正常です。
-- オレンジ：リンク済みですが、チャネルプローブが機能低下または未接続を報告しています。
+- 緑：リンク済みでプローブは正常です。
+- オレンジ：リンク済みですが、チャンネルプローブから機能低下または未接続が報告されています。
 - 赤：まだリンクされていません。
 
-2 行目には「リンク済み · 認証 12 分前」と表示されるか、失敗の理由が表示されます。
-メニューの「今すぐヘルスチェックを実行」を選択すると、オンデマンドのプローブが実行されます。
+2 行目には「リンク済み · 認証 12 分前」と表示されるか、失敗理由が表示されます。
+メニューの「Run Health Check Now」を選択すると、オンデマンドのプローブが実行されます。
 
 ## 設定
 
-- 「一般」タブにはヘルスカードが表示されます。ステータスドット、概要行（リンク状態 +
-  認証からの経過時間）、任意の失敗詳細行、および **今すぐ再試行** と
-  **ログを開く** ボタンが含まれます。
-- **チャネルタブ**には、WhatsApp と Telegram のチャネルごとの状態と操作（ログイン用 QR コード、
-  ログアウト、プローブ、最後の切断／エラー）が表示されます。
+- General タブにはヘルスカードが表示されます。ステータスドット、概要行（リンク状態 +
+  認証からの経過時間）、任意の失敗詳細行があり、**Retry now** ボタンと
+  **Open logs** ボタンも表示されます。
+- **Channels タブ**には、WhatsApp と Telegram のチャンネルごとの状態と操作（ログイン用 QR、
+  ログアウト、プローブ、最後の切断またはエラー）が表示されます。
 
 ## プローブの仕組み
 
-アプリは、既存の WebSocket 接続を介して Gateway の `health` RPC を
-約 60 秒ごと、およびオンデマンドで呼び出します（CLI のシェルアウトは使用しません）。RPC は
-認証情報を読み込み、メッセージを送信せずに状態を報告します。アプリは直近の
-正常なスナップショットと直近のエラーを個別にキャッシュするため、UI は即座に読み込まれ、
+アプリは、既存の WebSocket 接続（CLI の外部プロセス呼び出しではありません）を介して Gateway の `health` RPC を
+約 60 秒ごと、およびオンデマンドで呼び出します。この RPC は
+認証情報を読み込み、メッセージを送信せずに状態を報告します。アプリは最後に正常だった
+スナップショットと最後のエラーを個別にキャッシュするため、UI は即座に読み込まれ、
 オフライン中もちらつきません。
 
 ## 判断に迷う場合
 
-[Gateway のヘルス](/ja-JP/gateway/health)に記載されている CLI の手順（`openclaw status`、
+[Gateway のヘルス](/ja-JP/gateway/health) に記載された CLI の手順（`openclaw status`、
 `openclaw status --deep`、`openclaw health --json`）を使用し、
-`/tmp/openclaw/openclaw-*.log` を追跡して、`web-heartbeat` / `web-reconnect` で絞り込んでください。
+`openclaw logs --follow` を実行して、`web-heartbeat` / `web-reconnect` で絞り込みます。
 
 ## 関連項目
 

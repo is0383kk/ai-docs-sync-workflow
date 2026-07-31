@@ -1,21 +1,22 @@
 ---
 read_when:
-    - Estás instalando, configurando o auditando el plugin de Deepgram
+    - Está instalando, configurando o auditando el plugin de Deepgram
 summary: Añade compatibilidad con proveedores de comprensión multimedia. Añade compatibilidad con proveedores de transcripción en tiempo real.
 title: Plugin de Deepgram
 x-i18n:
-    generated_at: "2026-07-11T23:19:50Z"
+    generated_at: "2026-07-26T04:45:27Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 93383c01d5a5e1e1d412d396ec1def12f388fc7c5da102573373dbc8180497a3
+    source_hash: ababdaeda58a97236e3dd96bdf51a0ce560278bbeb20a731d05f51d28bfb4155
     source_path: plugins/reference/deepgram.md
     workflow: 16
 ---
 
 # Plugin de Deepgram
 
-Añade compatibilidad con proveedores de comprensión de contenido multimedia. Añade compatibilidad con proveedores de transcripción en tiempo real.
+Añade compatibilidad con proveedores de comprensión multimedia. Añade compatibilidad con proveedores de transcripción en tiempo real.
 
 ## Distribución
 
@@ -24,7 +25,7 @@ Añade compatibilidad con proveedores de comprensión de contenido multimedia. A
 
 ## Superficie
 
-contratos: mediaUnderstandingProviders, realtimeTranscriptionProviders
+contratos: `mediaUnderstandingProviders`, `realtimeTranscriptionProviders`
 
 ## Documentación relacionada
 

@@ -28,7 +28,7 @@ Use a WSL session when your repository lives inside the distribution's filesyste
   </Step>
 
   <Step title="Trust the folder">
-    The first session in a folder shows the workspace trust dialog. Trust is granted per distribution and folder; trusting a folder in one distribution doesn't apply to another distribution or to the same path on Windows.
+    The first session in a folder shows the workspace trust dialog. You grant trust per distribution and folder. A folder you trust in one distribution isn't trusted in another distribution or at the same path on Windows.
   </Step>
 </Steps>
 
@@ -44,4 +44,4 @@ A few features aren't available in WSL sessions yet: the integrated terminal, co
 
 ## Managed devices
 
-On devices managed by an organization, WSL sessions may be unavailable. If session start fails with a message that the device is managed, that's controlled by your administrator. Administrators: see [how settings reach devices](/en/admin-setup#decide-how-settings-reach-devices) in the deployment guide.
+On devices managed by an organization, WSL sessions may be unavailable. If session start fails with a message that the device is managed, that's controlled by your administrator. Administrators: see [how settings reach devices](/docs/en/admin-setup#decide-how-settings-reach-devices) in the deployment guide.

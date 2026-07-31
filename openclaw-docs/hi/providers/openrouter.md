@@ -1,41 +1,44 @@
 ---
 read_when:
-    - आप कई LLMs के लिए एक ही API कुंजी चाहते हैं
+    - आप कई LLM के लिए एक ही API कुंजी चाहते हैं
     - आप OpenClaw में OpenRouter के माध्यम से मॉडल चलाना चाहते हैं
-    - आप छवि निर्माण के लिए OpenRouter का उपयोग करना चाहते हैं
-    - आप संगीत निर्माण के लिए OpenRouter का उपयोग करना चाहते हैं
-    - आप वीडियो बनाने के लिए OpenRouter का उपयोग करना चाहते हैं
-summary: OpenClaw में कई मॉडलों तक पहुंचने के लिए OpenRouter के एकीकृत API का उपयोग करें
+    - आप इमेज जनरेशन के लिए OpenRouter का उपयोग करना चाहते हैं
+    - आप संगीत बनाने के लिए OpenRouter का उपयोग करना चाहते हैं
+    - आप वीडियो जनरेशन के लिए OpenRouter का उपयोग करना चाहते हैं
+summary: OpenClaw में कई मॉडल एक्सेस करने के लिए OpenRouter के एकीकृत API का उपयोग करें
 title: OpenRouter
 x-i18n:
-    generated_at: "2026-07-03T09:38:03Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:31:54Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: ca36f2a7afd35ea4d276f61ded28524aed7d15715b29eea9aaac0ac6e4abab40
+    source_hash: c0936a10222f44f376dee081b7ee0678cddc3bc4579ac0006321dc1012d59bcf
     source_path: providers/openrouter.md
     workflow: 16
 ---
 
-OpenRouter एक **एकीकृत API** प्रदान करता है, जो एक ही endpoint और API key के पीछे कई models को requests route करता है। यह OpenAI-संगत है, इसलिए अधिकांश OpenAI SDKs base URL बदलने पर काम करते हैं।
+OpenRouter एक API और एक कुंजी के पीछे कई मॉडलों तक अनुरोध रूट करता है। यह
+OpenAI-संगत है, इसलिए OpenClaw अन्य प्रॉक्सी प्रदाताओं के लिए उपयोग किए जाने वाले समान
+`openai-completions`-शैली के ट्रांसपोर्ट पर इससे संचार करता है।
 
-## शुरू करना
+## आरंभ करना
 
 <Tabs>
   <Tab title="OAuth">
     <Steps>
-      <Step title="OAuth onboarding चलाएँ">
+      <Step title="OAuth ऑनबोर्डिंग चलाएँ">
         ```bash
         openclaw onboard --auth-choice openrouter-oauth
         ```
 
-        OpenClaw OpenRouter का browser sign-in flow खोलता है, PKCE
-        code को OpenRouter API key से exchange करता है, और उस key को default
-        OpenRouter auth profile में store करता है। remote/headless hosts पर, OpenClaw
-        sign-in URL print करता है और sign in करने के बाद redirect URL paste करने को कहता है।
+        OpenClaw OpenRouter का ब्राउज़र साइन-इन प्रवाह (PKCE) खोलता है, कोड को
+        OpenRouter API कुंजी से बदलता है और उसे डिफ़ॉल्ट OpenRouter प्रमाणीकरण
+        प्रोफ़ाइल में संग्रहीत करता है। रिमोट/हेडलेस होस्ट पर, OpenClaw साइन-इन
+        URL प्रिंट करता है और साइन इन करने के बाद आपसे रीडायरेक्ट URL पेस्ट करने को कहता है।
       </Step>
-      <Step title="(वैकल्पिक) किसी विशिष्ट model पर switch करें">
-        Onboarding default रूप से `openrouter/auto` पर सेट होता है। बाद में कोई ठोस model चुनें:
+      <Step title="(वैकल्पिक) किसी विशिष्ट मॉडल पर स्विच करें">
+        ऑनबोर्डिंग का डिफ़ॉल्ट `openrouter/auto` है। बाद में कोई निश्चित मॉडल चुनें:
 
         ```bash
         openclaw models set openrouter/<provider>/<model>
@@ -45,18 +48,18 @@ OpenRouter एक **एकीकृत API** प्रदान करता ह
     </Steps>
 
   </Tab>
-  <Tab title="API key">
+  <Tab title="API कुंजी">
     <Steps>
-      <Step title="अपनी API key प्राप्त करें">
-        [openrouter.ai/keys](https://openrouter.ai/keys) पर API key बनाएँ।
+      <Step title="अपनी API कुंजी प्राप्त करें">
+        [openrouter.ai/keys](https://openrouter.ai/keys) पर एक API कुंजी बनाएँ।
       </Step>
-      <Step title="API-key onboarding चलाएँ">
+      <Step title="API-कुंजी ऑनबोर्डिंग चलाएँ">
         ```bash
         openclaw onboard --auth-choice openrouter-api-key
         ```
       </Step>
-      <Step title="(वैकल्पिक) किसी विशिष्ट model पर switch करें">
-        Onboarding default रूप से `openrouter/auto` पर सेट होता है। बाद में कोई ठोस model चुनें:
+      <Step title="(वैकल्पिक) किसी विशिष्ट मॉडल पर स्विच करें">
+        ऑनबोर्डिंग का डिफ़ॉल्ट `openrouter/auto` है। बाद में कोई निश्चित मॉडल चुनें:
 
         ```bash
         openclaw models set openrouter/<provider>/<model>
@@ -68,7 +71,7 @@ OpenRouter एक **एकीकृत API** प्रदान करता ह
   </Tab>
 </Tabs>
 
-## Config उदाहरण
+## कॉन्फ़िगरेशन उदाहरण
 
 ```json5
 {
@@ -81,25 +84,29 @@ OpenRouter एक **एकीकृत API** प्रदान करता ह
 }
 ```
 
-## Model references
+## मॉडल संदर्भ
 
 <Note>
-Model refs `openrouter/<provider>/<model>` pattern का पालन करते हैं। उपलब्ध
-providers और models की पूरी सूची के लिए, [/concepts/model-providers](/hi/concepts/model-providers) देखें।
+मॉडल संदर्भ `openrouter/<provider>/<model>` पैटर्न का पालन करते हैं। उपलब्ध प्रदाताओं और
+मॉडलों की पूरी सूची के लिए, [/concepts/model-providers](/hi/concepts/model-providers) देखें।
 </Note>
 
-Bundled fallback उदाहरण:
+लाइव कैटलॉग खोज अनुपलब्ध होने पर उपयोग किए जाने वाले बंडल किए गए फ़ॉलबैक मॉडल:
 
-| Model ref                         | Notes                        |
+| मॉडल संदर्भ                         | टिप्पणियाँ                        |
 | --------------------------------- | ---------------------------- |
-| `openrouter/auto`                 | OpenRouter automatic routing |
-| `openrouter/openrouter/fusion`    | OpenRouter Fusion router     |
-| `openrouter/moonshotai/kimi-k2.6` | MoonshotAI के माध्यम से Kimi K2.6 |
-| `openrouter/moonshotai/kimi-k2.5` | MoonshotAI के माध्यम से Kimi K2.5 |
+| `openrouter/auto`                 | OpenRouter स्वचालित रूटिंग |
+| `openrouter/moonshotai/kimi-k2.6` | MoonshotAI के माध्यम से Kimi K2.6     |
+| `openrouter/moonshotai/kimi-k2.5` | MoonshotAI के माध्यम से Kimi K2.5     |
 
-## Image generation
+`openrouter/openrouter/fusion` सहित कोई भी अन्य `openrouter/<provider>/<model>` संदर्भ
+([Fusion राउटर](#fusion-router) देखें), OpenRouter के लाइव मॉडल कैटलॉग के विरुद्ध
+गतिशील रूप से रिज़ॉल्व होता है।
 
-OpenRouter `image_generate` tool को भी back कर सकता है। `agents.defaults.imageGenerationModel` के अंतर्गत OpenRouter image model का उपयोग करें:
+## इमेज जनरेशन
+
+OpenRouter `image_generate` टूल का बैकएंड बन सकता है। `agents.defaults.mediaModels.image` के अंतर्गत
+एक OpenRouter इमेज मॉडल सेट करें:
 
 ```json5
 {
@@ -115,11 +122,17 @@ OpenRouter `image_generate` tool को भी back कर सकता है�
 }
 ```
 
-OpenClaw image requests को OpenRouter के chat completions image API पर `modalities: ["image", "text"]` के साथ भेजता है। Gemini image models को supported `aspectRatio` और `resolution` hints OpenRouter के `image_config` के माध्यम से मिलते हैं। धीमे OpenRouter image models के लिए `agents.defaults.imageGenerationModel.timeoutMs` का उपयोग करें; `image_generate` tool का per-call `timeoutMs` parameter फिर भी प्राथमिकता लेता है।
+OpenClaw `modalities: ["image", "text"]` के साथ OpenRouter के चैट-कम्प्लीशन्स इमेज API को
+इमेज अनुरोध भेजता है। Gemini इमेज मॉडलों को OpenRouter के `image_config` के माध्यम से
+`aspectRatio` और `resolution` संकेत भी मिलते हैं; अन्य
+इमेज मॉडलों को नहीं मिलते। धीमे मॉडलों के लिए `agents.defaults.mediaModels.image.timeoutMs` का उपयोग करें;
+`image_generate` टूल का प्रति-कॉल `timeoutMs` फिर भी प्राथमिकता लेता है।
 
-## Video generation
+## वीडियो जनरेशन
 
-OpenRouter अपने asynchronous `/videos` API के माध्यम से `video_generate` tool को भी back कर सकता है। `agents.defaults.videoGenerationModel` के अंतर्गत OpenRouter video model का उपयोग करें:
+OpenRouter अपने एसिंक्रोनस `/videos` API के माध्यम से
+`video_generate` टूल का बैकएंड बन सकता है। `agents.defaults.mediaModels.video` के अंतर्गत
+एक OpenRouter वीडियो मॉडल सेट करें:
 
 ```json5
 {
@@ -134,17 +147,20 @@ OpenRouter अपने asynchronous `/videos` API के माध्यम स
 }
 ```
 
-OpenClaw text-to-video और image-to-video jobs OpenRouter को submit करता है, लौटाए गए `polling_url` को poll करता है, और पूर्ण हुए video को
-OpenRouter के `unsigned_urls` या documented job content endpoint से download करता है।
-Reference images default रूप से first/last frame images के रूप में भेजी जाती हैं; `reference_image` tag वाली images OpenRouter input references के रूप में भेजी जाती हैं। Bundled `google/veo-3.1-fast` default वर्तमान supported 4/6/8
-second durations, `720P`/`1080P` resolutions, और `16:9`/`9:16` aspect
-ratios advertise करता है। Video-to-video OpenRouter के लिए registered नहीं है क्योंकि upstream
-video generation API फिलहाल text और image references स्वीकार करता है।
+OpenClaw टेक्स्ट-टू-वीडियो और इमेज-टू-वीडियो जॉब सबमिट करता है, लौटाए गए
+`polling_url` को पोल करता है और पूर्ण वीडियो को OpenRouter के
+`unsigned_urls` या जॉब सामग्री एंडपॉइंट से डाउनलोड करता है। संदर्भ इमेज डिफ़ॉल्ट रूप से
+पहले/अंतिम फ़्रेम की इमेज होती हैं; `reference_image` से टैग की गई इमेज इसके बजाय इनपुट
+संदर्भ के रूप में भेजी जाती हैं। बंडल किया गया `google/veo-3.1-fast` डिफ़ॉल्ट 4/6/8
+सेकंड की अवधियों, `720P`/`1080P` रिज़ॉल्यूशन और `16:9`/`9:16` आस्पेक्ट रेशियो का समर्थन करता है।
+वीडियो-टू-वीडियो समर्थित नहीं है: अपस्ट्रीम API केवल टेक्स्ट और इमेज
+संदर्भ स्वीकार करता है।
 
-## Music generation
+## संगीत जनरेशन
 
-OpenRouter chat completions audio output के माध्यम से `music_generate` tool को भी back कर सकता है। `agents.defaults.musicGenerationModel` के अंतर्गत
-OpenRouter audio model का उपयोग करें:
+OpenRouter चैट-कम्प्लीशन्स ऑडियो आउटपुट के माध्यम से `music_generate` टूल का
+बैकएंड बन सकता है। `agents.defaults.mediaModels.music` के अंतर्गत
+एक OpenRouter ऑडियो मॉडल सेट करें:
 
 ```json5
 {
@@ -160,45 +176,44 @@ OpenRouter audio model का उपयोग करें:
 }
 ```
 
-Bundled OpenRouter music provider default रूप से
-`google/lyria-3-pro-preview` का उपयोग करता है और
-`google/lyria-3-clip-preview` भी expose करता है। OpenClaw `modalities: ["text",
-"audio"]` भेजता है, streaming enable करता है, streamed audio chunks collect करता है, और
-channel delivery के लिए result को generated media के रूप में save करता है। Reference images
-shared `music_generate image=...` parameter के माध्यम से Lyria models के लिए
-स्वीकार की जाती हैं।
+बंडल किए गए OpenRouter संगीत प्रदाता का डिफ़ॉल्ट `google/lyria-3-pro-preview`
+है और वह `google/lyria-3-clip-preview` भी उपलब्ध कराता है। OpenClaw `modalities:
+["text", "audio"]` भेजता है, प्रतिक्रिया स्ट्रीम करता है, ऑडियो खंड एकत्र करता है और
+परिणाम को चैनल डिलीवरी के लिए जनरेट किए गए मीडिया के रूप में सहेजता है। Lyria मॉडल साझा
+`music_generate image=...` पैरामीटर के माध्यम से एक संदर्भ इमेज स्वीकार करते हैं।
+स्ट्रीमिंग ऑडियो, ट्रांसक्रिप्ट प्रतिधारण और व्युत्पन्न SSE इवेंट एन्वलप
+`agents.defaults.mediaMaxMb` से सीमित होते हैं (डिफ़ॉल्ट ऑडियो सीमा 16 MB है)।
 
-## Text-to-speech
+## टेक्स्ट-टू-स्पीच
 
-OpenRouter को उसके OpenAI-संगत
-`/audio/speech` endpoint के माध्यम से TTS provider के रूप में भी उपयोग किया जा सकता है।
+OpenRouter अपने OpenAI-संगत `/audio/speech` एंडपॉइंट के माध्यम से
+TTS प्रदाता के रूप में कार्य कर सकता है।
 
 ```json5
 {
-  messages: {
-    tts: {
-      auto: "always",
-      provider: "openrouter",
-      providers: {
-        openrouter: {
-          model: "hexgrad/kokoro-82m",
-          speakerVoice: "af_alloy",
-          responseFormat: "mp3",
-        },
+  tts: {
+    auto: "always",
+    provider: "openrouter",
+    providers: {
+      openrouter: {
+        model: "hexgrad/kokoro-82m",
+        speakerVoice: "af_alloy",
+        responseFormat: "mp3",
       },
     },
   },
 }
 ```
 
-यदि `messages.tts.providers.openrouter.apiKey` छोड़ा गया है, तो TTS
-`models.providers.openrouter.apiKey`, फिर `OPENROUTER_API_KEY` को reuse करता है।
+यदि `tts.providers.openrouter.apiKey` को छोड़ दिया जाता है, तो TTS पहले
+`models.providers.openrouter.apiKey`, फिर `OPENROUTER_API_KEY` पर फ़ॉलबैक करता है।
 
-## Speech-to-text (inbound audio)
+## स्पीच-टू-टेक्स्ट (इनबाउंड ऑडियो)
 
-OpenRouter shared `tools.media.audio` path के माध्यम से अपने STT endpoint (`/audio/transcriptions`) का उपयोग करके inbound voice/audio attachments को transcribe कर सकता है।
-यह किसी भी channel plugin पर लागू होता है जो inbound voice/audio को
-media understanding preflight में forward करता है।
+OpenRouter अपने STT एंडपॉइंट (`/audio/transcriptions`) का उपयोग करके साझा
+`tools.media.audio` पथ के माध्यम से इनबाउंड वॉइस/ऑडियो अटैचमेंट को ट्रांसक्राइब कर सकता है।
+यह ऐसे किसी भी चैनल Plugin पर लागू होता है जो इनबाउंड वॉइस/ऑडियो को
+मीडिया समझ प्रीफ़्लाइट में फ़ॉरवर्ड करता है।
 
 ```json5
 {
@@ -213,24 +228,26 @@ media understanding preflight में forward करता है।
 }
 ```
 
-OpenClaw OpenRouter STT requests को `input_audio` के अंतर्गत base64 audio के साथ JSON के रूप में भेजता है (OpenRouter STT contract), multipart OpenAI form uploads के रूप में नहीं।
+OpenClaw OpenRouter STT अनुरोधों को `input_audio` के अंतर्गत base64 ऑडियो वाले
+JSON के रूप में भेजता है (OpenRouter का STT अनुबंध), multipart OpenAI फ़ॉर्म
+अपलोड के रूप में नहीं।
 
-## Fusion router
+## Fusion राउटर
 
-जब आप चाहते हैं कि एक OpenClaw model ref कई
-OpenRouter models से parallel में पूछे, OpenRouter उनके उत्तरों का judgment करे, और normal OpenRouter provider endpoint के माध्यम से
-एक अंतिम response return करे, तब OpenRouter Fusion का उपयोग करें। क्योंकि
-upstream model slug `openrouter/fusion` है, OpenClaw model ref में
-OpenClaw provider prefix और upstream OpenRouter namespace दोनों शामिल होते हैं:
+OpenRouter Fusion एक OpenClaw मॉडल संदर्भ को समानांतर रूप से कई OpenRouter मॉडलों को
+भेजता है, OpenRouter से उनके उत्तरों का मूल्यांकन करवाता है और सामान्य OpenRouter
+एंडपॉइंट के माध्यम से एक अंतिम प्रतिक्रिया लौटाता है। अपस्ट्रीम मॉडल स्लग
+`openrouter/fusion` है, इसलिए OpenClaw मॉडल संदर्भ में OpenClaw
+प्रदाता प्रीफ़िक्स और अपस्ट्रीम OpenRouter नेमस्पेस दोनों होते हैं:
 
 ```bash
 openclaw models set openrouter/openrouter/fusion
 ```
 
-Fusion के panel और judge को model के `params.extraBody` के माध्यम से configure करें। वे
-fields OpenRouter chat-completions request body में forward किए जाते हैं। Fusion
-OpenRouter OAuth onboarding या API-key onboarding, दोनों के साथ काम करता है; यदि आप
-OAuth का उपयोग करते हैं, तो नीचे दिए गए example से `env.OPENROUTER_API_KEY` line हटा दें।
+मॉडल के `params.extraBody` के माध्यम से Fusion के पैनल और निर्णायक को कॉन्फ़िगर करें;
+वे फ़ील्ड सीधे OpenRouter चैट-कम्प्लीशन्स अनुरोध
+बॉडी में फ़ॉरवर्ड होते हैं। Fusion OAuth या API-कुंजी ऑनबोर्डिंग, दोनों के साथ काम करता है;
+यदि आप OAuth का उपयोग करते हैं, तो नीचे दी गई `env.OPENROUTER_API_KEY` पंक्ति छोड़ दें।
 
 ```json5
 {
@@ -262,67 +279,64 @@ OAuth का उपयोग करते हैं, तो नीचे दि�
 }
 ```
 
-`analysis_models` list parallel panel है, और Fusion
-plugin config के अंदर `model` judge model है। Fusion को force करने की कोशिश में normal OpenClaw agent/chat turns में top-level `tool_choice` को
-`"required"` पर set न करें;
-OpenClaw turns में OpenClaw tool definitions शामिल हो सकती हैं, और top-level required
-tool choice Fusion router के बजाय उन tools में से किसी एक की मांग कर सकता है। जब
-यह Fusion plugin config मौजूद होता है, OpenClaw configured analysis models और judge model के साथ sanitized
-system-prompt note भी जोड़ता है, ताकि
-agent अपने current Fusion panel के बारे में सवालों का जवाब दे सके। अन्य `extraBody`
-fields prompt में copy नहीं किए जाते।
+`analysis_models` समानांतर पैनल है; Fusion Plugin कॉन्फ़िगरेशन के भीतर
+`model` निर्णायक मॉडल है। सामान्य एजेंट/चैट टर्न में Fusion को बाध्य करने के लिए
+शीर्ष-स्तरीय `tool_choice` को `"required"` पर सेट न करें: OpenClaw टर्न में
+उसकी अपनी टूल परिभाषाएँ शामिल हो सकती हैं और शीर्ष-स्तरीय आवश्यक टूल चयन Fusion राउटर
+के बजाय उनमें से किसी एक को चुन सकता है। जब यह Fusion Plugin कॉन्फ़िगरेशन मौजूद होता है,
+OpenClaw कॉन्फ़िगर किए गए विश्लेषण मॉडलों और निर्णायक मॉडल को सूचीबद्ध करने वाला
+एक सैनिटाइज़ किया गया सिस्टम-प्रॉम्प्ट नोट जोड़ता है, ताकि एजेंट अपने Fusion पैनल के बारे में
+प्रश्नों का उत्तर दे सके। अन्य `extraBody` फ़ील्ड प्रॉम्प्ट में कॉपी नहीं किए जाते।
 
-Fusion design के अनुसार धीमा है। OpenRouter वही OpenClaw prompt
-कई analysis models को भेज सकता है और फिर final judge/synthesis step चला सकता है, इसलिए latency
-आमतौर पर direct single-model request से अधिक होती है। Fusion का उपयोग deliberate,
-high-quality answers या escalation paths के लिए करें, इसे
-latency-sensitive chat के लिए default न बनाएँ। तेज responses के लिए, panel छोटा रखें और
-तेज analysis और judge models चुनें।
+Fusion डिज़ाइन के अनुसार धीमा है: OpenRouter प्रॉम्प्ट को कई
+विश्लेषण मॉडलों में वितरित करता है, फिर निर्णायक/संश्लेषण चरण चलाता है, इसलिए विलंबता
+सीधे एकल-मॉडल अनुरोध से अधिक होती है। इसका उपयोग सोच-विचार वाले, उच्च-गुणवत्ता उत्तरों या
+एस्केलेशन पथों के लिए करें, विलंबता-संवेदी डिफ़ॉल्ट के रूप में नहीं। पैनल को छोटा रखें और
+शीघ्र प्रतिक्रियाओं के लिए तेज़ विश्लेषण/निर्णायक मॉडल चुनें।
 
-Configured ref को one-shot local model call से test करें:
+कॉन्फ़िगर किए गए संदर्भ को एक बार की स्थानीय कॉल से जाँचें:
 
 ```bash
 openclaw infer model run --local \
   --model openrouter/openrouter/fusion \
-  --prompt "Reply with exactly: FUSION_OK" \
+  --prompt "ठीक इसी तरह उत्तर दें: FUSION_OK" \
   --json
 ```
 
-## Authentication and headers
+## प्रमाणीकरण और हेडर
 
-OpenRouter पर्दे के पीछे आपकी API key के साथ Bearer token का उपयोग करता है। OpenRouter
-OAuth एक PKCE login flow है जो OpenRouter API key issue करता है, इसलिए OpenClaw
-result को manual API-key setup path द्वारा उपयोग किए जाने वाले उसी `openrouter:default` API-key auth profile के रूप में store करता है।
+OpenRouter आपकी API कुंजी से Bearer टोकन का उपयोग करता है। OpenRouter OAuth एक PKCE
+लॉगिन प्रवाह है जो OpenRouter API कुंजी जारी करता है, इसलिए OpenClaw परिणाम को
+मैन्युअल API-कुंजी सेटअप में उपयोग की जाने वाली उसी `openrouter:default` API-कुंजी
+प्रमाणीकरण प्रोफ़ाइल में संग्रहीत करता है।
 
-Existing install के लिए, full onboarding दोबारा चलाए बिना stored OpenRouter key में sign in करें या rotate करें:
+पूर्ण ऑनबोर्डिंग दोबारा चलाए बिना किसी मौजूदा इंस्टॉलेशन पर साइन इन करने या संग्रहीत कुंजी
+बदलने के लिए:
 
 ```bash
 openclaw models auth login --provider openrouter --method oauth
+openclaw models auth login --provider openrouter --method api-key
 ```
 
-जब आप OpenRouter पर manually बनाई गई key paste करना चाहते हैं, तब
-`openclaw models auth login --provider openrouter --method api-key` का उपयोग करें।
+सत्यापित OpenRouter अनुरोधों (`https://openrouter.ai/api/v1`) पर, OpenClaw
+OpenRouter के दस्तावेज़ीकृत ऐप-एट्रिब्यूशन हेडर जोड़ता है:
 
-Real OpenRouter requests (`https://openrouter.ai/api/v1`) पर, OpenClaw
-OpenRouter के documented app-attribution headers भी जोड़ता है:
-
-| Header                    | Value                                                                                                  |
+| हेडर                    | मान                                                                                                  |
 | ------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `HTTP-Referer`            | `https://openclaw.ai`                                                                                  |
 | `X-OpenRouter-Title`      | `OpenClaw`                                                                                             |
 | `X-OpenRouter-Categories` | `cli-agent,cloud-agent,programming-app,creative-writing,writing-assistant,general-chat,personal-agent` |
 
 <Warning>
-यदि आप OpenRouter provider को किसी अन्य proxy या base URL पर repoint करते हैं, तो OpenClaw
-वे OpenRouter-specific headers या Anthropic cache markers inject **नहीं** करता।
+यदि आप OpenRouter प्रदाता को किसी अन्य प्रॉक्सी या बेस URL की ओर इंगित करते हैं, तो OpenClaw
+उन OpenRouter-विशिष्ट हेडर या Anthropic कैश मार्कर को इंजेक्ट **नहीं** करता।
 </Warning>
 
-## Advanced configuration
+## उन्नत कॉन्फ़िगरेशन
 
 <AccordionGroup>
-  <Accordion title="Response caching">
-    OpenRouter response caching opt-in है। इसे प्रति OpenRouter model
-    model params के साथ enable करें:
+  <Accordion title="प्रतिक्रिया कैशिंग">
+    OpenRouter प्रतिक्रिया कैशिंग ऑप्ट-इन है। इसे प्रत्येक मॉडल के लिए सक्षम करें:
 
     ```json5
     {
@@ -341,64 +355,63 @@ OpenRouter के documented app-attribution headers भी जोड़ता �
     }
     ```
 
-    OpenClaw `X-OpenRouter-Cache: true` और, configure होने पर,
-    `X-OpenRouter-Cache-TTL` भेजता है। `responseCacheClear: true`
-    current request के लिए refresh force करता है और replacement response store करता है। Snake_case aliases
-    (`response_cache`, `response_cache_ttl_seconds`, और
-    `response_cache_clear`) भी स्वीकार किए जाते हैं।
+    OpenClaw `X-OpenRouter-Cache: true` और, कॉन्फ़िगर होने पर,
+    `X-OpenRouter-Cache-TTL` भेजता है। `responseCacheClear: true` वर्तमान अनुरोध के लिए
+    रीफ़्रेश को बाध्य करता है और प्रतिस्थापन प्रतिक्रिया संग्रहीत करता है। Snake_case
+    उपनाम (`response_cache`, `response_cache_ttl_seconds`,
+    `response_cache_clear`) स्वीकार किए जाते हैं, और `Seconds` प्रत्यय के बिना
+    `responseCacheTtl` / `response_cache_ttl` भी स्वीकार किए जाते हैं।
 
-    यह provider prompt caching और OpenRouter के
-    Anthropic `cache_control` markers से अलग है। यह केवल verified
-    `openrouter.ai` routes पर लागू होता है, custom proxy base URLs पर नहीं।
+    यह प्रदाता प्रॉम्प्ट कैशिंग और OpenRouter के Anthropic
+    `cache_control` मार्कर से अलग है। यह केवल सत्यापित
+    `openrouter.ai` रूट पर लागू होता है, कस्टम प्रॉक्सी बेस URL पर नहीं।
 
   </Accordion>
 
-  <Accordion title="Anthropic cache markers">
-    Verified OpenRouter routes पर, Anthropic model refs
-    OpenRouter-specific Anthropic `cache_control` markers बनाए रखते हैं, जिनका उपयोग OpenClaw
-    system/developer prompt blocks पर बेहतर prompt-cache reuse के लिए करता है।
+  <Accordion title="Anthropic कैश मार्कर">
+    सत्यापित OpenRouter रूट पर, Anthropic मॉडल संदर्भ सिस्टम/डेवलपर प्रॉम्प्ट ब्लॉक पर
+    बेहतर प्रॉम्प्ट-कैश पुनः उपयोग के लिए OpenRouter के Anthropic
+    `cache_control` मार्कर बनाए रखते हैं।
   </Accordion>
 
-  <Accordion title="Anthropic रीज़निंग प्रीफिल">
-    सत्यापित OpenRouter मार्गों पर, रीज़निंग सक्षम Anthropic मॉडल रेफ़
-    अनुरोध के OpenRouter तक पहुँचने से पहले अंतिम assistant प्रीफिल टर्न हटा देते हैं,
-    जिससे Anthropic की इस आवश्यकता से मेल बना रहता है कि रीज़निंग वार्तालाप
-    user टर्न के साथ समाप्त हों।
+  <Accordion title="Anthropic रीजनिंग प्रीफ़िल">
+    सत्यापित OpenRouter रूट पर, रीजनिंग सक्षम वाले Anthropic मॉडल संदर्भ अनुरोध के
+    OpenRouter तक पहुँचने से पहले अंतिम असिस्टेंट प्रीफ़िल टर्न हटा देते हैं, जो Anthropic
+    की इस आवश्यकता से मेल खाता है कि रीजनिंग वार्तालाप उपयोगकर्ता टर्न पर समाप्त हों।
   </Accordion>
 
-  <Accordion title="सोच / रीज़निंग इंजेक्शन">
-    समर्थित गैर-`auto` मार्गों पर, OpenClaw चुने गए सोच स्तर को
-    OpenRouter प्रॉक्सी रीज़निंग पेलोड में मैप करता है। असमर्थित मॉडल संकेत और
-    `openrouter/auto` उस रीज़निंग इंजेक्शन को छोड़ देते हैं। Hunter Alpha पुराने कॉन्फ़िगर किए गए
-    मॉडल रेफ़ के लिए प्रॉक्सी रीज़निंग भी छोड़ देता है क्योंकि OpenRouter
-    उस सेवानिवृत्त मार्ग के लिए रीज़निंग फ़ील्ड में अंतिम उत्तर टेक्स्ट
-    लौटा सकता था।
+  <Accordion title="थिंकिंग / रीजनिंग इंजेक्शन">
+    समर्थित गैर-`auto` रूटों पर, OpenClaw चयनित थिंकिंग स्तर को
+    OpenRouter प्रॉक्सी रीजनिंग पेलोड में मैप करता है। `openrouter/auto` और असमर्थित
+    मॉडल संकेत उस इंजेक्शन को छोड़ देते हैं। पुराने `openrouter/hunter-alpha` संदर्भ भी
+    इसे छोड़ देते हैं, क्योंकि OpenRouter उस सेवानिवृत्त रूट पर रीजनिंग
+    फ़ील्ड में अंतिम उत्तर का टेक्स्ट लौटा सकता था।
   </Accordion>
 
-  <Accordion title="DeepSeek V4 रीज़निंग रीप्ले">
-    सत्यापित OpenRouter मार्गों पर, `openrouter/deepseek/deepseek-v4-flash` और
-    `openrouter/deepseek/deepseek-v4-pro` रीप्ले किए गए assistant टर्न पर
-    अनुपस्थित `reasoning_content` भरते हैं ताकि सोच/टूल वार्तालाप DeepSeek V4 की
-    आवश्यक फ़ॉलो-अप आकृति बनाए रखें। OpenClaw इन मार्गों के लिए OpenRouter-समर्थित
-    `reasoning.effort` मान भेजता है; निम्न गैर-ऑफ़ स्तर
-    `high` पर मैप होते हैं, और पुराने `max` ओवरराइड `xhigh` पर मैप होते हैं।
+  <Accordion title="DeepSeek V4 रीजनिंग रीप्ले">
+    सत्यापित OpenRouter रूटों पर, `openrouter/deepseek/deepseek-v4-flash` और
+    `openrouter/deepseek/deepseek-v4-pro` रीप्ले किए गए असिस्टेंट टर्न में अनुपस्थित `reasoning_content` को
+    भरते हैं, जिससे थिंकिंग/टूल वार्तालाप DeepSeek
+    V4 के आवश्यक फ़ॉलो-अप स्वरूप में बने रहते हैं। OpenClaw इन रूटों के लिए OpenRouter-समर्थित
+    `reasoning.effort` मान भेजता है: `xhigh`/`max` को `xhigh` से मैप किया जाता है,
+    अन्य प्रत्येक गैर-ऑफ़ स्तर को `high` से मैप किया जाता है।
   </Accordion>
 
-  <Accordion title="केवल OpenAI अनुरोध आकार देना">
-    OpenRouter अब भी प्रॉक्सी-शैली वाले OpenAI-संगत पथ से होकर चलता है, इसलिए
-    मूल केवल OpenAI अनुरोध आकार देना, जैसे `serviceTier`, Responses `store`,
-    OpenAI रीज़निंग-संगत पेलोड, और प्रॉम्प्ट-कैश संकेत आगे नहीं भेजे जाते।
+  <Accordion title="केवल OpenAI के लिए अनुरोध का स्वरूप निर्धारण">
+    OpenRouter प्रॉक्सी-शैली वाले OpenAI-संगत पथ से चलता है, इसलिए केवल मूल
+    OpenAI के लिए अनुरोध का स्वरूप निर्धारण, जैसे `serviceTier`, Responses `store`,
+    OpenAI रीजनिंग-संगतता पेलोड और प्रॉम्प्ट-कैश संकेत फ़ॉरवर्ड नहीं किए जाते।
   </Accordion>
 
-  <Accordion title="Gemini-समर्थित मार्ग">
-    Gemini-समर्थित OpenRouter रेफ़ प्रॉक्सी-Gemini पथ पर रहते हैं: OpenClaw वहाँ
-    Gemini thought-signature स्वच्छता बनाए रखता है, लेकिन मूल Gemini
-    रीप्ले सत्यापन या बूटस्ट्रैप पुनर्लेखन सक्षम नहीं करता।
+  <Accordion title="Gemini-समर्थित रूट">
+    Gemini-समर्थित OpenRouter संदर्भ प्रॉक्सी-Gemini पथ पर बने रहते हैं: OpenClaw वहाँ
+    Gemini थॉट-सिग्नेचर सैनिटाइज़ेशन बनाए रखता है, लेकिन मूल
+    Gemini रीप्ले सत्यापन या बूटस्ट्रैप रीराइट सक्षम नहीं करता।
   </Accordion>
 
-  <Accordion title="प्रदाता रूटिंग मेटाडेटा">
-    OpenRouter अंतर्निहित प्रदाता रूटिंग के लिए `provider` अनुरोध ऑब्जेक्ट
-    का समर्थन करता है। सभी OpenRouter टेक्स्ट-मॉडल अनुरोधों के लिए
+  <Accordion title="प्रोवाइडर रूटिंग मेटाडेटा">
+    OpenRouter अंतर्निहित प्रोवाइडर रूटिंग के लिए एक `provider` अनुरोध ऑब्जेक्ट का
+    समर्थन करता है। सभी OpenRouter टेक्स्ट-मॉडल अनुरोधों के लिए
     `models.providers.openrouter.params.provider` के साथ एक डिफ़ॉल्ट नीति कॉन्फ़िगर करें:
 
     ```json5
@@ -419,13 +432,13 @@ OpenRouter के documented app-attribution headers भी जोड़ता �
     }
     ```
 
-    OpenClaw उस ऑब्जेक्ट को अनुरोध `provider` पेलोड के रूप में OpenRouter को
-    आगे भेजता है। OpenRouter के दस्तावेज़ित snake_case फ़ील्ड का उपयोग करें, जिनमें `sort`,
+    OpenClaw उस ऑब्जेक्ट को अनुरोध के `provider`
+    पेलोड के रूप में OpenRouter को फ़ॉरवर्ड करता है। OpenRouter के प्रलेखित snake_case फ़ील्ड का उपयोग करें, जिनमें `sort`,
     `only`, `ignore`, `order`, `allow_fallbacks`, `require_parameters`,
     `data_collection`, `quantizations`, `max_price`, `preferred_max_latency`,
     `preferred_min_throughput`, `zdr`, और `enforce_distillable_text` शामिल हैं।
 
-    प्रति-मॉडल पैरामीटर अब भी प्रदाता-व्यापी रूटिंग ऑब्जेक्ट को ओवरराइड करते हैं:
+    प्रति-मॉडल पैरामीटर, प्रोवाइडर-व्यापी रूटिंग ऑब्जेक्ट को ओवरराइड करते हैं:
 
     ```json5
     {
@@ -446,8 +459,8 @@ OpenRouter के documented app-attribution headers भी जोड़ता �
     }
     ```
 
-    यह केवल OpenRouter chat-completions मार्गों पर लागू होता है। सीधे Anthropic,
-    Google, OpenAI, या कस्टम प्रदाता मार्ग OpenRouter रूटिंग पैरामीटर को अनदेखा करते हैं।
+    यह केवल OpenRouter चैट-कम्प्लीशंस रूटों पर लागू होता है। प्रत्यक्ष Anthropic,
+    Google, OpenAI या कस्टम प्रोवाइडर रूट OpenRouter रूटिंग पैरामीटर की उपेक्षा करते हैं।
 
   </Accordion>
 </AccordionGroup>
@@ -456,9 +469,9 @@ OpenRouter के documented app-attribution headers भी जोड़ता �
 
 <CardGroup cols={2}>
   <Card title="मॉडल चयन" href="/hi/concepts/model-providers" icon="layers">
-    प्रदाताओं, मॉडल रेफ़, और फ़ेलओवर व्यवहार का चयन।
+    प्रोवाइडर, मॉडल संदर्भ और फ़ेलओवर व्यवहार चुनना।
   </Card>
   <Card title="कॉन्फ़िगरेशन संदर्भ" href="/hi/gateway/configuration-reference" icon="gear">
-    एजेंटों, मॉडलों, और प्रदाताओं के लिए पूर्ण कॉन्फ़िग संदर्भ।
+    एजेंट, मॉडल और प्रोवाइडर के लिए पूर्ण कॉन्फ़िगरेशन संदर्भ।
   </Card>
 </CardGroup>

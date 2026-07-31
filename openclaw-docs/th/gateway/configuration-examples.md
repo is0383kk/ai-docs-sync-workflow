@@ -3,23 +3,24 @@ read_when:
     - เรียนรู้วิธีกำหนดค่า OpenClaw
     - กำลังมองหาตัวอย่างการกำหนดค่า
     - การตั้งค่า OpenClaw เป็นครั้งแรก
-summary: ตัวอย่างการกำหนดค่าที่ตรงตามสคีมาสำหรับการตั้งค่า OpenClaw ที่ใช้ทั่วไป
+summary: ตัวอย่างการกำหนดค่าที่ตรงตามสคีมาสำหรับการตั้งค่า OpenClaw ทั่วไป
 title: ตัวอย่างการกำหนดค่า
 x-i18n:
-    generated_at: "2026-07-12T16:03:19Z"
+    generated_at: "2026-07-20T05:59:39Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c3ad82ccce62e0c8dbb72f81b0de62d60d8a6282f0a327ed1cbda7ffa3e47969
+    source_hash: 2796f28e33b631aff0f706e72e3c81072a57683c09d3bad1125c8f89cffb2ac4
     source_path: gateway/configuration-examples.md
     workflow: 16
 ---
 
-ตัวอย่างด้านล่างสอดคล้องกับสคีมาการกำหนดค่าปัจจุบัน สำหรับข้อมูลอ้างอิงฉบับสมบูรณ์และหมายเหตุของแต่ละฟิลด์ โปรดดู[การกำหนดค่า](/th/gateway/configuration)
+ตัวอย่างด้านล่างสอดคล้องกับสคีมาการกำหนดค่าปัจจุบัน สำหรับเอกสารอ้างอิงฉบับสมบูรณ์และหมายเหตุของแต่ละฟิลด์ โปรดดู [การกำหนดค่า](/th/gateway/configuration)
 
 ## เริ่มต้นอย่างรวดเร็ว
 
-### ขั้นต่ำที่สุด
+### ขั้นต่ำสุด
 
 ```json5
 {
@@ -28,7 +29,7 @@ x-i18n:
 }
 ```
 
-บันทึกไว้ที่ `~/.openclaw/openclaw.json` แล้วคุณจะสามารถส่งข้อความส่วนตัวถึงบอตจากหมายเลขดังกล่าวได้
+บันทึกไปยัง `~/.openclaw/openclaw.json` แล้วคุณจะส่งข้อความส่วนตัวถึงบอตจากหมายเลขนั้นได้
 
 ### การตั้งค่าเริ่มต้นที่แนะนำ
 
@@ -44,7 +45,7 @@ x-i18n:
         id: "main",
         identity: {
           name: "Clawd",
-          theme: "helpful assistant",
+          theme: "ผู้ช่วยที่พร้อมช่วยเหลือ",
           emoji: "🦞",
         },
       },
@@ -59,7 +60,7 @@ x-i18n:
   messages: {
     visibleReplies: "automatic",
     groupChat: {
-      visibleReplies: "message_tool", // เลือกเปิดใช้; เอาต์พุตที่มองเห็นได้ต้องใช้ message(action=send)
+      visibleReplies: "message_tool", // เลือกใช้; เอาต์พุตที่มองเห็นได้ต้องใช้ message(action=send)
       unmentionedInbound: "room_event",
     },
   },
@@ -68,7 +69,7 @@ x-i18n:
 
 ## ตัวอย่างแบบขยาย (ตัวเลือกหลัก)
 
-> JSON5 ช่วยให้คุณใช้ความคิดเห็นและเครื่องหมายจุลภาคต่อท้ายได้ และยังใช้ JSON ปกติได้เช่นกัน
+> JSON5 อนุญาตให้ใช้ความคิดเห็นและจุลภาคต่อท้ายได้ JSON ปกติก็ใช้ได้เช่นกัน
 
 ```json5
 {
@@ -84,7 +85,7 @@ x-i18n:
     },
   },
 
-  // ข้อมูลเมตาของโปรไฟล์การยืนยันตัวตน (ข้อมูลลับอยู่ใน auth-profiles.json)
+  // เมทาดาทาโปรไฟล์การยืนยันตัวตน (ข้อมูลลับอยู่ใน auth-profiles.json)
   auth: {
     profiles: {
       "anthropic:default": { provider: "anthropic", mode: "api_key" },
@@ -98,7 +99,7 @@ x-i18n:
     },
   },
 
-  // ข้อมูลประจำตัวกำหนดแยกตามเอเจนต์ — ตั้งค่าไว้ที่ agents.list[].identity ด้านล่าง
+  // ข้อมูลประจำตัวกำหนดแยกตามเอเจนต์ — ตั้งค่าที่ agents.list[].identity ด้านล่าง
 
   // การบันทึกล็อก
   logging: {
@@ -118,7 +119,7 @@ x-i18n:
     ackReactionScope: "group-mentions",
     groupChat: {
       historyLimit: 50,
-      visibleReplies: "message_tool", // เลือกเปิดใช้สำหรับห้องที่ใช้ร่วมกันกับโมเดลที่เรียกใช้เครื่องมือได้อย่างเชื่อถือได้
+      visibleReplies: "message_tool", // เลือกใช้สำหรับห้องที่ใช้ร่วมกันกับโมเดลที่เรียกใช้เครื่องมือได้อย่างเชื่อถือได้
       unmentionedInbound: "room_event",
     },
     queue: {
@@ -146,7 +147,7 @@ x-i18n:
         maxBytes: 20971520,
         models: [
           { provider: "openai", model: "gpt-4o-transcribe" },
-          // CLI สำรองที่เลือกใช้ได้ (ไบนารี Whisper):
+          // ทางเลือกสำรองสำหรับ CLI (ไบนารี Whisper):
           // { type: "cli", command: "whisper", args: ["--model", "base", "{{MediaPath}}"] }
         ],
         timeoutSeconds: 120,
@@ -181,7 +182,6 @@ x-i18n:
       maxDiskBytes: "500mb", // ไม่บังคับ
       highWaterBytes: "400mb", // ไม่บังคับ (ค่าเริ่มต้นคือ 80% ของ maxDiskBytes)
     },
-    typingIntervalSeconds: 5,
     sendPolicy: {
       default: "allow",
       rules: [{ action: "deny", match: { channel: "discord", chatType: "group" } }],
@@ -257,7 +257,7 @@ x-i18n:
         "anthropic/claude-sonnet-4-6": { alias: "sonnet" },
         "openai/gpt-5.4": { alias: "gpt" },
       },
-      skills: ["github", "weather"], // เอเจนต์ที่ไม่ได้ระบุ list[].skills จะสืบทอดค่านี้
+      skills: ["github", "weather"], // สืบทอดโดยเอเจนต์ที่ไม่ได้ระบุ list[].skills
       thinkingDefault: "low",
       verboseDefault: "off",
       toolProgressDetail: "explain",
@@ -320,20 +320,20 @@ x-i18n:
         default: true,
         identity: {
           name: "Samantha",
-          theme: "สลอธที่คอยช่วยเหลือ",
+          theme: "สลอธที่พร้อมช่วยเหลือ",
           emoji: "🦥",
         },
         // สืบทอด defaults.skills -> github, weather
         groupChat: {
           mentionPatterns: ["@openclaw", "openclaw"],
         },
-        thinkingDefault: "high", // เขียนทับการคิดแยกตามเอเจนต์
-        reasoningDefault: "on", // การแสดงเหตุผลแยกตามเอเจนต์
-        fastModeDefault: false, // โหมดเร็วแยกตามเอเจนต์
+        thinkingDefault: "high", // แทนที่การตั้งค่าการคิดสำหรับเอเจนต์นี้
+        reasoningDefault: "on", // การมองเห็นการให้เหตุผลสำหรับเอเจนต์นี้
+        fastModeDefault: false, // โหมดเร็วสำหรับเอเจนต์นี้
       },
       {
         id: "quick",
-        skills: [], // เอเจนต์นี้ไม่มี Skills
+        skills: [], // ไม่มี Skills สำหรับเอเจนต์นี้
         fastModeDefault: true, // เอเจนต์นี้ทำงานในโหมดเร็วเสมอ
         thinkingDefault: "off",
       },
@@ -392,12 +392,7 @@ x-i18n:
   cron: {
     enabled: true,
     store: "~/.openclaw/cron/jobs.json",
-    maxConcurrentRuns: 8, // ค่าเริ่มต้น; การส่งงาน Cron + การดำเนินการรอบเอเจนต์ Cron แบบแยกส่วน
     sessionRetention: "24h",
-    runLog: {
-      maxBytes: "2mb",
-      keepLines: 2000,
-    },
   },
 
   // Webhook
@@ -482,9 +477,9 @@ x-i18n:
 }
 ```
 
-### ที่เก็บ Skills ข้างเคียงที่เชื่อมด้วยลิงก์สัญลักษณ์
+### ที่เก็บ Skills ข้างเคียงที่เชื่อมด้วย symlink
 
-ใช้วิธีนี้เมื่อรากของ Skill ที่มีมาให้มีลิงก์สัญลักษณ์ชี้ไปยังที่เก็บข้างเคียง เช่น
+ใช้วิธีนี้เมื่อรูท Skills ในตัวมี symlink ไปยัง repo ข้างเคียง เช่น
 `~/.agents/skills/manager -> ~/Projects/manager/skills`
 
 ```json5
@@ -498,15 +493,15 @@ x-i18n:
 }
 ```
 
-- `extraDirs` สแกนที่เก็บข้างเคียงเป็นรากของ Skill ที่ระบุไว้อย่างชัดเจน
-- `allowSymlinkTargets` อนุญาตให้โฟลเดอร์ Skill ที่เชื่อมด้วยลิงก์สัญลักษณ์
-  แก้ไขเส้นทางไปยังรากเป้าหมายจริงที่เชื่อถือได้ โดยไม่อนุญาตให้ลิงก์สัญลักษณ์หลุดไปยังตำแหน่งอื่นโดยพลการ
-- หากต้องการให้ Skill Workshop เขียนข้อมูลผ่านเป้าหมายลิงก์สัญลักษณ์ที่เชื่อถือได้เดียวกัน
+- `extraDirs` จะสแกน repo ข้างเคียงเป็นรูท Skills ที่ระบุไว้อย่างชัดเจน
+- `allowSymlinkTargets` ช่วยให้โฟลเดอร์ Skills ที่เป็น symlink ชี้ไปยังรูทเป้าหมายจริงที่เชื่อถือได้
+  โดยไม่อนุญาตให้ symlink หลุดออกไปยังตำแหน่งอื่นตามอำเภอใจ
+- หากต้องการให้ Skill Workshop เขียนข้อมูลผ่านเป้าหมาย symlink ที่เชื่อถือได้เดียวกัน
   ให้ตั้งค่า `skills.workshop.allowSymlinkTargetWrites: true`
 
-## รูปแบบที่ใช้ทั่วไป
+## รูปแบบที่พบบ่อย
 
-### ค่าพื้นฐานของ Skills ที่ใช้ร่วมกันโดยมีการเขียนทับหนึ่งรายการ
+### ค่าเริ่มต้น Skills ที่ใช้ร่วมกันพร้อมการแทนที่หนึ่งรายการ
 
 ```json5
 {
@@ -523,9 +518,9 @@ x-i18n:
 }
 ```
 
-- `agents.defaults.skills` คือค่าพื้นฐานที่ใช้ร่วมกัน
-- `agents.list[].skills` จะแทนที่ค่าพื้นฐานนั้นสำหรับเอเจนต์หนึ่งตัว
-- ใช้ `skills: []` เมื่อไม่ต้องการให้เอเจนต์เห็น Skills ใด ๆ
+- `agents.defaults.skills` คือค่าเริ่มต้นที่ใช้ร่วมกัน
+- `agents.list[].skills` จะแทนที่ค่าเริ่มต้นนั้นสำหรับเอเจนต์หนึ่งตัว
+- ใช้ `skills: []` เมื่อไม่ต้องการให้เอเจนต์เห็น Skills ใดเลย
 
 ### การตั้งค่าหลายแพลตฟอร์ม
 
@@ -550,7 +545,9 @@ x-i18n:
 
 ### การอนุมัติอัตโนมัติสำหรับเครือข่าย Node ที่เชื่อถือได้
 
-ให้การจับคู่อุปกรณ์เป็นแบบดำเนินการด้วยตนเอง เว้นแต่คุณจะควบคุมเส้นทางเครือข่าย สำหรับเครือข่ายย่อยของห้องปฏิบัติการเฉพาะหรือ tailnet คุณสามารถเลือกใช้การอนุมัติอุปกรณ์ Node โดยอัตโนมัติในการจับคู่ครั้งแรกด้วย CIDR หรือ IP ที่ระบุอย่างชัดเจน:
+ให้จับคู่อุปกรณ์ด้วยตนเอง เว้นแต่คุณจะควบคุมเส้นทางเครือข่ายได้ สำหรับเครือข่าย
+แล็บโดยเฉพาะหรือซับเน็ต tailnet คุณสามารถเลือกเปิดใช้การอนุมัติอุปกรณ์ Node โดยอัตโนมัติเมื่อเชื่อมต่อครั้งแรก
+ด้วย CIDR หรือ IP ที่ตรงกันทุกประการ:
 
 ```json5
 {
@@ -564,25 +561,27 @@ x-i18n:
 }
 ```
 
-ความสามารถนี้จะยังคงปิดอยู่หากไม่ได้ตั้งค่า โดยใช้เฉพาะกับการจับคู่ `role: node` ใหม่ที่ไม่ได้ร้องขอขอบเขตสิทธิ์เท่านั้น ไคลเอนต์ของผู้ปฏิบัติงาน/เบราว์เซอร์ รวมถึงการอัปเกรดบทบาท ขอบเขตสิทธิ์ เมทาดาทา หรือกุญแจสาธารณะ ยังคงต้องได้รับการอนุมัติด้วยตนเอง
+หากไม่ได้ตั้งค่า ฟังก์ชันนี้จะยังคงปิดอยู่ โดยจะใช้เฉพาะกับการจับคู่ `role: node` ใหม่
+ที่ไม่ได้ขอขอบเขตสิทธิ์ใด ๆ เท่านั้น ไคลเอนต์ของผู้ดำเนินการ/เบราว์เซอร์ รวมถึงการอัปเกรดบทบาท ขอบเขตสิทธิ์ เมทาดาทา หรือ
+กุญแจสาธารณะ ยังคงต้องได้รับการอนุมัติด้วยตนเอง
 
-### โหมด DM ที่ปลอดภัย (กล่องข้อความเข้าที่ใช้ร่วมกัน / DM แบบหลายผู้ใช้)
+### โหมด DM ปลอดภัย (กล่องขาเข้าที่ใช้ร่วมกัน / DM แบบหลายผู้ใช้)
 
-หากมีบุคคลมากกว่าหนึ่งคนที่สามารถส่ง DM ถึงบอตของคุณได้ (มีหลายรายการใน `allowFrom` มีการอนุมัติการจับคู่สำหรับหลายคน หรือใช้ `dmPolicy: "open"`) ให้เปิดใช้ **โหมด DM ที่ปลอดภัย** เพื่อไม่ให้ DM จากผู้ส่งต่างกันใช้บริบทเดียวกันโดยค่าเริ่มต้น:
+หากมีมากกว่าหนึ่งคนที่สามารถส่ง DM ถึงบอตของคุณได้ (มีหลายรายการใน `allowFrom` การอนุมัติการจับคู่สำหรับหลายคน หรือ `dmPolicy: "open"`) ให้เปิดใช้ **โหมด DM ปลอดภัย** เพื่อไม่ให้ DM จากผู้ส่งต่างกันใช้บริบทร่วมกันโดยค่าเริ่มต้น:
 
 ```json5
 {
-  // Secure DM mode (recommended for multi-user or sensitive DM agents)
+  // โหมด DM ปลอดภัย (แนะนำสำหรับเอเจนต์ DM แบบหลายผู้ใช้หรือที่มีข้อมูลละเอียดอ่อน)
   session: { dmScope: "per-channel-peer" },
 
   channels: {
-    // Example: WhatsApp multi-user inbox
+    // ตัวอย่าง: กล่องขาเข้า WhatsApp แบบหลายผู้ใช้
     whatsapp: {
       dmPolicy: "allowlist",
       allowFrom: ["+15555550123", "+15555550124"],
     },
 
-    // Example: Discord multi-user inbox
+    // ตัวอย่าง: กล่องขาเข้า Discord แบบหลายผู้ใช้
     discord: {
       enabled: true,
       token: "YOUR_DISCORD_BOT_TOKEN",
@@ -592,10 +591,10 @@ x-i18n:
 }
 ```
 
-สำหรับ Discord/Google Chat/IRC/Mattermost/Microsoft Teams/Slack การอนุญาตผู้ส่งจะอิง ID เป็นหลักโดยค่าเริ่มต้น
-ให้เปิดใช้การจับคู่ชื่อ/อีเมล/ชื่อเล่นที่เปลี่ยนแปลงได้โดยตรงผ่าน `dangerouslyAllowNameMatching: true` ของแต่ละช่องทาง เฉพาะเมื่อคุณยอมรับความเสี่ยงนั้นอย่างชัดเจนเท่านั้น
+สำหรับ Discord/Google Chat/IRC/Mattermost/Microsoft Teams/Slack การอนุญาตผู้ส่งจะยึด ID เป็นหลักโดยค่าเริ่มต้น
+เปิดใช้การจับคู่ชื่อ/อีเมล/ชื่อเล่นที่เปลี่ยนแปลงได้โดยตรงด้วย `dangerouslyAllowNameMatching: true` ของแต่ละช่องทางเฉพาะเมื่อคุณยอมรับความเสี่ยงดังกล่าวอย่างชัดเจนเท่านั้น
 
-### คีย์ API ของ Anthropic และ MiniMax สำรอง
+### คีย์ API ของ Anthropic พร้อม MiniMax สำรอง
 
 ```json5
 {
@@ -699,12 +698,12 @@ x-i18n:
 
 ## เคล็ดลับ
 
-- หากคุณตั้งค่า `dmPolicy: "open"` รายการ `allowFrom` ที่ตรงกันต้องมี `"*"`
+- หากตั้งค่า `dmPolicy: "open"` รายการ `allowFrom` ที่ตรงกันต้องมี `"*"`
 - ID ของผู้ให้บริการมีรูปแบบแตกต่างกัน (หมายเลขโทรศัพท์, ID ผู้ใช้, ID ช่องทาง) โปรดดูเอกสารของผู้ให้บริการเพื่อยืนยันรูปแบบ
-- ส่วนที่เลือกเพิ่มได้ในภายหลัง: `web`, `browser`, `ui`, `discovery`, `plugins`, `talk`, `signal`, `imessage`
-- ดู [ผู้ให้บริการ](/th/providers) และ [การแก้ไขปัญหา](/th/gateway/troubleshooting) สำหรับหมายเหตุการตั้งค่าเชิงลึกเพิ่มเติม
+- ส่วนเสริมที่สามารถเพิ่มภายหลังได้: `web`, `browser`, `ui`, `discovery`, `plugins`, `talk`, `signal`, `imessage`
+- ดูหมายเหตุการตั้งค่าโดยละเอียดเพิ่มเติมได้ที่ [ผู้ให้บริการ](/th/providers) และ [การแก้ไขปัญหา](/th/gateway/troubleshooting)
 
-## เนื้อหาที่เกี่ยวข้อง
+## ที่เกี่ยวข้อง
 
-- [เอกสารอ้างอิงการกำหนดค่า](/th/gateway/configuration-reference)
+- [ข้อมูลอ้างอิงการกำหนดค่า](/th/gateway/configuration-reference)
 - [การกำหนดค่า](/th/gateway/configuration)

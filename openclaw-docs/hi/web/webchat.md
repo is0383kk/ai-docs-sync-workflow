@@ -1,110 +1,93 @@
 ---
 read_when:
-    - WebChat पहुँच को डीबग या कॉन्फ़िगर करना
-summary: चैट UI के लिए Loopback WebChat स्टैटिक होस्ट और Gateway WS उपयोग
+    - WebChat एक्सेस को डीबग या कॉन्फ़िगर करना
+summary: चैट UI के लिए लूपबैक WebChat स्टैटिक होस्ट और Gateway WS का उपयोग
 title: वेब चैट
 x-i18n:
-    generated_at: "2026-06-29T00:27:27Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:54:53Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 108dd98f975a2d2e980921bd0f486c3683c18ba6eb37111163af87929a9d7973
+    source_hash: 19c301af1eb1b28650849cdd90924805dd0f5189516693505d9b75f62197007f
     source_path: web/webchat.md
     workflow: 16
 ---
 
-स्थिति: macOS/iOS SwiftUI चैट UI सीधे Gateway WebSocket से बात करता है।
+स्थिति: macOS/iOS SwiftUI चैट UI सीधे Gateway WebSocket से संचार करता है। कोई एम्बेडेड ब्राउज़र नहीं, कोई स्थानीय स्थिर सर्वर नहीं।
 
 ## यह क्या है
 
-- Gateway के लिए एक नेटिव चैट UI (कोई एम्बेडेड ब्राउज़र और कोई स्थानीय स्थैतिक सर्वर नहीं)।
-- अन्य चैनलों जैसे ही सत्र और रूटिंग नियमों का उपयोग करता है।
-- निर्धारक रूटिंग: उत्तर हमेशा WebChat पर वापस जाते हैं।
+- Gateway के लिए एक नेटिव चैट UI।
+- अन्य चैनलों के समान सत्रों और रूटिंग नियमों का उपयोग करता है।
+- नियतात्मक रूटिंग: उत्तर हमेशा WebChat पर वापस जाते हैं।
+- इतिहास हमेशा Gateway से प्राप्त किया जाता है (स्थानीय फ़ाइल की निगरानी नहीं होती)। यदि Gateway उपलब्ध नहीं है, तो WebChat केवल-पढ़ने योग्य होता है।
 
 ## त्वरित शुरुआत
 
 1. Gateway शुरू करें।
-2. WebChat UI (macOS/iOS ऐप) या Control UI चैट टैब खोलें।
-3. सुनिश्चित करें कि एक वैध Gateway प्रमाणीकरण पथ कॉन्फ़िगर है (डिफ़ॉल्ट रूप से shared-secret,
-   loopback पर भी)।
+2. WebChat UI (macOS/iOS ऐप) या Control UI का चैट टैब खोलें।
+3. सुनिश्चित करें कि एक मान्य Gateway प्रमाणीकरण पथ कॉन्फ़िगर किया गया है (डिफ़ॉल्ट रूप से shared-secret, loopback पर भी)।
 
-## यह कैसे काम करता है (व्यवहार)
+## यह कैसे काम करता है
 
-- UI Gateway WebSocket से कनेक्ट होता है और `chat.history`, `chat.send`, और `chat.inject` का उपयोग करता है।
-- स्थिरता के लिए `chat.history` सीमित है: Gateway लंबे टेक्स्ट फ़ील्ड काट सकता है, भारी मेटाडेटा छोड़ सकता है, और बहुत बड़ी प्रविष्टियों को `[chat.history omitted: message too large]` से बदल सकता है।
-- जब `chat.history` में कोई दृश्यमान assistant संदेश काट दिया गया हो, तो Control UI एक साइड रीडर खोल सकता है और डिफ़ॉल्ट इतिहास पेलोड बढ़ाए बिना `chat.message.get` के ज़रिए मांग पर पूरी डिस्प्ले-सामान्यीकृत प्रविष्टि ला सकता है।
-- आधुनिक केवल-जोड़ने वाली सत्र फ़ाइलों के लिए `chat.history` सक्रिय ट्रांसक्रिप्ट शाखा का पालन करता है, इसलिए छोड़ी गई rewrite शाखाएँ और प्रतिस्थापित prompt प्रतियाँ WebChat में रेंडर नहीं होतीं।
-- Compaction प्रविष्टियाँ स्पष्ट संकुचित-इतिहास विभाजक के रूप में रेंडर होती हैं। विभाजक समझाता है कि संकुचित ट्रांसक्रिप्ट checkpoint के रूप में संरक्षित है और Sessions checkpoint नियंत्रणों से लिंक करता है, जहाँ ऑपरेटर अपनी अनुमतियाँ होने पर उस संकुचित दृश्य से शाखा बना सकते हैं या restore कर सकते हैं।
-- Control UI `chat.history` द्वारा लौटाए गए आधारभूत Gateway `sessionId` को याद रखता है और उसे आगे की `chat.send` कॉलों में शामिल करता है, इसलिए reconnect और पेज refresh वही संग्रहीत बातचीत जारी रखते हैं, जब तक कि उपयोगकर्ता कोई सत्र शुरू या reset न करे।
-- Control UI नई `chat.send` run id बनाने से पहले उसी सत्र, संदेश, और attachments के लिए डुप्लिकेट in-flight submits को coalesce करता है; Gateway अब भी उसी idempotency key का दोबारा उपयोग करने वाले दोहराए गए अनुरोधों को dedupe करता है।
-- Workspace startup फ़ाइलें और लंबित `BOOTSTRAP.md` निर्देश agent system prompt के Project Context के ज़रिए दिए जाते हैं, WebChat उपयोगकर्ता संदेश में कॉपी नहीं किए जाते। Bootstrap truncation केवल संक्षिप्त system-prompt recovery notice जोड़ता है; विस्तृत counts और config knobs diagnostic surfaces पर रहते हैं।
-- `chat.history` भी display-normalized है: runtime-only OpenClaw context,
-  inbound envelope wrappers, inline delivery directive tags
-  जैसे `[[reply_to_*]]` और `[[audio_as_voice]]`, plain-text tool-call XML
-  payloads (जिसमें `<tool_call>...</tool_call>`,
-  `<function_call>...</function_call>`, `<tool_calls>...</tool_calls>`,
-  `<function_calls>...</function_calls>`, और काटे गए tool-call blocks शामिल हैं), और
-  लीक हुए ASCII/full-width model control tokens दृश्यमान टेक्स्ट से हटा दिए जाते हैं,
-  और ऐसी assistant प्रविष्टियाँ जिनका पूरा दृश्यमान टेक्स्ट केवल exact silent
-  token `NO_REPLY` / `no_reply` होता है, छोड़ दी जाती हैं।
-- Reasoning-flagged reply payloads (`isReasoning: true`) WebChat assistant content, transcript replay text, और audio content blocks से बाहर रखे जाते हैं, इसलिए केवल-सोच वाले payloads दृश्यमान assistant संदेशों या चलाए जा सकने वाले audio के रूप में सतह पर नहीं आते।
-- `chat.inject` transcript में सीधे एक assistant note जोड़ता है और उसे UI पर broadcast करता है (कोई agent run नहीं)।
-- रोके गए runs UI में partial assistant output दृश्यमान रख सकते हैं।
-- buffered output मौजूद होने पर Gateway रोके गए partial assistant text को transcript history में persist करता है, और उन प्रविष्टियों को abort metadata से चिह्नित करता है।
-- History हमेशा Gateway से fetch की जाती है (कोई स्थानीय फ़ाइल watching नहीं)।
-- यदि Gateway पहुँच योग्य नहीं है, तो WebChat read-only होता है।
+- UI Gateway WebSocket से कनेक्ट होता है और `chat.history`, `chat.send`, `chat.inject`, तथा `chat.message.get` RPC विधियों का उपयोग करता है।
+- स्थिरता के लिए `chat.history` सीमित है: Gateway लंबे टेक्स्ट फ़ील्ड को छोटा कर सकता है, भारी मेटाडेटा छोड़ सकता है और अत्यधिक बड़े प्रविष्टियों को `[chat.history omitted: message too large]` से बदल सकता है। API क्लाइंट एक कॉल के लिए डिफ़ॉल्ट सीमा को ओवरराइड करने हेतु प्रत्येक अनुरोध में `maxChars` भेज सकते हैं।
+- जब `chat.history` में कोई दृश्यमान सहायक संदेश छोटा कर दिया गया हो, तो Control UI एक साइड रीडर खोल सकता है और डिफ़ॉल्ट इतिहास पेलोड बढ़ाए बिना `chat.message.get` के माध्यम से माँग पर पूरी डिस्प्ले-सामान्यीकृत प्रविष्टि प्राप्त कर सकता है। `chat.message.get`, `chat.history` के समान ट्रांसक्रिप्ट शाखा और डिस्प्ले नियमों का उपयोग करता है, लेकिन `messageId` द्वारा एक प्रविष्टि को लक्षित करता है और जब पूरी सामग्री अब लौटाई नहीं जा सकती, तो अनुपलब्धता का वास्तविक कारण लौटाता है।
+- `chat.history` केवल-जोड़ सत्र फ़ाइलों के लिए सक्रिय ट्रांसक्रिप्ट शाखा का अनुसरण करता है, इसलिए छोड़ी गई पुनर्लेखन शाखाएँ और प्रतिस्थापित प्रॉम्प्ट प्रतियाँ WebChat में रेंडर नहीं होतीं।
+- Compaction प्रविष्टियाँ "संकुचित इतिहास" विभाजक के रूप में रेंडर होती हैं, जो बताता है कि संकुचित ट्रांसक्रिप्ट को चेकपॉइंट के रूप में संरक्षित किया गया है और सत्र चेकपॉइंट खोलने की कार्रवाई देता है (अनुमतियाँ मिलने पर शाखा बनाना या पुनर्स्थापित करना)।
+- Control UI, `chat.history` द्वारा लौटाए गए आधारभूत Gateway `sessionId` को याद रखता है और बाद की `chat.send` कॉल में उसे शामिल करता है, इसलिए पुनः कनेक्ट करने और पृष्ठ रीफ़्रेश करने पर वही संग्रहीत बातचीत जारी रहती है, जब तक उपयोगकर्ता कोई सत्र शुरू या रीसेट न करे।
+- फ़ोरग्राउंड प्रेषण रेंडर किए गए इतिहास से प्रदर्शित शाखा के अंतिम नोड को `expectedLeafEntryId` के रूप में भी शामिल करते हैं; यदि किसी अन्य क्लाइंट ने पहले शाखा बदल दी हो, तो Control UI संदेश को नई शाखा में पोस्ट करने के बजाय समीक्षा के लिए रोकता है और ट्रांसक्रिप्ट रीफ़्रेश करता है। वर्तमान इतिहास का मिलान करने के बाद पुनः कनेक्शन और पुनर्स्थापित आउटबॉक्स रीप्ले जानबूझकर इस पूर्वशर्त को छोड़ देते हैं।
+- `chat.send` एक आइडेम्पोटेंसी कुंजी लेता है (Control UI रन आईडी का उपयोग करता है); Gateway समान कुंजी का दोबारा उपयोग करने वाले अनुरोधों की डुप्लिकेट प्रतियाँ हटाता है, इसलिए समान सत्र/संदेश/अटैचमेंट के लिए पुनः प्रयास किए गए या डुप्लिकेट प्रक्रियाधीन सबमिशन दूसरा रन नहीं बनाते।
+- किसी विशिष्ट संदेश का उत्तर देने पर (राइट-क्लिक → Reply), लक्ष्य की ट्रांसक्रिप्ट आईडी `chat.send` पर `replyToId` के रूप में भेजी जाती है। Gateway सत्र इतिहास से उस संदेश को हल करता है और उसी चैनल-अज्ञेय उत्तर-संदर्भ मेटाडेटा को भरता है जिसका उपयोग Discord उत्तर करते हैं: एजेंट `has_reply_context` तथा प्रेषक लेबल और मुख्य सामग्री वाला अविश्वसनीय "वर्तमान उपयोगकर्ता संदेश का उत्तर लक्ष्य" ब्लॉक देखते हैं। (प्रत्यक्ष WebChat सत्रों के लिए मौजूदा बाइट-स्थिर प्रॉम्प्ट नीति के अनुसार, WebChat प्रॉम्प्ट `reply_to_id` जैसी अस्थिर बातचीत आईडी को छिपाए रखते हैं।) बिना स्थायी ट्रांसक्रिप्ट आईडी वाले उत्तर लक्ष्य (उदाहरण के लिए लंबित प्रेषण) संदेश की मुख्य सामग्री में इनलाइन उद्धरण का उपयोग करते हैं।
+- कार्यक्षेत्र स्टार्टअप फ़ाइलें और लंबित `BOOTSTRAP.md` निर्देश एजेंट सिस्टम प्रॉम्प्ट के `# Project Context` अनुभाग के माध्यम से दिए जाते हैं, WebChat उपयोगकर्ता संदेश में कॉपी नहीं किए जाते। यदि बूटस्ट्रैप सामग्री छोटी कर दी जाती है, तो सिस्टम प्रॉम्प्ट को इसके बजाय एक संक्षिप्त "बूटस्ट्रैप संदर्भ सूचना" मिलती है; विस्तृत गणनाएँ और कॉन्फ़िगरेशन नियंत्रण डायग्नोस्टिक सतहों पर रहते हैं।
+- `chat.history` पर डिस्प्ले सामान्यीकरण इन्हें हटाता है: केवल रनटाइम वाला OpenClaw संदर्भ, इनबाउंड एनवेलप रैपर, `[[reply_to_current]]`, `[[reply_to:<id>]]`, और `[[audio_as_voice]]` जैसे इनलाइन डिलीवरी डायरेक्टिव टैग, सादे-टेक्स्ट टूल-कॉल XML पेलोड (`<tool_call>`, `<function_call>`, `<tool_calls>`, `<function_calls>`, छोटे किए गए ब्लॉक सहित), तथा लीक हुए ASCII/पूर्ण-चौड़ाई मॉडल नियंत्रण टोकन। जिन सहायक प्रविष्टियों का पूरा दृश्यमान टेक्स्ट केवल मौन टोकन `NO_REPLY` है (केस-असंवेदी), उन्हें छोड़ दिया जाता है।
+- रीज़निंग-फ़्लैग वाले उत्तर पेलोड (`isReasoning: true`) WebChat सहायक सामग्री, ट्रांसक्रिप्ट रीप्ले टेक्स्ट और ऑडियो सामग्री ब्लॉक से बाहर रखे जाते हैं, इसलिए केवल चिंतन वाले पेलोड दृश्यमान सहायक संदेश या चलाने योग्य ऑडियो के रूप में दिखाई नहीं देते।
+- `chat.inject` ट्रांसक्रिप्ट में सीधे एक सहायक नोट जोड़ता है और उसे UI पर प्रसारित करता है (कोई एजेंट रन नहीं)।
+- निरस्त रन आंशिक सहायक आउटपुट को UI में दृश्यमान रख सकते हैं। बफ़र किया गया आउटपुट मौजूद होने पर Gateway उस आंशिक टेक्स्ट को ट्रांसक्रिप्ट इतिहास में स्थायी करता है और प्रविष्टि को निरस्तीकरण मेटाडेटा से चिह्नित करता है।
 
-### Transcript और delivery model
+### ट्रांसक्रिप्ट और डिलीवरी मॉडल
 
-WebChat में दो अलग-अलग data paths हैं:
+WebChat में दो अलग डेटा पथ हैं:
 
-- session JSONL फ़ाइल durable model/runtime transcript है। सामान्य agent runs के लिए, embedded OpenClaw runtime अपने session manager के ज़रिए model-visible `user`, `assistant`, और `toolResult` संदेशों को persist करता है। WebChat उस transcript में मनमाना delivery, status, या helper text नहीं लिखता।
-- Gateway `ReplyPayload` events live delivery projection हैं। उन्हें WebChat/channel display, block streaming, directive tags, media embedding, TTS/audio flags, और UI fallback behavior के लिए normalize किया जा सकता है। वे स्वयं canonical session log नहीं हैं।
-- जिन harnesses को `tools.message` के ज़रिए दृश्यमान replies चाहिए, वे अब भी WebChat को current-run internal source reply sink के रूप में उपयोग करते हैं। उस सक्रिय WebChat run से targetless `message.send` उसी चैट में project होता है और session transcript में mirror होता है; WebChat reusable outbound channel नहीं बनता और कभी `lastChannel` inherit नहीं करता।
-- WebChat assistant transcript entries केवल तब inject करता है जब Gateway सामान्य embedded agent turn के बाहर displayed message का मालिक हो: `chat.inject`, non-agent command replies, aborted partial output, और WebChat-managed media transcript supplements।
-- `chat.history` stored session transcript पढ़ता है और WebChat display projection लागू करता है। यदि किसी run के दौरान live assistant text दिखाई देता है लेकिन history reload के बाद गायब हो जाता है, तो पहले जाँचें कि raw JSONL में assistant text है या नहीं, फिर कि `chat.history` projection ने उसे stripped किया या नहीं, फिर कि Control UI optimistic-tail merge ने local delivery state को persisted snapshot से बदल दिया या नहीं।
-- `chat.message.get` `chat.history` जैसे ही transcript branch और display projection rules का उपयोग करता है, जिसमें active-agent scoping शामिल है, लेकिन `messageId` द्वारा एक transcript entry को target करता है और जब पूरा content अब लौटाया नहीं जा सकता, तो ईमानदार unavailable reason लौटाता है।
+- SQLite ट्रांसक्रिप्ट पंक्तियाँ टिकाऊ मॉडल/रनटाइम ट्रांसक्रिप्ट हैं। सामान्य एजेंट रन के लिए, एम्बेडेड OpenClaw रनटाइम सत्र एक्सेसर के माध्यम से मॉडल को दिखाई देने वाले `user`, `assistant`, और `toolResult` संदेशों को स्थायी करता है। WebChat उस ट्रांसक्रिप्ट में मनमाना डिलीवरी, स्थिति या सहायक टेक्स्ट नहीं लिखता।
+- Gateway `ReplyPayload` ईवेंट लाइव डिलीवरी प्रक्षेपण हैं: WebChat/चैनल डिस्प्ले, ब्लॉक स्ट्रीमिंग, डायरेक्टिव टैग, मीडिया एम्बेडिंग, TTS/ऑडियो फ़्लैग और UI फ़ॉलबैक व्यवहार के लिए सामान्यीकृत। वे स्वयं प्रामाणिक सत्र लॉग नहीं हैं।
+- `tools.message` के माध्यम से दृश्यमान उत्तरों की आवश्यकता वाले हार्नेस अभी भी WebChat को वर्तमान रन के आंतरिक स्रोत उत्तर सिंक के रूप में उपयोग करते हैं। उस सक्रिय WebChat रन से लक्ष्य-रहित `message.send` को उसी चैट में प्रक्षेपित और सत्र ट्रांसक्रिप्ट में प्रतिबिंबित किया जाता है; WebChat पुनः उपयोग योग्य आउटबाउंड चैनल नहीं बनता और कभी भी `lastChannel` प्राप्त नहीं करता।
+- WebChat सहायक ट्रांसक्रिप्ट प्रविष्टियाँ केवल तब सम्मिलित करता है, जब Gateway सामान्य एम्बेडेड एजेंट टर्न के बाहर प्रदर्शित संदेश का स्वामी होता है: `chat.inject`, गैर-एजेंट कमांड उत्तर, निरस्त आंशिक आउटपुट और WebChat-प्रबंधित मीडिया ट्रांसक्रिप्ट पूरक।
+- यदि रन के दौरान लाइव सहायक टेक्स्ट दिखाई देता है, लेकिन इतिहास पुनः लोड होने के बाद गायब हो जाता है, तो इस क्रम में जाँचें: क्या SQLite ट्रांसक्रिप्ट में सहायक टेक्स्ट मौजूद है, क्या `chat.history` डिस्प्ले प्रक्षेपण ने उसे हटा दिया, फिर क्या Control UI के आशावादी-अंत मर्ज ने स्थानीय डिलीवरी स्थिति को स्थायी स्नैपशॉट से बदल दिया।
 
-सामान्य agent-run final answers durable होने चाहिए क्योंकि embedded runtime assistant `message_end` लिखता है। delivered final payload को transcript में mirror करने वाले किसी भी fallback को पहले ऐसे assistant turn को duplicate करने से बचना होगा जिसे embedded runtime पहले ही लिख चुका है।
+सामान्य एजेंट-रन अंतिम उत्तर टिकाऊ होने चाहिए, क्योंकि एम्बेडेड रनटाइम सहायक `message_end` लिखता है। डिलीवर किए गए अंतिम पेलोड को ट्रांसक्रिप्ट में प्रतिबिंबित करने वाले किसी भी फ़ॉलबैक को पहले उस सहायक टर्न की डुप्लिकेट प्रति बनाने से बचना चाहिए जिसे एम्बेडेड रनटाइम पहले ही लिख चुका है।
 
-## Control UI agents tools panel
+## Control UI एजेंट टूल पैनल
 
-- Control UI `/agents` Tools panel में दो अलग-अलग views हैं:
-  - **अभी उपलब्ध** `tools.effective(sessionKey=...)` का उपयोग करता है और current session inventory का server-derived
-    read-only projection दिखाता है, जिसमें core, Plugin, channel-owned,
-    और पहले से खोजे गए MCP server tools शामिल हैं।
-  - **Tool Configuration** `tools.catalog` का उपयोग करता है और profiles, overrides, और
-    catalog semantics पर केंद्रित रहता है।
-- Runtime availability session-scoped है। उसी agent पर sessions बदलने से
-  **अभी उपलब्ध** सूची बदल सकती है। यदि configured MCP servers connect नहीं हुए हैं या
-  last discovery के बाद बदले गए हैं, तो panel read path से चुपचाप MCP transports
-  शुरू करने के बजाय notice दिखाता है।
-- config editor runtime availability का संकेत नहीं देता; effective access अब भी policy
-  precedence (`allow`/`deny`, per-agent और provider/channel overrides) का पालन करता है।
+- Control UI के `/agents` टूल पैनल में `tools.effective(sessionKey=...)` द्वारा समर्थित "अभी उपलब्ध" दृश्य है: वर्तमान सत्र की टूल सूची का सर्वर-व्युत्पन्न, केवल-पढ़ने योग्य प्रक्षेपण, जिसमें कोर, Plugin, चैनल-स्वामित्व वाले और पहले से खोजे गए MCP सर्वर टूल शामिल हैं।
+- एक अलग कॉन्फ़िगरेशन-संपादन दृश्य (`tools.catalog` द्वारा समर्थित) प्रोफ़ाइल, प्रति-एजेंट ओवरराइड और कैटलॉग अर्थविज्ञान को शामिल करता है।
+- रनटाइम उपलब्धता सत्र-सीमित है। एक ही एजेंट पर सत्र बदलने से "अभी उपलब्ध" सूची बदल सकती है। यदि कॉन्फ़िगर किए गए MCP सर्वर पिछली खोज के बाद से कनेक्ट या परिवर्तित नहीं हुए हैं, तो पैनल पठन पथ से चुपचाप MCP ट्रांसपोर्ट शुरू करने के बजाय एक सूचना दिखाता है।
+- कॉन्फ़िगरेशन संपादक रनटाइम उपलब्धता का संकेत नहीं देता; प्रभावी पहुँच अभी भी नीति प्राथमिकता (`allow`/`deny`, प्रति-एजेंट तथा प्रदाता/चैनल ओवरराइड) का अनुसरण करती है।
 
 ## दूरस्थ उपयोग
 
-- Remote mode Gateway WebSocket को SSH/Tailscale पर tunnel करता है।
-- आपको अलग WebChat server चलाने की आवश्यकता नहीं है।
+- दूरस्थ मोड Gateway WebSocket को SSH/Tailscale पर टनल करता है।
+- आपको अलग WebChat सर्वर चलाने की आवश्यकता नहीं है।
 
-## Configuration reference (WebChat)
+## कॉन्फ़िगरेशन संदर्भ (WebChat)
 
-पूरी configuration: [Configuration](/hi/gateway/configuration)
+पूर्ण कॉन्फ़िगरेशन: [कॉन्फ़िगरेशन](/hi/gateway/configuration)
 
-WebChat में कोई persisted config section नहीं है। Gateway built-in `chat.history` display limit का उपयोग करता है; API clients किसी एक `chat.history` call के लिए उसे override करने हेतु per-request `maxChars` भेज सकते हैं। Legacy `channels.webchat` और `gateway.webchat` config retire हो चुका है; इसे हटाने के लिए `openclaw doctor --fix` चलाएँ।
+WebChat में कोई स्थायी कॉन्फ़िगरेशन अनुभाग नहीं है। Gateway अंतर्निहित `chat.history` डिस्प्ले सीमा का उपयोग करता है; API क्लाइंट एक कॉल के लिए इसे ओवरराइड करने हेतु प्रत्येक अनुरोध में `maxChars` भेज सकते हैं। पुराना `channels.webchat` और `gateway.webchat` कॉन्फ़िगरेशन सेवानिवृत्त हो चुका है; उसे हटाने के लिए `openclaw doctor --fix` चलाएँ।
 
-संबंधित global options:
+संबंधित वैश्विक विकल्प:
 
-- `gateway.port`, `gateway.bind`: WebSocket host/port।
+- `gateway.port`, `gateway.bind`: WebSocket होस्ट/पोर्ट।
 - `gateway.auth.mode`, `gateway.auth.token`, `gateway.auth.password`:
-  shared-secret WebSocket auth।
-- `gateway.auth.allowTailscale`: सक्षम होने पर browser Control UI chat tab Tailscale
-  Serve identity headers का उपयोग कर सकता है।
-- `gateway.auth.mode: "trusted-proxy"`: identity-aware **non-loopback** proxy source के पीछे browser clients के लिए reverse-proxy auth ([Trusted Proxy Auth](/hi/gateway/trusted-proxy-auth) देखें)।
-- `gateway.remote.url`, `gateway.remote.token`, `gateway.remote.password`: remote Gateway target।
-- `session.*`: session storage और main key defaults।
+  shared-secret WebSocket प्रमाणीकरण।
+- `gateway.auth.allowTailscale`: ब्राउज़र Control UI चैट टैब सक्षम होने पर Tailscale
+  Serve पहचान हेडर का उपयोग कर सकता है।
+- `gateway.auth.mode: "trusted-proxy"`: पहचान-जागरूक **गैर-loopback** प्रॉक्सी स्रोत के पीछे ब्राउज़र क्लाइंट के लिए रिवर्स-प्रॉक्सी प्रमाणीकरण ([विश्वसनीय प्रॉक्सी प्रमाणीकरण](/hi/gateway/trusted-proxy-auth) देखें)।
+- `gateway.remote.url`, `gateway.remote.token`, `gateway.remote.password`: दूरस्थ Gateway लक्ष्य।
+- `session.*`: सत्र भंडारण और मुख्य कुंजी के डिफ़ॉल्ट।
 
 ## संबंधित
 
 - [Control UI](/hi/web/control-ui)
-- [Dashboard](/hi/web/dashboard)
+- [डैशबोर्ड](/hi/web/dashboard)

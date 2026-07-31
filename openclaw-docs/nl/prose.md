@@ -1,47 +1,51 @@
 ---
 read_when:
-    - U wilt .prose-workflowbestanden uitvoeren of schrijven
-    - U wilt de OpenProse-plugin inschakelen
-    - U moet begrijpen hoe OpenProse wordt gekoppeld aan OpenClaw-primitieven
+    - Je wilt .prose-workflowbestanden uitvoeren of schrijven
+    - Je wilt de OpenProse-plugin inschakelen
+    - Je moet begrijpen hoe OpenProse wordt gekoppeld aan OpenClaw-primitieven
 sidebarTitle: OpenProse
-summary: OpenProse is een workflowindeling met Markdown als uitgangspunt voor AI-sessies met meerdere agents. In OpenClaw wordt het geleverd als een Plugin met een `/prose`-slashcommando en een Skillspakket.
+summary: OpenProse is een workflowindeling met Markdown als uitgangspunt voor AI-sessies met meerdere agents. In OpenClaw wordt het geleverd als een Plugin met een `/prose`-slashcommando en een Skills-pakket.
 title: OpenProse
 x-i18n:
-    generated_at: "2026-07-12T09:17:19Z"
+    generated_at: "2026-07-27T05:18:00Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 8b04eb23bf827fbec6db11c1e95993e7f6c617451c5f4fda771ad078674c12bc
     source_path: prose.md
     workflow: 16
 ---
 
-OpenProse is een overdraagbare, op Markdown gerichte workflowindeling voor het orkestreren van AI-sessies. In OpenClaw wordt het geleverd als een Plugin die een OpenProse-skillpakket en een slashopdracht `/prose` installeert. Programma's staan in `.prose`-bestanden en kunnen meerdere subagents starten met een expliciete besturingsstroom.
+OpenProse is een overdraagbare, op Markdown gerichte workflowindeling voor het orkestreren van AI-
+sessies. In OpenClaw wordt het geleverd als een plugin die een OpenProse-Skills-
+pakket en een `/prose`-slashopdracht installeert. Programma's staan in `.prose`-bestanden en kunnen
+meerdere subagents starten met een expliciete besturingsstroom.
 
 <CardGroup cols={3}>
   <Card title="Installeren" icon="download" href="#install">
-    Schakel de OpenProse-Plugin in en start de Gateway opnieuw.
+    Schakel de OpenProse-plugin in en herstart de Gateway.
   </Card>
   <Card title="Een programma uitvoeren" icon="play" href="#slash-command">
     Gebruik `/prose run` om een `.prose`-bestand of extern programma uit te voeren.
   </Card>
   <Card title="Programma's schrijven" icon="pencil" href="#example-parallel-research-and-synthesis">
-    Schrijf multiagentworkflows met parallelle en opeenvolgende stappen.
+    Schrijf multi-agentworkflows met parallelle en opeenvolgende stappen.
   </Card>
 </CardGroup>
 
 ## Installeren
 
 <Steps>
-  <Step title="De Plugin inschakelen">
-    OpenProse wordt meegeleverd, maar is standaard uitgeschakeld. Schakel het in:
+  <Step title="De plugin inschakelen">
+    OpenProse wordt meegeleverd, maar is standaard uitgeschakeld. Schakel de plugin in:
 
     ```bash
     openclaw plugins enable open-prose
     ```
 
   </Step>
-  <Step title="De Gateway opnieuw starten">
+  <Step title="De Gateway herstarten">
     ```bash
     openclaw gateway restart
     ```
@@ -51,18 +55,18 @@ OpenProse is een overdraagbare, op Markdown gerichte workflowindeling voor het o
     openclaw plugins list | grep prose
     ```
 
-    `open-prose` moet als ingeschakeld worden weergegeven. De skillopdracht
-    `/prose` is nu beschikbaar in de chat.
+    Je zou `open-prose` als ingeschakeld moeten zien. De Skills-opdracht `/prose` is nu
+    beschikbaar in de chat.
 
   </Step>
 </Steps>
 
-Vanuit een uitgecheckte repository kunt u de Plugin rechtstreeks installeren:
+Vanuit een uitgecheckte repository kun je de plugin rechtstreeks installeren:
 `openclaw plugins install ./extensions/open-prose`
 
 ## Slashopdracht
 
-OpenProse registreert `/prose` als een door de gebruiker aanroepbare skillopdracht:
+OpenProse registreert `/prose` als een door de gebruiker aanroepbare Skills-opdracht:
 
 ```text
 /prose help
@@ -74,39 +78,42 @@ OpenProse registreert `/prose` als een door de gebruiker aanroepbare skillopdrac
 /prose update
 ```
 
-`/prose run <handle/slug>` wordt omgezet naar `https://p.prose.md/<handle>/<slug>`.
-Rechtstreekse URL's worden ongewijzigd opgehaald met het hulpprogramma `web_fetch`.
+`/prose run <handle/slug>` wordt omgezet in `https://p.prose.md/<handle>/<slug>`.
+Rechtstreekse URL's worden ongewijzigd opgehaald met de tool `web_fetch`.
 
-Externe uitvoeringen op het hoogste niveau zijn expliciet. Externe imports binnen een `.prose`-programma zijn transitieve codeafhankelijkheden: voordat OpenProse een extern `use`-doel ophaalt, toont het de opgeloste importlijst en moet de beheerder voor die uitvoering exact antwoorden met `approve remote prose imports`.
+Externe uitvoeringen op het hoogste niveau zijn expliciet. Externe imports binnen een `.prose`-programma zijn
+transitieve codeafhankelijkheden: voordat OpenProse een extern `use`-doel ophaalt,
+toont het de omgezette importlijst en moet de operator voor die uitvoering exact
+`approve remote prose imports` antwoorden.
 
 ## Mogelijkheden
 
-- Multiagentonderzoek en -synthese met expliciet parallellisme.
-- Herhaalbare workflows met veilige goedkeuringen (codebeoordeling, incidenttriage, inhoudspijplijnen).
-- Herbruikbare `.prose`-programma's die u in ondersteunde agentruntimes kunt uitvoeren.
+- Multi-agentonderzoek en -synthese met expliciet parallellisme.
+- Herhaalbare, goedkeuringsveilige workflows (codebeoordeling, incidenttriage, contentpijplijnen).
+- Herbruikbare `.prose`-programma's die je in ondersteunde agentruntimes kunt uitvoeren.
 
 ## Voorbeeld: parallel onderzoek en synthese
 
 ```prose
-# Research + synthesis with two agents running in parallel.
+# Onderzoek + synthese met twee agents die parallel worden uitgevoerd.
 
-input topic: "What should we research?"
+input topic: "Wat moeten we onderzoeken?"
 
 agent researcher:
   model: sonnet
-  prompt: "You research thoroughly and cite sources."
+  prompt: "Je doet grondig onderzoek en vermeldt bronnen."
 
 agent writer:
   model: opus
-  prompt: "You write a concise summary."
+  prompt: "Je schrijft een beknopte samenvatting."
 
 parallel:
   findings = session: researcher
-    prompt: "Research {topic}."
+    prompt: "Onderzoek {topic}."
   draft = session: writer
-    prompt: "Summarize {topic}."
+    prompt: "Vat {topic} samen."
 
-session "Merge the findings + draft into a final answer."
+session "Voeg de bevindingen + het concept samen tot een definitief antwoord."
   context: { findings, draft }
 ```
 
@@ -114,36 +121,36 @@ session "Merge the findings + draft into a final answer."
 
 OpenProse-programma's worden toegewezen aan OpenClaw-primitieven:
 
-| OpenProse-concept          | OpenClaw-hulpprogramma                           |
+| OpenProse-concept          | OpenClaw-tool                                   |
 | ------------------------- | ----------------------------------------------- |
-| Sessie starten / Task-hulpprogramma | `sessions_spawn`                        |
+| Sessie starten / Task-tool | `sessions_spawn`                                |
 | Bestand lezen / schrijven | `read` / `write`                                |
-| Webinhoud ophalen         | `web_fetch` (`exec` + curl wanneer POST nodig is) |
+| Web ophalen               | `web_fetch` (`exec` + curl wanneer POST nodig is) |
 
 <Warning>
-  Als uw lijst met toegestane hulpprogramma's `sessions_spawn`, `read`, `write`
-  of `web_fetch` blokkeert, mislukken OpenProse-programma's. Controleer uw
-  [configuratie van de lijst met toegestane hulpprogramma's](/nl/gateway/config-tools).
+  Als je lijst met toegestane tools `sessions_spawn`, `read`, `write` of
+  `web_fetch` blokkeert, mislukken OpenProse-programma's. Controleer je
+  [configuratie voor de lijst met toegestane tools](/nl/gateway/config-tools).
 </Warning>
 
 ## Bestandslocaties
 
-OpenProse bewaart de status onder `.prose/` in uw werkruimte:
+OpenProse bewaart de status onder `.prose/` in je werkruimte:
 
 ```text
 .prose/
-├── .env                      # config (key=value), e.g. OPENPROSE_POSTGRES_URL
+├── .env                      # configuratie (sleutel=waarde), bijvoorbeeld OPENPROSE_POSTGRES_URL
 ├── runs/
 │   └── {YYYYMMDD}-{HHMMSS}-{random}/
-│       ├── program.prose     # copy of the running program
-│       ├── state.md          # execution state
+│       ├── program.prose     # kopie van het uitgevoerde programma
+│       ├── state.md          # uitvoeringsstatus
 │       ├── bindings/
-│       ├── imports/          # nested remote program runs
+│       ├── imports/          # geneste uitvoeringen van externe programma's
 │       └── agents/
-└── agents/                   # project-scoped persistent agents
+└── agents/                   # permanente agents binnen het projectbereik
 ```
 
-Permanente agents op gebruikersniveau, die tussen projecten worden gedeeld, staan in:
+Permanente agents op gebruikersniveau (gedeeld tussen projecten) staan in:
 
 ```text
 ~/.prose/agents/
@@ -153,25 +160,25 @@ Permanente agents op gebruikersniveau, die tussen projecten worden gedeeld, staa
 
 <AccordionGroup>
   <Accordion title="bestandssysteem (standaard)">
-    De status wordt naar `.prose/runs/...` in de werkruimte geschreven. Er zijn
-    geen extra afhankelijkheden vereist.
+    De status wordt in de werkruimte naar `.prose/runs/...` geschreven. Geen extra
+    afhankelijkheden vereist.
   </Accordion>
   <Accordion title="in context">
-    Tijdelijke status die in het contextvenster wordt bewaard; selecteer deze met
-    `--in-context`. Geschikt voor kleine, kortstondige programma's.
+    Tijdelijke status die in het contextvenster wordt bewaard; selecteer met `--in-context`.
+    Geschikt voor kleine, kortlopende programma's.
   </Accordion>
   <Accordion title="sqlite (experimenteel)">
-    Selecteer deze met `--state=sqlite`. Vereist het binaire bestand `sqlite3` in
-    `PATH` (valt terug op het bestandssysteem als dit ontbreekt); de status wordt
-    opgeslagen in `.prose/runs/{id}/state.db`.
+    Selecteer met `--state=sqlite`. Vereist het binaire bestand `sqlite3` op `PATH`
+    (valt terug op het bestandssysteem wanneer dit ontbreekt); de status wordt opgeslagen in
+    `.prose/runs/{id}/state.db`.
   </Accordion>
   <Accordion title="postgres (experimenteel)">
-    Selecteer deze met `--state=postgres`. Vereist `psql` en een verbindingsreeks
-    in `OPENPROSE_POSTGRES_URL` (stel deze in via `.prose/.env`).
+    Selecteer met `--state=postgres`. Vereist `psql` en een verbindingsreeks in
+    `OPENPROSE_POSTGRES_URL` (stel deze in `.prose/.env` in).
 
     <Warning>
-      Postgres-inloggegevens komen in de logboeken van subagents terecht. Gebruik
-      een aparte database met minimale bevoegdheden.
+      Postgres-referenties komen in de logboeken van subagents terecht. Gebruik een afzonderlijke
+      database met minimale bevoegdheden.
     </Warning>
 
   </Accordion>
@@ -179,22 +186,27 @@ Permanente agents op gebruikersniveau, die tussen projecten worden gedeeld, staa
 
 ## Beveiliging
 
-Behandel `.prose`-bestanden als code. Beoordeel ze vóór uitvoering, inclusief externe `use`-imports. Verzoeken van het hoogste niveau met `/prose run https://...` zijn expliciet, maar transitieve externe imports vereisen per uitvoering goedkeuring voordat ze worden opgehaald of uitgevoerd. Gebruik lijsten met toegestane OpenClaw-hulpprogramma's en goedkeuringspoorten om neveneffecten te beheren. Vergelijk voor deterministische workflows met verplichte goedkeuring met [Lobster](/nl/tools/lobster).
+Behandel `.prose`-bestanden als code. Controleer ze vóór uitvoering, inclusief externe
+`use`-imports. `/prose run https://...`-verzoeken op het hoogste niveau zijn expliciet, maar
+voor transitieve externe imports is per uitvoering goedkeuring vereist voordat ze worden opgehaald of
+uitgevoerd. Gebruik OpenClaw-lijsten met toegestane tools en goedkeuringspoorten om neveneffecten
+te beheersen. Vergelijk voor deterministische workflows met verplichte goedkeuring met
+[Lobster](/nl/tools/lobster).
 
 ## Gerelateerd
 
 <CardGroup cols={2}>
   <Card title="Skills-referentie" href="/nl/tools/skills" icon="puzzle-piece">
-    Hoe het skillpakket van OpenProse wordt geladen en welke poorten van toepassing zijn.
+    Hoe het Skills-pakket van OpenProse wordt geladen en welke poorten van toepassing zijn.
   </Card>
   <Card title="Subagents" href="/nl/tools/subagents" icon="users">
-    De ingebouwde multiagentcoördinatielaag van OpenClaw.
+    De ingebouwde multi-agentcoördinatielaag van OpenClaw.
   </Card>
   <Card title="Tekst-naar-spraak" href="/nl/tools/tts" icon="volume-high">
-    Voeg audio-uitvoer toe aan uw workflows.
+    Voeg audio-uitvoer toe aan je workflows.
   </Card>
   <Card title="Slashopdrachten" href="/nl/tools/slash-commands" icon="terminal">
-    Alle beschikbare chatopdrachten, waaronder /prose.
+    Alle beschikbare chatopdrachten, inclusief /prose.
   </Card>
 </CardGroup>
 

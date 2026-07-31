@@ -1,59 +1,47 @@
 ---
 read_when:
-    - वॉइस वेक वर्ड्स के व्यवहार या डिफ़ॉल्ट बदलना
-    - वेक वर्ड सिंक की आवश्यकता वाले नए नोड प्लेटफ़ॉर्म जोड़ना
-summary: वैश्विक वॉइस वेक वर्ड्स (Gateway-स्वामित्व वाले) और वे नोड्स में कैसे सिंक होते हैं
-title: आवाज़ से सक्रियण
+    - वॉइस वेक वर्ड के व्यवहार या डिफ़ॉल्ट को बदलना
+    - वेक वर्ड सिंक की आवश्यकता वाले नए Node प्लेटफ़ॉर्म जोड़ना
+summary: वैश्विक वॉइस वेक शब्द (Gateway के स्वामित्व वाले) और वे नोड्स में कैसे सिंक होते हैं
+title: वॉइस वेक
 x-i18n:
-    generated_at: "2026-06-28T23:25:59Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:30:21Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 3c57955e8061eca2f9fec83500e829f183cd3ef9f794bf385823a28f9c89b0a4
+    source_hash: aef2a5bba664ce10fb6ab457bb6d202639dcc6c0a9df61567e7cb402c290bbec
     source_path: nodes/voicewake.md
     workflow: 16
 ---
 
-OpenClaw **वेक शब्दों को एक ही वैश्विक सूची** के रूप में मानता है, जिसका स्वामित्व **Gateway** के पास है।
+वेक शब्द **Gateway के स्वामित्व वाली एक वैश्विक सूची** हैं — प्रत्येक Node के लिए अलग कस्टम सूचियाँ नहीं हैं। कोई भी Node या ऐप UI सूची को संपादित कर सकता है; Gateway बदलाव को स्थायी रूप से सहेजता है और उसे प्रत्येक कनेक्टेड क्लाइंट तक प्रसारित करता है।
 
-- **प्रति-नोड कस्टम वेक शब्द नहीं हैं**।
-- **कोई भी नोड/ऐप UI सूची संपादित कर सकता है**; बदलाव Gateway द्वारा स्थायी किए जाते हैं और सभी तक प्रसारित किए जाते हैं।
-- macOS और iOS स्थानीय **वॉयस वेक सक्षम/अक्षम** टॉगल रखते हैं (स्थानीय UX + अनुमतियां अलग होती हैं)।
-- Android फिलहाल वॉयस वेक बंद रखता है और वॉइस टैब में मैनुअल माइक फ्लो का उपयोग करता है।
+- **macOS**: स्थानीय Voice Wake सक्षम/अक्षम टॉगल। macOS 26+ आवश्यक है; रनटाइम/PTT विवरण के लिए [वॉइस वेक (macOS)](/hi/platforms/mac/voicewake) देखें।
+- **iOS**: Settings में स्थानीय Voice Wake सक्षम/अक्षम टॉगल।
+- **Android**: Settings → Voice में स्थानीय Voice Wake सक्षम/अक्षम टॉगल और वेक-शब्द संपादक। Android की ऑन-डिवाइस वाक् पहचान आवश्यक है।
 
-## स्टोरेज (Gateway होस्ट)
+## भंडारण
 
-वेक शब्द और रूटिंग नियम Gateway स्टेट डेटाबेस में संग्रहीत होते हैं:
-
-- `~/.openclaw/state/openclaw.sqlite`
-
-सक्रिय टेबल हैं:
-
-- `voicewake_triggers`
-- `voicewake_routing_config`
-- `voicewake_routing_routes`
-
-लेगेसी `settings/voicewake.json` और `settings/voicewake-routing.json` फाइलें
-केवल doctor माइग्रेशन इनपुट हैं; रनटाइम SQLite टेबल पढ़ता और लिखता है।
+वेक शब्द और रूटिंग नियम Gateway की स्टेट डेटाबेस में रहते हैं, डिफ़ॉल्ट रूप से `~/.openclaw/state/openclaw.sqlite` (इसे `OPENCLAW_STATE_DIR` से ओवरराइड करें), तालिकाएँ `voicewake_triggers`, `voicewake_routing_config`, `voicewake_routing_routes`। पुराने `settings/voicewake.json` और `settings/voicewake-routing.json` केवल `openclaw doctor --fix` माइग्रेशन इनपुट हैं — रनटाइम उन्हें कभी नहीं पढ़ता।
 
 ## प्रोटोकॉल
 
-### मेथड
+### ट्रिगर सूची
 
-- `voicewake.get` → `{ triggers: string[] }`
-- `voicewake.set` पैरामीटर `{ triggers: string[] }` के साथ → `{ triggers: string[] }`
+| विधि          | पैरामीटर                   | परिणाम                   |
+| --------------- | ------------------------ | ------------------------ |
+| `voicewake.get` | कोई नहीं                     | `{ triggers: string[] }` |
+| `voicewake.set` | `{ triggers: string[] }` | `{ triggers: string[] }` |
 
-नोट्स:
+`voicewake.set` इनपुट को सामान्यीकृत करता है: रिक्त स्थान काटता है, खाली प्रविष्टियाँ हटाता है, अधिकतम 32 ट्रिगर रखता है और सरोगेट युग्मों को विभाजित किए बिना प्रत्येक को 64 UTF-16 कोड इकाइयों तक छोटा करता है। खाली परिणाम होने पर अंतर्निहित डिफ़ॉल्ट (`openclaw`, `claude`, `computer`) का उपयोग किया जाता है।
 
-- ट्रिगर सामान्यीकृत किए जाते हैं (trimmed, खाली हटाए गए)। खाली सूचियां डिफॉल्ट पर वापस जाती हैं।
-- सुरक्षा के लिए सीमाएं लागू की जाती हैं (गिनती/लंबाई कैप)।
+### रूटिंग (ट्रिगर से लक्ष्य तक)
 
-### रूटिंग मेथड (ट्रिगर → लक्ष्य)
-
-- `voicewake.routing.get` → `{ config: VoiceWakeRoutingConfig }`
-- `voicewake.routing.set` पैरामीटर `{ config: VoiceWakeRoutingConfig }` के साथ → `{ config: VoiceWakeRoutingConfig }`
-
-`VoiceWakeRoutingConfig` आकार:
+| विधि                  | पैरामीटर                               | परिणाम                               |
+| ----------------------- | ------------------------------------ | ------------------------------------ |
+| `voicewake.routing.get` | कोई नहीं                                 | `{ config: VoiceWakeRoutingConfig }` |
+| `voicewake.routing.set` | `{ config: VoiceWakeRoutingConfig }` | `{ config: VoiceWakeRoutingConfig }` |
 
 ```json
 {
@@ -64,41 +52,31 @@ OpenClaw **वेक शब्दों को एक ही वैश्वि�
 }
 ```
 
-रूट लक्ष्य इनमें से ठीक एक का समर्थन करते हैं:
+प्रत्येक रूट `target` निम्न में से ठीक एक का समर्थन करता है:
 
 - `{ "mode": "current" }`
 - `{ "agentId": "main" }`
 - `{ "sessionKey": "agent:main:main" }`
 
+सीमाएँ: अधिकतम 32 रूट, ट्रिगर टेक्स्ट अधिकतम 64 वर्ण। मिलान और डुप्लिकेट पहचान के लिए रूट ट्रिगर को लोअरकेस करके, प्रत्येक शब्द के आरंभ/अंत से विराम-चिह्न हटाकर और रिक्त स्थान समेटकर सामान्यीकृत किया जाता है (`"Hey, Bot!!"` और `"hey bot"` मेल खाते हैं और डुप्लिकेट माने जाते हैं) — यह ऊपर दी गई वैश्विक ट्रिगर सूची के लिए उपयोग किए गए साधारण ट्रिम से अधिक कठोर सामान्यीकरण है।
+
 ### इवेंट
 
-- `voicewake.changed` पेलोड `{ triggers: string[] }`
-- `voicewake.routing.changed` पेलोड `{ config: VoiceWakeRoutingConfig }`
+| इवेंट                       | पेलोड                              |
+| --------------------------- | ------------------------------------ |
+| `voicewake.changed`         | `{ triggers: string[] }`             |
+| `voicewake.routing.changed` | `{ config: VoiceWakeRoutingConfig }` |
 
-इसे कौन प्राप्त करता है:
-
-- सभी WebSocket क्लाइंट (macOS ऐप, WebChat, आदि)
-- सभी कनेक्टेड नोड (iOS/Android), और नोड कनेक्ट होने पर आरंभिक "वर्तमान स्थिति" पुश के रूप में भी।
+दोनों को रीड स्कोप वाले प्रत्येक WebSocket क्लाइंट (macOS ऐप, WebChat और इसी तरह के अन्य क्लाइंट) तथा प्रत्येक कनेक्टेड Node तक प्रसारित किया जाता है। कनेक्ट होने के तुरंत बाद Node को आरंभिक स्नैपशॉट पुश के रूप में भी दोनों मिलते हैं।
 
 ## क्लाइंट व्यवहार
 
-### macOS ऐप
-
-- `VoiceWakeRuntime` ट्रिगर को गेट करने के लिए वैश्विक सूची का उपयोग करता है।
-- वॉइस वेक सेटिंग्स में "ट्रिगर शब्द" संपादित करने पर `voicewake.set` कॉल होता है और फिर अन्य क्लाइंट को सिंक में रखने के लिए प्रसारण पर निर्भर करता है।
-
-### iOS नोड
-
-- `VoiceWakeManager` ट्रिगर डिटेक्शन के लिए वैश्विक सूची का उपयोग करता है।
-- सेटिंग्स में वेक शब्द संपादित करने पर `voicewake.set` (Gateway WS पर) कॉल होता है और स्थानीय वेक-शब्द डिटेक्शन को भी रिस्पॉन्सिव रखता है।
-
-### Android नोड
-
-- वॉयस वेक फिलहाल Android रनटाइम/सेटिंग्स में अक्षम है।
-- Android वॉइस वेक-शब्द ट्रिगर के बजाय वॉइस टैब में मैनुअल माइक कैप्चर का उपयोग करता है।
+- **macOS**: `voicewake.set`/`voicewake.get` को कॉल करता है और अन्य क्लाइंट के साथ समन्वय बनाए रखने के लिए `voicewake.changed` को सुनता है।
+- **iOS**: `voicewake.set`/`voicewake.get` को कॉल करता है और स्थानीय वेक-शब्द पहचान को प्रतिक्रियाशील बनाए रखने के लिए `voicewake.changed` को सुनता है।
+- **Android**: `voicewake.set`/`voicewake.get` को कॉल करता है, `voicewake.changed` को सुनता है और सक्षम होने पर `voiceWake` को विज्ञापित करता है। पहचान ऑन-डिवाइस और केवल फ़ोरग्राउंड में रहती है; जब Talk, मैन्युअल डिक्टेशन, वॉइस-नोट कैप्चर या संदेश वाक् ऑडियो का उपयोग कर रहा हो, तब यह रुक जाती है।
 
 ## संबंधित
 
-- [टॉक मोड](/hi/nodes/talk)
+- [Talk मोड](/hi/nodes/talk)
 - [ऑडियो और वॉइस नोट्स](/hi/nodes/audio)
-- [मीडिया समझ](/hi/nodes/media-understanding)
+- [मीडिया की समझ](/hi/nodes/media-understanding)

@@ -1,21 +1,22 @@
 ---
 read_when:
-    - tokenjuice pluginini yüklüyor, yapılandırıyor veya denetliyorsunuz
-summary: exec ve bash aracı sonuçlarını tokenjuice indirgeyicileriyle sıkıştırır.
-title: Tokenjuice Plugin'i
+    - Tokenjuice pluginini yüklüyor, yapılandırıyor veya denetliyorsunuz
+summary: Exec ve bash aracı sonuçlarını tokenjuice indirgeyicileriyle sıkıştırır.
+title: Tokenjuice plugin'i
 x-i18n:
-    generated_at: "2026-07-12T12:03:44Z"
+    generated_at: "2026-07-27T00:09:11Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: a51416caa94a17799e3a55c1d3b88bf2c026fd003317b86d7926cf11b9b81fab
+    source_hash: 214b04944642ed16afc43a5271e1ad8beeae7445f1a5b6e7ee123e496ec43b2a
     source_path: plugins/reference/tokenjuice.md
     workflow: 16
 ---
 
 # Tokenjuice plugin’i
 
-Exec ve bash aracı sonuçlarını tokenjuice indirgeyicileriyle sıkıştırır.
+exec ve bash araç sonuçlarını tokenjuice indirgeyicileriyle sıkıştırır.
 
 ## Dağıtım
 
@@ -24,8 +25,8 @@ Exec ve bash aracı sonuçlarını tokenjuice indirgeyicileriyle sıkıştırır
 
 ## Yüzey
 
-sözleşmeler: agentToolResultMiddleware
+sözleşmeler: `agentToolResultMiddleware`
 
 ## İlgili belgeler
 
-- [tokenjuice](/tr/tools/tokenjuice)
+- [Tokenjuice](/tr/tools/tokenjuice)

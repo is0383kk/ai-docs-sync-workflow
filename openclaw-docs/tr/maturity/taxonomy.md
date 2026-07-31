@@ -1,12 +1,13 @@
 ---
-summary: OpenClaw olgunluk puan kartının temelindeki ürün alanları ve denetimler için ayrıntılı başvuru kaynağı.
+summary: OpenClaw olgunluk puan kartının temelindeki ürün alanları ve kontroller için ayrıntılı başvuru kaynağı.
 title: Olgunluk taksonomisi
 x-i18n:
-    generated_at: "2026-07-12T12:23:46Z"
+    generated_at: "2026-07-27T00:03:40Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 0739da06341d9bd86cc3a98772c8cbfbcb9a5acf80ca5ac1005c86dafaf273b7
+    source_hash: dbed5794f43b230d8c8adb211734d93eb81f02623fe57df078e1dfd5a6d2586c
     source_path: maturity/taxonomy.md
     workflow: 16
 ---
@@ -16,23 +17,23 @@ x-i18n:
 <div className="maturity-hero maturity-hero-compact">
   <p className="maturity-kicker">puan kartının temelindeki model</p>
   <p className="maturity-hero-title">Yüzeyler &gt; kategoriler &gt; yetenekler &gt; kanıtlar.</p>
-  <p>Her kategorinin standart belgeler ve QA kapsam kimlikleriyle ilişkilendirildiği, 4 ailede gruplandırılmış 50 yüzey.</p>
+  <p>4 ailede gruplandırılmış 50 yüzey; her kategori, kanonik dokümanlar ve QA kapsam kimlikleriyle ilişkilendirilmiştir.</p>
   <p className="maturity-jump-links"><a href="#product-areas">Ürün alanlarına göz atın</a> / <a href="#taxonomy-details">Ayrıntılı taksonomiyi açın</a> / <a href="/tr/maturity/scorecard">Puanları görüntüleyin</a></p>
 </div>
 
 ## Bu sayfa nasıl okunur?
 
-Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ürün alanıdır. Her yüzey kategoriler, her kategori de QA senaryolarının kapsadığı yetenek düzeyindeki kontrolleri içerir. Sürüm düzeyinde değerlendirme için puan kartını, temelindeki modeli incelemek için bu sayfayı kullanın.
+Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ürün alanıdır. Her yüzey kategoriler, her kategori de QA senaryolarının kapsadığı yetenek düzeyindeki kontrolleri içerir. Sürüm düzeyinde değerlendirme için puan kartını; temelindeki modeli incelemek için bu sayfayı kullanın.
 
 ## Olgunluk düzeyleri
 
 <div className="maturity-level-list">
-  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-experimental"><span className="maturity-level-code">M0</span><span>Planlandı</span></span></span><span>İzlenecek yön biliniyor ancak desteklenen bir kullanıcı yolu mevcut değil.</span><span className="maturity-level-promotion">Yükseltme: Tasarım kaydı, sorumlu ve hedef yüzey mevcut.</span></div>
-  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-experimental"><span className="maturity-level-code">M1</span><span>Deneysel</span></span></span><span>Kısıtlamalar, bayraklar, kaynak derlemeleri veya yalnızca bakımcıların kullanabildiği akışların ardında uygulandı.</span><span className="maturity-level-promotion">Yükseltme: Bakımcı, senaryoyu güncel ana daldan çalıştırabilir.</span></div>
-  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-alpha"><span className="maturity-level-code">M2</span><span>Alfa</span></span></span><span>Gerçek kullanıcılar deneyebilir ancak geriye dönük uyumsuz değişiklikler ve eksik kullanıcı deneyimi beklenir.</span><span className="maturity-level-promotion">Yükseltme: Belgelenmiş kurulum, temel testler, bilinen kısıtlamalar ve gerçek bir ortamda elde edilmiş en az bir kanıt.</span></div>
-  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Beta</span></span></span><span>Herkese açık bir yol mevcuttur ve ana iş akışı sınırlı kısıtlamalarla kullanılabilir.</span><span className="maturity-level-promotion">Yükseltme: Kurulum/güncelleme belgeleri, regresyon testleri, destek çalışma kılavuzu ve beklenen ortam genelinde başarılı senaryo kanıtı.</span></div>
-  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-stable"><span className="maturity-level-code">M4</span><span>Kararlı</span></span></span><span>Standart kullanıcılar için önerilen yol. Hatalar regresyon olarak değerlendirilir.</span><span className="maturity-level-promotion">Yükseltme: Sürüm geçidi, doctor/sorun giderme yolu, kapsamlı belgeler ve tekrarlanan gerçek dünya kanıtı.</span></div>
-  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-clawesome"><span className="maturity-level-code">M5</span><span>Clawesome</span></span></span><span>İncelikli, memnuniyet verici, kapsamlı biçimde ölçümlenmiş ve karşılaştırılabilir en iyi iş akışlarıyla rekabet edebilecek düzeydedir.</span><span className="maturity-level-promotion">Yükseltme: Kararlı düzeye ek olarak temsili kullanıcılar genelinde kullanıcı puan kartından geçme.</span></div>
+  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-experimental"><span className="maturity-level-code">M0</span><span>Planlandı</span></span></span><span>Yön biliniyor ancak desteklenen bir kullanıcı yolu mevcut değil.</span><span className="maturity-level-promotion">Yükseltme: Tasarım sorunu, sorumlu ve hedef yüzey mevcut.</span></div>
+  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-experimental"><span className="maturity-level-code">M1</span><span>Deneysel</span></span></span><span>Uyarılar, bayraklar, kaynak derlemeleri veya yalnızca bakımcıların kullanabildiği akışların arkasında uygulanmıştır.</span><span className="maturity-level-promotion">Yükseltme: Bakımcı, senaryoyu güncel ana daldan çalıştırabilir.</span></div>
+  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-alpha"><span className="maturity-level-code">M2</span><span>Alfa</span></span></span><span>Gerçek kullanıcılar deneyebilir ancak uyumsuz değişiklikler ve eksik kullanıcı deneyimi beklenir.</span><span className="maturity-level-promotion">Yükseltme: Belgelenmiş kurulum, temel testler, bilinen uyarılar ve gerçek bir ortamdan en az bir kanıt.</span></div>
+  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Beta</span></span></span><span>Herkese açık bir yol mevcuttur ve ana iş akışı, sınırları belirli uyarılarla kullanılabilir.</span><span className="maturity-level-promotion">Yükseltme: Kurulum/güncelleme dokümanları, regresyon testleri, destek çalışma kılavuzu ve beklenen ortam genelinde başarılı senaryo kanıtı.</span></div>
+  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-stable"><span className="maturity-level-code">M4</span><span>Kararlı</span></span></span><span>Normal kullanıcılar için önerilen yol. Hatalar regresyon olarak değerlendirilir.</span><span className="maturity-level-promotion">Yükseltme: Sürüm kapısı, doctor/sorun giderme yolu, kapsamlı dokümanlar ve tekrarlanmış gerçek dünya kanıtı.</span></div>
+  <div className="maturity-level-row"><span className="maturity-level-title"><span className="maturity-level-pill maturity-level-clawesome"><span className="maturity-level-code">M5</span><span>Clawesome</span></span></span><span>İyileştirilmiş, keyifli, kapsamlı biçimde ölçümlenmiş ve karşılaştırılabilir en iyi iş akışlarıyla rekabet edebilir.</span><span className="maturity-level-promotion">Yükseltme: Kararlı düzeye ek olarak temsili kullanıcılar genelinde kullanıcı puan kartından geçme.</span></div>
 </div>
 
 ## Ürün alanları
@@ -88,12 +89,12 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
     </a>
 
     <a className="maturity-surface-link" href="#automation-cron-hooks-tasks-polling">
-      <span className="maturity-surface-title">Otomasyon: Cron, kancalar, görevler, yoklama</span>
+      <span className="maturity-surface-title">Otomasyon: cron, kancalar, görevler, yoklama</span>
       <span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-beta"><span className="maturity-level-code">M3</span><span>Beta</span></span><span>6 alan - %79 tamamlandı</span></span>
     </a>
 
     <a className="maturity-surface-link" href="#media-understanding-and-media-generation">
-      <span className="maturity-surface-title">Medya anlama ve medya oluşturma</span>
+      <span className="maturity-surface-title">Medya anlama ve medya üretimi</span>
       <span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-alpha"><span className="maturity-level-code">M2</span><span>Alfa</span></span><span>6 alan - %68 tamamlandı</span></span>
     </a>
 
@@ -287,7 +288,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
     </a>
 
     <a className="maturity-surface-link" href="#image-video-and-music-generation-tools">
-      <span className="maturity-surface-title">Görüntü, video ve müzik üretme araçları</span>
+      <span className="maturity-surface-title">Görsel, video ve müzik üretme araçları</span>
       <span className="maturity-surface-meta"><span className="maturity-level-pill maturity-level-alpha"><span className="maturity-level-code">M2</span><span>Alfa</span></span><span>5 alan - %68 tamamlandı</span></span>
     </a>
 
@@ -323,72 +324,100 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">CLI Kurulumu</span>
-          <span>6 özellik / LTS destekli</span>
+          <span>6 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>17%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "17%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/install/index), [Yükleyici](/tr/install/installer), [Node](/tr/install/node), [Güncelleme](/tr/install/updating)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/install/index), [Yükleyici](/tr/install/installer), [Node](/tr/install/node), [Güncelleme](/tr/install/updating)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">İlk Kullanıma Başlama ve Kimlik Doğrulama Kurulumu</span>
-          <span>5 özellik / LTS destekli</span>
+          <span className="maturity-category-title">İlk Katılım ve Kimlik Doğrulama Kurulumu</span>
+          <span>5 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[İlk Kullanıma Başlama](/tr/cli/onboard), [Yapılandırma](/tr/cli/configure), [İlk Kullanıma Başlamaya Genel Bakış](/tr/start/onboarding-overview)</div>
+        <div className="maturity-category-docs">
+
+    [İlk Katılım](/tr/cli/onboard), [Yapılandırma](/tr/cli/configure), [İlk Katılıma Genel Bakış](/tr/start/onboarding-overview)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Plugin ve Kanal Kurulumu</span>
-          <span>5 özellik</span>
+          <span>5 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[İlk Kullanıma Başlama](/tr/cli/onboard), [Plugin'ler](/tr/cli/plugins), [Kanallar](/tr/cli/channels)</div>
+        <div className="maturity-category-docs">
+
+    [İlk Katılım](/tr/cli/onboard), [Pluginler](/tr/cli/plugins), [Kanallar](/tr/cli/channels)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Gateway Hizmet Yönetimi</span>
-          <span>5 özellik / LTS destekli</span>
+          <span>5 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>14%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "14%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>87%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "87%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Gateway](/tr/cli/gateway), [Güncelleme](/tr/install/updating), [Sorun Giderme](/tr/gateway/troubleshooting)</div>
+        <div className="maturity-category-docs">
+
+    [Gateway](/tr/cli/gateway), [Güncelleme](/tr/install/updating), [Sorun Giderme](/tr/gateway/troubleshooting)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">CLI Gözlemlenebilirliği</span>
-          <span>5 özellik / LTS destekli</span>
+          <span>5 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Durum](/tr/cli/status), [Sistem Sağlığı](/tr/cli/health), [Günlükler](/tr/cli/logs), [Tanılama](/tr/gateway/diagnostics)</div>
+        <div className="maturity-category-docs">
+
+    [Durum](/tr/cli/status), [Sağlık](/tr/cli/health), [Günlükler](/tr/cli/logs), [Tanılama](/tr/gateway/diagnostics)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Doktor</span>
-          <span>10 özellik / LTS destekli</span>
+          <span className="maturity-category-title">Doctor</span>
+          <span>10 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Doktor](/tr/cli/doctor), [Doktor](/tr/gateway/doctor), [Gizli Değerler](/tr/gateway/secrets), [Sorun Giderme](/tr/gateway/troubleshooting)</div>
+        <div className="maturity-category-docs">
+
+    [Doctor](/tr/cli/doctor), [Doctor](/tr/gateway/doctor), [Gizli Bilgiler](/tr/gateway/secrets), [Sorun Giderme](/tr/gateway/troubleshooting)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Güncellemeler ve Sürüm Yükseltmeleri</span>
-          <span>5 özellik / LTS destekli</span>
+          <span className="maturity-category-title">Güncellemeler ve Yükseltmeler</span>
+          <span>5 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Güncelleme](/tr/install/updating), [Güncelle](/tr/cli/update), [Sorun Giderme](/tr/gateway/troubleshooting)</div>
+        <div className="maturity-category-docs">
+
+    [Güncelleme](/tr/install/updating), [Güncelleme](/tr/cli/update), [Sorun Giderme](/tr/gateway/troubleshooting)
+
+    </div>
       </div>
     </div>
 
@@ -397,7 +426,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Gateway çalışma zamanı - M4 Kararlı - 13 alan">
     <a id="gateway-runtime" />
 
-    Temel mimari, kimlik doğrulama, eşleştirme, protokol belgeleri, arka plan hizmeti belgeleri ve CLI çalışma kılavuzları kapsamlı ve günceldir.
+    Temel mimari, kimlik doğrulama, eşleştirme, protokol belgeleri, artalan hizmeti belgeleri ve CLI çalışma kılavuzları kapsamlı ve günceldir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 6%</span><span>Kalite Kararlı - 81%</span><span>Tamlık Kararlı - 89%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 12</span></span></div>
 
@@ -411,7 +440,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Protokol](/tr/gateway/protocol), [Dizin](/tr/gateway/security/index)</div>
+        <div className="maturity-category-docs">
+
+    [Protokol](/tr/gateway/protocol), [Dizin](/tr/gateway/security/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -421,7 +454,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>25%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "25%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/gateway/index), [OpenAI HTTP API'si](/tr/gateway/openai-http-api), [OpenResponses HTTP API'si](/tr/gateway/openresponses-http-api), [Araç Çağırma HTTP API'si](/tr/gateway/tools-invoke-http-api), [Kancalar](/tr/automation/hooks), [Dizin](/tr/web/index)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/gateway/index), [OpenAI HTTP API'si](/tr/gateway/openai-http-api), [OpenResponses HTTP API'si](/tr/gateway/openresponses-http-api), [Araçları Çağırma HTTP API'si](/tr/gateway/tools-invoke-http-api), [Kancalar](/tr/automation/hooks), [Dizin](/tr/web/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -431,7 +468,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/gateway/index), [Mimari](/tr/concepts/architecture), [Denetim Arayüzü](/tr/web/control-ui), [Web Sohbeti](/tr/web/webchat), [Tuval](/tr/refactor/canvas)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/gateway/index), [Mimari](/tr/concepts/architecture), [Kontrol Arayüzü](/tr/web/control-ui), [Web Sohbeti](/tr/web/webchat), [Tuval](/tr/refactor/canvas)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -441,7 +482,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>9%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "9%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Protokol](/tr/gateway/protocol), [Dizin](/tr/gateway/index), [Mimari](/tr/concepts/architecture)</div>
+        <div className="maturity-category-docs">
+
+    [Protokol](/tr/gateway/protocol), [Dizin](/tr/gateway/index), [Mimari](/tr/concepts/architecture)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -451,7 +496,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Protokol](/tr/gateway/protocol), [Eşleştirme](/tr/gateway/pairing), [Dizin](/tr/gateway/security/index)</div>
+        <div className="maturity-category-docs">
+
+    [Protokol](/tr/gateway/protocol), [Eşleştirme](/tr/gateway/pairing), [Dizin](/tr/gateway/security/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -461,27 +510,39 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/gateway/index), [Keşif](/tr/gateway/discovery), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/gateway/index), [Keşif](/tr/gateway/discovery), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Node'lar ve Uzaktan Yetenekler</span>
+          <span className="maturity-category-title">Node'lar ve Uzak Yetenekler</span>
           <span>8 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Protokol](/tr/gateway/protocol), [Mimari](/tr/concepts/architecture), [Dizin](/tr/nodes/index)</div>
+        <div className="maturity-category-docs">
+
+    [Protokol](/tr/gateway/protocol), [Mimari](/tr/concepts/architecture), [Dizin](/tr/nodes/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Sistem Sağlığı, Tanılama ve Onarım</span>
+          <span className="maturity-category-title">Sistem Durumu, Tanılama ve Onarım</span>
           <span>7 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/gateway/index), [Tanılama](/tr/gateway/diagnostics), [Doctor](/tr/gateway/doctor)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/gateway/index), [Tanılama](/tr/gateway/diagnostics), [Doctor](/tr/gateway/doctor)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -491,7 +552,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Protokol](/tr/gateway/protocol), [Mimari](/tr/concepts/architecture), [Typebox](/tr/concepts/typebox), [Köprü Protokolü](/tr/gateway/bridge-protocol)</div>
+        <div className="maturity-category-docs">
+
+    [Protokol](/tr/gateway/protocol), [Mimari](/tr/concepts/architecture), [TypeBox](/tr/concepts/typebox), [Köprü Protokolü](/tr/gateway/bridge-protocol)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -501,7 +566,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Protokol](/tr/gateway/protocol), [Dizin](/tr/gateway/security/index)</div>
+        <div className="maturity-category-docs">
+
+    [Protokol](/tr/gateway/protocol), [Dizin](/tr/gateway/security/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -511,7 +580,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>33%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "33%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/gateway/index), [Mimari](/tr/concepts/architecture)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/gateway/index), [Mimari](/tr/concepts/architecture)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -521,7 +594,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/gateway/security/index), [Protokol](/tr/gateway/protocol), [Keşif](/tr/gateway/discovery)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/gateway/security/index), [Protokol](/tr/gateway/protocol), [Keşif](/tr/gateway/discovery)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -531,21 +608,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>13%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "13%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>90%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "90%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Protokol](/tr/gateway/protocol), [Mimari](/tr/concepts/architecture)</div>
+        <div className="maturity-category-docs">
+
+    [Protokol](/tr/gateway/protocol), [Mimari](/tr/concepts/architecture)
+
+    </div>
       </div>
     </div>
 
   </Accordion>
 
-  <Accordion title="Aracı Çalışma Zamanı - M3 Beta - 9 alan">
+  <Accordion title="Agent Çalışma Zamanı - M3 Beta - 9 alan">
     <a id="agent-runtime" />
 
-    Ana döngü, modeller, sağlayıcı yönlendirmesi ve araç akışı birinci sınıf özelliklerdir; ancak sağlayıcı davranışı haftalık olarak değişir ve her sürüm için senaryo kanıtı gerektirir.
+    Ana döngü, modeller, sağlayıcı yönlendirmesi ve araç akışı birinci sınıf özelliklerdir; ancak sağlayıcı davranışları haftalık olarak değişir ve her sürüm için senaryo kanıtı gerektirir.
 
-    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - %33</span><span>Kalite Beta - %78</span><span>Tamlık Beta - %79</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 6</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 33%</span><span>Kalite Beta - 78%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 6</span></span></div>
 
     <div className="maturity-category-list">
-      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsama</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
+      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Agent Turunun Yürütülmesi</span>
@@ -554,17 +635,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>29%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "29%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Agent Döngüsü](/tr/concepts/agent-loop), [Agent](/tr/cli/agent), [Agent Çalışma Zamanları](/tr/concepts/agent-runtimes)</div>
+        <div className="maturity-category-docs">
+
+    [Agent Döngüsü](/tr/concepts/agent-loop), [Agent](/tr/cli/agent), [Agent Çalışma Zamanları](/tr/concepts/agent-runtimes)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Harici Çalışma Zamanları ve Alt Agentlar</span>
+          <span className="maturity-category-title">Harici Çalışma Zamanları ve Alt Agent'lar</span>
           <span>4 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>30%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "30%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Agent Çalışma Zamanları](/tr/concepts/agent-runtimes), [Anthropic](/tr/providers/anthropic), [Google](/tr/providers/google), [Alt Agentlar](/tr/tools/subagents)</div>
+        <div className="maturity-category-docs">
+
+    [Agent Çalışma Zamanları](/tr/concepts/agent-runtimes), [Anthropic](/tr/providers/anthropic), [Google](/tr/providers/google), [Alt Agent'lar](/tr/tools/subagents)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -574,17 +663,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>20%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "20%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Openai](/tr/providers/openai), [Anthropic](/tr/providers/anthropic), [Google](/tr/providers/google), [Modeller](/tr/concepts/models)</div>
+        <div className="maturity-category-docs">
+
+    [OpenAI](/tr/providers/openai), [Anthropic](/tr/providers/anthropic), [Google](/tr/providers/google), [Modeller](/tr/concepts/models)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Yerel ve Kendi Sunucunuzda Barındırılan Sağlayıcılar</span>
+          <span className="maturity-category-title">Yerel ve Kendi Kendine Barındırılan Sağlayıcılar</span>
           <span>5 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Ollama](/tr/providers/ollama), [Modeller](/tr/concepts/models), [Agent](/tr/cli/agent)</div>
+        <div className="maturity-category-docs">
+
+    [Ollama](/tr/providers/ollama), [Modeller](/tr/concepts/models), [Agent](/tr/cli/agent)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -594,7 +691,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>25%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "25%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Modeller](/tr/concepts/models), [Modeller](/tr/cli/models), [Openai](/tr/providers/openai), [Agent Çalışma Zamanları](/tr/concepts/agent-runtimes)</div>
+        <div className="maturity-category-docs">
+
+    [Modeller](/tr/concepts/models), [Modeller](/tr/cli/models), [OpenAI](/tr/providers/openai), [Ajan Çalışma Zamanları](/tr/concepts/agent-runtimes)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -604,7 +705,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>24%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "24%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Modeller](/tr/concepts/models), [Agent](/tr/cli/agent), [Modeller](/tr/cli/models), [Openai](/tr/providers/openai), [Anthropic](/tr/providers/anthropic), [Google](/tr/providers/google), [Alt Agentlar](/tr/tools/subagents)</div>
+        <div className="maturity-category-docs">
+
+    [Modeller](/tr/concepts/models), [Ajan](/tr/cli/agent), [Modeller](/tr/cli/models), [OpenAI](/tr/providers/openai), [Anthropic](/tr/providers/anthropic), [Google](/tr/providers/google), [Alt Ajanlar](/tr/tools/subagents)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -614,7 +719,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>56%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "56%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Akış](/tr/concepts/streaming), [Agent Döngüsü](/tr/concepts/agent-loop)</div>
+        <div className="maturity-category-docs">
+
+    [Akış](/tr/concepts/streaming), [Ajan Döngüsü](/tr/concepts/agent-loop)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -624,7 +733,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>65%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "65%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Agent Döngüsü](/tr/concepts/agent-loop), [Ollama](/tr/providers/ollama)</div>
+        <div className="maturity-category-docs">
+
+    [Ajan Döngüsü](/tr/concepts/agent-loop), [Ollama](/tr/providers/ollama)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -634,7 +747,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>50%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "50%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Korumalı Alan, Araç Politikası ve Yükseltilmiş Yetkiler](/tr/gateway/sandbox-vs-tool-policy-vs-elevated), [Ajan Döngüsü](/tr/concepts/agent-loop), [Alt Ajanlar](/tr/tools/subagents)</div>
+        <div className="maturity-category-docs">
+
+    [Korumalı Alan, Araç Politikası ve Yükseltilmiş Yetkiler Karşılaştırması](/tr/gateway/sandbox-vs-tool-policy-vs-elevated), [Ajan Döngüsü](/tr/concepts/agent-loop), [Alt Ajanlar](/tr/tools/subagents)
+
+    </div>
       </div>
     </div>
 
@@ -645,10 +762,10 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
 
     Güçlü dokümantasyon ve aktif uygulama. Olgunluk; transkript dayanıklılığına, Compaction kalitesine ve istemciler arası eşdeğerliğe bağlıdır.
 
-    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - %30</span><span>Kalite Beta - %77</span><span>Tamlık Beta - %79</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 6</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 30%</span><span>Kalite Beta - 77%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 6</span></span></div>
 
     <div className="maturity-category-list">
-      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
+      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Dokümantasyon</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">CLI Oturum ve Transkript Yönetimi</span>
@@ -657,17 +774,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Oturum](/tr/concepts/session), [Oturum Yönetimi Compaction](/tr/reference/session-management-compaction), [Oturumlar](/tr/cli/sessions)</div>
+        <div className="maturity-category-docs">
+
+    [Oturum](/tr/concepts/session), [Oturum Yönetimi Compaction](/tr/reference/session-management-compaction), [Oturumlar](/tr/cli/sessions)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Belirteç Yönetimi</span>
+          <span className="maturity-category-title">Token Yönetimi</span>
           <span>3 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>20%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "20%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Compaction](/tr/concepts/compaction), [Bağlam](/tr/concepts/context), [Oturum Yönetimi Compaction](/tr/reference/session-management-compaction)</div>
+        <div className="maturity-category-docs">
+
+    [Compaction](/tr/concepts/compaction), [Bağlam](/tr/concepts/context), [Oturum Yönetimi Compaction](/tr/reference/session-management-compaction)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -677,17 +802,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>57%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "57%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Bağlam](/tr/concepts/context), [Bağlam Motoru](/tr/concepts/context-engine)</div>
+        <div className="maturity-category-docs">
+
+    [Bağlam](/tr/concepts/context), [Bağlam Motoru](/tr/concepts/context-engine)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">İstemciler Arası Geçmiş ve Oturum Eşdeğerliği</span>
+          <span className="maturity-category-title">İstemciler Arası Geçmiş ve Oturum Eşliği</span>
           <span>2 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>40%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "40%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Web Sohbeti](/tr/web/webchat), [Android](/tr/platforms/android), [Kanal Yönlendirme](/tr/channels/channel-routing)</div>
+        <div className="maturity-category-docs">
+
+    [Web sohbeti](/tr/web/webchat), [Android](/tr/platforms/android), [Kanal Yönlendirme](/tr/channels/channel-routing)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -697,7 +830,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>40%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "40%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Tanılama](/tr/gateway/diagnostics), [Oturum Yönetimi Compaction](/tr/reference/session-management-compaction), [Bayraklar](/tr/diagnostics/flags)</div>
+        <div className="maturity-category-docs">
+
+    [Tanılama](/tr/gateway/diagnostics), [Oturum Yönetimi Compaction](/tr/reference/session-management-compaction), [Bayraklar](/tr/diagnostics/flags)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -707,7 +844,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>38%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "38%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Bağlam](/tr/concepts/context), [Transkript Temizliği](/tr/reference/transcript-hygiene), [Discord](/tr/channels/discord)</div>
+        <div className="maturity-category-docs">
+
+    [Bağlam](/tr/concepts/context), [Transkript Düzeni](/tr/reference/transcript-hygiene), [Discord](/tr/channels/discord)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -717,7 +858,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>46%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "46%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Bellek Yapılandırması](/tr/reference/memory-config), [Bellek Qmd](/tr/concepts/memory-qmd), [Bellek](/tr/concepts/memory), [Discord](/tr/channels/discord)</div>
+        <div className="maturity-category-docs">
+
+    [Bellek Yapılandırması](/tr/reference/memory-config), [Bellek Qmd](/tr/concepts/memory-qmd), [Bellek](/tr/concepts/memory), [Discord](/tr/channels/discord)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -727,7 +872,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>25%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "25%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Oturum](/tr/concepts/session), [Kanal Yönlendirme](/tr/channels/channel-routing), [Discord](/tr/channels/discord)</div>
+        <div className="maturity-category-docs">
+
+    [Oturum](/tr/concepts/session), [Kanal Yönlendirme](/tr/channels/channel-routing), [Discord](/tr/channels/discord)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -737,7 +886,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Oturum Yönetimi Compaction](/tr/reference/session-management-compaction), [Transkript Hijyeni](/tr/reference/transcript-hygiene)</div>
+        <div className="maturity-category-docs">
+
+    [Oturum Yönetimi Compaction](/tr/reference/session-management-compaction), [Transkript Hijyeni](/tr/reference/transcript-hygiene)
+
+    </div>
       </div>
     </div>
 
@@ -746,9 +899,9 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Kanal çerçevesi - M3 Beta - 8 alan">
     <a id="channel-framework" />
 
-    Birçok kanal, Gateway teslimat ve yönlendirme sözleşmelerini paylaşır; ancak kanal davranışı, üst kaynak API'sine ve hesap politikası kısıtlamalarına göre değişir.
+    Birçok kanal, Gateway teslim ve yönlendirme sözleşmelerini paylaşır; ancak kanal davranışı, üst kaynak API'sine ve hesap politikası kısıtlamalarına göre değişir.
 
-    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - %13</span><span>Kalite Beta - %76</span><span>Tamlık Beta - %79</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 5</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 13%</span><span>Kalite Beta - 76%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 5</span></span></div>
 
     <div className="maturity-category-list">
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
@@ -760,7 +913,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Gruplar](/tr/channels/groups), [Discord](/tr/channels/discord), [Google Chat](/tr/channels/googlechat), [Signal](/tr/channels/signal), [Matrix](/tr/channels/matrix)</div>
+        <div className="maturity-category-docs">
+
+    [Gruplar](/tr/channels/groups), [Discord](/tr/channels/discord), [Google Chat](/tr/channels/googlechat), [Signal](/tr/channels/signal), [Matrix](/tr/channels/matrix)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -770,7 +927,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>14%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "14%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/channels/index), [Eşleştirme](/tr/channels/pairing), [Sorun Giderme](/tr/channels/troubleshooting), [SDK Kanal Pluginleri](/tr/plugins/sdk-channel-plugins)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/channels/index), [Eşleştirme](/tr/channels/pairing), [Sorun Giderme](/tr/channels/troubleshooting), [SDK Kanal Pluginleri](/tr/plugins/sdk-channel-plugins)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -780,17 +941,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>36%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "36%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Gruplar](/tr/channels/groups), [Grup Mesajları](/tr/channels/group-messages), [Ortam Odası Olayları](/tr/channels/ambient-room-events), [Yayın Grupları](/tr/channels/broadcast-groups), [Discord](/tr/channels/discord)</div>
+        <div className="maturity-category-docs">
+
+    [Gruplar](/tr/channels/groups), [Grup Mesajları](/tr/channels/group-messages), [Ortam Odası Etkinlikleri](/tr/channels/ambient-room-events), [Yayın Grupları](/tr/channels/broadcast-groups), [Discord](/tr/channels/discord)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Gelen Erişim ve Kimlik Denetimleri</span>
+          <span className="maturity-category-title">Gelen Erişim ve Kimlik Geçitleri</span>
           <span>5 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Erişim Grupları](/tr/channels/access-groups), [Gruplar](/tr/channels/groups), [Discord](/tr/channels/discord), [LINE](/tr/channels/line)</div>
+        <div className="maturity-category-docs">
+
+    [Erişim Grupları](/tr/channels/access-groups), [Gruplar](/tr/channels/groups), [Discord](/tr/channels/discord), [Line](/tr/channels/line)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -800,7 +969,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[LINE](/tr/channels/line), [Signal](/tr/channels/signal), [Google Chat](/tr/channels/googlechat), [Matrix](/tr/channels/matrix), [Discord](/tr/channels/discord)</div>
+        <div className="maturity-category-docs">
+
+    [Line](/tr/channels/line), [Signal](/tr/channels/signal), [Google Chat](/tr/channels/googlechat), [Matrix](/tr/channels/matrix), [Discord](/tr/channels/discord)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -810,27 +983,39 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>38%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "38%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Gruplar](/tr/channels/groups), [Ortam Odası Olayları](/tr/channels/ambient-room-events), [Discord](/tr/channels/discord), [Matrix](/tr/channels/matrix), [Kanal Yapılandırması](/tr/gateway/config-channels)</div>
+        <div className="maturity-category-docs">
+
+    [Gruplar](/tr/channels/groups), [Ortam Odası Etkinlikleri](/tr/channels/ambient-room-events), [Discord](/tr/channels/discord), [Matrix](/tr/channels/matrix), [Kanal Yapılandırması](/tr/gateway/config-channels)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma Yönlendirmesi ve Teslimi</span>
+          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimi</span>
           <span>10 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Kanal Yönlendirmesi](/tr/channels/channel-routing), [Gruplar](/tr/channels/groups), [Discord](/tr/channels/discord), [Matrix](/tr/channels/matrix), [Sorun Giderme](/tr/channels/troubleshooting), [Yapılandırma Başvurusu](/tr/gateway/configuration-reference)</div>
+        <div className="maturity-category-docs">
+
+    [Kanal Yönlendirme](/tr/channels/channel-routing), [Gruplar](/tr/channels/groups), [Discord](/tr/channels/discord), [Matrix](/tr/channels/matrix), [Sorun Giderme](/tr/channels/troubleshooting), [Yapılandırma Referansı](/tr/gateway/configuration-reference)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Durum, Sistem Sağlığı ve Operatör Denetimleri</span>
+          <span className="maturity-category-title">Durum Sağlığı ve Operatör Denetimleri</span>
           <span>4 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Sistem Durumu](/tr/gateway/health), [Yapılandırma Referansı](/tr/gateway/configuration-reference), [Sorun Giderme](/tr/channels/troubleshooting), [Discord](/tr/channels/discord)</div>
+        <div className="maturity-category-docs">
+
+    [Sağlık](/tr/gateway/health), [Yapılandırma Başvurusu](/tr/gateway/configuration-reference), [Sorun Giderme](/tr/channels/troubleshooting), [Discord](/tr/channels/discord)
+
+    </div>
       </div>
     </div>
 
@@ -839,12 +1024,12 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Gözlemlenebilirlik - M3 Beta - 5 alan">
     <a id="observability" />
 
-    OTel, Prometheus, günlük kaydı ve tanılama belgeleri mevcut. Operatörlerin önce nelere bakması gerektiğini açıklayan, kamuya açık bir olgunluk değerlendirmesi gerekiyor.
+    OTel, Prometheus, günlük kaydı ve tanılama belgeleri mevcut. Herkese açık bir "operatörlerin öncelikle nelere bakması gerektiği" olgunluk değerlendirmesi gerekiyor.
 
-    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 18%</span><span>Kalite Beta - 75%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 3</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 18%</span><span>Kalite Beta - 75%</span><span>Eksiksizlik Beta - 79%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 3</span></span></div>
 
     <div className="maturity-category-list">
-      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
+      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Eksiksizlik</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Sağlık ve Onarım</span>
@@ -853,7 +1038,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>28%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "28%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Sağlık](/tr/gateway/health), [Telegram](/tr/channels/telegram), [Doktor](/tr/cli/doctor), [Doktor](/tr/gateway/doctor), [SDK Alt Yolları](/tr/plugins/sdk-subpaths), [Sağlık](/tr/cli/health), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [Sağlık](/tr/gateway/health), [Telegram](/tr/channels/telegram), [Doctor](/tr/cli/doctor), [Doctor](/tr/gateway/doctor), [SDK Alt Yolları](/tr/plugins/sdk-subpaths), [Sağlık](/tr/cli/health), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -863,7 +1052,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Günlük Kaydı](/tr/logging), [Günlük Kaydı](/tr/gateway/logging), [Günlükler](/tr/cli/logs)</div>
+        <div className="maturity-category-docs">
+
+    [Günlük Kaydı](/tr/logging), [Günlük Kaydı](/tr/gateway/logging), [Günlükler](/tr/cli/logs)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -873,7 +1066,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>30%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "30%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Tanılama](/tr/gateway/diagnostics), [Sağlık](/tr/gateway/health), [Codex Test Düzeneği](/tr/plugins/codex-harness), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [Tanılama](/tr/gateway/diagnostics), [Sistem Durumu](/tr/gateway/health), [Codex Test Düzeneği](/tr/plugins/codex-harness), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -883,17 +1080,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>33%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "33%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Kancalar](/tr/plugins/hooks), [OpenTelemetry](/tr/gateway/opentelemetry), [Günlük Kaydı](/tr/logging), [SDK Alt Yolları](/tr/plugins/sdk-subpaths), [Otel Tanılaması](/tr/plugins/reference/diagnostics-otel), [Prometheus](/tr/gateway/prometheus), [Prometheus Tanılaması](/tr/plugins/reference/diagnostics-prometheus)</div>
+        <div className="maturity-category-docs">
+
+    [Kancalar](/tr/plugins/hooks), [Opentelemetry](/tr/gateway/opentelemetry), [Günlük Kaydı](/tr/logging), [SDK Alt Yolları](/tr/plugins/sdk-subpaths), [Tanılama Otel](/tr/plugins/reference/diagnostics-otel), [Prometheus](/tr/gateway/prometheus), [Tanılama Prometheus](/tr/plugins/reference/diagnostics-prometheus)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Oturum Tanılaması</span>
+          <span className="maturity-category-title">Oturum Tanılama</span>
           <span>4 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenTelemetry](/tr/gateway/opentelemetry), [Prometheus](/tr/gateway/prometheus), [Tanılama](/tr/gateway/diagnostics), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [Opentelemetry](/tr/gateway/opentelemetry), [Prometheus](/tr/gateway/prometheus), [Tanılama](/tr/gateway/diagnostics), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
     </div>
 
@@ -902,7 +1107,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Gateway Web Uygulaması - M3 Beta - 6 alan">
     <a id="gateway-web-app" />
 
-    Web kullanıcı arayüzü; eşleştirme, sohbet, PWA, konuşma, anlık bildirim ve uzak Gateway akışlarıyla belgelenmiştir. Tarayıcılar arası ve mobil PWA puan kartlarından sonra yükseltin.
+    Web kullanıcı arayüzü; eşleştirme, sohbet, PWA, konuşma, anlık bildirim ve uzak Gateway akışlarıyla birlikte belgelenmiştir. Tarayıcılar arası ve mobil PWA değerlendirme kartlarından sonra üst seviyeye yükseltin.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 4%</span><span>Kalite Beta - 74%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -916,7 +1121,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Denetim Arayüzü](/tr/web/control-ui), [Protokol](/tr/gateway/protocol), [Konuşma](/tr/nodes/talk)</div>
+        <div className="maturity-category-docs">
+
+    [Kontrol Arayüzü](/tr/web/control-ui), [Protokol](/tr/gateway/protocol), [Konuşma](/tr/nodes/talk)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -926,7 +1135,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Denetim Arayüzü](/tr/web/control-ui), [Gösterge Paneli](/tr/web/dashboard), [Tailscale](/tr/gateway/tailscale), [Uzaktan Erişim](/tr/gateway/remote)</div>
+        <div className="maturity-category-docs">
+
+    [Kontrol Arayüzü](/tr/web/control-ui), [Gösterge Paneli](/tr/web/dashboard), [Tailscale](/tr/gateway/tailscale), [Uzaktan Erişim](/tr/gateway/remote)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -936,7 +1149,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Denetim Arayüzü](/tr/web/control-ui), [Yapılandırma](/tr/gateway/configuration)</div>
+        <div className="maturity-category-docs">
+
+    [Kontrol Arayüzü](/tr/web/control-ui), [Yapılandırma](/tr/gateway/configuration)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -946,7 +1163,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>8%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "8%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Denetim Arayüzü](/tr/web/control-ui), [Dizin](/tr/web/index), [Gösterge Paneli](/tr/web/dashboard), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [Kontrol Arayüzü](/tr/web/control-ui), [Dizin](/tr/web/index), [Gösterge Paneli](/tr/web/dashboard), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -956,7 +1177,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>10%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "10%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Denetim Arayüzü](/tr/web/control-ui), [WebChat](/tr/web/webchat), [Başlarken](/tr/start/getting-started), [Kanal Yönlendirme](/tr/channels/channel-routing), [Güvenli Dosya İşlemleri](/tr/gateway/security/secure-file-operations)</div>
+        <div className="maturity-category-docs">
+
+    [Kontrol Arayüzü](/tr/web/control-ui), [Webchat](/tr/web/webchat), [Başlarken](/tr/start/getting-started), [Kanal Yönlendirme](/tr/channels/channel-routing), [Güvenli Dosya İşlemleri](/tr/gateway/security/secure-file-operations)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -966,7 +1191,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>8%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "8%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Denetim Arayüzü](/tr/web/control-ui), [Sistem Durumu](/tr/gateway/health), [Protokol](/tr/gateway/protocol), [Gösterge Paneli](/tr/web/dashboard)</div>
+        <div className="maturity-category-docs">
+
+    [Kontrol Arayüzü](/tr/web/control-ui), [Durum](/tr/gateway/health), [Protokol](/tr/gateway/protocol), [Gösterge Paneli](/tr/web/dashboard)
+
+    </div>
       </div>
     </div>
 
@@ -989,57 +1218,81 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Plugin Oluşturma](/tr/plugins/building-plugins), [SDK'ya Genel Bakış](/tr/plugins/sdk-overview), [SDK Giriş Noktaları](/tr/plugins/sdk-entrypoints), [SDK Alt Yolları](/tr/plugins/sdk-subpaths), [Manifest](/tr/plugins/manifest), [Başvuru](/tr/plugins/reference)</div>
+        <div className="maturity-category-docs">
+
+    [Plugin Oluşturma](/tr/plugins/building-plugins), [SDK'ya Genel Bakış](/tr/plugins/sdk-overview), [SDK Giriş Noktaları](/tr/plugins/sdk-entrypoints), [SDK Alt Yolları](/tr/plugins/sdk-subpaths), [Manifest](/tr/plugins/manifest), [Başvuru](/tr/plugins/reference)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Birlikte sunulan plugin'ler</span>
+          <span className="maturity-category-title">Paketle birlikte sunulan pluginler</span>
           <span>5 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Plugin Envanteri](/tr/plugins/plugin-inventory), [Plugin'ler](/tr/cli/plugins), [Mimari İç Yapısı](/tr/plugins/architecture-internals)</div>
+        <div className="maturity-category-docs">
+
+    [Plugin Envanteri](/tr/plugins/plugin-inventory), [Pluginler](/tr/cli/plugins), [Mimari İç Yapısı](/tr/plugins/architecture-internals)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Canvas plugin'i</span>
+          <span className="maturity-category-title">Canvas plugini</span>
           <span>6 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Canvas](/tr/plugins/reference/canvas), [Canvas](/tr/refactor/canvas), [Yapılandırma Başvurusu](/tr/gateway/configuration-reference)</div>
+        <div className="maturity-category-docs">
+
+    [Canvas](/tr/plugins/reference/canvas), [Canvas](/tr/refactor/canvas), [Yapılandırma Başvurusu](/tr/gateway/configuration-reference)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Plugin'leri yükleme ve çalıştırma</span>
+          <span className="maturity-category-title">Pluginleri yükleme ve çalıştırma</span>
           <span>6 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>35%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "35%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Mimari](/tr/plugins/architecture), [Mimari İç Yapısı](/tr/plugins/architecture-internals), [Plugin'ler](/tr/cli/plugins)</div>
+        <div className="maturity-category-docs">
+
+    [Mimari](/tr/plugins/architecture), [Mimari İç Yapısı](/tr/plugins/architecture-internals), [Pluginler](/tr/cli/plugins)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Kanal plugin'leri</span>
+          <span className="maturity-category-title">Kanal pluginleri</span>
           <span>5 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[SDK Kanal Plugin'leri](/tr/plugins/sdk-channel-plugins), [SDK Kanal Gelen İletileri](/tr/plugins/sdk-channel-inbound), [SDK Kanal Giden İletileri](/tr/plugins/sdk-channel-outbound)</div>
+        <div className="maturity-category-docs">
+
+    [SDK Kanal Pluginleri](/tr/plugins/sdk-channel-plugins), [SDK Kanal Gelen İletişimi](/tr/plugins/sdk-channel-inbound), [SDK Kanal Giden İletişimi](/tr/plugins/sdk-channel-outbound)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Sağlayıcı ve araç plugin'leri</span>
+          <span className="maturity-category-title">Sağlayıcı ve araç pluginleri</span>
           <span>6 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>43%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "43%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[SDK Sağlayıcı Plugin'leri](/tr/plugins/sdk-provider-plugins), [Araç Plugin'leri](/tr/plugins/tool-plugins), [Yetenek Ekleme](/tr/plugins/adding-capabilities)</div>
+        <div className="maturity-category-docs">
+
+    [SDK Sağlayıcı Pluginleri](/tr/plugins/sdk-provider-plugins), [Araç Pluginleri](/tr/plugins/tool-plugins), [Yetenek Ekleme](/tr/plugins/adding-capabilities)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1049,17 +1302,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Plugin İzin İstekleri](/tr/plugins/plugin-permission-requests), [Çalıştırma Onayları](/tr/tools/exec-approvals), [SDK Kanal Plugin'leri](/tr/plugins/sdk-channel-plugins)</div>
+        <div className="maturity-category-docs">
+
+    [Plugin İzin İstekleri](/tr/plugins/plugin-permission-requests), [Çalıştırma Onayları](/tr/tools/exec-approvals), [SDK Kanal Pluginleri](/tr/plugins/sdk-channel-plugins)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Plugin yayımlama</span>
+          <span className="maturity-category-title">Pluginleri yayımlama</span>
           <span>6 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Pluginler](/tr/cli/plugins), [Uyumluluk](/tr/plugins/compatibility), [Yayımlama](/tr/clawhub/publishing)</div>
+        <div className="maturity-category-docs">
+
+    [Pluginler](/tr/cli/plugins), [Uyumluluk](/tr/plugins/compatibility), [Yayımlama](/tr/clawhub/publishing)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1069,7 +1330,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>27%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "27%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[SDK Testleri](/tr/plugins/sdk-testing), [SDK Kurulumu](/tr/plugins/sdk-setup), [Codex Test Düzeneği](/tr/plugins/codex-harness)</div>
+        <div className="maturity-category-docs">
+
+    [SDK Testleri](/tr/plugins/sdk-testing), [SDK Kurulumu](/tr/plugins/sdk-setup), [Codex Test Düzeneği](/tr/plugins/codex-harness)
+
+    </div>
       </div>
     </div>
 
@@ -1078,7 +1343,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Güvenlik, kimlik doğrulama, eşleştirme ve gizli bilgiler - M3 Beta - 6 alan">
     <a id="security-auth-pairing-and-secrets" />
 
-    İyi belgeler ve sağlamlaştırma yüzeyleri mevcut. Düzenli yükseltme ve güvenlik senaryosu çalıştırmaları kurulum gerilemesi olmadığını kanıtladıktan sonra üst seviyeye yükseltin.
+    İyi belgeler ve sağlamlaştırma yüzeyleri mevcut. Düzenli yükseltme ve güvenlik senaryosu çalıştırmaları kurulum gerilemesi olmadığını kanıtladıktan sonra üst seviyeye taşıyın.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 16%</span><span>Kalite Beta - 72%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 5</span></span></div>
 
@@ -1086,13 +1351,17 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Onay Politikası ve Araç Güvenlik Önlemleri</span>
+          <span className="maturity-category-title">Onay Politikası ve Araç Korumaları</span>
           <span>2 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>50%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "50%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Çalıştırma Onayları](/tr/tools/exec-approvals), [Onaylar](/tr/cli/approvals), [Plugin İzin İstekleri](/tr/plugins/plugin-permission-requests), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)</div>
+        <div className="maturity-category-docs">
+
+    [Çalıştırma Onayları](/tr/tools/exec-approvals), [Onaylar](/tr/cli/approvals), [Plugin İzin İstekleri](/tr/plugins/plugin-permission-requests), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1102,7 +1371,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/gateway/security/index), [Erişime Açma Çalışma Kılavuzu](/tr/gateway/security/exposure-runbook), [Güvenilir Proxy Kimlik Doğrulaması](/tr/gateway/trusted-proxy-auth), [Tailscale](/tr/gateway/tailscale), [Uzaktan Erişim](/tr/gateway/remote), [Yapılandırma Başvurusu](/tr/gateway/configuration-reference), [Gateway](/tr/cli/gateway), [Doctor](/tr/cli/doctor), [Denetim Arayüzü](/tr/web/control-ui), [Tarayıcı Denetimi](/tr/tools/browser-control), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/gateway/security/index), [Erişime Açma İşletim Kılavuzu](/tr/gateway/security/exposure-runbook), [Güvenilir Proxy Kimlik Doğrulaması](/tr/gateway/trusted-proxy-auth), [Tailscale](/tr/gateway/tailscale), [Uzaktan Erişim](/tr/gateway/remote), [Yapılandırma Başvurusu](/tr/gateway/configuration-reference), [Gateway](/tr/cli/gateway), [Doctor](/tr/cli/doctor), [Denetim Arayüzü](/tr/web/control-ui), [Tarayıcı Denetimi](/tr/tools/browser-control), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1112,7 +1385,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Eşleştirme](/tr/channels/pairing), [Telegram](/tr/channels/telegram), [Erişim Grupları](/tr/channels/access-groups), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)</div>
+        <div className="maturity-category-docs">
+
+    [Eşleştirme](/tr/channels/pairing), [Telegram](/tr/channels/telegram), [Erişim Grupları](/tr/channels/access-groups), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1122,7 +1399,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Protokol](/tr/gateway/protocol), [Cihazlar](/tr/cli/devices), [Eşleştirme](/tr/channels/pairing), [Eşleştirme](/tr/gateway/pairing), [Operatör Kapsamları](/tr/gateway/operator-scopes), [Denetim Arayüzü](/tr/web/control-ui), [Web Sohbeti](/tr/web/webchat), [Onaylar](/tr/cli/approvals)</div>
+        <div className="maturity-category-docs">
+
+    [Protokol](/tr/gateway/protocol), [Cihazlar](/tr/cli/devices), [Eşleştirme](/tr/channels/pairing), [Eşleştirme](/tr/gateway/pairing), [Operatör Kapsamları](/tr/gateway/operator-scopes), [Denetim Arayüzü](/tr/web/control-ui), [Web Sohbeti](/tr/web/webchat), [Onaylar](/tr/cli/approvals)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1132,26 +1413,34 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Bildirim Dosyası](/tr/plugins/manifest), [Plugin İzin İstekleri](/tr/plugins/plugin-permission-requests), [Plugin'leri Yönetme](/tr/plugins/manage-plugins), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)</div>
+        <div className="maturity-category-docs">
+
+    [Manifest](/tr/plugins/manifest), [Plugin İzin İstekleri](/tr/plugins/plugin-permission-requests), [Pluginleri Yönetme](/tr/plugins/manage-plugins), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Kimlik Bilgileri ve Gizli Bilgi Güvenliği</span>
+          <span className="maturity-category-title">Kimlik Bilgisi ve Gizli Bilgi Hijyeni</span>
           <span>5 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>46%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "46%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Kimlik Doğrulama](/tr/gateway/authentication), [Modeller](/tr/cli/models), [OpenAI](/tr/providers/openai), [OAuth](/tr/concepts/oauth), [Gizli Bilgiler](/tr/gateway/secrets), [Gizli Bilgiler](/tr/cli/secrets), [Secretref Kimlik Bilgisi Yüzeyi](/tr/reference/secretref-credential-surface), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)</div>
+        <div className="maturity-category-docs">
+
+    [Kimlik Doğrulama](/tr/gateway/authentication), [Modeller](/tr/cli/models), [OpenAI](/tr/providers/openai), [OAuth](/tr/concepts/oauth), [Gizli Bilgiler](/tr/gateway/secrets), [Gizli Bilgiler](/tr/cli/secrets), [Secretref Kimlik Bilgisi Yüzeyi](/tr/reference/secretref-credential-surface), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)
+
+    </div>
       </div>
     </div>
 
   </Accordion>
 
-  <Accordion title="Otomasyon: Cron, kancalar, görevler, yoklama - M3 Beta - 6 alan">
+  <Accordion title="Otomasyon: cron, kancalar, görevler, yoklama - M3 Beta - 6 alan">
     <a id="automation-cron-hooks-tasks-polling" />
 
-    Belgelenmiş ve kullanılabilir durumdadır; ancak senaryo kanıtları gözetimsiz teslimatı, yeniden denemeleri ve hataların görünürlüğünü kapsamalıdır.
+    Belgelenmiş ve kullanılabilir durumdadır, ancak senaryo kanıtı gözetimsiz teslimatı, yeniden denemeleri ve hata görünürlüğünü kapsamalıdır.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 2%</span><span>Kalite Beta - 72%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -1165,7 +1454,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Cron İşleri](/tr/automation/cron-jobs), [Cron](/tr/cli/cron), [Protokol](/tr/gateway/protocol), [Görevler](/tr/automation/tasks), [Discord](/tr/channels/discord)</div>
+        <div className="maturity-category-docs">
+
+    [Cron İşleri](/tr/automation/cron-jobs), [Cron](/tr/cli/cron), [Protokol](/tr/gateway/protocol), [Görevler](/tr/automation/tasks), [Discord](/tr/channels/discord)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1175,7 +1468,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Telegram](/tr/channels/telegram), [Zalo](/tr/channels/zalo), [Sorun Giderme](/tr/channels/troubleshooting), [BlueBubbles'dan iMessage](/tr/channels/imessage-from-bluebubbles), [Gmail Pub/Sub Entegrasyonu](/tr/automation/cron-jobs#gmail-pubsub-integration), [Gmail Pub/Sub](/tr/automation/cron-jobs), [Webhook'lar](/tr/cli/webhooks), [Webhook'lar](/tr/automation/cron-jobs#webhooks), [Webhook](/tr/automation/cron-jobs)</div>
+        <div className="maturity-category-docs">
+
+    [Telegram](/tr/channels/telegram), [Zalo](/tr/channels/zalo), [Sorun Giderme](/tr/channels/troubleshooting), [BlueBubbles'dan iMessage](/tr/channels/imessage-from-bluebubbles), [Gmail Pub/Sub Entegrasyonu](/tr/automation/cron-jobs#gmail-pubsub-integration), [Gmail Pub/Sub](/tr/automation/cron-jobs), [Webhook'lar](/tr/cli/webhooks), [Webhook'lar](/tr/automation/cron-jobs#webhooks), [Webhook](/tr/automation/cron-jobs)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1185,7 +1482,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Kancalar](/tr/automation/hooks), [Kancalar](/tr/cli/hooks), [Kancalar](/tr/plugins/hooks), [Plugin İzin İstekleri](/tr/plugins/plugin-permission-requests), [SDK Alt Yolları](/tr/plugins/sdk-subpaths)</div>
+        <div className="maturity-category-docs">
+
+    [Kancalar](/tr/automation/hooks), [Kancalar](/tr/cli/hooks), [Kancalar](/tr/plugins/hooks), [Plugin İzin İstekleri](/tr/plugins/plugin-permission-requests), [SDK Alt Yolları](/tr/plugins/sdk-subpaths)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1195,7 +1496,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Görevler](/tr/automation/tasks), [Dizin](/tr/automation/index), [Görevler](/tr/cli/tasks), [TaskFlow](/tr/automation/taskflow), [SDK Çalışma Zamanı](/tr/plugins/sdk-runtime)</div>
+        <div className="maturity-category-docs">
+
+    [Görevler](/tr/automation/tasks), [Dizin](/tr/automation/index), [Görevler](/tr/cli/tasks), [TaskFlow](/tr/automation/taskflow), [SDK Çalışma Zamanı](/tr/plugins/sdk-runtime)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1205,7 +1510,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>14%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "14%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/automation/index), [Heartbeat](/tr/gateway/heartbeat), [Taahhütler](/tr/concepts/commitments)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/automation/index), [Heartbeat](/tr/gateway/heartbeat), [Taahhütler](/tr/concepts/commitments)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1215,7 +1524,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Yoklama](/tr/cli/message), [Mesaj](/tr/cli/message), [Telegram](/tr/channels/telegram), [Microsoft Teams](/tr/channels/msteams), [Arka Plan İşlemi](/tr/gateway/background-process)</div>
+        <div className="maturity-category-docs">
+
+    [Yoklama](/tr/cli/message), [Mesaj](/tr/cli/message), [Telegram](/tr/channels/telegram), [Microsoft Teams](/tr/channels/msteams), [Arka Plan İşlemi](/tr/gateway/background-process)
+
+    </div>
       </div>
     </div>
 
@@ -1224,7 +1537,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Medya anlama ve medya oluşturma - M2 Alfa - 6 alan">
     <a id="media-understanding-and-media-generation" />
 
-    Geniş bir yetenek yüzeyi mevcut ancak sağlayıcılar arasındaki farklılıklar, dosya sınırları ve Node/uygulama uyumluluğu bunun henüz kararlı olmadığı anlamına geliyor.
+    Geniş bir yetenek yüzeyi mevcuttur; ancak sağlayıcı farklılıkları, dosya sınırları ve Node/uygulama eşliği nedeniyle henüz kararlı değildir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 2%</span><span>Kalite Alfa - 64%</span><span>Tamlık Alfa - 68%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -1238,7 +1551,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Medyaya Genel Bakış](/tr/tools/media-overview), [Medya Anlama](/tr/nodes/media-understanding), [Güvenli Dosya İşlemleri](/tr/gateway/security/secure-file-operations), [PDF](/tr/tools/pdf), [Görsel Oluşturma](/tr/tools/image-generation), [QR](/tr/cli/qr), [LINE](/tr/channels/line), [WhatsApp](/tr/channels/whatsapp)</div>
+        <div className="maturity-category-docs">
+
+    [Medyaya Genel Bakış](/tr/tools/media-overview), [Medya Anlama](/tr/nodes/media-understanding), [Güvenli Dosya İşlemleri](/tr/gateway/security/secure-file-operations), [PDF](/tr/tools/pdf), [Görsel Oluşturma](/tr/tools/image-generation), [QR](/tr/cli/qr), [LINE](/tr/channels/line), [WhatsApp](/tr/channels/whatsapp)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1248,7 +1565,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Görseller](/tr/nodes/images), [Medyaya Genel Bakış](/tr/tools/media-overview), [Discord](/tr/channels/discord)</div>
+        <div className="maturity-category-docs">
+
+    [Görseller](/tr/nodes/images), [Medyaya Genel Bakış](/tr/tools/media-overview), [Discord](/tr/channels/discord)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1258,17 +1579,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Medyaya Genel Bakış](/tr/tools/media-overview), [Görsel Oluşturma](/tr/tools/image-generation), [Bildirim Dosyası](/tr/plugins/manifest), [Codex Çalıştırma Sistemi](/tr/plugins/codex-harness)</div>
+        <div className="maturity-category-docs">
+
+    [Medyaya Genel Bakış](/tr/tools/media-overview), [Görsel Oluşturma](/tr/tools/image-generation), [Manifest](/tr/plugins/manifest), [Codex Çalıştırma Sistemi](/tr/plugins/codex-harness)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Metinden Sese İletim</span>
+          <span className="maturity-category-title">Metinden Konuşmaya İletim</span>
           <span>2 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Metinden Sese](/tr/tools/tts), [Medyaya Genel Bakış](/tr/tools/media-overview), [Discord](/tr/channels/discord)</div>
+        <div className="maturity-category-docs">
+
+    [TTS](/tr/tools/tts), [Medyaya Genel Bakış](/tr/tools/media-overview), [Discord](/tr/channels/discord)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1278,7 +1607,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>7%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "7%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>69%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "69%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>69%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "69%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Ses](/tr/nodes/audio), [Medya Anlama](/tr/nodes/media-understanding), [Medyaya Genel Bakış](/tr/tools/media-overview), [WhatsApp](/tr/channels/whatsapp), [Görseller](/tr/nodes/images), [Çıkarım](/tr/cli/infer), [PDF](/tr/tools/pdf)</div>
+        <div className="maturity-category-docs">
+
+    [Ses](/tr/nodes/audio), [Medya Anlama](/tr/nodes/media-understanding), [Medyaya Genel Bakış](/tr/tools/media-overview), [WhatsApp](/tr/channels/whatsapp), [Görseller](/tr/nodes/images), [Çıkarım](/tr/cli/infer), [PDF](/tr/tools/pdf)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1288,7 +1621,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>5%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "5%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>69%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "69%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>69%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "69%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Görsel Oluşturma](/tr/tools/image-generation), [Medyaya Genel Bakış](/tr/tools/media-overview), [Skills](/tr/tools/skills), [Müzik Oluşturma](/tr/tools/music-generation), [Video Oluşturma](/tr/tools/video-generation)</div>
+        <div className="maturity-category-docs">
+
+    [Görsel Oluşturma](/tr/tools/image-generation), [Medyaya Genel Bakış](/tr/tools/media-overview), [Skills](/tr/tools/skills), [Müzik Oluşturma](/tr/tools/music-generation), [Video Oluşturma](/tr/tools/video-generation)
+
+    </div>
       </div>
     </div>
 
@@ -1297,7 +1634,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Sesli ve gerçek zamanlı konuşma - M2 Alfa - 6 alan">
     <a id="voice-and-realtime-talk" />
 
-    Control UI, uygulamalar ve sağlayıcılar genelinde birden fazla uygulama mevcuttur. Beta aşamasından önce gecikme, hata modları ve kurulum puan kartları gereklidir.
+    Control UI, uygulamalar ve sağlayıcılar genelinde birden fazla uygulama mevcuttur. Beta öncesinde gecikme, hata modları ve kurulum puan kartları gereklidir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 61%</span><span>Tamlık Alfa - 68%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -1311,7 +1648,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenAI](/tr/providers/openai), [Google](/tr/providers/google), [SDK Sağlayıcı Pluginleri](/tr/plugins/sdk-provider-plugins), [Konuşma](/tr/nodes/talk), [Denetim Arayüzü](/tr/web/control-ui)</div>
+        <div className="maturity-category-docs">
+
+    [OpenAI](/tr/providers/openai), [Google](/tr/providers/google), [SDK Sağlayıcı Pluginleri](/tr/plugins/sdk-provider-plugins), [Konuşma](/tr/nodes/talk), [Control UI](/tr/web/control-ui)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1321,17 +1662,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Konuşma](/tr/nodes/talk), [Denetim Arayüzü](/tr/web/control-ui)</div>
+        <div className="maturity-category-docs">
+
+    [Konuşma](/tr/nodes/talk), [Denetim Arayüzü](/tr/web/control-ui)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma ve Deşifre</span>
+          <span className="maturity-category-title">Konuşma ve Transkripsiyon</span>
           <span>5 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Konuşma](/tr/nodes/talk), [OpenAI](/tr/providers/openai), [Google](/tr/providers/google)</div>
+        <div className="maturity-category-docs">
+
+    [Konuşma](/tr/nodes/talk), [OpenAI](/tr/providers/openai), [Google](/tr/providers/google)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1341,7 +1690,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Konuşma](/tr/nodes/talk), [Sesle Uyandırma](/tr/platforms/mac/voicewake)</div>
+        <div className="maturity-category-docs">
+
+    [Konuşma](/tr/nodes/talk), [Sesle Uyandırma](/tr/platforms/mac/voicewake)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1351,7 +1704,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Sesle Uyandırma](/tr/nodes/voicewake), [Sesle Uyandırma](/tr/platforms/mac/voicewake), [Ses Katmanı](/tr/platforms/mac/voice-overlay)</div>
+        <div className="maturity-category-docs">
+
+    [Sesle Uyandırma](/tr/nodes/voicewake), [Sesle Uyandırma](/tr/platforms/mac/voicewake), [Ses Katmanı](/tr/platforms/mac/voice-overlay)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1361,7 +1718,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Denetim Arayüzü](/tr/web/control-ui), [Ses Katmanı](/tr/platforms/mac/voice-overlay), [Konuşma](/tr/nodes/talk)</div>
+        <div className="maturity-category-docs">
+
+    [Denetim Arayüzü](/tr/web/control-ui), [Ses Katmanı](/tr/platforms/mac/voice-overlay), [Konuşma](/tr/nodes/talk)
+
+    </div>
       </div>
     </div>
 
@@ -1370,7 +1731,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="TUI - M2 Alfa - 5 alan">
     <a id="tui" />
 
-    Belgelerde ve kaynak kodda mevcut, ancak birincil kullanıcı iş akışı olarak daha az görünür. Açık bir senaryo tanımı gerekiyor.
+    Belgelerde ve kaynakta mevcut, ancak birincil kullanıcı iş akışı olarak daha az görünür. Açık bir senaryo tanımı gerekiyor.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 59%</span><span>Tamlık Alfa - 66%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -1384,7 +1745,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[TUI](/tr/cli/tui), [TUI](/tr/web/tui), [Dizin](/tr/cli/index)</div>
+        <div className="maturity-category-docs">
+
+    [TUI](/tr/cli/tui), [TUI](/tr/web/tui), [Dizin](/tr/cli/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1394,7 +1759,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[TUI](/tr/web/tui)</div>
+        <div className="maturity-category-docs">
+
+    [TUI](/tr/web/tui)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1404,7 +1773,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[TUI](/tr/web/tui), [Oturumlar](/tr/cli/sessions)</div>
+        <div className="maturity-category-docs">
+
+    [TUI](/tr/web/tui), [Oturumlar](/tr/cli/sessions)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1414,7 +1787,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[TUI](/tr/web/tui), [TUI](/tr/cli/tui)</div>
+        <div className="maturity-category-docs">
+
+    [TUI](/tr/web/tui), [TUI](/tr/cli/tui)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1424,7 +1801,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[TUI](/tr/web/tui), [QR](/tr/cli/qr), [Günlükler](/tr/cli/logs), [Tamamlama](/tr/cli/completion)</div>
+        <div className="maturity-category-docs">
+
+    [TUI](/tr/web/tui), [QR](/tr/cli/qr), [Günlükler](/tr/cli/logs), [Tamamlama](/tr/cli/completion)
+
+    </div>
       </div>
     </div>
 
@@ -1438,7 +1819,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 58%</span><span>Tamlık Alfa - 62%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
-      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsama</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
+      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Yayımlama</span>
@@ -1447,7 +1828,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>54%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "54%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>55%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "55%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Yayımlama](/tr/clawhub/publishing), [Skills Oluşturma](/tr/tools/creating-skills), [Topluluk](/tr/plugins/community)</div>
+        <div className="maturity-category-docs">
+
+    [Yayımlama](/tr/clawhub/publishing), [Skills Oluşturma](/tr/tools/creating-skills), [Topluluk](/tr/plugins/community)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1457,7 +1842,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Plugin](/tr/tools/plugin), [Pluginler](/tr/cli/plugins), [Skills](/tr/cli/skills), [Skills](/tr/tools/skills), [Topluluk](/tr/plugins/community)</div>
+        <div className="maturity-category-docs">
+
+    [Plugin](/tr/tools/plugin), [Pluginler](/tr/cli/plugins), [Skills](/tr/cli/skills), [Skills](/tr/tools/skills), [Topluluk](/tr/plugins/community)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1467,7 +1856,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>55%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "55%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>56%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "56%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Plugin](/tr/tools/plugin), [Pluginler](/tr/cli/plugins), [Uyumluluk](/tr/plugins/compatibility), [Plugin Envanteri](/tr/plugins/plugin-inventory), [Yayımlama](/tr/clawhub/publishing), [Skills](/tr/tools/skills), [Skills Yapılandırması](/tr/tools/skills-config)</div>
+        <div className="maturity-category-docs">
+
+    [Plugin](/tr/tools/plugin), [Pluginler](/tr/cli/plugins), [Uyumluluk](/tr/plugins/compatibility), [Plugin Envanteri](/tr/plugins/plugin-inventory), [Yayımlama](/tr/clawhub/publishing), [Skills](/tr/tools/skills), [Skills Yapılandırması](/tr/tools/skills-config)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1477,18 +1870,22 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Plugin](/tr/tools/plugin), [Pluginler](/tr/cli/plugins), [Skills](/tr/cli/skills), [Skills](/tr/tools/skills), [Protokol](/tr/gateway/protocol), [Paketler](/tr/plugins/bundles), [Bağımlılık Çözümleme](/tr/plugins/dependency-resolution)</div>
+        <div className="maturity-category-docs">
+
+    [Plugin](/tr/tools/plugin), [Pluginler](/tr/cli/plugins), [Skills](/tr/cli/skills), [Skills](/tr/tools/skills), [Protokol](/tr/gateway/protocol), [Paketler](/tr/plugins/bundles), [Bağımlılık Çözümleme](/tr/plugins/dependency-resolution)
+
+    </div>
       </div>
     </div>
 
   </Accordion>
 
-  <Accordion title="OpenClaw App SDK - M2 Alfa - 6 alan">
+  <Accordion title="OpenClaw Uygulama SDK'sı - M2 Alfa - 6 alan">
     <a id="openclaw-app-sdk" />
 
-    OpenClaw App SDK, Gateway çalışma zamanından ve Plugin SDK'dan ayrı, bağımsız bir harici uygulama sözleşmesidir. Mevcut puanlama; genel kullanıma açık paketleme, otomatik keşif, onaylar, yardımcılar ve uyumluluk konularında eksikleri bulunan gerçek bir `@openclaw/sdk` yolunu gösteriyor.
+    OpenClaw Uygulama SDK'sı, Gateway çalışma zamanından ve Plugin SDK'sından ayrı, harici uygulamalara yönelik farklı bir sözleşmedir. Mevcut puanlama; herkese açık paketleme, otomatik keşif, onaylar, yardımcılar ve uyumluluk konularında boşlukları bulunan gerçek bir `@openclaw/sdk` yolu olduğunu gösteriyor.
 
-    <div className="maturity-surface-rollup"><span>Kapsama Deneysel - 3%</span><span>Kalite Alfa - 54%</span><span>Tamlık Alfa - 53%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 3%</span><span>Kalite Alfa - 54%</span><span>Tamlık Alfa - 53%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
@@ -1500,7 +1897,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>51%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "51%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>50%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "50%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenClaw SDK](/tr/gateway/external-apps), [OpenClaw SDK API Tasarımı](/tr/gateway/external-apps)</div>
+        <div className="maturity-category-docs">
+
+    [OpenClaw SDK](/tr/gateway/external-apps), [OpenClaw SDK API Tasarımı](/tr/gateway/external-apps)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1510,7 +1911,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>53%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "53%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>54%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "54%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenClaw SDK](/tr/gateway/external-apps), [OpenClaw SDK API Tasarımı](/tr/gateway/external-apps), [Protokol](/tr/gateway/protocol), [Dizin](/tr/gateway/security/index)</div>
+        <div className="maturity-category-docs">
+
+    [OpenClaw SDK](/tr/gateway/external-apps), [OpenClaw SDK API Tasarımı](/tr/gateway/external-apps), [Protokol](/tr/gateway/protocol), [Dizin](/tr/gateway/security/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1520,7 +1925,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>52%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "52%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>52%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "52%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenClaw SDK](/tr/gateway/external-apps), [OpenClaw SDK API Tasarımı](/tr/gateway/external-apps), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [OpenClaw SDK](/tr/gateway/external-apps), [OpenClaw SDK API Tasarımı](/tr/gateway/external-apps), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1530,7 +1939,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>52%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "52%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>52%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "52%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenClaw SDK](/tr/gateway/external-apps), [OpenClaw SDK API Tasarımı](/tr/gateway/external-apps), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [OpenClaw SDK](/tr/gateway/external-apps), [OpenClaw SDK API Tasarımı](/tr/gateway/external-apps), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1540,7 +1953,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>17%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "17%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>62%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "62%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>53%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "53%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenClaw SDK](/tr/gateway/external-apps), [OpenClaw SDK API Tasarımı](/tr/gateway/external-apps)</div>
+        <div className="maturity-category-docs">
+
+    [OpenClaw SDK](/tr/gateway/external-apps), [OpenClaw SDK API Tasarımı](/tr/gateway/external-apps)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1550,7 +1967,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>54%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "54%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>55%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "55%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenClaw SDK API Tasarımı](/tr/gateway/external-apps), [TypeBox](/tr/concepts/typebox), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [OpenClaw SDK API Tasarımı](/tr/gateway/external-apps), [Typebox](/tr/concepts/typebox), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
     </div>
 
@@ -1564,7 +1985,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Linux Gateway ana makinesi - M4 Kararlı - 5 alan">
     <a id="linux-gateway-host" />
 
-    Node çalışma zamanı önerilir, systemd kullanıcı hizmeti belgelenmiştir ve VPS/konteyner rehberliği kapsamlıdır.
+    Node çalışma zamanı önerilir, systemd kullanıcı hizmeti belgelenmiştir ve VPS/kapsayıcı rehberliği kapsamlıdır.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Beta - 75%</span><span>Tamlık Kararlı - 89%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 4</span></span></div>
 
@@ -1578,7 +1999,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/install/index), [Güncelleme](/tr/install/updating), [Linux](/tr/platforms/linux), [Dizin](/tr/platforms/index)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/install/index), [Güncelleme](/tr/install/updating), [Linux](/tr/platforms/linux), [Dizin](/tr/platforms/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1588,7 +2013,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway), [Linux](/tr/platforms/linux), [VPS](/tr/vps)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway), [Linux](/tr/platforms/linux), [VPS](/tr/vps)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1598,7 +2027,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Uzaktan Erişim](/tr/gateway/remote), [Tailscale](/tr/gateway/tailscale), [Dışa Açma İşletim Kılavuzu](/tr/gateway/security/exposure-runbook), [Kimlik Doğrulama](/tr/gateway/authentication), [Gizli Bilgiler](/tr/gateway/secrets)</div>
+        <div className="maturity-category-docs">
+
+    [Uzaktan Erişim](/tr/gateway/remote), [Tailscale](/tr/gateway/tailscale), [Dışa Açma Operasyon Kılavuzu](/tr/gateway/security/exposure-runbook), [Kimlik Doğrulama](/tr/gateway/authentication), [Gizli Bilgiler](/tr/gateway/secrets)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1608,7 +2041,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Durum](/tr/cli/status), [Günlükler](/tr/cli/logs), [Doctor](/tr/cli/doctor), [Tanılama](/tr/gateway/diagnostics), [Dizin](/tr/gateway/index)</div>
+        <div className="maturity-category-docs">
+
+    [Durum](/tr/cli/status), [Günlükler](/tr/cli/logs), [Doctor](/tr/cli/doctor), [Tanılama](/tr/gateway/diagnostics), [Dizin](/tr/gateway/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1618,7 +2055,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>75%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "75%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>89%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "89%" }} /></span></span></div>
-        <div className="maturity-category-docs">[VPS](/tr/vps), [Docker](/tr/install/docker), [Hetzner](/tr/install/hetzner), [DigitalOcean](/tr/install/digitalocean), [Kubernetes](/tr/install/kubernetes), [Podman](/tr/install/podman)</div>
+        <div className="maturity-category-docs">
+
+    [VPS](/tr/vps), [Docker](/tr/install/docker), [Hetzner](/tr/install/hetzner), [DigitalOcean](/tr/install/digitalocean), [Kubernetes](/tr/install/kubernetes), [Podman](/tr/install/podman)
+
+    </div>
       </div>
     </div>
 
@@ -1632,7 +2073,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Beta - 74%</span><span>Tamlık Kararlı - 88%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
-      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsama</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
+      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">CLI Kurulumu</span>
@@ -1641,7 +2082,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>74%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "74%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>88%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "88%" }} /></span></span></div>
-        <div className="maturity-category-docs">[macOS](/tr/platforms/macos), [Paketlenmiş Gateway](/tr/platforms/mac/bundled-gateway), [Yükleyici](/tr/install/installer), [Node](/tr/install/node)</div>
+        <div className="maturity-category-docs">
+
+    [Macos](/tr/platforms/macos), [Paketlenmiş Gateway](/tr/platforms/mac/bundled-gateway), [Yükleyici](/tr/install/installer), [Node](/tr/install/node)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1651,7 +2096,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>74%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "74%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>88%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "88%" }} /></span></span></div>
-        <div className="maturity-category-docs">[macOS](/tr/platforms/macos), [Paketlenmiş Gateway](/tr/platforms/mac/bundled-gateway), [Uzak](/tr/platforms/mac/remote), [Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway), [Bonjour](/tr/gateway/bonjour)</div>
+        <div className="maturity-category-docs">
+
+    [Macos](/tr/platforms/macos), [Paketlenmiş Gateway](/tr/platforms/mac/bundled-gateway), [Uzak](/tr/platforms/mac/remote), [Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway), [Bonjour](/tr/gateway/bonjour)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1661,7 +2110,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>74%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "74%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>88%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "88%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Uzak](/tr/platforms/mac/remote), [Uzak](/tr/gateway/remote), [Tailscale](/tr/gateway/tailscale)</div>
+        <div className="maturity-category-docs">
+
+    [Uzak](/tr/platforms/mac/remote), [Uzak](/tr/gateway/remote), [Tailscale](/tr/gateway/tailscale)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1671,7 +2124,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>74%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "74%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>88%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "88%" }} /></span></span></div>
-        <div className="maturity-category-docs">[macOS](/tr/platforms/macos), [Paketlenmiş Gateway](/tr/platforms/mac/bundled-gateway), [Gateway](/tr/cli/gateway), [Dizin](/tr/gateway/index), [Güncelleme](/tr/cli/update), [Güncelleme](/tr/install/updating), [Kaldırma](/tr/install/uninstall), [Sorun Giderme](/tr/gateway/troubleshooting)</div>
+        <div className="maturity-category-docs">
+
+    [Macos](/tr/platforms/macos), [Paketlenmiş Gateway](/tr/platforms/mac/bundled-gateway), [Gateway](/tr/cli/gateway), [Dizin](/tr/gateway/index), [Güncelleme](/tr/cli/update), [Güncelleme](/tr/install/updating), [Kaldırma](/tr/install/uninstall), [Sorun Giderme](/tr/gateway/troubleshooting)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1681,7 +2138,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>74%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "74%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>88%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "88%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Paketlenmiş Gateway](/tr/platforms/mac/bundled-gateway), [macOS](/tr/platforms/macos), [Gateway](/tr/cli/gateway), [Doctor](/tr/gateway/doctor), [Sorun Giderme](/tr/gateway/troubleshooting)</div>
+        <div className="maturity-category-docs">
+
+    [Paketlenmiş Gateway](/tr/platforms/mac/bundled-gateway), [Macos](/tr/platforms/macos), [Gateway](/tr/cli/gateway), [Tanılama](/tr/gateway/doctor), [Sorun Giderme](/tr/gateway/troubleshooting)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1691,7 +2152,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>74%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "74%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>88%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "88%" }} /></span></span></div>
-        <div className="maturity-category-docs">[macOS](/tr/platforms/macos), [Uzak](/tr/platforms/mac/remote)</div>
+        <div className="maturity-category-docs">
+
+    [Macos](/tr/platforms/macos), [Uzak](/tr/platforms/mac/remote)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1701,17 +2166,21 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>74%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "74%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>88%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "88%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Birden Fazla Gateway](/tr/gateway/multiple-gateways), [Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway)</div>
+        <div className="maturity-category-docs">
+
+    [Birden Fazla Gateway](/tr/gateway/multiple-gateways), [Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway)
+
+    </div>
       </div>
     </div>
 
   </Accordion>
-  <Accordion title="Android app - M4 Stable - 7 areas">
+  <Accordion title="Android uygulaması - M4 Kararlı - 7 alan">
     <a id="android-app" />
 
-    Resmî Google Play dağıtımı mevcuttur, kaynak koddan derleme/çalıştırma belgeleri güncel tutulmaktadır ve Android uygulaması kullanıcılar için standart bir yardımcı Node olarak belgelenmiştir.
+    Resmî Google Play dağıtımı mevcuttur, kaynak koddan derleme/çalıştırma belgeleri güncel tutulmaktadır ve Android uygulaması, kullanıcılar için normal bir yardımcı Node olarak belgelenmektedir.
 
-    <div className="maturity-surface-rollup"><span>Kapsama Deneysel - 0%</span><span>Kalite Kararlı - 80%</span><span>Tamlık Kararlı - 80%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Kararlı - 80%</span><span>Tamlık Kararlı - 80%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
@@ -1723,7 +2192,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Android](/tr/platforms/android), [Kamera](/tr/nodes/camera)</div>
+        <div className="maturity-category-docs">
+
+    [Android](/tr/platforms/android), [Kamera](/tr/nodes/camera)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1733,7 +2206,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Android](/tr/platforms/android)</div>
+        <div className="maturity-category-docs">
+
+    [Android](/tr/platforms/android)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1743,7 +2220,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Android](/tr/platforms/android), [Bonjour](/tr/gateway/bonjour), [Eşleştirme](/tr/gateway/pairing)</div>
+        <div className="maturity-category-docs">
+
+    [Android](/tr/platforms/android), [Bonjour](/tr/gateway/bonjour), [Eşleştirme](/tr/gateway/pairing)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1753,7 +2234,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Android](/tr/platforms/android)</div>
+        <div className="maturity-category-docs">
+
+    [Android](/tr/platforms/android)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1763,7 +2248,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Android](/tr/platforms/android)</div>
+        <div className="maturity-category-docs">
+
+    [Android](/tr/platforms/android)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1773,7 +2262,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Android](/tr/platforms/android), [Konuşma](/tr/nodes/talk)</div>
+        <div className="maturity-category-docs">
+
+    [Android](/tr/platforms/android), [Konuşma](/tr/nodes/talk)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1783,7 +2276,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Android](/tr/platforms/android), [Sorun Giderme](/tr/nodes/troubleshooting), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [Android](/tr/platforms/android), [Sorun Giderme](/tr/nodes/troubleshooting), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
     </div>
 
@@ -1805,7 +2302,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios), [Kamera](/tr/nodes/camera)</div>
+        <div className="maturity-category-docs">
+
+    [Ios](/tr/platforms/ios), [Kamera](/tr/nodes/camera)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1815,7 +2316,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios), [Tuval](/tr/plugins/reference/canvas)</div>
+        <div className="maturity-category-docs">
+
+    [Ios](/tr/platforms/ios), [Tuval](/tr/plugins/reference/canvas)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1825,7 +2330,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios), [Web sohbeti](/tr/web/webchat), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [Ios](/tr/platforms/ios), [Web sohbeti](/tr/web/webchat), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1835,7 +2344,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios), [Eşleştirme](/tr/channels/pairing)</div>
+        <div className="maturity-category-docs">
+
+    [Ios](/tr/platforms/ios), [Eşleştirme](/tr/channels/pairing)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1845,7 +2358,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios)</div>
+        <div className="maturity-category-docs">
+
+    [Ios](/tr/platforms/ios)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1855,7 +2372,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [Ios](/tr/platforms/ios), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1865,7 +2386,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios), [Yapılandırma](/tr/gateway/configuration)</div>
+        <div className="maturity-category-docs">
+
+    [Ios](/tr/platforms/ios), [Yapılandırma](/tr/gateway/configuration)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1875,7 +2400,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>80%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "80%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios), [Konuşma](/tr/nodes/talk)</div>
+        <div className="maturity-category-docs">
+
+    [Ios](/tr/platforms/ios), [Konuşma](/tr/nodes/talk)
+
+    </div>
       </div>
     </div>
 
@@ -1884,12 +2413,12 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Docker ve Podman barındırma - M3 Beta - 4 alan">
     <a id="docker-and-podman-hosting" />
 
-    Kurulum belgeleri mevcuttur ve bunlar yaygın dağıtım yollarıdır. Yinelenen sürüm duman testleri yükseltme ve birim davranışını kaydettikten sonra olgunluk düzeyini yükseltin.
+    Kurulum belgeleri mevcuttur ve bunlar yaygın dağıtım yollarıdır. Yinelenen sürüm duman testleri yükseltme ve birim davranışını kaydettikten sonra üst düzeye çıkarın.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 7%</span><span>Kalite Beta - 71%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
-      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsama</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
+      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Eksiksizlik</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Konteyner Kurulumu</span>
@@ -1898,7 +2427,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Docker](/tr/install/docker), [Podman](/tr/install/podman)</div>
+        <div className="maturity-category-docs">
+
+    [Docker](/tr/install/docker), [Podman](/tr/install/podman)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1908,27 +2441,39 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Podman](/tr/install/podman), [Docker VM Çalışma Zamanı](/tr/install/docker-vm-runtime), [Docker](/tr/install/docker), [Hetzner](/tr/install/hetzner), [Hostinger](/tr/install/hostinger)</div>
+        <div className="maturity-category-docs">
+
+    [Podman](/tr/install/podman), [Docker VM Çalışma Zamanı](/tr/install/docker-vm-runtime), [Docker](/tr/install/docker), [Hetzner](/tr/install/hetzner), [Hostinger](/tr/install/hostinger)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">İmaj Sürümü ve Doğrulaması</span>
+          <span className="maturity-category-title">İmaj Sürümü ve Doğrulama</span>
           <span>5 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>29%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "29%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Docker](/tr/install/docker), [Docker VM Çalışma Zamanı](/tr/install/docker-vm-runtime), [Tam Sürüm Doğrulaması](/tr/reference/full-release-validation)</div>
+        <div className="maturity-category-docs">
+
+    [Docker](/tr/install/docker), [Docker VM Çalışma Zamanı](/tr/install/docker-vm-runtime), [Tam Sürüm Doğrulaması](/tr/reference/full-release-validation)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Ajan Korumalı Alanı ve Araçları</span>
+          <span className="maturity-category-title">Aracı Korumalı Alanı ve Araçları</span>
           <span>3 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Docker](/tr/install/docker), [Docker VM Çalışma Zamanı](/tr/install/docker-vm-runtime)</div>
+        <div className="maturity-category-docs">
+
+    [Docker](/tr/install/docker), [Docker VM Çalışma Zamanı](/tr/install/docker-vm-runtime)
+
+    </div>
       </div>
     </div>
 
@@ -1937,9 +2482,9 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="WSL2 üzerinden Windows - M3 Beta - 6 alan">
     <a id="windows-via-wsl2" />
 
-    systemd/kullanıcı hizmeti rehberliği ve önyükleme zinciri belgeleriyle önerilen Windows yolu. Tekrarlanan kurulum/güncelleme puan kartlarından sonra yükseltin.
+    systemd/kullanıcı hizmeti rehberliği ve önyükleme zinciri belgeleriyle önerilen Windows yolu. Tekrarlanan kurulum/güncelleme puan kartlarından sonra üst seviyeye yükseltin.
 
-    <div className="maturity-surface-rollup"><span>Kapsama Deneysel - 6%</span><span>Kalite Alfa - 69%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 5</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 6%</span><span>Kalite Alfa - 69%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 5</span></span></div>
 
     <div className="maturity-category-list">
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
@@ -1951,7 +2496,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Windows](/tr/platforms/windows), [Başlangıç](/tr/start/getting-started)</div>
+        <div className="maturity-category-docs">
+
+    [Windows](/tr/platforms/windows), [Başlarken](/tr/start/getting-started)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1961,7 +2510,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Windows](/tr/platforms/windows), [Başlangıç](/tr/start/getting-started), [Güncelleme](/tr/install/updating), [İlk Kurulum](/tr/cli/onboard), [Tanılama](/tr/cli/doctor), [Durum](/tr/cli/status), [Günlükler](/tr/cli/logs)</div>
+        <div className="maturity-category-docs">
+
+    [Windows](/tr/platforms/windows), [Başlarken](/tr/start/getting-started), [Güncelleme](/tr/install/updating), [İlk Yapılandırma](/tr/cli/onboard), [Tanılama](/tr/cli/doctor), [Durum](/tr/cli/status), [Günlükler](/tr/cli/logs)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1971,7 +2524,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Windows](/tr/platforms/windows), [Dizin](/tr/gateway/index), [Tanılama](/tr/gateway/doctor)</div>
+        <div className="maturity-category-docs">
+
+    [Windows](/tr/platforms/windows), [Dizin](/tr/gateway/index), [Tanılama](/tr/gateway/doctor)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1981,7 +2538,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Kimlik Doğrulama](/tr/gateway/authentication), [Gizli Bilgiler](/tr/gateway/secrets), [Uzaktan Erişim](/tr/gateway/remote), [Dışa Açma İşletim Kılavuzu](/tr/gateway/security/exposure-runbook), [Windows](/tr/platforms/windows)</div>
+        <div className="maturity-category-docs">
+
+    [Kimlik Doğrulama](/tr/gateway/authentication), [Gizli Bilgiler](/tr/gateway/secrets), [Uzaktan Erişim](/tr/gateway/remote), [Dışa Açılma Operasyon Kılavuzu](/tr/gateway/security/exposure-runbook), [Windows](/tr/platforms/windows)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -1991,7 +2552,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>38%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "38%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Windows](/tr/platforms/windows), [Durum](/tr/cli/status), [Günlükler](/tr/cli/logs), [Tanılama](/tr/cli/doctor), [Tanılama](/tr/gateway/doctor)</div>
+        <div className="maturity-category-docs">
+
+    [Windows](/tr/platforms/windows), [Durum](/tr/cli/status), [Günlükler](/tr/cli/logs), [Doctor](/tr/cli/doctor), [Doctor](/tr/gateway/doctor)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2001,7 +2566,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Tarayıcı WSL2 Windows Uzak CDP Sorun Giderme](/tr/tools/browser-wsl2-windows-remote-cdp-troubleshooting), [Tarayıcı](/tr/tools/browser), [Denetim Arayüzü](/tr/web/control-ui)</div>
+        <div className="maturity-category-docs">
+
+    [Tarayıcı Wsl2 Windows Uzak Cdp Sorun Giderme](/tr/tools/browser-wsl2-windows-remote-cdp-troubleshooting), [Tarayıcı](/tr/tools/browser), [Denetim Arayüzü](/tr/web/control-ui)
+
+    </div>
       </div>
     </div>
 
@@ -2010,7 +2579,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Raspberry Pi ve küçük Linux cihazları - M3 Beta - 4 alan">
     <a id="raspberry-pi-and-small-linux-devices" />
 
-    Platform belgeleri mevcut ve Gateway yolu Linux tabanlıdır. Daha üst düzeye geçmek için donanıma özgü sürüm duman testi kanıtı gereklidir.
+    Platform belgeleri mevcut ve Gateway yolu Linux tabanlıdır. Daha yüksek bir düzeye geçmek için donanıma özgü sürüm duman testi kanıtı gerekir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 67%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -2019,42 +2588,58 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Kurulum ve Uyumluluk</span>
-          <span>12 özellik</span>
+          <span>12 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Raspberry Pi](/tr/install/raspberry-pi), [Dizin](/tr/install/index), [İlk Çalıştırma SSS](/tr/help/faq-first-run), [SSS](/tr/help/faq), [Linux](/tr/platforms/linux), [Yükleyici](/tr/install/installer)</div>
+        <div className="maturity-category-docs">
+
+    [Raspberry Pi](/tr/install/raspberry-pi), [Dizin](/tr/install/index), [İlk Çalıştırma SSS](/tr/help/faq-first-run), [SSS](/tr/help/faq), [Linux](/tr/platforms/linux), [Yükleyici](/tr/install/installer)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Uzaktan Erişim ve Kimlik Doğrulama</span>
-          <span>9 özellik</span>
+          <span>9 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Raspberry Pi](/tr/install/raspberry-pi), [Kimlik Doğrulama](/tr/gateway/authentication), [Gizli Bilgiler](/tr/gateway/secrets), [Eşleştirme](/tr/gateway/pairing), [Cihazlar](/tr/cli/devices), [Uzaktan Erişim](/tr/gateway/remote), [Tailscale](/tr/gateway/tailscale)</div>
+        <div className="maturity-category-docs">
+
+    [Raspberry Pi](/tr/install/raspberry-pi), [Kimlik Doğrulama](/tr/gateway/authentication), [Gizli Bilgiler](/tr/gateway/secrets), [Eşleştirme](/tr/gateway/pairing), [Cihazlar](/tr/cli/devices), [Uzaktan Erişim](/tr/gateway/remote), [Tailscale](/tr/gateway/tailscale)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Gateway Çalışma Zamanı</span>
-          <span>10 özellik</span>
+          <span>10 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway), [Raspberry Pi](/tr/install/raspberry-pi), [Linux](/tr/platforms/linux), [VPS](/tr/vps)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway), [Raspberry Pi](/tr/install/raspberry-pi), [Linux](/tr/platforms/linux), [VPS](/tr/vps)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Performans ve Tanılama</span>
-          <span>5 özellik</span>
+          <span>5 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Raspberry Pi](/tr/install/raspberry-pi), [Linux](/tr/platforms/linux), [Sistem Durumu](/tr/gateway/health), [Tanılama](/tr/gateway/diagnostics)</div>
+        <div className="maturity-category-docs">
+
+    [Raspberry Pi](/tr/install/raspberry-pi), [Linux](/tr/platforms/linux), [Sağlık](/tr/gateway/health), [Tanılama](/tr/gateway/diagnostics)
+
+    </div>
       </div>
     </div>
 
@@ -2063,7 +2648,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="macOS yardımcı uygulaması - M3 Beta - 8 alan">
     <a id="macos-companion-app" />
 
-    Zengin menü çubuğu uygulaması, izinler, Node modu, Canvas, sesle uyandırma, WebChat ve uzaktan erişim modu mevcuttur. Ancak hâlâ Kararlı olarak sınıflandırılamayacak kadar hızlı gelişmektedir.
+    Zengin özellikli menü çubuğu uygulaması, izinler, Node modu, Canvas, sesle uyandırma, WebChat ve uzak mod mevcuttur. Stable olarak sınıflandırılamayacak kadar hızlı gelişmeye devam etmektedir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 66%</span><span>Tamlık Beta - 78%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -2071,13 +2656,17 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Tuval</span>
+          <span className="maturity-category-title">Canvas</span>
           <span>4 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Tuval](/tr/platforms/mac/canvas), [Macos](/tr/platforms/macos), [Web sohbeti](/tr/web/webchat)</div>
+        <div className="maturity-category-docs">
+
+    [Canvas](/tr/platforms/mac/canvas), [macOS](/tr/platforms/macos), [WebChat](/tr/web/webchat)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2087,7 +2676,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Paketlenmiş Gateway](/tr/platforms/mac/bundled-gateway), [Macos](/tr/platforms/macos), [Alt Süreç](/tr/platforms/mac/child-process), [Geliştirme Kurulumu](/tr/platforms/mac/dev-setup)</div>
+        <div className="maturity-category-docs">
+
+    [Birlikte Gelen Gateway](/tr/platforms/mac/bundled-gateway), [Macos](/tr/platforms/macos), [Alt Süreç](/tr/platforms/mac/child-process), [Geliştirme Kurulumu](/tr/platforms/mac/dev-setup)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2097,7 +2690,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Menü Çubuğu](/tr/platforms/mac/menu-bar), [Simge](/tr/platforms/mac/icon), [Macos](/tr/platforms/macos), [Sistem Durumu](/tr/platforms/mac/health), [Günlük Kaydı](/tr/platforms/mac/logging), [Uzaktan Erişim](/tr/platforms/mac/remote)</div>
+        <div className="maturity-category-docs">
+
+    [Menü Çubuğu](/tr/platforms/mac/menu-bar), [Simge](/tr/platforms/mac/icon), [Macos](/tr/platforms/macos), [Sistem Durumu](/tr/platforms/mac/health), [Günlük Kaydı](/tr/platforms/mac/logging), [Uzaktan Erişim](/tr/platforms/mac/remote)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2107,7 +2704,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Macos](/tr/platforms/macos), [Xpc](/tr/platforms/mac/xpc), [İzinler](/tr/platforms/mac/permissions), [İmzalama](/tr/platforms/mac/signing), [Peekaboo](/tr/platforms/mac/peekaboo)</div>
+        <div className="maturity-category-docs">
+
+    [Macos](/tr/platforms/macos), [Xpc](/tr/platforms/mac/xpc), [İzinler](/tr/platforms/mac/permissions), [İmzalama](/tr/platforms/mac/signing), [Peekaboo](/tr/platforms/mac/peekaboo)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2117,7 +2718,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Uzaktan Erişim](/tr/platforms/mac/remote), [Macos](/tr/platforms/macos), [Uzaktan Erişim](/tr/gateway/remote)</div>
+        <div className="maturity-category-docs">
+
+    [Uzaktan Erişim](/tr/platforms/mac/remote), [Macos](/tr/platforms/macos), [Uzaktan Erişim](/tr/gateway/remote)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2127,27 +2732,39 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Sesle Uyandırma](/tr/platforms/mac/voicewake), [Ses Katmanı](/tr/platforms/mac/voice-overlay), [Konuşma](/tr/nodes/talk), [Macos](/tr/platforms/macos)</div>
+        <div className="maturity-category-docs">
+
+    [Sesle Uyandırma](/tr/platforms/mac/voicewake), [Ses Katmanı](/tr/platforms/mac/voice-overlay), [Konuşma](/tr/nodes/talk), [Macos](/tr/platforms/macos)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Web Sohbeti</span>
+          <span className="maturity-category-title">WebChat</span>
           <span>3 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Web sohbeti](/tr/platforms/mac/webchat), [Macos](/tr/platforms/macos), [Web sohbeti](/tr/web/webchat)</div>
+        <div className="maturity-category-docs">
+
+    [Webchat](/tr/platforms/mac/webchat), [Macos](/tr/platforms/macos), [Webchat](/tr/web/webchat)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Uzak Web Sohbeti</span>
+          <span className="maturity-category-title">Uzak WebChat</span>
           <span>5 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Web sohbeti](/tr/platforms/mac/webchat), [Uzaktan Erişim](/tr/gateway/remote), [Uzaktan Erişim](/tr/platforms/mac/remote)</div>
+        <div className="maturity-category-docs">
+
+    [Webchat](/tr/platforms/mac/webchat), [Uzak](/tr/gateway/remote), [Uzak](/tr/platforms/mac/remote)
+
+    </div>
       </div>
     </div>
 
@@ -2156,9 +2773,9 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Yerel Windows - M2 Alfa - 4 alan">
     <a id="native-windows" />
 
-    Temel CLI/Gateway akışları çalışır, ancak belgeler tam deneyim için hâlâ WSL2'yi önerir ve yerel kullanıma ilişkin sınırlamaları listeler.
+    Temel CLI/Gateway akışları çalışır ancak belgeler tam deneyim için hâlâ WSL2'yi önerir ve yerel kullanıma ilişkin kısıtlamaları listeler.
 
-    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - %0</span><span>Kalite Alfa - %58</span><span>Tamlık Alfa - %66</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 1</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 58%</span><span>Tamlık Alfa - 66%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 1</span></span></div>
 
     <div className="maturity-category-list">
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
@@ -2170,7 +2787,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>54%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "54%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>64%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "64%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/install/index), [Yükleyici](/tr/install/installer), [Windows](/tr/platforms/windows), [Başlarken](/tr/start/getting-started), [İlk Kurulum](/tr/cli/onboard)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/install/index), [Yükleyici](/tr/install/installer), [Windows](/tr/platforms/windows), [Başlarken](/tr/start/getting-started), [İlk Kurulum](/tr/cli/onboard)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2180,7 +2801,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Windows](/tr/platforms/windows), [Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway), [Tanılama](/tr/cli/doctor)</div>
+        <div className="maturity-category-docs">
+
+    [Windows](/tr/platforms/windows), [Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway), [Doctor](/tr/cli/doctor)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2190,7 +2815,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Windows](/tr/platforms/windows), [Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway)</div>
+        <div className="maturity-category-docs">
+
+    [Windows](/tr/platforms/windows), [Dizin](/tr/gateway/index), [Gateway](/tr/cli/gateway)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2200,7 +2829,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Güncelleme](/tr/install/updating), [CI](/tr/ci)</div>
+        <div className="maturity-category-docs">
+
+    [Güncelleme](/tr/install/updating), [CI](/tr/ci)
+
+    </div>
       </div>
     </div>
 
@@ -2209,7 +2842,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Kubernetes barındırma - M2 Alfa - 4 alan">
     <a id="kubernetes-hosting" />
 
-    Kubernetes barındırma, Kustomize tabanlı ayrı bir küme dağıtım yoludur. Mevcut puanlama; Kubernetes'e özgü CI, giriş/TLS/NetworkPolicy paketleme, yedekleme/geri yükleme ve üretim ortamına açılma güvenliğinin sağlamlaştırılması konularında eksikleri bulunan, gerçekten kullanılabilir asgari bir dağıtım yolu olduğunu göstermektedir.
+    Kubernetes barındırma, Kustomize tabanlı ayrı bir küme dağıtım yoludur. Mevcut puanlama; Kubernetes'e özgü CI, giriş/TLS/NetworkPolicy paketleme, yedekleme/geri yükleme ve üretim ortamına açılma güvenliğinin sağlamlaştırılması konularında eksikleri bulunan, gerçek bir asgari dağıtım yolu olduğunu gösteriyor.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 55%</span><span>Tamlık Alfa - 61%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -2223,7 +2856,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>55%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "55%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Kubernetes](/tr/install/kubernetes), [Dizin](/tr/install/index)</div>
+        <div className="maturity-category-docs">
+
+    [Kubernetes](/tr/install/kubernetes), [Dizin](/tr/install/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2233,17 +2870,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>55%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "55%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Kubernetes](/tr/install/kubernetes), [Gizli Bilgiler](/tr/gateway/secrets), [Ortam](/tr/help/environment)</div>
+        <div className="maturity-category-docs">
+
+    [Kubernetes](/tr/install/kubernetes), [Gizli Bilgiler](/tr/gateway/secrets), [Ortam](/tr/help/environment)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Erişim ve Dışa Açılma</span>
+          <span className="maturity-category-title">Erişim ve Dışa Açma</span>
           <span>5 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>55%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "55%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Kubernetes](/tr/install/kubernetes), [Kimlik Doğrulama](/tr/gateway/authentication), [Uzaktan Erişim](/tr/gateway/remote), [Dışa Açılma Operasyon Kılavuzu](/tr/gateway/security/exposure-runbook)</div>
+        <div className="maturity-category-docs">
+
+    [Kubernetes](/tr/install/kubernetes), [Kimlik Doğrulama](/tr/gateway/authentication), [Uzaktan Erişim](/tr/gateway/remote), [Dışa Açma Çalıştırma Kılavuzu](/tr/gateway/security/exposure-runbook)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2253,7 +2898,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>55%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "55%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Kubernetes](/tr/install/kubernetes), [Dizin](/tr/gateway/index)</div>
+        <div className="maturity-category-docs">
+
+    [Kubernetes](/tr/install/kubernetes), [Dizin](/tr/gateway/index)
+
+    </div>
       </div>
     </div>
 
@@ -2262,61 +2911,81 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Nix kurulum yolu - M1 Deneysel - 5 alan">
     <a id="nix-install-path" />
 
-    İsteğe bağlı kurulum akışı. Alfa/beta düzeyine yükseltilmeden önce destek taahhüdünün daha açık olması gerekir.
+    İsteğe bağlı kurulum akışı. Alfa/beta aşamasına yükseltilmeden önce daha net bir destek taahhüdüne ihtiyaç duyuyor.
 
-    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - %0</span><span>Kalite Deneysel - %41</span><span>Tamlık Deneysel - %44</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Deneysel - 41%</span><span>Tamlık Deneysel - 44%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
-      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
+      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamamlanma</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Kurulum Devri</span>
           <span>4 yetenek</span>
         </div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%0</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%41</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%44</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Nix](/tr/install/nix), [Dizin](/tr/install/index), [Belgeler Dizini](/tr/start/docs-directory)</div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
+        <div className="maturity-category-docs">
+
+    [Nix](/tr/install/nix), [Dizin](/tr/install/index), [Belgeler Dizini](/tr/start/docs-directory)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Plugin Yaşam Döngüsü</span>
           <span>4 yetenek</span>
         </div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%0</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%41</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%44</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Plugin'leri Yönetme](/tr/plugins/manage-plugins), [Plugin](/tr/tools/plugin), [Nix](/tr/install/nix)</div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
+        <div className="maturity-category-docs">
+
+    [Pluginleri Yönet](/tr/plugins/manage-plugins), [Plugin](/tr/tools/plugin), [Nix](/tr/install/nix)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Etkinleştirme ve Uygulama Kullanıcı Deneyimi</span>
           <span>7 yetenek</span>
         </div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%0</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%41</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%44</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Nix](/tr/install/nix)</div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
+        <div className="maturity-category-docs">
+
+    [Nix](/tr/install/nix)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Yapılandırma ve Durum</span>
           <span>7 yetenek</span>
         </div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%0</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%41</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%44</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Nix](/tr/install/nix), [Kurulum](/tr/cli/setup), [Ortam](/tr/help/environment)</div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
+        <div className="maturity-category-docs">
+
+    [Nix](/tr/install/nix), [Kurulum](/tr/cli/setup), [Ortam](/tr/help/environment)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Hizmet Çalışma Zamanı ve Korumalar</span>
           <span>8 yetenek</span>
         </div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%0</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%41</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%44</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Nix](/tr/install/nix), [Kurulum](/tr/cli/setup), [Tanılama](/tr/cli/doctor), [Güncelleme](/tr/cli/update)</div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
+        <div className="maturity-category-docs">
+
+    [Nix](/tr/install/nix), [Kurulum](/tr/cli/setup), [Tanılama](/tr/cli/doctor), [Güncelleme](/tr/cli/update)
+
+    </div>
       </div>
     </div>
 
@@ -2327,10 +2996,10 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
 
     Kaynakta Watch uygulaması/uzantısı yüzeyleri bulunur; genel kullanıma açık belgeler bunu henüz bir kullanıcı özelliği olarak sunmamaktadır.
 
-    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - %0</span><span>Kalite Deneysel - %41</span><span>Tamlık Deneysel - %44</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Deneysel - 41%</span><span>Tamlık Deneysel - 44%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
-      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsama</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
+      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Teslimat ve Kurtarma</span>
@@ -2339,17 +3008,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios)</div>
+        <div className="maturity-category-docs">
+
+    [iOS](/tr/platforms/ios)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Çalıştırma Onayları</span>
+          <span className="maturity-category-title">Yürütme Onayları</span>
           <span>3 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Çalıştırma Onayları](/tr/tools/exec-approvals), [iOS](/tr/platforms/ios)</div>
+        <div className="maturity-category-docs">
+
+    [Yürütme Onayları](/tr/tools/exec-approvals), [iOS](/tr/platforms/ios)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2359,7 +3036,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios)</div>
+        <div className="maturity-category-docs">
+
+    [iOS](/tr/platforms/ios)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2369,7 +3050,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios)</div>
+        <div className="maturity-category-docs">
+
+    [iOS](/tr/platforms/ios)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2379,7 +3064,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iOS](/tr/platforms/ios)</div>
+        <div className="maturity-category-docs">
+
+    [iOS](/tr/platforms/ios)
+
+    </div>
       </div>
     </div>
 
@@ -2390,7 +3079,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
 
     Belgelerde yerel Linux yardımcı uygulamalarının planlandığı belirtilmektedir; günümüzde Linux için desteklenen yol Gateway'dir.
 
-    <div className="maturity-surface-rollup"><span>Kapsama Deneysel - 0%</span><span>Kalite Deneysel - 19%</span><span>Tamlık Deneysel - 21%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Deneysel - 19%</span><span>Tamlık Deneysel - 21%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
@@ -2402,7 +3091,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Linux](/tr/platforms/linux), [Dizin](/tr/platforms/index), [Dizin](/tr/install/index)</div>
+        <div className="maturity-category-docs">
+
+    [Linux](/tr/platforms/linux), [Dizin](/tr/platforms/index), [Dizin](/tr/install/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2412,7 +3105,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Linux](/tr/platforms/linux), [Dizin](/tr/gateway/index), [Eşleştirme](/tr/gateway/pairing), [Uzak Erişim](/tr/gateway/remote)</div>
+        <div className="maturity-category-docs">
+
+    [Linux](/tr/platforms/linux), [Dizin](/tr/gateway/index), [Eşleştirme](/tr/gateway/pairing), [Uzaktan Erişim](/tr/gateway/remote)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2422,7 +3119,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Linux](/tr/platforms/linux), [Protokol](/tr/gateway/protocol), [Web Sohbeti](/tr/web/webchat)</div>
+        <div className="maturity-category-docs">
+
+    [Linux](/tr/platforms/linux), [Protokol](/tr/gateway/protocol), [Web Sohbeti](/tr/web/webchat)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2432,7 +3133,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Linux](/tr/platforms/linux), [Çalıştırma Onayları](/tr/tools/exec-approvals), [Gizli Bilgiler](/tr/gateway/secrets), [Dizin](/tr/nodes/index), [Çalıştırma](/tr/tools/exec), [Konuşma](/tr/nodes/talk), [Kamera](/tr/nodes/camera)</div>
+        <div className="maturity-category-docs">
+
+    [Linux](/tr/platforms/linux), [Çalıştırma Onayları](/tr/tools/exec-approvals), [Gizli Bilgiler](/tr/gateway/secrets), [Dizin](/tr/nodes/index), [Çalıştırma](/tr/tools/exec), [Konuşma](/tr/nodes/talk), [Kamera](/tr/nodes/camera)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2442,7 +3147,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Linux](/tr/platforms/linux), [OpenClaw](/tr/start/openclaw), [Doktor](/tr/gateway/doctor)</div>
+        <div className="maturity-category-docs">
+
+    [Linux](/tr/platforms/linux), [OpenClaw](/tr/start/openclaw), [Doctor](/tr/gateway/doctor)
+
+    </div>
       </div>
     </div>
 
@@ -2465,7 +3174,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Windows](/tr/platforms/windows), [Dizin](/tr/install/index)</div>
+        <div className="maturity-category-docs">
+
+    [Windows](/tr/platforms/windows), [Dizin](/tr/install/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2475,7 +3188,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Windows](/tr/platforms/windows), [Dizin](/tr/gateway/index), [Eşleştirme](/tr/gateway/pairing), [Uzaktan](/tr/gateway/remote)</div>
+        <div className="maturity-category-docs">
+
+    [Windows](/tr/platforms/windows), [Dizin](/tr/gateway/index), [Eşleştirme](/tr/gateway/pairing), [Uzak](/tr/gateway/remote)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2485,7 +3202,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Windows](/tr/platforms/windows), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [Windows](/tr/platforms/windows), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2495,7 +3216,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Windows](/tr/platforms/windows), [Tanılama](/tr/gateway/doctor), [Dizin](/tr/gateway/index)</div>
+        <div className="maturity-category-docs">
+
+    [Windows](/tr/platforms/windows), [Tanılama](/tr/gateway/doctor), [Dizin](/tr/gateway/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2505,7 +3230,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>19%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "19%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>21%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "21%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Windows](/tr/platforms/windows), [Dizin](/tr/nodes/index), [Çalıştırma](/tr/tools/exec), [Çalıştırma Onayları](/tr/tools/exec-approvals), [Dizin](/tr/gateway/security/index)</div>
+        <div className="maturity-category-docs">
+
+    [Windows](/tr/platforms/windows), [Dizin](/tr/nodes/index), [Çalıştırma](/tr/tools/exec), [Çalıştırma Onayları](/tr/tools/exec-approvals), [Dizin](/tr/gateway/security/index)
+
+    </div>
       </div>
     </div>
 
@@ -2519,7 +3248,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Discord - M4 Kararlı - 6 alan">
     <a id="discord" />
 
-    Ayrıntılı belgeler ve geniş özellik kapsamı. Ses ve temsilci atama yolları beta/alfa olarak ayrı ayrı puanlanmaya devam etmelidir.
+    Ayrıntılı belgeler ve geniş özellik kapsamı. Ses/delegasyon yolları beta/alfa olarak ayrı ayrı puanlanmalıdır.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Beta - 73%</span><span>Tamlık Kararlı - 87%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 4</span></span></div>
 
@@ -2533,7 +3262,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>73%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "73%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>87%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "87%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Discord](/tr/channels/discord), [Discord](/tr/plugins/reference/discord), [Fly](/tr/install/fly), [Eğik Çizgi Komutları](/tr/tools/slash-commands), [Sistem Durumu](/tr/gateway/health), [Kanallar](/tr/cli/channels), [Kanal Yapılandırması](/tr/gateway/config-channels)</div>
+        <div className="maturity-category-docs">
+
+    [Discord](/tr/channels/discord), [Discord](/tr/plugins/reference/discord), [Fly](/tr/install/fly), [Eğik Çizgi Komutları](/tr/tools/slash-commands), [Sistem Durumu](/tr/gateway/health), [Kanallar](/tr/cli/channels), [Kanal Yapılandırması](/tr/gateway/config-channels)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2543,17 +3276,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>73%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "73%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>87%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "87%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Discord](/tr/channels/discord), [Eşleştirme](/tr/channels/pairing), [Erişim Grupları](/tr/channels/access-groups), [Gruplar](/tr/channels/groups)</div>
+        <div className="maturity-category-docs">
+
+    [Discord](/tr/channels/discord), [Eşleştirme](/tr/channels/pairing), [Erişim Grupları](/tr/channels/access-groups), [Gruplar](/tr/channels/groups)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimi</span>
+          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimatı</span>
           <span>12 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>73%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "73%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>87%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "87%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Discord](/tr/channels/discord), [Kanal Yönlendirme](/tr/channels/channel-routing), [Gruplar](/tr/channels/groups), [Erişim Grupları](/tr/channels/access-groups), [ACP Aracıları](/tr/tools/acp-agents), [Alt Aracılar](/tr/tools/subagents)</div>
+        <div className="maturity-category-docs">
+
+    [Discord](/tr/channels/discord), [Kanal Yönlendirme](/tr/channels/channel-routing), [Gruplar](/tr/channels/groups), [Erişim Grupları](/tr/channels/access-groups), [ACP Ajanları](/tr/tools/acp-agents), [Alt Ajanlar](/tr/tools/subagents)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2563,7 +3304,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>73%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "73%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>87%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "87%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Discord](/tr/channels/discord)</div>
+        <div className="maturity-category-docs">
+
+    [Discord](/tr/channels/discord)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2573,7 +3318,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>73%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "73%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>87%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "87%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Discord](/tr/channels/discord), [Eğik Çizgi Komutları](/tr/tools/slash-commands)</div>
+        <div className="maturity-category-docs">
+
+    [Discord](/tr/channels/discord), [Eğik Çizgi Komutları](/tr/tools/slash-commands)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2583,7 +3332,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>73%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "73%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-stable"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-stable">Kararlı</span><span>87%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "87%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Discord](/tr/channels/discord), [OpenAI](/tr/providers/openai), [ElevenLabs](/tr/providers/elevenlabs), [QA Uçtan Uca Otomasyonu](/tr/concepts/qa-e2e-automation), [Kanal Yapılandırması](/tr/gateway/config-channels)</div>
+        <div className="maturity-category-docs">
+
+    [Discord](/tr/channels/discord), [OpenAI](/tr/providers/openai), [Elevenlabs](/tr/providers/elevenlabs), [QA Uçtan Uca Otomasyonu](/tr/concepts/qa-e2e-automation), [Kanal Yapılandırması](/tr/gateway/config-channels)
+
+    </div>
       </div>
     </div>
 
@@ -2592,7 +3345,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Telegram - M3 Beta - 5 alan">
     <a id="telegram" />
 
-    Temel kanal düzenli kullanım için yeterince olgundur, ancak yüksek değişkenlik gösteren kullanıcı deneyimi ve medya uç durumları yinelenen senaryo kanıtı gerektirir.
+    Temel kanal düzenli kullanım için yeterince olgundur, ancak yüksek değişkenlik gösteren kullanıcı deneyimi ve medya uç durumları düzenli senaryo kanıtı gerektirir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 68%</span><span>Tamlık Beta - 78%</span><span><span className="maturity-lts maturity-lts-full">Tam - 5</span></span></div>
 
@@ -2600,13 +3353,17 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Kanal Kurulumu ve İşletimi</span>
+          <span className="maturity-category-title">Kanal Kurulumu ve Operasyonları</span>
           <span>10 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Telegram](/tr/channels/telegram), [Kanal Yapılandırması](/tr/gateway/config-channels), [Kanallar](/tr/cli/channels)</div>
+        <div className="maturity-category-docs">
+
+    [Telegram](/tr/channels/telegram), [Yapılandırma Kanalları](/tr/gateway/config-channels), [Kanallar](/tr/cli/channels)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2616,17 +3373,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Telegram](/tr/channels/telegram), [Eşleştirme](/tr/channels/pairing), [Erişim Grupları](/tr/channels/access-groups), [Gruplar](/tr/channels/groups), [Çoklu Aracı](/tr/concepts/multi-agent)</div>
+        <div className="maturity-category-docs">
+
+    [Telegram](/tr/channels/telegram), [Eşleştirme](/tr/channels/pairing), [Erişim Grupları](/tr/channels/access-groups), [Gruplar](/tr/channels/groups), [Çoklu Ajan](/tr/concepts/multi-agent)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimatı</span>
+          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslim</span>
           <span>1 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Telegram](/tr/channels/telegram), [Gruplar](/tr/channels/groups), [Çoklu Aracı](/tr/concepts/multi-agent)</div>
+        <div className="maturity-category-docs">
+
+    [Telegram](/tr/channels/telegram), [Gruplar](/tr/channels/groups), [Çoklu Ajan](/tr/concepts/multi-agent)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2636,7 +3401,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Telegram](/tr/channels/telegram), [Konum](/tr/channels/location)</div>
+        <div className="maturity-category-docs">
+
+    [Telegram](/tr/channels/telegram), [Konum](/tr/channels/location)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2646,7 +3415,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>77%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "77%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Telegram](/tr/channels/telegram), [Çalıştırma Onayları](/tr/tools/exec-approvals), [Tepkiler](/tr/tools/reactions)</div>
+        <div className="maturity-category-docs">
+
+    [Telegram](/tr/channels/telegram), [Çalıştırma Onayları](/tr/tools/exec-approvals), [Tepkiler](/tr/tools/reactions)
+
+    </div>
       </div>
     </div>
 
@@ -2655,7 +3428,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Slack - M3 Beta - 5 alan">
     <a id="slack" />
 
-    Birinci sınıf kanal belgeleri ve yönlendirme yüzeyi. Çalışma alanı kurulum/yönetici senaryosu puan kartlarına ihtiyaç duyuyor.
+    Birinci sınıf kanal belgeleri ve yönlendirme yüzeyi. Çalışma alanı kurulum/yönetici senaryosu puan kartları gerekiyor.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 66%</span><span>Tamlık Beta - 78%</span><span><span className="maturity-lts maturity-lts-full">Tam - 5</span></span></div>
 
@@ -2663,13 +3436,17 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Kanal Kurulumu ve İşletimi</span>
+          <span className="maturity-category-title">Kanal Kurulumu ve Operasyonları</span>
           <span>10 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Slack](/tr/channels/slack), [Slack](/tr/plugins/reference/slack), [Gizli Bilgiler](/tr/gateway/secrets), [Uçtan Uca Kalite Güvencesi Otomasyonu](/tr/concepts/qa-e2e-automation), [Sorun Giderme](/tr/channels/troubleshooting)</div>
+        <div className="maturity-category-docs">
+
+    [Slack](/tr/channels/slack), [Slack](/tr/plugins/reference/slack), [Gizli Değerler](/tr/gateway/secrets), [QA E2E Otomasyonu](/tr/concepts/qa-e2e-automation), [Sorun Giderme](/tr/channels/troubleshooting)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2679,17 +3456,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Slack](/tr/channels/slack), [Eşleştirme](/tr/channels/pairing)</div>
+        <div className="maturity-category-docs">
+
+    [Slack](/tr/channels/slack), [Eşleştirme](/tr/channels/pairing)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma Yönlendirme ve İletimi</span>
+          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimatı</span>
           <span>5 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Slack](/tr/channels/slack), [Bot Döngüsü Koruması](/tr/channels/bot-loop-protection), [Eşleştirme](/tr/channels/pairing)</div>
+        <div className="maturity-category-docs">
+
+    [Slack](/tr/channels/slack), [Bot Döngüsü Koruması](/tr/channels/bot-loop-protection), [Eşleştirme](/tr/channels/pairing)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2699,7 +3484,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Slack](/tr/channels/slack), [Uçtan Uca Kalite Güvencesi Otomasyonu](/tr/concepts/qa-e2e-automation)</div>
+        <div className="maturity-category-docs">
+
+    [Slack](/tr/channels/slack), [QA E2E Otomasyonu](/tr/concepts/qa-e2e-automation)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2709,7 +3498,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Slack](/tr/channels/slack), [Eğik Çizgi Komutları](/tr/tools/slash-commands), [Çalıştırma Onayları](/tr/tools/exec-approvals)</div>
+        <div className="maturity-category-docs">
+
+    [Slack](/tr/channels/slack), [Eğik Çizgi Komutları](/tr/tools/slash-commands), [Çalıştırma Onayları](/tr/tools/exec-approvals)
+
+    </div>
       </div>
     </div>
 
@@ -2726,13 +3519,17 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Kanal Kurulumu ve İşletimi</span>
+          <span className="maturity-category-title">Kanal Kurulumu ve Operasyonları</span>
           <span>11 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[BlueBubbles iMessage](/tr/announcements/bluebubbles-imessage), [BlueBubbles Üzerinden iMessage](/tr/channels/imessage-from-bluebubbles), [Kanal Yapılandırması](/tr/gateway/config-channels), [iMessage](/tr/channels/imessage)</div>
+        <div className="maturity-category-docs">
+
+    [BlueBubbles iMessage](/tr/announcements/bluebubbles-imessage), [BlueBubbles'dan iMessage'a](/tr/channels/imessage-from-bluebubbles), [Kanal Yapılandırması](/tr/gateway/config-channels), [iMessage](/tr/channels/imessage)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2742,17 +3539,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iMessage](/tr/channels/imessage), [BlueBubbles Üzerinden iMessage](/tr/channels/imessage-from-bluebubbles), [Kanal Yapılandırması](/tr/gateway/config-channels)</div>
+        <div className="maturity-category-docs">
+
+    [iMessage](/tr/channels/imessage), [BlueBubbles'dan iMessage'a](/tr/channels/imessage-from-bluebubbles), [Kanal Yapılandırması](/tr/gateway/config-channels)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimatı</span>
+          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimi</span>
           <span>4 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iMessage](/tr/channels/imessage)</div>
+        <div className="maturity-category-docs">
+
+    [iMessage](/tr/channels/imessage)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2762,7 +3567,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iMessage](/tr/channels/imessage), [BlueBubbles Üzerinden iMessage](/tr/channels/imessage-from-bluebubbles), [Kanal Yapılandırması](/tr/gateway/config-channels)</div>
+        <div className="maturity-category-docs">
+
+    [iMessage](/tr/channels/imessage), [BlueBubbles'dan iMessage](/tr/channels/imessage-from-bluebubbles), [Kanal Yapılandırması](/tr/gateway/config-channels)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2772,7 +3581,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[iMessage](/tr/channels/imessage)</div>
+        <div className="maturity-category-docs">
+
+    [iMessage](/tr/channels/imessage)
+
+    </div>
       </div>
     </div>
 
@@ -2781,7 +3594,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="WhatsApp - M3 Beta - 5 alan">
     <a id="whatsapp" />
 
-    Temel yol önemlidir ve belgelenmiştir; yukarı akıştaki Baileys/oturum değişkenliği, kararlılık düzeyinin altında kalmasına neden olur.
+    Temel yol önemlidir ve belgelenmiştir; yukarı akıştaki Baileys/oturum değişkenliği nedeniyle Kararlı düzeyinin altında kalır.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 66%</span><span>Tamlık Beta - 78%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -2795,7 +3608,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[WhatsApp](/tr/channels/whatsapp), [Kanal Yapılandırması](/tr/gateway/config-channels), [WhatsApp](/tr/plugins/reference/whatsapp), [QA E2E Otomasyonu](/tr/concepts/qa-e2e-automation), [Doctor](/tr/gateway/doctor)</div>
+        <div className="maturity-category-docs">
+
+    [WhatsApp](/tr/channels/whatsapp), [Kanal Yapılandırması](/tr/gateway/config-channels), [WhatsApp](/tr/plugins/reference/whatsapp), [QA Uçtan Uca Otomasyonu](/tr/concepts/qa-e2e-automation), [Doctor](/tr/gateway/doctor)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2805,17 +3622,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[WhatsApp](/tr/channels/whatsapp), [Kanal Yapılandırması](/tr/gateway/config-channels), [QA E2E Otomasyonu](/tr/concepts/qa-e2e-automation), [Eşleştirme](/tr/channels/pairing)</div>
+        <div className="maturity-category-docs">
+
+    [WhatsApp](/tr/channels/whatsapp), [Yapılandırma Kanalları](/tr/gateway/config-channels), [QA Uçtan Uca Otomasyonu](/tr/concepts/qa-e2e-automation), [Eşleştirme](/tr/channels/pairing)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimatı</span>
+          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimi</span>
           <span>4 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[WhatsApp](/tr/channels/whatsapp), [Grup Mesajları](/tr/channels/group-messages)</div>
+        <div className="maturity-category-docs">
+
+    [WhatsApp](/tr/channels/whatsapp), [Grup Mesajları](/tr/channels/group-messages)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2825,7 +3650,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[WhatsApp](/tr/channels/whatsapp)</div>
+        <div className="maturity-category-docs">
+
+    [WhatsApp](/tr/channels/whatsapp)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2835,16 +3664,20 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[WhatsApp](/tr/channels/whatsapp)</div>
+        <div className="maturity-category-docs">
+
+    [WhatsApp](/tr/channels/whatsapp)
+
+    </div>
       </div>
     </div>
 
   </Accordion>
 
-  <Accordion title="Matris - M2 Alfa - 6 alan">
+  <Accordion title="Matrix - M2 Alfa - 6 alan">
     <a id="matrix" />
 
-    Paketle birlikte gelen Plugin aracılığıyla desteklenir. Köprü, kimlik doğrulama ve oda yaşam döngüsü puan kartları gerektirir.
+    Paketle birlikte sunulan Plugin aracılığıyla desteklenir. Köprü, kimlik doğrulama ve oda yaşam döngüsü puan kartları gerekir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 60%</span><span>Tamlık Alfa - 67%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -2852,13 +3685,17 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Kanal Kurulumu ve İşletimi</span>
+          <span className="maturity-category-title">Kanal Kurulumu ve İşlemleri</span>
           <span>5 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>60%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "60%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Matrix](/tr/channels/matrix), [Matrix Geçişi](/tr/channels/matrix-migration)</div>
+        <div className="maturity-category-docs">
+
+    [Matrix](/tr/channels/matrix), [Matrix Geçişi](/tr/channels/matrix-migration)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2868,17 +3705,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>60%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "60%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Matrix](/tr/channels/matrix), [Gruplar](/tr/channels/groups), [Bot Döngüsü Koruması](/tr/channels/bot-loop-protection)</div>
+        <div className="maturity-category-docs">
+
+    [Matrix](/tr/channels/matrix), [Gruplar](/tr/channels/groups), [Bot Döngüsü Koruması](/tr/channels/bot-loop-protection)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimi</span>
+          <span className="maturity-category-title">Konuşma Yönlendirme ve İletimi</span>
           <span>1 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>60%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "60%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Matrix](/tr/channels/matrix)</div>
+        <div className="maturity-category-docs">
+
+    [Matrix](/tr/channels/matrix)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2888,7 +3733,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>60%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "60%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Matrix](/tr/channels/matrix)</div>
+        <div className="maturity-category-docs">
+
+    [Matrix](/tr/channels/matrix)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2898,7 +3747,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>60%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "60%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Matrix](/tr/channels/matrix)</div>
+        <div className="maturity-category-docs">
+
+    [Matrix](/tr/channels/matrix)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2908,7 +3761,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>60%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "60%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Matrix](/tr/channels/matrix), [Matrix Geçişi](/tr/channels/matrix-migration)</div>
+        <div className="maturity-category-docs">
+
+    [Matrix](/tr/channels/matrix), [Matrix Geçişi](/tr/channels/matrix-migration)
+
+    </div>
       </div>
     </div>
 
@@ -2917,7 +3774,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Google Chat - M2 Alfa - 5 alan">
     <a id="google-chat" />
 
-    Belgelenmiş bir kanal; ancak kurumsal/yönetici kurulumu olgunluk riskini artırıyor.
+    Belgelenmiş kanal, ancak kurumsal/yönetici kurulumu olgunluk riskini artırıyor.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 59%</span><span>Tamlık Alfa - 66%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -2925,13 +3782,17 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Kanal Kurulumu ve İşletimi</span>
+          <span className="maturity-category-title">Kanal Kurulumu ve İşlemleri</span>
           <span>16 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Google Chat](/tr/channels/googlechat), [Google Chat](/tr/plugins/reference/googlechat), [Kanal Yapılandırması](/tr/gateway/config-channels), [Sihirbaz CLI Başvurusu](/tr/start/wizard-cli-reference), [Gizli Bilgiler](/tr/gateway/secrets), [Secretref Kimlik Bilgisi Yüzeyi](/tr/reference/secretref-credential-surface), [Sistem Durumu](/tr/gateway/health), [Plugin Envanteri](/tr/plugins/plugin-inventory), [Dizin](/tr/channels/index)</div>
+        <div className="maturity-category-docs">
+
+    [Google Chat](/tr/channels/googlechat), [Google Chat](/tr/plugins/reference/googlechat), [Kanal Yapılandırması](/tr/gateway/config-channels), [Sihirbaz CLI Referansı](/tr/start/wizard-cli-reference), [Gizli Bilgiler](/tr/gateway/secrets), [Secretref Kimlik Bilgisi Yüzeyi](/tr/reference/secretref-credential-surface), [Sistem Durumu](/tr/gateway/health), [Plugin Envanteri](/tr/plugins/plugin-inventory), [Dizin](/tr/channels/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2941,17 +3802,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Google Chat](/tr/channels/googlechat), [Eşleştirme](/tr/channels/pairing), [Erişim Grupları](/tr/channels/access-groups), [Kanal Yapılandırması](/tr/gateway/config-channels), [Bot Döngüsü Koruması](/tr/channels/bot-loop-protection), [Kanal Yönlendirme](/tr/channels/channel-routing)</div>
+        <div className="maturity-category-docs">
+
+    [Google Chat](/tr/channels/googlechat), [Eşleştirme](/tr/channels/pairing), [Erişim Grupları](/tr/channels/access-groups), [Kanal Yapılandırması](/tr/gateway/config-channels), [Bot Döngüsü Koruması](/tr/channels/bot-loop-protection), [Kanal Yönlendirme](/tr/channels/channel-routing)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma Yönlendirme ve İletimi</span>
+          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslim</span>
           <span>1 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Google Chat](/tr/channels/googlechat), [Bot Döngüsü Koruması](/tr/channels/bot-loop-protection), [Erişim Grupları](/tr/channels/access-groups), [Kanal Yönlendirme](/tr/channels/channel-routing)</div>
+        <div className="maturity-category-docs">
+
+    [Google Chat](/tr/channels/googlechat), [Bot Döngüsü Koruması](/tr/channels/bot-loop-protection), [Erişim Grupları](/tr/channels/access-groups), [Kanal Yönlendirme](/tr/channels/channel-routing)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2961,7 +3830,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Google Chat](/tr/channels/googlechat), [Mesaj](/tr/cli/message), [Medya Anlama](/tr/nodes/media-understanding), [Secretref Kimlik Bilgisi Yüzeyi](/tr/reference/secretref-credential-surface)</div>
+        <div className="maturity-category-docs">
+
+    [Google Chat](/tr/channels/googlechat), [Mesaj](/tr/cli/message), [Medya Anlama](/tr/nodes/media-understanding), [Secretref Kimlik Bilgisi Yüzeyi](/tr/reference/secretref-credential-surface)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -2971,7 +3844,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Google Chat](/tr/channels/googlechat), [Mesaj](/tr/cli/message), [Medya Anlama](/tr/nodes/media-understanding), [Secretref Kimlik Bilgisi Yüzeyi](/tr/reference/secretref-credential-surface), [Tepkiler](/tr/tools/reactions), [Eğik Çizgi Komutları](/tr/tools/slash-commands), [Ajan Yapılandırması](/tr/gateway/config-agents), [Mesaj Yaşam Döngüsü Yeniden Düzenlemesi](/tr/concepts/message-lifecycle-refactor)</div>
+        <div className="maturity-category-docs">
+
+    [Google Chat](/tr/channels/googlechat), [Mesaj](/tr/cli/message), [Medya Anlama](/tr/nodes/media-understanding), [Secretref Kimlik Bilgisi Yüzeyi](/tr/reference/secretref-credential-surface), [Tepkiler](/tr/tools/reactions), [Eğik Çizgi Komutları](/tr/tools/slash-commands), [Ajanları Yapılandırma](/tr/gateway/config-agents), [Mesaj Yaşam Döngüsü Yeniden Düzenlemesi](/tr/concepts/message-lifecycle-refactor)
+
+    </div>
       </div>
     </div>
 
@@ -2980,7 +3857,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Microsoft Teams - M2 Alfa - 5 alan">
     <a id="microsoft-teams" />
 
-    Kurumsal kimlik doğrulama/yönetici akışları için açık senaryo kanıtı gereklidir.
+    Kurumsal kimlik doğrulama/yönetici akışları açık senaryo kanıtı gerektirir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 59%</span><span>Tamlık Alfa - 66%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -2988,13 +3865,17 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Kanal Kurulumu ve İşletimi</span>
+          <span className="maturity-category-title">Kanal Kurulumu ve İşlemleri</span>
           <span>9 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Msteams](/tr/channels/msteams), [Msteams](/tr/plugins/reference/msteams), [Kanal Yapılandırması](/tr/gateway/config-channels), [Sağlık](/tr/gateway/health)</div>
+        <div className="maturity-category-docs">
+
+    [Microsoft Teams](/tr/channels/msteams), [Microsoft Teams](/tr/plugins/reference/msteams), [Yapılandırma Kanalları](/tr/gateway/config-channels), [Sağlık](/tr/gateway/health)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3004,7 +3885,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Msteams](/tr/channels/msteams), [Eşleştirme](/tr/channels/pairing), [Erişim Grupları](/tr/channels/access-groups)</div>
+        <div className="maturity-category-docs">
+
+    [Microsoft Teams](/tr/channels/msteams), [Eşleştirme](/tr/channels/pairing), [Erişim Grupları](/tr/channels/access-groups)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3014,7 +3899,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Msteams](/tr/channels/msteams), [Gruplar](/tr/channels/groups), [Kanal Yönlendirme](/tr/channels/channel-routing)</div>
+        <div className="maturity-category-docs">
+
+    [Microsoft Teams](/tr/channels/msteams), [Gruplar](/tr/channels/groups), [Kanal Yönlendirme](/tr/channels/channel-routing)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3024,7 +3913,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Msteams](/tr/channels/msteams)</div>
+        <div className="maturity-category-docs">
+
+    [Microsoft Teams](/tr/channels/msteams)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3034,7 +3927,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Msteams](/tr/channels/msteams), [Gelişmiş Yürütme Onayları](/tr/tools/exec-approvals-advanced)</div>
+        <div className="maturity-category-docs">
+
+    [Microsoft Teams](/tr/channels/msteams), [Gelişmiş Çalıştırma Onayları](/tr/tools/exec-approvals-advanced)
+
+    </div>
       </div>
     </div>
 
@@ -3057,7 +3954,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Signal](/tr/channels/signal), [Signal](/tr/plugins/reference/signal)</div>
+        <div className="maturity-category-docs">
+
+    [Signal](/tr/channels/signal), [Signal](/tr/plugins/reference/signal)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3067,17 +3968,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Signal](/tr/channels/signal)</div>
+        <div className="maturity-category-docs">
+
+    [Signal](/tr/channels/signal)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimatı</span>
+          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimi</span>
           <span>1 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Signal](/tr/channels/signal)</div>
+        <div className="maturity-category-docs">
+
+    [Signal](/tr/channels/signal)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3087,7 +3996,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Signal](/tr/channels/signal)</div>
+        <div className="maturity-category-docs">
+
+    [Signal](/tr/channels/signal)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3097,7 +4010,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>59%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "59%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Signal](/tr/channels/signal)</div>
+        <div className="maturity-category-docs">
+
+    [Signal](/tr/channels/signal)
+
+    </div>
       </div>
     </div>
 
@@ -3106,7 +4023,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Feishu, QQ Bot, WeChat, Yuanbao, Zalo, Zalo Personal, bölgesel kanallar - M2 Alfa - 4 alan">
     <a id="feishu-qq-bot-wechat-yuanbao-zalo-zalo-personal-regional-channels" />
 
-    Önemli bir bölgesel kapsam sunar, ancak genel destek düzeyi hesap türüne, üst sistem onayına ve bakım sorumlularının sunduğu kanıtlara göre belirlenmelidir.
+    Önemli bölgesel kapsam sağlar, ancak herkese açık destek düzeyi hesap türüne, üst kaynak onayına ve bakım sorumlusu kanıtına göre ayarlanmalıdır.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 55%</span><span>Tamlık Alfa - 58%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -3114,13 +4031,17 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Kanal Kurulumu ve İşletimi</span>
+          <span className="maturity-category-title">Kanal Kurulumu ve İşlemleri</span>
           <span>6 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/channels/index), [Eşleştirme](/tr/channels/pairing), [Feishu](/tr/plugins/reference/feishu), [Mimari İç Yapısı](/tr/plugins/architecture-internals)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/channels/index), [Eşleştirme](/tr/channels/pairing), [Feishu](/tr/plugins/reference/feishu), [Mimari İç Yapısı](/tr/plugins/architecture-internals)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3130,7 +4051,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>53%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "53%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>54%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "54%" }} /></span></span></div>
-        <div className="maturity-category-docs">Bağlantılı belge yok</div>
+        <div className="maturity-category-docs">
+
+    Bağlantılı belge yok
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3140,7 +4065,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>53%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "53%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>54%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "54%" }} /></span></span></div>
-        <div className="maturity-category-docs">Bağlantılı belge yok</div>
+        <div className="maturity-category-docs">
+
+    Bağlantılı belge yok
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3150,7 +4079,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>53%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "53%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>54%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "54%" }} /></span></span></div>
-        <div className="maturity-category-docs">Bağlantılı belge yok</div>
+        <div className="maturity-category-docs">
+
+    Bağlantılı belge yok
+
+    </div>
       </div>
     </div>
 
@@ -3159,7 +4092,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Mattermost, LINE, IRC, Nextcloud Talk, Nostr, Twitch, Tlon, Synology Chat - M2 Alfa - 4 alan">
     <a id="mattermost-line-irc-nextcloud-talk-nostr-twitch-tlon-synology-chat" />
 
-    Desteklenen yüzeyler mevcut, ancak olgunluk düzeyi muhtemelen üst kaynak ve bakım sorumlusu kapsamına göre değişmektedir. Daha sonra ayrı ayrı puanlayın.
+    Desteklenen yüzeyler mevcut, ancak olgunluk düzeyi muhtemelen üst kaynak ve bakım sorumlusu kapsamına göre değişir. Daha sonra ayrı ayrı puanlayın.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 53%</span><span>Tamlık Alfa - 54%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -3173,7 +4106,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>53%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "53%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>54%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "54%" }} /></span></span></div>
-        <div className="maturity-category-docs">Bağlantılı belge yok</div>
+        <div className="maturity-category-docs">
+
+    Bağlantılı belge yok
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3183,17 +4120,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>53%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "53%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>54%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "54%" }} /></span></span></div>
-        <div className="maturity-category-docs">Bağlantılı belge yok</div>
+        <div className="maturity-category-docs">
+
+    Bağlantılı belge yok
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma Yönlendirme ve İletimi</span>
+          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimatı</span>
           <span>1 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>53%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "53%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>54%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "54%" }} /></span></span></div>
-        <div className="maturity-category-docs">Bağlantılı belge yok</div>
+        <div className="maturity-category-docs">
+
+    Bağlantılı belge yok
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3203,7 +4148,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>53%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "53%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>54%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "54%" }} /></span></span></div>
-        <div className="maturity-category-docs">Bağlantılı belge yok</div>
+        <div className="maturity-category-docs">
+
+    Bağlantılı belge yok
+
+    </div>
       </div>
     </div>
 
@@ -3212,7 +4161,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Sesli Arama kanalı - M1 Deneysel - 5 alan">
     <a id="voice-call-channel" />
 
-    Karmaşık gerçek zamanlı davranışa sahip isteğe bağlı/Plugin yolu. Genel beta öncesinde senaryo puan kartı gerektirir.
+    Karmaşık gerçek zamanlı davranışa sahip isteğe bağlı/plugin yolu. Genel beta öncesinde senaryo puan kartı gerektirir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Deneysel - 41%</span><span>Tamlık Deneysel - 44%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -3226,7 +4175,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Sesli Arama](/tr/cli/voicecall), [Sesli Arama](/tr/plugins/voice-call), [Protokol](/tr/gateway/protocol)</div>
+        <div className="maturity-category-docs">
+
+    [Voicecall](/tr/cli/voicecall), [Sesli Arama](/tr/plugins/voice-call), [Protokol](/tr/gateway/protocol)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3236,17 +4189,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Sesli Arama](/tr/plugins/voice-call), [Sesli Arama](/tr/cli/voicecall)</div>
+        <div className="maturity-category-docs">
+
+    [Sesli Arama](/tr/plugins/voice-call), [Voicecall](/tr/cli/voicecall)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Konuşma Yönlendirme ve Teslimi</span>
+          <span className="maturity-category-title">Görüşme Yönlendirme ve Teslim</span>
           <span>1 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Sesli Arama](/tr/plugins/voice-call)</div>
+        <div className="maturity-category-docs">
+
+    [Sesli Arama](/tr/plugins/voice-call)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3256,7 +4217,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Sesli Arama](/tr/plugins/voice-call), [Plugin Envanteri](/tr/plugins/plugin-inventory)</div>
+        <div className="maturity-category-docs">
+
+    [Sesli Arama](/tr/plugins/voice-call), [Plugin Envanteri](/tr/plugins/plugin-inventory)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3266,7 +4231,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>41%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "41%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Sesli Arama](/tr/plugins/voice-call)</div>
+        <div className="maturity-category-docs">
+
+    [Sesli Arama](/tr/plugins/voice-call)
+
+    </div>
       </div>
     </div>
 
@@ -3277,10 +4246,10 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
 ### Sağlayıcı ve araç
 
 <AccordionGroup>
-  <Accordion title="Tarayıcı otomasyonu, exec ve sandbox araçları - M3 Beta - 3 alan">
+  <Accordion title="Tarayıcı otomasyonu, exec ve korumalı alan araçları - M3 Beta - 3 alan">
     <a id="browser-automation-exec-and-sandbox-tools" />
 
-    Temel araçlar belgelenmiştir ancak ana makine güvenliği ve izin kullanıcı deneyimi, aktif puan kartı incelemesi altında tutulmalıdır.
+    Temel araçlar belgelenmiştir, ancak ana makine güvenliği ve izin kullanıcı deneyimi etkin puan kartı incelemesi altında kalmalıdır.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 21%</span><span>Kalite Beta - 75%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 2</span></span></div>
 
@@ -3294,7 +4263,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>13%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "13%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Tarayıcı Denetimi](/tr/tools/browser-control), [Test Etme](/tr/help/testing), [Tarayıcı](/tr/tools/browser), [Dizin](/tr/gateway/security/index), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)</div>
+        <div className="maturity-category-docs">
+
+    [Tarayıcı Denetimi](/tr/tools/browser-control), [Test Etme](/tr/help/testing), [Tarayıcı](/tr/tools/browser), [Dizin](/tr/gateway/security/index), [Denetim Kontrolleri](/tr/gateway/security/audit-checks)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3304,7 +4277,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>50%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "50%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Yürütme](/tr/tools/exec), [Arka Plan Süreci](/tr/gateway/background-process), [Araç Çağırma HTTP API'si](/tr/gateway/tools-invoke-http-api), [Operatör Kapsamları](/tr/gateway/operator-scopes), [Protokol](/tr/gateway/protocol), [Yürütme Onayları](/tr/tools/exec-approvals), [Gelişmiş Yürütme Onayları](/tr/tools/exec-approvals-advanced), [Yükseltilmiş Yetkiler](/tr/tools/elevated)</div>
+        <div className="maturity-category-docs">
+
+    [Yürütme](/tr/tools/exec), [Arka Plan İşlemi](/tr/gateway/background-process), [Araçlarla HTTP API Çağırma](/tr/gateway/tools-invoke-http-api), [Operatör Kapsamları](/tr/gateway/operator-scopes), [Protokol](/tr/gateway/protocol), [Yürütme Onayları](/tr/tools/exec-approvals), [Gelişmiş Yürütme Onayları](/tr/tools/exec-approvals-advanced), [Yükseltilmiş](/tr/tools/elevated)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3314,7 +4291,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Korumalı Alan Kullanımı](/tr/gateway/sandboxing), [Korumalı Alan, Araç Politikası ve Yükseltilmiş Yetkiler Karşılaştırması](/tr/gateway/sandbox-vs-tool-policy-vs-elevated), [Çoklu Agent Korumalı Alan Araçları](/tr/tools/multi-agent-sandbox-tools), [Codex Çalıştırma Ortamı Başvurusu](/tr/plugins/codex-harness-reference), [Yapılandırma Araçları](/tr/gateway/config-tools)</div>
+        <div className="maturity-category-docs">
+
+    [Korumalı Alan Kullanımı](/tr/gateway/sandboxing), [Korumalı Alan ile Araç Politikası ile Yükseltilmiş Karşılaştırması](/tr/gateway/sandbox-vs-tool-policy-vs-elevated), [Çoklu Ajan Korumalı Alan Araçları](/tr/tools/multi-agent-sandbox-tools), [Codex Çalıştırma Ortamı Referansı](/tr/plugins/codex-harness-reference), [Yapılandırma Araçları](/tr/gateway/config-tools)
+
+    </div>
       </div>
     </div>
 
@@ -3323,7 +4304,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="OpenAI ve Codex sağlayıcı yolu - M3 Beta - 5 alan">
     <a id="openai-and-codex-provider-path" />
 
-    Ayrıntılı belgeler, OAuth/abonelik yolu, gerçek zamanlı ses, görüntü ve uyumluluk davranışı. Sağlayıcıdaki sık değişiklikler, sürüm puan kartı kanıtı olmadan bunun Kararlı düzeye ulaşmasını engelliyor.
+    Ayrıntılı belgeler, OAuth/abonelik yolu, gerçek zamanlı ses, görüntü ve uyumluluk davranışı. Sağlayıcı değişkenliği, sürüm puan kartı kanıtı olmadan bunun Kararlı düzeye ulaşmasını engelliyor.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 26%</span><span>Kalite Beta - 74%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-partial">Kısmi - 3</span></span></div>
 
@@ -3337,27 +4318,39 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenAI](/tr/providers/openai), [Codex Çalıştırma Ortamı](/tr/plugins/codex-harness), [Modeller](/tr/concepts/models), [OAuth](/tr/concepts/oauth), [Codex Çalıştırma Ortamı Başvurusu](/tr/plugins/codex-harness-reference), [Kimlik Doğrulama İzleme](/tr/gateway/authentication)</div>
+        <div className="maturity-category-docs">
+
+    [OpenAI](/tr/providers/openai), [Codex Çalıştırma Ortamı](/tr/plugins/codex-harness), [Modeller](/tr/concepts/models), [OAuth](/tr/concepts/oauth), [Codex Çalıştırma Ortamı Referansı](/tr/plugins/codex-harness-reference), [Kimlik Doğrulama İzleme](/tr/gateway/authentication)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Yanıt ve Araç Uyumluluğu</span>
+          <span className="maturity-category-title">Yanıtlar ve Araç Uyumluluğu</span>
           <span>4 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>40%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "40%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenAI](/tr/providers/openai), [OpenResponses HTTP API](/tr/gateway/openresponses-http-api), [OpenAI HTTP API](/tr/gateway/openai-http-api), [Yerel Codex Pluginleri](/tr/plugins/codex-native-plugins)</div>
+        <div className="maturity-category-docs">
+
+    [OpenAI](/tr/providers/openai), [OpenResponses HTTP API](/tr/gateway/openresponses-http-api), [OpenAI HTTP API](/tr/gateway/openai-http-api), [Codex Yerel Pluginleri](/tr/plugins/codex-native-plugins)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Yerel Codex Çalıştırma Ortamı</span>
+          <span className="maturity-category-title">Yerel Codex Harness</span>
           <span>2 yetenek / LTS destekli</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>44%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "44%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Codex Çalıştırma Ortamı](/tr/plugins/codex-harness), [Codex Çalıştırma Ortamı Çalışma Zamanı](/tr/plugins/codex-harness-runtime), [Codex Çalıştırma Ortamı Başvurusu](/tr/plugins/codex-harness-reference), [Yerel Codex Pluginleri](/tr/plugins/codex-native-plugins)</div>
+        <div className="maturity-category-docs">
+
+    [Codex Harness](/tr/plugins/codex-harness), [Codex Harness Çalışma Zamanı](/tr/plugins/codex-harness-runtime), [Codex Harness Başvurusu](/tr/plugins/codex-harness-reference), [Yerel Codex Pluginleri](/tr/plugins/codex-native-plugins)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3367,7 +4360,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenAI](/tr/providers/openai), [Görüntü Oluşturma](/tr/tools/image-generation), [Görüntüler](/tr/nodes/images)</div>
+        <div className="maturity-category-docs">
+
+    [OpenAI](/tr/providers/openai), [Görüntü Oluşturma](/tr/tools/image-generation), [Görüntüler](/tr/nodes/images)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3377,7 +4374,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>67%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "67%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[OpenAI](/tr/providers/openai), [Discord](/tr/channels/discord), [Sesli Arama](/tr/plugins/voice-call)</div>
+        <div className="maturity-category-docs">
+
+    [OpenAI](/tr/providers/openai), [Discord](/tr/channels/discord), [Sesli Arama](/tr/plugins/voice-call)
+
+    </div>
       </div>
     </div>
 
@@ -3386,12 +4387,12 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Web arama araçları - M3 Beta - 4 alan">
     <a id="web-search-tools" />
 
-    Birden fazla sağlayıcı ve belge mevcuttur. Her sağlayıcı ailesi için kota/hata/SSRF kanıtı gereklidir.
+    Birden çok sağlayıcı ve belge mevcuttur. Her sağlayıcı ailesi için kota/hata/SSRF kanıtı gerekir.
 
-    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - %9</span><span>Kalite Beta - %74</span><span>Tamlık Beta - %79</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 9%</span><span>Kalite Beta - 74%</span><span>Tamlık Beta - 79%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
-      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsama</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
+      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Arama Sağlayıcıları</span>
@@ -3400,7 +4401,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>11%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "11%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Web](/tr/tools/web), [Brave Arama](/tr/tools/brave-search), [Tavily](/tr/tools/tavily), [Exa Arama](/tr/tools/exa-search), [Firecrawl](/tr/tools/firecrawl), [Perplexity Arama](/tr/tools/perplexity-search), [Duckduckgo Arama](/tr/tools/duckduckgo-search), [Searxng Arama](/tr/tools/searxng-search), [Gemini Arama](/tr/tools/gemini-search), [Grok Arama](/tr/tools/grok-search), [Kimi Arama](/tr/tools/kimi-search), [Minimax Arama](/tr/tools/minimax-search), [Ollama Arama](/tr/tools/ollama-search), [Sdk Alt Yolları](/tr/plugins/sdk-subpaths), [Sdk Genel Bakış](/tr/plugins/sdk-overview), [Manifest](/tr/plugins/manifest)</div>
+        <div className="maturity-category-docs">
+
+    [Web](/tr/tools/web), [Brave Search](/tr/tools/brave-search), [Tavily](/tr/tools/tavily), [Exa Search](/tr/tools/exa-search), [Firecrawl](/tr/tools/firecrawl), [Perplexity Search](/tr/tools/perplexity-search), [Duckduckgo Search](/tr/tools/duckduckgo-search), [Searxng Search](/tr/tools/searxng-search), [Gemini Search](/tr/tools/gemini-search), [Grok Search](/tr/tools/grok-search), [Kimi Search](/tr/tools/kimi-search), [Minimax Search](/tr/tools/minimax-search), [Ollama Search](/tr/tools/ollama-search), [Sdk Alt Yolları](/tr/plugins/sdk-subpaths), [Sdk Genel Bakışı](/tr/plugins/sdk-overview), [Manifest](/tr/plugins/manifest)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3410,7 +4415,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Web](/tr/tools/web), [Web Getirme](/tr/tools/web-fetch), [SSS](/tr/help/faq), [API Kullanım Maliyetleri](/tr/reference/api-usage-costs), [Brave Arama](/tr/tools/brave-search), [Perplexity Arama](/tr/tools/perplexity-search), [Tavily](/tr/tools/tavily), [Firecrawl](/tr/tools/firecrawl)</div>
+        <div className="maturity-category-docs">
+
+    [Web](/tr/tools/web), [Web Getirme](/tr/tools/web-fetch), [SSS](/tr/help/faq), [API Kullanım Maliyetleri](/tr/reference/api-usage-costs), [Brave Search](/tr/tools/brave-search), [Perplexity Search](/tr/tools/perplexity-search), [Tavily](/tr/tools/tavily), [Firecrawl](/tr/tools/firecrawl)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3420,7 +4429,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Web](/tr/tools/web), [Web Getirme](/tr/tools/web-fetch), [Firecrawl](/tr/tools/firecrawl), [Searxng Arama](/tr/tools/searxng-search)</div>
+        <div className="maturity-category-docs">
+
+    [Web](/tr/tools/web), [Web Getirme](/tr/tools/web-fetch), [Firecrawl](/tr/tools/firecrawl), [Searxng Search](/tr/tools/searxng-search)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3430,7 +4443,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>25%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "25%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Yapılandırma Araçları](/tr/gateway/config-tools), [Web Getirme](/tr/tools/web-fetch), [Web](/tr/tools/web), [SSS](/tr/help/faq)</div>
+        <div className="maturity-category-docs">
+
+    [Yapılandırma Araçları](/tr/gateway/config-tools), [Web Getirme](/tr/tools/web-fetch), [Web](/tr/tools/web), [SSS](/tr/help/faq)
+
+    </div>
       </div>
     </div>
 
@@ -3439,9 +4456,9 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Anthropic sağlayıcı yolu - M3 Beta - 5 alan">
     <a id="anthropic-provider-path" />
 
-    Birinci sınıf model sağlayıcısı. Yinelenen kimlik doğrulama/katalog/araç çağrısı senaryosu kanıtına ihtiyaç duyar.
+    Birinci sınıf model sağlayıcısı. Yinelenen kimlik doğrulama/katalog/araç çağrısı senaryosu kanıtı gerekir.
 
-    <div className="maturity-surface-rollup"><span>Kapsama Deneysel - 0%</span><span>Kalite Beta - 71%</span><span>Tamlık Beta - 78%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Beta - 71%</span><span>Tamlık Beta - 78%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
       <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
@@ -3453,7 +4470,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Anthropic](/tr/providers/anthropic), [Doctor](/tr/gateway/doctor), [Yapılandırma Örnekleri](/tr/gateway/configuration-examples), [Sorun Giderme](/tr/gateway/troubleshooting), [İstem Önbelleğe Alma](/tr/reference/prompt-caching)</div>
+        <div className="maturity-category-docs">
+
+    [Anthropic](/tr/providers/anthropic), [Doctor](/tr/gateway/doctor), [Yapılandırma Örnekleri](/tr/gateway/configuration-examples), [Sorun Giderme](/tr/gateway/troubleshooting), [İstem Önbelleğe Alma](/tr/reference/prompt-caching)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3463,17 +4484,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Anthropic](/tr/providers/anthropic), [Ajan Yapılandırması](/tr/gateway/config-agents), [Modeller](/tr/concepts/models), [CLI Arka Uçları](/tr/gateway/cli-backends)</div>
+        <div className="maturity-category-docs">
+
+    [Anthropic](/tr/providers/anthropic), [Aracıları Yapılandırma](/tr/gateway/config-agents), [Modeller](/tr/concepts/models), [CLI Arka Uçları](/tr/gateway/cli-backends)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">İstek Aktarımı ve Tur Anlam Bilimi</span>
+          <span className="maturity-category-title">İstek Aktarımı ve Tur Semantiği</span>
           <span>10 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>77%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "77%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>79%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "79%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Anthropic](/tr/providers/anthropic), [İstem Önbelleğe Alma](/tr/reference/prompt-caching), [Sorun Giderme](/tr/gateway/troubleshooting), [CLI Arka Uçları](/tr/gateway/cli-backends), [Model Sağlayıcıları](/tr/concepts/model-providers)</div>
+        <div className="maturity-category-docs">
+
+    [Anthropic](/tr/providers/anthropic), [İstem Önbelleğe Alma](/tr/reference/prompt-caching), [Sorun Giderme](/tr/gateway/troubleshooting), [CLI Arka Uçları](/tr/gateway/cli-backends), [Model Sağlayıcıları](/tr/concepts/model-providers)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3483,7 +4512,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Anthropic](/tr/providers/anthropic), [İstem Önbelleğe Alma](/tr/reference/prompt-caching), [Sorun Giderme](/tr/gateway/troubleshooting), [Heartbeat](/tr/gateway/heartbeat)</div>
+        <div className="maturity-category-docs">
+
+    [Anthropic](/tr/providers/anthropic), [İstem Önbelleğe Alma](/tr/reference/prompt-caching), [Sorun Giderme](/tr/gateway/troubleshooting), [Heartbeat](/tr/gateway/heartbeat)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3493,7 +4526,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Anthropic](/tr/providers/anthropic), [Ajan Yapılandırması](/tr/gateway/config-agents)</div>
+        <div className="maturity-category-docs">
+
+    [Anthropic](/tr/providers/anthropic), [Aracıları Yapılandırma](/tr/gateway/config-agents)
+
+    </div>
       </div>
     </div>
 
@@ -3516,7 +4553,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Google](/tr/providers/google), [Model Sağlayıcıları](/tr/concepts/model-providers)</div>
+        <div className="maturity-category-docs">
+
+    [Google](/tr/providers/google), [Model Sağlayıcıları](/tr/concepts/model-providers)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3526,7 +4567,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Google](/tr/providers/google), [Model Sağlayıcıları](/tr/concepts/model-providers), [Google](/tr/plugins/reference/google), [Gemini Araması](/tr/tools/gemini-search)</div>
+        <div className="maturity-category-docs">
+
+    [Google](/tr/providers/google), [Model Sağlayıcıları](/tr/concepts/model-providers), [Google](/tr/plugins/reference/google), [Gemini Arama](/tr/tools/gemini-search)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3536,17 +4581,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Google](/tr/providers/google), [Model Sağlayıcıları](/tr/concepts/model-providers), [Model SSS](/tr/help/faq-models), [Canlı Test](/tr/help/testing-live)</div>
+        <div className="maturity-category-docs">
+
+    [Google](/tr/providers/google), [Model Sağlayıcıları](/tr/concepts/model-providers), [SSS Modelleri](/tr/help/faq-models), [Canlı Test](/tr/help/testing-live)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Medya, Arama ve Gerçek Zamanlı İşlemler</span>
+          <span className="maturity-category-title">Medya, Arama ve Gerçek Zamanlı</span>
           <span>10 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Google](/tr/plugins/reference/google), [Google](/tr/providers/google)</div>
+        <div className="maturity-category-docs">
+
+    [Google](/tr/plugins/reference/google), [Google](/tr/providers/google)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3556,7 +4609,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[İstem Önbelleğe Alma](/tr/reference/prompt-caching), [Google](/tr/providers/google), [Model Sağlayıcıları](/tr/concepts/model-providers), [Token Kullanımı](/tr/reference/token-use)</div>
+        <div className="maturity-category-docs">
+
+    [İstem Önbelleğe Alma](/tr/reference/prompt-caching), [Google](/tr/providers/google), [Model Sağlayıcıları](/tr/concepts/model-providers), [Token Kullanımı](/tr/reference/token-use)
+
+    </div>
       </div>
     </div>
 
@@ -3565,7 +4622,7 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="OpenRouter sağlayıcı yolu - M3 Beta - 4 alan">
     <a id="openrouter-provider-path" />
 
-    Birleşik sağlayıcı yolu belgelenmiştir ve değerlidir, ancak modele özgü davranışlar değişiklik gösterir.
+    Birleştirilmiş sağlayıcı yolu belgelenmiştir ve değerlidir, ancak modele özgü davranışlar değişiklik gösterir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 66%</span><span>Tamlık Beta - 78%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -3579,7 +4636,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Openrouter](/tr/providers/openrouter), [Model Sağlayıcıları](/tr/concepts/model-providers), [Yapılandırma](/tr/cli/configure), [Kimlik Doğrulama](/tr/gateway/authentication), [Ortam](/tr/help/environment), [Modeller](/tr/cli/models), [Modeller](/tr/concepts/models)</div>
+        <div className="maturity-category-docs">
+
+    [Openrouter](/tr/providers/openrouter), [Model Sağlayıcıları](/tr/concepts/model-providers), [Yapılandırma](/tr/cli/configure), [Kimlik Doğrulama](/tr/gateway/authentication), [Ortam](/tr/help/environment), [Modeller](/tr/cli/models), [Modeller](/tr/concepts/models)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3589,7 +4650,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Openrouter](/tr/providers/openrouter), [Model Sağlayıcıları](/tr/concepts/model-providers), [İstem Önbelleğe Alma](/tr/reference/prompt-caching)</div>
+        <div className="maturity-category-docs">
+
+    [Openrouter](/tr/providers/openrouter), [Model Sağlayıcıları](/tr/concepts/model-providers), [İstem Önbelleğe Alma](/tr/reference/prompt-caching)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3599,7 +4664,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Model Yük Devretme](/tr/concepts/model-failover), [Openrouter](/tr/providers/openrouter), [Modeller](/tr/cli/models)</div>
+        <div className="maturity-category-docs">
+
+    [Model Yük Devretme](/tr/concepts/model-failover), [Openrouter](/tr/providers/openrouter), [Modeller](/tr/cli/models)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3609,16 +4678,20 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>66%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "66%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-beta"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-beta">Beta</span><span>78%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "78%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Openrouter](/tr/providers/openrouter), [Görüntü Üretimi](/tr/tools/image-generation), [Müzik Üretimi](/tr/tools/music-generation), [Medyaya Genel Bakış](/tr/tools/media-overview), [Video Üretimi](/tr/tools/video-generation), [Tts](/tr/tools/tts)</div>
+        <div className="maturity-category-docs">
+
+    [Openrouter](/tr/providers/openrouter), [Görsel Üretimi](/tr/tools/image-generation), [Müzik Üretimi](/tr/tools/music-generation), [Medyaya Genel Bakış](/tr/tools/media-overview), [Video Üretimi](/tr/tools/video-generation), [Tts](/tr/tools/tts)
+
+    </div>
       </div>
     </div>
 
   </Accordion>
 
-  <Accordion title="Görüntü, video ve müzik üretim araçları - M2 Alfa - 5 alan">
+  <Accordion title="Görsel, video ve müzik üretim araçları - M2 Alfa - 5 alan">
     <a id="image-video-and-music-generation-tools" />
 
-    Yetenek çeşitli sağlayıcılarda mevcuttur ancak kalite, gecikme ve parametre uyumluluğu, sağlayıcı başına kanıt olmadan beta düzeyi için fazlasıyla değişkenlik gösterir.
+    Yetenek, sağlayıcılar genelinde mevcuttur ancak kalite, gecikme süresi ve parametre uyumluluğu, sağlayıcı başına kanıt olmadan beta için fazlasıyla değişkenlik göstermektedir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 61%</span><span>Tamlık Alfa - 68%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
@@ -3632,27 +4705,39 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Yapılandırma Aracıları](/tr/gateway/config-agents), [Görüntü Oluşturma](/tr/tools/image-generation), [Video Oluşturma](/tr/tools/video-generation), [Müzik Oluşturma](/tr/tools/music-generation)</div>
+        <div className="maturity-category-docs">
+
+    [Yapılandırma Aracıları](/tr/gateway/config-agents), [Görsel Üretimi](/tr/tools/image-generation), [Video Üretimi](/tr/tools/video-generation), [Müzik Üretimi](/tr/tools/music-generation)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Görev Yaşam Döngüsü ve Teslimi</span>
+          <span className="maturity-category-title">Görev Yaşam Döngüsü ve Teslimat</span>
           <span>12 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Medyaya Genel Bakış](/tr/tools/media-overview), [Görüntü Oluşturma](/tr/tools/image-generation), [Video Oluşturma](/tr/tools/video-generation), [Müzik Oluşturma](/tr/tools/music-generation)</div>
+        <div className="maturity-category-docs">
+
+    [Medya Genel Bakışı](/tr/tools/media-overview), [Görsel Oluşturma](/tr/tools/image-generation), [Video Oluşturma](/tr/tools/video-generation), [Müzik Oluşturma](/tr/tools/music-generation)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Görüntü Oluşturma</span>
+          <span className="maturity-category-title">Görsel Oluşturma</span>
           <span>9 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Görüntü Oluşturma](/tr/tools/image-generation), [Çıkarım](/tr/cli/infer), [Medyaya Genel Bakış](/tr/tools/media-overview)</div>
+        <div className="maturity-category-docs">
+
+    [Görsel Oluşturma](/tr/tools/image-generation), [Çıkarım](/tr/cli/infer), [Medya Genel Bakışı](/tr/tools/media-overview)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3662,7 +4747,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Video Oluşturma](/tr/tools/video-generation), [Runway](/tr/providers/runway), [Pixverse](/tr/providers/pixverse), [Fal](/tr/providers/fal), [Openrouter](/tr/providers/openrouter)</div>
+        <div className="maturity-category-docs">
+
+    [Video Oluşturma](/tr/tools/video-generation), [Runway](/tr/providers/runway), [Pixverse](/tr/providers/pixverse), [Fal](/tr/providers/fal), [Openrouter](/tr/providers/openrouter)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3672,7 +4761,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Müzik Oluşturma](/tr/tools/music-generation)</div>
+        <div className="maturity-category-docs">
+
+    [Müzik Oluşturma](/tr/tools/music-generation)
+
+    </div>
       </div>
     </div>
 
@@ -3681,12 +4774,12 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Yerel model sağlayıcıları: Ollama, vLLM, SGLang, LM Studio - M2 Alfa - 5 alan">
     <a id="local-model-providers-ollama-vllm-sglang-lm-studio" />
 
-    Kullanışlı ve belgelenmiş olsa da ortamlar arasındaki farklılık yüksektir.
+    Kullanışlı ve belgelenmiş, ancak ortam farklılıkları yüksektir.
 
     <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 61%</span><span>Tamlık Alfa - 68%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
-      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsama</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
+      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Belgeler</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Sağlayıcı Kurulumu, Yaşam Döngüsü ve Tanılama</span>
@@ -3695,17 +4788,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Yerel Modeller](/tr/gateway/local-models), [Lmstudio](/tr/providers/lmstudio), [Ollama](/tr/providers/ollama), [Vllm](/tr/providers/vllm), [Yerel Model Hizmetleri](/tr/gateway/local-model-services), [Aracıları Yapılandırma](/tr/gateway/config-agents), [Sorun Giderme](/tr/gateway/troubleshooting), [Doctor](/tr/gateway/doctor)</div>
+        <div className="maturity-category-docs">
+
+    [Yerel Modeller](/tr/gateway/local-models), [Lmstudio](/tr/providers/lmstudio), [Ollama](/tr/providers/ollama), [Vllm](/tr/providers/vllm), [Yerel Model Hizmetleri](/tr/gateway/local-model-services), [Aracıları Yapılandırma](/tr/gateway/config-agents), [Sorun Giderme](/tr/gateway/troubleshooting), [Doctor](/tr/gateway/doctor)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Yerel Sağlayıcı Plugin'leri</span>
+          <span className="maturity-category-title">Yerel Sağlayıcı Pluginleri</span>
           <span>10 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Ollama](/tr/providers/ollama), [Lmstudio](/tr/providers/lmstudio)</div>
+        <div className="maturity-category-docs">
+
+    [Ollama](/tr/providers/ollama), [Lmstudio](/tr/providers/lmstudio)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3715,17 +4816,25 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Vllm](/tr/providers/vllm), [Sglang](/tr/providers/sglang), [Yerel Modeller](/tr/gateway/local-models), [Lmstudio](/tr/providers/lmstudio)</div>
+        <div className="maturity-category-docs">
+
+    [Vllm](/tr/providers/vllm), [Sglang](/tr/providers/sglang), [Yerel Modeller](/tr/gateway/local-models), [Lmstudio](/tr/providers/lmstudio)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
-          <span className="maturity-category-title">Yerel Bellek ve Gömme Vektörleri</span>
+          <span className="maturity-category-title">Yerel Bellek ve Gömmeler</span>
           <span>5 yetenek</span>
         </div>
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Bellek](/tr/concepts/memory), [Doctor](/tr/gateway/doctor)</div>
+        <div className="maturity-category-docs">
+
+    [Bellek](/tr/concepts/memory), [Doctor](/tr/gateway/doctor)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
@@ -3735,7 +4844,11 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
         <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
         <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/gateway/security/index), [Araçları Yapılandırma](/tr/gateway/config-tools), [Yerel Modeller](/tr/gateway/local-models)</div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/gateway/security/index), [Yapılandırma Araçları](/tr/gateway/config-tools), [Yerel Modeller](/tr/gateway/local-models)
+
+    </div>
       </div>
     </div>
 
@@ -3744,41 +4857,53 @@ Yüzey; Gateway çalışma zamanı, Discord veya macOS uygulaması gibi bir ür�
   <Accordion title="Uzun kuyruklu barındırılan sağlayıcılar - M2 Alfa - 3 alan">
     <a id="long-tail-hosted-providers" />
 
-    Çok sayıda belge/başvuru sayfası mevcuttur; puan, sağlayıcı meta verileri ile canlı temel işlev testi kapsamından oluşturulmalıdır.
+    Çok sayıda doküman/başvuru sayfası mevcuttur; puan, sağlayıcı meta verileri ile canlı duman testi kapsamından oluşturulmalıdır.
 
-    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - %0</span><span>Kalite Alfa - %61</span><span>Tamamlanma Alfa - %68</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
+    <div className="maturity-surface-rollup"><span>Kapsam Deneysel - 0%</span><span>Kalite Alfa - 61%</span><span>Tamlık Alfa - 68%</span><span><span className="maturity-lts maturity-lts-none">Yok</span></span></div>
 
     <div className="maturity-category-list">
-      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamamlanma</span><span>Belgeler</span></div>
+      <div className="maturity-category-row maturity-category-row-header"><span>Alan</span><span>Kapsam</span><span>Kalite</span><span>Tamlık</span><span>Dokümanlar</span></div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Barındırılan LLM Sağlayıcıları</span>
           <span>12 yetenek</span>
         </div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%0</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>%61</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>%68</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/providers/index), [Model Sağlayıcıları](/tr/concepts/model-providers), [Canlı Test](/tr/help/testing-live), [İlk Kurulum](/tr/cli/onboard)</div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/providers/index), [Model Sağlayıcıları](/tr/concepts/model-providers), [Canlı Test](/tr/help/testing-live), [İlk Kurulum](/tr/cli/onboard)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Barındırılan Medya Sağlayıcıları</span>
           <span>8 yetenek</span>
         </div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%0</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>%61</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>%68</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Bildirim Dosyası](/tr/plugins/manifest), [Canlı Test](/tr/help/testing-live), [Dizin](/tr/providers/index)</div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
+        <div className="maturity-category-docs">
+
+    [Bildirim Dosyası](/tr/plugins/manifest), [Canlı Test](/tr/help/testing-live), [Dizin](/tr/providers/index)
+
+    </div>
       </div>
       <div className="maturity-category-row">
         <div className="maturity-category-area">
           <span className="maturity-category-title">Sağlayıcı İşlemleri</span>
           <span>12 yetenek</span>
         </div>
-        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>%0</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>%61</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
-        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>%68</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
-        <div className="maturity-category-docs">[Dizin](/tr/providers/index), [Model Sağlayıcıları](/tr/concepts/model-providers), [Bildirim Dosyası](/tr/plugins/manifest), [Canlı Test](/tr/help/testing-live), [Modeller](/tr/cli/models)</div>
+        <div><span className="maturity-score maturity-score-experimental"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-experimental">Deneysel</span><span>0%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "0%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>61%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "61%" }} /></span></span></div>
+        <div><span className="maturity-score maturity-score-alpha"><span className="maturity-score-label"><span className="maturity-level-pill maturity-level-alpha">Alfa</span><span>68%</span></span><span className="maturity-meter" aria-hidden="true"><span style={{ width: "68%" }} /></span></span></div>
+        <div className="maturity-category-docs">
+
+    [Dizin](/tr/providers/index), [Model Sağlayıcıları](/tr/concepts/model-providers), [Bildirim Dosyası](/tr/plugins/manifest), [Canlı Test](/tr/help/testing-live), [Modeller](/tr/cli/models)
+
+    </div>
       </div>
     </div>
 

@@ -1,27 +1,28 @@
 ---
 read_when:
     - Men-debug kesalahan cakupan operator yang hilang
-    - Meninjau persetujuan pemasangan perangkat atau Node
+    - Meninjau persetujuan pemasangan perangkat atau node
     - Menambahkan atau mengklasifikasikan metode RPC Gateway
 summary: Peran operator, cakupan, dan pemeriksaan saat persetujuan untuk klien Gateway
 title: Cakupan operator
 x-i18n:
-    generated_at: "2026-07-12T14:12:46Z"
+    generated_at: "2026-07-19T04:56:44Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: cfda4486e8d31c01fb7ffff398dcc678d298194f0f0ce6308ae9e5388f5a2856
+    source_hash: 40053793bb5a80afab28fdfcdcac6565abde6bca988389b03a407272c70043e2
     source_path: gateway/operator-scopes.md
     workflow: 16
 ---
 
-Cakupan operator membatasi apa yang dapat dilakukan klien Gateway setelah diautentikasi.
-Cakupan tersebut merupakan pagar pengaman bidang kontrol di dalam satu domain operator Gateway tepercaya,
-bukan isolasi multipenyewa yang tidak tepercaya. Untuk pemisahan yang kuat antara orang,
+Cakupan operator membatasi apa yang dapat dilakukan klien Gateway setelah melakukan autentikasi.
+Cakupan tersebut merupakan pagar pengaman bidang kontrol dalam satu domain operator Gateway tepercaya,
+bukan isolasi multipenyewa yang tahan terhadap pihak bermusuhan. Untuk pemisahan yang kuat antara orang,
 tim, atau mesin, jalankan Gateway terpisah di bawah pengguna OS atau host yang terpisah.
 
 Terkait: [Keamanan](/id/gateway/security), [Protokol Gateway](/id/gateway/protocol),
-[Pengaitan Gateway](/id/gateway/pairing), [CLI Perangkat](/id/cli/devices).
+[Pemasangan Gateway](/id/gateway/pairing), [CLI Perangkat](/id/cli/devices).
 
 ## Peran
 
@@ -37,97 +38,113 @@ memerlukan peran `node`.
 
 ## Tingkat cakupan
 
-| Cakupan                 | Arti                                                                                                                                                                           |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `operator.read`         | Status, daftar, katalog, log, pembacaan sesi, dan panggilan lain yang tidak mengubah keadaan, hanya-baca.                                                                       |
-| `operator.write`        | Tindakan operator yang mengubah keadaan: mengirim pesan, menjalankan alat, memperbarui pengaturan percakapan/suara, meneruskan perintah node. Juga memenuhi `operator.read`.    |
-| `operator.admin`        | Akses administratif. Memenuhi setiap cakupan `operator.*`. Diperlukan untuk perubahan konfigurasi, pembaruan, kait native, namespace khusus, dan persetujuan berisiko tinggi. |
-| `operator.pairing`      | Pengelolaan pengaitan perangkat dan node: mencantumkan, menyetujui, menolak, menghapus, merotasi, mencabut.                                                                      |
-| `operator.approvals`    | API persetujuan eksekusi dan plugin.                                                                                                                                            |
-| `operator.talk.secrets` | Membaca konfigurasi Percakapan dengan menyertakan rahasia.                                                                                                                       |
+| Cakupan                 | Arti                                                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `operator.read`         | Status hanya-baca, daftar, katalog, log, pembacaan sesi, dan panggilan lain yang tidak mengubah data.                                                         |
+| `operator.write`        | Tindakan operator yang mengubah data: mengirim pesan, memanggil alat, memperbarui pengaturan percakapan/suara, meneruskan perintah node. Juga memenuhi `operator.read`. |
+| `operator.admin`        | Akses administratif. Memenuhi setiap cakupan `operator.*`. Diperlukan untuk perubahan konfigurasi, pembaruan, hook native, namespace yang dicadangkan, dan persetujuan berisiko tinggi. |
+| `operator.pairing`      | Pengelolaan pemasangan perangkat dan node: mencantumkan, menyetujui, menolak, menghapus, merotasi, mencabut.                                                   |
+| `operator.approvals`    | API persetujuan eksekusi dan plugin.                                                                                                                          |
+| `operator.questions`    | Mencantumkan, membaca, menjawab, dan menyelesaikan pertanyaan interaktif.                                                                                      |
+| `operator.talk.secrets` | Membaca konfigurasi Percakapan dengan menyertakan rahasia.                                                                                                    |
 
-Cakupan `operator.*` mendatang yang tidak dikenal memerlukan kecocokan persis, kecuali pemanggil
+Cakupan `operator.*` mendatang yang tidak dikenal memerlukan kecocokan persis kecuali pemanggil
 sudah memiliki `operator.admin`.
 
 ## Cakupan metode hanyalah gerbang pertama
 
-Setiap RPC Gateway memiliki cakupan metode dengan hak akses minimum yang menentukan apakah suatu
-permintaan dapat mencapai penanganannya. Beberapa penangan kemudian menerapkan pemeriksaan yang lebih ketat berdasarkan
-hal konkret yang disetujui atau diubah:
+Setiap RPC Gateway memiliki cakupan metode dengan hak akses minimum yang menentukan apakah
+permintaan mencapai handler-nya. Metode yang memperhitungkan parameter memperoleh cakupan tersebut sebelum
+pengiriman sehingga kegagalan otorisasi memiliki satu respons terstruktur kanonis:
 
-- `device.pair.approve` dapat diakses dengan `operator.pairing`, tetapi persetujuan
+- `agent` memerlukan `operator.write` untuk giliran biasa dan `operator.admin` untuk
+  perintah siklus hidup sesi `/new` atau `/reset`.
+- `node.invoke` memerlukan `operator.write` untuk perintah penerusan biasa dan
+  `operator.admin` untuk `browser.proxy`, `fs.listDir`, dan `terminal.upload`.
+- `talk.config` memerlukan `operator.read`; `includeSecrets: true` juga memerlukan
+  `operator.talk.secrets`.
+
+Beberapa handler kemudian menerapkan pemeriksaan yang lebih ketat berdasarkan hal konkret yang
+disetujui atau diubah:
+
+- `device.pair.approve` dapat dicapai dengan `operator.pairing`, tetapi menyetujui
   perangkat operator hanya dapat menerbitkan atau mempertahankan cakupan yang sudah dimiliki pemanggil.
-- `node.pair.approve` dapat diakses dengan `operator.pairing`, lalu memperoleh cakupan
-  persetujuan tambahan dari daftar perintah yang dinyatakan oleh node yang tertunda.
-- `chat.send` adalah metode bercakupan tulis, tetapi perintah percakapan `/config set` dan
-  `/config unset` memerlukan `operator.admin` sebagai tambahan,
+- `node.pair.approve` dapat dicapai dengan `operator.pairing`, lalu memperoleh cakupan
+  persetujuan tambahan dari daftar perintah yang dideklarasikan oleh node tertunda.
+- `chat.send` adalah metode bercakupan tulis, tetapi perintah percakapan
+  `/config set` dan `/config unset` memerlukan `operator.admin` sebagai tambahan,
   terlepas dari cakupan pengiriman percakapan milik pemanggil.
 
-Hal ini memungkinkan operator dengan cakupan lebih rendah melakukan tindakan pengaitan berisiko rendah tanpa
-menjadikan semua persetujuan pengaitan hanya dapat dilakukan oleh administrator.
+Hal ini memungkinkan operator dengan cakupan lebih rendah melakukan tindakan pemasangan berisiko rendah tanpa
+menjadikan semua persetujuan pemasangan hanya dapat dilakukan oleh administrator.
 
-## Persetujuan pengaitan perangkat
+RPC perubahan sesi diotorisasi berdasarkan cakupan operator yang dinegosiasikan,
+terlepas dari `client.id` atau `client.mode` milik klien yang terhubung. Identitas klien
+tetap dapat memengaruhi kebijakan koneksi dan autentikasi perangkat, tetapi tidak
+memberikan maupun menghapus kewenangan untuk mengubah sesi.
 
-Catatan pengaitan perangkat merupakan sumber tetap bagi peran dan cakupan yang disetujui.
-Perangkat yang sudah dikaitkan tidak memperoleh akses yang lebih luas secara diam-diam: koneksi ulang
-yang meminta peran atau cakupan lebih luas akan membuat permintaan peningkatan baru yang tertunda.
+## Persetujuan pemasangan perangkat
 
-Saat menyetujui permintaan perangkat:
+Catatan pemasangan perangkat merupakan sumber persisten untuk peran dan cakupan yang disetujui.
+Perangkat yang telah dipasangkan tidak memperoleh akses lebih luas secara diam-diam: koneksi ulang
+yang meminta peran atau cakupan lebih luas membuat permintaan peningkatan tertunda baru.
+
+Menyetujui permintaan perangkat:
 
 - Permintaan tanpa peran operator tidak memerlukan persetujuan cakupan operator.
 - Permintaan untuk peran perangkat nonoperator (misalnya `node`) memerlukan
   `operator.admin`, meskipun `device.pair.approve` sendiri hanya memerlukan
   `operator.pairing`.
 - Permintaan untuk `operator.read`, `operator.write`, `operator.approvals`,
-  `operator.pairing`, atau `operator.talk.secrets` mengharuskan pemanggil sudah
-  memiliki cakupan tersebut, atau `operator.admin`.
+  `operator.questions`, `operator.pairing`, atau `operator.talk.secrets` mengharuskan
+  pemanggil sudah memiliki cakupan tersebut, atau `operator.admin`.
 - Permintaan untuk `operator.admin` memerlukan `operator.admin`.
-- Permintaan perbaikan tanpa cakupan eksplisit dapat mewarisi cakupan token operator
-  yang ada; jika token tersebut bercakupan admin, persetujuan tetap memerlukan
+- Permintaan perbaikan tanpa cakupan eksplisit dapat mewarisi cakupan token
+  operator yang ada; jika token tersebut bercakupan admin, persetujuan tetap memerlukan
   `operator.admin`.
 
 Sesi rahasia bersama dan proksi tepercaya nonadmin hanya dapat menyetujui
-permintaan perangkat operator dalam cakupan operator yang dinyatakannya sendiri; persetujuan
+permintaan perangkat operator dalam cakupan operator yang mereka deklarasikan sendiri; menyetujui
 peran nonoperator hanya dapat dilakukan oleh admin meskipun sesi tersebut dapat menggunakan
-`operator.pairing` untuk keperluan lain.
+`operator.pairing` untuk hal lain.
 
-Untuk sesi token perangkat yang telah dikaitkan, pengelolaan terbatas pada diri sendiri kecuali pemanggil
-memiliki `operator.admin`: pemanggil nonadmin hanya melihat entri pengaitannya sendiri, dan
+Untuk sesi token perangkat yang dipasangkan, pengelolaan dibatasi pada diri sendiri kecuali pemanggil
+memiliki `operator.admin`: pemanggil nonadmin hanya melihat entri pemasangannya sendiri, dan
 hanya dapat menyetujui, menolak, merotasi, mencabut, atau menghapus entri perangkatnya sendiri.
 
-## Persetujuan pengaitan Node
+## Persetujuan pemasangan node
 
-Metode lama `node.pair.*` menggunakan penyimpanan pengaitan node terpisah yang dimiliki Gateway.
-Node WS menggunakan pengaitan perangkat (`role: node`) sebagai gantinya, tetapi kosakata
-persetujuan yang sama berlaku. Lihat [Pengaitan Gateway](/id/gateway/pairing) untuk mengetahui hubungan kedua
+Metode `node.pair.*` lama menggunakan penyimpanan pemasangan node terpisah yang dimiliki Gateway.
+Node WS menggunakan pemasangan perangkat (`role: node`) sebagai gantinya, tetapi kosakata
+persetujuan yang sama berlaku. Lihat [Pemasangan Gateway](/id/gateway/pairing) untuk mengetahui hubungan kedua
 penyimpanan tersebut.
 
 `node.pair.approve` memperoleh cakupan tambahan yang diperlukan dari daftar
 perintah permintaan tertunda:
 
-| Perintah yang dinyatakan                              | Cakupan yang diperlukan                 |
-| ----------------------------------------------------- | --------------------------------------- |
-| tidak ada                                             | `operator.pairing`                      |
-| perintah node non-eksekusi                            | `operator.pairing` + `operator.write`   |
-| `system.run`, `system.run.prepare`, atau `system.which` | `operator.pairing` + `operator.admin` |
+| Perintah yang dideklarasikan                                                                                         | Cakupan yang diperlukan                 |
+| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| tidak ada                                                                                                            | `operator.pairing`                      |
+| perintah node biasa                                                                                                  | `operator.pairing` + `operator.write` |
+| `system.run`, `system.run.prepare`, `system.which`, `browser.proxy`, `fs.listDir`, atau `system.execApprovals.get/set` | `operator.pairing` + `operator.admin` |
 
 Menyetujui deklarasi node tidak mengaktifkan perintah yang memiliki gerbang daftar izin
 runtime terpisah. Misalnya, menyetujui node yang mendeklarasikan
-`computer.act` memerlukan pengaitan serta cakupan tulis, tetapi hanya mencatat permukaan tersebut.
+`computer.act` memerlukan pemasangan beserta cakupan tulis, tetapi hanya mencatat permukaan tersebut.
 Administrator atau pemilik tetap harus mengaktifkan `computer.act`. Selama tetap
-diaktifkan, pemanggilannya melalui metode `node.invoke` bercakupan tulis tidak
-memerlukan cakupan admin untuk setiap tindakan.
+aktif, pemanggilannya melalui `node.invoke` memerlukan cakupan tulis, tetapi tidak memerlukan cakupan
+admin untuk setiap tindakan.
 
-Pengaitan Node menetapkan identitas dan kepercayaan; hal tersebut tidak menggantikan kebijakan
+Pemasangan node menetapkan identitas dan kepercayaan; hal tersebut tidak menggantikan kebijakan
 persetujuan eksekusi `system.run` milik node itu sendiri.
 
 ## Autentikasi rahasia bersama
 
-Autentikasi token/kata sandi Gateway bersama diperlakukan sebagai akses operator tepercaya untuk
+Autentikasi token/kata sandi gateway bersama diperlakukan sebagai akses operator tepercaya untuk
 Gateway tersebut. Permukaan HTTP yang kompatibel dengan OpenAI, `/tools/invoke`, dan endpoint HTTP
-riwayat sesi memulihkan kumpulan lengkap cakupan operator default untuk autentikasi bearer
-rahasia bersama, meskipun pemanggil mengirim cakupan dinyatakan yang lebih sempit.
+riwayat sesi memulihkan kumpulan cakupan operator default lengkap untuk
+autentikasi bearer rahasia bersama, meskipun pemanggil mengirim cakupan yang dideklarasikan lebih sempit.
 
-Mode yang menyertakan identitas, seperti autentikasi proksi tepercaya atau `none` untuk ingress privat,
-tetap dapat mematuhi cakupan eksplisit yang dinyatakan. Gunakan Gateway terpisah untuk pemisahan
-batas kepercayaan yang sebenarnya.
+Mode yang membawa identitas, seperti autentikasi proksi tepercaya atau `none` ingress privat,
+tetap dapat mematuhi cakupan eksplisit yang dideklarasikan. Gunakan Gateway terpisah untuk pemisahan
+batas kepercayaan yang nyata.

@@ -1,14 +1,15 @@
 ---
 read_when:
     - Je wilt OpenClaw 24/7 op GCP laten draaien
-    - U wilt een productieklare, permanent actieve Gateway op uw eigen VM
+    - Je wilt een productieklare, altijd actieve Gateway op je eigen VM
     - Je wilt volledige controle over persistentie, binaire bestanden en herstartgedrag
 summary: Voer OpenClaw Gateway 24/7 uit op een GCP Compute Engine-VM (Docker) met duurzame status
 title: GCP
 x-i18n:
-    generated_at: "2026-07-12T09:03:12Z"
+    generated_at: "2026-07-27T05:37:00Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 6ca46b2ee78731162261cae6ea5a26b718be6035b998fa92e4ee5c9ea2e7ae07
     source_path: install/gcp.md
@@ -19,14 +20,14 @@ Voer een permanente OpenClaw Gateway uit op een GCP Compute Engine-VM met Docker
 
 De prijs varieert per machinetype en regio; kies de kleinste VM die geschikt is voor je werklast en schaal op als er OOM-fouten optreden.
 
-De Gateway is toegankelijk vanaf je laptop via SSH-poortdoorsturing, of via directe openstelling van de poort als je zelf de firewall en tokens beheert.
+De Gateway is vanaf je laptop toegankelijk via SSH-poortdoorsturing, of via directe openstelling van de poort als je zelf de firewall en tokens beheert.
 
 Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de pakketten dienovereenkomstig aan. Zie [Docker](/nl/install/docker) voor de algemene Docker-procedure.
 
 ## Wat je nodig hebt
 
 - GCP-account (`e2-micro` komt in aanmerking voor de gratis laag)
-- `gcloud` CLI of de [Cloud Console](https://console.cloud.google.com)
+- `gcloud` CLI, of de [Cloud Console](https://console.cloud.google.com)
 - SSH-toegang vanaf je laptop
 - Docker en Docker Compose
 - Authenticatiegegevens voor het model
@@ -36,7 +37,7 @@ Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de
 ## Snelle procedure
 
 1. Maak een GCP-project, schakel facturering en de Compute Engine API in
-2. Maak een Compute Engine-VM (`e2-small`, Debian 12, 20 GB)
+2. Maak een Compute Engine-VM (`e2-small`, Debian 12, 20GB)
 3. Maak via SSH verbinding met de VM en installeer Docker
 4. Kloon de OpenClaw-repository
 5. Maak permanente hostmappen
@@ -44,8 +45,8 @@ Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de
 7. Bouw de vereiste binaire bestanden in, bouw de image en start deze
 
 <Steps>
-  <Step title="Installeer de gcloud CLI (of gebruik de Console)">
-    Installeer deze via [cloud.google.com/sdk/docs/install](https://cloud.google.com/sdk/docs/install) en voer vervolgens uit:
+  <Step title="Installeer de gcloud CLI (of gebruik Console)">
+    Installeer deze via [cloud.google.com/sdk/docs/install](https://cloud.google.com/sdk/docs/install) en voer vervolgens het volgende uit:
 
     ```bash
     gcloud init
@@ -65,16 +66,16 @@ Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de
 
     Schakel facturering in via [console.cloud.google.com/billing](https://console.cloud.google.com/billing) (vereist voor Compute Engine).
 
-    Equivalent in de Console: IAM & Admin > Create Project, schakel facturering in en ga vervolgens naar APIs & Services > Enable APIs > "Compute Engine API" > Enable.
+    Overeenkomstige stappen in Console: IAM & Admin > Create Project, schakel facturering in en ga vervolgens naar APIs & Services > Enable APIs > "Compute Engine API" > Enable.
 
   </Step>
 
   <Step title="Maak de VM">
-    | Type      | Specificaties             | Kosten                       | Opmerkingen                                          |
-    | --------- | ------------------------- | ---------------------------- | ---------------------------------------------------- |
-    | e2-medium | 2 vCPU, 4 GB RAM          | Ongeveer $ 25 per maand      | Meest betrouwbaar voor lokale Docker-builds          |
-    | e2-small  | 2 vCPU, 2 GB RAM          | Ongeveer $ 12 per maand      | Aanbevolen minimum voor een Docker-build              |
-    | e2-micro  | 2 vCPU (gedeeld), 1 GB RAM | Komt in aanmerking voor gratis laag | Mislukt vaak door OOM tijdens Docker-build (afsluitcode 137) |
+    | Type      | Specificaties             | Kosten                       | Opmerkingen                                            |
+    | --------- | ------------------------- | ---------------------------- | ------------------------------------------------------ |
+    | e2-medium | 2 vCPU, 4GB RAM           | Ongeveer $25 per maand       | Meest betrouwbaar voor lokale Docker-builds            |
+    | e2-small  | 2 vCPU, 2GB RAM           | Ongeveer $12 per maand       | Aanbevolen minimum voor een Docker-build                |
+    | e2-micro  | 2 vCPU (gedeeld), 1GB RAM | Komt in aanmerking voor gratis laag | Mislukt vaak door OOM tijdens Docker-build (exit 137) |
 
     ```bash
     gcloud compute instances create openclaw-gateway \
@@ -92,7 +93,7 @@ Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de
     gcloud compute ssh openclaw-gateway --zone=us-central1-a
     ```
 
-    Console: klik op "SSH" naast de VM in het Compute Engine-dashboard.
+    Console: klik naast de VM in het Compute Engine-dashboard op "SSH".
 
     Het doorgeven van SSH-sleutels kan na het maken van de VM 1-2 minuten duren; wacht en probeer het opnieuw als de verbinding wordt geweigerd.
 
@@ -106,7 +107,7 @@ Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de
     sudo usermod -aG docker $USER
     ```
 
-    Meld je af en weer aan om de groepswijziging van kracht te laten worden en maak daarna opnieuw via SSH verbinding:
+    Meld je af en weer aan om de groepswijziging toe te passen en maak daarna opnieuw via SSH verbinding:
 
     ```bash
     exit
@@ -136,7 +137,7 @@ Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de
   </Step>
 
   <Step title="Maak permanente hostmappen">
-    Docker-containers zijn tijdelijk; alle langlevende status moet op de host worden opgeslagen.
+    Docker-containers zijn tijdelijk; alle lang bewaarde status moet op de host staan.
 
     ```bash
     mkdir -p ~/.openclaw
@@ -161,21 +162,18 @@ Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de
     XDG_CONFIG_HOME=/home/node/.openclaw
     ```
 
-    Stel `OPENCLAW_GATEWAY_TOKEN` in om het stabiele Gateway-token via
-    `.env` te beheren; configureer anders `gateway.auth.token` voordat je
-    erop vertrouwt dat clients na herstarts verbinding kunnen maken. Als geen
-    van beide is ingesteld, gebruikt OpenClaw voor die startsessie een token
-    dat alleen tijdens runtime bestaat. Genereer een wachtwoord voor de
-    sleutelring voor `GOG_KEYRING_PASSWORD`:
+    Stel `OPENCLAW_GATEWAY_TOKEN` in om het stabiele Gateway-token te beheren via
+    `.env`; configureer anders `gateway.auth.token` voordat je erop vertrouwt dat clients
+    na herstarts verbonden kunnen worden. Als geen van beide is ingesteld, gebruikt OpenClaw voor
+    die opstart een token dat alleen tijdens runtime bestaat. Genereer een sleutelringwachtwoord voor `GOG_KEYRING_PASSWORD`:
 
     ```bash
     openssl rand -hex 32
     ```
 
-    **Commit dit bestand niet.** Het bevat omgevingsvariabelen voor de
-    container/runtime, zoals `OPENCLAW_GATEWAY_TOKEN`. Opgeslagen
-    OAuth-/API-sleutelauthenticatie voor providers staat in het gekoppelde
-    `~/.openclaw/agents/<agentId>/agent/auth-profiles.json`.
+    **Commit dit bestand niet.** Het bevat omgevingsvariabelen voor de container/runtime, zoals
+    `OPENCLAW_GATEWAY_TOKEN`. Opgeslagen OAuth-/API-sleutelauthenticatie voor providers staat in de
+    aangekoppelde `~/.openclaw/agents/<agentId>/agent/auth-profiles.json`.
 
   </Step>
 
@@ -204,8 +202,8 @@ Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de
           - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
           - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
         ports:
-          # Aanbevolen: houd de Gateway op de VM alleen op loopback; gebruik een SSH-tunnel voor toegang.
-          # Verwijder om deze openbaar toegankelijk te maken het voorvoegsel `127.0.0.1:` en configureer de firewall dienovereenkomstig.
+          # Aanbevolen: houd de Gateway op de VM beperkt tot de loopback-interface; gebruik een SSH-tunnel voor toegang.
+          # Verwijder het voorvoegsel `127.0.0.1:` en pas de firewall dienovereenkomstig aan om deze openbaar toegankelijk te maken.
           - "127.0.0.1:${OPENCLAW_GATEWAY_PORT}:18789"
         command:
           [
@@ -220,14 +218,14 @@ Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de
           ]
     ```
 
-    `--allow-unconfigured` is alleen bedoeld voor gemak tijdens de initiële configuratie en is geen vervanging voor een echte Gateway-configuratie. Stel nog steeds authenticatie (`gateway.auth.token` of een wachtwoord) en een veilige bindingsmodus in voor je implementatie.
+    `--allow-unconfigured` is uitsluitend bedoeld voor gemak tijdens het opstarten en is geen vervanging voor een echte Gateway-configuratie. Stel nog steeds authenticatie (`gateway.auth.token` of een wachtwoord) en een veilige bindmodus voor je implementatie in.
 
   </Step>
 
   <Step title="Gedeelde runtimestappen voor Docker-VM's">
     Volg de gedeelde runtimehandleiding voor de algemene Docker-hostprocedure:
 
-    - [Bouw vereiste binaire bestanden in de image in](/nl/install/docker-vm-runtime#bake-required-binaries-into-the-image)
+    - [Bouw de vereiste binaire bestanden in de image in](/nl/install/docker-vm-runtime#bake-required-binaries-into-the-image)
     - [Bouw en start](/nl/install/docker-vm-runtime#build-and-launch)
     - [Wat waar permanent wordt opgeslagen](/nl/install/docker-vm-runtime#what-persists-where)
     - [Updates](/nl/install/docker-vm-runtime#updates)
@@ -235,9 +233,9 @@ Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de
   </Step>
 
   <Step title="GCP-specifieke opmerkingen voor het starten">
-    Als de build mislukt met `Killed` of `exit code 137` tijdens `pnpm install --frozen-lockfile`, heeft de VM onvoldoende geheugen. Gebruik minimaal `e2-small`, of `e2-medium` voor betrouwbaardere eerste builds.
+    Als de build tijdens `pnpm install --frozen-lockfile` mislukt met `Killed` of `exit code 137`, heeft de VM onvoldoende geheugen. Gebruik minimaal `e2-small`, of `e2-medium` voor betrouwbaardere eerste builds.
 
-    Wanneer je aan LAN bindt (`OPENCLAW_GATEWAY_BIND=lan`), moet je een vertrouwde browseroorsprong configureren voordat je verdergaat:
+    Als je aan LAN bindt (`OPENCLAW_GATEWAY_BIND=lan`), configureer je een vertrouwde browseroorsprong voordat je doorgaat:
 
     ```bash
     docker compose run --rm openclaw-cli config set gateway.controlUi.allowedOrigins '["http://127.0.0.1:18789"]' --strict-json
@@ -256,19 +254,18 @@ Deze handleiding gebruikt Debian op GCP Compute Engine. Ubuntu werkt ook; pas de
 
     Open `http://127.0.0.1:18789/` in je browser.
 
-    Toon opnieuw een overzichtelijke dashboardlink:
+    Geef opnieuw een schone dashboardlink weer:
 
     ```bash
     docker compose run --rm openclaw-cli dashboard --no-open
     ```
 
-    Als de gebruikersinterface om authenticatie met een gedeeld geheim vraagt,
-    plak je het geconfigureerde token of wachtwoord in de instellingen van de
-    Control UI (deze Docker-procedure schrijft standaard een token; gebruik in
-    plaats daarvan je geconfigureerde wachtwoord als je bent overgeschakeld
-    op wachtwoordauthenticatie).
+    Als de UI om authenticatie met een gedeeld geheim vraagt, plak je het geconfigureerde token of
+    wachtwoord in de instellingen van de Control UI (deze Docker-procedure schrijft standaard een token;
+    gebruik in plaats daarvan je geconfigureerde wachtwoord als je bent overgeschakeld op
+    wachtwoordauthenticatie).
 
-    Als de Control UI `unauthorized` of `disconnected (1008): pairing required` weergeeft, keur je het browserapparaat goed:
+    Als de Control UI `unauthorized` of `disconnected (1008): pairing required` toont, keur je het browserapparaat goed:
 
     ```bash
     docker compose run --rm openclaw-cli devices list
@@ -294,11 +291,11 @@ Controleer je OS Login-profiel:
 gcloud compute os-login describe-profile
 ```
 
-Controleer of je account de vereiste IAM-machtigingen heeft (Compute OS Login of Compute OS Admin Login).
+Zorg dat je account de vereiste IAM-machtigingen heeft (Compute OS Login of Compute OS Admin Login).
 
 **Onvoldoende geheugen (OOM)**
 
-Als de Docker-build mislukt met `Killed` en `exit code 137`, is het VM-proces vanwege OOM beëindigd:
+Als de Docker-build mislukt met `Killed` en `exit code 137`, is de VM vanwege OOM beëindigd:
 
 ```bash
 # Stop eerst de VM
@@ -313,9 +310,9 @@ gcloud compute instances set-machine-type openclaw-gateway \
 gcloud compute instances start openclaw-gateway --zone=us-central1-a
 ```
 
-## Serviceaccounts (aanbevolen beveiligingspraktijk)
+## Serviceaccounts (best practice voor beveiliging)
 
-Voor persoonlijk gebruik volstaat je standaardgebruikersaccount. Maak voor automatisering of CI/CD een speciaal serviceaccount met minimale machtigingen:
+Voor persoonlijk gebruik werkt je standaardgebruikersaccount prima. Maak voor automatisering of CI/CD een speciaal serviceaccount met minimale machtigingen:
 
 ```bash
 gcloud iam service-accounts create openclaw-deploy \

@@ -1,78 +1,77 @@
 ---
 read_when:
-    - समूह चैट व्यवहार या उल्लेख गेटिंग बदलना
-    - विशिष्ट समूह वार्तालापों तक mentionPatterns को सीमित करना
+    - ग्रुप चैट के व्यवहार या उल्लेख गेटिंग को बदलना
+    - mentionPatterns को विशिष्ट समूह वार्तालापों तक सीमित करना
 sidebarTitle: Groups
-summary: सतहों पर समूह चैट व्यवहार (Discord/iMessage/Matrix/Microsoft Teams/QQBot/Signal/Slack/Telegram/WhatsApp/Zalo)
+summary: विभिन्न प्लेटफ़ॉर्म पर समूह चैट का व्यवहार (Discord/iMessage/Matrix/Microsoft Teams/QQBot/Signal/Slack/Telegram/WhatsApp/Zalo)
 title: समूह
 x-i18n:
-    generated_at: "2026-06-28T22:35:04Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T17:23:57Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 48660e36ac642956842d453fd4caf2cbd7f4193efee9ac864fd7cf700c3c43b6
+    source_hash: 146378f0fc31e129b6504df6778ab8633c048cd4d02af02a5e6da1bfef640d3f
     source_path: channels/groups.md
     workflow: 16
 ---
 
-OpenClaw सभी सतहों पर समूह चैट को एकसमान मानता है: Discord, iMessage, Matrix, Microsoft Teams, QQBot, Signal, Slack, Telegram, WhatsApp, Zalo.
+OpenClaw समूह-सक्षम चैनलों में समान समूह नियम लागू करता है, जिनमें Discord, iMessage, Matrix, Microsoft Teams, QQBot, Signal, Slack, Telegram, WhatsApp और Zalo शामिल हैं।
 
-हमेशा चालू रहने वाले उन रूम के लिए, जिन्हें एजेंट के स्पष्ट रूप से दृश्य संदेश भेजने तक शांत संदर्भ देना चाहिए, [परिवेशी रूम इवेंट](/hi/channels/ambient-room-events) देखें।
+हमेशा सक्रिय रहने वाले उन रूम के लिए, जिन्हें एजेंट द्वारा स्पष्ट रूप से दृश्यमान संदेश भेजे जाने तक शांत संदर्भ प्रदान करना चाहिए, [परिवेशी रूम इवेंट](/hi/channels/ambient-room-events) देखें।
 
 ## शुरुआती परिचय (2 मिनट)
 
-OpenClaw आपके अपने मैसेजिंग खातों पर "रहता" है। कोई अलग WhatsApp बॉट उपयोगकर्ता नहीं होता। यदि **आप** किसी समूह में हैं, तो OpenClaw उस समूह को देख सकता है और वहीं जवाब दे सकता है।
+OpenClaw आपके अपने मैसेजिंग खातों पर "रहता" है। कोई अलग WhatsApp बॉट उपयोगकर्ता नहीं होता: यदि **आप** किसी समूह में हैं, तो OpenClaw उस समूह को देख सकता है और वहाँ जवाब दे सकता है।
 
 डिफ़ॉल्ट व्यवहार:
 
-- समूह प्रतिबंधित होते हैं (`groupPolicy: "allowlist"`)।
-- जवाबों के लिए mention आवश्यक है, जब तक आप स्पष्ट रूप से mention gating बंद न करें।
-- समूहों/चैनलों में दृश्य जवाब डिफ़ॉल्ट रूप से `message` टूल का उपयोग करते हैं।
+- समूह प्रतिबंधित होते हैं (`groupPolicy: "allowlist"`); समूह के प्रेषकों को अनुमति-सूची में जोड़े जाने तक ब्लॉक किया जाता है।
+- जब तक आप किसी समूह के लिए उल्लेख गेटिंग अक्षम नहीं करते, जवाबों के लिए उल्लेख आवश्यक होता है।
+- अंतिम जवाब का टेक्स्ट रूम में अपने-आप पोस्ट होता है (`visibleReplies: "automatic"`)।
 
-अर्थ: allowlist में शामिल भेजने वाले OpenClaw को mention करके ट्रिगर कर सकते हैं।
+अर्थात: अनुमति-सूची में शामिल प्रेषक OpenClaw का उल्लेख करके उसे ट्रिगर कर सकते हैं।
 
 <Note>
-**TL;DR**
+**संक्षेप में**
 
-- **DM पहुंच** `*.allowFrom` से नियंत्रित होती है।
-- **समूह पहुंच** `*.groupPolicy` + allowlists (`*.groups`, `*.groupAllowFrom`) से नियंत्रित होती है।
-- **जवाब ट्रिगर करना** mention gating (`requireMention`, `/activation`) से नियंत्रित होता है।
+- **DM एक्सेस** को `*.allowFrom` नियंत्रित करता है।
+- **समूह एक्सेस** को `*.groupPolicy` + अनुमति-सूचियाँ (`*.groups`, `*.groupAllowFrom`) नियंत्रित करती हैं।
+- **जवाब ट्रिगर करना** उल्लेख गेटिंग (`requireMention`, `/activation`) द्वारा नियंत्रित होता है।
 
 </Note>
 
 त्वरित प्रवाह (समूह संदेश के साथ क्या होता है):
 
+```text
+groupPolicy? disabled -> छोड़ें
+groupPolicy? allowlist -> समूह अनुमत है? नहीं -> छोड़ें
+requireMention? yes -> उल्लेख किया गया? नहीं -> केवल संदर्भ के लिए संग्रहीत करें
+उल्लेख/जवाब/कमांड/DM -> उपयोगकर्ता अनुरोध
+हमेशा सक्रिय समूह की बातचीत -> उपयोगकर्ता अनुरोध, या कॉन्फ़िगर होने पर रूम इवेंट
 ```
-groupPolicy? disabled -> drop
-groupPolicy? allowlist -> group allowed? no -> drop
-requireMention? yes -> mentioned? no -> store for context only
-mention/reply/command/DM -> user request
-always-on group chatter -> user request, or room event when configured
-```
 
-## दृश्य जवाब
+## दृश्यमान जवाब
 
-सामान्य समूह/चैनल अनुरोधों के लिए, OpenClaw डिफ़ॉल्ट रूप से `messages.groupChat.visibleReplies: "automatic"` का उपयोग करता है। अंतिम सहायक पाठ legacy दृश्य जवाब पथ से पोस्ट होता है, जब तक आप रूम को message-tool-only आउटपुट में ऑप्ट इन नहीं करते।
+सामान्य समूह/चैनल अनुरोधों के लिए, OpenClaw डिफ़ॉल्ट रूप से `messages.groupChat.visibleReplies: "automatic"` का उपयोग करता है: अंतिम सहायक टेक्स्ट दृश्यमान जवाब के रूप में रूम में पोस्ट होता है।
 
-जब कोई साझा रूम एजेंट को `message(action=send)` कॉल करके बोलने का समय तय करने देना चाहिए, तब `messages.groupChat.visibleReplies: "message_tool"` उपयोग करें। यह GPT 5.5 जैसे नवीनतम पीढ़ी के, टूल-विश्वसनीय मॉडलों द्वारा समर्थित समूह रूम के लिए सबसे अच्छा काम करता है। यदि मॉडल वह टूल चूक जाता है और सार्थक अंतिम पाठ लौटाता है, तो OpenClaw उस अंतिम पाठ को रूम में पोस्ट करने के बजाय निजी रखता है।
+जब किसी साझा रूम में एजेंट को `message(action=send)` कॉल करके यह तय करने देना हो कि कब बोलना है, तब `messages.groupChat.visibleReplies: "message_tool"` का उपयोग करें। यह टूल का विश्वसनीय रूप से उपयोग करने वाले मॉडल (उदाहरण के लिए GPT-5.6 Sol) के साथ सबसे अच्छा काम करता है। यदि मॉडल टूल का उपयोग करना चूक जाता है और सार्थक अंतिम टेक्स्ट लौटाता है, तो OpenClaw उस टेक्स्ट को रूम में पोस्ट करने के बजाय निजी रखता है।
 
-कमज़ोर मॉडलों या ऐसे runtime के लिए `"automatic"` उपयोग करें जो tool-only delivery को भरोसेमंद ढंग से नहीं समझते। automatic मोड में, एजेंट का अंतिम सहायक पाठ दृश्य स्रोत जवाब पथ होता है, इसलिए जो मॉडल लगातार `message(action=send)` कॉल नहीं कर सकता, वह फिर भी सामान्य रूप से उत्तर दे सकता है।
+उन मॉडल या रनटाइम के लिए `"automatic"` का उपयोग करें जो केवल-टूल डिलीवरी का विश्वसनीय रूप से पालन नहीं करते: सामान्य अंतिम टेक्स्ट सीधे रूम में पोस्ट होता है और एजेंट अब भी उन फ़ाइलों, इमेज या अन्य अटैचमेंट के लिए `message(action=send)` कॉल कर सकता है जिन्हें अंतिम टेक्स्ट के साथ नहीं भेजा जा सकता।
 
-automatic मोड में, सामान्य टेक्स्ट अंतिम जवाब सीधे रूम में पोस्ट किए जाते हैं। यदि दृश्य जवाब को फ़ाइलों, छवियों या अन्य attachments की आवश्यकता है, तो एजेंट उस attachment के लिए अंतिम टेक्स्ट जवाब से जबरन भेजने के बजाय फिर भी `message(action=send)` उपयोग कर सकता है।
+यदि सक्रिय टूल नीति के अंतर्गत संदेश टूल उपलब्ध नहीं है, तो OpenClaw जवाब को चुपचाप दबाने के बजाय स्वचालित दृश्यमान जवाबों पर वापस जाता है। `openclaw doctor` इस असंगति के बारे में चेतावनी देता है।
 
-यदि सक्रिय tool policy के अंतर्गत message टूल उपलब्ध नहीं है, तो OpenClaw प्रतिक्रिया को चुपचाप दबाने के बजाय automatic दृश्य जवाबों पर वापस लौटता है। `openclaw doctor` इस mismatch के बारे में चेतावनी देता है।
+प्रत्यक्ष चैट और किसी भी अन्य स्रोत इवेंट के लिए, `messages.visibleReplies: "message_tool"` समान केवल-टूल व्यवहार को वैश्विक रूप से लागू करता है; `messages.groupChat.visibleReplies` समूह/चैनल रूम के लिए अधिक विशिष्ट ओवरराइड बना रहता है। आंतरिक WebChat के प्रत्यक्ष टर्न डिफ़ॉल्ट रूप से स्वचालित अंतिम-जवाब डिलीवरी का उपयोग करते हैं, ताकि Pi और Codex को समान दृश्यमान-जवाब अनुबंध मिले।
 
-प्रत्यक्ष चैट और किसी भी अन्य स्रोत इवेंट के लिए, उसी tool-only दृश्य-जवाब व्यवहार को वैश्विक रूप से लागू करने के लिए `messages.visibleReplies: "message_tool"` उपयोग करें। आंतरिक WebChat प्रत्यक्ष turns automatic अंतिम-जवाब delivery पर डिफ़ॉल्ट होते हैं ताकि Pi और Codex को वही दृश्य-जवाब contract मिले। दृश्य आउटपुट के लिए जानबूझकर `message(action=send)` आवश्यक करने हेतु `messages.visibleReplies: "message_tool"` सेट करें। `messages.groupChat.visibleReplies` समूह/चैनल रूम के लिए अधिक विशिष्ट override बना रहता है।
+केवल-टूल मोड, छिपकर देखने वाले मोड के अधिकांश टर्न के लिए मॉडल को `NO_REPLY` से जवाब देने के लिए बाध्य करने वाले पुराने पैटर्न की जगह लेता है। केवल-टूल मोड में प्रॉम्प्ट किसी `NO_REPLY` अनुबंध को परिभाषित नहीं करता; कुछ भी दृश्यमान न करने का अर्थ केवल संदेश टूल को कॉल न करना है।
 
-यह पुराने पैटर्न को बदलता है जिसमें अधिकांश lurk-mode turns के लिए मॉडल को `NO_REPLY` उत्तर देने के लिए मजबूर किया जाता था। tool-only मोड में, prompt कोई `NO_REPLY` contract परिभाषित नहीं करता। कुछ भी दृश्य न करना बस message टूल कॉल न करने का अर्थ है।
+Plugin के स्वामित्व वाली वार्तालाप बाइंडिंग इसका अपवाद हैं। जब कोई Plugin किसी थ्रेड को बाइंड करके इनबाउंड टर्न पर दावा कर लेता है, तो Plugin द्वारा लौटाया गया जवाब दृश्यमान बाइंडिंग जवाब होता है; उसे `message(action=send)` की आवश्यकता नहीं होती। वह जवाब Plugin रनटाइम आउटपुट है, निजी मॉडल का अंतिम टेक्स्ट नहीं।
 
-Plugin-स्वामित्व वाली conversation bindings अपवाद हैं। जब कोई Plugin किसी thread को bind कर देता है और inbound turn का दावा करता है, तो Plugin द्वारा लौटाया गया reply ही दृश्य binding response होता है; उसे `message(action=send)` की आवश्यकता नहीं होती। वह reply Plugin runtime आउटपुट है, निजी मॉडल final text नहीं।
+प्रत्यक्ष समूह अनुरोधों के लिए टाइपिंग संकेतक अब भी भेजे जाते हैं। सक्षम होने पर परिवेशी हमेशा सक्रिय रूम इवेंट तब तक पूरी तरह शांत रहते हैं, जब तक एजेंट संदेश टूल को कॉल नहीं करता।
 
-प्रत्यक्ष समूह अनुरोधों के लिए typing indicators अब भी भेजे जाते हैं। Ambient हमेशा-चालू रूम इवेंट, सक्षम होने पर, तब तक सख्त और शांत रहते हैं जब तक एजेंट message टूल कॉल नहीं करता।
+सेशन डिफ़ॉल्ट रूप से विस्तृत टूल/प्रगति सारांशों को दबाते हैं। डीबगिंग के दौरान वर्तमान सेशन के लिए उन्हें दिखाने हेतु `/verbose on` (या `/verbose full`) और केवल-अंतिम-जवाब व्यवहार पर लौटने के लिए `/verbose off` का उपयोग करें। विस्तृत स्थिति प्रत्येक सेशन के लिए अलग होती है और प्रत्यक्ष चैट, समूहों, चैनलों तथा फ़ोरम विषयों में समान रूप से काम करती है।
 
-Sessions डिफ़ॉल्ट रूप से verbose tool/progress summaries को दबा देते हैं। debugging के दौरान वर्तमान session के लिए वे summaries दिखाने हेतु `/verbose on` उपयोग करें, और final-reply-only व्यवहार पर लौटने के लिए `/verbose off`। वही verbose state प्रत्यक्ष चैट, समूहों, चैनलों और forum topics में लागू होती है।
-
-बिना mention वाले हमेशा-चालू समूह chatter को user requests के बजाय शांत room context के रूप में जमा करने के लिए [परिवेशी रूम इवेंट](/hi/channels/ambient-room-events) उपयोग करें:
+उल्लेख-रहित हमेशा सक्रिय समूह वार्तालाप को उपयोगकर्ता अनुरोधों के बजाय शांत रूम संदर्भ के रूप में सबमिट करने के लिए [परिवेशी रूम इवेंट](/hi/channels/ambient-room-events) का उपयोग करें:
 
 ```json5
 {
@@ -84,11 +83,9 @@ Sessions डिफ़ॉल्ट रूप से verbose tool/progress summari
 }
 ```
 
-डिफ़ॉल्ट `unmentionedInbound: "user_request"` है।
+डिफ़ॉल्ट `unmentionedInbound: "user_request"` है। उल्लेखित संदेश, कमांड, निरस्तीकरण अनुरोध और DM उपयोगकर्ता अनुरोध ही रहते हैं।
 
-Mention किए गए संदेश, commands, abort requests, और DMs user requests बने रहते हैं।
-
-समूह/चैनल अनुरोधों के लिए दृश्य आउटपुट को message टूल से गुजरना आवश्यक करने के लिए:
+समूह/चैनल अनुरोधों के दृश्यमान आउटपुट को संदेश टूल के माध्यम से भेजना आवश्यक बनाने के लिए:
 
 ```json5
 {
@@ -100,9 +97,7 @@ Mention किए गए संदेश, commands, abort requests, और DMs u
 }
 ```
 
-फ़ाइल सहेजे जाने के बाद Gateway `messages` config को hot-reload करता है। restart केवल तब करें जब deployment में file watching या config reload अक्षम हो।
-
-हर स्रोत चैट के लिए दृश्य आउटपुट को message टूल से गुजरना आवश्यक करने के लिए:
+प्रत्येक स्रोत चैट के लिए इसे आवश्यक बनाने हेतु:
 
 ```json5
 {
@@ -112,32 +107,28 @@ Mention किए गए संदेश, commands, abort requests, और DMs u
 }
 ```
 
-Native slash commands (Discord, Telegram, और native command support वाली अन्य सतहें) `visibleReplies: "message_tool"` को bypass करते हैं और हमेशा दृश्य रूप से reply करते हैं ताकि channel-native command UI को अपेक्षित response मिले। यह केवल validated native command turns पर लागू होता है; text-typed `/...` commands और सामान्य chat turns अब भी configured group default का पालन करते हैं।
+फ़ाइल सहेजे जाने के बाद Gateway, `messages` कॉन्फ़िगरेशन परिवर्तनों को रीस्टार्ट के बिना अपना लेता है। केवल तभी रीस्टार्ट करें जब कॉन्फ़िगरेशन रीलोड अक्षम हो (`gateway.reload.mode: "off"`)।
 
-## संदर्भ दृश्यता और allowlists
+कमांड टर्न `visibleReplies: "message_tool"` को बायपास करते हैं और हमेशा दृश्यमान रूप से जवाब देते हैं: नेटिव स्लैश कमांड (Discord, Telegram और नेटिव कमांड समर्थन वाले अन्य इंटरफ़ेस) तथा अधिकृत टेक्स्ट `/...` कमांड, दोनों अपना जवाब स्रोत चैट में पोस्ट करते हैं। समूहों में अनधिकृत टेक्स्ट `/...` टर्न केवल-संदेश-टूल बने रहते हैं; सामान्य चैट टर्न कॉन्फ़िगर किए गए डिफ़ॉल्ट का पालन करते हैं।
 
-समूह सुरक्षा में दो अलग नियंत्रण शामिल हैं:
+## संदर्भ दृश्यता और अनुमति-सूचियाँ
 
-- **Trigger authorization**: एजेंट को कौन trigger कर सकता है (`groupPolicy`, `groups`, `groupAllowFrom`, channel-specific allowlists)।
-- **Context visibility**: मॉडल में कौन सा supplemental context डाला जाता है (reply text, quotes, thread history, forwarded metadata)।
+समूह सुरक्षा में दो अलग-अलग नियंत्रण शामिल होते हैं:
 
-डिफ़ॉल्ट रूप से, OpenClaw सामान्य चैट व्यवहार को प्राथमिकता देता है और context को अधिकांशतः जैसा प्राप्त हुआ वैसा रखता है। इसका अर्थ है कि allowlists मुख्य रूप से तय करते हैं कि actions कौन trigger कर सकता है, न कि हर quoted या historical snippet के लिए सार्वभौमिक redaction boundary।
+- **ट्रिगर प्राधिकरण**: एजेंट को कौन ट्रिगर कर सकता है (`groupPolicy`, `groups`, `groupAllowFrom`, चैनल-विशिष्ट अनुमति-सूचियाँ)।
+- **संदर्भ दृश्यता**: मॉडल में कौन-सा पूरक संदर्भ डाला जाता है (जवाब/उद्धरण टेक्स्ट, थ्रेड इतिहास, फ़ॉरवर्ड किया गया मेटाडेटा)।
 
-<AccordionGroup>
-  <Accordion title="वर्तमान व्यवहार चैनल-विशिष्ट है">
-    - कुछ चैनल पहले से ही specific paths में supplemental context के लिए sender-based filtering लागू करते हैं (उदाहरण के लिए Slack thread seeding, Matrix reply/thread lookups)।
-    - अन्य चैनल अब भी quote/reply/forward context को जैसा प्राप्त हुआ वैसा पास करते हैं।
+डिफ़ॉल्ट रूप से OpenClaw संदर्भ को प्राप्त रूप में ही रखता है: अनुमति-सूचियाँ तय करती हैं कि कार्रवाइयाँ कौन ट्रिगर कर सकता है, न कि मॉडल को कौन-से उद्धृत या ऐतिहासिक अंश दिखाई देते हैं। पूरक संदर्भ को भी फ़िल्टर करने के लिए `contextVisibility` सेट करें:
 
-  </Accordion>
-  <Accordion title="Hardening दिशा (योजनाबद्ध)">
-    - `contextVisibility: "all"` (डिफ़ॉल्ट) वर्तमान as-received व्यवहार रखता है।
-    - `contextVisibility: "allowlist"` supplemental context को allowlisted senders तक filter करता है।
-    - `contextVisibility: "allowlist_quote"` `allowlist` है और साथ में एक स्पष्ट quote/reply exception है।
+| मोड                | व्यवहार                                                                         |
+| ------------------- | -------------------------------------------------------------------------------- |
+| `"all"` (डिफ़ॉल्ट)   | पूरक संदर्भ को प्राप्त रूप में रखें।                                           |
+| `"allowlist"`       | केवल अनुमति-सूची में शामिल प्रेषकों का इतिहास/थ्रेड/उद्धरण/फ़ॉरवर्ड किया गया संदर्भ डालें।     |
+| `"allowlist_quote"` | `allowlist`, साथ ही किसी भी प्रेषक के स्पष्ट रूप से उद्धृत/जवाब दिए गए संदेश को रखें। |
 
-    जब तक यह hardening model सभी चैनलों में एकसमान रूप से लागू नहीं हो जाता, सतह के अनुसार अंतर अपेक्षित रखें।
+इसे प्रत्येक चैनल (`channels.<channel>.contextVisibility`), प्रत्येक खाते (`channels.<channel>.accounts.<accountId>.contextVisibility`) या वैश्विक रूप से (`channels.defaults.contextVisibility`) सेट करें। पूरक संदर्भ प्राप्त करने वाले चैनल (Discord, Feishu, iMessage, Matrix, Microsoft Teams, Signal, Slack, Telegram, WhatsApp) इनबाउंड संदर्भ बनाते समय यह नीति लागू करते हैं; अज्ञात नीति संयोजन सुरक्षित रूप से विफल होते हैं और संदर्भ को छोड़ देते हैं।
 
-  </Accordion>
-</AccordionGroup>
+ये मोड केवल चैनल द्वारा दिए गए पूरक संदर्भ को फ़िल्टर करते हैं। टूल नीति और केवल-स्वामी टूल सूची अब भी वर्तमान टर्न के मूल अनुरोधकर्ता के आधार पर चुनी जाती हैं, न कि प्रॉम्प्ट में दर्शाए गए प्रत्येक प्रेषक के आधार पर। [अनुरोधकर्ता-स्कोप वाले नियंत्रण और प्रॉम्प्ट संदर्भ](/hi/gateway/security#requester-scoped-controls-and-prompt-context) देखें।
 
 ![समूह संदेश प्रवाह](/images/groups-flow.svg)
 
@@ -145,47 +136,47 @@ Native slash commands (Discord, Telegram, और native command support वा�
 
 | लक्ष्य                                         | क्या सेट करें                                                |
 | -------------------------------------------- | ---------------------------------------------------------- |
-| सभी समूहों को अनुमति दें लेकिन केवल @mentions पर reply करें | `groups: { "*": { requireMention: true } }`                |
-| सभी समूह replies अक्षम करें                    | `groupPolicy: "disabled"`                                  |
-| केवल विशिष्ट समूह                         | `groups: { "<group-id>": { ... } }` (कोई `"*"` key नहीं)         |
-| समूहों में केवल आप trigger कर सकते हैं               | `groupPolicy: "allowlist"`, `groupAllowFrom: ["+1555..."]` |
-| चैनलों में एक भरोसेमंद sender set दोबारा उपयोग करें | `groupAllowFrom: ["accessGroup:operators"]`                |
+| सभी समूहों को अनुमति दें, लेकिन केवल @उल्लेखों पर जवाब दें | `groups: { "*": { requireMention: true } }`                |
+| समूह के सभी जवाब अक्षम करें                    | `groupPolicy: "disabled"`                                  |
+| केवल विशिष्ट समूह                         | `groups: { "<group-id>": { ... } }` (कोई `"*"` कुंजी नहीं)         |
+| समूहों में केवल आप ट्रिगर कर सकें               | `groupPolicy: "allowlist"`, `groupAllowFrom: ["+1555..."]` |
+| सभी चैनलों में विश्वसनीय प्रेषकों के एक सेट का पुनः उपयोग करें | `groupAllowFrom: ["accessGroup:operators"]`                |
 
-Reusable sender allowlists के लिए, [Access groups](/hi/channels/access-groups) देखें।
+पुनः उपयोग योग्य प्रेषक अनुमति-सूचियों के लिए [एक्सेस समूह](/hi/channels/access-groups) देखें।
 
-## Session keys
+## सेशन कुंजियाँ
 
-- समूह sessions `agent:<agentId>:<channel>:group:<id>` session keys उपयोग करते हैं (rooms/channels `agent:<agentId>:<channel>:channel:<id>` उपयोग करते हैं)।
-- Telegram forum topics समूह id में `:topic:<threadId>` जोड़ते हैं ताकि हर topic का अपना session हो।
-- Direct chats main session उपयोग करते हैं (या configured होने पर per-sender)।
-- समूह sessions के लिए Heartbeats छोड़ दिए जाते हैं।
+- समूह सेशन `agent:<agentId>:<channel>:group:<id>` सेशन कुंजियों का उपयोग करते हैं (रूम/चैनल `agent:<agentId>:<channel>:channel:<id>` का उपयोग करते हैं)।
+- Telegram फ़ोरम विषय समूह आईडी में `:topic:<threadId>` जोड़ते हैं, ताकि प्रत्येक विषय का अपना सेशन हो।
+- प्रत्यक्ष चैट मुख्य सेशन का उपयोग करती हैं (या यदि `session.dmScope` कॉन्फ़िगर किया गया है, तो प्रत्येक प्रेषक के लिए अलग सेशन)।
+- Heartbeats कॉन्फ़िगर किए गए Heartbeat सेशन में चलते हैं (डिफ़ॉल्ट: एजेंट का मुख्य सेशन); समूह सेशन अपने Heartbeats नहीं चलाते।
 
 <a id="pattern-personal-dms-public-groups-single-agent"></a>
 
-## पैटर्न: व्यक्तिगत DMs + सार्वजनिक समूह (single agent)
+## पैटर्न: निजी DM + सार्वजनिक समूह (एक एजेंट)
 
-हाँ — यह अच्छी तरह काम करता है यदि आपका "personal" traffic **DMs** है और आपका "public" traffic **groups** है।
+हाँ — यदि आपका "निजी" ट्रैफ़िक **DM** है और आपका "सार्वजनिक" ट्रैफ़िक **समूह** है, तो यह अच्छी तरह काम करता है।
 
-कारण: single-agent mode में, DMs आमतौर पर **main** session key (`agent:main:main`) में जाते हैं, जबकि groups हमेशा **non-main** session keys (`agent:main:<channel>:group:<id>`) उपयोग करते हैं। यदि आप `mode: "non-main"` के साथ sandboxing सक्षम करते हैं, तो वे group sessions configured sandbox backend में चलते हैं जबकि आपका main DM session on-host रहता है। यदि आप कोई backend नहीं चुनते, तो Docker डिफ़ॉल्ट backend है।
+कारण: एकल-एजेंट मोड में, DM सामान्यतः **मुख्य** सेशन कुंजी (`agent:main:main`) में पहुँचते हैं, जबकि समूह हमेशा **गैर-मुख्य** सेशन कुंजियों (`agent:main:<channel>:group:<id>`) का उपयोग करते हैं। यदि आप `mode: "non-main"` के साथ सैंडबॉक्सिंग सक्षम करते हैं, तो वे समूह सेशन कॉन्फ़िगर किए गए सैंडबॉक्स बैकएंड में चलते हैं, जबकि आपका मुख्य DM सेशन होस्ट पर रहता है। यदि आप कोई बैकएंड नहीं चुनते, तो Docker डिफ़ॉल्ट बैकएंड होता है।
 
-इससे आपको एक agent "brain" (shared workspace + memory) मिलता है, लेकिन दो execution postures:
+इससे आपको एजेंट का एक "मस्तिष्क" (साझा वर्कस्पेस + मेमोरी), लेकिन निष्पादन की दो स्थितियाँ मिलती हैं:
 
-- **DMs**: full tools (host)
-- **Groups**: sandbox + restricted tools
+- **DM**: पूर्ण टूल (होस्ट)
+- **समूह**: सैंडबॉक्स + प्रतिबंधित टूल
 
 <Note>
-यदि आपको सचमुच अलग workspaces/personas चाहिए ("personal" और "public" कभी mix नहीं होने चाहिए), तो दूसरा agent + bindings उपयोग करें। [Multi-Agent Routing](/hi/concepts/multi-agent) देखें।
+यदि आपको वास्तव में अलग-अलग वर्कस्पेस/व्यक्तित्व चाहिए ("निजी" और "सार्वजनिक" कभी मिश्रित नहीं होने चाहिए), तो दूसरे एजेंट + बाइंडिंग का उपयोग करें। [मल्टी-एजेंट रूटिंग](/hi/concepts/multi-agent) देखें।
 </Note>
 
 <Tabs>
-  <Tab title="DMs host पर, groups sandboxed">
+  <Tab title="होस्ट पर DM, सैंडबॉक्स में समूह">
     ```json5
     {
       agents: {
         defaults: {
           sandbox: {
-            mode: "non-main", // groups/channels are non-main -> sandboxed
-            scope: "session", // strongest isolation (one container per group/channel)
+            mode: "non-main", // समूह/चैनल गैर-मुख्य हैं -> सैंडबॉक्स किए गए
+            scope: "session", // सबसे मजबूत पृथक्करण (प्रत्येक समूह/चैनल के लिए एक कंटेनर)
             workspaceAccess: "none",
           },
         },
@@ -193,7 +184,7 @@ Reusable sender allowlists के लिए, [Access groups](/hi/channels/access
       tools: {
         sandbox: {
           tools: {
-            // If allow is non-empty, everything else is blocked (deny still wins).
+            // यदि allow रिक्त नहीं है, तो बाकी सब कुछ ब्लॉक होता है (deny की प्राथमिकता फिर भी रहती है)।
             allow: ["group:messaging", "group:sessions"],
             deny: ["group:runtime", "group:fs", "group:ui", "nodes", "cron", "gateway"],
           },
@@ -202,8 +193,8 @@ Reusable sender allowlists के लिए, [Access groups](/hi/channels/access
     }
     ```
   </Tab>
-  <Tab title="Groups केवल allowlisted folder देखते हैं">
-    "no host access" के बजाय "groups can only see folder X" चाहते हैं? `workspaceAccess: "none"` रखें और sandbox में केवल allowlisted paths mount करें:
+  <Tab title="समूहों को केवल अनुमति-सूची वाला फ़ोल्डर दिखाई देता है">
+    "होस्ट एक्सेस नहीं" के बजाय "समूह केवल फ़ोल्डर X देख सकते हैं" चाहिए? `workspaceAccess: "none"` बनाए रखें और केवल अनुमति-सूची वाले पाथ सैंडबॉक्स में माउंट करें:
 
     ```json5
     {
@@ -230,18 +221,18 @@ Reusable sender allowlists के लिए, [Access groups](/hi/channels/access
 
 संबंधित:
 
-- Configuration keys और defaults: [Gateway configuration](/hi/gateway/config-agents#agentsdefaultssandbox)
-- कोई tool क्यों blocked है, debug करना: [Sandbox vs Tool Policy vs Elevated](/hi/gateway/sandbox-vs-tool-policy-vs-elevated)
-- Bind mounts details: [Sandboxing](/hi/gateway/sandboxing#custom-bind-mounts)
+- कॉन्फ़िगरेशन कुंजियाँ और डिफ़ॉल्ट: [Gateway कॉन्फ़िगरेशन](/hi/gateway/config-agents#agentsdefaultssandbox)
+- टूल के ब्लॉक होने का कारण डीबग करना: [सैंडबॉक्स बनाम टूल नीति बनाम उन्नत](/hi/gateway/sandbox-vs-tool-policy-vs-elevated)
+- बाइंड माउंट का विवरण: [सैंडबॉक्सिंग](/hi/gateway/sandboxing#custom-bind-mounts)
 
-## Display labels
+## प्रदर्शन लेबल
 
-- UI labels उपलब्ध होने पर `displayName` उपयोग करते हैं, जिसे `<channel>:<token>` के रूप में format किया जाता है।
-- `#room` rooms/channels के लिए reserved है; group chats `g-<slug>` उपयोग करते हैं (lowercase, spaces -> `-`, `#@+._-` रखें)।
+- उपलब्ध होने पर UI लेबल `displayName` का उपयोग करते हैं, जिसे `<channel>:<token>` के रूप में फ़ॉर्मैट किया जाता है।
+- `#room` रूम/चैनल के लिए आरक्षित है; समूह चैट `g-<slug>` का उपयोग करती हैं (लोअरकेस, रिक्त स्थान -> `-`, `#@+._-` बनाए रखें)। बहुत लंबी अपारदर्शी आईडी को UI में पूर्ण रूट आईडी उजागर करने के बजाय एक स्थिर टोकन में छोटा किया जाता है।
 
-## Group policy
+## समूह नीति
 
-प्रति चैनल group/room messages कैसे handled होते हैं, नियंत्रित करें:
+प्रत्येक चैनल के लिए समूह/रूम संदेशों के प्रबंधन का तरीका नियंत्रित करें:
 
 ```json5
 {
@@ -252,7 +243,7 @@ Reusable sender allowlists के लिए, [Access groups](/hi/channels/access
     },
     telegram: {
       groupPolicy: "disabled",
-      groupAllowFrom: ["123456789"], // numeric Telegram user id (wizard can resolve @username)
+      groupAllowFrom: ["123456789"], // संख्यात्मक Telegram उपयोगकर्ता आईडी (सेटअप @username को हल करता है)
     },
     signal: {
       groupPolicy: "disabled",
@@ -269,12 +260,12 @@ Reusable sender allowlists के लिए, [Access groups](/hi/channels/access
     discord: {
       groupPolicy: "allowlist",
       guilds: {
-        GUILD_ID: { channels: { help: { allow: true } } },
+        GUILD_ID: { channels: { help: { enabled: true } } },
       },
     },
     slack: {
       groupPolicy: "allowlist",
-      channels: { "#general": { allow: true } },
+      channels: { "#general": { enabled: true } },
     },
     matrix: {
       groupPolicy: "allowlist",
@@ -288,25 +279,25 @@ Reusable sender allowlists के लिए, [Access groups](/hi/channels/access
 }
 ```
 
-| नीति        | व्यवहार                                                     |
-| ------------- | ------------------------------------------------------------ |
-| `"open"`      | समूह allowlists को बायपास करते हैं; mention-gating अब भी लागू रहती है।      |
-| `"disabled"`  | सभी समूह संदेशों को पूरी तरह ब्लॉक करें।                           |
-| `"allowlist"` | केवल उन समूहों/रूम को अनुमति दें जो कॉन्फ़िगर की गई allowlist से मेल खाते हैं। |
+| नीति          | व्यवहार                                                               |
+| ------------- | --------------------------------------------------------------------- |
+| `"open"`      | समूह अनुमति-सूचियों को दरकिनार करते हैं; उल्लेख-गेटिंग फिर भी लागू होती है। |
+| `"disabled"`  | सभी समूह संदेशों को पूरी तरह अवरुद्ध करें।                            |
+| `"allowlist"` | केवल कॉन्फ़िगर की गई अनुमति-सूची से मेल खाने वाले समूहों/कक्षों को अनुमति दें। |
 
 <AccordionGroup>
-  <Accordion title="Per-channel notes">
-    - `groupPolicy` mention-gating से अलग है (जिसके लिए @mentions आवश्यक हैं)।
-    - WhatsApp/Telegram/Signal/iMessage/Microsoft Teams/Zalo: `groupAllowFrom` का उपयोग करें (fallback: स्पष्ट `allowFrom`)।
-    - Signal: `groupAllowFrom` इनबाउंड Signal समूह id या भेजने वाले के फ़ोन/UUID, दोनों में से किसी से भी मेल खा सकता है।
-    - DM पेयरिंग अनुमोदन (`*-allowFrom` स्टोर प्रविष्टियां) केवल DM पहुंच पर लागू होते हैं; समूह भेजने वाले की अनुमति समूह allowlists के लिए स्पष्ट रहती है।
-    - Discord: allowlist `channels.discord.guilds.<id>.channels` का उपयोग करती है।
-    - Slack: allowlist `channels.slack.channels` का उपयोग करती है।
-    - Matrix: allowlist `channels.matrix.groups` का उपयोग करती है। रूम IDs या aliases को प्राथमिकता दें; joined-room नाम lookup सर्वोत्तम-प्रयास है, और अनसुलझे नाम runtime पर अनदेखे किए जाते हैं। भेजने वालों को प्रतिबंधित करने के लिए `channels.matrix.groupAllowFrom` का उपयोग करें; प्रति-रूम `users` allowlists भी समर्थित हैं।
-    - समूह DMs अलग से नियंत्रित होते हैं (`channels.discord.dm.*`, `channels.slack.dm.*`)।
-    - Telegram allowlist user IDs (`"123456789"`, `"telegram:123456789"`, `"tg:123456789"`) या usernames (`"@alice"` या `"alice"`) से मेल खा सकती है; prefixes case-insensitive हैं।
-    - डिफ़ॉल्ट `groupPolicy: "allowlist"` है; यदि आपकी समूह allowlist खाली है, तो समूह संदेश ब्लॉक हो जाते हैं।
-    - Runtime सुरक्षा: जब कोई provider ब्लॉक पूरी तरह अनुपस्थित हो (`channels.<provider>` अनुपस्थित), तो समूह नीति `channels.defaults.groupPolicy` से इनहेरिट करने के बजाय fail-closed मोड (आमतौर पर `allowlist`) पर fallback करती है।
+  <Accordion title="प्रति-चैनल टिप्पणियाँ">
+    - `groupPolicy` उल्लेख-गेटिंग (जिसके लिए @mentions आवश्यक हैं) से अलग है।
+    - WhatsApp/Telegram/Signal/iMessage/Microsoft Teams/Zalo: `groupAllowFrom` का उपयोग करें (फ़ॉलबैक: स्पष्ट `allowFrom`)।
+    - Signal: `groupAllowFrom` आने वाले Signal समूह आईडी या प्रेषक के फ़ोन/UUID में से किसी से भी मेल खा सकता है।
+    - DM पेयरिंग अनुमोदन (`*-allowFrom` स्टोर प्रविष्टियाँ) केवल DM पहुँच पर लागू होते हैं; समूह प्रेषक प्राधिकरण समूह अनुमति-सूचियों में स्पष्ट रूप से निर्धारित रहता है।
+    - Discord: अनुमति-सूची `channels.discord.guilds.<id>.channels` का उपयोग करती है।
+    - Slack: अनुमति-सूची `channels.slack.channels` का उपयोग करती है।
+    - Matrix: अनुमति-सूची `channels.matrix.groups` का उपयोग करती है। कक्ष आईडी (`!room:server`) या उपनाम (`#alias:server`) का उपयोग करें; कक्ष-नाम कुंजियाँ केवल `channels.matrix.dangerouslyAllowNameMatching: true` के साथ मेल खाती हैं, और अनसुलझी प्रविष्टियों को रनटाइम पर अनदेखा किया जाता है। प्रेषकों को प्रतिबंधित करने के लिए `channels.matrix.groupAllowFrom` का उपयोग करें; प्रति-कक्ष `users` अनुमति-सूचियाँ भी समर्थित हैं।
+    - समूह DM अलग से नियंत्रित होते हैं (`channels.discord.dm.*`, `channels.slack.dm.*`: `groupEnabled`, `groupChannels`)।
+    - Telegram: प्रेषक अनुमति-सूचियाँ केवल संख्यात्मक उपयोगकर्ता आईडी स्वीकार करती हैं (`"123456789"`; `telegram:`/`tg:` उपसर्गों को केस-असंवेदी ढंग से हटा दिया जाता है)। `@username` प्रविष्टियाँ रनटाइम पर मेल नहीं खातीं और चेतावनी लॉग करती हैं; सेटअप `@username` को आईडी में हल करता है। ऋणात्मक चैट आईडी प्रेषक अनुमति-सूचियों में नहीं, बल्कि `channels.telegram.groups` के अंतर्गत रखी जाती हैं।
+    - डिफ़ॉल्ट `groupPolicy: "allowlist"` है; यदि आपकी समूह अनुमति-सूची खाली है, तो समूह संदेश अवरुद्ध कर दिए जाते हैं।
+    - रनटाइम सुरक्षा: जब कोई प्रदाता ब्लॉक पूरी तरह अनुपस्थित होता है (`channels.<provider>` अनुपस्थित), तो समूह नीति `channels.defaults.groupPolicy` को इनहेरिट करने के बजाय सुरक्षित रूप से `allowlist` पर विफल होती है, और Gateway प्रत्येक खाते के लिए फ़ॉलबैक को एक बार लॉग करता है।
 
   </Accordion>
 </AccordionGroup>
@@ -317,19 +308,27 @@ Reusable sender allowlists के लिए, [Access groups](/hi/channels/access
   <Step title="groupPolicy">
     `groupPolicy` (open/disabled/allowlist)।
   </Step>
-  <Step title="Group allowlists">
-    समूह allowlists (`*.groups`, `*.groupAllowFrom`, channel-specific allowlist)।
+  <Step title="समूह अनुमति-सूचियाँ">
+    समूह अनुमति-सूचियाँ (`*.groups`, `*.groupAllowFrom`, चैनल-विशिष्ट अनुमति-सूची)।
   </Step>
-  <Step title="Mention gating">
-    Mention gating (`requireMention`, `/activation`)।
+  <Step title="उल्लेख-गेटिंग">
+    उल्लेख-गेटिंग (`requireMention`, `/activation`)।
   </Step>
 </Steps>
 
-## Mention gating (डिफ़ॉल्ट)
+## उल्लेख-गेटिंग (डिफ़ॉल्ट)
 
-समूह संदेशों के लिए mention आवश्यक होता है, जब तक कि प्रति समूह उसे override न किया गया हो। डिफ़ॉल्ट `*.groups."*"` के अंतर्गत प्रति subsystem रहते हैं।
+समूह संदेशों के लिए उल्लेख आवश्यक है, जब तक कि प्रति समूह इसे ओवरराइड न किया गया हो। डिफ़ॉल्ट प्रत्येक उपतंत्र के लिए `*.groups."*"` के अंतर्गत होते हैं।
 
-जब channel reply metadata का समर्थन करता है, तो bot संदेश का उत्तर देना implicit mention माना जाता है। जिन channels में quote metadata उपलब्ध होता है, वहां bot संदेश को quote करना भी implicit mention माना जा सकता है। मौजूदा built-in मामलों में Telegram, WhatsApp, Slack, Discord, Microsoft Teams, और ZaloUser शामिल हैं।
+समर्थित अंतर्निहित उल्लेख तथ्य चैनल-विशिष्ट हैं:
+
+| तथ्य                    | वर्तमान अंतर्निर्मित उत्पादक                         |
+| ----------------------- | ---------------------------------------------------- |
+| बॉट को उत्तर            | Discord, Microsoft Teams, QQBot, Slack, Telegram     |
+| बॉट का उद्धरण           | WhatsApp, Zalo personal                              |
+| बॉट थ्रेड में शामिल हुआ | Mattermost, Slack, Tlon                              |
+
+चैनल द्वारा प्रत्येक तथ्य उत्पन्न किए जाने पर वह डिफ़ॉल्ट रूप से सक्षम होता है। उस तथ्य को उल्लेख-गेटिंग दरकिनार करने से रोकने के लिए संबंधित `implicitMentions` फ़्लैग को `false` पर सेट करें; मूल स्पष्ट उल्लेख अप्रभावित रहते हैं। जो चैनल उस तथ्य को उत्पन्न नहीं करते, उन पर फ़्लैग का कोई प्रभाव नहीं होता।
 
 ```json5
 {
@@ -354,35 +353,30 @@ Reusable sender allowlists के लिए, [Access groups](/hi/channels/access
     },
   },
   agents: {
-    list: [
-      {
-        id: "main",
+    entries: {
+      main: {
         groupChat: {
           mentionPatterns: ["@openclaw", "openclaw", "\\+15555550123"],
           historyLimit: 50,
         },
       },
-    ],
+    },
   },
 }
 ```
 
-## कॉन्फ़िगर किए गए mention patterns को scope करें
+## कॉन्फ़िगर किए गए उल्लेख पैटर्न का दायरा
 
-कॉन्फ़िगर किए गए `mentionPatterns` regex fallback triggers हैं। उनका उपयोग तब करें जब
-platform कोई native bot mention expose नहीं करता, या जब आप चाहते हों कि plain text जैसे
-`openclaw:` mention माना जाए। Native platform mentions अलग हैं:
-जब Discord, Slack, Telegram, Matrix, या कोई अन्य channel यह साबित कर सकता है कि संदेश ने
-bot को स्पष्ट रूप से mention किया है, तो वह native mention फिर भी trigger करता है, भले ही
-कॉन्फ़िगर किए गए regex patterns deny किए गए हों।
+कॉन्फ़िगर किए गए `mentionPatterns` रेगेक्स फ़ॉलबैक ट्रिगर हैं। उनका उपयोग तब करें जब
+प्लेटफ़ॉर्म मूल बॉट उल्लेख उपलब्ध नहीं कराता, या जब आप चाहते हैं कि
+`openclaw:` जैसा सामान्य टेक्स्ट उल्लेख माना जाए। मूल प्लेटफ़ॉर्म उल्लेख अलग होते हैं:
+जब Discord, Slack, Telegram, Matrix, Signal या कोई अन्य चैनल यह प्रमाणित कर सकता है कि संदेश में
+बॉट का स्पष्ट रूप से उल्लेख हुआ है, तब कॉन्फ़िगर किए गए रेगेक्स पैटर्न अस्वीकृत होने पर भी
+वह मूल उल्लेख ट्रिगर करता है।
 
-डिफ़ॉल्ट रूप से, कॉन्फ़िगर किए गए mention patterns हर उस जगह लागू होते हैं जहां वह channel
-provider और conversation facts को mention detection में पास करता है। broad patterns को
-हर समूह में agent को जगाने से रोकने के लिए, उन्हें प्रति channel
-`channels.<channel>.mentionPatterns` के साथ scope करें।
+डिफ़ॉल्ट रूप से, कॉन्फ़िगर किए गए उल्लेख पैटर्न हर उस स्थान पर लागू होते हैं जहाँ चैनल प्रदाता और वार्तालाप तथ्यों को उल्लेख पहचान में भेजता है। व्यापक पैटर्न से एजेंट को प्रत्येक समूह में सक्रिय होने से रोकने के लिए, `channels.<channel>.mentionPatterns` के साथ प्रति चैनल उनका दायरा निर्धारित करें।
 
-जब regex mention patterns किसी
-channel के लिए डिफ़ॉल्ट रूप से बंद होने चाहिए, तो `mode: "deny"` का उपयोग करें, फिर specific rooms में `allowIn` के साथ opt in करें:
+जब किसी चैनल के लिए रेगेक्स उल्लेख पैटर्न डिफ़ॉल्ट रूप से बंद होने चाहिए, तब `mode: "deny"` का उपयोग करें और फिर `allowIn` के साथ विशिष्ट कक्षों को शामिल करें:
 
 ```json5
 {
@@ -402,8 +396,7 @@ channel के लिए डिफ़ॉल्ट रूप से बंद ह
 }
 ```
 
-जब regex mention patterns
-व्यापक रूप से लागू होने चाहिए, तो डिफ़ॉल्ट `mode: "allow"` का उपयोग करें (या `mode` छोड़ दें), फिर शोर-भरे rooms में उन्हें `denyIn` के साथ बंद करें:
+जब रेगेक्स उल्लेख पैटर्न व्यापक रूप से लागू होने चाहिए, तब डिफ़ॉल्ट `mode: "allow"` का उपयोग करें (या `mode` को छोड़ दें), फिर `denyIn` के साथ शोरगुल वाले कक्षों में उन्हें बंद करें:
 
 ```json5
 {
@@ -426,66 +419,60 @@ channel के लिए डिफ़ॉल्ट रूप से बंद ह
 
 | फ़ील्ड           | प्रभाव                                                                                                                |
 | --------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `mode: "allow"` | रेगेक्स मेंशन पैटर्न सक्षम होते हैं, जब तक conversation ID `denyIn` में न हो। यह डिफ़ॉल्ट है।                    |
-| `mode: "deny"`  | रेगेक्स मेंशन पैटर्न अक्षम होते हैं, जब तक conversation ID `allowIn` में न हो।                                       |
-| `allowIn`       | वे conversation ID जहाँ deny मोड में रेगेक्स मेंशन पैटर्न सक्षम होते हैं।                                               |
-| `denyIn`        | वे conversation ID जहाँ रेगेक्स मेंशन पैटर्न अक्षम होते हैं। अगर दोनों में वही ID शामिल हो, तो `denyIn`, `allowIn` पर प्राथमिकता लेता है। |
+| `mode: "allow"` | रेगेक्स उल्लेख पैटर्न तब तक सक्षम रहते हैं, जब तक वार्तालाप आईडी `denyIn` में न हो। यह डिफ़ॉल्ट है।                    |
+| `mode: "deny"`  | रेगेक्स उल्लेख पैटर्न तब तक अक्षम रहते हैं, जब तक वार्तालाप आईडी `allowIn` में न हो।                                       |
+| `allowIn`       | वे वार्तालाप आईडी जहाँ अस्वीकार मोड में रेगेक्स उल्लेख पैटर्न सक्षम होते हैं।                                               |
+| `denyIn`        | वे वार्तालाप आईडी जहाँ रेगेक्स उल्लेख पैटर्न अक्षम होते हैं। यदि दोनों में समान आईडी शामिल हो, तो `denyIn`, `allowIn` पर प्राथमिकता लेता है। |
 
-आज समर्थित scoped रेगेक्स नीति:
+वर्तमान में समर्थित दायरा-निर्धारित रेगेक्स नीति:
 
-| चैनल  | `allowIn` / `denyIn` में उपयोग की गई ID                             |
+| चैनल     | `allowIn` / `denyIn` में उपयोग की जाने वाली आईडी |
 | -------- | ------------------------------------------------------------ |
-| Discord  | Discord चैनल ID।                                         |
-| Matrix   | Matrix रूम ID।                                             |
-| Slack    | Slack चैनल ID।                                           |
-| Telegram | समूह चैट ID, या फ़ोरम विषयों के लिए `chatId:topic:threadId`। |
-| WhatsApp | WhatsApp conversation ID जैसे `123@g.us`।                |
+| Discord  | Discord चैनल आईडी।                                           |
+| Matrix   | Matrix कक्ष आईडी।                                            |
+| Slack    | Slack चैनल आईडी।                                             |
+| Telegram | समूह चैट आईडी, या फ़ोरम विषयों के लिए `chatId:topic:threadId`।    |
+| WhatsApp | `123@g.us` जैसी WhatsApp वार्तालाप आईडी।             |
 
-Account-level चैनल कॉन्फ़िग वही नीति
-`channels.<channel>.accounts.<accountId>.mentionPatterns` के अंतर्गत सेट कर सकते हैं, जब वह चैनल
-कई खातों का समर्थन करता है। उस खाते के लिए account नीति top-level
-चैनल नीति पर प्राथमिकता लेती है।
+जब वह चैनल एकाधिक खातों का समर्थन करता है, तब खाता-स्तरीय चैनल कॉन्फ़िगरेशन `channels.<channel>.accounts.<accountId>.mentionPatterns` के अंतर्गत वही नीति सेट कर सकते हैं। उस खाते के लिए खाता नीति शीर्ष-स्तरीय चैनल नीति पर प्राथमिकता लेती है।
 
 <AccordionGroup>
-  <Accordion title="मेंशन गेटिंग नोट्स">
-    - `mentionPatterns` case-insensitive सुरक्षित रेगेक्स पैटर्न हैं; अमान्य पैटर्न और असुरक्षित nested-repetition रूपों को अनदेखा किया जाता है।
-    - जो सतहें स्पष्ट मेंशन देती हैं, वे फिर भी पास होती हैं; कॉन्फ़िगर किए गए रेगेक्स पैटर्न fallback हैं।
-    - `channels.<channel>.mentionPatterns.mode: "deny"` उस चैनल के लिए कॉन्फ़िगर किए गए मेंशन पैटर्न को डिफ़ॉल्ट रूप से अक्षम करता है; चुनी हुई conversations को `allowIn` से फिर से सक्षम करें।
-    - `channels.<channel>.mentionPatterns.denyIn` विशिष्ट conversation ID के लिए कॉन्फ़िगर किए गए मेंशन पैटर्न अक्षम करता है, जबकि native platform @mentions फिर भी पास होते हैं।
-    - प्रति-agent override: `agents.list[].groupChat.mentionPatterns` (जब कई agents एक समूह साझा करते हैं तो उपयोगी)।
-    - मेंशन गेटिंग केवल तब लागू होती है जब मेंशन पहचान संभव हो (native mentions या `mentionPatterns` कॉन्फ़िगर किए गए हों)।
-    - किसी समूह या sender को allowlist करने से मेंशन गेटिंग अक्षम नहीं होती; जब सभी संदेश trigger होने चाहिए, तो उस समूह का `requireMention` `false` पर सेट करें।
-    - Automatic group chat prompt context हर turn में resolved silent-reply निर्देश साथ रखता है; workspace files को `NO_REPLY` mechanics दोहराने नहीं चाहिए।
-    - जिन समूहों में automatic silent replies की अनुमति है, वे साफ़ खाली या केवल reasoning वाले model turns को silent मानते हैं, जो `NO_REPLY` के बराबर है। Direct chats को कभी `NO_REPLY` guidance नहीं मिलता, और message-tool-only group replies `message(action=send)` को call न करके शांत रहते हैं।
-    - Ambient always-on group chatter डिफ़ॉल्ट रूप से user-request semantics का उपयोग करता है। इसके बजाय इसे quiet context के रूप में submit करने के लिए `messages.groupChat.unmentionedInbound: "room_event"` सेट करें। सेटअप उदाहरणों के लिए [Ambient room events](/hi/channels/ambient-room-events) देखें।
-    - Room events को नकली user requests के रूप में stored नहीं किया जाता, और no-message-tool room events से private assistant text को chat history के रूप में replay नहीं किया जाता।
-    - Discord defaults `channels.discord.guilds."*"` में रहते हैं (प्रति guild/channel override किए जा सकते हैं)।
-    - Group history context सभी channels में एकसमान रूप से wrapped होता है। Mention-gated groups pending skipped messages रखते हैं; always-on groups हाल के processed room messages भी रख सकते हैं, जब channel इसका समर्थन करता हो। Global default के लिए `messages.groupChat.historyLimit` और overrides के लिए `channels.<channel>.historyLimit` (या `channels.<channel>.accounts.*.historyLimit`) का उपयोग करें। अक्षम करने के लिए `0` सेट करें।
+  <Accordion title="उल्लेख-गेटिंग टिप्पणियाँ">
+    - `mentionPatterns` केस-असंवेदी सुरक्षित रेगेक्स पैटर्न हैं; अमान्य पैटर्न और असुरक्षित नेस्टेड-पुनरावृत्ति रूपों को चेतावनी के साथ अनदेखा किया जाता है।
+    - पैटर्न प्राथमिकता: `agents.entries.*.groupChat.mentionPatterns` (जब एकाधिक एजेंट एक समूह साझा करते हैं तब उपयोगी) `messages.groupChat.mentionPatterns` को ओवरराइड करता है; जब दोनों में से कोई सेट न हो, तब पैटर्न एजेंट की पहचान के नाम/इमोजी से निकाले जाते हैं।
+    - उल्लेख-गेटिंग केवल तभी लागू की जाती है जब उल्लेख पहचान संभव हो (मूल उल्लेख या `mentionPatterns` कॉन्फ़िगर किए गए हों)।
+    - किसी समूह या प्रेषक को अनुमति-सूची में शामिल करने से उल्लेख-गेटिंग अक्षम नहीं होती; जब सभी संदेशों को ट्रिगर करना चाहिए, तब उस समूह के `requireMention` को `false` पर सेट करें।
+    - स्वचालित समूह चैट प्रॉम्प्ट संदर्भ प्रत्येक टर्न पर हल किया गया मौन-उत्तर निर्देश साथ रखता है; कार्यस्थान फ़ाइलों को `NO_REPLY` कार्यविधि की नकल नहीं करनी चाहिए।
+    - वे समूह जहाँ स्वचालित मौन उत्तरों की अनुमति है, साफ़ खाली या केवल-रीज़निंग मॉडल टर्न को `NO_REPLY` के समकक्ष मौन मानते हैं। प्रत्यक्ष चैट को कभी `NO_REPLY` मार्गदर्शन नहीं मिलता, और केवल-संदेश-टूल समूह उत्तर `message(action=send)` को कॉल न करके शांत रहते हैं।
+    - परिवेशी सदैव-सक्रिय समूह वार्तालाप डिफ़ॉल्ट रूप से उपयोगकर्ता-अनुरोध सिमेंटिक्स का उपयोग करता है। इसके बजाय इसे शांत संदर्भ के रूप में सबमिट करने के लिए `messages.groupChat.unmentionedInbound: "room_event"` सेट करें। सेटअप उदाहरणों के लिए [परिवेशी कक्ष घटनाएँ](/hi/channels/ambient-room-events) देखें।
+    - कक्ष घटनाएँ नकली उपयोगकर्ता अनुरोधों के रूप में संग्रहीत नहीं की जातीं, और बिना-संदेश-टूल वाली कक्ष घटनाओं का निजी सहायक टेक्स्ट चैट इतिहास के रूप में दोबारा नहीं चलाया जाता।
+    - Discord के डिफ़ॉल्ट `channels.discord.guilds."*"` में होते हैं (प्रति गिल्ड/चैनल ओवरराइड किए जा सकते हैं)।
+    - समूह इतिहास संदर्भ सभी चैनलों में एकसमान रूप से लपेटा जाता है। उल्लेख-गेटेड समूह लंबित छोड़े गए संदेश रखते हैं; सदैव-सक्रिय समूह भी हाल के संसाधित कक्ष संदेश रख सकते हैं, यदि चैनल इसका समर्थन करता हो। वैश्विक डिफ़ॉल्ट के लिए `messages.groupChat.historyLimit` और ओवरराइड के लिए `channels.<channel>.historyLimit` (या `channels.<channel>.accounts.*.historyLimit`) का उपयोग करें। अक्षम करने के लिए `0` सेट करें।
 
   </Accordion>
 </AccordionGroup>
 
-## समूह/चैनल tool restrictions (वैकल्पिक)
+## समूह/चैनल टूल प्रतिबंध (वैकल्पिक)
 
-कुछ चैनल कॉन्फ़िग यह सीमित करने का समर्थन करते हैं कि **किसी विशिष्ट group/room/channel के अंदर** कौन से tools उपलब्ध हैं।
+कुछ चैनल कॉन्फ़िगरेशन यह प्रतिबंधित करने का समर्थन करते हैं कि **किसी विशिष्ट समूह/कक्ष/चैनल के भीतर** कौन-से टूल उपलब्ध हैं।
 
-- `tools`: पूरे समूह के लिए tools को allow/deny करें।
-- `toolsBySender`: समूह के भीतर प्रति-sender overrides। स्पष्ट key prefixes का उपयोग करें: `channel:<channelId>:<senderId>`, `id:<senderId>`, `e164:<phone>`, `username:<handle>`, `name:<displayName>`, और `"*"` wildcard। Channel ids canonical OpenClaw channel ids का उपयोग करते हैं; `teams` जैसे aliases `msteams` में normalize होते हैं। Legacy unprefixed keys अभी भी स्वीकार की जाती हैं और केवल `id:` के रूप में matched होती हैं।
+- `tools`: पूरे समूह के लिए टूल को अनुमति दें/अस्वीकार करें (`allow`, `alsoAllow`, `deny`; अस्वीकार को प्राथमिकता मिलती है)।
+- `toolsBySender`: समूह के भीतर प्रति-प्रेषक ओवरराइड। स्पष्ट कुंजी उपसर्गों का उपयोग करें: `channel:<channelId>:<senderId>`, `id:<senderId>`, `e164:<phone>`, `username:<handle>`, `name:<displayName>`, और `"*"` वाइल्डकार्ड। चैनल आईडी प्रामाणिक OpenClaw चैनल आईडी का उपयोग करती हैं; `teams` जैसे उपनाम `msteams` में सामान्यीकृत होते हैं। पुराने उपसर्ग-रहित कुंजी रूप अभी भी स्वीकार किए जाते हैं, केवल `id:` के रूप में मिलाए जाते हैं, और एक अप्रचलन चेतावनी लॉग करते हैं।
 
-Resolution order (सबसे specific जीतता है):
+समाधान क्रम (सबसे विशिष्ट को प्राथमिकता):
 
 <Steps>
-  <Step title="Group toolsBySender">
-    Group/channel `toolsBySender` match.
+  <Step title="समूह toolsBySender">
+    समूह/चैनल `toolsBySender` मिलान।
   </Step>
-  <Step title="Group tools">
-    Group/channel `tools`.
+  <Step title="समूह tools">
+    समूह/चैनल `tools`।
   </Step>
-  <Step title="Default toolsBySender">
-    Default (`"*"`) `toolsBySender` match.
+  <Step title="डिफ़ॉल्ट toolsBySender">
+    डिफ़ॉल्ट (`"*"`) `toolsBySender` मिलान।
   </Step>
-  <Step title="Default tools">
-    Default (`"*"`) `tools`.
+  <Step title="डिफ़ॉल्ट tools">
+    डिफ़ॉल्ट (`"*"`) `tools`।
   </Step>
 </Steps>
 
@@ -510,18 +497,18 @@ Resolution order (सबसे specific जीतता है):
 ```
 
 <Note>
-Group/channel tool restrictions global/agent tool नीति के अतिरिक्त लागू की जाती हैं (deny फिर भी जीतता है)। कुछ channels rooms/channels के लिए अलग nesting का उपयोग करते हैं (जैसे, Discord `guilds.*.channels.*`, Slack `channels.*`, Microsoft Teams `teams.*.channels.*`)।
+समूह/चैनल टूल प्रतिबंध वैश्विक/एजेंट टूल नीति के अतिरिक्त लागू होते हैं (अस्वीकृति को फिर भी प्राथमिकता मिलती है)। कुछ चैनल कक्षों/चैनलों के लिए अलग नेस्टिंग का उपयोग करते हैं (उदा., Discord `guilds.*.channels.*`, Slack `channels.*`, Microsoft Teams `teams.*.channels.*`)।
 </Note>
 
-## Group allowlists
+## समूह अनुमति-सूचियाँ
 
-जब `channels.whatsapp.groups`, `channels.telegram.groups`, या `channels.imessage.groups` कॉन्फ़िगर किया जाता है, तो keys group allowlist के रूप में काम करती हैं। सभी groups को allow करने के लिए `"*"` का उपयोग करें, साथ ही default mention behavior सेट करना जारी रखें।
+जब `channels.whatsapp.groups`, `channels.telegram.groups`, या `channels.imessage.groups` कॉन्फ़िगर किया जाता है, तो कुंजियाँ समूह अनुमति-सूची के रूप में कार्य करती हैं। डिफ़ॉल्ट उल्लेख व्यवहार सेट रखते हुए सभी समूहों को अनुमति देने के लिए `"*"` का उपयोग करें।
 
 <Warning>
-सामान्य भ्रम: DM पेयरिंग अनुमोदन समूह प्राधिकरण जैसा नहीं है। DM पेयरिंग का समर्थन करने वाले चैनलों के लिए, पेयरिंग स्टोर केवल DM अनलॉक करता है। समूह कमांड के लिए अभी भी config अनुमति-सूचियों जैसे `groupAllowFrom` या उस चैनल के लिए दस्तावेजीकृत config fallback से स्पष्ट समूह प्रेषक प्राधिकरण आवश्यक है।
+सामान्य भ्रम: DM पेयरिंग अनुमोदन, समूह प्राधिकरण के समान नहीं है। DM पेयरिंग का समर्थन करने वाले चैनलों के लिए, पेयरिंग स्टोर केवल DMs को अनलॉक करता है। समूह कमांड के लिए फिर भी `groupAllowFrom` जैसी कॉन्फ़िगरेशन अनुमति-सूचियों या उस चैनल के लिए दस्तावेज़ीकृत कॉन्फ़िगरेशन फ़ॉलबैक से स्पष्ट समूह प्रेषक प्राधिकरण आवश्यक है।
 </Warning>
 
-सामान्य उद्देश्य (कॉपी/पेस्ट):
+सामान्य उद्देश्य (कॉपी/पेस्ट करें):
 
 <Tabs>
   <Tab title="सभी समूह उत्तर अक्षम करें">
@@ -545,7 +532,7 @@ Group/channel tool restrictions global/agent tool नीति के अति�
     }
     ```
   </Tab>
-  <Tab title="सभी समूहों को अनुमति दें लेकिन mention आवश्यक करें">
+  <Tab title="सभी समूहों को अनुमति दें, लेकिन उल्लेख आवश्यक करें">
     ```json5
     {
       channels: {
@@ -556,7 +543,7 @@ Group/channel tool restrictions global/agent tool नीति के अति�
     }
     ```
   </Tab>
-  <Tab title="केवल स्वामी ट्रिगर (WhatsApp)">
+  <Tab title="केवल स्वामी के ट्रिगर (WhatsApp)">
     ```json5
     {
       channels: {
@@ -573,42 +560,42 @@ Group/channel tool restrictions global/agent tool नीति के अति�
 
 ## सक्रियण (केवल स्वामी)
 
-समूह स्वामी प्रति-समूह सक्रियण टॉगल कर सकते हैं:
+समूह स्वामी एक स्वतंत्र संदेश से प्रत्येक समूह के सक्रियण को टॉगल कर सकते हैं:
 
 - `/activation mention`
 - `/activation always`
 
-स्वामी `channels.whatsapp.allowFrom` से निर्धारित होता है (या सेट न होने पर बॉट के अपने E.164 से)। कमांड को अलग संदेश के रूप में भेजें। अन्य सतहें अभी `/activation` को अनदेखा करती हैं।
+`/activation` एक मुख्य स्वामी-प्रतिबंधित कमांड है और केवल समूह चैट में लागू होता है। स्वामी का अर्थ है कि प्रेषक `commands.ownerAllowFrom` से मेल खाता है; चैनल `allowFrom` सूचियाँ केवल सामान्य चैनल और कमांड पहुँच नियंत्रित करती हैं। जो चैनल संग्रहीत मोड का उपयोग करते हैं (Google Chat, QQBot, Telegram, WhatsApp), उनमें यह मोड उस समूह के `requireMention` को ओवरराइड करता है, और समूह सिस्टम-प्रॉम्प्ट परिचय हर जगह सक्रिय मोड दर्शाता है।
 
 ## संदर्भ फ़ील्ड
 
-समूह इनबाउंड पेलोड सेट करते हैं:
+समूह के इनबाउंड पेलोड ये सेट करते हैं:
 
 - `ChatType=group`
 - `GroupSubject` (यदि ज्ञात हो)
 - `GroupMembers` (यदि ज्ञात हो)
-- `WasMentioned` (mention gating परिणाम)
+- `WasMentioned` (उल्लेख गेटिंग का परिणाम)
 - Telegram फ़ोरम विषयों में `MessageThreadId` और `IsForum` भी शामिल होते हैं।
 
-एजेंट सिस्टम प्रॉम्प्ट में नए समूह सत्र के पहले turn पर समूह परिचय शामिल होता है। यह मॉडल को मनुष्य की तरह जवाब देने, खाली पंक्तियों को कम रखने और सामान्य चैट spacing का पालन करने, और literal `\n` sequences टाइप करने से बचने की याद दिलाता है। गैर-Telegram समूह Markdown tables को भी हतोत्साहित करते हैं; Telegram rich-text guidance Telegram चैनल प्रॉम्प्ट से आती है। चैनल-स्रोत समूह नाम और सहभागी labels fenced untrusted metadata के रूप में render किए जाते हैं, inline system instructions के रूप में नहीं।
+एजेंट सिस्टम प्रॉम्प्ट में नए समूह सत्र के पहले टर्न पर (और `/activation` बदलने के बाद) समूह परिचय शामिल होता है। यह मॉडल को मनुष्य की तरह उत्तर देने, खाली पंक्तियाँ न्यूनतम रखने और सामान्य चैट रिक्ति का पालन करने तथा अक्षरशः `\n` अनुक्रम टाइप करने से बचने की याद दिलाता है। जिन चैनलों का घोषित तालिका मोड नेटिव या रॉ तालिकाओं को बनाए नहीं रखता, वे Markdown तालिकाओं को भी हतोत्साहित करते हैं। चैनल से प्राप्त समूह नाम और प्रतिभागी लेबल इनलाइन सिस्टम निर्देशों के रूप में नहीं, बल्कि फ़ेंस किए गए अविश्वसनीय मेटाडेटा के रूप में रेंडर होते हैं।
 
-## iMessage विशेषताएँ
+## iMessage की विशिष्टताएँ
 
-- routing या allowlisting करते समय `chat_id:<id>` को प्राथमिकता दें।
-- chats सूचीबद्ध करें: `imsg chats --limit 20`।
+- रूटिंग या अनुमति-सूची बनाते समय `chat_id:<id>` को प्राथमिकता दें।
+- चैट सूचीबद्ध करें: `imsg chats --limit 20`।
 - समूह उत्तर हमेशा उसी `chat_id` पर वापस जाते हैं।
 
 ## WhatsApp सिस्टम प्रॉम्प्ट
 
-canonical WhatsApp सिस्टम प्रॉम्प्ट नियमों के लिए [WhatsApp](/hi/channels/whatsapp#system-prompts) देखें, जिसमें समूह और direct prompt resolution, wildcard behavior, और account override semantics शामिल हैं।
+समूह और प्रत्यक्ष प्रॉम्प्ट समाधान, वाइल्डकार्ड व्यवहार तथा खाता ओवरराइड अर्थविज्ञान सहित प्रामाणिक WhatsApp सिस्टम प्रॉम्प्ट नियमों के लिए [WhatsApp](/hi/channels/whatsapp#system-prompts) देखें।
 
-## WhatsApp विशेषताएँ
+## WhatsApp की विशिष्टताएँ
 
-WhatsApp-only behavior (history injection, mention handling details) के लिए [समूह संदेश](/hi/channels/group-messages) देखें।
+केवल WhatsApp के व्यवहार (इतिहास अंतःक्षेपण, उल्लेख प्रबंधन विवरण) के लिए [समूह संदेश](/hi/channels/group-messages) देखें।
 
 ## संबंधित
 
-- [Broadcast समूह](/hi/channels/broadcast-groups)
-- [चैनल routing](/hi/channels/channel-routing)
+- [प्रसारण समूह](/hi/channels/broadcast-groups)
+- [चैनल रूटिंग](/hi/channels/channel-routing)
 - [समूह संदेश](/hi/channels/group-messages)
-- [Pairing](/hi/channels/pairing)
+- [पेयरिंग](/hi/channels/pairing)

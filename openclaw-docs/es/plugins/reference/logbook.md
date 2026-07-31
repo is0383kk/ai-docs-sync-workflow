@@ -1,12 +1,13 @@
 ---
 read_when:
-    - Estás instalando, configurando o auditando el plugin de bitácora
-summary: 'Diario de trabajo automático: captura instantáneas periódicas de la pantalla de un Node vinculado y las convierte en una cronología revisable de tu jornada.'
-title: Plugin de bitácora
+    - Está instalando, configurando o auditando el plugin de registro
+summary: 'Diario de trabajo automático: captura periódicamente instantáneas de pantalla de un Node emparejado y las convierte en una cronología revisable de la jornada.'
+title: Plugin de registro
 x-i18n:
-    generated_at: "2026-07-11T23:24:40Z"
+    generated_at: "2026-07-26T05:22:24Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: fada790df69b0a25f7ee1d79ab40341353ad98ada63d863bc0545188d29a8073
     source_path: plugins/reference/logbook.md
@@ -15,7 +16,7 @@ x-i18n:
 
 # Plugin Logbook
 
-Diario de trabajo automático: captura periódicamente imágenes de la pantalla de un Node emparejado y las convierte en una cronología revisable de tu jornada.
+Diario de trabajo automático: captura instantáneas periódicas de la pantalla desde un Node emparejado y las convierte en una cronología revisable de la jornada.
 
 ## Distribución
 
@@ -28,4 +29,4 @@ Plugin
 
 ## Documentación relacionada
 
-- [Logbook](/es/plugins/logbook)
+- [logbook](/es/plugins/logbook)

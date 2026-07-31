@@ -1,14 +1,15 @@
 ---
 read_when:
     - आप nostr Plugin को इंस्टॉल, कॉन्फ़िगर या ऑडिट कर रहे हैं
-summary: OpenClaw Nostr चैनल Plugin, NIP-04 एन्क्रिप्टेड डायरेक्ट मैसेज के लिए।
+summary: NIP-04 एन्क्रिप्टेड प्रत्यक्ष संदेशों के लिए OpenClaw Nostr चैनल Plugin।
 title: Nostr Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:47:10Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:48:02Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: e56fd9eee17c55bcbba3d7b85d783930c10d2368f36173ac478b254c2bd5ec22
+    source_hash: 9efb2014cd168e3d847a045cf82fde3ec364ca3f6a75ee3ef8e1acfb92a79efa
     source_path: plugins/reference/nostr.md
     workflow: 16
 ---
@@ -24,7 +25,7 @@ NIP-04 एन्क्रिप्टेड डायरेक्ट मैस�
 
 ## सतह
 
-चैनल: nostr
+चैनल: `nostr`
 
 ## संबंधित दस्तावेज़
 

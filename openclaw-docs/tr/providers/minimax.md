@@ -2,48 +2,49 @@
 read_when:
     - OpenClaw'da MiniMax modellerini kullanmak istiyorsunuz
     - MiniMax kurulum rehberine ihtiyacınız var
-summary: OpenClaw'da MiniMax modellerini kullanın
+summary: OpenClaw'da MiniMax modellerini kullanma
 title: MiniMax
 x-i18n:
-    generated_at: "2026-07-12T12:43:20Z"
+    generated_at: "2026-07-26T23:32:36Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 1172d2d2c92dc92858f15564eee9ffeb8eb9599ee70157116fd2e302556dd75a
+    source_hash: 6d3e95cf9836fd0bc30ac91649422a1d0ed8e7b2908a42e241106c1ea783cbbc
     source_path: providers/minimax.md
     workflow: 16
 ---
 
-  Paketle birlikte gelen `minimax` Plugin'i, iki sağlayıcının yanı sıra yedi yetenek kaydeder: sohbet, görsel oluşturma, müzik oluşturma, video oluşturma, görsel anlama, konuşma (T2A v2) ve web araması.
+Paketle gelen `minimax` Plugin'i iki sağlayıcıya ek olarak yedi yetenek kaydeder: sohbet, görüntü oluşturma, müzik oluşturma, video oluşturma, görüntü anlama, konuşma (T2A v2) ve web araması.
 
-  | Sağlayıcı kimliği | Kimlik doğrulama | Yetenekler                                                                                       |
-  | ----------------- | ----------------- | ------------------------------------------------------------------------------------------------ |
-  | `minimax`         | API anahtarı      | Metin, görsel oluşturma, müzik oluşturma, video oluşturma, görsel anlama, konuşma, web araması    |
-  | `minimax-portal`  | OAuth             | Metin, görsel oluşturma, müzik oluşturma, video oluşturma, görsel anlama, konuşma                 |
+| Sağlayıcı kimliği      | Kimlik doğrulama    | Yetenekler                                                                                        |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------- |
+| `minimax`        | API anahtarı | Metin, görüntü oluşturma, müzik oluşturma, video oluşturma, görüntü anlama, konuşma, web araması |
+| `minimax-portal` | OAuth   | Metin, görüntü oluşturma, müzik oluşturma, video oluşturma, görüntü anlama, konuşma             |
 
-  <Tip>
-  MiniMax Coding Plan için yönlendirme bağlantısı (%10 indirim): [MiniMax Coding Plan](https://platform.minimax.io/subscribe/coding-plan?code=DbXJTRClnb&source=link)
-  </Tip>
+<Tip>
+MiniMax Coding Plan için yönlendirme bağlantısı (%10 indirim): [MiniMax Coding Plan](https://platform.minimax.io/subscribe/coding-plan?code=DbXJTRClnb&source=link)
+</Tip>
 
-  ## Yerleşik katalog
+## Yerleşik katalog
 
-  | Model                    | Tür                  | Açıklama                                       |
-  | ------------------------ | -------------------- | ---------------------------------------------- |
-  | `MiniMax-M3`             | Sohbet (akıl yürütme) | Varsayılan barındırılan akıl yürütme modeli    |
-  | `MiniMax-M2.7`           | Sohbet (akıl yürütme) | Önceki barındırılan akıl yürütme modeli        |
-  | `MiniMax-M2.7-highspeed` | Sohbet (akıl yürütme) | Daha hızlı M2.7 akıl yürütme katmanı           |
-  | `MiniMax-VL-01`          | Görü                 | Görsel anlama modeli                           |
-  | `image-01`               | Görsel oluşturma     | Metinden görsele ve görselden görsele düzenleme |
-  | `music-2.6`              | Müzik oluşturma      | Varsayılan müzik modeli                        |
-  | `MiniMax-Hailuo-2.3`     | Video oluşturma      | Metinden videoya ve görselden videoya akışlar  |
+| Model                    | Tür             | Açıklama                              |
+| ------------------------ | ---------------- | ---------------------------------------- |
+| `MiniMax-M3`             | Sohbet (akıl yürütme) | Varsayılan barındırılan akıl yürütme modeli           |
+| `MiniMax-M2.7`           | Sohbet (akıl yürütme) | Önceki barındırılan akıl yürütme modeli          |
+| `MiniMax-M2.7-highspeed` | Sohbet (akıl yürütme) | Daha hızlı M2.7 akıl yürütme katmanı               |
+| `MiniMax-VL-01`          | Görüntü           | Görüntü anlama modeli                |
+| `image-01`               | Görüntü oluşturma | Metinden görüntüye ve görüntüden görüntüye düzenleme |
+| `music-2.6`              | Müzik oluşturma | Varsayılan müzik modeli                      |
+| `MiniMax-Hailuo-2.3`     | Video oluşturma | Metinden videoya ve görüntüden videoya akışlar   |
 
-  Model başvuruları kimlik doğrulama yolunu izler: API anahtarı kurulumları için `minimax/<model>`, OAuth kurulumları için `minimax-portal/<model>`.
+Model referansları kimlik doğrulama yolunu izler: API anahtarı kurulumları için `minimax/<model>`, OAuth kurulumları için `minimax-portal/<model>`.
 
-  ## Başlarken
+## Başlarken
 
-  <Tabs>
+<Tabs>
   <Tab title="OAuth (Coding Plan)">
-    **En uygun olduğu durum:** API anahtarı gerektirmeden OAuth aracılığıyla MiniMax Coding Plan ile hızlı kurulum.
+    **En uygun kullanım:** API anahtarı gerektirmeden OAuth aracılığıyla MiniMax Coding Plan ile hızlı kurulum.
 
     <Tabs>
       <Tab title="Uluslararası">
@@ -53,7 +54,7 @@ x-i18n:
             openclaw onboard --auth-choice minimax-global-oauth
             ```
 
-            Ortaya çıkan sağlayıcı temel URL'si: `api.minimax.io`.
+            Elde edilen sağlayıcı temel URL'si: `api.minimax.io`.
           </Step>
           <Step title="Modelin kullanılabilir olduğunu doğrulayın">
             ```bash
@@ -69,7 +70,7 @@ x-i18n:
             openclaw onboard --auth-choice minimax-cn-oauth
             ```
 
-            Ortaya çıkan sağlayıcı temel URL'si: `api.minimaxi.com`.
+            Elde edilen sağlayıcı temel URL'si: `api.minimaxi.com`.
           </Step>
           <Step title="Modelin kullanılabilir olduğunu doğrulayın">
             ```bash
@@ -81,13 +82,13 @@ x-i18n:
     </Tabs>
 
     <Note>
-    OAuth kurulumları `minimax-portal` sağlayıcı kimliğini kullanır. Model başvuruları `minimax-portal/MiniMax-M3` biçimindedir.
+    OAuth kurulumları `minimax-portal` sağlayıcı kimliğini kullanır. Model referansları `minimax-portal/MiniMax-M3` biçimini izler.
     </Note>
 
   </Tab>
 
   <Tab title="API anahtarı">
-    **En uygun olduğu durum:** Anthropic uyumlu API'ye sahip barındırılan MiniMax.
+    **En uygun kullanım:** Anthropic uyumlu API ile barındırılan MiniMax.
 
     <Tabs>
       <Tab title="Uluslararası">
@@ -97,7 +98,7 @@ x-i18n:
             openclaw onboard --auth-choice minimax-global-api
             ```
 
-            Bu işlem, temel URL'yi `api.minimax.io` olarak yapılandırır.
+            Bu, temel URL olarak `api.minimax.io` değerini yapılandırır.
           </Step>
           <Step title="Modelin kullanılabilir olduğunu doğrulayın">
             ```bash
@@ -113,7 +114,7 @@ x-i18n:
             openclaw onboard --auth-choice minimax-cn-api
             ```
 
-            Bu işlem, temel URL'yi `api.minimaxi.com` olarak yapılandırır.
+            Bu, temel URL olarak `api.minimaxi.com` değerini yapılandırır.
           </Step>
           <Step title="Modelin kullanılabilir olduğunu doğrulayın">
             ```bash
@@ -173,17 +174,17 @@ x-i18n:
     ```
 
     <Warning>
-    MiniMax-M2.x'in Anthropic uyumlu akış uç noktası, `reasoning_content` içeriğini yerel Anthropic düşünme blokları yerine OpenAI tarzı delta parçaları hâlinde gönderir; bu da düşünme örtük olarak etkin bırakılırsa dahili akıl yürütmenin görünür çıktıya sızmasına neden olur. `thinking` ayarını açıkça kendiniz belirlemediğiniz sürece OpenClaw, M2.x düşünmesini varsayılan olarak devre dışı bırakır. MiniMax-M3 (ve ileriye dönük uyumlu M3.x) bundan muaftır: M3, uygun Anthropic düşünme blokları gönderir ve görünür içerik üretebilmek için düşünmenin etkin olmasını gerektirir; bu nedenle OpenClaw, M3'ü sağlayıcının uyarlanabilir düşünme yolunda tutar. Aşağıdaki Gelişmiş yapılandırma bölümünde yer alan Düşünme varsayılanları kısmına bakın.
+    MiniMax-M2.x'in Anthropic uyumlu akış uç noktası, yerel Anthropic düşünme blokları yerine OpenAI tarzı delta parçalarında `reasoning_content` yayar; bu da düşünme örtük olarak etkin bırakılırsa dahili akıl yürütmenin görünür çıktıya sızmasına neden olur. OpenClaw, `thinking` değerini açıkça kendiniz ayarlamadığınız sürece M2.x düşünmesini varsayılan olarak devre dışı bırakır. MiniMax-M3 (ve ileriye dönük uyumlu M3.x) bundan muaftır: M3, uygun Anthropic düşünme blokları yayar ve görünür içerik üretmek için düşünmenin etkin olmasını gerektirir; bu nedenle OpenClaw, M3'ü sağlayıcının uyarlanabilir düşünme yolunda tutar. Aşağıdaki Gelişmiş yapılandırma bölümünde yer alan Düşünme varsayılanları kısmına bakın.
     </Warning>
 
     <Note>
-    API anahtarı kurulumları `minimax` sağlayıcı kimliğini kullanır. Model başvuruları `minimax/MiniMax-M3` biçimindedir.
+    API anahtarı kurulumları `minimax` sağlayıcı kimliğini kullanır. Model referansları `minimax/MiniMax-M3` biçimini izler.
     </Note>
 
   </Tab>
 </Tabs>
 
-## `openclaw configure` ile yapılandırma
+## `openclaw configure` aracılığıyla yapılandırma
 
 <Steps>
   <Step title="Sihirbazı başlatın">
@@ -191,16 +192,16 @@ x-i18n:
     openclaw configure
     ```
   </Step>
-  <Step title="Model/kimlik doğrulama seçeneğini belirleyin">
-    Menüden **Model/kimlik doğrulama** seçeneğini belirleyin.
+  <Step title="Model/kimlik doğrulamayı seçin">
+    Menüden **Model/auth** öğesini seçin.
   </Step>
   <Step title="Bir MiniMax kimlik doğrulama seçeneği belirleyin">
-    | Kimlik doğrulama seçeneği | Açıklama                              |
-    | -------------------------- | ------------------------------------- |
-    | `minimax-global-oauth`     | Uluslararası OAuth (Kodlama Planı)    |
-    | `minimax-cn-oauth`         | Çin OAuth'ı (Kodlama Planı)           |
-    | `minimax-global-api`       | Uluslararası API anahtarı             |
-    | `minimax-cn-api`           | Çin API anahtarı                      |
+    | Kimlik doğrulama seçimi            | Açıklama                        |
+    | ----------------------- | ----------------------------------- |
+    | `minimax-global-oauth` | Uluslararası OAuth (Coding Plan)  |
+    | `minimax-cn-oauth`     | Çin OAuth (Coding Plan)          |
+    | `minimax-global-api`   | Uluslararası API anahtarı              |
+    | `minimax-cn-api`       | Çin API anahtarı                      |
   </Step>
   <Step title="Varsayılan modelinizi seçin">
     İstendiğinde varsayılan modelinizi seçin.
@@ -209,12 +210,12 @@ x-i18n:
 
 ## Yetenekler
 
-### Görsel oluşturma
+### Görüntü oluşturma
 
-MiniMax Plugin'i, metin modelleriyle aynı `MINIMAX_API_KEY` veya OAuth kimlik doğrulamasını yeniden kullanarak hem `minimax` hem de `minimax-portal` üzerinde `image_generate` aracı için `image-01` modelini kaydeder.
+MiniMax Plugin'i, aynı `MINIMAX_API_KEY` veya OAuth kimlik doğrulamasını metin modelleriyle yeniden kullanarak hem `minimax` hem de `minimax-portal` üzerinde `image_generate` aracı için `image-01` modelini kaydeder.
 
-- Her ikisinde de en-boy oranı denetimi bulunan metinden görsel oluşturma ve görselden görsele düzenleme (özne referansı)
-- İstek başına en fazla 9 çıktı görseli, düzenleme isteği başına 1 referans görseli
+- En-boy oranı denetimiyle hem metinden görüntü oluşturma hem de görüntüden görüntüye düzenleme (özne referansı)
+- İstek başına en fazla 9 çıktı görüntüsü, düzenleme isteği başına 1 referans görüntüsü
 - Desteklenen en-boy oranları: `1:1`, `16:9`, `4:3`, `3:2`, `2:3`, `3:4`, `9:16`, `21:9`
 
 ```json5
@@ -227,42 +228,42 @@ MiniMax Plugin'i, metin modelleriyle aynı `MINIMAX_API_KEY` veya OAuth kimlik d
 }
 ```
 
-Görsel oluşturma her zaman MiniMax'ın özel görsel uç noktasını (`/v1/image_generation`) kullanır ve bu alan sohbet/Anthropic uyumlu temel URL'yi yapılandırdığı için `models.providers.minimax.baseUrl` değerini yok sayar. Görsel oluşturmayı Çin uç noktası üzerinden yönlendirmek için `MINIMAX_API_HOST=https://api.minimaxi.com` değerini ayarlayın; varsayılan küresel uç nokta `https://api.minimax.io` adresidir.
+Görüntü oluşturma her zaman MiniMax'in özel görüntü uç noktasını (`/v1/image_generation`) kullanır ve bu alan bunun yerine sohbet/Anthropic uyumlu temel URL'yi yapılandırdığından `models.providers.minimax.baseUrl` değerini yok sayar. Görüntü oluşturmayı CN uç noktası üzerinden yönlendirmek için `MINIMAX_API_HOST=https://api.minimaxi.com` değerini ayarlayın; varsayılan küresel uç nokta `https://api.minimax.io` değeridir.
 
 <Note>
-Ortak araç parametreleri, sağlayıcı seçimi ve yük devretme davranışı için [Görsel Oluşturma](/tr/tools/image-generation) bölümüne bakın.
+Paylaşılan araç parametreleri, sağlayıcı seçimi ve yük devretme davranışı için [Görüntü Oluşturma](/tr/tools/image-generation) bölümüne bakın.
 </Note>
 
 ### Metinden konuşmaya
 
-Paketle gelen `minimax` Plugin'i, MiniMax T2A v2'yi `messages.tts` için bir konuşma sağlayıcısı olarak kaydeder.
+Paketle gelen `minimax` Plugin'i, `tts` için MiniMax T2A v2'yi konuşma sağlayıcısı olarak kaydeder.
 
 - Varsayılan TTS modeli: `speech-2.8-hd`
 - Varsayılan ses: `English_expressive_narrator`
-- Paketle gelen model kimlikleri: `speech-2.8-hd`, `speech-2.8-turbo`, `speech-2.6-hd`, `speech-2.6-turbo`, `speech-02-hd`, `speech-02-turbo`, `speech-01-hd`, `speech-01-turbo`, `speech-01-240228`
-- Kimlik doğrulama çözümleme sırası: `messages.tts.providers.minimax.apiKey`, ardından `minimax-portal` OAuth/belirteç kimlik doğrulama profilleri, ardından Token Plan ortam anahtarları (`MINIMAX_OAUTH_TOKEN`, `MINIMAX_CODE_PLAN_KEY`, `MINIMAX_CODING_API_KEY`) ve son olarak `MINIMAX_API_KEY`
-- Hiçbir TTS ana makinesi yapılandırılmamışsa OpenClaw, yapılandırılmış `minimax-portal` OAuth ana makinesini yeniden kullanır ve `/anthropic` gibi Anthropic uyumlu yol son eklerini kaldırır
-- Normal ses ekleri MP3 olarak kalır. Sesli not hedefleri (Feishu, Telegram ve sesli not uyumlu ek isteyen diğer kanallar), örneğin Feishu/Lark dosya API'si yerel sesli mesajlar için yalnızca `file_type: "opus"` değerini kabul ettiğinden MiniMax MP3'ten `ffmpeg` ile 48 kHz Opus'a dönüştürülür
-- MiniMax T2A, kesirli `speed` ve `vol` değerlerini kabul eder ancak `pitch` tam sayı olarak gönderilir; OpenClaw, API isteğinden önce kesirli `pitch` değerlerinin ondalık kısmını atar
+- Paketle gelen model kimlikleri: `speech-2.8-hd`, `speech-2.8-turbo`, `speech-2.6-hd`, `speech-2.6-turbo`, `speech-02-hd`, `speech-02-turbo`, `speech-01-hd`, `speech-01-turbo`
+- Kimlik doğrulama çözümleme sırası: `tts.providers.minimax.apiKey`, ardından `minimax-portal` OAuth/token kimlik doğrulama profilleri, ardından Token Plan ortam anahtarları (`MINIMAX_OAUTH_TOKEN`, `MINIMAX_CODE_PLAN_KEY`, `MINIMAX_CODING_API_KEY`), ardından `MINIMAX_API_KEY`
+- Hiçbir TTS ana makinesi yapılandırılmamışsa OpenClaw, yapılandırılmış `minimax-portal` OAuth ana makinesini yeniden kullanır ve `/anthropic` gibi Anthropic uyumlu yol soneklerini kaldırır
+- Normal ses ekleri MP3 olarak kalır. Sesli not hedefleri (Feishu, Telegram ve sesli not uyumlu bir ek isteyen diğer kanallar), örneğin Feishu/Lark dosya API'si yerel sesli mesajlar için yalnızca `file_type: "opus"` kabul ettiğinden MiniMax MP3'ten `ffmpeg` ile 48kHz Opus'a dönüştürülür
+- MiniMax T2A kesirli `speed` ve `vol` değerlerini kabul eder, ancak `pitch` bir tam sayı olarak gönderilir; OpenClaw, API isteğinden önce kesirli `pitch` değerlerini keser
 
-| Ayar                                     | Ortam değişkeni         | Varsayılan                    | Açıklama                                  |
-| ---------------------------------------- | ----------------------- | ----------------------------- | ----------------------------------------- |
-| `messages.tts.providers.minimax.baseUrl` | `MINIMAX_API_HOST`      | `https://api.minimax.io`      | MiniMax T2A API ana makinesi.             |
-| `messages.tts.providers.minimax.model`   | `MINIMAX_TTS_MODEL`     | `speech-2.8-hd`               | TTS model kimliği.                        |
-| `messages.tts.providers.minimax.voiceId` | `MINIMAX_TTS_VOICE_ID`  | `English_expressive_narrator` | Konuşma çıktısında kullanılan ses kimliği. |
-| `messages.tts.providers.minimax.speed`   |                         | `1.0`                         | Oynatma hızı, `0.5..2.0`.                 |
-| `messages.tts.providers.minimax.vol`     |                         | `1.0`                         | Ses düzeyi, `(0, 10]`.                    |
-| `messages.tts.providers.minimax.pitch`   |                         | `0`                           | Tam sayı perde kaydırması, `-12..12`.     |
+| Ayar                         | Ortam değişkeni                | Varsayılan                       | Açıklama                      |
+| ------------------------------- | ---------------------- | ----------------------------- | -------------------------------- |
+| `tts.providers.minimax.baseUrl` | `MINIMAX_API_HOST`     | `https://api.minimax.io`      | MiniMax T2A API ana makinesi.            |
+| `tts.providers.minimax.model`   | `MINIMAX_TTS_MODEL`    | `speech-2.8-hd`               | TTS model kimliği.                    |
+| `tts.providers.minimax.voiceId` | `MINIMAX_TTS_VOICE_ID` | `English_expressive_narrator` | Konuşma çıktısı için kullanılan ses kimliği. |
+| `tts.providers.minimax.speed`   |                        | `1.0`                         | Oynatma hızı, `0.5..2.0`.      |
+| `tts.providers.minimax.vol`     |                        | `1.0`                         | Ses düzeyi, `(0, 10]`.               |
+| `tts.providers.minimax.pitch`   |                        | `0`                           | Tam sayı perde kaydırması, `-12..12`.  |
 
 ### Müzik oluşturma
 
-Paketle gelen MiniMax Plugin'i, hem `minimax` hem de `minimax-portal` için ortak `music_generate` aracı üzerinden müzik oluşturmayı kaydeder.
+Paketle gelen MiniMax Plugin'i, hem `minimax` hem de `minimax-portal` için paylaşılan `music_generate` aracı üzerinden müzik oluşturmayı kaydeder.
 
 - Varsayılan müzik modeli: `minimax/music-2.6` (OAuth: `minimax-portal/music-2.6`)
-- `music-2.6-free`, `music-cover` ve `music-cover-free` modellerini de destekler
+- Ayrıca `music-2.6-free`, `music-cover` ve `music-cover-free` desteklenir
 - İstem denetimleri: `lyrics`, `instrumental`
 - Çıktı biçimi: `mp3`
-- Oturum destekli çalıştırmalar, `action: "status"` dâhil olmak üzere ortak görev/durum akışı üzerinden ayrılır
+- Oturum destekli çalıştırmalar, `action: "status"` dâhil olmak üzere paylaşılan görev/durum akışı üzerinden ayrılır
 
 ```json5
 {
@@ -275,17 +276,17 @@ Paketle gelen MiniMax Plugin'i, hem `minimax` hem de `minimax-portal` için orta
 ```
 
 <Note>
-Ortak araç parametreleri, sağlayıcı seçimi ve yük devretme davranışı için [Müzik Oluşturma](/tr/tools/music-generation) bölümüne bakın.
+Paylaşılan araç parametreleri, sağlayıcı seçimi ve yük devretme davranışı için [Müzik Oluşturma](/tr/tools/music-generation) bölümüne bakın.
 </Note>
 
 ### Video oluşturma
 
-Paketle gelen MiniMax Plugin'i, hem `minimax` hem de `minimax-portal` için ortak `video_generate` aracı üzerinden video oluşturmayı kaydeder.
+Paketle gelen MiniMax Plugin'i, hem `minimax` hem de `minimax-portal` için paylaşılan `video_generate` aracı üzerinden video oluşturmayı kaydeder.
 
 - Varsayılan video modeli: `minimax/MiniMax-Hailuo-2.3` (OAuth: `minimax-portal/MiniMax-Hailuo-2.3`)
-- `MiniMax-Hailuo-2.3-Fast`, `MiniMax-Hailuo-02`, `I2V-01-Director`, `I2V-01-live` ve `I2V-01` modellerini de destekler
+- Ayrıca `MiniMax-Hailuo-2.3-Fast`, `MiniMax-Hailuo-02`, `I2V-01-Director`, `I2V-01-live` ve `I2V-01` desteklenir
 - Modlar: metinden videoya ve tek görsel referanslı akışlar
-- `resolution` değerini destekler (Hailuo 2.3/02 modellerinde `768P` veya `1080P`); `aspectRatio` desteklenmez ve yok sayılır
+- `resolution` desteklenir (Hailuo 2.3/02 modellerinde `768P` veya `1080P`); `aspectRatio` desteklenmez ve yok sayılır
 
 ```json5
 {
@@ -298,36 +299,36 @@ Paketle gelen MiniMax Plugin'i, hem `minimax` hem de `minimax-portal` için orta
 ```
 
 <Note>
-Ortak araç parametreleri, sağlayıcı seçimi ve yük devretme davranışı için [Video Üretimi](/tr/tools/video-generation) bölümüne bakın.
+Ortak araç parametreleri, sağlayıcı seçimi ve yük devretme davranışı için [Video Oluşturma](/tr/tools/video-generation) bölümüne bakın.
 </Note>
 
-### Görüntü anlama
+### Görsel anlama
 
-MiniMax plugin'i, görüntü anlamayı metin kataloğundan ayrı olarak kaydeder:
+MiniMax Plugin, görsel anlamayı metin kataloğundan ayrı olarak kaydeder:
 
-| Sağlayıcı kimliği | Varsayılan görüntü modeli | PDF metin çıkarma |
+| Sağlayıcı kimliği      | Varsayılan görsel modeli | PDF metin çıkarma |
 | ---------------- | ------------------- | ------------------- |
 | `minimax`        | `MiniMax-VL-01`     | `MiniMax-M2.7`      |
 | `minimax-portal` | `MiniMax-VL-01`     | `MiniMax-M2.7`      |
 
-Bu nedenle otomatik medya yönlendirmesi, paketle gelen metin sağlayıcısı kataloğu görüntü destekli M3 sohbet referanslarını da içerdiğinde bile MiniMax görüntü anlamayı kullanabilir. PDF anlama, yalnızca metin çıkarma için `MiniMax-M2.7` kullanır; MiniMax, PDF'den görüntüye dönüştürme yolu kaydetmez.
+Bu nedenle, paketle birlikte gelen metin sağlayıcısı kataloğu görsel özellikli M3 sohbet referanslarını da içerse bile otomatik medya yönlendirmesi MiniMax görsel anlamayı kullanabilir. PDF anlama, yalnızca metin çıkarma için `MiniMax-M2.7` kullanır; MiniMax, PDF'den görsele dönüştürme yolu kaydetmez.
 
 ### Web araması
 
-MiniMax plugin'i ayrıca MiniMax Token Plan arama API'si (`/v1/coding_plan/search`) üzerinden `web_search` kaydeder.
+MiniMax Plugin ayrıca MiniMax Token Plan arama API'si (`/v1/coding_plan/search`) üzerinden `web_search` kaydeder.
 
 - Sağlayıcı kimliği: `minimax`
-- Yapılandırılmış sonuçlar: başlıklar, URL'ler, metin parçacıkları, ilgili sorgular
+- Yapılandırılmış sonuçlar: başlıklar, URL'ler, parçacıklar, ilgili sorgular
 - Tercih edilen ortam değişkeni: `MINIMAX_CODE_PLAN_KEY`
-- Kabul edilen ortam değişkeni diğer adları: `MINIMAX_CODING_API_KEY`, `MINIMAX_OAUTH_TOKEN`
-- Uyumluluk geri dönüşü: Zaten bir token planı kimlik bilgisine işaret ediyorsa `MINIMAX_API_KEY`
-- Bölgeyi yeniden kullanma sırası: `plugins.entries.minimax.config.webSearch.region`, ardından `MINIMAX_API_HOST`, ardından MiniMax sağlayıcı temel URL'leri
-- Arama, `minimax` sağlayıcı kimliğinde kalır; OAuth CN/küresel kurulumu, `models.providers.minimax-portal.baseUrl` aracılığıyla bölgeyi dolaylı olarak yönlendirebilir ve `MINIMAX_OAUTH_TOKEN` aracılığıyla taşıyıcı kimlik doğrulaması sağlayabilir
+- Kabul edilen ortam değişkeni takma adları: `MINIMAX_CODING_API_KEY`, `MINIMAX_OAUTH_TOKEN`
+- Uyumluluk geri dönüşü: zaten bir token planı kimlik bilgisine işaret ediyorsa `MINIMAX_API_KEY`
+- Bölgeyi yeniden kullanma sırası: `plugins.entries.minimax.config.webSearch.region`, ardından `MINIMAX_API_HOST`, ardından MiniMax sağlayıcısının temel URL'leri
+- Arama, `minimax` sağlayıcı kimliğinde kalır; OAuth CN/global kurulumu, `models.providers.minimax-portal.baseUrl` üzerinden bölgeyi dolaylı olarak yönlendirebilir ve `MINIMAX_OAUTH_TOKEN` üzerinden bearer kimlik doğrulaması sağlayabilir
 
 Yapılandırma `plugins.entries.minimax.config.webSearch.*` altında bulunur.
 
 <Note>
-Eksiksiz web araması yapılandırması ve kullanımı için [MiniMax Arama](/tr/tools/minimax-search) bölümüne bakın.
+Web aramasının tam yapılandırması ve kullanımı için [MiniMax Arama](/tr/tools/minimax-search) bölümüne bakın.
 </Note>
 
 ## Gelişmiş yapılandırma
@@ -336,18 +337,19 @@ Eksiksiz web araması yapılandırması ve kullanımı için [MiniMax Arama](/tr
   <Accordion title="Yapılandırma seçenekleri">
     | Seçenek | Açıklama |
     | --- | --- |
-    | `models.providers.minimax.baseUrl` | `https://api.minimax.io/anthropic` adresini (Anthropic uyumlu) tercih edin; OpenAI uyumlu yükler için `https://api.minimax.io/v1` isteğe bağlıdır |
-    | `models.providers.minimax.api` | `anthropic-messages` değerini tercih edin; OpenAI uyumlu yükler için `openai-completions` isteğe bağlıdır |
+    | `models.providers.minimax.baseUrl` | `https://api.minimax.io/anthropic` tercih edilir (Anthropic uyumlu); OpenAI uyumlu yükler için `https://api.minimax.io/v1` isteğe bağlıdır |
+    | `models.providers.minimax.api` | `anthropic-messages` tercih edilir; OpenAI uyumlu yükler için `openai-completions` isteğe bağlıdır |
     | `models.providers.minimax.apiKey` | MiniMax API anahtarı (`MINIMAX_API_KEY`) |
-    | `models.providers.minimax.models` | `id`, `name`, `reasoning`, `contextWindow`, `maxTokens`, `cost` değerlerini tanımlayın |
-    | `agents.defaults.models` | İzin verilenler listesinde olmasını istediğiniz modellere diğer ad verin |
-    | `models.mode` | MiniMax'i yerleşik modellerin yanına eklemek istiyorsanız `merge` olarak tutun |
+    | `models.providers.minimax.models` | `id`, `name`, `reasoning`, `contextWindow`, `maxTokens`, `cost` tanımlar |
+    | `agents.defaults.models` | Model başına takma adlar, parametreler ve meta veriler |
+    | `agents.defaults.modelPolicy.allow` | İsteğe bağlı açık model izin listesi |
+    | `models.mode` | MiniMax'i yerleşik seçeneklerin yanına eklemek istiyorsanız `merge` değerini koruyun |
   </Accordion>
 
   <Accordion title="Düşünme varsayılanları">
-    `api: "anthropic-messages"` kullanıldığında, daha önceki bir sarmalayıcı yükte `thinking` alanını zaten ayarlamamışsa OpenClaw, MiniMax M2.x modelleri için `thinking: { type: "disabled" }` ekler. Bu, M2.x'in akış uç noktasının OpenAI tarzı değişiklik parçalarında `reasoning_content` yaymasını önler; aksi takdirde dahili akıl yürütme görünür çıktıya sızardı.
+    `api: "anthropic-messages"` üzerinde, önceki bir sarmalayıcı yükteki `thinking` alanını önceden ayarlamadığı sürece OpenClaw, MiniMax M2.x modelleri için `thinking: { type: "disabled" }` ekler. Bu, M2.x'in akış uç noktasının OpenAI tarzı delta parçalarında `reasoning_content` yayımlamasını önleyerek dahili akıl yürütmenin görünür çıktıya sızmasını engeller.
 
-    MiniMax-M3 (ve M3.x) bundan muaftır: Düşünme devre dışı bırakıldığında M3, `stop_reason: "end_turn"` ile boş bir `content` dizisi döndürür. Bu nedenle OpenClaw, M3 için örtük devre dışı varsayılanını kaldırır ve bir düşünme düzeyi ayarlandığında bunun yerine `thinking: { type: "adaptive" }` değerini zorunlu kılar.
+    MiniMax-M3 (ve M3.x) muaftır: düşünme devre dışı bırakıldığında M3, `stop_reason: "end_turn"` ile boş bir `content` dizisi döndürür; bu nedenle OpenClaw, M3 için örtük devre dışı varsayılanını kaldırır ve bir düşünme düzeyi ayarlandığında bunun yerine `thinking: { type: "adaptive" }` değerini zorunlu kılar.
 
     Model ailesine göre kullanılabilir düşünme düzeyleri:
 
@@ -363,7 +365,7 @@ Eksiksiz web araması yapılandırması ve kullanımı için [MiniMax Arama](/tr
   </Accordion>
 
   <Accordion title="Geri dönüş örneği">
-    **En uygun kullanım:** En güçlü en yeni nesil modelinizi birincil olarak tutun, başarısızlık durumunda MiniMax M2.7'ye geçin. Aşağıdaki örnekte somut bir birincil model olarak Opus kullanılır; bunu tercih ettiğiniz en yeni nesil birincil modelle değiştirin.
+    **En uygun kullanım:** En güçlü son nesil modelinizi birincil olarak kullanın, başarısızlık durumunda MiniMax M2.7'ye geçin. Aşağıdaki örnekte somut bir birincil model olarak Opus kullanılır; bunu tercih ettiğiniz son nesil birincil modelle değiştirin.
 
     ```json5
     {
@@ -387,10 +389,10 @@ Eksiksiz web araması yapılandırması ve kullanımı için [MiniMax Arama](/tr
 
   <Accordion title="Coding Plan kullanım ayrıntıları">
     - Coding Plan kullanım API'si: `https://api.minimaxi.com/v1/token_plan/remains` veya `https://api.minimax.io/v1/token_plan/remains` (bir coding plan anahtarı gerektirir).
-    - Kullanım yoklaması, yapılandırıldığında ana bilgisayarı `models.providers.minimax-portal.baseUrl` veya `models.providers.minimax.baseUrl` üzerinden türetir; böylece `https://api.minimax.io/anthropic` kullanan küresel kurulumlar `api.minimax.io` adresini yoklar. Eksik veya hatalı biçimlendirilmiş temel URL'ler, uyumluluk için CN geri dönüşünü korur.
-    - OpenClaw, MiniMax coding planı kullanımını diğer sağlayıcıların kullandığı aynı `% kaldı` gösterimine normalleştirir. MiniMax'in ham `usage_percent` / `usagePercent` alanları tüketilen kotayı değil, kalan kotayı belirtir; bu nedenle OpenClaw bunları tersine çevirir. Mevcut olduğunda sayım tabanlı alanlara öncelik verilir.
-    - API `model_remains` döndürdüğünde OpenClaw, sohbet modeli girdisini tercih eder, gerektiğinde pencere etiketini `start_time` / `end_time` değerlerinden türetir ve coding planı pencerelerinin daha kolay ayırt edilebilmesi için seçilen model adını plan etiketine ekler.
-    - Kullanım anlık görüntüleri `minimax`, `minimax-cn`, `minimax-portal` ve `minimax-portal-cn` değerlerini aynı MiniMax kota yüzeyi olarak değerlendirir ve Coding Plan anahtarı ortam değişkenlerine geri dönmeden önce kayıtlı MiniMax OAuth'u tercih eder.
+    - Kullanım yoklaması, yapılandırıldığında ana bilgisayarı `models.providers.minimax-portal.baseUrl` veya `models.providers.minimax.baseUrl` üzerinden türetir; böylece `https://api.minimax.io/anthropic` kullanan global kurulumlar `api.minimax.io` adresini yoklar. Eksik veya hatalı biçimlendirilmiş temel URL'ler, uyumluluk amacıyla CN geri dönüşünü korur.
+    - OpenClaw, MiniMax coding plan kullanımını diğer sağlayıcıların kullandığı `% left` görünümüyle aynı biçime normalleştirir. MiniMax'in ham `usage_percent` / `usagePercent` alanları tüketilen değil, kalan kotayı gösterir; bu nedenle OpenClaw bunları tersine çevirir. Mevcut olduklarında sayı tabanlı alanlar önceliklidir.
+    - API, `model_remains` döndürdüğünde OpenClaw sohbet modeli girdisini tercih eder, gerektiğinde pencere etiketini `start_time` / `end_time` üzerinden türetir ve coding plan pencerelerinin daha kolay ayırt edilebilmesi için seçilen model adını plan etiketine ekler.
+    - Kullanım anlık görüntüleri `minimax`, `minimax-cn`, `minimax-portal` ve `minimax-portal-cn` değerlerini aynı MiniMax kota yüzeyi olarak ele alır ve Coding Plan anahtarı ortam değişkenlerine geri dönmeden önce depolanmış MiniMax OAuth'u tercih eder.
 
   </Accordion>
 </AccordionGroup>
@@ -399,9 +401,9 @@ Eksiksiz web araması yapılandırması ve kullanımı için [MiniMax Arama](/tr
 
 - Varsayılan sohbet modeli: `MiniMax-M3`. Alternatif sohbet modelleri: `MiniMax-M2.7`, `MiniMax-M2.7-highspeed`
 - İlk katılım ve doğrudan API anahtarı kurulumu, M3 ve her iki M2.7 çeşidi için model tanımları yazar
-- Görüntü anlama, plugin'e ait `MiniMax-VL-01` medya sağlayıcısını kullanır
-- Kesin maliyet takibine ihtiyacınız varsa `models.json` içindeki fiyatlandırma değerlerini güncelleyin
-- Geçerli sağlayıcı kimliğini doğrulamak için `openclaw models list` komutunu kullanın, ardından `openclaw models set minimax/MiniMax-M3` veya `openclaw models set minimax-portal/MiniMax-M3` ile geçiş yapın
+- Görsel anlama, Plugin'e ait `MiniMax-VL-01` medya sağlayıcısını kullanır
+- Kesin maliyet takibi gerekiyorsa `models.json` içindeki fiyatlandırma değerlerini güncelleyin
+- Geçerli sağlayıcı kimliğini doğrulamak için `openclaw models list` kullanın, ardından `openclaw models set minimax/MiniMax-M3` veya `openclaw models set minimax-portal/MiniMax-M3` ile geçiş yapın
 
 <Note>
 Sağlayıcı kuralları için [Model sağlayıcıları](/tr/concepts/model-providers) bölümüne bakın.
@@ -411,7 +413,7 @@ Sağlayıcı kuralları için [Model sağlayıcıları](/tr/concepts/model-provi
 
 <AccordionGroup>
   <Accordion title='"Bilinmeyen model: minimax/MiniMax-M3"'>
-    Bu genellikle **MiniMax sağlayıcısının yapılandırılmadığı** anlamına gelir (eşleşen sağlayıcı girdisi ve MiniMax kimlik doğrulama profili/ortam anahtarı bulunamadı). Düzeltmek için:
+    Bu genellikle **MiniMax sağlayıcısının yapılandırılmadığı** anlamına gelir (eşleşen bir sağlayıcı girdisi ve MiniMax kimlik doğrulama profili/ortam anahtarı bulunamadı). Çözüm için:
 
     - `openclaw configure` komutunu çalıştırıp bir **MiniMax** kimlik doğrulama seçeneği belirleyin veya
     - Eşleşen `models.providers.minimax` ya da `models.providers.minimax-portal` bloğunu elle ekleyin veya
@@ -422,7 +424,7 @@ Sağlayıcı kuralları için [Model sağlayıcıları](/tr/concepts/model-provi
     - API anahtarı yolu: `minimax/MiniMax-M3`, `minimax/MiniMax-M2.7` veya `minimax/MiniMax-M2.7-highspeed`
     - OAuth yolu: `minimax-portal/MiniMax-M3`, `minimax-portal/MiniMax-M2.7` veya `minimax-portal/MiniMax-M2.7-highspeed`
 
-    Ardından şununla yeniden kontrol edin:
+    Ardından şu komutla yeniden kontrol edin:
 
     ```bash
     openclaw models list
@@ -435,23 +437,23 @@ Sağlayıcı kuralları için [Model sağlayıcıları](/tr/concepts/model-provi
 Daha fazla yardım: [Sorun giderme](/tr/help/troubleshooting) ve [SSS](/tr/help/faq).
 </Note>
 
-## İlgili
+## İlgili içerikler
 
 <CardGroup cols={2}>
   <Card title="Model seçimi" href="/tr/concepts/model-providers" icon="layers">
     Sağlayıcıları, model referanslarını ve yük devretme davranışını seçme.
   </Card>
-  <Card title="Görüntü üretimi" href="/tr/tools/image-generation" icon="image">
-    Ortak görüntü aracı parametreleri ve sağlayıcı seçimi.
+  <Card title="Görsel oluşturma" href="/tr/tools/image-generation" icon="image">
+    Ortak görsel aracı parametreleri ve sağlayıcı seçimi.
   </Card>
-  <Card title="Müzik üretimi" href="/tr/tools/music-generation" icon="music">
+  <Card title="Müzik oluşturma" href="/tr/tools/music-generation" icon="music">
     Ortak müzik aracı parametreleri ve sağlayıcı seçimi.
   </Card>
-  <Card title="Video üretimi" href="/tr/tools/video-generation" icon="video">
+  <Card title="Video oluşturma" href="/tr/tools/video-generation" icon="video">
     Ortak video aracı parametreleri ve sağlayıcı seçimi.
   </Card>
   <Card title="MiniMax Arama" href="/tr/tools/minimax-search" icon="magnifying-glass">
-    MiniMax Token Plan aracılığıyla web araması yapılandırması.
+    MiniMax Token Plan üzerinden web araması yapılandırması.
   </Card>
   <Card title="Sorun giderme" href="/tr/help/troubleshooting" icon="wrench">
     Genel sorun giderme ve SSS.

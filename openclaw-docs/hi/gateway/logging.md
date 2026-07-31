@@ -1,151 +1,125 @@
 ---
 read_when:
-    - लॉगिंग आउटपुट या फ़ॉर्मैट बदलना
+    - लॉगिंग आउटपुट या प्रारूप बदलना
     - CLI या Gateway आउटपुट की डीबगिंग
-summary: लॉगिंग सतहें, फ़ाइल लॉग, WS लॉग शैलियाँ, और कंसोल फ़ॉर्मैटिंग
+summary: लॉगिंग सतहें, फ़ाइल लॉग, WS लॉग शैलियाँ और कंसोल फ़ॉर्मेटिंग
 title: Gateway लॉगिंग
 x-i18n:
-    generated_at: "2026-06-28T23:10:04Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T17:48:06Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: dde5e589bb48cd8c41ac6dd0d74780fec1cc1ee79d82d433b4e7c7450dc5c8b6
+    source_hash: f0b11a68611032c29c31091b2411982487e7f5df3ecf4f1e3b586e7d21e543d3
     source_path: gateway/logging.md
     workflow: 16
 ---
 
 # लॉगिंग
 
-उपयोगकर्ता-उन्मुख अवलोकन (CLI + Control UI + कॉन्फ़िग) के लिए, [/logging](/hi/logging) देखें।
+उपयोगकर्ता-दृश्य अवलोकन (CLI + Control UI + कॉन्फ़िगरेशन) के लिए, [/logging](/hi/logging) देखें।
 
-OpenClaw में दो लॉग "सतहें" हैं:
+OpenClaw में दो लॉग सतहें हैं:
 
-- **कंसोल आउटपुट** (जो आप टर्मिनल / Debug UI में देखते हैं)।
-- Gateway लॉगर द्वारा लिखे गए **फ़ाइल लॉग** (JSON lines)।
+- **कंसोल आउटपुट** - जो आपको टर्मिनल / डीबग UI में दिखाई देता है।
+- **फ़ाइल लॉग** - Gateway लॉगर द्वारा लिखी गई JSON पंक्तियाँ।
 
-स्टार्टअप पर, Gateway हल किए गए डिफ़ॉल्ट एजेंट मॉडल को उन
-मोड डिफ़ॉल्ट के साथ लॉग करता है जो नए सेशन को प्रभावित करते हैं, उदाहरण के लिए:
+स्टार्टअप पर, Gateway समाधान किया गया डिफ़ॉल्ट एजेंट मॉडल और नए सत्रों को प्रभावित करने वाले मोड डिफ़ॉल्ट लॉग करता है:
 
 ```text
-agent model: openai/gpt-5.5 (thinking=medium, fast=on)
+एजेंट मॉडल: openai/gpt-5.6-sol (चिंतन=मध्यम, तेज़=चालू)
 ```
 
-`thinking` डिफ़ॉल्ट एजेंट, मॉडल पैरामीटर, या ग्लोबल एजेंट डिफ़ॉल्ट से आता है;
-जब यह सेट नहीं होता, तो स्टार्टअप सारांश `medium` दिखाता है। `fast` डिफ़ॉल्ट
-एजेंट या मॉडल `fastMode` पैरामीटर से आता है।
+`thinking` डिफ़ॉल्ट एजेंट, मॉडल पैरामीटर या वैश्विक एजेंट डिफ़ॉल्ट से आता है; सेट न होने पर यह `medium` दिखाता है। `fast` डिफ़ॉल्ट एजेंट या मॉडल के `fastMode` पैरामीटर से आता है।
 
 ## फ़ाइल-आधारित लॉगर
 
-- डिफ़ॉल्ट रोलिंग लॉग फ़ाइल `/tmp/openclaw/` के अंतर्गत होती है (प्रति दिन एक फ़ाइल): `openclaw-YYYY-MM-DD.log`
-  - तारीख Gateway होस्ट के स्थानीय टाइमज़ोन का उपयोग करती है।
-- सक्रिय लॉग फ़ाइलें `logging.maxFileBytes` (डिफ़ॉल्ट: 100 MB) पर रोटेट होती हैं, पाँच तक
-  क्रमांकित आर्काइव रखती हैं और नई सक्रिय फ़ाइल में लिखना जारी रखती हैं।
-- लॉग फ़ाइल पथ और स्तर को `~/.openclaw/openclaw.json` के माध्यम से कॉन्फ़िगर किया जा सकता है:
-  - `logging.file`
-  - `logging.level`
+- डिफ़ॉल्ट रोलिंग लॉग फ़ाइलें `/tmp/openclaw/` के अंतर्गत होती हैं (प्रतिदिन एक फ़ाइल), जिनकी तारीख Gateway होस्ट के स्थानीय समय क्षेत्र के अनुसार होती है। डिफ़ॉल्ट प्रोफ़ाइल `openclaw-YYYY-MM-DD.log` का उपयोग करती है; नामित प्रोफ़ाइल `openclaw-<profile>-YYYY-MM-DD.log` का उपयोग करती हैं (उदाहरण के लिए, `openclaw-dev-YYYY-MM-DD.log`)। यदि वह डायरेक्टरी असुरक्षित या लिखने योग्य नहीं है (गलत स्वामी, सभी के लिए लिखने योग्य, या सिमलिंक), तो OpenClaw इसके बजाय उपयोगकर्ता-स्कोप वाले `os.tmpdir()/openclaw-<uid>` पथ पर फ़ॉलबैक करता है; Windows पर यह हमेशा उसी OS-tmpdir फ़ॉलबैक का उपयोग करता है।
+- सक्रिय लॉग फ़ाइलें `logging.maxFileBytes` पर रोटेट होती हैं (डिफ़ॉल्ट: 100 MB), अधिकतम पाँच क्रमांकित अभिलेख (`.1` से `.5` तक) रखती हैं और नई सक्रिय फ़ाइल में लिखना जारी रखती हैं।
+- लॉग फ़ाइल पथ और स्तर को `~/.openclaw/openclaw.json` के माध्यम से कॉन्फ़िगर करें: `logging.file`, `logging.level`।
+- फ़ाइल प्रारूप में प्रत्येक पंक्ति पर एक JSON ऑब्जेक्ट होता है।
 
-फ़ाइल फ़ॉर्मैट प्रति पंक्ति एक JSON ऑब्जेक्ट है।
+वार्तालाप, रीयलटाइम वॉइस और प्रबंधित-कक्ष कोड पथ, संचालन डीबगिंग और OTLP लॉग निर्यात के लिए निर्धारित सीमित जीवनचक्र रिकॉर्ड हेतु साझा फ़ाइल लॉगर का उपयोग करते हैं। ट्रांसक्रिप्ट टेक्स्ट, ऑडियो पेलोड, टर्न आईडी, कॉल आईडी और प्रदाता आइटम आईडी कभी भी लॉग रिकॉर्ड में कॉपी नहीं किए जाते।
 
-Talk, रीयलटाइम वॉइस, और managed-room कोड पाथ सीमित lifecycle रिकॉर्ड के लिए साझा फ़ाइल लॉगर का उपयोग करते हैं। ये रिकॉर्ड ऑपरेशनल डिबगिंग और OTLP लॉग एक्सपोर्ट के लिए हैं; ट्रांसक्रिप्ट टेक्स्ट, ऑडियो पेलोड, turn ids, call ids, और provider item ids को लॉग रिकॉर्ड में कॉपी नहीं किया जाता।
-
-Control UI Logs टैब इस फ़ाइल को Gateway (`logs.tail`) के माध्यम से tail करता है।
-CLI भी यही कर सकता है:
+Control UI का Logs टैब Gateway के माध्यम से इस फ़ाइल को टेल करता है (`logs.tail`)। CLI भी यही करता है:
 
 ```bash
 openclaw logs --follow
 ```
 
-**वर्बोज़ बनाम लॉग स्तर**
+### वर्बोज़ बनाम लॉग स्तर
 
-- **फ़ाइल लॉग** केवल `logging.level` द्वारा नियंत्रित होते हैं।
-- `--verbose` केवल **कंसोल verbosity** (और WS लॉग शैली) को प्रभावित करता है; यह फ़ाइल लॉग स्तर को
-  नहीं बढ़ाता।
-- फ़ाइल लॉग में केवल-वर्बोज़ विवरण कैप्चर करने के लिए, `logging.level` को `debug` या
-  `trace` पर सेट करें।
-- Trace logging में चुने हुए hot paths के लिए डायग्नॉस्टिक timing summaries भी शामिल होती हैं,
-  जैसे plugin tool factory preparation। देखें
-  [/tools/plugin#slow-plugin-tool-setup](/hi/tools/plugin#slow-plugin-tool-setup).
+- **फ़ाइल लॉग** विशेष रूप से `logging.level` द्वारा नियंत्रित होते हैं।
+- `--verbose` केवल **कंसोल वर्बोसिटी** (और WS लॉग शैली) को प्रभावित करता है - यह फ़ाइल लॉग स्तर को **नहीं** बढ़ाता।
+- फ़ाइल लॉग में केवल-वर्बोज़ विवरण कैप्चर करने के लिए, `logging.level` को `debug` या `trace` पर सेट करें।
+- ट्रेस लॉगिंग में चयनित हॉट पाथ के लिए नैदानिक समय-सारांश भी शामिल होते हैं, जैसे Plugin टूल फ़ैक्टरी की तैयारी। [/tools/plugin#slow-plugin-tool-setup](/hi/tools/plugin#slow-plugin-tool-setup) देखें।
 
 ## कंसोल कैप्चर
 
-CLI `console.log/info/warn/error/debug/trace` को कैप्चर करता है और उन्हें फ़ाइल लॉग में लिखता है,
-साथ ही stdout/stderr पर प्रिंट करना जारी रखता है।
+CLI `console.log/info/warn/error/debug/trace` को कैप्चर करता है, उन्हें फ़ाइल लॉग में लिखता है और फिर भी stdout/stderr पर प्रिंट करता है।
 
-आप कंसोल verbosity को अलग से ट्यून कर सकते हैं:
+कंसोल वर्बोसिटी को स्वतंत्र रूप से समायोजित करें:
 
 - `logging.consoleLevel` (डिफ़ॉल्ट `info`)
-- `logging.consoleStyle` (`pretty` | `compact` | `json`)
+- `logging.consoleStyle` (`pretty` | `compact` | `json`; TTY पर डिफ़ॉल्ट `pretty`, अन्यथा `compact`)
 
 ## रिडैक्शन
 
-OpenClaw संवेदनशील टोकन को लॉग या ट्रांसक्रिप्ट आउटपुट के process से बाहर जाने से पहले mask कर सकता है। यह logging redaction policy कंसोल, file-log, OTLP log-record, और session transcript text sinks पर लागू होती है, ताकि मेल खाने वाली secret values को JSONL lines या messages के डिस्क पर लिखे जाने से पहले mask किया जा सके।
+OpenClaw संवेदनशील टोकन को प्रक्रिया से बाहर जाने वाले लॉग या ट्रांसक्रिप्ट आउटपुट से पहले मास्क करता है। यह रिडैक्शन नीति कंसोल, फ़ाइल-लॉग, OTLP लॉग-रिकॉर्ड और सत्र ट्रांसक्रिप्ट टेक्स्ट सिंक पर लागू होती है, ताकि मेल खाने वाले गुप्त मान JSONL पंक्तियों या संदेशों को डिस्क पर लिखे जाने से पहले मास्क हो जाएँ।
 
-- `logging.redactSensitive`: `off` | `tools` (डिफ़ॉल्ट: `tools`)
-- `logging.redactPatterns`: regex strings की array (डिफ़ॉल्ट को override करती है)
-  - Raw regex strings (auto `gi`) का उपयोग करें, या custom flags चाहिए हों तो `/pattern/flags` का।
-  - Matches को पहले 6 + अंतिम 4 chars (length >= 18) रखकर mask किया जाता है, अन्यथा `***`।
-  - डिफ़ॉल्ट सामान्य key assignments, CLI flags, JSON fields, bearer headers, PEM blocks, लोकप्रिय token prefixes, और payment credential field names जैसे card number, CVC/CVV, shared payment token, और payment credential को cover करते हैं।
+- संवेदनशील-मान रिडैक्शन हमेशा सक्षम रहता है।
+- `logging.redactPatterns`: रेगेक्स स्ट्रिंग की सरणी (डिफ़ॉल्ट को ओवरराइड करती है)
+  - कच्ची रेगेक्स स्ट्रिंग (`gi` स्वतः), या कस्टम फ़्लैग के लिए `/pattern/flags` का उपयोग करें।
+  - मिलान को पहले 6 + अंतिम 4 वर्ण रखते हुए मास्क किया जाता है (मान >= 18 वर्ण); छोटे मान `***` बन जाते हैं।
+  - डिफ़ॉल्ट में सामान्य कुंजी असाइनमेंट, CLI फ़्लैग, JSON फ़ील्ड, बियरर हेडर, PEM ब्लॉक, लोकप्रिय विक्रेता टोकन प्रीफ़िक्स और भुगतान क्रेडेंशियल फ़ील्ड नाम (कार्ड नंबर, CVC/CVV, साझा भुगतान टोकन, भुगतान क्रेडेंशियल) शामिल हैं।
 
-कुछ safety boundaries `logging.redactSensitive` की परवाह किए बिना हमेशा redact करती हैं।
-इसमें Control UI tool-call events, `sessions_history` tool output,
-diagnostics support exports, provider error observations, exec approval command
-display, और Gateway WebSocket protocol logs शामिल हैं। ये surfaces फिर भी अतिरिक्त patterns के रूप में
-`logging.redactPatterns` का उपयोग कर सकती हैं, लेकिन `redactSensitive: "off"`
-उन्हें raw secrets emit नहीं करने देता।
+Control UI टूल-कॉल इवेंट, `sessions_history` आउटपुट, डायग्नोस्टिक्स निर्यात, प्रदाता त्रुटियाँ, exec अनुमोदन प्रदर्शन और Gateway WebSocket लॉग जैसी सुरक्षा सीमाएँ हमेशा रिडैक्ट करती हैं। `logging.redactPatterns` परिनियोजन-विशिष्ट पैटर्न जोड़ता है।
 
 ## Gateway WebSocket लॉग
 
-Gateway WebSocket protocol logs को दो modes में print करता है:
+Gateway WebSocket प्रोटोकॉल लॉग को दो मोड में प्रिंट करता है:
 
-- **सामान्य मोड (कोई `--verbose` नहीं)**: केवल "दिलचस्प" RPC results print होते हैं:
-  - errors (`ok=false`)
-  - धीमी calls (डिफ़ॉल्ट threshold: `>= 50ms`)
-  - parse errors
-- **वर्बोज़ मोड (`--verbose`)**: सभी WS request/response traffic print करता है।
+- **सामान्य मोड (`--verbose` के बिना)**: केवल "दिलचस्प" RPC परिणाम प्रिंट होते हैं - त्रुटियाँ (`ok=false`), धीमी कॉल (डिफ़ॉल्ट सीमा: `>= 50ms`) और पार्स त्रुटियाँ।
+- **वर्बोज़ मोड (`--verbose`)**: सभी WS अनुरोध/प्रतिक्रिया ट्रैफ़िक प्रिंट करता है।
 
 ### WS लॉग शैली
 
-`openclaw gateway` प्रति-Gateway style switch को support करता है:
+`openclaw gateway` प्रत्येक Gateway के लिए शैली स्विच का समर्थन करता है:
 
-- `--ws-log auto` (डिफ़ॉल्ट): सामान्य मोड optimized है; verbose mode compact output का उपयोग करता है
-- `--ws-log compact`: verbose होने पर compact output (paired request/response)
-- `--ws-log full`: verbose होने पर full per-frame output
-- `--compact`: `--ws-log compact` के लिए alias
-
-उदाहरण:
+- `--ws-log auto` (डिफ़ॉल्ट): सामान्य मोड अनुकूलित होता है; वर्बोज़ मोड संक्षिप्त आउटपुट का उपयोग करता है।
+- `--ws-log compact`: वर्बोज़ होने पर संक्षिप्त आउटपुट (युग्मित अनुरोध/प्रतिक्रिया)।
+- `--ws-log full`: वर्बोज़ होने पर पूर्ण प्रति-फ़्रेम आउटपुट।
+- `--compact`: `--ws-log compact` का उपनाम।
 
 ```bash
-# optimized (only errors/slow)
+# अनुकूलित (केवल त्रुटियाँ/धीमे अनुरोध)
 openclaw gateway
 
-# show all WS traffic (paired)
+# सभी WS ट्रैफ़िक दिखाएँ (युग्मित)
 openclaw gateway --verbose --ws-log compact
 
-# show all WS traffic (full meta)
+# सभी WS ट्रैफ़िक दिखाएँ (पूर्ण मेटाडेटा)
 openclaw gateway --verbose --ws-log full
 ```
 
-## कंसोल फ़ॉर्मैटिंग (subsystem logging)
+## कंसोल स्वरूपण (सबसिस्टम लॉगिंग)
 
-कंसोल formatter **TTY-aware** है और सुसंगत, prefixed lines print करता है।
-Subsystem loggers output को grouped और scannable रखते हैं।
+कंसोल फ़ॉर्मैटर **TTY-जागरूक** है और सुसंगत, प्रीफ़िक्स वाली पंक्तियाँ प्रिंट करता है। सबसिस्टम लॉगर आउटपुट को समूहीकृत और आसानी से स्कैन करने योग्य रखते हैं:
 
-व्यवहार:
+- प्रत्येक पंक्ति पर **सबसिस्टम प्रीफ़िक्स** (जैसे `[gateway]`, `[canvas]`, `[tailscale]`)।
+- **सबसिस्टम रंग** (प्रत्येक सबसिस्टम के लिए स्थिर, नाम से हैश किए गए) और स्तर के रंग।
+- जब आउटपुट TTY हो या परिवेश समृद्ध टर्मिनल जैसा दिखे (`TERM`/`COLORTERM`/`TERM_PROGRAM`), तब **रंग**; `NO_COLOR` और `FORCE_COLOR` का सम्मान करता है।
+- **संक्षिप्त सबसिस्टम प्रीफ़िक्स**: आरंभिक `gateway/`, `channels/` या `providers/` खंड हटाता है, फिर शेष में से अधिकतम अंतिम 2 खंड रखता है (जैसे `channels/turn/kernel` को `turn/kernel` के रूप में प्रदर्शित किया जाता है)। ज्ञात चैनल सबसिस्टम (`telegram`, `whatsapp`, `slack` आदि) हमेशा केवल चैनल नाम तक संक्षिप्त हो जाते हैं।
+- **सबसिस्टम के अनुसार उप-लॉगर** (स्वचालित प्रीफ़िक्स + संरचित फ़ील्ड `{ subsystem }`)।
+- QR/UX आउटपुट के लिए **`logRaw()`** (कोई प्रीफ़िक्स नहीं, कोई स्वरूपण नहीं)।
+- **कंसोल शैलियाँ**: `pretty` | `compact` | `json`।
+- **कंसोल लॉग स्तर** फ़ाइल लॉग स्तर से अलग है (`logging.level` के `debug`/`trace` होने पर फ़ाइल पूरा विवरण रखती है)।
+- **WhatsApp संदेश का मुख्य भाग** `debug` स्तर पर लॉग होता है (उसे देखने के लिए `--verbose` का उपयोग करें)।
 
-- हर line पर **Subsystem prefixes** (जैसे `[gateway]`, `[canvas]`, `[tailscale]`)
-- **Subsystem colors** (प्रति subsystem स्थिर) और level coloring
-- **जब output TTY हो या environment rich terminal जैसा दिखे तब color** (`TERM`/`COLORTERM`/`TERM_PROGRAM`), `NO_COLOR` का सम्मान करता है
-- **छोटे किए गए subsystem prefixes**: leading `gateway/` + `channels/` हटाता है, अंतिम 2 segments रखता है (जैसे `whatsapp/outbound`)
-- **Subsystem के अनुसार sub-loggers** (auto prefix + structured field `{ subsystem }`)
-- QR/UX output के लिए **`logRaw()`** (कोई prefix नहीं, कोई formatting नहीं)
-- **कंसोल styles** (जैसे `pretty | compact | json`)
-- **कंसोल log level** file log level से अलग (जब `logging.level` को `debug`/`trace` पर सेट किया जाता है, तो file पूरा detail रखती है)
-- **WhatsApp message bodies** `debug` पर log होते हैं (उन्हें देखने के लिए `--verbose` का उपयोग करें)
-
-यह मौजूदा file logs को स्थिर रखता है और interactive output को scannable बनाता है।
+इससे फ़ाइल लॉग स्थिर रहते हैं और इंटरैक्टिव आउटपुट आसानी से स्कैन करने योग्य बनता है।
 
 ## संबंधित
 
-- [Logging](/hi/logging)
-- [OpenTelemetry export](/hi/gateway/opentelemetry)
-- [Diagnostics export](/hi/gateway/diagnostics)
+- [लॉगिंग](/hi/logging)
+- [OpenTelemetry निर्यात](/hi/gateway/opentelemetry)
+- [डायग्नोस्टिक्स निर्यात](/hi/gateway/diagnostics)

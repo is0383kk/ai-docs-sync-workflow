@@ -1,21 +1,22 @@
 ---
 read_when:
-    - شما در حال نصب، پیکربندی یا ممیزی Plugin توییچ هستید
-summary: Plugin کانال Twitch برای OpenClaw جهت گردش‌کارهای گفت‌وگو و نظارت.
+    - در حال نصب، پیکربندی یا ممیزی Plugin توییچ هستید
+summary: Plugin کانال Twitch برای OpenClaw جهت جریان‌های کاری گفت‌وگو و مدیریت محتوا.
 title: Plugin توییچ
 x-i18n:
-    generated_at: "2026-07-12T10:31:59Z"
+    generated_at: "2026-07-27T14:25:35Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: fc1bbe93d4d91427cf9c53abd4ed6833c9a06520f466cc31a24f94f6f0f327d7
+    source_hash: 6a931d467430d05b7a93471a1b8fd4b7b7d6cdc010ec0bcc5cb36d777888f105
     source_path: plugins/reference/twitch.md
     workflow: 16
 ---
 
-# Plugin توییچ
+# Plugin Twitch
 
-Plugin کانال توییچ OpenClaw برای گردش‌کارهای گفتگو و مدیریت محتوا.
+Plugin کانال Twitch برای OpenClaw جهت جریان‌های کاری چت و مدیریت محتوا.
 
 ## توزیع
 
@@ -24,8 +25,8 @@ Plugin کانال توییچ OpenClaw برای گردش‌کارهای گفتگ�
 
 ## سطح
 
-کانال‌ها: twitch
+کانال‌ها: `twitch`
 
 ## مستندات مرتبط
 
-- [توییچ](/fa/channels/twitch)
+- [Twitch](/fa/channels/twitch)

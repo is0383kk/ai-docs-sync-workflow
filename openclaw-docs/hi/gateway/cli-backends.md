@@ -1,80 +1,55 @@
 ---
 read_when:
-    - आप API प्रदाताओं के विफल होने पर एक विश्वसनीय फ़ॉलबैक चाहते हैं
-    - आप स्थानीय AI CLIs चला रहे हैं और उन्हें फिर से उपयोग करना चाहते हैं
-    - आप CLI बैकएंड टूल एक्सेस के लिए MCP loopback bridge को समझना चाहते हैं
+    - API प्रदाताओं के विफल होने पर आप एक विश्वसनीय फ़ॉलबैक चाहते हैं
+    - आप स्थानीय AI CLI चला रहे हैं और उनका पुनः उपयोग करना चाहते हैं
+    - आप CLI बैकएंड टूल एक्सेस के लिए MCP लूपबैक ब्रिज को समझना चाहते हैं
 summary: 'CLI बैकएंड: वैकल्पिक MCP टूल ब्रिज के साथ स्थानीय AI CLI फ़ॉलबैक'
-title: CLI बैकएंड
+title: CLI बैकएंड्स
 x-i18n:
-    generated_at: "2026-07-01T08:06:31Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T18:03:43Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2296c5e429f3acbc8375892e4539c397c09b973a8d15e21729b51985952dff29
+    source_hash: 0ce0427c587bf2a1e0a2ff24b5e76952eecae059e6f900af777b897b2d8d4210
     source_path: gateway/cli-backends.md
     workflow: 16
 ---
 
-OpenClaw API प्रदाताओं के डाउन होने, रेट-लिमिटेड होने या अस्थायी रूप से गलत व्यवहार करने पर
-**स्थानीय AI CLIs** को **केवल-टेक्स्ट fallback** के रूप में चला सकता है। यह जानबूझकर रूढ़िवादी है:
+OpenClaw, API प्रदाताओं के बंद होने, दर-सीमित होने या गलत व्यवहार करने पर, केवल-पाठ फ़ॉलबैक के रूप में स्थानीय AI CLI चला सकता है। इसे जानबूझकर सतर्क रखा गया है:
 
-- **OpenClaw टूल सीधे inject नहीं किए जाते**, लेकिन `bundleMcp: true` वाले बैकएंड
-  loopback MCP ब्रिज के जरिए gateway टूल प्राप्त कर सकते हैं।
-- इसका समर्थन करने वाली CLIs के लिए **JSONL स्ट्रीमिंग**।
-- **सत्र समर्थित हैं** (इसलिए फॉलो-अप टर्न सुसंगत रहते हैं)।
-- **इमेज pass through की जा सकती हैं** अगर CLI इमेज पाथ स्वीकार करती है।
+- OpenClaw टूल सीधे इंजेक्ट नहीं किए जाते, लेकिन `bundleMcp: true` वाला बैकएंड लूपबैक MCP ब्रिज के माध्यम से Gateway टूल प्राप्त कर सकता है।
+- इसका समर्थन करने वाले CLI के लिए JSONL स्ट्रीमिंग।
+- सेशन समर्थित हैं, इसलिए बाद के टर्न सुसंगत बने रहते हैं।
+- यदि CLI इमेज पथ स्वीकार करता है, तो इमेज आगे भेजी जाती हैं।
 
-इसे प्राथमिक पथ के बजाय एक **सुरक्षा जाल** के रूप में डिज़ाइन किया गया है। इसका उपयोग तब करें जब आप
-बाहरी APIs पर निर्भर हुए बिना "हमेशा काम करता है" टेक्स्ट प्रतिक्रियाएँ चाहते हों।
-
-अगर आप ACP सत्र नियंत्रणों, बैकग्राउंड टास्क,
-थ्रेड/बातचीत बाइंडिंग और स्थायी बाहरी कोडिंग सत्रों के साथ पूरा harness runtime चाहते हैं, तो इसके बजाय
-[ACP एजेंट](/hi/tools/acp-agents) का उपयोग करें। CLI बैकएंड ACP नहीं हैं।
+इसे प्राथमिक पथ के रूप में नहीं, बल्कि "हमेशा काम करने वाली" पाठ प्रतिक्रियाओं के लिए सुरक्षा उपाय के रूप में उपयोग करें। ACP सेशन नियंत्रण, बैकग्राउंड कार्यों, थ्रेड/वार्तालाप बाइंडिंग और स्थायी बाहरी कोडिंग सेशन वाले पूर्ण हार्नेस रनटाइम के लिए इसके बजाय [ACP एजेंट](/hi/tools/acp-agents) का उपयोग करें; CLI बैकएंड ACP नहीं हैं।
 
 <Tip>
-  नया बैकएंड Plugin बना रहे हैं? 
-  [CLI बैकएंड Plugin](/hi/plugins/cli-backend-plugins) का उपयोग करें। यह पेज उन उपयोगकर्ताओं के लिए है
-  जो पहले से registered बैकएंड को configure और operate कर रहे हैं।
+  नया बैकएंड Plugin बना रहे हैं? [CLI बैकएंड Plugin](/hi/plugins/cli-backend-plugins) देखें। यह पृष्ठ पहले से पंजीकृत बैकएंड को कॉन्फ़िगर और संचालित करने के बारे में है।
 </Tip>
 
-## शुरुआती लोगों के लिए quick start
+## त्वरित शुरुआत
 
-आप Claude Code CLI का उपयोग **बिना किसी config** के कर सकते हैं (bundled Anthropic Plugin
-एक default बैकएंड register करता है):
+बंडल किया गया Anthropic Plugin एक डिफ़ॉल्ट `claude-cli` बैकएंड पंजीकृत करता है, इसलिए Claude Code इंस्टॉल और उसमें लॉग इन होने के अतिरिक्त किसी कॉन्फ़िगरेशन के बिना यह काम करता है:
 
 ```bash
 openclaw agent --agent main --message "hi" --model claude-cli/claude-sonnet-4-6
 ```
 
-जब कोई explicit agent list configure नहीं की जाती, तो `main` default agent id होता है। अगर
-आप कई agents का उपयोग करते हैं, तो इसे उस agent id से बदलें जिसे आप चलाना चाहते हैं।
+जब कोई स्पष्ट एजेंट सूची कॉन्फ़िगर नहीं होती, तब `main` डिफ़ॉल्ट एजेंट आईडी होती है; अन्यथा इसे अपनी एजेंट आईडी से बदलें।
 
-अगर आपका gateway launchd/systemd के तहत चलता है और PATH minimal है, तो केवल
-command path जोड़ें:
+Gateway सेवा के `PATH` पर CLI उपलब्ध होना चाहिए। यदि किसी परिनियोजन को
+गैर-मानक निष्पादन योग्य पथ या आर्ग्युमेंट की आवश्यकता है, तो लॉन्च
+प्रक्रिया को `openclaw.json` में रखने के बजाय उस अडैप्टर को
+[CLI बैकएंड Plugin](/hi/plugins/cli-backend-plugins) में पंजीकृत करें।
 
-```json5
-{
-  agents: {
-    defaults: {
-      cliBackends: {
-        "claude-cli": {
-          command: "/opt/homebrew/bin/claude",
-        },
-      },
-    },
-  },
-}
-```
+जब मॉडल चयन या मॉडल-स्कोप वाला `agentRuntime.id` उसके बैकएंड को संदर्भित करता है,
+तब OpenClaw स्वामित्व वाला बंडल किया गया Plugin स्वतः लोड करता है।
 
-बस इतना ही। CLI के अलावा कोई keys या अतिरिक्त auth config आवश्यक नहीं है।
+## फ़ॉलबैक के रूप में इसका उपयोग
 
-अगर आप gateway host पर bundled CLI बैकएंड को **primary message provider** के रूप में उपयोग करते हैं, तो OpenClaw अब owning bundled Plugin को auto-load करता है जब आपका config
-उस बैकएंड को model ref में या
-`agents.defaults.cliBackends` के तहत explicit रूप से reference करता है।
-
-## इसे fallback के रूप में उपयोग करना
-
-अपनी fallback list में CLI बैकएंड जोड़ें ताकि यह केवल primary models के विफल होने पर चले:
+CLI बैकएंड को अपनी फ़ॉलबैक सूची में जोड़ें, ताकि यह केवल प्राथमिक मॉडल के विफल होने पर चले:
 
 ```json5
 {
@@ -93,60 +68,21 @@ command path जोड़ें:
 }
 ```
 
-नोट्स:
+प्राथमिक प्रदाता के विफल होने पर (प्रमाणीकरण, दर सीमाएँ, टाइमआउट) कॉन्फ़िगर किए गए फ़ॉलबैक पात्र बने रहते हैं, भले ही वे `agents.defaults.modelPolicy.allow` में न हों। CLI बैकएंड मॉडल को उस नीति में केवल तभी जोड़ें, जब उपयोगकर्ताओं को उसे `/model`, सेशन ओवरराइड या `--model` के माध्यम से सीधे चुनने में भी सक्षम होना चाहिए। `agents.defaults.models` केवल प्रति-मॉडल उपनामों, पैरामीटर और मेटाडेटा का स्वामी है।
 
-- अगर आप `agents.defaults.models` (allowlist) का उपयोग करते हैं, तो आपको अपने CLI बैकएंड models भी वहाँ शामिल करने होंगे।
-- अगर primary provider विफल होता है (auth, rate limits, timeouts), तो OpenClaw
-  अगला CLI बैकएंड आज़माएगा।
+## कॉन्फ़िगरेशन
 
-## Configuration overview
-
-सभी CLI बैकएंड यहाँ रहते हैं:
-
-```
-agents.defaults.cliBackends
-```
-
-हर entry एक **provider id** (जैसे `claude-cli`, `my-cli`) से keyed होती है।
-provider id आपके model ref का बायाँ हिस्सा बन जाता है:
-
-```
-<provider>/<model>
-```
-
-### उदाहरण configuration
+उपयोगकर्ता मॉडल और रनटाइम नीति के माध्यम से पंजीकृत बैकएंड चुनते हैं। मॉडल
+संदर्भ को कैनॉनिकल रखें और प्रति मॉडल CLI रनटाइम चुनें:
 
 ```json5
 {
   agents: {
     defaults: {
-      cliBackends: {
-        "my-cli": {
-          command: "my-cli",
-          args: ["--json"],
-          output: "json",
-          input: "arg",
-          modelArg: "--model",
-          modelAliases: {
-            "claude-opus-4-6": "opus",
-            "claude-sonnet-4-6": "sonnet",
-          },
-          sessionArg: "--session",
-          sessionMode: "existing",
-          sessionIdFields: ["session_id", "conversation_id"],
-          systemPromptArg: "--system",
-          // For CLIs with a dedicated prompt-file flag:
-          // systemPromptFileArg: "--system-file",
-          // Codex-style CLIs can point at a prompt file instead:
-          // systemPromptFileConfigArg: "-c",
-          // systemPromptFileConfigKey: "model_instructions_file",
-          systemPromptWhen: "first",
-          imageArg: "--image",
-          imageMode: "repeat",
-          // Opt in only if this backend may reseed safe invalidated sessions
-          // from bounded raw OpenClaw transcript history before compaction.
-          reseedFromRawTranscriptWhenUncompacted: true,
-          serialize: true,
+      model: "anthropic/claude-opus-5",
+      models: {
+        "anthropic/claude-opus-5": {
+          agentRuntime: { id: "claude-cli" },
         },
       },
     },
@@ -154,50 +90,54 @@ provider id आपके model ref का बायाँ हिस्सा ब
 }
 ```
 
+क्रेडेंशियल OpenClaw प्रमाणीकरण प्रोफ़ाइल या स्वामित्व वाले Plugin के कॉन्फ़िगरेशन में रहते हैं।
+कमांड, argv, परिवेश, पार्सिंग, सेशन, इमेज और वॉचडॉग प्रक्रियाएँ
+`api.registerCliBackend(...)` के साथ पंजीकृत Plugin कोड होती हैं।
+
 ## यह कैसे काम करता है
 
-1. provider prefix (`claude-cli/...`) के आधार पर **बैकएंड चुनता है**।
-2. उसी OpenClaw prompt + workspace context का उपयोग करके **system prompt बनाता है**।
-3. session id (अगर समर्थित हो) के साथ **CLI execute करता है** ताकि history consistent रहे।
-   bundled `claude-cli` बैकएंड हर OpenClaw session के लिए एक Claude stdio process जीवित रखता है
-   और follow-up turns को stream-json stdin पर भेजता है।
-4. **Output parse करता है** (JSON या plain text) और final text return करता है।
-5. प्रति बैकएंड **session ids persist करता है**, ताकि follow-ups वही CLI session फिर से उपयोग करें।
+1. प्रदाता उपसर्ग (`claude-cli/...`) के आधार पर बैकएंड चुनता है।
+2. समान OpenClaw प्रॉम्प्ट और कार्यक्षेत्र संदर्भ का उपयोग करके सिस्टम प्रॉम्प्ट बनाता है।
+3. सेशन आईडी (यदि समर्थित हो) के साथ CLI निष्पादित करता है, ताकि इतिहास सुसंगत रहे। बंडल किया गया `claude-cli` बैकएंड प्रत्येक OpenClaw सेशन के लिए Claude stdio प्रक्रिया को सक्रिय रखता है और बाद के टर्न stream-json stdin पर भेजता है।
+4. आउटपुट (JSON या सादा पाठ) को पार्स करके अंतिम पाठ लौटाता है।
+5. प्रत्येक बैकएंड के लिए सेशन आईडी स्थायी रखता है, ताकि बाद के टर्न उसी CLI सेशन का पुनः उपयोग करें।
 
-<Note>
-bundled Anthropic `claude-cli` बैकएंड फिर से supported है। Anthropic staff ने
-हमें बताया कि OpenClaw-शैली Claude CLI usage फिर से allowed है, इसलिए OpenClaw
-इस integration के लिए `claude -p` usage को sanctioned मानता है जब तक Anthropic
-नई policy publish नहीं करता।
-</Note>
+## टाइमआउट और लंबे समय तक चलने वाला कार्य
 
-bundled Anthropic `claude-cli` बैकएंड OpenClaw skills के लिए Claude Code के native skill
-resolver को prefer करता है। जब current skills snapshot में materialized path वाला कम से कम
-एक selected skill शामिल होता है, तो OpenClaw `--plugin-dir` के साथ temporary Claude
-Code Plugin pass करता है और appended system prompt से duplicate OpenClaw skills catalog
-हटा देता है। अगर snapshot में कोई materialized Plugin
-skill नहीं है, तो OpenClaw prompt catalog को fallback के रूप में रखता है। Skill env/API key
-overrides अभी भी run के लिए child process environment पर OpenClaw द्वारा apply किए जाते हैं।
+CLI बैकएंड की दो स्वतंत्र सीमाएँ होती हैं:
 
-Claude CLI का अपना noninteractive permission mode भी है। OpenClaw उसे
-Claude-specific policy config जोड़ने के बजाय existing exec policy से map करता है।
-OpenClaw-managed Claude live sessions के लिए, effective OpenClaw exec policy
-authoritative है: YOLO (`tools.exec.security: "full"` और
-`tools.exec.ask: "off"`) Claude को
-`--permission-mode bypassPermissions` के साथ launch करता है, जबकि restrictive effective exec policy
-Claude को `--permission-mode default` के साथ launch करता है। Per-agent
-`agents.list[].tools.exec` settings उस
-agent के लिए global `tools.exec` को override करती हैं। Raw Claude backend args में अभी भी `--permission-mode` शामिल हो सकता है, लेकिन live
-Claude launches उस flag को effective OpenClaw exec policy से match करने के लिए normalize करते हैं।
+- `agents.defaults.timeoutSeconds` पूरे एजेंट टर्न को सीमित करता है। सामान्य Gateway टर्न 48-घंटे की डिफ़ॉल्ट सीमा प्राप्त करते हैं; `0` टर्न बजट को असीमित बनाता है। `600` जैसा संग्रहित ओवरराइड उस डिफ़ॉल्ट को बदल देता है।
+- CLI का नो-आउटपुट वॉचडॉग मौन बने रहने वाली उप-प्रक्रिया को रोक देता है। प्रत्येक बैकएंड Plugin अलग-अलग नए/फिर से शुरू किए गए प्रोफ़ाइल का स्वामी होता है, और समग्र टर्न बजट असीमित होने पर भी वॉचडॉग सक्रिय रहता है।
 
-bundled Anthropic `claude-cli` बैकएंड OpenClaw `/think` levels को
-non-off levels के लिए Claude Code के native `--effort` flag से भी map करता है। `minimal` और
-`low` `low` पर map होते हैं, `adaptive` और `medium` `medium` पर map होते हैं, और `high`,
-`xhigh`, और `max` सीधे map होते हैं। अन्य CLI बैकएंड को `/think` के spawned CLI को प्रभावित कर सकने से पहले अपने owning Plugin से
-equivalent argv mapper declare करवाना होगा।
+48-घंटे के डिफ़ॉल्ट पर लौटने के लिए छोटा समग्र-टाइमआउट ओवरराइड हटाएँ, या 12 घंटे जैसा स्पष्ट बजट सेट करें:
 
-OpenClaw bundled `claude-cli` बैकएंड का उपयोग कर सके, उससे पहले Claude Code स्वयं
-उसी host पर पहले से logged in होना चाहिए:
+```bash
+# 48-घंटे के डिफ़ॉल्ट पर लौटें:
+openclaw config unset agents.defaults.timeoutSeconds
+
+# या स्पष्ट 12-घंटे की सीमा चुनें:
+openclaw config set agents.defaults.timeoutSeconds 43200
+```
+
+CLI के भीतर शुरू किया गया बैकग्राउंड कार्य अभी भी उसी CLI उप-प्रक्रिया का हिस्सा होता है। यदि मूल टर्न अपनी समग्र सीमा तक पहुँच जाता है, तो OpenClaw उप-प्रक्रिया और उसके CLI-आंतरिक बैकग्राउंड कार्यों को एक साथ रोक देता है। लंबे समय तक टिकाऊ कार्य के लिए अलग किया गया OpenClaw [उप-एजेंट](/hi/tools/subagents) या [ACP एजेंट](/hi/tools/acp-agents) उपयोग करें; अलग किए गए उप-एजेंट के लिए डिफ़ॉल्ट रूप से कोई रन टाइमआउट नहीं होता।
+
+`openclaw agent` कमांड की अपनी अनुरोध समय-सीमा भी होती है। उसका 600-सेकंड का फ़ॉलबैक डिफ़ॉल्ट उस कमांड आह्वान पर लागू होता है, सामान्य Gateway टर्न पर नहीं; [`openclaw agent`](/hi/cli/agent) देखें।
+
+### Claude CLI की विशिष्टताएँ
+
+बंडल किया गया `claude-cli` बैकएंड Claude Code के मूल स्किल रिज़ॉल्वर को प्राथमिकता देता है। जब वर्तमान स्किल स्नैपशॉट में भौतिक पथ वाला कम-से-कम एक चयनित स्किल होता है, तब OpenClaw `--plugin-dir` के माध्यम से एक अस्थायी Claude Code Plugin भेजता है और जोड़े गए सिस्टम प्रॉम्प्ट से डुप्लिकेट OpenClaw स्किल कैटलॉग हटा देता है। भौतिक रूप से उपलब्ध Plugin स्किल न होने पर OpenClaw प्रॉम्प्ट कैटलॉग को फ़ॉलबैक के रूप में बनाए रखता है। स्किल परिवेश/API कुंजी ओवरराइड अभी भी रन के लिए चाइल्ड प्रक्रिया के परिवेश पर लागू होते हैं।
+
+Claude CLI का अपना गैर-इंटरैक्टिव अनुमति मोड है; OpenClaw Claude-विशिष्ट कॉन्फ़िगरेशन जोड़ने के बजाय उसे मौजूदा exec नीति से मैप करता है। OpenClaw द्वारा प्रबंधित Claude लाइव सेशन के लिए प्रभावी exec नीति निर्णायक होती है: YOLO (`tools.exec.mode: "full"`) सामान्यतः Claude को `--permission-mode bypassPermissions` के साथ लॉन्च करता है, जबकि प्रतिबंधात्मक नीति उसे `--permission-mode default` के साथ लॉन्च करती है। रूट द्वारा चलाए जाने वाले Gateway भी `default` उपयोग करते हैं, क्योंकि Claude Code रूट के लिए बायपास मोड अस्वीकार करता है। प्रति-एजेंट `agents.entries.*.tools.exec` सेटिंग उस एजेंट के लिए वैश्विक `tools.exec` को ओवरराइड करती है। Anthropic Plugin प्रभावी नीति और होस्ट प्रतिबंध से मेल कराने के लिए Claude के अनुमति फ़्लैग को सामान्यीकृत करता है।
+
+प्रतिबंधात्मक नीति के अंतर्गत Claude अपने किसी मूल या एक्सटेंशन टूल (अपने Bash, WebFetch या Claude in Chrome ब्राउज़र टूल) का उपयोग करने से पहले stdio के माध्यम से OpenClaw से पूछता है। जब प्रभावी exec पूछताछ सेटिंग `on-miss` या `always` होती है, तब OpenClaw प्रत्येक अनुरोध को इंटरैक्टिव स्वीकृति के रूप में सेशन के चैनल पर भेजता है: **Allow once** केवल एक कॉल की अनुमति देता है, **Allow always** शेष लाइव Claude सेशन के लिए उस टूल नाम की अनुमति देता है (केवल मेमोरी में, कभी स्थायी रूप से संग्रहित नहीं), और **Deny**, टाइमआउट या अनुपलब्ध स्वीकृति मार्ग—सभी कॉल को अस्वीकार कर देते हैं। कभी प्रॉम्प्ट न करने वाली नीतियाँ अपना पुराना व्यवहार बनाए रखती हैं: `security: "deny"` प्रत्येक अनुरोध अस्वीकार करता है, और पूर्ण सुरक्षा से कम (exec मोड `allowlist`) वाला ask `off` बिना पूछे अस्वीकार कर देता है।
+
+### Claude ब्राउज़र टूल और 1Password साइन-इन
+
+Claude Code, [Claude in Chrome extension](https://code.claude.com/docs/en/chrome) के माध्यम से Chrome ब्राउज़र चला सकता है, जिसमें [Claude के लिए 1Password](/hi/gateway/1password#browser-sign-in-with-1password-for-claude) क्रेडेंशियल ऑटोफ़िल शामिल है। बंडल किया गया बैकएंड इसे सक्षम नहीं करता; ऐसा [CLI बैकएंड Plugin](/hi/plugins/cli-backend-plugins) पंजीकृत करें, जो `claude-stream-json`-डायलेक्ट बैकएंड के लॉन्च आर्ग्युमेंट में `--chrome` जोड़ता हो। OpenClaw सामान्य रन पर कॉन्फ़िगर किए गए `--chrome` को बनाए रखता है और साइड प्रश्नों जैसी प्रतिबंधित टूल नीति वाले रन पर हमेशा `--no-chrome` बाध्य करता है। Chrome विंडो, एक्सटेंशन और 1Password के सभी स्वीकृति प्रॉम्प्ट Gateway होस्ट पर रहते हैं, इसलिए क्रेडेंशियल उपयोग को स्वीकृत करने के लिए किसी व्यक्ति का उस मशीन पर उपस्थित होना आवश्यक है।
+
+बैकएंड OpenClaw `/think` स्तरों को Claude Code के मूल `--effort` फ़्लैग से भी मैप करता है: `minimal`/`low` -> `low`, `medium` -> `medium`, और `high`/`xhigh`/`max` सीधे आगे भेजे जाते हैं। इससे समर्थित Fable 5 प्रयास स्तर, सदस्यता-समर्थित Claude CLI और API-कुंजी मार्गों के लिए समान बने रहते हैं। `adaptive` कॉन्फ़िगर किए गए `--effort` फ़्लैग हटाता है और कोई प्रतिस्थापन नहीं देता, इसलिए Claude Code अपने परिवेश, सेटिंग और मॉडल डिफ़ॉल्ट से प्रभावी प्रयास निर्धारित करता है। अन्य CLI बैकएंड के लिए उनके स्वामित्व वाले Plugin को समतुल्य argv मैपर घोषित करना होगा, तभी `/think` उत्पन्न किए गए CLI को प्रभावित करेगा।
+
+OpenClaw द्वारा `claude-cli` उपयोग किए जाने से पहले, उसी होस्ट पर Claude Code में लॉग इन होना आवश्यक है:
 
 ```bash
 claude auth login
@@ -205,282 +145,191 @@ claude auth status --text
 openclaw models auth login --provider anthropic --method cli --set-default
 ```
 
-Docker installs में Claude Code persisted
-container home के अंदर installed और logged in होना चाहिए, केवल host पर नहीं। देखें
-[Docker में Claude CLI बैकएंड](/hi/install/docker#claude-cli-backend-in-docker).
+Docker इंस्टॉल में Claude Code को केवल होस्ट पर नहीं, बल्कि स्थायी कंटेनर होम के भीतर इंस्टॉल और लॉग इन करना आवश्यक है; [Docker में Claude CLI बैकएंड](/hi/install/docker#claude-cli-backend-in-docker) देखें।
 
-`agents.defaults.cliBackends.claude-cli.command` का उपयोग केवल तब करें जब `claude`
-binary पहले से `PATH` पर न हो।
+Gateway सेवा को `PATH` पर `claude` रिज़ॉल्व करना आवश्यक है। गैर-मानक पथ के लिए,
+एक छोटा रैपर बैकएंड Plugin पंजीकृत करें।
 
-## Sessions
+## सेशन
 
-- अगर CLI sessions support करती है, तो `sessionArg` (जैसे `--session-id`) या
-  `sessionArgs` (placeholder `{sessionId}`) set करें जब ID को
-  कई flags में insert करना हो।
-- अगर CLI अलग flags के साथ **resume subcommand** का उपयोग करती है, तो
-  `resumeArgs` (resuming के समय `args` को replace करता है) और optional `resumeOutput`
-  (non-JSON resumes के लिए) set करें।
+- यदि CLI सेशन का समर्थन करता है, तो `{sessionId}` प्लेसहोल्डर (उदाहरण के लिए `["--session-id", "{sessionId}"]`) के साथ `sessionArgs` सेट करें।
+- यदि CLI अलग फ़्लैग वाले रिज़्यूम उपकमांड का उपयोग करता है, तो `resumeArgs` सेट करें (रिज़्यूम करते समय `args` को बदलता है) और गैर-JSON रिज़्यूम के लिए वैकल्पिक रूप से `resumeOutput` सेट करें।
 - `sessionMode`:
-  - `always`: हमेशा session id भेजें (अगर कोई stored नहीं है तो नया UUID)।
-  - `existing`: session id केवल तब भेजें जब कोई पहले stored हो।
-  - `none`: कभी session id न भेजें।
-- `claude-cli` defaults `liveSession: "claude-stdio"`, `output: "jsonl"`,
-  और `input: "stdin"` पर हैं ताकि follow-up turns active रहने के दौरान live Claude process का फिर से उपयोग करें।
-  Warm stdio अब default है, custom configs के लिए भी
-  जो transport fields omit करते हैं। अगर Gateway restart होता है या idle process
-  exit करता है, तो OpenClaw stored Claude session id से resume करता है। Stored session
-  ids को resume से पहले existing readable project transcript के विरुद्ध verify किया जाता है, इसलिए phantom bindings `--resume` के तहत silently fresh Claude CLI session शुरू करने के बजाय `reason=transcript-missing`
-  के साथ clear हो जाती हैं।
-- Claude live sessions bounded JSONL output guards रखते हैं। Defaults प्रति turn
-  8 MiB और 20,000 raw JSONL lines तक allow करते हैं। Tool-heavy Claude turns इन्हें
-  प्रति बैकएंड
-  `agents.defaults.cliBackends.claude-cli.reliability.outputLimits.maxTurnRawChars`
-  और `maxTurnLines` से बढ़ा सकते हैं; OpenClaw उन settings को 64 MiB और 100,000
-  lines तक clamp करता है।
-- Stored CLI sessions provider-owned continuity हैं। implicit daily session
-  reset उन्हें cut नहीं करता; `/reset` और explicit `session.reset` policies अभी भी
-  करती हैं।
-- Fresh CLI sessions सामान्यतः केवल OpenClaw की compaction summary
-  और post-compaction tail से reseed होते हैं। उन short sessions को recover करने के लिए जो
-  compaction से पहले invalidated हो जाते हैं, कोई बैकएंड
-  `reseedFromRawTranscriptWhenUncompacted: true` से opt in कर सकता है। OpenClaw अभी भी raw
-  transcript reseed को bounded रखता है और इसे safe invalidations जैसे missing
-  CLI transcripts, system-prompt/MCP changes, या session-expired retry तक सीमित करता है; auth
-  profile या credential-epoch changes कभी raw transcript history reseed नहीं करते।
+  - `always`: हमेशा सेशन आईडी भेजें (यदि कोई संग्रहित न हो तो नई UUID)।
+  - `existing`: केवल तभी सेशन आईडी भेजें, जब कोई पहले से संग्रहित हो।
+  - `none`: कभी सेशन आईडी न भेजें।
+- `claude-cli` डिफ़ॉल्ट रूप से `liveSession: "claude-stdio"`, `output: "jsonl"` और `input: "stdin"` का उपयोग करता है, इसलिए बाद के टर्न लाइव Claude प्रक्रिया के सक्रिय रहने तक उसका पुनः उपयोग करते हैं, इसमें ट्रांसपोर्ट फ़ील्ड छोड़ने वाले कस्टम कॉन्फ़िगरेशन भी शामिल हैं। यदि Gateway पुनः शुरू होता है या निष्क्रिय प्रक्रिया बंद हो जाती है, तो OpenClaw संग्रहित Claude सेशन आईडी से फिर शुरू करता है। रिज़्यूम करने से पहले संग्रहित सेशन आईडी को पठनीय प्रोजेक्ट ट्रांस्क्रिप्ट के विरुद्ध सत्यापित किया जाता है; ट्रांस्क्रिप्ट न मिलने पर `--resume` के अंतर्गत चुपचाप नया सेशन शुरू करने के बजाय बाइंडिंग साफ़ कर दी जाती है (`reason=transcript-missing` के रूप में लॉग किया जाता है)।
+- Claude लाइव सेशन सीमित JSONL आउटपुट सुरक्षा बनाए रखते हैं: प्रत्येक टर्न में 8 MiB और 20,000 अपरिष्कृत JSONL पंक्तियाँ।
+- संग्रहित CLI सेशन प्रदाता-स्वामित्व वाली निरंतरता हैं। स्वचालित रीसेट डिफ़ॉल्ट रूप से अक्षम है; `/reset` और स्पष्ट दैनिक या निष्क्रिय `session.reset` नीतियाँ अब भी उन्हें समाप्त करती हैं।
+- नए CLI सेशन सामान्यतः केवल OpenClaw के Compaction सारांश और Compaction के बाद के शेष भाग से दोबारा सीड होते हैं। Compaction से पहले अमान्य हुए छोटे सेशन पुनर्प्राप्त करने के लिए बैकएंड `reseedFromRawTranscriptWhenUncompacted: true` के साथ इसे चुन सकता है। अपरिष्कृत ट्रांस्क्रिप्ट का पुनः सीड सीमित रहता है और केवल सुरक्षित अमान्यताओं तक सीमित होता है, जैसे अनुपलब्ध CLI ट्रांस्क्रिप्ट, अनाथ टूल-उपयोग शेष भाग, संदेश-नीति/सिस्टम-प्रॉम्प्ट/cwd/MCP परिवर्तन या सेशन-समाप्ति पुनः प्रयास; प्रमाणीकरण प्रोफ़ाइल या क्रेडेंशियल-युग परिवर्तन कभी अपरिष्कृत ट्रांस्क्रिप्ट इतिहास को दोबारा सीड नहीं करते।
 
-Serialization notes:
+सीरियलाइज़ेशन: `serialize: true` समान-लेन रन का क्रम बनाए रखता है (अधिकांश CLI एक प्रदाता लेन पर क्रमिक रूप से चलते हैं)। चयनित प्रमाणीकरण पहचान बदलने पर OpenClaw संग्रहित CLI सेशन का पुनः उपयोग भी बंद कर देता है, जिसमें बदली हुई प्रमाणीकरण प्रोफ़ाइल आईडी, स्थिर API कुंजी, स्थिर टोकन या CLI द्वारा उपलब्ध कराई गई OAuth खाता पहचान शामिल है; केवल OAuth एक्सेस/रिफ़्रेश टोकन का रोटेशन सेशन को समाप्त नहीं करता। यदि CLI के पास स्थिर OAuth खाता आईडी नहीं है, तो OpenClaw उस CLI को अपनी रिज़्यूम अनुमतियाँ स्वयं लागू करने देता है।
 
-- `serialize: true` same-lane runs को ordered रखता है।
-- अधिकांश CLIs एक provider lane पर serialize करती हैं।
-- selected auth identity बदलने पर OpenClaw stored CLI session reuse drop कर देता है,
-  जिसमें changed auth profile id, static API key, static token, या OAuth
-  account identity शामिल है जब CLI कोई expose करती है। OAuth access और refresh token
-  rotation stored CLI session को cut नहीं करता। अगर CLI stable OAuth account id expose नहीं करती, तो OpenClaw उस CLI को resume permissions enforce करने देता है।
+## claude-cli सेशन से फ़ॉलबैक प्रस्तावना
 
-## claude-cli sessions से fallback prelude
+जब कोई `claude-cli` प्रयास [`agents.defaults.model.fallbacks`](/hi/concepts/model-failover) में किसी गैर-CLI उम्मीदवार पर फ़ेलओवर करता है, तो OpenClaw अगले प्रयास को Claude Code की स्थानीय JSONL ट्रांसक्रिप्ट से प्राप्त संदर्भ प्रस्तावना के साथ आरंभ करता है (`~/.claude/projects/` के अंतर्गत, प्रत्येक कार्यस्थान के अनुसार कुंजीबद्ध)। इस आरंभिक संदर्भ के बिना फ़ॉलबैक प्रदाता बिना संदर्भ के शुरू होता है, क्योंकि `claude-cli` रन के लिए OpenClaw की अपनी सत्र ट्रांसक्रिप्ट खाली होती है।
 
-जब कोई `claude-cli` attempt
-[`agents.defaults.model.fallbacks`](/hi/concepts/model-failover) में किसी non-CLI candidate पर fail over करता है, तो OpenClaw
-Claude Code के local
-JSONL transcript at `~/.claude/projects/` से harvested context prelude के साथ
-अगले attempt को seed करता है। इस seed के बिना, fallback
-provider cold start करेगा क्योंकि OpenClaw का अपना session transcript
-`claude-cli` runs के लिए empty होता है।
+- प्रस्तावना नवीनतम `/compact` सारांश या `compact_boundary` मार्कर को प्राथमिकता देती है, फिर वर्ण बजट तक सीमा के बाद के सबसे हालिया संवाद जोड़ती है। सीमा से पहले के संवाद हटा दिए जाते हैं, क्योंकि सारांश पहले ही उनका प्रतिनिधित्व करता है।
+- प्रॉम्प्ट बजट को सटीक बनाए रखने के लिए टूल ब्लॉक को संक्षिप्त `(tool call: name)` और `(tool result: …)` संकेतों में समेकित किया जाता है; अत्यधिक बड़ा सारांश छोटा करके `(truncated)` लेबल किया जाता है।
+- समान-प्रदाता `claude-cli` से `claude-cli` फ़ॉलबैक Claude के अपने `--resume` पर निर्भर करते हैं और प्रस्तावना को छोड़ देते हैं।
+- आरंभिक संदर्भ मौजूदा Claude सत्र-फ़ाइल पथ सत्यापन का पुनः उपयोग करता है, इसलिए मनमाने पथ पढ़े नहीं जा सकते।
 
-- prelude latest `/compact` summary या `compact_boundary`
-  marker को prefer करता है, फिर char
-  budget तक सबसे recent post-boundary turns append करता है। Pre-boundary turns drop किए जाते हैं क्योंकि summary पहले से
-  उन्हें represent करती है।
-- Tool blocks को prompt budget honest रखने के लिए compact `(tool call: name)` और
-  `(tool result: …)` hints में coalesce किया जाता है। Summary overflow होने पर
-  `(truncated)` label की जाती है।
-- Same-provider `claude-cli` से `claude-cli` fallbacks Claude के अपने
-  `--resume` पर rely करते हैं और prelude skip करते हैं।
-- seed existing Claude session-file path validation को reuse करता है, इसलिए
-  arbitrary paths read नहीं किए जा सकते।
+## इमेज
 
-## इमेज (pass-through)
-
-अगर आपकी CLI image paths स्वीकार करती है, तो `imageArg` set करें:
+Plugin लेखक `imageArg` के साथ इमेज-पथ समर्थन घोषित करते हैं:
 
 ```json5
 imageArg: "--image",
 imageMode: "repeat"
 ```
 
-OpenClaw base64 images को temp files में write करेगा। अगर `imageArg` set है, तो वे
-paths CLI args के रूप में pass किए जाते हैं। अगर `imageArg` missing है, तो OpenClaw
-file paths को prompt (path injection) में append करता है, जो उन CLIs के लिए पर्याप्त है जो plain paths से local files auto-
-load करती हैं।
+OpenClaw base64 इमेज को अस्थायी फ़ाइलों में लिखता है। यदि `imageArg` सेट है, तो वे पथ CLI तर्कों के रूप में पास किए जाते हैं; यदि नहीं, तो OpenClaw फ़ाइल पथों को प्रॉम्प्ट में जोड़ता है (पथ इंजेक्शन), जो उन CLI के लिए काम करता है जो साधारण पथों से स्थानीय फ़ाइलें स्वतः लोड करते हैं।
 
-## Inputs / outputs
+## इनपुट और आउटपुट
 
-- `output: "json"` (default) JSON parse करने और text + session id extract करने की कोशिश करता है।
-- Gemini CLI JSON output के लिए, OpenClaw reply text को `response` से और usage
-  को `stats` से पढ़ता है जब `usage` missing या empty हो। bundled Gemini CLI default
-  `stream-json` का उपयोग करता है, लेकिन पुराने `--output-format json` overrides अभी भी
-  JSON parser का उपयोग करते हैं।
-- `output: "jsonl"` JSONL streams parse करता है और final agent message plus session
-  identifiers extract करता है जब present हों।
-- `output: "text"` stdout को final response मानता है।
+- `output: "text"` (डिफ़ॉल्ट) stdout को अंतिम प्रतिक्रिया मानता है।
+- `output: "json"` JSON को पार्स करके टेक्स्ट और सत्र आईडी निकालने का प्रयास करता है।
+- `output: "jsonl"` JSONL स्ट्रीम को पार्स करता है और उपलब्ध होने पर अंतिम एजेंट संदेश तथा सत्र पहचानकर्ता निकालता है।
+- Gemini CLI JSON आउटपुट के लिए, जब `usage` अनुपलब्ध या खाली हो, तो OpenClaw उत्तर टेक्स्ट को `response` से और उपयोग को `stats` से पढ़ता है। बंडल किया गया Gemini CLI अडैप्टर `stream-json` का उपयोग करता है।
 
-Input modes:
+इनपुट मोड:
 
-- `input: "arg"` (डिफ़ॉल्ट) प्रॉम्प्ट को अंतिम CLI arg के रूप में पास करता है।
+- `input: "arg"` (डिफ़ॉल्ट) प्रॉम्प्ट को अंतिम CLI तर्क के रूप में पास करता है।
 - `input: "stdin"` प्रॉम्प्ट को stdin के माध्यम से भेजता है।
-- यदि प्रॉम्प्ट बहुत लंबा है और `maxPromptArgChars` सेट है, तो stdin इस्तेमाल होता है।
+- यदि प्रॉम्प्ट बहुत लंबा है और `maxPromptArgChars` सेट है, तो इसके बजाय stdin का उपयोग किया जाता है।
 
-## डिफ़ॉल्ट्स (Plugin-स्वामित्व वाले)
+## Plugin-स्वामित्व वाले डिफ़ॉल्ट
 
-बंडल किए गए CLI बैकएंड डिफ़ॉल्ट्स अपने स्वामी Plugin के साथ रहते हैं। उदाहरण के लिए,
-Anthropic `claude-cli` का स्वामी है और Google `google-gemini-cli` का स्वामी है। OpenAI Codex
-एजेंट रन `openai/*` के माध्यम से Codex app-server harness का उपयोग करते हैं; OpenClaw अब
-बंडल किया हुआ `codex-cli` बैकएंड पंजीकृत नहीं करता।
-
-बंडल किया गया Anthropic Plugin `claude-cli` के लिए एक डिफ़ॉल्ट पंजीकृत करता है:
-
-- `command: "claude"`
-- `args: ["-p","--output-format","stream-json","--include-partial-messages","--verbose", ...]`
-- `output: "jsonl"`
-- `input: "stdin"`
-- `modelArg: "--model"`
-- `sessionMode: "always"`
-
-बंडल किया गया Google Plugin भी `google-gemini-cli` के लिए एक डिफ़ॉल्ट पंजीकृत करता है:
-
-- `command: "gemini"`
-- `args: ["--skip-trust", "--approval-mode", "auto_edit", "--output-format", "stream-json", "--prompt", "{prompt}"]`
-- `resumeArgs: ["--skip-trust", "--approval-mode", "auto_edit", "--resume", "{sessionId}", "--output-format", "stream-json", "--prompt", "{prompt}"]`
-- `output: "jsonl"`
-- `resumeOutput: "jsonl"`
-- `jsonlDialect: "gemini-stream-json"`
-- `imageArg: "@"`
-- `imagePathScope: "workspace"`
-- `modelArg: "--model"`
-- `sessionMode: "existing"`
-- `sessionIdFields: ["session_id", "sessionId"]`
-
-पूर्वापेक्षा: स्थानीय Gemini CLI इंस्टॉल होना चाहिए और `PATH` पर
-`gemini` के रूप में उपलब्ध होना चाहिए (`brew install gemini-cli` या
-`npm install -g @google/gemini-cli`)।
-
-Gemini CLI आउटपुट नोट्स:
-
-- डिफ़ॉल्ट `stream-json` पार्सर सहायक `message` इवेंट, टूल इवेंट,
-  अंतिम `result` उपयोग, और घातक Gemini त्रुटि इवेंट पढ़ता है।
-- यदि आप Gemini args को `--output-format json` पर ओवरराइड करते हैं, तो OpenClaw उस
-  बैकएंड को वापस `output: "json"` पर सामान्यीकृत करता है और JSON `response`
-  फ़ील्ड से उत्तर टेक्स्ट पढ़ता है।
-- जब `usage` अनुपस्थित या खाली होता है, तो उपयोग `stats` पर फ़ॉलबैक करता है।
-- `stats.cached` को OpenClaw `cacheRead` में सामान्यीकृत किया जाता है।
-- यदि `stats.input` अनुपस्थित है, तो OpenClaw इनपुट टोकन
-  `stats.input_tokens - stats.cached` से निकालता है।
-
-केवल आवश्यकता होने पर ओवरराइड करें (आम: पूर्ण `command` पाथ)।
-
-## Plugin-स्वामित्व वाले डिफ़ॉल्ट्स
-
-CLI बैकएंड डिफ़ॉल्ट्स अब Plugin सतह का हिस्सा हैं:
+CLI बैकएंड डिफ़ॉल्ट Plugin सतह का हिस्सा हैं:
 
 - Plugins उन्हें `api.registerCliBackend(...)` के साथ पंजीकृत करते हैं।
-- बैकएंड `id` मॉडल refs में provider prefix बन जाता है।
-- `agents.defaults.cliBackends.<id>` में उपयोगकर्ता कॉन्फ़िग अभी भी Plugin डिफ़ॉल्ट को ओवरराइड करता है।
-- बैकएंड-विशिष्ट कॉन्फ़िग सफ़ाई वैकल्पिक
-  `normalizeConfig` hook के माध्यम से Plugin-स्वामित्व में रहती है।
+- बैकएंड `id` मॉडल संदर्भों में प्रदाता उपसर्ग बन जाता है।
+- कमांड, argv, परिवेश, पार्सर, सत्र और वॉचडॉग व्यवहार Plugin कोड में रहता है।
+- बैकएंड-विशिष्ट सामान्यीकरण वैकल्पिक `normalizeConfig` हुक के माध्यम से Plugin के स्वामित्व में रहता है।
 
-जिन Plugins को छोटे प्रॉम्प्ट/संदेश संगतता shims चाहिए, वे provider या CLI बैकएंड बदले बिना
-द्विदिश टेक्स्ट transforms घोषित कर सकते हैं:
+Anthropic `claude-cli` का और Google `google-gemini-cli` का स्वामी है। OpenAI Codex एजेंट रन `openai/*` के माध्यम से Codex ऐप-सर्वर हार्नेस का उपयोग करते हैं; OpenClaw अब बंडल किए गए `codex-cli` बैकएंड को पंजीकृत नहीं करता।
+
+बंडल किया गया Anthropic Plugin `claude-cli` के लिए पंजीकरण करता है:
+
+| कुंजी                   | मान                                                                                                                                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `command`             | `claude`                                                                                                                                                                                                      |
+| `args`                | `-p --output-format stream-json --include-partial-messages --verbose --setting-sources user --allowedTools mcp__openclaw__* --disallowedTools ScheduleWakeup,CronCreate,Bash(run_in_background:true),Monitor` |
+| `output`              | `jsonl`                                                                                                                                                                                                       |
+| `input`               | `stdin`                                                                                                                                                                                                       |
+| `modelArg`            | `--model`                                                                                                                                                                                                     |
+| `sessionArgs`         | `["--session-id", "{sessionId}"]`                                                                                                                                                                             |
+| `sessionMode`         | `always`                                                                                                                                                                                                      |
+| `imageArg`            | `@`                                                                                                                                                                                                           |
+| `imagePathScope`      | `workspace`                                                                                                                                                                                                   |
+| `systemPromptFileArg` | `--append-system-prompt-file`                                                                                                                                                                                 |
+| `systemPromptMode`    | `append`                                                                                                                                                                                                      |
+
+बंडल किया गया Google Plugin `google-gemini-cli` के लिए पंजीकरण करता है:
+
+| कुंजी                       | मान                                                                                  |
+| ------------------------- | -------------------------------------------------------------------------------------- |
+| `command`                 | `gemini`                                                                               |
+| `args`                    | `--skip-trust --approval-mode auto_edit --output-format stream-json --prompt {prompt}` |
+| `resumeArgs`              | वही, `--resume {sessionId}` के साथ                                                      |
+| `output` / `resumeOutput` | `jsonl`                                                                                |
+| `jsonlDialect`            | `gemini-stream-json`                                                                   |
+| `imageArg`                | `@`                                                                                    |
+| `imagePathScope`          | `workspace`                                                                            |
+| `modelArg`                | `--model`                                                                              |
+| `sessionMode`             | `existing`                                                                             |
+| `sessionIdFields`         | `["session_id", "sessionId"]`                                                          |
+
+पूर्वापेक्षा: स्थानीय Gemini CLI इंस्टॉल होना चाहिए और `PATH` पर `gemini` के रूप में उपलब्ध होना चाहिए (`brew install gemini-cli` या `npm install -g @google/gemini-cli`)।
+
+Gemini CLI आउटपुट संबंधी टिप्पणियाँ:
+
+- डिफ़ॉल्ट `stream-json` पार्सर सहायक `message` इवेंट, टूल इवेंट, अंतिम `result` उपयोग और घातक Gemini त्रुटि इवेंट पढ़ता है।
+- जब `usage` अनुपलब्ध या खाली हो, तो उपयोग `stats` पर फ़ॉलबैक करता है; `stats.cached` को OpenClaw `cacheRead` में सामान्यीकृत किया जाता है, और यदि `stats.input` अनुपलब्ध है, तो इनपुट टोकन `stats.input_tokens - stats.cached` से निकाले जाते हैं।
+
+## टेक्स्ट रूपांतरण ओवरले
+
+जिन Plugins को छोटे प्रॉम्प्ट/संदेश संगतता शिम की आवश्यकता होती है, वे प्रदाता या CLI बैकएंड को बदले बिना द्विदिश टेक्स्ट रूपांतरण घोषित कर सकते हैं:
 
 ```typescript
 api.registerTextTransforms({
-  input: [
-    { from: /red basket/g, to: "blue basket" },
-    { from: /paper ticket/g, to: "digital ticket" },
-    { from: /left shelf/g, to: "right shelf" },
-  ],
-  output: [
-    { from: /blue basket/g, to: "red basket" },
-    { from: /digital ticket/g, to: "paper ticket" },
-    { from: /right shelf/g, to: "left shelf" },
-  ],
+  input: [{ from: /red basket/g, to: "blue basket" }],
+  output: [{ from: /blue basket/g, to: "red basket" }],
 });
 ```
 
-`input` CLI को पास किए गए सिस्टम प्रॉम्प्ट और उपयोगकर्ता प्रॉम्प्ट को फिर से लिखता है। `output`
-OpenClaw द्वारा अपने नियंत्रण markers और channel delivery संभालने से पहले streamed assistant text और parsed final text को फिर से लिखता है। provider-backed model calls के लिए,
-`output` stream repair के बाद और tool execution से पहले structured tool-call arguments के अंदर string values को भी पुनर्स्थापित करता है। Raw provider JSON fragments
-अपरिवर्तित रहते हैं; consumers को structured partial, end, या result payload का उपयोग करना चाहिए।
+`input` CLI को पास किए गए सिस्टम प्रॉम्प्ट और उपयोगकर्ता प्रॉम्प्ट को पुनर्लिखता है। `output` OpenClaw द्वारा अपने नियंत्रण मार्कर और चैनल डिलीवरी संभालने से पहले स्ट्रीम किए गए सहायक टेक्स्ट और पार्स किए गए अंतिम टेक्स्ट को पुनर्लिखता है; प्रदाता-समर्थित मॉडल कॉल के लिए यह स्ट्रीम सुधार के बाद और टूल निष्पादन से पहले संरचित टूल-कॉल तर्कों के भीतर स्ट्रिंग मानों को भी पुनर्स्थापित करता है। अपरिष्कृत प्रदाता JSON खंड अपरिवर्तित रहते हैं; उपभोक्ताओं को संरचित आंशिक, समाप्ति या परिणाम पेलोड का उपयोग करना चाहिए।
 
-Provider-specific JSONL events emit करने वाले CLIs के लिए, उस
-बैकएंड के config पर `jsonlDialect` सेट करें। समर्थित dialects Claude
-Code-compatible streams के लिए `claude-stream-json` और Gemini CLI `stream-json`
-events के लिए `gemini-stream-json` हैं।
+प्रदाता-विशिष्ट JSONL इवेंट उत्सर्जित करने वाले CLI के लिए, उस बैकएंड के कॉन्फ़िगरेशन पर `jsonlDialect` सेट करें: Claude Code-संगत स्ट्रीम के लिए `claude-stream-json`, Gemini CLI `stream-json` इवेंट के लिए `gemini-stream-json`।
 
-## Native compaction स्वामित्व
+## नेटिव Compaction स्वामित्व
 
-कुछ CLI बैकएंड ऐसा एजेंट चलाते हैं जो अपना **स्वयं** का transcript compact करता है, इसलिए OpenClaw को
-उनके विरुद्ध अपना safeguard summarizer नहीं चलाना चाहिए - ऐसा करने से बैकएंड की अपनी
-compaction से टकराव होता है और turn hard-fail हो सकता है।
+कुछ CLI बैकएंड ऐसा एजेंट चलाते हैं जो अपनी ट्रांसक्रिप्ट को स्वयं संकुचित करता है, इसलिए OpenClaw को उनके विरुद्ध अपना सुरक्षा सारांशकर्ता नहीं चलाना चाहिए—ऐसा करने से बैकएंड के अपने Compaction में टकराव होता है और संवाद पूरी तरह विफल हो सकता है।
 
-`claude-cli` में कोई harness endpoint नहीं है - Claude Code internally compact करता है - इसलिए यह
-`ownsNativeCompaction: true` घोषित करता है, और OpenClaw compaction path से no-op लौटाता है।
-Codex जैसे native-harness sessions इसके बजाय अपने harness compaction endpoint पर route करते रहते हैं।
-
-क्योंकि बैकएंड compaction का स्वामी है, केवल OpenClaw के safeguard को
-claude-cli session पर fire होने से रोकने के लिए `contextTokens: 1_000_000` सेट करने वाला पुराना stopgap
-**अब आवश्यक नहीं है** - opt-out उसे बदल देता है।
+`claude-cli` का कोई हार्नेस एंडपॉइंट नहीं है (Claude Code आंतरिक रूप से संकुचित करता है), इसलिए यह `ownsNativeCompaction: true` घोषित करता है और OpenClaw का Compaction पथ सत्र प्रविष्टि को अपरिवर्तित लौटाता है। OpenClaw रन के प्रभावी संदर्भ बजट को Claude Code के दस्तावेज़ीकृत [`CLAUDE_CODE_AUTO_COMPACT_WINDOW`](https://code.claude.com/docs/en/env-vars) के माध्यम से पास करता है, जिससे नेटिव स्वचालित Compaction कॉन्फ़िगर की गई Anthropic `contextTokens` सीमाओं के अनुरूप रहता है। इसके बजाय Codex जैसे नेटिव-हार्नेस सत्र अपने हार्नेस Compaction एंडपॉइंट पर रूट होते रहते हैं।
 
 ```typescript
 api.registerCliBackend({ id: "my-cli", ownsNativeCompaction: true /* ... */ });
 ```
 
-`ownsNativeCompaction` केवल उस बैकएंड के लिए घोषित करें जो वास्तव में अपनी compaction का स्वामी हो: उसे
-अपने context window के पास पहुंचने पर अपने transcript को भरोसेमंद ढंग से bound करना चाहिए और
-resumable session persist करना चाहिए (जैसे `--resume` / `--session-id`); अन्यथा deferred session
-budget से ऊपर रह सकता है। Matching `agentHarnessId` sessions अभी भी harness endpoint पर route करते हैं।
+`ownsNativeCompaction` केवल ऐसे बैकएंड के लिए घोषित करें जो वास्तव में Compaction का स्वामी हो: उसे संदर्भ विंडो के आसपास अपनी ट्रांसक्रिप्ट को विश्वसनीय रूप से सीमित करना और फिर से शुरू किए जा सकने वाला सत्र (जैसे `--resume` / `--session-id`) बनाए रखना आवश्यक है, अन्यथा स्थगित सत्र बजट से अधिक रह सकता है।
 
-## Bundle MCP overlays
+## बंडल MCP ओवरले
 
-CLI बैकएंड OpenClaw tool calls सीधे प्राप्त **नहीं** करते, लेकिन कोई बैकएंड
-`bundleMcp: true` के साथ generated MCP config overlay में opt in कर सकता है।
+CLI बैकएंड को OpenClaw टूल कॉल सीधे प्राप्त नहीं होते, लेकिन कोई बैकएंड `bundleMcp: true` के साथ जनरेट किए गए MCP कॉन्फ़िगरेशन ओवरले को चुन सकता है। वर्तमान बंडल व्यवहार:
 
-वर्तमान बंडल व्यवहार:
+- `claude-cli`: जनरेट की गई कठोर MCP कॉन्फ़िगरेशन फ़ाइल।
+- `google-gemini-cli`: जनरेट की गई Gemini सिस्टम सेटिंग फ़ाइल।
 
-- `claude-cli`: generated strict MCP config file
-- `google-gemini-cli`: generated Gemini system settings file
+बंडल MCP सक्षम होने पर, OpenClaw:
 
-जब bundle MCP सक्षम होता है, OpenClaw:
+- एक लूपबैक HTTP MCP सर्वर प्रारंभ करता है, जो CLI प्रक्रिया को Gateway टूल उपलब्ध कराता है और केवल वर्तमान निष्पादन प्रयास के लिए सक्रिय प्रति-रन संदर्भ अनुदान (`OPENCLAW_MCP_TOKEN`) से प्रमाणीकृत होता है;
+- चाइल्ड-प्रोसेस हेडर पर भरोसा करने के बजाय, टूल एक्सेस को Gateway द्वारा चयनित सत्र, खाते और चैनल संदर्भ से बाँधता है;
+- वर्तमान कार्यस्थान के लिए सक्षम बंडल-MCP सर्वर लोड करता है और उन्हें किसी भी मौजूदा बैकएंड MCP कॉन्फ़िगरेशन/सेटिंग आकार के साथ मर्ज करता है;
+- स्वामी Plugin से प्राप्त बैकएंड-स्वामित्व वाले एकीकरण मोड का उपयोग करके लॉन्च कॉन्फ़िगरेशन को पुनर्लिखता है।
 
-- एक loopback HTTP MCP server spawn करता है जो CLI process को gateway tools expose करता है
-- per-session token (`OPENCLAW_MCP_TOKEN`) के साथ bridge को authenticate करता है
-- tool access को current session, account, और channel context तक scope करता है
-- current workspace के लिए enabled bundle-MCP servers load करता है
-- उन्हें किसी भी existing backend MCP config/settings shape के साथ merge करता है
-- owning extension से backend-owned integration mode का उपयोग करके launch config rewrite करता है
+cron जॉब जैसे प्रतिबंधित रन, जिनमें `toolsAllow` होता है, के लिए बैकएंड के स्वामित्व वाला सटीक
+अनुवाद आवश्यक है। बंडल किया गया `claude-cli` बैकएंड Claude के
+मूल टूल और उपयोगकर्ता, प्रोजेक्ट तथा स्थानीय अनुकूलनों को अक्षम करता है, जिनमें हुक,
+plugins, एजेंट, skills और `CLAUDE.md` शामिल हैं। इसके बाद यह अनुदान-स्कोप वाले MCP सर्वर के माध्यम से प्रत्येक अनुमत
+OpenClaw टूल उपलब्ध कराता है। इससे फ़ाइल सिस्टम,
+प्रोसेस, exec, अनुमोदन और सैंडबॉक्स नीति OpenClaw के भीतर रहती है और
+Claude के मूल टूल या अनुकूलन प्रोसेस को अधिक अधिकार नहीं मिलते। यही MCP
+सूची Claude के जनरेट किए गए कॉन्फ़िगरेशन में और Gateway द्वारा टूल
+सूचीकरण तथा निष्पादन के समय फिर से लागू की जाती है। अनुदान जारी करने से पहले, कोर ऐसे बैकएंड
+अनुवादों को अस्वीकार करता है जो मूल अनुमति-सूची से बाहर की किसी MCP अनुमति का नाम देते हैं।
+सटीक अनुवाद के बिना बैकएंड अब भी सुरक्षित रूप से विफल होते हैं।
 
-यदि कोई MCP server enabled नहीं है, तो OpenClaw तब भी strict config inject करता है जब कोई
-बैकएंड bundle MCP में opt in करता है ताकि background runs isolated रहें।
+यदि कोई MCP सर्वर सक्षम नहीं है, तब भी जब कोई बैकएंड बंडल MCP का विकल्प चुनता है तो OpenClaw एक सख्त कॉन्फ़िगरेशन प्रविष्ट करता है, ताकि पृष्ठभूमि रन अलग-थलग रहें।
 
-Session-scoped bundled MCP runtimes को session के भीतर reuse के लिए cache किया जाता है, फिर
-`mcp.sessionIdleTtlMs` milliseconds के idle time के बाद reap किया जाता है (डिफ़ॉल्ट 10
-minutes; disable करने के लिए `0` सेट करें)। Auth probes,
-slug generation, और active-memory recall जैसे one-shot embedded runs run end पर cleanup request करते हैं ताकि stdio
-children और Streamable HTTP/SSE streams run से अधिक समय तक जीवित न रहें।
+सत्र-स्कोप वाले बंडल MCP रनटाइम को एक सत्र के भीतर पुनः उपयोग के लिए कैश किया जाता है, फिर 10 मिनट तक निष्क्रिय रहने के बाद हटा दिया जाता है। प्रमाणीकरण जाँच, स्लग जनरेशन और Active Memory रिकॉल जैसे एकबारगी एम्बेडेड रन, रन समाप्त होने पर क्लीनअप का अनुरोध करते हैं, ताकि stdio चाइल्ड और Streamable HTTP/SSE स्ट्रीम रन के बाद भी सक्रिय न रहें।
 
-## Reseed history cap
+`claude-cli` के लिए, चयनित या क्रमबद्ध संगत OpenClaw OAuth/टोकन प्रोफ़ाइल
+उस Claude चाइल्ड को अग्रेषित की जाती है। इससे उस टर्न के लिए प्रति-एजेंट प्रोफ़ाइल प्रामाणिक स्रोत बनती हैं,
+जबकि कोई संगत प्रोफ़ाइल मौजूद न होने पर Claude का मूल होस्ट लॉगिन बरकरार रहता है।
 
-जब कोई fresh CLI session किसी पिछले OpenClaw transcript से seed किया जाता है (उदाहरण के लिए
-`session_expired` retry के बाद), तो rendered
-`<conversation_history>` block को cap किया जाता है ताकि reseed prompts
-बेकाबू न बढ़ें। डिफ़ॉल्ट `12288` characters है (लगभग 3000 tokens)।
+## पुनः सीड किए गए इतिहास की सीमा
 
-Claude CLI बैकएंड resolved
-Claude context tier से निकली बड़ी cap स्वतः उपयोग करते हैं। Standard 200K-token Claude runs बड़ा transcript
-slice रखते हैं, और 1M-token Claude runs उससे भी बड़ा slice रखते हैं, जबकि अन्य CLI
-बैकएंड conservative default रखते हैं।
+जब किसी नई CLI सत्र को पूर्व OpenClaw ट्रांसक्रिप्ट से सीड किया जाता है (उदाहरण के लिए `session_expired` पुनः प्रयास के बाद), तो रेंडर किए गए `<conversation_history>` ब्लॉक को सीमित किया जाता है, ताकि पुनः सीड प्रॉम्प्ट अनियंत्रित रूप से बड़े न हों। डिफ़ॉल्ट सीमा 12,288 वर्ण (लगभग 3,000 टोकन) है।
 
-- cap केवल reseed prompt के prior-history block को नियंत्रित करता है। Live-session
-  output limits को `reliability.outputLimits` के अंतर्गत अलग से tune किया जाता है
-  (देखें [Sessions](#sessions))।
+इसके बजाय Claude CLI बैकएंड इस सीमा को समाधान किए गए Claude कॉन्टेक्स्ट विंडो के अनुसार स्केल करते हैं: बड़े कॉन्टेक्स्ट विंडो को पूर्व इतिहास का बड़ा अंश मिलता है, जो एक निश्चित अधिकतम सीमा तक होता है; अन्य CLI बैकएंड सावधानीपूर्ण डिफ़ॉल्ट बनाए रखते हैं। यह सीमा केवल पुनः सीड प्रॉम्प्ट के पूर्व-इतिहास ब्लॉक को नियंत्रित करती है।
 
-## सीमाएं
+## सीमाएँ
 
-- **सीधे OpenClaw tool calls नहीं।** OpenClaw
-  CLI बैकएंड protocol में tool calls inject नहीं करता। बैकएंड gateway tools केवल तब देखते हैं जब वे
-  `bundleMcp: true` में opt in करते हैं।
-- **Streaming बैकएंड-विशिष्ट है।** कुछ बैकएंड JSONL stream करते हैं; अन्य exit तक
-  buffer करते हैं।
-- **Structured outputs** CLI के JSON format पर निर्भर करते हैं।
+- OpenClaw, CLI बैकएंड प्रोटोकॉल में टूल कॉल प्रविष्ट नहीं करता। बैकएंड को Gateway टूल केवल तभी दिखाई देते हैं, जब वे `bundleMcp: true` का विकल्प चुनते हैं।
+- स्ट्रीमिंग बैकएंड-विशिष्ट है: कुछ बैकएंड JSONL स्ट्रीम करते हैं, जबकि अन्य बाहर निकलने तक बफ़र करते हैं।
+- संरचित आउटपुट CLI के अपने JSON फ़ॉर्मैट पर निर्भर करते हैं।
 
 ## समस्या निवारण
 
-- **CLI नहीं मिला**: `command` को full path पर सेट करें।
-- **गलत model name**: `provider/model` → CLI model map करने के लिए `modelAliases` का उपयोग करें।
-- **Session continuity नहीं है**: सुनिश्चित करें कि `sessionArg` सेट है और `sessionMode`
-  `none` नहीं है।
-- **Images ignore हो रही हैं**: `imageArg` सेट करें (और verify करें कि CLI file paths support करता है)।
+| लक्षण                  | समाधान                                                                                           |
+| --------------------- | ---------------------------------------------------------------------------------------------- |
+| CLI नहीं मिली         | CLI को Gateway सेवा के `PATH` पर रखें, या स्वामी plugin की पंजीकृत कमांड अपडेट करें। |
+| मॉडल का गलत नाम       | plugin की `modelAliases` मैपिंग अपडेट करें।                                                    |
+| सत्र निरंतरता नहीं है | plugin के `sessionArgs` और `sessionMode` की जाँच करें।                                            |
+| छवियाँ अनदेखी हुईं    | plugin के `imageArg` और CLI के फ़ाइल-पथ समर्थन की जाँच करें।                                 |
 
 ## संबंधित
 
-- [Gateway runbook](/hi/gateway)
-- [Local models](/hi/gateway/local-models)
+- [Gateway रनबुक](/hi/gateway)
+- [स्थानीय मॉडल](/hi/gateway/local-models)

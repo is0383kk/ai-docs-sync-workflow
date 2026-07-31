@@ -1,12 +1,13 @@
 ---
 read_when:
-    - Estás instalando, configurando o auditando el plugin Bonjour
+    - Se está instalando, configurando o auditando el plugin bonjour
 summary: Anuncia el Gateway local de OpenClaw mediante Bonjour/mDNS.
 title: Plugin Bonjour
 x-i18n:
-    generated_at: "2026-07-11T23:19:35Z"
+    generated_at: "2026-07-26T05:21:41Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: fcd64530e5eabfe7b49ef4a297fffb9790cc9ccd698457b34cbf629ecd0c2db0
     source_path: plugins/reference/bonjour.md
@@ -20,7 +21,7 @@ Anuncia el Gateway local de OpenClaw mediante Bonjour/mDNS.
 ## Distribución
 
 - Paquete: `@openclaw/bonjour`
-- Método de instalación: incluido en OpenClaw
+- Ruta de instalación: incluido en OpenClaw
 
 ## Superficie
 

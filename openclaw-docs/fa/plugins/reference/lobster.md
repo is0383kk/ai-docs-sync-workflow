@@ -1,21 +1,22 @@
 ---
 read_when:
-    - شما در حال نصب، پیکربندی یا ممیزی Plugin لابستر هستید
+    - در حال نصب، پیکربندی یا ممیزی Plugin مربوط به Lobster هستید
 summary: Plugin ابزار گردش‌کار Lobster برای پایپ‌لاین‌های نوع‌دار و تأییدهای قابل‌ازسرگیری.
-title: Plugin خرچنگ دریایی
+title: Plugin Lobster
 x-i18n:
-    generated_at: "2026-07-12T10:31:12Z"
+    generated_at: "2026-07-27T15:55:52Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b91ea189fe8339380e2a7ef8a8761ea1591e1f1d8459b4a554211128c33f338b
+    source_hash: 7e3a1dce5531ba71bfe56f06b61e05612d6d155a63e61e1d496a0e1e25338926
     source_path: plugins/reference/lobster.md
     workflow: 16
 ---
 
 # Plugin Lobster
 
-Plugin ابزار گردش‌کار Lobster برای پایپ‌لاین‌های نوع‌دار و تأییدهای ازسرگرفتنی.
+Plugin ابزار گردش کار Lobster برای پایپ‌لاین‌های نوع‌دار و تأییدهای ازسرگرفتنی.
 
 ## توزیع
 
@@ -24,4 +25,4 @@ Plugin ابزار گردش‌کار Lobster برای پایپ‌لاین‌ها�
 
 ## سطح
 
-قراردادها: ابزارها
+قراردادها: `tools`

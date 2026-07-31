@@ -1,21 +1,22 @@
 ---
 read_when:
-    - Doctor migrasyonları ekleme veya değiştirme
-    - Geriye dönük uyumsuz config değişiklikleri sunma
+    - Doctor geçişleri ekleme veya değiştirme
+    - Geriye dönük uyumluluğu bozan yapılandırma değişikliklerinin kullanıma sunulması
 sidebarTitle: Doctor
-summary: 'Doctor komutu: sağlık kontrolleri, yapılandırma geçişleri ve onarım adımları'
+summary: 'Doctor komutu: sistem durumu kontrolleri, yapılandırma geçişleri ve onarım adımları'
 title: Doktor
 x-i18n:
-    generated_at: "2026-06-28T00:34:24Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T23:59:10Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: fdb5e3fb437a8678c427dee698a0ea6004b22b71c6e38cc6f75ba674fa4fcc5e
+    source_hash: 3f599553a2455759cd0fe56bafbc16948f7ab4d381d344b08a496bf19c9dc636
     source_path: gateway/doctor.md
     workflow: 16
 ---
 
-`openclaw doctor`, OpenClaw için onarım + geçiş aracıdır. Bayat yapılandırma/durumu düzeltir, sağlığı denetler ve uygulanabilir onarım adımları sağlar.
+`openclaw doctor`, OpenClaw için onarım ve geçiş aracıdır. Eski yapılandırmayı/durumu düzeltir, sistem sağlığını denetler ve uygulanabilir onarım adımları sunar.
 
 ## Hızlı başlangıç
 
@@ -31,7 +32,7 @@ openclaw doctor
     openclaw doctor --yes
     ```
 
-    Varsayılanları sormadan kabul et (geçerli olduğunda yeniden başlatma/hizmet/sandbox onarım adımları dahil).
+    Sormadan varsayılanları kabul eder (uygun olduğunda yeniden başlatma/hizmet/sandbox onarım adımları dahil).
 
   </Tab>
   <Tab title="--fix">
@@ -39,7 +40,7 @@ openclaw doctor
     openclaw doctor --fix
     ```
 
-    Önerilen onarımları sormadan uygula (güvenli olduğunda onarımlar + yeniden başlatmalar).
+    Önerilen onarımları sormadan uygular (`--repair` bir diğer addır).
 
   </Tab>
   <Tab title="--lint">
@@ -48,9 +49,8 @@ openclaw doctor
     openclaw doctor --lint --json
     ```
 
-    CI veya ön kontrol otomasyonu için yapılandırılmış sağlık denetimleri çalıştır. Bu mod
-    salt okunurdur: sormaz, onarmaz, yapılandırmayı taşımaz, hizmetleri yeniden başlatmaz veya
-    duruma dokunmaz.
+    CI veya ön kontrol otomasyonu için yapılandırılmış sistem sağlığı denetimleri çalıştırır. Salt okunurdur:
+    istem, onarım, geçiş, yeniden başlatma veya durum yazma işlemi yapmaz.
 
   </Tab>
   <Tab title="--fix --force">
@@ -58,7 +58,7 @@ openclaw doctor
     openclaw doctor --fix --force
     ```
 
-    Agresif onarımları da uygula (özel supervisor yapılandırmalarının üzerine yazar).
+    Agresif onarımları da uygular (özel denetleyici yapılandırmalarının üzerine yazar).
 
   </Tab>
   <Tab title="--non-interactive">
@@ -66,7 +66,9 @@ openclaw doctor
     openclaw doctor --non-interactive
     ```
 
-    Komutları sormadan çalıştır ve yalnızca güvenli geçişleri uygula (yapılandırma normalleştirme + disk üzerindeki durum taşıma işlemleri). İnsan onayı gerektiren yeniden başlatma/hizmet/sandbox eylemlerini atlar. Eski durum geçişleri algılandığında otomatik çalışır.
+    Sormadan çalışır ve yalnızca güvenli geçişleri uygular (yapılandırma normalleştirmesi +
+    disk üzerindeki durum taşıma işlemleri). İnsan onayı gerektiren yeniden başlatma/hizmet/sandbox
+    eylemlerini atlar. Eski durum geçişleri algılandığında yine otomatik olarak çalışır.
 
   </Tab>
   <Tab title="--deep">
@@ -74,12 +76,12 @@ openclaw doctor
     openclaw doctor --deep
     ```
 
-    Ek gateway kurulumları için sistem hizmetlerini tara (launchd/systemd/schtasks).
+    Ek Gateway kurulumları için sistem hizmetlerini tarar (launchd/systemd/schtasks).
 
   </Tab>
 </Tabs>
 
-Yazmadan önce değişiklikleri incelemek istiyorsan önce yapılandırma dosyasını aç:
+Yazmadan önce değişiklikleri incelemek için önce yapılandırma dosyasını açın:
 
 ```bash
 cat ~/.openclaw/openclaw.json
@@ -87,26 +89,40 @@ cat ~/.openclaw/openclaw.json
 
 ## Salt okunur lint modu
 
-`openclaw doctor --lint`, `openclaw doctor --fix` komutunun otomasyon dostu
-kardeşidir. İkisi de doctor sağlık denetimlerini kullanır, ancak duruşları
-farklıdır:
+`openclaw doctor --lint`, `openclaw doctor --fix` aracının otomasyona uygun kardeşidir.
+Aynı Doctor kural kayıt defterini paylaşırlar ancak kuralları aynı şekilde
+seçmez veya uygulamazlar:
 
-| Mod                      | Sorular   | Yapılandırma/durum yazar | Çıktı                         | Bunun için kullan              |
-| ------------------------ | --------- | ------------------------ | ----------------------------- | ------------------------------ |
-| `openclaw doctor`        | evet      | hayır                    | kullanıcı dostu sağlık raporu | durumu denetleyen bir insan    |
-| `openclaw doctor --fix`  | bazen     | evet, onarım ilkesiyle   | kullanıcı dostu onarım günlüğü | onaylı onarımları uygulama     |
-| `openclaw doctor --lint` | hayır     | hayır                    | yapılandırılmış bulgular      | CI, ön kontrol ve inceleme kapıları |
+| Mod                      | İstemler       | Yapılandırma/durum yazma | Çıktı                      | Kullanım amacı                         |
+| ------------------------ | -------------- | ------------------------ | -------------------------- | -------------------------------------- |
+| `openclaw doctor`       | evet           | hayır                    | anlaşılır sistem sağlığı raporu | bir kişinin durumu denetlemesi     |
+| `openclaw doctor --fix`       | bazen          | evet, onarım ilkesiyle   | anlaşılır onarım günlüğü   | onaylanmış onarımları uygulama          |
+| `openclaw doctor --lint`       | hayır          | hayır                    | yapılandırılmış bulgular   | CI, ön kontrol ve inceleme kapıları     |
 
-Modernleştirilmiş sağlık denetimleri isteğe bağlı bir `repair()` uygulaması
-sağlayabilir. `doctor --fix`, bu onarımlar mevcut olduğunda uygular ve henüz
-taşınmamış denetimler için mevcut doctor onarım akışını kullanmaya devam eder.
-Yapılandırılmış onarım sözleşmesi, onarım raporlamasını algılamadan da ayırır:
-`detect()` mevcut bulguları bildirirken `repair()` değişiklikleri,
-yapılandırma/dosya farklarını ve dosya dışı yan etkileri bildirebilir. Bu,
-lint denetimlerinin mutasyon planlamasına neden olmadan gelecekteki
-`doctor --fix --dry-run` ve fark çıktısı için geçiş yolunu açık tutar.
+Varsayılan `doctor --lint`, geniş ve güvenli otomasyon profilini çalıştırır:
+statik, yerel ve CI ya da ön kontrol çıktısında yararlı olan denetimler. İsteğe
+bağlı danışmanlık denetimlerini, ortama duyarlı denetimleri, canlı hizmete bağlı
+denetimleri, hesap/çalışma alanı envanterini ve geçmiş temizliğini atlar. Bu isteğe
+bağlı denetimler dahil kayıtlı lint denetiminin tamamını istediğinizde
+`doctor --lint --all`, hedefli bir denetim içinse `--only <id>` kullanın.
 
-Örnekler:
+`doctor --fix`, lint varsayılan profilini kullanmaz ve
+`--all` kabul etmez. Doctor'ın sıralı onarım yolunu çalıştırır: modern
+sistem sağlığı denetimleri isteğe bağlı bir `repair()` uygulaması
+sağlayabilirken eski alanlar hâlâ eski Doctor onarım akışını kullanır. Bazı lint
+bulguları kasıtlı olarak yalnızca tanılama amaçlıdır; dolayısıyla bir denetimin
+`--lint --all` içinde görünmesi, `--fix` aracının o alanı
+değiştireceği anlamına gelmez. Sözleşme, `detect()` (bulguları bildirir)
+ile `repair()` (değişiklikleri/farkları/yan etkileri bildirir) öğelerini
+birbirinden ayırır. Böylece lint denetimlerini değişiklik planlayıcılarına
+dönüştürmeden gelecekteki bir `doctor --fix --dry-run` için yol açık tutulur.
+
+Bazı yerleşik denetimler, varsayılan `doctor --lint` otomasyon profilinin
+parçası hâline gelmeden `--all`, `--only` ve Doctor onarım
+akışlarında kullanılabilmeleri için dahili olarak varsayılan biçimde devre dışıdır.
+Bulgu önem derecesi yine her bulgu için yayınlanır (`info`,
+`warning` veya `error`); varsayılan seçim bir önem derecesi
+değildir.
 
 ```bash
 openclaw doctor --lint
@@ -116,468 +132,501 @@ openclaw doctor --lint --all
 openclaw doctor --lint --only core/doctor/gateway-config --json
 ```
 
-JSON çıktısı şunları içerir:
+JSON çıktı alanları:
 
-- `ok`: seçilen önem eşiğini karşılayan görünür bir bulgu olup olmadığı
-- `checksRun`: yürütülen sağlık denetimi sayısı
-- `checksSkipped`: seçilen profil, `--only` veya `--skip` tarafından atlanan denetimler
-- `findings`: `checkId`, `severity`, `message` ve isteğe bağlı `path`, `line`,
-  `column`, `ocPath` ve `fixHint` içeren yapılandırılmış tanı bilgileri
+- `ok`: herhangi bir bulgunun seçilen önem derecesi eşiğini karşılayıp karşılamadığı
+- `checksRun` / `checksSkipped`: sayılar (profil, `--only` veya `--skip` nedeniyle atlananlar)
+- `findings`: `checkId`, `severity`, `message` ile isteğe bağlı `path`, `line`, `column`, `ocPath`, `source`, `target`, `requirement`, `fixHint` içeren yapılandırılmış tanılamalar
 
 Çıkış kodları:
 
-- `0`: seçilen eşikte veya üzerinde bulgu yok
-- `1`: bir veya daha fazla bulgu seçilen eşiği karşıladı
-- `2`: lint bulguları üretilemeden önce komut/çalışma zamanı hatası
+| Kod | Anlamı                                                          |
+| --- | --------------------------------------------------------------- |
+| `0` | seçilen eşikte veya üzerinde bulgu yok                           |
+| `1` | bir veya daha fazla bulgu seçilen eşiği karşıladı                |
+| `2` | bulgular yayınlanamadan önce komut/çalışma zamanı hatası oluştu   |
 
-Hem neyin yazdırılacağını hem de neyin sıfır olmayan lint çıkışına neden olacağını
-kontrol etmek için `--severity-min info|warning|error` kullan. Varsayılan otomasyon kümesinden hariç tutulan daha derin, isteğe bağlı denetimler dahil olmak üzere eksiksiz lint envanterini çalıştırmak için `--all` kullan. Dar ön kontrol kapıları için `--only <id>` ve
-lint çalışmasının geri kalanını etkin tutarken gürültülü bir denetimi geçici olarak hariç tutmak için
-`--skip <id>` kullan.
-`--json`, `--severity-min`, `--all`, `--only` ve `--skip` gibi lint çıktısı
-seçenekleri `--lint` ile eşleştirilmelidir; normal doctor ve onarım çalışmaları
-bunları reddeder.
+Bayraklar:
 
-## Ne yapar (özet)
+- `--severity-min info|warning|error` (varsayılan `warning`): hem neyin yazdırılacağını hem de neyin sıfır dışı çıkışa neden olacağını belirler.
+- `--all`: varsayılan otomasyon kümesinin dışında tutulan isteğe bağlı denetimler dahil kayıtlı tüm lint denetimlerini çalıştırır.
+- `--only <id>` (tekrarlanabilir): yalnızca belirtilen denetim kimliklerini çalıştırır; bilinmeyen bir kimlik hata bulgusu olarak bildirilir.
+- `--skip <id>` (tekrarlanabilir): çalışmanın geri kalanını etkin tutarken bir denetimi hariç tutar.
+- `--json`, `--severity-min`, `--all`, `--only` ve `--skip`, `--lint` gerektirir; düz `openclaw doctor` ve `--fix` çalıştırmaları bunları reddeder.
+
+## Yaptıkları (özet)
 
 <AccordionGroup>
-  <Accordion title="Sağlık, UI ve güncellemeler">
-    - Git kurulumları için isteğe bağlı ön uçuş güncellemesi (yalnızca etkileşimli).
-    - UI protokol güncelliği denetimi (protokol şeması daha yeniyse Control UI yeniden derlenir).
-    - Sağlık denetimi + yeniden başlatma istemi.
-    - Skills durum özeti (uygun/eksik/engellenmiş) ve plugin durumu.
+  <Accordion title="Sistem sağlığı, kullanıcı arayüzü ve güncellemeler">
+    - Git kurulumları için isteğe bağlı ön kontrol güncellemesi (yalnızca etkileşimli).
+    - Kullanıcı arayüzü protokolünün güncellik denetimi (protokol şeması daha yeniyse Control UI yeniden oluşturulur).
+    - Sistem sağlığı denetimi + yeniden başlatma istemi.
+    - Yalnızca sorunlu Skills ve Plugin notları; sağlıklı envanter `openclaw skills check` ve `openclaw plugins list` içinde kalır.
 
   </Accordion>
   <Accordion title="Yapılandırma ve geçişler">
-    - Eski değerler için yapılandırma normalleştirme.
-    - Eski düz `talk.*` alanlarından `talk.provider` + `talk.providers.<provider>` içine Talk yapılandırma geçişi.
+    - Eski değer biçimleri için yapılandırma normalleştirmesi.
+    - Eski düz `talk.*` alanlarından `talk.provider` + `talk.providers.<provider>` biçimine Talk yapılandırması geçişi.
     - Eski Chrome uzantısı yapılandırmaları ve Chrome MCP hazırlığı için tarayıcı geçiş denetimleri.
-    - OpenCode provider geçersiz kılma uyarıları (`models.providers.opencode` / `models.providers.opencode-go`).
-    - Eski OpenAI Codex provider/profil geçişi (`openai-codex` → `openai`) ve bayat `models.providers.openai-codex` için gölgeleme uyarıları.
-    - OpenAI Codex OAuth profilleri için OAuth TLS önkoşulları denetimi.
-    - `plugins.allow` kısıtlayıcıyken araç ilkesi hâlâ joker karakter veya plugin sahipli araçlar istediğinde Plugin/araç allowlist uyarıları.
+    - OpenCode sağlayıcı geçersiz kılma uyarıları (`models.providers.opencode` / `opencode-zen` / `opencode-go`).
+    - Eski OpenAI Codex sağlayıcı/profil geçişi (`openai-codex` → `openai`) ve eski `models.providers.openai-codex` için gölgeleme uyarıları.
+    - OpenAI Codex OAuth profilleri için OAuth TLS ön koşul denetimi.
+    - `plugins.allow` kısıtlayıcıyken araç ilkesi hâlâ joker karakter veya Plugin'e ait araçlar istediğinde Plugin/araç izin listesi uyarıları.
     - Eski disk üzerindeki durum geçişi (oturumlar/agent dizini/WhatsApp kimlik doğrulaması).
-    - Eski plugin manifest sözleşme anahtarı geçişi (`speechProviders`, `realtimeTranscriptionProviders`, `realtimeVoiceProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, `videoGenerationProviders`, `webFetchProviders`, `webSearchProviders` → `contracts`).
-    - Eski cron deposu geçişi (`jobId`, `schedule.cron`, üst düzey teslim/payload alanları, payload `provider`, `notify: true` webhook geri dönüş işleri).
-    - Eski tüm-agent çalışma zamanı ilkesi temizliği; provider/model çalışma zamanı ilkesi etkin rota seçicidir.
-    - Pluginler etkinleştirildiğinde bayat plugin yapılandırması temizliği; `plugins.enabled=false` olduğunda bayat plugin referansları durağan kapsama yapılandırması olarak ele alınır ve korunur.
+    - Eski Plugin manifest sözleşme anahtarı geçişi (`speechProviders`, `realtimeTranscriptionProviders`, `realtimeVoiceProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, `videoGenerationProviders`, `webFetchProviders`, `webSearchProviders` → `contracts`).
+    - Eski Cron deposu geçişi (`jobId`, `schedule.cron`, üst düzey teslim/yük alanları, yük `provider`, `notify: true` Webhook geri dönüş işleri).
+    - `agents.defaults`, `agents.entries.*` ve `models.providers.*` genelinde (model başına girdiler dahil) Codex CLI çalışma zamanı sabitleme onarımı (`agentRuntime.id: "codex-cli"` → `"codex"`).
+    - Plugin'ler etkinleştirildiğinde eski Plugin yapılandırması temizliği; `plugins.enabled=false` olduğunda eski Plugin başvuruları etkisiz çevreleme yapılandırması olarak korunur.
 
   </Accordion>
   <Accordion title="Durum ve bütünlük">
-    - Oturum kilit dosyası incelemesi ve bayat kilit temizliği.
-    - Etkilenen 2026.4.24 derlemeleri tarafından oluşturulan yinelenmiş prompt-yeniden-yazma dalları için oturum transkripti onarımı.
-    - Takılmış subagent yeniden başlatma-kurtarma tombstone algılama; `--fix`, bayat iptal edilmiş kurtarma bayraklarını temizlemeyi destekler, böylece başlangıç çocuğu yeniden başlatma-iptal edilmiş olarak görmeye devam etmez.
+    - Oturum kilit dosyası incelemesi ve eski kilitlerin temizlenmesi.
+    - Etkilenen 2026.4.24 derlemelerinin oluşturduğu yinelenen istem yeniden yazma dalları için oturum transkripti onarımı.
+    - Kilitlenmiş ana oturum ve alt agent yeniden başlatma-kurtarma mezar taşı algılaması. Doctor, engellenen oturumları bildirir ve yalnızca mevcut bir mezar taşıyla çakışan eski iptal işaretlerini onarır; otomatik kurtarmayı yeniden etkinleştirmez.
     - Durum bütünlüğü ve izin denetimleri (oturumlar, transkriptler, durum dizini).
-    - Yerel çalışırken yapılandırma dosyası izin denetimleri (chmod 600).
-    - Model kimlik doğrulama sağlığı: OAuth süresinin dolmasını denetler, süresi dolmak üzere olan tokenları yenileyebilir ve kimlik doğrulama profili cooldown/devre dışı durumlarını bildirir.
+    - Yerel olarak çalışırken yapılandırma dosyası izin denetimleri (chmod 600).
+    - Model kimlik doğrulaması sağlığı: OAuth süresinin dolmasını denetler, süresi dolmak üzere olan token'ları yenileyebilir ve kimlik doğrulama profili bekleme süresi/devre dışı durumlarını bildirir.
 
   </Accordion>
-  <Accordion title="Gateway, hizmetler ve supervisorlar">
+  <Accordion title="Gateway, hizmetler ve denetleyiciler">
     - Sandbox etkinleştirildiğinde sandbox imajı onarımı.
-    - Eski hizmet geçişi ve ek gateway algılama.
-    - Matrix kanalı eski durum geçişi (`--fix` / `--repair` modunda).
-    - Gateway çalışma zamanı denetimleri (hizmet kurulu ama çalışmıyor; önbelleğe alınmış launchd etiketi).
-    - Kanal durum uyarıları (çalışan gateway üzerinden yoklanır).
+    - Eski hizmet geçişi ve ek Gateway algılama.
+    - Matrix kanalının eski durum geçişi (`--fix` / `--repair` modunda).
+    - Gateway çalışma zamanı denetimleri (hizmet kurulu ancak çalışmıyor; önbelleğe alınmış launchd etiketi).
+    - Kanal durumu uyarıları (çalışan Gateway üzerinden yoklanır).
     - Kanala özgü izin denetimleri `openclaw channels capabilities` altında bulunur; örneğin Discord ses kanalı izinleri `openclaw channels capabilities --channel discord --target channel:<channel-id>` ile denetlenir.
-    - Yerel TUI istemcileri hâlâ çalışırken bozulmuş Gateway event-loop sağlığı için WhatsApp yanıt verebilirlik denetimleri; `--fix` yalnızca doğrulanmış yerel TUI istemcilerini durdurur.
-    - Birincil modellerde, geri dönüşlerde, görüntü/video üretim modellerinde, heartbeat/subagent/compaction geçersiz kılmalarında, hooklarda, kanal model geçersiz kılmalarında ve oturum rota sabitlemelerinde eski `openai-codex/*` model refleri için Codex rota onarımı; `--fix` bunları `openai/*` olarak yeniden yazar, `openai-codex:*` kimlik doğrulama profillerini/sırasını `openai:*` içine taşır, bayat oturum/tüm-agent çalışma zamanı sabitlemelerini kaldırır ve kanonik OpenAI agent reflerini varsayılan Codex harness üzerinde bırakır.
-    - İsteğe bağlı onarımla supervisor yapılandırma denetimi (launchd/systemd/schtasks).
-    - Kurulum veya güncelleme sırasında kabuk `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` değerlerini yakalayan gateway hizmetleri için gömülü proxy ortam temizliği.
-    - Gateway çalışma zamanı en iyi uygulama denetimleri (Node ve Bun, sürüm yöneticisi yolları).
-    - Gateway port çakışması tanıları (varsayılan `18789`).
+    - Yerel TUI istemcileri hâlâ çalışırken bozulmuş Gateway olay döngüsü sağlığı için WhatsApp yanıt verebilirlik denetimleri; `--fix` yalnızca doğrulanmış yerel TUI istemcilerini durdurur.
+    - Birincil modeller, geri dönüşler, görüntü/video oluşturma modelleri, Heartbeat/alt agent/Compaction geçersiz kılmaları, hook'lar, kanal modeli geçersiz kılmaları ve oturum rota sabitlemelerindeki eski `openai-codex/*` model başvuruları için Codex rota onarımı; `--fix` bunları `openai/*` olarak yeniden yazar, `openai-codex:*` kimlik doğrulama profillerini/sırasını `openai:*` biçimine geçirir, eski oturum/tüm agent çalışma zamanı sabitlemelerini kaldırır ve onarılan etkin rotanın Codex'in uyumlu olup olmadığını belirlemesini sağlar.
+    - İsteğe bağlı onarımla denetleyici yapılandırması denetimi (launchd/systemd/schtasks).
+    - Kurulum veya güncelleme sırasında kabuk `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` değerlerini yakalayan Gateway hizmetleri için gömülü proxy ortamı temizliği.
+    - Gateway çalışma zamanı denetimleri (desteklenmeyen eski Bun hizmetleri, sürüm yöneticisi yolları).
+    - Gateway bağlantı noktası çakışması tanılamaları (varsayılan `18789`).
 
   </Accordion>
-  <Accordion title="Kimlik doğrulama, güvenlik ve eşleme">
+  <Accordion title="Kimlik doğrulama, güvenlik ve eşleştirme">
     - Açık DM ilkeleri için güvenlik uyarıları.
-    - Yerel token modu için Gateway kimlik doğrulama denetimleri (token kaynağı yoksa token üretimi önerir; token SecretRef yapılandırmalarının üzerine yazmaz).
-    - Cihaz eşleme sorun algılama (bekleyen ilk kez eşleme istekleri, bekleyen rol/kapsam yükseltmeleri, bayat yerel cihaz-token önbellek sapması ve eşlenmiş kayıt kimlik doğrulama sapması).
+    - Yerel token modu için Gateway kimlik doğrulama denetimleri (token kaynağı yoksa token oluşturmayı önerir; token SecretRef yapılandırmalarının üzerine yazmaz).
+    - Cihaz eşleştirme sorunu algılama (bekleyen ilk eşleştirme istekleri, bekleyen rol/kapsam yükseltmeleri, eski yerel cihaz token'ı önbelleği sapması ve eşleştirilmiş kayıt kimlik doğrulama sapması).
 
   </Accordion>
   <Accordion title="Çalışma alanı ve kabuk">
-    - Linux üzerinde systemd linger denetimi.
-    - Çalışma alanı bootstrap dosya boyutu denetimi (bağlam dosyaları için kesilme/sınıra yakın uyarıları).
-    - Varsayılan agent için Skills hazırlık denetimi; eksik binary, env, yapılandırma veya OS gereksinimleri olan izin verilmiş skills bildirir ve `--fix`, kullanılamayan skills öğelerini `skills.entries` içinde devre dışı bırakabilir.
-    - Kabuk tamamlama durum denetimi ve otomatik kurulum/yükseltme.
-    - Bellek araması embedding provider hazırlık denetimi (yerel model, uzak API anahtarı veya QMD binary).
-    - Kaynak kurulum denetimleri (pnpm çalışma alanı uyumsuzluğu, eksik UI varlıkları, eksik tsx binary).
-    - Güncellenmiş yapılandırma + sihirbaz meta verisi yazar.
+    - Linux'ta systemd linger denetimi.
+    - Çalışma alanı önyükleme dosyası boyutu denetimi (bağlam dosyaları için kesilme/sınıra yaklaşma uyarıları).
+    - Varsayılan agent için Skills hazırlık denetimi; eksik ikili dosya, ortam, yapılandırma veya işletim sistemi gereksinimleri bulunan izin verilmiş Skills öğelerini bildirir ve `--fix`, `skills.entries` içindeki kullanılamayan Skills öğelerini devre dışı bırakabilir.
+    - Kabuk tamamlama durumu denetimi ve otomatik kurulum/yükseltme.
+    - Bellek araması gömme sağlayıcısı hazırlık denetimi (yerel model, uzak API anahtarı veya QMD ikili dosyası).
+    - Kaynak kurulum denetimleri (pnpm çalışma alanı uyuşmazlığı, eksik kullanıcı arayüzü varlıkları, eksik tsx ikili dosyası).
+    - Güncellenmiş yapılandırmayı + sihirbaz meta verilerini yazar.
 
   </Accordion>
 </AccordionGroup>
 
-## Dreams UI geri doldurma ve sıfırlama
+## Dreams kullanıcı arayüzü geriye dönük doldurma ve sıfırlama
 
-Control UI Dreams sahnesi, grounded dreaming iş akışı için **Geri doldur**, **Sıfırla** ve **Grounded Temizle** eylemlerini içerir. Bu eylemler gateway doctor tarzı RPC yöntemlerini kullanır, ancak `openclaw doctor` CLI onarımı/geçişinin parçası **değildir**.
+  Control UI Dreams sahnesi, grounded dreaming iş akışı için **Geri Doldur**, **Sıfırla** ve **Grounded Verileri Temizle** eylemlerini içerir. Bunlar Gateway doctor tarzı RPC yöntemlerini kullanır ancak `openclaw doctor` CLI onarımının/geçişinin parçası **değildir**.
 
-Ne yaparlar:
+  | Eylem                    | Yaptığı işlem                                                                                                                                                                                    |
+  | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Geri Doldur              | Etkin çalışma alanındaki geçmiş `memory/YYYY-MM-DD.md` dosyalarını tarar, grounded REM günlük geçişini çalıştırır ve geri alınabilir geri doldurma girdilerini `DREAMS.md` içine yazar.          |
+  | Sıfırla                  | Yalnızca işaretlenmiş geri doldurma günlük girdilerini `DREAMS.md` içinden kaldırır.                                                                                                      |
+  | Grounded Verileri Temizle | Yalnızca geçmiş yeniden oynatmadan gelen, henüz canlı hatırlama veya günlük destek biriktirmemiş, aşamalandırılmış ve yalnızca grounded olan kısa süreli girdileri kaldırır.                       |
 
-- **Geri doldur**, etkin çalışma alanındaki geçmiş `memory/YYYY-MM-DD.md` dosyalarını tarar, grounded REM günlük geçişini çalıştırır ve geri alınabilir geri doldurma girdilerini `DREAMS.md` içine yazar.
-- **Sıfırla**, yalnızca işaretlenmiş geri doldurma günlük girdilerini `DREAMS.md` dosyasından kaldırır.
-- **Grounded Temizle**, yalnızca geçmiş yeniden oynatmadan gelen ve henüz canlı hatırlama veya günlük destek biriktirmemiş aşamalanmış yalnızca-grounded kısa vadeli girdileri kaldırır.
+  Bunların hiçbiri `MEMORY.md` üzerinde değişiklik yapmaz, tam doctor geçişlerini çalıştırmaz veya grounded adaylarını kendiliğinden canlı kısa süreli yükseltme deposunda aşamalandırmaz. Grounded geçmiş yeniden oynatmayı normal derin yükseltme hattına beslemek için bunun yerine CLI akışını kullanın:
 
-Kendi başlarına **yapmadıkları** şeyler:
+  ```bash
+  openclaw memory rem-backfill --path ./memory --stage-short-term
+  ```
 
-- `MEMORY.md` dosyasını düzenlemezler
-- tam doctor geçişlerini çalıştırmazlar
-- aşamalanmış CLI yolunu açıkça önce çalıştırmadığın sürece grounded adayları canlı kısa vadeli promotion deposuna otomatik olarak aşamalamazlar
+  Bu işlem, grounded kalıcı adayları kısa süreli dreaming deposunda aşamalandırırken `DREAMS.md` inceleme yüzeyi olarak kalır.
 
-Grounded geçmiş yeniden oynatmanın normal deep promotion hattını etkilemesini istiyorsan bunun yerine CLI akışını kullan:
+  ## Ayrıntılı davranış ve gerekçe
 
-```bash
-openclaw memory rem-backfill --path ./memory --stage-short-term
-```
-
-Bu, `DREAMS.md` dosyasını inceleme yüzeyi olarak tutarken grounded kalıcı adayları kısa vadeli dreaming deposuna aşamalar.
-
-## Ayrıntılı davranış ve gerekçe
-
-<AccordionGroup>
+  <AccordionGroup>
   <Accordion title="0. İsteğe bağlı güncelleme (git kurulumları)">
-    Bu bir git checkout ise ve doctor etkileşimli çalışıyorsa, doctor çalışmadan önce güncelleme (fetch/rebase/build) yapmayı önerir.
+    Bu bir git çalışma kopyasıysa ve doctor etkileşimli olarak çalışıyorsa doctor çalıştırılmadan önce güncelleme (fetch/rebase/build) önerir.
   </Accordion>
-  <Accordion title="1. Yapılandırma normalleştirme">
-    Yapılandırma eski değer şekilleri içeriyorsa (örneğin kanala özgü geçersiz kılma olmadan `messages.ackReaction`), doctor bunları mevcut şemaya normalleştirir.
+  <Accordion title="1. Yapılandırma normalleştirmesi">
+    Doctor, eski değer biçimlerini geçerli şemaya normalleştirir. Geçerli Talk konuşma yapılandırması `talk.provider` + `talk.providers.<provider>` biçimindedir ve gerçek zamanlı ses yapılandırması `talk.realtime.*` altındadır. Doctor, eski `talk.voiceId` / `talk.voiceAliases` / `talk.modelId` / `talk.outputFormat` / `talk.apiKey` biçimlerini sağlayıcı eşlemesine dönüştürür ve eski üst düzey gerçek zamanlı seçicileri (`talk.mode`, `talk.transport`, `talk.brain`, `talk.model`, `talk.voice`) `talk.realtime` içine yeniden yazar.
 
-    Buna eski Talk düz alanları da dahildir. Mevcut herkese açık Talk konuşma yapılandırması `talk.provider` + `talk.providers.<provider>`, gerçek zamanlı ses yapılandırması ise `talk.realtime.*` şeklindedir. Doctor, eski `talk.voiceId` / `talk.voiceAliases` / `talk.modelId` / `talk.outputFormat` / `talk.apiKey` şekillerini provider haritasına yeniden yazar ve eski üst düzey gerçek zamanlı seçicileri (`talk.mode`, `talk.transport`, `talk.brain`, `talk.model`, `talk.voice`) `talk.realtime` içine yeniden yazar.
-
-    Doctor ayrıca `plugins.allow` boş değilken ve araç ilkesi joker karakter veya Plugin’e ait araç girdileri kullandığında uyarır. `tools.allow: ["*"]` yalnızca gerçekten yüklenen Plugin’lerden gelen araçlarla eşleşir; özel Plugin izin listesini atlamaz.
+    Doctor ayrıca `plugins.allow` boş değilse ve araç politikası joker karakter veya plugin'e ait araç girdileri kullanıyorsa uyarır. `tools.allow: ["*"]` yalnızca gerçekten yüklenen plugin'lerin araçlarıyla eşleşir; özel plugin izin listesini atlamaz.
 
   </Accordion>
   <Accordion title="2. Eski yapılandırma anahtarı geçişleri">
-    Yapılandırma kullanımdan kaldırılmış anahtarlar içerdiğinde, diğer komutlar çalışmayı reddeder ve sizden `openclaw doctor` çalıştırmanızı ister.
+    Yapılandırma, etkin bir geçişe sahip kullanımdan kaldırılmış bir anahtar içerdiğinde diğer komutlar çalışmayı reddeder ve `openclaw doctor` komutunu çalıştırmanızı ister. Doctor, hangi eski anahtarların bulunduğunu açıklar, uyguladığı geçişi gösterir ve `~/.openclaw/openclaw.json` dosyasını güncellenmiş şemayla yeniden yazar. Gateway başlatma işlemi eski yapılandırma biçimlerini reddeder ve `openclaw doctor --fix` komutunu çalıştırmanızı ister; başlatma sırasında `openclaw.json` dosyasını yeniden yazmaz. Cron işi deposu geçişleri de `openclaw doctor --fix` tarafından işlenir.
 
-    Doctor şunları yapar:
+    <Note>
+      Doctor, bir anahtar kullanımdan kaldırıldıktan sonra yalnızca yaklaşık iki ay
+      boyunca otomatik geçişleri sağlar. Daha eski anahtarların (örneğin özgün
+      `routing.queue`, `routing.bindings`, `routing.agents`/`defaultAgentId`,
+      `routing.transcribeAudio`, üst düzey `agent.*` veya çoklu ajan öncesi
+      yapılandırma biçimindeki üst düzey `identity`) artık bir geçiş yolu
+      yoktur; bunları kullanan yapılandırma artık yeniden yazılmak yerine
+      doğrulamada başarısız olur. Doctor'ın devam edebilmesi için bu anahtarları
+      geçerli yapılandırma referansına göre elle düzeltin.
+    </Note>
 
-    - Hangi eski anahtarların bulunduğunu açıklar.
-    - Uyguladığı geçişi gösterir.
-    - `~/.openclaw/openclaw.json` dosyasını güncellenmiş şemayla yeniden yazar.
+    Etkin geçişler:
 
-    Gateway başlangıcı eski yapılandırma biçimlerini reddeder ve sizden `openclaw doctor --fix` çalıştırmanızı ister; başlangıçta `openclaw.json` dosyasını yeniden yazmaz. Cron iş deposu geçişleri de `openclaw doctor --fix` tarafından işlenir.
+    | Eski anahtar                                                                                    | Geçerli anahtar                                                                 |
+    | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+    | `routing.allowFrom`                                                                              | `channels.whatsapp.allowFrom`                                                |
+    | `routing.groupChat.requireMention`                                                               | `channels.whatsapp/telegram/imessage.groups."*".requireMention`             |
+    | `routing.groupChat.historyLimit`                                                                 | `messages.groupChat.historyLimit`                                            |
+    | `routing.groupChat.mentionPatterns`                                                              | `messages.groupChat.mentionPatterns`                                         |
+    | `channels.telegram.requireMention`                                                               | `channels.telegram.groups."*".requireMention`                               |
+    | `channels.webchat`, `gateway.webchat`                                                            | kaldırıldı (WebChat kullanımdan kaldırıldı)                                                 |
+    | `channels.feishu.accounts.<accountId>.botName`                                                   | `channels.feishu.accounts.<accountId>.name`                                 |
+    | `session.threadBindings.ttlHours`, `channels.<id>.threadBindings.ttlHours` (ve hesap başına)      | `...threadBindings.idleHours`                                               |
+    | eski `talk.voiceId`/`talk.voiceAliases`/`talk.modelId`/`talk.outputFormat`/`talk.apiKey`        | `talk.provider` + `talk.providers.<provider>`                               |
+    | eski üst düzey gerçek zamanlı Talk seçicileri (`talk.mode`/`talk.transport`/`talk.brain`/`talk.model`/`talk.voice`) | `talk.realtime`                                                              |
+    | `messages.tts`                                                                                  | üst düzey `tts`                                                              |
+    | `messages.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`)                             | `tts.providers.<provider>`                                                   |
+    | `messages.tts.provider: "edge"` / `messages.tts.providers.edge`                                  | `tts.provider: "microsoft"` / `tts.providers.microsoft`                    |
+    | `tools.exec.security` + `tools.exec.ask`                                                         | `tools.exec.mode`                                                            |
+    | `session.idleMinutes`                                                                            | `session.reset.idleMinutes`                                                  |
+    | açık kanal bloklarına sahip `messages.responsePrefix`                                           | yapılandırılmış kanal/hesabın `responsePrefix` alanına kopyalandı; örtük/özel kanallar için genel geri dönüş korundu |
+    | `web.enabled`                                                                                    | `channels.whatsapp.enabled`                                                  |
+    | `meta.lastTouchedAt`, kanca kurulumları, cron deposu, paketle birlikte gelen keşif, genel TTS tercihleri yolu            | paylaşılan SQLite durumu                                                       |
+    | TTS konuşmacı alanları `voice`/`voiceName`/`voiceId`                                                 | `speakerVoice`/`speakerVoiceId`                                              |
+    | `channels.<id>.tts.<provider>` / `channels.<id>.accounts.<accountId>.tts.<provider>` (Discord dışındaki tüm kanallar)                                          | `...tts.providers.<provider>`                                                |
+    | `channels.<id>.voice.tts.<provider>` / `channels.<id>.accounts.<accountId>.voice.tts.<provider>` (Discord dahil tüm kanallar)                          | `...voice.tts.providers.<provider>`                                          |
+    | `plugins.entries.voice-call.config.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`)     | `plugins.entries.voice-call.config.tts.providers.<provider>`                |
+    | `plugins.entries.voice-call.config.tts.provider: "edge"` / `...tts.providers.edge`                | `provider: "microsoft"` / `...tts.providers.microsoft`                      |
+    | `plugins.entries.voice-call.config.provider: "log"`                                              | `"mock"`                                                                      |
+    | `plugins.entries.voice-call.config.twilio.from`                                                  | `plugins.entries.voice-call.config.fromNumber`                              |
+    | `plugins.entries.voice-call.config.streaming.sttProvider`                                        | `plugins.entries.voice-call.config.streaming.provider`                      |
+    | `plugins.entries.voice-call.config.streaming.openaiApiKey`/`sttModel`/`silenceDurationMs`/`vadThreshold` | `plugins.entries.voice-call.config.streaming.providers.openai.*`             |
+    | `models.providers.*.api: "openai"`                                                               | `"openai-completions"` (Gateway başlatılırken ayrıca `api` değeri gelecekteki/bilinmeyen bir enum değeri olan sağlayıcılar, kapalı biçimde başarısız olmak yerine atlanır) |
+    | `browser.ssrfPolicy.allowPrivateNetwork`                                                         | `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork`                          |
+    | `browser.profiles.*.driver: "extension"`                                                         | `"existing-session"`                                                          |
+    | `browser.relayBindHost`                                                                          | kaldırıldı (eski Chrome uzantısı aktarma ayarı)                             |
+    | `mcp.servers.*.type` (CLI'ya özgü takma adlar)                                                        | `mcp.servers.*.transport`                                                    |
+    | `mcp.servers.*.disabled`                                                                         | tersi `mcp.servers.*.enabled`                                              |
+    | MCP zaman aşımı takma adları `connectTimeout`/`connect_timeout`/`timeout`                                 | `connectionTimeoutMs`/`requestTimeoutMs`                                    |
+    | alt çizgili MCP sunucu alanları                                                                     | camelCase MCP sunucu alanları                                                   |
+    | `tools.media.image/audio/video.models`                                                           | yetenek etiketli `tools.media.models`                                        |
+    | `tools.media.asyncCompletion`                                                                    | kaldırıldı                                                                       |
+    | `tools.message.allowCrossContextSend`                                                            | `tools.message.crossContext`                                                  |
+    | medya modeli `deepgram` seçenekleri                                                                   | `providerOptions.deepgram`                                                    |
+    | `talk.realtime.voice`, Discord gerçek zamanlı `voice`                                                 | `speakerVoice`                                                                |
+    | `agents.defaults.pdfMaxBytesMb`                                                                  | `agents.defaults.pdfMaxMb`                                                    |
+    | `tools.exec.timeoutSec`                                                                          | `tools.exec.timeoutSeconds`                                                   |
+    | `browser.ssrfPolicy.hostnameAllowlist`                                                           | joker karakterlerini algılayan `browser.ssrfPolicy.allowedHostnames`                          |
+    | korumalı alan tarayıcısı `enableNoVnc`                                                                    | `noVncEnabled`                                                                |
+    | kök `media`                                                                                     | `attachments`                                                                |
+    | kanal/hesap `heartbeat` görünürlük blokları                                                   | `heartbeatVisibility`                                                         |
+    | `channels.slack.identity`                                                                        | `channels.slack.postAs`                                                       |
+    | kök `audit`                                                                                     | `logging.audit`                                                               |
+    | `gateway.nodes.skills.enabled`                                                                   | `gateway.nodes.allowSkills`                                                   |
+    | `gateway.nodes.allowCommands`/`denyCommands`                                                    | `gateway.nodes.commands.allow`/`deny`                                         |
+    | oluşturma modeli varsayılanları                                                                       | `agents.defaults.mediaModels.{image,video,music}`                              |
+    | kullanımdan kaldırılmış nihai düzen ayarlama düğmeleri                                                               | yerleşik varsayılan davranış                                                     |
+    | `channels.whatsapp.messagePrefix` ve eski `messages.messagePrefix`                            | `channels.whatsapp.responsePrefix`                                            |
+    | `channels.whatsapp.ackReaction`                                                                  | genel `messages.ackReaction` ve çevrilebilir olduğu yerlerde `ackReactionScope`        |
+    | `cron.failureDestination`                                                                        | `cron.failureAlert` üzerindeki hedef alanları                                     |
+    | `gateway.controlUi.chatMessageMaxWidth`, yalnızca sunuma yönelik `ui.prefs` anahtarları                       | kaldırıldı (metin ölçeği, sohbet genişliği ve canlı kenar çubuğu etkinliği tarayıcıya özeldir) |
+    | `agents.list`                                                                                    | anahtarlı `agents.entries`                                                        |
+    | üst düzey `defaultModel`                                                                         | `agents.defaults.model`                                                      |
+    | `messages.messagePrefix`                                                                         | `channels.whatsapp.responsePrefix`                                            |
+    | `session.maintenance.pruneDays`, `session.resetByType.dm`                                        | `session.maintenance.pruneAfter`, `session.resetByType.direct`               |
+    | üst düzey `tui`                                                                                  | kaldırıldı (TUI alt bilgisi kompakt varsayılanı kullanır)                            |
+    | `plugins.entries.codex.config.codexDynamicToolsProfile`                                          | kaldırıldı (Codex uygulama sunucusu, Codex'e özgü çalışma alanı araçlarını her zaman yerel tutar) |
+    | `commands.modelsWrite`                                                                           | kaldırıldı (`/models add` kullanımdan kaldırılmıştır)                                       |
+    | `agents.defaults/list[].silentReplyRewrite`, `surfaces.*.silentReplyRewrite`                     | kaldırıldı (tam `NO_REPLY` artık görünür geri dönüş metni olarak yeniden yazılmaz)  |
+    | `agents.defaults/list[].systemPromptOverride`                                                    | kaldırıldı (oluşturulan sistem isteminin sahibi OpenClaw'dur)                        |
+    | `agents.defaults/list[].embeddedPi`                                                              | `embeddedAgent`                                                              |
+    | `agents.defaults/list[].sandbox.perSession`                                                      | `sandbox.scope`                                                              |
+    | `agents.defaults.llm`                                                                             | kaldırıldı (yavaş model/sağlayıcı zaman aşımları için `models.providers.<id>.timeoutSeconds` kullanın; aracı/çalıştırma zaman aşımı tavanının altında tutulur) |
+    | üst düzey `memorySearch`, `agents.defaults.memorySearch`                                         | `memory.search`                                                             |
+    | `agents.entries.*.memorySearch`                                                                     | `agents.entries.*.memory.search`                                               |
+    | `memorySearch.provider: "auto"`                                                                  | `"openai"`                                                                    |
+    | `memorySearch.store.path` (herhangi bir düzey)                                                            | kaldırıldı (bellek dizinleri her bir aracı veritabanında bulunur)                       |
+    | üst düzey `heartbeat`                                                                            | `agents.defaults.heartbeat` / `channels.defaults.heartbeat`                 |
+    | `plugins.openai-codex` politika kimlikleri                                                                | `plugins.openai`                                                             |
+    | `tools.web.x_search.apiKey`                                                                      | `plugins.entries.xai.config.webSearch.apiKey`                               |
+    | `session.maintenance.rotateBytes`, `session.parentForkMaxTokens`                                 | kaldırıldı (kullanımdan kaldırılmıştı)                                                        |
+    | 2026.7 sürümünde kullanımdan kaldırılan çalışma zamanı ve kanal ayarları                                               | kaldırıldı (yerleşik üretim varsayılanları geçerlidir)                               |
 
-    Mevcut geçişler:
+    <Note>
+      Yukarıdaki `plugins.entries.voice-call.config.*` satırları, her yapılandırma yüklemesinde
+      `openclaw
+      doctor` tarafından değil, Voice Call plugininin kendisi tarafından normalleştirilir. Plugin ayrıca `openclaw
+      doctor --fix` konumunu işaret eden bir başlangıç uyarısı kaydeder, ancak doctor şu anda bu anahtarlar için
+      `openclaw.json` öğesini yeniden yazmaz; değişikliği çalışma zamanında uygulayan,
+      pluginin kendi normalleştirmesidir.
+    </Note>
 
-    - `routing.allowFrom` → `channels.whatsapp.allowFrom`
-    - `routing.groupChat.requireMention` → `channels.whatsapp/telegram/imessage.groups."*".requireMention`
-    - `routing.groupChat.historyLimit` → `messages.groupChat.historyLimit`
-    - `routing.groupChat.mentionPatterns` → `messages.groupChat.mentionPatterns`
-    - `channels.telegram.requireMention` → `channels.telegram.groups."*".requireMention`
-    - emekliye ayrılmış `channels.webchat` ve `gateway.webchat` kaldırılır
-    - `routing.queue` → `messages.queue`
-    - `routing.bindings` → üst düzey `bindings`
-    - `routing.agents`/`routing.defaultAgentId` → `agents.list` + `agents.list[].default`
-    - eski `talk.voiceId`/`talk.voiceAliases`/`talk.modelId`/`talk.outputFormat`/`talk.apiKey` → `talk.provider` + `talk.providers.<provider>`
-    - eski üst düzey gerçek zamanlı Talk seçicileri (`talk.mode`/`talk.transport`/`talk.brain`/`talk.model`/`talk.voice`) + `talk.provider`/`talk.providers` → `talk.realtime`
-    - `routing.agentToAgent` → `tools.agentToAgent`
-    - `routing.transcribeAudio` → `tools.media.audio.models`
-    - `messages.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`) → `messages.tts.providers.<provider>`
-    - `messages.tts.provider: "edge"` ve `messages.tts.providers.edge` → `messages.tts.provider: "microsoft"` ve `messages.tts.providers.microsoft`
-    - TTS konuşmacı seçimi alanları (`voice`/`voiceName`/`voiceId`) → `speakerVoice`/`speakerVoiceId`
-    - `channels.discord.voice.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`) → `channels.discord.voice.tts.providers.<provider>`
-    - `channels.discord.accounts.<id>.voice.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`) → `channels.discord.accounts.<id>.voice.tts.providers.<provider>`
-    - `plugins.entries.voice-call.config.tts.<provider>` (`openai`/`elevenlabs`/`microsoft`/`edge`) → `plugins.entries.voice-call.config.tts.providers.<provider>`
-    - `plugins.entries.voice-call.config.tts.provider: "edge"` ve `plugins.entries.voice-call.config.tts.providers.edge` → `provider: "microsoft"` ve `providers.microsoft`
-    - `plugins.entries.voice-call.config.provider: "log"` → `"mock"`
-    - `plugins.entries.voice-call.config.twilio.from` → `plugins.entries.voice-call.config.fromNumber`
-    - `plugins.entries.voice-call.config.streaming.sttProvider` → `plugins.entries.voice-call.config.streaming.provider`
-    - `plugins.entries.voice-call.config.streaming.openaiApiKey|sttModel|silenceDurationMs|vadThreshold` → `plugins.entries.voice-call.config.streaming.providers.openai.*`
-    - `bindings[].match.accountID` → `bindings[].match.accountId`
-    - Adlandırılmış `accounts` içeren ama kalıcı tek hesaplı üst düzey kanal değerleri bulunan kanallarda, bu hesap kapsamlı değerleri ilgili kanal için seçilen yükseltilmiş hesaba taşı (`accounts.default` çoğu kanal için; Matrix mevcut eşleşen adlandırılmış/varsayılan hedefi koruyabilir)
-    - `identity` → `agents.list[].identity`
-    - `agent.*` → `agents.defaults` + `tools.*` (tools/elevated/exec/sandbox/subagents)
-    - `agent.model`/`allowedModels`/`modelAliases`/`modelFallbacks`/`imageModelFallbacks` → `agents.defaults.models` + `agents.defaults.model.primary/fallbacks` + `agents.defaults.imageModel.primary/fallbacks`
-    - `agents.defaults.llm` kaldırılır; yavaş sağlayıcı/model zaman aşımları için `models.providers.<id>.timeoutSeconds` kullanın ve tüm çalıştırmanın daha uzun sürmesi gerektiğinde ajan/çalıştırma zaman aşımını bu değerin üzerinde tutun
-    - `browser.ssrfPolicy.allowPrivateNetwork` → `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork`
-    - `browser.profiles.*.driver: "extension"` → `"existing-session"`
-    - `browser.relayBindHost` kaldırılır (eski uzantı röle ayarı)
-    - eski `models.providers.*.api: "openai"` → `"openai-completions"` (Gateway başlangıcı, `api` değeri gelecekteki veya bilinmeyen bir enum değerine ayarlanmış sağlayıcıları da kapalı hata vermek yerine atlar)
-    - `plugins.entries.codex.config.codexDynamicToolsProfile` kaldırılır; Codex uygulama sunucusu Codex’e özgü çalışma alanı araçlarını her zaman yerel tutar
+    Birden çok hesaba sahip kanallar için hesap varsayılanı kılavuzu:
 
-    Doctor uyarıları, çok hesaplı kanallar için hesap-varsayılanı kılavuzunu da içerir:
-
-    - İki veya daha fazla `channels.<channel>.accounts` girdisi `channels.<channel>.defaultAccount` veya `accounts.default` olmadan yapılandırılmışsa, doctor yedek yönlendirmenin beklenmeyen bir hesap seçebileceği konusunda uyarır.
-    - `channels.<channel>.defaultAccount` bilinmeyen bir hesap kimliğine ayarlanmışsa, doctor uyarır ve yapılandırılmış hesap kimliklerini listeler.
+    - İki veya daha fazla `channels.<channel>.accounts` girdisi, `channels.<channel>.defaultAccount` ya da `accounts.default` olmadan yapılandırılırsa doctor, yedek yönlendirmenin beklenmeyen bir hesabı seçebileceği konusunda uyarır.
+    - `channels.<channel>.defaultAccount` bilinmeyen bir hesap kimliğine ayarlanmışsa doctor uyarır ve yapılandırılmış hesap kimliklerini listeler.
 
   </Accordion>
   <Accordion title="2b. OpenCode sağlayıcı geçersiz kılmaları">
-    `models.providers.opencode`, `opencode-zen` veya `opencode-go` girdilerini elle eklediyseniz, bu `openclaw/plugin-sdk/llm` içindeki yerleşik OpenCode kataloğunu geçersiz kılar. Bu, modelleri yanlış API’ye zorlayabilir veya maliyetleri sıfırlayabilir. Doctor, geçersiz kılmayı kaldırıp model başına API yönlendirmesini ve maliyetleri geri yükleyebilmeniz için uyarır.
+    `models.providers.opencode`, `opencode-zen` veya `opencode-go` öğesini elle eklediyseniz bu, `openclaw/plugin-sdk/llm` içindeki yerleşik OpenCode kataloğunu geçersiz kılar. Bu durum, modelleri yanlış API'ye yönelmeye zorlayabilir veya maliyetleri sıfırlayabilir. Doctor, geçersiz kılmayı kaldırıp model başına API yönlendirmesini ve maliyetleri geri yükleyebilmeniz için uyarır.
   </Accordion>
-  <Accordion title="2c. Tarayıcı geçişi ve Chrome MCP hazır olma durumu">
-    Tarayıcı yapılandırmanız hâlâ kaldırılmış Chrome uzantısı yolunu gösteriyorsa, doctor bunu mevcut ana makineye yerel Chrome MCP bağlanma modeline normalleştirir:
+  <Accordion title="2c. Tarayıcı geçişi ve Chrome MCP hazırlığı">
+    Tarayıcı yapılandırmanız hâlâ kaldırılmış Chrome uzantısı yolunu gösteriyorsa doctor, bunu güncel ana makine yerelindeki Chrome MCP bağlanma modeline normalleştirir (`browser.profiles.*.driver: "extension"` → `"existing-session"`; `browser.relayBindHost` kaldırılır).
 
-    - `browser.profiles.*.driver: "extension"` değeri `"existing-session"` olur
-    - `browser.relayBindHost` kaldırılır
+    Doctor ayrıca `defaultProfile: "user"` veya yapılandırılmış bir `existing-session` profili kullandığınızda ana makine yerelindeki Chrome MCP yolunu denetler:
 
-    Doctor, `defaultProfile: "user"` veya yapılandırılmış bir `existing-session` profili kullandığınızda ana makineye yerel Chrome MCP yolunu da denetler:
-
-    - varsayılan otomatik bağlanma profilleri için Google Chrome’un aynı ana makinede yüklü olup olmadığını denetler
-    - algılanan Chrome sürümünü denetler ve Chrome 144’ün altındaysa uyarır
+    - varsayılan otomatik bağlantı profilleri için Google Chrome'un aynı ana makinede yüklü olup olmadığını denetler
+    - algılanan Chrome sürümünü denetler ve Chrome 144'ten düşük olduğunda uyarır
     - tarayıcı inceleme sayfasında uzaktan hata ayıklamayı etkinleştirmenizi hatırlatır (örneğin `chrome://inspect/#remote-debugging`, `brave://inspect/#remote-debugging` veya `edge://inspect/#remote-debugging`)
 
-    Doctor, Chrome tarafındaki ayarı sizin için etkinleştiremez. Ana makineye yerel Chrome MCP hâlâ şunları gerektirir:
+    Doctor, Chrome tarafındaki ayarı sizin yerinize etkinleştiremez. Ana makine yerelindeki Chrome MCP hâlâ gateway/node ana makinesinde yerel olarak çalışan, uzaktan hata ayıklaması etkinleştirilmiş ve ilk bağlanma onayı istemi tarayıcıda kabul edilmiş Chromium tabanlı 144+ bir tarayıcı gerektirir.
 
-    - gateway/node ana makinesinde Chromium tabanlı 144+ bir tarayıcı
-    - tarayıcının yerel olarak çalışıyor olması
-    - o tarayıcıda uzaktan hata ayıklamanın etkinleştirilmiş olması
-    - tarayıcıdaki ilk bağlanma onayı istemini onaylama
-
-    Buradaki hazır olma durumu yalnızca yerel bağlanma önkoşullarıyla ilgilidir. Existing-session mevcut Chrome MCP rota sınırlarını korur; `responsebody`, PDF dışa aktarma, indirme kesme ve toplu işlemler gibi gelişmiş rotalar hâlâ yönetilen bir tarayıcı veya ham CDP profili gerektirir.
-
-    Bu denetim Docker, sandbox, uzak tarayıcı veya diğer başsız akışlar için geçerli **değildir**. Bunlar ham CDP kullanmaya devam eder.
+    Buradaki hazırlık yalnızca yerel bağlanma ön koşullarını kapsar. Mevcut oturum, geçerli Chrome MCP rota sınırlarını korur; `responsebody`, PDF dışa aktarma, indirme yakalama ve toplu eylemler gibi gelişmiş rotalar hâlâ yönetilen bir tarayıcı veya ham CDP profili gerektirir. Bu denetim, ham CDP kullanmaya devam eden Docker, sandbox, uzak tarayıcı veya diğer başsız akışlar için geçerli değildir.
 
   </Accordion>
-  <Accordion title="2d. OAuth TLS önkoşulları">
-    Bir OpenAI Codex OAuth profili yapılandırıldığında, doctor yerel Node/OpenSSL TLS yığınının sertifika zincirini doğrulayabildiğini kontrol etmek için OpenAI yetkilendirme uç noktasını yoklar. Yoklama bir sertifika hatasıyla başarısız olursa (örneğin `UNABLE_TO_GET_ISSUER_CERT_LOCALLY`, süresi dolmuş sertifika veya kendinden imzalı sertifika), doctor platforma özgü düzeltme kılavuzu yazdırır. Homebrew Node kullanılan macOS’ta düzeltme genellikle `brew postinstall ca-certificates` komutudur. `--deep` ile, Gateway sağlıklı olsa bile yoklama çalışır.
+  <Accordion title="2d. OAuth TLS ön koşulları">
+    Bir OpenAI Codex OAuth profili yapılandırıldığında doctor, yerel Node/OpenSSL TLS yığınının sertifika zincirini doğrulayabildiğini kontrol etmek için OpenAI yetkilendirme uç noktasını yoklar. Yoklama bir sertifika hatasıyla başarısız olursa (örneğin `UNABLE_TO_GET_ISSUER_CERT_LOCALLY`, süresi dolmuş sertifika veya kendinden imzalı sertifika), doctor platforma özgü düzeltme kılavuzu yazdırır. Homebrew Node kullanılan macOS'ta düzeltme genellikle `brew postinstall ca-certificates` şeklindedir. `--deep` ile Gateway sağlıklı olsa bile yoklama çalışır.
   </Accordion>
   <Accordion title="2e. Codex OAuth sağlayıcı geçersiz kılmaları">
-    Daha önce `models.providers.openai-codex` altında eski OpenAI aktarım ayarları eklediyseniz, bunlar yeni sürümlerin otomatik olarak kullandığı yerleşik Codex OAuth sağlayıcı yolunu gölgeleyebilir. Doctor, bu eski aktarım ayarlarını Codex OAuth ile birlikte gördüğünde uyarır; böylece eskimiş aktarım geçersiz kılmasını kaldırabilir veya yeniden yazabilir ve yerleşik yönlendirme/yedek davranışını geri alabilirsiniz. Özel proxy’ler ve yalnızca başlık geçersiz kılmaları hâlâ desteklenir ve bu uyarıyı tetiklemez.
+    Daha önce `models.providers.openai-codex` altına eski OpenAI taşıma ayarları eklediyseniz bunlar, yerleşik Codex OAuth sağlayıcı yolunu gölgeleyebilir. Doctor, eski taşıma geçersiz kılmasını kaldırıp veya yeniden yazıp güncel yönlendirme davranışını geri yükleyebilmeniz için Codex OAuth ile birlikte bu eski taşıma ayarlarını gördüğünde uyarır. Özel proxy'ler ve yalnızca üstbilgi geçersiz kılmaları desteklenmeye devam eder ve bu uyarıyı tetiklemez, ancak kullanıcı tarafından oluşturulan bu istek rotaları örtük Codex seçimine uygun değildir.
   </Accordion>
   <Accordion title="2f. Codex rota onarımı">
-    Doctor eski `openai-codex/*` model başvurularını denetler. Yerel Codex harness yönlendirmesi kanonik `openai/*` model başvurularını kullanır; OpenAI ajan turları OpenClaw OpenAI sağlayıcı yolu yerine Codex uygulama sunucusu harness’ı üzerinden gider.
+    Doctor, eski `openai-codex/*` model başvurularını denetler. Yerel Codex çalıştırma sistemi yönlendirmesi, standart `openai/*` model başvurularını kullanır ancak yalnızca önek Codex'i hiçbir zaman seçmez. Çalışma zamanı ilkesi ayarlanmamışken veya `auto` iken, yalnızca kullanıcı tarafından oluşturulmuş istek geçersiz kılması bulunmayan, tam olarak eşleşen resmî HTTPS Platform Responses veya ChatGPT Responses rotası uygundur. Bkz. [OpenAI örtük ajan çalışma zamanı](/tr/providers/openai#implicit-agent-runtime).
 
-    `--fix` / `--repair` modunda doctor, birincil modeller, yedekler, görüntü/video üretim modelleri, heartbeat/subagent/compaction geçersiz kılmaları, hook’lar, kanal modeli geçersiz kılmaları ve eskimiş kalıcı oturum rota durumu dahil olmak üzere etkilenen varsayılan ajan ve ajan başına başvuruları yeniden yazar:
+    `--fix` / `--repair` modunda doctor; birincil modeller, yedekler, görüntü/video oluşturma modelleri, heartbeat/alt ajan/compaction geçersiz kılmaları, hook'lar, kanal modeli geçersiz kılmaları ve kalıcı hâle getirilmiş eski oturum rota durumu dâhil olmak üzere etkilenen varsayılan ajan ve ajan başına başvuruları yeniden yazar:
 
-    - `openai-codex/gpt-*` değeri `openai/gpt-*` olur.
-    - Codex niyeti, onarılan ajan modeli başvuruları için sağlayıcı/model kapsamlı `agentRuntime.id: "codex"` girdilerine taşınır.
-    - Çalışma zamanı seçimi sağlayıcı/model kapsamlı olduğundan, eskimiş tüm-ajan çalışma zamanı yapılandırması ve kalıcı oturum çalışma zamanı sabitlemeleri kaldırılır.
-    - Onarılan eski model başvurusu eski kimlik doğrulama yolunu korumak için Codex yönlendirmesine ihtiyaç duymadığı sürece mevcut sağlayıcı/model çalışma zamanı ilkesi korunur.
-    - Mevcut model yedek listeleri, eski girdileri yeniden yazılarak korunur; kopyalanan model başına ayarlar eski anahtardan kanonik `openai/*` anahtarına taşınır.
-    - Kalıcı oturum `modelProvider`/`providerOverride`, `model`/`modelOverride`, yedek bildirimleri ve kimlik doğrulama profili sabitlemeleri keşfedilen tüm ajan oturum depolarında onarılır.
+    - `openai-codex/gpt-*`, `openai/gpt-*` olur.
+    - Codex amacı, onarılan ajan modeli başvuruları için sağlayıcı/model kapsamlı `agentRuntime.id: "codex"` girdilerine taşınır.
+    - Çalışma zamanı seçimi sağlayıcı/model kapsamında olduğundan eski tüm ajan çalışma zamanı yapılandırması ve kalıcı hâle getirilmiş oturum çalışma zamanı sabitlemeleri kaldırılır.
+    - Onarılan eski model başvurusu, eski kimlik doğrulama yolunu korumak için Codex yönlendirmesine ihtiyaç duymadığı sürece mevcut sağlayıcı/model çalışma zamanı ilkesi korunur.
+    - Mevcut model yedek listeleri, eski girdileri yeniden yazılarak korunur; kopyalanan model başına ayarlar eski anahtardan standart `openai/*` anahtarına taşınır.
+    - Kalıcı hâle getirilmiş oturum `modelProvider`/`providerOverride`, `model`/`modelOverride`, yedek bildirimleri ve kimlik doğrulama profili sabitlemeleri, keşfedilen tüm ajan oturumu depolarında onarılır.
+    - Doctor, eski `agentRuntime.id: "codex-cli"` sabitlemelerini (ayrı bir eski çalışma zamanı kimliği) `agents.defaults`, `agents.entries.*` ve `models.providers.*` model girdilerinin tamamında ayrıca `"codex"` olarak onarır.
     - `/codex ...`, "sohbetten yerel bir Codex konuşmasını denetle veya bağla" anlamına gelir.
-    - `/acp ...` veya `runtime: "acp"`, "harici ACP/acpx adaptörünü kullan" anlamına gelir.
+    - `/acp ...` veya `runtime: "acp"`, "harici ACP/acpx bağdaştırıcısını kullan" anlamına gelir.
 
   </Accordion>
-  <Accordion title="2g. Oturum rota temizliği">
-    Doctor, yapılandırılmış modelleri veya çalışma zamanını Codex gibi Plugin’e ait bir rotadan uzaklaştırdıktan sonra eskimiş otomatik oluşturulmuş rota durumu için keşfedilen ajan oturum depolarını da tarar.
+  <Accordion title="2g. Oturum rotası temizliği">
+    Doctor ayrıca yapılandırılmış modelleri veya çalışma zamanını Codex gibi bir pluginin sahip olduğu rotadan taşımanızın ardından kalan ve otomatik oluşturulmuş eski rota durumu için keşfedilen ajan oturumu depolarını tarar.
 
-    `openclaw doctor --fix`, sahip rotaları artık yapılandırılmadığında `modelOverrideSource: "auto"` model sabitlemeleri, çalışma zamanı modeli meta verileri, sabitlenmiş harness kimlikleri, CLI oturum bağlamaları ve otomatik kimlik doğrulama profili geçersiz kılmaları gibi otomatik oluşturulmuş eskimiş durumu temizleyebilir. Açık kullanıcı veya eski oturum modeli seçimleri elle inceleme için raporlanır ve dokunulmadan bırakılır; o rota artık amaçlanmıyorsa bunları `/model ...`, `/new` ile değiştirin veya oturumu sıfırlayın.
+    `openclaw doctor --fix`; sahip olan rota artık yapılandırılmadığında `modelOverrideSource: "auto"` model sabitlemeleri, çalışma zamanı modeli meta verileri, sabitlenmiş çalıştırma sistemi kimlikleri, CLI oturum bağlamaları ve otomatik kimlik doğrulama profili geçersiz kılmaları gibi otomatik oluşturulmuş eski durumu temizleyebilir. Açık kullanıcı veya eski oturum modeli seçimleri, elle incelenmek üzere bildirilir ve değiştirilmeden bırakılır; bu rota artık istenmiyorsa bunları `/model ...`, `/new` ile değiştirin veya oturumu sıfırlayın.
 
   </Accordion>
   <Accordion title="3. Eski durum geçişleri (disk düzeni)">
-    Doctor eski disk üstü düzenleri mevcut yapıya geçirebilir:
+    Doctor, eski disk düzenlerini güncel yapıya geçirebilir:
 
-    - Oturum deposu + transkriptler:
-      - `~/.openclaw/sessions/` konumundan `~/.openclaw/agents/<agentId>/sessions/` konumuna
-    - Ajan dizini:
-      - `~/.openclaw/agent/` konumundan `~/.openclaw/agents/<agentId>/agent/` konumuna
-    - WhatsApp kimlik doğrulama durumu (Baileys):
-      - eski `~/.openclaw/credentials/*.json` konumundan (`oauth.json` hariç)
-      - `~/.openclaw/credentials/whatsapp/<accountId>/...` konumuna (varsayılan hesap kimliği: `default`)
+    - Oturum deposu + dökümler: `~/.openclaw/sessions/` konumundan `~/.openclaw/agents/<agentId>/sessions/` konumuna
+    - Ajan dizini: `~/.openclaw/agent/` konumundan `~/.openclaw/agents/<agentId>/agent/` konumuna
+    - WhatsApp kimlik doğrulama durumu (Baileys): eski `~/.openclaw/credentials/*.json` konumundan (`oauth.json` hariç) `~/.openclaw/credentials/whatsapp/<accountId>/...` konumuna (varsayılan hesap kimliği: `default`)
+    - İmzalı cihaz kimliği: `~/.openclaw/identity/device.json` konumundan `state/openclaw.sqlite` içindeki `primary` `device_identities` satırına; ayrı cihaz kimlik doğrulama dosyasına dokunulmaz
 
-    Bu geçişler en iyi çaba temelinde çalışır ve idempotenttir; doctor, herhangi bir eski klasörü yedek olarak geride bıraktığında uyarılar yayar. Gateway/CLI de başlangıçta eski oturumları ve ajan dizinini otomatik olarak geçirir, böylece geçmiş/kimlik doğrulama/modeller elle doctor çalıştırılmadan ajan başına yola yerleşir. WhatsApp kimlik doğrulaması kasıtlı olarak yalnızca `openclaw doctor` üzerinden geçirilir. Talk sağlayıcı/sağlayıcı haritası normalleştirmesi artık yapısal eşitlikle karşılaştırır, bu nedenle yalnızca anahtar sırası farkları artık tekrarlanan etkisiz `doctor --fix` değişikliklerini tetiklemez.
+    Bu geçişler mümkün olan en iyi çabayla ve bir kez uygulanmış olsa bile aynı sonucu verecek şekilde çalışır; doctor, herhangi bir eski klasörü yedek olarak yerinde bıraktığında uyarı verir. Gateway/CLI ayrıca başlangıçta eski oturumları ve ajan dizinini otomatik olarak geçirir; böylece geçmiş/kimlik doğrulama/modeller, elle doctor çalıştırılmadan ajan başına yola taşınır. WhatsApp kimlik doğrulaması kasıtlı olarak yalnızca `openclaw doctor` aracılığıyla geçirilir. Talk sağlayıcısı/sağlayıcı eşlemesi normalleştirmesi yapısal eşitliğe göre karşılaştırma yaptığından, yalnızca anahtar sırasından kaynaklanan farklar artık tekrarlanan ve etkisiz `doctor --fix` değişikliklerini tetiklemez.
 
   </Accordion>
   <Accordion title="3a. Eski plugin manifest geçişleri">
-    Doctor, yüklü tüm Plugin manifestlerini kullanımdan kaldırılmış üst düzey capability anahtarları (`speechProviders`, `realtimeTranscriptionProviders`, `realtimeVoiceProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, `videoGenerationProviders`, `webFetchProviders`, `webSearchProviders`) için tarar. Bulduğunda, bunları `contracts` nesnesine taşımayı ve manifest dosyasını yerinde yeniden yazmayı önerir. Bu geçiş idempotenttir; `contracts` anahtarı zaten aynı değerlere sahipse, eski anahtar veri yinelenmeden kaldırılır.
+    Doctor, kullanımdan kaldırılmış üst düzey yetenek anahtarları (`speechProviders`, `realtimeTranscriptionProviders`, `realtimeVoiceProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, `videoGenerationProviders`, `webFetchProviders`, `webSearchProviders`) için yüklü tüm plugin manifestlerini tarar. Bulunduğunda bunları `contracts` nesnesine taşımayı ve manifest dosyasını yerinde yeniden yazmayı teklif eder. Bu geçiş bir kez uygulanmış olsa bile aynı sonucu verir; `contracts` zaten aynı değerlere sahipse eski anahtar, veriler yinelenmeden kaldırılır.
   </Accordion>
   <Accordion title="3b. Eski cron deposu geçişleri">
-    Doctor ayrıca, zamanlayıcının uyumluluk için hâlâ kabul ettiği eski iş şekilleri için cron iş deposunu (varsayılan olarak `~/.openclaw/cron/jobs.json` veya geçersiz kılındığında `cron.store`) denetler.
+    Doctor ayrıca standart satırları SQLite'a aktarmadan önce eski cron işi deposunda (`~/.openclaw/cron/jobs.json`) eski iş şekillerini denetler.
 
-    Geçerli cron temizlemeleri şunları içerir:
+    Güncel cron temizlemeleri şunları içerir:
 
     - `jobId` → `id`
     - `schedule.cron` → `schedule.expr`
-    - üst düzey payload alanları (`message`, `model`, `thinking`, ...) → `payload`
-    - üst düzey delivery alanları (`deliver`, `channel`, `to`, `provider`, ...) → `delivery`
-    - payload `provider` delivery diğer adları → açık `delivery.channel`
-    - eski `notify: true` webhook fallback işleri → `cron.webhook` ayarlandığında açık webhook delivery; duyuru işleri sohbet delivery'lerini korur ve `delivery.completionDestination` alır. `cron.webhook` ayarlanmamışsa, inert üst düzey `notify` işaretçisi hedefi olmayan işler için kaldırılır (duyuru dahil mevcut delivery korunur), çünkü çalışma zamanı delivery bunu hiçbir zaman okumaz
+    - üst düzey yük alanları (`message`, `model`, `thinking`, ...) → `payload`
+    - üst düzey teslim alanları (`deliver`, `channel`, `to`, `provider`, ...) → `delivery`
+    - yük `provider` teslim takma adları → açık `delivery.channel`
+    - eski `notify: true` webhook yedek işleri → geçerliyse kullanımdan kaldırılan ham `cron.webhook` değerinden açık webhook teslimi; duyuru işleri sohbet teslimlerini korur ve `delivery.completionDestination` değerini alır. Ardından doctor eski yapılandırma anahtarını kaldırır. Kullanılabilir bir eski webhook yoksa çalışma zamanı teslimi bunu hiçbir zaman okumadığından, etkisiz üst düzey `notify` işareti hedefi olmayan işlerden kaldırılır (duyuru dâhil mevcut teslim korunur).
 
-    Gateway, yükleme sırasında hatalı biçimlendirilmiş cron satırlarını da temizler, böylece geçerli işler çalışmaya devam eder. Ham hatalı satırlar, `jobs.json` içinden kaldırılmadan önce etkin deponun yanındaki `jobs-quarantine.json` dosyasına kopyalanır; doctor karantinaya alınmış satırları bildirir, böylece bunları elle inceleyebilir veya onarabilirsiniz.
+    Gateway ayrıca yükleme sırasında hatalı biçimlendirilmiş cron satırlarını temizler; böylece geçerli işler çalışmaya devam eder. Ham hatalı satırlar `jobs.json` içinden kaldırılmadan önce etkin deponun yanındaki `jobs-quarantine.json` konumuna kopyalanır; doctor, elle inceleyebilmeniz veya onarabilmeniz için karantinaya alınan satırları bildirir.
 
-    Gateway başlatması çalışma zamanı projeksiyonunu normalleştirir ve üst düzey `notify` işaretçisini yok sayar, ancak kalıcı cron yapılandırmasını doctor onarımı için bırakır. `cron.webhook` ayarlanmamışsa, doctor geçiş hedefi olmayan işler için (`delivery.mode` yok/yok sayılmış, kullanılamaz bir webhook hedefi veya mevcut duyuru/sohbet delivery) inert işaretçiyi kaldırır ve mevcut delivery'ye dokunmaz; böylece tekrarlanan `doctor --fix` çalıştırmaları aynı iş hakkında artık yeniden uyarı vermez. `cron.webhook` ayarlanmış ancak geçerli bir HTTP(S) URL'si değilse, doctor yine uyarır ve URL'yi düzeltebilmeniz için işaretçiyi yerinde bırakır.
+    Gateway başlangıcı, çalışma zamanı izdüşümünü normalleştirir ve üst düzey `notify` işaretini yok sayar ancak kalıcı cron durumunu doctor onarımı için bırakır. Doctor, geçiş hedefi olmayan işler için etkisiz işaretleri kaldırır (`delivery.mode` yok/eksik, kullanılamayan eski webhook hedefi veya mevcut duyuru/sohbet teslimi) ve mevcut teslime dokunmaz; böylece tekrarlanan `doctor --fix` çalıştırmaları artık aynı iş için yeniden uyarmaz.
 
-    Linux'ta doctor, kullanıcının crontab'ı hâlâ eski `~/.openclaw/bin/ensure-whatsapp.sh` çağırıyorsa da uyarır. Bu ana makineye yerel betik, mevcut OpenClaw tarafından bakımı yapılmaz ve cron systemd kullanıcı veriyoluna ulaşamadığında `~/.openclaw/logs/whatsapp-health.log` içine hatalı `Gateway inactive` iletileri yazabilir. Eski crontab girdisini `crontab -e` ile kaldırın; geçerli sağlık denetimleri için `openclaw channels status --probe`, `openclaw doctor` ve `openclaw gateway status` kullanın.
+    Linux'ta doctor, kullanıcının crontab'ı hâlâ eski `~/.openclaw/bin/ensure-whatsapp.sh` öğesini çağırdığında da uyarır. Ana makineye özgü bu yerel betik, güncel OpenClaw tarafından sürdürülmez ve cron, systemd kullanıcı veri yoluna erişemediğinde `~/.openclaw/logs/whatsapp-health.log` konumuna hatalı `Gateway inactive` iletileri yazabilir. Eski crontab girdisini `crontab -e` ile kaldırın; güncel sağlık denetimleri için `openclaw channels status --probe`, `openclaw doctor` ve `openclaw gateway status` kullanın.
 
   </Accordion>
-  <Accordion title="3c. Oturum kilidi temizliği">
-    Doctor, anormal şekilde sonlanan bir oturumdan geride kalan eski yazma kilidi dosyaları için her ajan oturumu dizinini tarar. Bulunan her kilit dosyası için şunları bildirir: yol, PID, PID'nin hâlâ canlı olup olmadığı, kilit yaşı ve eski kabul edilip edilmediği (ölü PID, hatalı biçimlendirilmiş sahip meta verisi, 30 dakikadan eski olması veya OpenClaw dışı bir sürece ait olduğu kanıtlanabilen canlı PID). `--fix` / `--repair` modunda, ölü, sahipsiz, yeniden kullanılmış, hatalı biçimlendirilmiş-eski veya OpenClaw dışı sahipleri olan kilitleri otomatik olarak kaldırır. Hâlâ canlı bir OpenClaw sürecine ait olan eski kilitler bildirilir ancak yerinde bırakılır; böylece doctor etkin bir transkript yazıcısını kesmez.
+  <Accordion title="3c. Oturum kilidi temizleme">
+    Doctor, bir oturumun olağan dışı biçimde sonlanmasıyla geride kalan eski yazma kilidi dosyalarını bulmak için her ajan oturumu dizinini tarar. Bulunan her kilit dosyası için şunları bildirir: yol, PID, PID'nin hâlâ çalışıp çalışmadığı, kilidin yaşı ve eski sayılıp sayılmadığı (ölü PID, hatalı biçimlendirilmiş sahip meta verileri, 30 dakikadan eski olma veya OpenClaw dışı bir işleme ait olduğu kanıtlanmış çalışan bir PID). `--fix` / `--repair` modunda ölü, sahipsiz, yeniden kullanılmış, hatalı biçimlendirilmiş ve eski ya da OpenClaw dışı sahipleri olan kilitleri otomatik olarak kaldırır. Hâlâ çalışan bir OpenClaw işleminin sahip olduğu eski kilitler bildirilir ancak Doctor'ın etkin bir transkript yazıcısını kesintiye uğratmaması için yerinde bırakılır.
   </Accordion>
-  <Accordion title="3d. Oturum transkript dalı onarımı">
-    Doctor, 2026.4.24 prompt transkript yeniden yazma hatasının oluşturduğu yinelenmiş dal şeklini bulmak için ajan oturumu JSONL dosyalarını tarar: OpenClaw iç çalışma zamanı bağlamına sahip terk edilmiş bir kullanıcı turu ve aynı görünür kullanıcı promptunu içeren etkin bir kardeş. `--fix` / `--repair` modunda doctor, etkilenen her dosyayı özgünün yanına yedekler ve transkripti etkin dala yeniden yazar; böylece gateway geçmişi ve bellek okuyucuları artık yinelenen turları görmez.
+  <Accordion title="3d. Oturum transkripti dalı onarımı">
+    Doctor, 2026.4.24 istem transkripti yeniden yazma hatasının oluşturduğu yinelenen dal yapısını bulmak için ajan oturumu JSONL dosyalarını tarar: OpenClaw iç çalışma zamanı bağlamını içeren terk edilmiş bir kullanıcı sırası ve aynı görünür kullanıcı istemini içeren etkin bir kardeş dal. `--fix` / `--repair` modunda Doctor, etkilenen her dosyayı özgün dosyanın yanında yedekler ve Gateway geçmişi ile bellek okuyucularının artık yinelenen sıralar görmemesi için transkripti etkin dala göre yeniden yazar.
   </Accordion>
   <Accordion title="4. Durum bütünlüğü denetimleri (oturum kalıcılığı, yönlendirme ve güvenlik)">
-    Durum dizini operasyonel beyin sapıdır. Kaybolursa oturumları, kimlik bilgilerini, günlükleri ve yapılandırmayı kaybedersiniz (başka yerde yedekleriniz yoksa).
+    Durum dizini, operasyonel beyin sapıdır. Kaybolursa başka bir yerde yedekleriniz olmadığı sürece oturumları, kimlik bilgilerini, günlükleri ve yapılandırmayı kaybedersiniz.
 
     Doctor şunları denetler:
 
-    - **Durum dizini eksik**: yıkıcı durum kaybı hakkında uyarır, dizini yeniden oluşturmayı ister ve eksik verileri kurtaramayacağını hatırlatır.
-    - **Durum dizini izinleri**: yazılabilirliği doğrular; izinleri onarmayı önerir (ve sahip/grup uyumsuzluğu algılandığında bir `chown` ipucu verir).
-    - **macOS bulutla eşitlenen durum dizini**: durum iCloud Drive (`~/Library/Mobile Documents/com~apple~CloudDocs/...`) veya `~/Library/CloudStorage/...` altında çözümlendiğinde uyarır, çünkü eşitleme destekli yollar daha yavaş G/Ç ve kilit/eşitleme yarışlarına neden olabilir.
-    - **Linux SD veya eMMC durum dizini**: durum bir `mmcblk*` bağlama kaynağına çözümlendiğinde uyarır, çünkü SD veya eMMC destekli rastgele G/Ç, oturum ve kimlik bilgisi yazmaları altında daha yavaş olabilir ve daha hızlı yıpranabilir.
-    - **Linux geçici durum dizini**: durum `tmpfs` veya `ramfs` olarak çözümlendiğinde uyarır, çünkü oturumlar, kimlik bilgileri, yapılandırma ve WAL/günlük yan dosyalarıyla birlikte SQLite durumu yeniden başlatmada kaybolur. Docker `overlay` bağlamaları bilerek işaretlenmez, çünkü yazılabilir katmanları konteyner kaldığı sürece ana makine yeniden başlatmaları boyunca kalıcıdır.
-    - **Oturum dizinleri eksik**: geçmişi kalıcı kılmak ve `ENOENT` çökmelerini önlemek için `sessions/` ve oturum deposu dizini gereklidir.
-    - **Transkript uyumsuzluğu**: son oturum girdilerinde eksik transkript dosyaları olduğunda uyarır.
-    - **Ana oturum "1 satırlık JSONL"**: ana transkriptte yalnızca bir satır olduğunda işaretler (geçmiş birikmiyordur).
-    - **Birden çok durum dizini**: ev dizinleri genelinde birden çok `~/.openclaw` klasörü olduğunda veya `OPENCLAW_STATE_DIR` başka bir yeri gösterdiğinde uyarır (geçmiş kurulumlar arasında bölünebilir).
-    - **Uzak mod hatırlatıcısı**: `gateway.mode=remote` ise doctor bunu uzak ana makinede çalıştırmanızı hatırlatır (durum orada yaşar).
-    - **Yapılandırma dosyası izinleri**: `~/.openclaw/openclaw.json` grup/dünya tarafından okunabilir durumdaysa uyarır ve `600` değerine sıkılaştırmayı önerir.
+    - **Durum dizini eksik**: yıkıcı durum kaybı hakkında uyarır, dizini yeniden oluşturmanızı ister ve eksik verileri kurtaramayacağını hatırlatır.
+    - **Durum dizini izinleri**: yazılabilirliği doğrular; izinleri onarmayı önerir (ve sahip/grup uyuşmazlığı algılandığında bir `chown` ipucu verir).
+    - **macOS bulutla eşitlenen durum dizini**: durum iCloud Drive (`~/Library/Mobile Documents/com~apple~CloudDocs/...`) veya `~/Library/CloudStorage/...` altında çözümlendiğinde uyarır; çünkü eşitleme destekli yollar daha yavaş G/Ç'ye ve kilit/eşitleme yarışlarına neden olabilir.
+    - **Linux SD veya eMMC durum dizini**: durum bir `mmcblk*` bağlama kaynağına çözümlendiğinde uyarır; çünkü SD/eMMC destekli rastgele G/Ç daha yavaş olabilir ve oturum ile kimlik bilgisi yazımları altında daha hızlı yıpranabilir.
+    - **Linux geçici durum dizini**: durum `tmpfs` veya `ramfs` olarak çözümlendiğinde uyarır; çünkü oturumlar, kimlik bilgileri, yapılandırma ve SQLite durumu (WAL/günlük yan dosyalarıyla birlikte) yeniden başlatmada kaybolur. Docker `overlay` bağlamaları, yazılabilir katmanları kapsayıcı varlığını sürdürdüğü sürece ana makine yeniden başlatmaları boyunca kalıcı olduğundan bilerek işaretlenmez.
+    - **Oturum dizinleri eksik**: geçmişi kalıcılaştırmak ve `ENOENT` çökmelerini önlemek için `sessions/` ile oturum deposu dizini gereklidir.
+    - **Transkript uyuşmazlığı**: son oturum girdilerinin transkript dosyaları eksik olduğunda uyarır.
+    - **Ana oturum "1 satırlı JSONL"**: ana transkript yalnızca bir satır içerdiğinde işaretler (geçmiş birikmiyordur).
+    - **Birden çok durum dizini**: ana dizinler arasında birden çok `~/.openclaw` klasörü bulunduğunda veya `OPENCLAW_STATE_DIR` başka bir yeri gösterdiğinde uyarır (geçmiş kurulumlar arasında bölünebilir).
+    - **Uzak mod hatırlatıcısı**: `gateway.mode=remote` ise Doctor, kendisini uzak ana makinede çalıştırmanızı hatırlatır (durum orada bulunur).
+    - **Yapılandırma dosyası izinleri**: `~/.openclaw/openclaw.json` grup/dünya tarafından okunabiliyorsa uyarır ve izinleri `600` olarak sıkılaştırmayı önerir.
 
   </Accordion>
-  <Accordion title="5. Model kimlik doğrulama sağlığı (OAuth sona ermesi)">
-    Doctor, auth deposundaki OAuth profillerini inceler, tokenlar sona ermek üzereyse/sona ermişse uyarır ve güvenli olduğunda bunları yenileyebilir. Anthropic OAuth/token profili bayatsa, bir Anthropic API anahtarı veya Anthropic setup-token yolunu önerir. Yenileme istemleri yalnızca etkileşimli çalışırken (TTY) görünür; `--non-interactive` yenileme denemelerini atlar.
+  <Accordion title="5. Model kimlik doğrulama sağlığı (OAuth süre sonu)">
+    Doctor, kimlik doğrulama deposundaki OAuth profillerini inceler, tokenların süresi dolmak üzere olduğunda veya dolduğunda uyarır ve güvenli olduğunda bunları yenileyebilir. Anthropic OAuth/token profili eskiyse bir Anthropic API anahtarı veya Anthropic kurulum tokenı yolunu önerir. Yenileme istemleri yalnızca etkileşimli (TTY) çalıştırmada görünür; `--non-interactive` yenileme girişimlerini atlar.
 
-    Bir OAuth yenilemesi kalıcı olarak başarısız olduğunda (örneğin `refresh_token_reused`, `invalid_grant` veya sağlayıcının yeniden oturum açmanızı söylemesi), doctor yeniden kimlik doğrulamanın gerekli olduğunu bildirir ve çalıştırılacak tam `openclaw models auth login --provider ...` komutunu yazdırır.
+    Bir OAuth yenilemesi kalıcı olarak başarısız olduğunda (örneğin `refresh_token_reused`, `invalid_grant` veya bir sağlayıcının yeniden oturum açmanızı istemesi), Doctor yeniden kimlik doğrulaması gerektiğini bildirir ve çalıştırılacak tam `openclaw models auth login --provider ...` komutunu yazdırır.
 
-    Doctor ayrıca şu nedenlerle geçici olarak kullanılamayan auth profillerini de bildirir:
+    Doctor ayrıca kısa bekleme süreleri (hız sınırları/zaman aşımları/kimlik doğrulama hataları) veya daha uzun süreli devre dışı bırakmalar (faturalandırma/kredi hataları) nedeniyle geçici olarak kullanılamayan kimlik doğrulama profillerini bildirir.
 
-    - kısa bekleme süreleri (hız sınırları/zaman aşımları/auth hataları)
-    - daha uzun devre dışı bırakmalar (faturalama/kredi hataları)
-
-    Tokenları macOS Keychain içinde yaşayan eski Codex OAuth profilleri (dosya tabanlı yan dosya düzeninden önceki eski onboarding) yalnızca doctor tarafından onarılır. Keychain destekli eski tokenları yerinde `auth-profiles.json` içine geçirmek için etkileşimli bir terminalden bir kez `openclaw doctor --fix` çalıştırın; bundan sonra gömülü turlar (Telegram, cron, alt ajan dispatch) bunları kanonik OpenAI OAuth profilleri olarak çözer.
+    Tokenları macOS Keychain'de bulunan eski Codex OAuth profilleri (dosya tabanlı yan dosya düzeninden önceki eski ilk katılım) yalnızca Doctor tarafından onarılır. Keychain destekli eski tokenları satır içi olarak `auth-profiles.json` içine taşımak için etkileşimli bir terminalden `openclaw doctor --fix` komutunu bir kez çalıştırın; bundan sonra gömülü sıralar (Telegram, cron, alt ajan gönderimi) bunları standart OpenAI OAuth profilleri olarak çözümler.
 
   </Accordion>
-  <Accordion title="6. Hooks model doğrulaması">
-    `hooks.gmail.model` ayarlanmışsa, doctor model referansını katalog ve izin listesine göre doğrular ve çözümlenmeyecekse veya izin verilmiyorsa uyarır.
+  <Accordion title="6. Hook model doğrulaması">
+    `hooks.gmail.model` ayarlanmışsa Doctor, model referansını kataloğa ve izin listesine göre doğrular; çözümlenmeyecek veya izin verilmeyen durumlarda uyarır.
   </Accordion>
-  <Accordion title="7. Sandbox imaj onarımı">
-    Sandbox etkinleştirildiğinde, doctor Docker imajlarını denetler ve geçerli imaj eksikse eski adlara geçmeyi veya derlemeyi önerir.
+  <Accordion title="7. Korumalı alan görüntüsü onarımı">
+    Korumalı alan etkinleştirildiğinde Doctor, Docker görüntülerini denetler ve geçerli görüntü eksikse oluşturmayı veya eski adlara geçmeyi önerir.
   </Accordion>
   <Accordion title="7b. Plugin kurulum temizliği">
-    Doctor, `openclaw doctor --fix` / `openclaw doctor --repair` modunda OpenClaw tarafından oluşturulmuş eski Plugin bağımlılığı hazırlama durumunu kaldırır. Bu; bayat oluşturulmuş bağımlılık köklerini, eski install-stage dizinlerini, önceki gömülü Plugin bağımlılığı onarım kodundan kalan paket yerel kalıntıları ve geçerli gömülü manifesti gölgeleyebilen gömülü `@openclaw/*` Plugin'lerinin sahipsiz veya kurtarılmış yönetilen npm kopyalarını kapsar. Doctor ayrıca ana makine `openclaw` paketini `peerDependencies.openclaw` bildiren yönetilen npm Plugin'lerine yeniden bağlar; böylece `openclaw/plugin-sdk/*` gibi paket yerel çalışma zamanı importları güncellemelerden veya npm onarımlarından sonra çözümlenmeye devam eder.
+    Doctor, `openclaw doctor --fix` / `openclaw doctor --repair` modunda OpenClaw tarafından oluşturulmuş eski Plugin bağımlılığı hazırlama durumunu kaldırır: eski oluşturulmuş bağımlılık kökleri, eski kurulum aşaması dizinleri, önceki paketlenmiş Plugin bağımlılığı onarım kodundan kalan paket yerelindeki kalıntılar ve geçerli paketlenmiş manifesti gölgeleyebilen paketlenmiş `@openclaw/*` Pluginlerinin sahipsiz veya kurtarılmış yönetilen npm kopyaları. Doctor ayrıca ana makine `openclaw` paketini, `peerDependencies.openclaw` bildiren yönetilen npm Pluginlerine yeniden bağlar; böylece `openclaw/plugin-sdk/*` gibi paket yerelindeki çalışma zamanı içe aktarımları güncellemelerden veya npm onarımlarından sonra çözümlenmeye devam eder.
 
-    Doctor, yapılandırma bunlara başvurduğunda ancak yerel Plugin kayıt defteri bunları bulamadığında eksik indirilebilir Plugin'leri de yeniden kurabilir. Örnekler arasında somut `plugins.entries`, yapılandırılmış kanal/sağlayıcı/arama ayarları ve yapılandırılmış ajan çalışma zamanları bulunur. Paket güncellemeleri sırasında doctor, çekirdek paket değiştirilirken paket yöneticisi Plugin onarımını çalıştırmaktan kaçınır; yapılandırılmış bir Plugin hâlâ kurtarma gerektiriyorsa güncellemeden sonra `openclaw doctor --fix` komutunu yeniden çalıştırın. Gateway başlatması ve yapılandırma yeniden yüklemesi paket yöneticilerini çalıştırmaz; Plugin kurulumları açık doctor/install/update işi olarak kalır.
+    Doctor ayrıca yapılandırma bunlara başvurduğunda ancak yerel Plugin kayıt defteri bunları bulamadığında eksik indirilebilir Pluginleri yeniden kurabilir (önemli `plugins.entries`, yapılandırılmış kanal/sağlayıcı/arama ayarları, yapılandırılmış ajan çalışma zamanları). Paket güncellemeleri sırasında Doctor, çekirdek paket değiştirilirken Plugin paketlerini yeniden kurmaktan kaçınır; yapılandırılmış bir Plugin hâlâ kurtarma gerektiriyorsa güncellemeden sonra `openclaw doctor --fix` komutunu yeniden çalıştırın. Aşağıdaki kapsayıcı görüntüsü başlatma istisnası dışında Gateway başlatma ve yapılandırma yeniden yükleme paket onarımı çalıştırmaz; Plugin kurulumları açık Doctor/kurulum/güncelleme çalışmaları olarak kalır.
 
-  </Accordion>
-  <Accordion title="8. Gateway hizmet geçişleri ve temizlik ipuçları">
-    Doctor, eski gateway hizmetlerini (launchd/systemd/schtasks) algılar ve bunları kaldırıp geçerli gateway portunu kullanarak OpenClaw hizmetini kurmayı önerir. Ayrıca ek gateway benzeri hizmetleri tarayabilir ve temizlik ipuçları yazdırabilir. Profil adlı OpenClaw gateway hizmetleri birinci sınıf kabul edilir ve "ekstra" olarak işaretlenmez.
-
-    Linux'ta, kullanıcı düzeyi gateway hizmeti eksik ancak sistem düzeyi bir OpenClaw gateway hizmeti varsa, doctor otomatik olarak ikinci bir kullanıcı düzeyi hizmet kurmaz. `openclaw gateway status --deep` veya `openclaw doctor --deep` ile inceleyin; ardından yineleneni kaldırın veya gateway yaşam döngüsüne bir sistem süpervizörü sahipse `OPENCLAW_SERVICE_REPAIR_POLICY=external` ayarlayın.
+    Kapsayıcılaştırılmış Gateway başlatmanın dar kapsamlı bir yükseltme istisnası vardır: `openclaw gateway run` yeni bir OpenClaw sürümünde başladığında hazır olmadan önce güvenli durum taşımalarını ve mevcut çekirdek sonrası Plugin yakınsamasını çalıştırır, ardından sürüm başına bir denetim noktası kaydeder. Bu başlatma geçişi eski paketlenmiş Plugin kayıtlarını temizleyebilir, yerel Plugin bağlantılarını onarabilir, yakınsama yolu gerektirdiğinde yapılandırılmış Plugin paketlerini yeniden kurabilir ve etkin Plugin yüklerini denetleyebilir. Başlatma güvenli biçimde onaramazsa kapsayıcıyı normal şekilde yeniden başlatmadan önce aynı görüntüyü aynı bağlı durum/yapılandırmaya karşı `openclaw doctor --fix` ile bir kez çalıştırın.
 
   </Accordion>
-  <Accordion title="8b. Başlatma Matrix geçişi">
-    Bir Matrix kanal hesabında bekleyen veya işlem yapılabilir eski durum geçişi olduğunda, doctor (`--fix` / `--repair` modunda) geçiş öncesi bir snapshot oluşturur ve ardından en iyi çaba geçiş adımlarını çalıştırır: eski Matrix durum geçişi ve eski şifreli durum hazırlığı. Her iki adım da ölümcül değildir; hatalar günlüğe kaydedilir ve başlatma devam eder. Salt okunur modda (`--fix` olmadan `openclaw doctor`) bu denetim tamamen atlanır.
-  </Accordion>
-  <Accordion title="8c. Cihaz eşleştirme ve auth sapması">
-    Doctor artık normal sağlık geçişinin parçası olarak cihaz eşleştirme durumunu inceler.
+  <Accordion title="8. Gateway hizmeti taşımaları ve temizlik ipuçları">
+    Doctor, eski Gateway hizmetlerini (launchd/systemd/schtasks) algılar ve bunları kaldırıp geçerli Gateway bağlantı noktasını kullanarak OpenClaw hizmetini kurmayı önerir. Ayrıca ek Gateway benzeri hizmetleri tarayabilir ve temizlik ipuçları yazdırabilir. Profil adını taşıyan OpenClaw Gateway hizmetleri birinci sınıf kabul edilir ve "ekstra" olarak işaretlenmez.
 
-    Bildirdikleri:
+    Linux'ta kullanıcı düzeyindeki Gateway hizmeti eksik ancak sistem düzeyinde bir OpenClaw Gateway hizmeti mevcutsa Doctor, ikinci bir kullanıcı düzeyi hizmeti otomatik olarak kurmaz. `openclaw gateway status --deep` veya `openclaw doctor --deep` ile inceleyin, ardından yinelenen hizmeti kaldırın ya da bir sistem yöneticisi Gateway yaşam döngüsünün sahibiyse `OPENCLAW_SERVICE_REPAIR_POLICY=external` değerini ayarlayın.
+
+  </Accordion>
+  <Accordion title="8b. Başlangıç Matrix taşıması">
+    Bir Matrix kanal hesabında bekleyen veya uygulanabilir bir eski durum taşıması bulunduğunda Doctor (`--fix` / `--repair` modunda) taşıma öncesi bir anlık görüntü oluşturur ve ardından en iyi çaba esaslı taşıma adımlarını çalıştırır: eski Matrix durum taşıması ve eski şifreli durum hazırlığı. Her iki adım da ölümcül değildir; hatalar günlüğe kaydedilir ve başlatma devam eder. Salt okunur modda (`openclaw doctor`, `--fix` olmadan) bu denetim tamamen atlanır.
+  </Accordion>
+  <Accordion title="8c. Cihaz eşleştirme ve kimlik doğrulama sapması">
+    Doctor, normal sağlık geçişinin bir parçası olarak cihaz eşleştirme durumunu inceler ve şunları bildirir:
 
     - bekleyen ilk eşleştirme istekleri
-    - zaten eşleştirilmiş cihazlar için bekleyen rol yükseltmeleri
-    - zaten eşleştirilmiş cihazlar için bekleyen kapsam yükseltmeleri
-    - cihaz id'sinin hâlâ eşleştiği ancak cihaz kimliğinin artık onaylı kayıtla eşleşmediği public-key uyumsuzluğu onarımları
-    - onaylı bir rol için etkin tokenı eksik olan eşleştirilmiş kayıtlar
-    - kapsamları onaylı eşleştirme temel çizgisinin dışına kayan eşleştirilmiş tokenlar
-    - geçerli makine için gateway tarafı token rotasyonundan daha eski olan veya bayat kapsam meta verisi taşıyan yerel önbelleğe alınmış cihaz-token girdileri
+    - zaten eşleştirilmiş cihazlar için bekleyen rol veya kapsam yükseltmeleri
+    - cihaz kimliği hâlâ eşleşirken cihazın tanımlayıcı kimliğinin artık onaylanmış kayıtla eşleşmediği açık anahtar uyuşmazlığı onarımları
+    - onaylanmış bir rol için etkin tokenı eksik olan eşleştirilmiş kayıtlar
+    - kapsamları onaylanmış eşleştirme temel çizgisinin dışına sapan eşleştirilmiş tokenlar
+    - geçerli makine için Gateway tarafındaki bir token döndürmesinden önce oluşturulmuş veya eski kapsam meta verileri taşıyan yerel önbelleğe alınmış cihaz tokenı girdileri
 
-    Doctor eşleştirme isteklerini otomatik onaylamaz veya cihaz tokenlarını otomatik döndürmez. Bunun yerine tam sonraki adımları yazdırır:
+    Doctor, eşleştirme isteklerini otomatik olarak onaylamaz veya cihaz tokenlarını otomatik olarak döndürmez. Tam sonraki adımları yazdırır:
 
     - bekleyen istekleri `openclaw devices list` ile inceleyin
     - tam isteği `openclaw devices approve <requestId>` ile onaylayın
     - `openclaw devices rotate --device <deviceId> --role <role>` ile yeni bir token döndürün
-    - bayat bir kaydı `openclaw devices remove <deviceId>` ile kaldırıp yeniden onaylayın
+    - eski bir kaydı `openclaw devices remove <deviceId>` ile kaldırıp yeniden onaylayın
 
-    Bu, yaygın “zaten eşleştirilmiş ama hâlâ eşleştirme gerekli uyarısı alınıyor” açığını kapatır: doctor artık ilk kez eşleştirme ile bekleyen rol/kapsam yükseltmelerini ve eskimiş token/cihaz kimliği sapmasını ayırt eder.
+    Bu, ilk eşleştirmeyi bekleyen rol/kapsam yükseltmelerinden ve eski token/cihaz tanımlayıcı kimliği sapmasından ayırarak yaygın "zaten eşleştirildi ancak hâlâ eşleştirme gerekli hatası alınıyor" açığını kapatır.
 
   </Accordion>
   <Accordion title="9. Güvenlik uyarıları">
-    Bir sağlayıcı izin listesi olmadan DM'lere açık olduğunda veya bir ilke tehlikeli şekilde yapılandırıldığında Doctor uyarılar üretir.
+    Doctor yalnızca izin listesi olmadan doğrudan mesajlara açık bir sağlayıcı veya tehlikeli biçimde yapılandırılmış bir politika gibi bir uyarı bulduğunda Güvenlik notu verir. Tam güvenlik envanteri için `openclaw security audit` kullanın.
   </Accordion>
-  <Accordion title="10. systemd linger (Linux)">
-    Bir systemd kullanıcı servisi olarak çalışıyorsa Doctor, çıkıştan sonra Gateway'in çalışmaya devam etmesi için lingering'in etkin olduğundan emin olur.
+  <Accordion title="10. systemd kalıcılığı (Linux)">
+    Bir systemd kullanıcı hizmeti olarak çalışıyorsa Doctor, Gateway'in oturum kapatıldıktan sonra çalışmayı sürdürmesi için kalıcılığın etkinleştirilmesini sağlar.
   </Accordion>
-  <Accordion title="11. Çalışma alanı durumu (Skills, Plugin'ler ve TaskFlow'lar)">
-    Doctor, varsayılan ajan için çalışma alanı durumunun bir özetini yazdırır:
+  <Accordion title="11. Çalışma alanı durumu (Skills, Pluginler ve TaskFlow'lar)">
+    Doctor, sağlıklı durum envanterini değil, varsayılan ajan için sorunları ve eylemleri yazdırır:
 
-    - **Skills durumu**: uygun, eksik-gereksinimli ve izin-listesi-engelli Skills sayılarını gösterir.
-    - **Plugin durumu**: etkin/devre dışı/hatalı Plugin'leri sayar; hatalar için Plugin ID'lerini listeler; paket Plugin yeteneklerini raporlar.
-    - **Plugin uyumluluk uyarıları**: geçerli çalışma zamanı ile uyumluluk sorunları olan Plugin'leri işaretler.
-    - **Plugin tanılamaları**: Plugin kayıt defterinin yükleme sırasında yaydığı uyarı veya hataları görünür kılar.
-    - **TaskFlow kurtarma**: elle incelenmesi veya iptal edilmesi gereken şüpheli yönetilen TaskFlow'ları görünür kılar.
+    - **Skills**: izin verilen ancak kullanılamayan Skill adlarını listeler; gereksinim ayrıntıları ve tam sayımlar için `openclaw skills check` kullanın.
+    - **Pluginler**: yalnızca hata veren Plugin kimliklerini bildirir; yüklenen, içe aktarılan, devre dışı bırakılan ve paket Plugin envanteri için `openclaw plugins list` kullanın.
+    - **Plugin uyumluluk uyarıları**: geçerli çalışma zamanıyla uyumluluk sorunları olan Pluginleri işaretler.
+    - **Plugin tanılamaları**: Plugin kayıt defterinin yükleme sırasında verdiği tüm uyarıları veya hataları gösterir.
+    - **TaskFlow kurtarma**: elle incelenmesi veya iptal edilmesi gereken şüpheli yönetilen TaskFlow'ları gösterir.
+    - **Claude CLI**: yalnızca ikili dosya, kimlik doğrulama, profil, çalışma alanı veya proje dizini sorunlarını bildirir; sağlıklı yoklama ayrıntıları gösterilmez.
 
   </Accordion>
-  <Accordion title="11b. Bootstrap dosya boyutu">
-    Doctor, çalışma alanı bootstrap dosyalarının (örneğin `AGENTS.md`, `CLAUDE.md` veya diğer enjekte edilen bağlam dosyaları) yapılandırılmış karakter bütçesine yaklaşıp yaklaşmadığını veya bunu aşıp aşmadığını denetler. Dosya başına ham ve enjekte edilmiş karakter sayılarını, kırpma yüzdesini, kırpma nedenini (`max/file` veya `max/total`) ve toplam enjekte edilmiş karakterlerin toplam bütçeye oranını raporlar. Dosyalar kırpıldığında veya sınıra yaklaştığında Doctor, `agents.defaults.bootstrapMaxChars` ve `agents.defaults.bootstrapTotalMaxChars` ayarlarını düzenlemek için ipuçları yazdırır.
-  </Accordion>
-  <Accordion title="11d. Eski kanal Plugin temizliği">
-    `openclaw doctor --fix` eksik bir kanal Plugin'ini kaldırdığında, o Plugin'e başvuran sarkık kanal kapsamlı yapılandırmayı da kaldırır: `channels.<id>` girdileri, kanalı adlandıran Heartbeat hedefleri ve `agents.*.models["<channel>/*"]` geçersiz kılmaları. Bu, kanal çalışma zamanı yok olmuşken yapılandırmanın hâlâ Gateway'den ona bağlanmasını istediği Gateway önyükleme döngülerini önler.
+  <Accordion title="11b. Önyükleme dosyası boyutu">
+    Doctor, çalışma alanı önyükleme dosyalarının (örneğin `AGENTS.md`, `CLAUDE.md` veya eklenen diğer bağlam dosyaları) yapılandırılmış karakter bütçesine yakın veya bu bütçenin üzerinde olup olmadığını denetler. Dosya başına ham ve eklenen karakter sayılarını, kırpma yüzdesini, kırpma nedenini (`max/file` veya `max/total`) ve toplam eklenen karakterlerin toplam bütçeye oranını bildirir. Dosyalar kırpıldığında veya sınıra yaklaştığında Doctor, `agents.defaults.bootstrapMaxChars` ve `agents.defaults.bootstrapTotalMaxChars` ayarlarını düzenlemeye yönelik ipuçları yazdırır.
   </Accordion>
   <Accordion title="11c. Kabuk tamamlama">
-    Doctor, geçerli kabuk (zsh, bash, fish veya PowerShell) için sekme tamamlamanın kurulu olup olmadığını denetler:
+    Doctor, geçerli kabuk (zsh, bash, fish veya PowerShell) için sekmeyle tamamlamanın kurulu olup olmadığını denetler:
 
-    - Kabuk profili yavaş bir dinamik tamamlama kalıbı (`source <(openclaw completion ...)`) kullanıyorsa Doctor bunu daha hızlı önbelleğe alınmış dosya varyantına yükseltir.
-    - Tamamlama profilde yapılandırılmış ancak önbellek dosyası eksikse Doctor önbelleği otomatik olarak yeniden oluşturur.
-    - Hiç tamamlama yapılandırılmamışsa Doctor bunun kurulmasını ister (yalnızca etkileşimli mod; `--non-interactive` ile atlanır).
+    - Kabuk profili yavaş bir dinamik tamamlama kalıbı kullanıyorsa (`source <(openclaw completion ...)`), doctor bunu daha hızlı olan önbelleğe alınmış dosya varyantına yükseltir.
+    - Tamamlama profilde yapılandırılmış ancak önbellek dosyası eksikse doctor önbelleği otomatik olarak yeniden oluşturur.
+    - Hiçbir tamamlama yapılandırılmamışsa doctor bunu yüklemeyi önerir (yalnızca etkileşimli modda; `--non-interactive` ile atlanır).
 
-    Önbelleği elle yeniden oluşturmak için `openclaw completion --write-state` çalıştırın.
-
-  </Accordion>
-  <Accordion title="12. Gateway kimlik doğrulama denetimleri (yerel token)">
-    Doctor, yerel Gateway token kimlik doğrulama hazırlığını denetler.
-
-    - Token modu bir token gerektiriyorsa ve token kaynağı yoksa Doctor bir tane üretmeyi teklif eder.
-    - `gateway.auth.token` SecretRef tarafından yönetiliyor ancak kullanılamıyorsa Doctor uyarır ve bunu düz metinle üzerine yazmaz.
-    - `openclaw doctor --generate-gateway-token`, yalnızca hiçbir token SecretRef yapılandırılmamışsa üretimi zorlar.
+    Önbelleği elle yeniden oluşturmak için `openclaw completion --write-state` komutunu çalıştırın.
 
   </Accordion>
-  <Accordion title="12b. Salt okunur SecretRef duyarlı onarımlar">
+  <Accordion title="11d. Eski kanal Plugin temizliği">
+    `openclaw doctor --fix` eksik bir kanal Plugin'ini kaldırdığında, bu Plugin'e başvuran bağlantısız kanal kapsamlı yapılandırmayı da kaldırır: `channels.<id>` girdileri, kanalı adlandıran Heartbeat hedefleri ve `agents.*.models["<channel>/*"]` geçersiz kılmaları. Bu, kanal çalışma zamanı artık mevcut olmadığı hâlde yapılandırmanın Gateway'den ona bağlanmasını istemeye devam ettiği Gateway önyükleme döngülerini önler.
+  </Accordion>
+  <Accordion title="12. Gateway kimlik doğrulama kontrolleri (yerel belirteç)">
+    Doctor, yerel Gateway belirteciyle kimlik doğrulamanın hazır olup olmadığını kontrol eder.
+
+    - Belirteç modu bir belirteç gerektiriyorsa ve hiçbir belirteç kaynağı yoksa doctor bir tane oluşturmayı önerir.
+    - `gateway.auth.token` SecretRef tarafından yönetiliyorsa ancak kullanılamıyorsa doctor uyarır ve bunu düz metinle değiştirmez.
+    - `openclaw doctor --generate-gateway-token`, yalnızca hiçbir belirteç SecretRef'i yapılandırılmamışsa oluşturmayı zorunlu kılar.
+
+  </Accordion>
+  <Accordion title="12b. Salt okunur, SecretRef uyumlu onarımlar">
     Bazı onarım akışlarının, çalışma zamanının hızlı başarısız olma davranışını zayıflatmadan yapılandırılmış kimlik bilgilerini incelemesi gerekir.
 
-    - `openclaw doctor --fix` artık hedefli yapılandırma onarımları için durum ailesi komutlarıyla aynı salt okunur SecretRef özet modelini kullanır.
-    - Örnek: Telegram `allowFrom` / `groupAllowFrom` `@username` onarımı, mevcut olduğunda yapılandırılmış bot kimlik bilgilerini kullanmayı dener.
-    - Telegram bot token'ı SecretRef üzerinden yapılandırılmış ancak geçerli komut yolunda kullanılamıyorsa Doctor, kimlik bilgisinin yapılandırılmış-ama-kullanılamaz olduğunu bildirir ve token'ı eksik olarak yanlış raporlamak veya çökmek yerine otomatik çözümlemeyi atlar.
+    - `openclaw doctor --fix`, hedefli yapılandırma onarımları için durum ailesindeki komutlarla aynı salt okunur SecretRef özet modelini kullanır.
+    - Örnek: Telegram `allowFrom` / `groupAllowFrom` `@username` onarımı, kullanılabilir olduğunda yapılandırılmış bot kimlik bilgilerini kullanmaya çalışır.
+    - Telegram bot belirteci SecretRef aracılığıyla yapılandırılmış ancak geçerli komut yolunda kullanılamıyorsa doctor, kimlik bilgisinin yapılandırılmış-ancak-kullanılamıyor olduğunu bildirir ve çökmek ya da belirteci yanlışlıkla eksik olarak bildirmek yerine otomatik çözümlemeyi atlar.
 
   </Accordion>
-  <Accordion title="13. Gateway sağlık denetimi + yeniden başlatma">
-    Doctor bir sağlık denetimi çalıştırır ve Gateway sağlıksız görünüyorsa yeniden başlatmayı teklif eder.
+  <Accordion title="13. Gateway sağlık kontrolü + yeniden başlatma">
+    Doctor bir sağlık kontrolü çalıştırır ve Gateway sağlıksız görünüyorsa yeniden başlatmayı önerir.
   </Accordion>
-  <Accordion title="13b. Bellek arama hazırlığı">
-    Doctor, yapılandırılmış bellek arama embedding sağlayıcısının varsayılan ajan için hazır olup olmadığını denetler. Davranış, yapılandırılmış arka uca ve sağlayıcıya bağlıdır:
+  <Accordion title="13b. Bellek araması hazırlığı">
+    Doctor, yapılandırılmış bellek araması gömme sağlayıcısının varsayılan aracı için hazır olup olmadığını kontrol eder. Davranış, yapılandırılmış arka uca ve sağlayıcıya bağlıdır:
 
-    - **QMD arka ucu**: `qmd` ikilisinin mevcut ve başlatılabilir olup olmadığını yoklar. Değilse npm paketi ve elle ikili yol seçeneği dahil düzeltme rehberliği yazdırır.
-    - **Açık yerel sağlayıcı**: yerel model dosyası veya tanınan uzak/indirilebilir model URL'si olup olmadığını denetler. Eksikse uzak sağlayıcıya geçmeyi önerir.
-    - **Açık uzak sağlayıcı** (`openai`, `voyage` vb.): ortamda veya kimlik doğrulama deposunda bir API anahtarı bulunduğunu doğrular. Eksikse uygulanabilir düzeltme ipuçları yazdırır.
-    - **Eski otomatik sağlayıcı**: `memorySearch.provider: "auto"` değerini OpenAI olarak ele alır, OpenAI hazırlığını denetler ve `doctor --fix` bunu `provider: "openai"` olarak yeniden yazar.
+    - **QMD arka ucu**: `qmd` ikili dosyasının kullanılabilir ve başlatılabilir olup olmadığını yoklar. Değilse `npm install -g @tobilu/qmd` (veya Bun eşdeğeri) ve elle ikili dosya yolu seçeneği dâhil olmak üzere düzeltme yönergeleri yazdırır.
+    - **Açık yerel sağlayıcı**: Yerel bir model dosyasını veya tanınan bir uzak/indirilebilir model URL'sini kontrol eder. Eksikse uzak bir sağlayıcıya geçilmesini önerir.
+    - **Açık uzak sağlayıcı** (`openai`, `voyage` vb.): Ortamda veya kimlik doğrulama deposunda bir API anahtarının bulunduğunu doğrular. Eksikse uygulanabilir düzeltme ipuçları yazdırır.
+    - **Eski otomatik sağlayıcı**: `memorySearch.provider: "auto"` değerini OpenAI olarak değerlendirir, OpenAI hazırlığını kontrol eder ve `doctor --fix` bunu `provider: "openai"` olarak yeniden yazar.
 
-    Önbelleğe alınmış bir Gateway yoklama sonucu mevcut olduğunda (denetim sırasında Gateway sağlıklıydı), Doctor bunun sonucunu CLI tarafından görülebilen yapılandırmayla çapraz başvurur ve olası tutarsızlıkları belirtir. Doctor varsayılan yolda yeni bir embedding ping'i başlatmaz; canlı sağlayıcı denetimi istediğinizde derin bellek durum komutunu kullanın.
+    Önbelleğe alınmış bir Gateway yoklama sonucu mevcut olduğunda (kontrol sırasında Gateway sağlıklıysa) doctor, sonucu CLI tarafından görülebilen yapılandırmayla çapraz karşılaştırır ve varsa tutarsızlıkları belirtir. Doctor varsayılan yolda yeni bir gömme ping'i başlatmaz; canlı bir sağlayıcı kontrolü istediğinizde ayrıntılı bellek durumu komutunu kullanın.
 
-    Çalışma zamanında embedding hazırlığını doğrulamak için `openclaw memory status --deep` kullanın.
+    Çalışma zamanında gömme hazırlığını doğrulamak için `openclaw memory status --deep` komutunu kullanın.
 
   </Accordion>
   <Accordion title="14. Kanal durumu uyarıları">
-    Gateway sağlıklıysa Doctor bir kanal durumu yoklaması çalıştırır ve önerilen düzeltmelerle birlikte uyarıları raporlar.
+    Gateway sağlıklıysa doctor bir kanal durumu yoklaması çalıştırır ve önerilen düzeltmelerle birlikte uyarıları bildirir.
   </Accordion>
-  <Accordion title="15. Supervisor yapılandırma denetimi + onarım">
-    Doctor, kurulu supervisor yapılandırmasını (launchd/systemd/schtasks) eksik veya güncel olmayan varsayılanlar açısından denetler (ör. systemd network-online bağımlılıkları ve yeniden başlatma gecikmesi). Bir uyumsuzluk bulduğunda güncelleme önerir ve servis dosyasını/görevi geçerli varsayılanlara yeniden yazabilir.
+  <Accordion title="15. Gözetmen yapılandırması denetimi + onarım">
+    Doctor, yüklü gözetmen yapılandırmasını (launchd/systemd/schtasks) eksik veya güncel olmayan varsayılanlar (örneğin systemd network-online bağımlılıkları ve yeniden başlatma gecikmesi) açısından kontrol eder. Bir uyumsuzluk bulduğunda güncelleme önerir ve hizmet dosyasını/görevi geçerli varsayılanlarla yeniden yazabilir.
 
     Notlar:
 
-    - `openclaw doctor`, supervisor yapılandırmasını yeniden yazmadan önce onay ister.
+    - `openclaw doctor`, gözetmen yapılandırmasını yeniden yazmadan önce onay ister.
     - `openclaw doctor --yes`, varsayılan onarım istemlerini kabul eder.
-    - `openclaw doctor --fix`, önerilen düzeltmeleri istem olmadan uygular (`--repair` bir takma addır).
-    - `openclaw doctor --fix --force`, özel supervisor yapılandırmalarının üzerine yazar.
-    - `OPENCLAW_SERVICE_REPAIR_POLICY=external`, Gateway servis yaşam döngüsü için Doctor'ı salt okunur tutar. Servis sağlığını yine raporlar ve servis dışı onarımları çalıştırır, ancak dış bir supervisor bu yaşam döngüsüne sahip olduğu için servis kurma/başlatma/yeniden başlatma/bootstrap, supervisor yapılandırma yeniden yazmaları ve eski servis temizliğini atlar.
-    - Linux'ta Doctor, eşleşen systemd Gateway birimi etkinken komut/entrypoint meta verilerini yeniden yazmaz. Ayrıca yinelenen servis taraması sırasında etkin olmayan eski olmayan ek Gateway benzeri birimleri yok sayar; böylece yardımcı servis dosyaları temizlik gürültüsü oluşturmaz.
-    - Token kimlik doğrulaması bir token gerektiriyorsa ve `gateway.auth.token` SecretRef tarafından yönetiliyorsa Doctor servis kurulumu/onarımı SecretRef'i doğrular, ancak çözümlenmiş düz metin token değerlerini supervisor servis ortam meta verilerine kalıcı olarak yazmaz.
-    - Doctor, eski LaunchAgent, systemd veya Windows Scheduled Task kurulumlarının satır içi gömdüğü yönetilen `.env`/SecretRef destekli servis ortam değerlerini algılar ve bu değerlerin supervisor tanımı yerine çalışma zamanı kaynağından yüklenmesi için servis meta verilerini yeniden yazar.
-    - Doctor, `gateway.port` değiştikten sonra servis komutunun hâlâ eski bir `--port` sabitlediğini algılar ve servis meta verilerini geçerli porta yeniden yazar.
-    - Token kimlik doğrulaması bir token gerektiriyorsa ve yapılandırılmış token SecretRef çözümlenemiyorsa Doctor kurulum/onarım yolunu uygulanabilir rehberlikle engeller.
-    - Hem `gateway.auth.token` hem de `gateway.auth.password` yapılandırılmışsa ve `gateway.auth.mode` ayarlanmamışsa Doctor, mod açıkça ayarlanana kadar kurulumu/onarımı engeller.
-    - Linux kullanıcı-systemd birimleri için Doctor token sapması denetimleri artık servis kimlik doğrulama meta verilerini karşılaştırırken hem `Environment=` hem de `EnvironmentFile=` kaynaklarını içerir.
-    - Doctor servis onarımları, yapılandırma en son daha yeni bir sürüm tarafından yazıldıysa eski bir OpenClaw ikilisinden gelen Gateway servisini yeniden yazmayı, durdurmayı veya yeniden başlatmayı reddeder. Bkz. [Gateway sorun giderme](/tr/gateway/troubleshooting#split-brain-installs-and-newer-config-guard).
-    - Her zaman `openclaw gateway install --force` ile tam yeniden yazmayı zorlayabilirsiniz.
+    - `openclaw doctor --fix`, önerilen düzeltmeleri istem göstermeden uygular (`--repair` bir diğer addır).
+    - `openclaw doctor --fix --force`, özel gözetmen yapılandırmalarının üzerine yazar.
+    - `OPENCLAW_SERVICE_REPAIR_POLICY=external`, Gateway hizmeti yaşam döngüsü için doctor'ı salt okunur durumda tutar. Hizmet durumunu bildirmeye ve hizmet dışı onarımları çalıştırmaya devam eder ancak bu yaşam döngüsünün sahibi harici bir gözetmen olduğundan hizmet yükleme/başlatma/yeniden başlatma/önyükleme, gözetmen yapılandırması yeniden yazma ve eski hizmet temizleme işlemlerini atlar.
+    - Linux'ta doctor, eşleşen systemd Gateway birimi etkinken komut/giriş noktası meta verilerini yeniden yazmaz. Ayrıca yinelenen hizmet taraması sırasında etkin olmayan, eski olmayan ek Gateway benzeri birimleri yok sayar; böylece yardımcı hizmet dosyaları temizleme gürültüsü oluşturmaz.
+    - Belirteç kimlik doğrulaması bir belirteç gerektiriyorsa ve `gateway.auth.token` SecretRef tarafından yönetiliyorsa doctor hizmet yükleme/onarımı SecretRef'i doğrular ancak çözümlenmiş düz metin belirteç değerlerini gözetmen hizmet ortamı meta verilerine kalıcı olarak kaydetmez.
+    - Doctor, eski LaunchAgent, systemd veya Windows Zamanlanmış Görev kurulumlarının satır içine gömdüğü, yönetilen `.env`/SecretRef destekli hizmet ortamı değerlerini algılar ve bu değerlerin gözetmen tanımı yerine çalışma zamanı kaynağından yüklenmesi için hizmet meta verilerini yeniden yazar.
+    - Doctor, `gateway.port` değiştikten sonra hizmet komutunun hâlâ eski bir `--port` değerini sabitlediğini algılar ve hizmet meta verilerini geçerli bağlantı noktasına yeniden yazar.
+    - Belirteç kimlik doğrulaması bir belirteç gerektiriyorsa ve yapılandırılmış belirteç SecretRef'i çözümlenemiyorsa doctor, uygulanabilir yönergelerle yükleme/onarım yolunu engeller.
+    - Hem `gateway.auth.token` hem de `gateway.auth.password` yapılandırılmışsa ve `gateway.auth.mode` ayarlanmamışsa doctor, mod açıkça ayarlanana kadar yükleme/onarımı engeller.
+    - Linux kullanıcı systemd birimleri için doctor'ın belirteç sapması kontrolleri, hizmet kimlik doğrulama meta verilerini karşılaştırırken hem `Environment=` hem de `EnvironmentFile=` kaynaklarını içerir.
+    - Doctor hizmet onarımları, yapılandırma en son daha yeni bir sürüm tarafından yazılmışsa eski bir OpenClaw ikili dosyasından gelen Gateway hizmetini yeniden yazmayı, durdurmayı veya yeniden başlatmayı reddeder. Bkz. [Gateway sorun giderme](/tr/gateway/troubleshooting#split-brain-installs-and-newer-config-guard).
+    - `openclaw gateway install --force` aracılığıyla her zaman tam yeniden yazmayı zorlayabilirsiniz.
 
   </Accordion>
-  <Accordion title="16. Gateway çalışma zamanı + port tanılamaları">
-    Doctor servis çalışma zamanını (PID, son çıkış durumu) inceler ve servis kurulu olduğu hâlde gerçekten çalışmadığında uyarır. Ayrıca Gateway portunda (varsayılan `18789`) port çakışmalarını denetler ve olası nedenleri (Gateway zaten çalışıyor, SSH tüneli) raporlar.
+  <Accordion title="16. Gateway çalışma zamanı + bağlantı noktası tanılaması">
+    Doctor hizmet çalışma zamanını (PID, son çıkış durumu) inceler ve hizmet yüklü olmasına rağmen gerçekte çalışmıyorsa uyarır. Ayrıca Gateway bağlantı noktasında (varsayılan `18789`) bağlantı noktası çakışmalarını kontrol eder ve olası nedenleri (Gateway zaten çalışıyor, SSH tüneli) bildirir.
   </Accordion>
-  <Accordion title="17. Gateway çalışma zamanı en iyi uygulamaları">
-    Gateway servisi Bun üzerinde veya sürüm tarafından yönetilen bir Node yolunda (`nvm`, `fnm`, `volta`, `asdf` vb.) çalıştığında Doctor uyarır. WhatsApp + Telegram kanalları Node gerektirir ve sürüm yöneticisi yolları yükseltmelerden sonra bozulabilir, çünkü servis kabuk başlatmanızı yüklemez. Doctor, mevcut olduğunda sistem Node kurulumuna geçmeyi teklif eder (Homebrew/apt/choco).
+  <Accordion title="17. Gateway çalışma zamanı için en iyi uygulamalar">
+    Doctor, Gateway hizmeti Bun veya sürüm yöneticisi tarafından yönetilen bir Node yolunda (`nvm`, `fnm`, `volta`, `asdf` vb.) çalıştığında uyarır. Bun, OpenClaw'ın `node:sqlite` durum deposunu açamaz; bu nedenle onarımlar eski Bun hizmetlerini Node'a geçirir. Sürüm yöneticisi yolları, hizmet kabuk başlatma yapılandırmanızı yüklemediğinden yükseltmelerden sonra bozulabilir. Doctor, mevcut olduğunda sistem Node kurulumuna (Homebrew/apt/choco) geçiş yapmayı önerir.
 
-    Yeni kurulan veya onarılan macOS LaunchAgent'ları etkileşimli kabuk PATH'ini kopyalamak yerine kurallı bir sistem PATH'i (`/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin`) kullanır; böylece Homebrew tarafından yönetilen sistem ikilileri kullanılabilir kalırken Volta, asdf, fnm, pnpm ve diğer sürüm yöneticisi dizinleri Node alt süreçlerinin neyi çözümlediğini değiştirmez. Linux servisleri açık ortam köklerini (`NVM_DIR`, `FNM_DIR`, `VOLTA_HOME`, `ASDF_DATA_DIR`, `BUN_INSTALL`, `PNPM_HOME`) ve kararlı user-bin dizinlerini korumaya devam eder, ancak tahmin edilen sürüm yöneticisi fallback dizinleri yalnızca bu dizinler diskte mevcutsa servis PATH'ine yazılır.
+    Yeni yüklenen veya onarılan macOS LaunchAgent'ları, etkileşimli kabuk PATH'ini kopyalamak yerine standart bir sistem PATH'i (`/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin`) kullanır; böylece Homebrew tarafından yönetilen sistem ikili dosyaları kullanılabilir kalırken Volta, asdf, fnm, pnpm ve diğer sürüm yöneticisi dizinleri, Node alt süreçlerinin hangisini çözümlediğini değiştirmez. Linux hizmetleri açık ortam köklerini (`NVM_DIR`, `FNM_DIR`, `VOLTA_HOME`, `ASDF_DATA_DIR`, `BUN_INSTALL`, `PNPM_HOME`) ve kararlı kullanıcı ikili dosya dizinlerini korumaya devam eder ancak tahmin edilen sürüm yöneticisi yedek dizinleri yalnızca bu dizinler diskte mevcutsa hizmet PATH'ine yazılır.
 
   </Accordion>
   <Accordion title="18. Yapılandırma yazma + sihirbaz meta verileri">
-    Doctor tüm yapılandırma değişikliklerini kalıcılaştırır ve doctor çalıştırmasını kaydetmek için sihirbaz meta verilerini damgalar.
+    Doctor tüm yapılandırma değişikliklerini kalıcı olarak kaydeder ve doctor çalıştırmasını kaydetmek için sihirbaz meta verilerini damgalar.
   </Accordion>
   <Accordion title="19. Çalışma alanı ipuçları (yedekleme + bellek sistemi)">
-    Doctor, eksik olduğunda bir çalışma alanı bellek sistemi önerir ve çalışma alanı zaten git altında değilse bir yedekleme ipucu yazdırır.
+    Doctor, eksik olduğunda bir çalışma alanı bellek sistemi önerir ve çalışma alanı zaten git denetimi altında değilse bir yedekleme ipucu yazdırır.
 
-    Çalışma alanı yapısı ve git yedeklemesi için tam kılavuz olarak [/concepts/agent-workspace](/tr/concepts/agent-workspace) sayfasına bakın (önerilen: özel GitHub veya GitLab).
+    Çalışma alanı yapısı ve git yedeklemesi (önerilen: özel GitHub veya GitLab) hakkında eksiksiz bir kılavuz için [/concepts/agent-workspace](/tr/concepts/agent-workspace) sayfasına bakın.
 
   </Accordion>
 </AccordionGroup>
 
 ## İlgili
 
-- [Gateway çalıştırma kılavuzu](/tr/gateway)
+- [Gateway işletim kılavuzu](/tr/gateway)
 - [Gateway sorun giderme](/tr/gateway/troubleshooting)

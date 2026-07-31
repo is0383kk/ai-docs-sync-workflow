@@ -4,18 +4,19 @@ read_when:
 summary: OpenClaw mesajlarını göndermek ve almak için Clickclack kanal yüzeyini ekler.
 title: Clickclack Plugin'i
 x-i18n:
-    generated_at: "2026-07-12T12:36:33Z"
+    generated_at: "2026-07-27T00:10:54Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: d939f5291de0510eaac361732f93fb79cac94656ac56a653f3c9e97394c6a9ae
+    source_hash: fcb39341009946dc38a12cc24496e65fd704ed3f2f9aff44bb2dd29fdedaef26
     source_path: plugins/reference/clickclack.md
     workflow: 16
 ---
 
-# Clickclack Plugin'i
+# Clickclack plugin'i
 
-OpenClaw mesajlarını göndermek ve almak için Clickclack kanal yüzeyini ekler.
+OpenClaw mesajlarını gönderip almak için Clickclack kanal yüzeyini ekler.
 
 ## Dağıtım
 
@@ -24,7 +25,13 @@ OpenClaw mesajlarını göndermek ve almak için Clickclack kanal yüzeyini ekle
 
 ## Yüzey
 
-kanallar: clickclack
+kanallar: `clickclack`; sözleşmeler: `tools`
+
+<!-- openclaw-plugin-reference:manual-start -->
+
+Plugin, isteğe bağlı olarak her OpenClaw oturumu için yaşam döngüsüyle eşzamanlı bir ClickClack kanalı oluşturabilir. Yönetilen tartışma kanalları, gözlem ve aktarım için aynı ajana ait bir yan oturum kullanırken bağlı ana oturum yalnızca çekme işlevli bir `discussion` aracı alır. Yapılandırma ve oturum aracı görünürlüğü gereksinimleri için [ClickClack oturum tartışmaları](/tr/channels/clickclack#session-discussions) bölümüne bakın.
+
+<!-- openclaw-plugin-reference:manual-end -->
 
 ## İlgili belgeler
 

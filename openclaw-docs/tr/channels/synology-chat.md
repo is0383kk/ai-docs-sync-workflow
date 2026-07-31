@@ -2,21 +2,22 @@
 read_when:
     - OpenClaw ile Synology Chat'i ayarlama
     - Synology Chat Webhook yönlendirmesinde hata ayıklama
-summary: Synology Chat Webhook kurulumu ve OpenClaw yapılandırması
+summary: Synology Chat webhook kurulumu ve OpenClaw yapılandırması
 title: Synology Chat
 x-i18n:
-    generated_at: "2026-07-12T11:30:19Z"
+    generated_at: "2026-07-26T23:13:08Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 7829bb1464c4f5546adf086a96b7f3478e6f03e35ed2443bd92c160fa3d2bb8b
+    source_hash: 3c03379944ee4187260a7287f6d2aed1ad8fdd1c22b5581c8a5d55515bbb6ad5
     source_path: channels/synology-chat.md
     workflow: 16
 ---
 
-Synology Chat, OpenClaw'a bir Webhook çifti üzerinden bağlanır: Synology Chat giden Webhook'u, gelen doğrudan mesajları Gateway'e gönderir; yanıtlar ise Synology Chat gelen Webhook'u üzerinden geri iletilir.
+Synology Chat, OpenClaw'a bir Webhook çifti aracılığıyla bağlanır: Synology Chat giden Webhook'u gelen doğrudan mesajları Gateway'e gönderir ve yanıtlar bir Synology Chat gelen Webhook'u üzerinden geri iletilir.
 
-Durum: Resmî Plugin, ayrı olarak kurulur. Yalnızca doğrudan mesajlar desteklenir; metin ve URL tabanlı dosya gönderimleri desteklenir.
+Durum: resmi Plugin, ayrı olarak kurulur. Yalnızca doğrudan mesajlar; metin ve URL tabanlı dosya gönderimleri desteklenir.
 
 ## Kurulum
 
@@ -30,9 +31,9 @@ Yerel çalışma kopyası (bir git deposundan çalıştırırken):
 openclaw plugins install ./path/to/local/synology-chat-plugin
 ```
 
-Ayrıntılar: [Plugin'ler](/tr/tools/plugin)
+Ayrıntılar: [Pluginler](/tr/tools/plugin)
 
-## Hızlı yapılandırma
+## Hızlı kurulum
 
 1. Plugin'i kurun (yukarıda).
 2. Synology Chat entegrasyonlarında:
@@ -40,17 +41,17 @@ Ayrıntılar: [Plugin'ler](/tr/tools/plugin)
    - Gizli token'ınızla bir giden Webhook oluşturun.
 3. Giden Webhook URL'sini OpenClaw Gateway'inize yönlendirin:
    - Varsayılan olarak `https://gateway-host/webhook/synology`.
-   - Veya özel `channels.synology-chat.webhookPath` değeriniz.
-4. OpenClaw'daki yapılandırmayı tamamlayın. Synology Chat, her iki akışta da aynı kanal yapılandırma listesinde görünür:
-   - Rehberli: `openclaw onboard` veya `openclaw channels add`
+   - Ya da özel `channels.synology-chat.webhookPath` değeriniz.
+4. Kurulumu OpenClaw'da tamamlayın. Synology Chat, her iki akışta da aynı kanal kurulum listesinde görünür:
+   - Kılavuzlu: `openclaw onboard` veya `openclaw channels add`
    - Doğrudan: `openclaw channels add --channel synology-chat --token <token> --url <incoming-webhook-url>`
 5. Gateway'i yeniden başlatın ve Synology Chat botuna bir doğrudan mesaj gönderin.
 
 Webhook kimlik doğrulama ayrıntıları:
 
-- OpenClaw, giden Webhook token'ını sırasıyla `body.token`, ardından
-  `?token=...`, ardından başlıklardan kabul eder.
-- Kabul edilen başlık biçimleri:
+- OpenClaw, giden Webhook token'ını önce `body.token`, ardından
+  `?token=...`, son olarak üstbilgilerden kabul eder.
+- Kabul edilen üstbilgi biçimleri:
   - `x-synology-token`
   - `x-webhook-token`
   - `x-openclaw-token`
@@ -58,7 +59,13 @@ Webhook kimlik doğrulama ayrıntıları:
 - Boş veya eksik token'lar güvenli biçimde reddedilir.
 - Yükler `application/x-www-form-urlencoded` veya `application/json` olabilir; `token`, `user_id` ve `text` zorunludur.
 
-En küçük yapılandırma:
+## Gelen verilerin kalıcılığı
+
+Token, gönderen politikası ve hız sınırı denetimleri geçtikten sonra OpenClaw, Webhook token'ını depolanan zarftan kaldırır ve olayı onaylamadan önce kalıcı olarak kuyruğa alır. Rota, yalnızca bu ekleme başarılı olduktan sonra `204` döndürür; kalıcı depolama hatası `503` döndürür, böylece Synology Chat mesajı sessizce kaybetmek yerine yeniden deneyebilir.
+
+Bekleyen veya yeniden denenebilir olaylar Gateway yeniden başlatıldığında korunur. Synology'nin kararlı `post_id` değeri, ilgili etkin veya saklanan tamamlanma kaydı var olduğu sürece yinelenen kuyruk girdilerini engeller. Kuyruktan aracıya devir boyunca teslimat en az bir kez yapılmaya devam eder; dolayısıyla bu sınırdaki bir çökme, bir etkileşimin yeniden oynatılmasına neden olabilir.
+
+Asgari yapılandırma:
 
 ```json5
 {
@@ -90,16 +97,16 @@ Varsayılan hesap için ortam değişkenlerini kullanabilirsiniz:
 
 Yapılandırma değerleri ortam değişkenlerini geçersiz kılar.
 
-`SYNOLOGY_CHAT_INCOMING_URL` ve `SYNOLOGY_NAS_HOST`, çalışma alanındaki bir `.env` dosyasından ayarlanamaz; bkz. [Çalışma alanı `.env` dosyaları](/tr/gateway/security#workspace-env-files).
+`SYNOLOGY_CHAT_INCOMING_URL` ve `SYNOLOGY_NAS_HOST`, çalışma alanındaki bir `.env` üzerinden ayarlanamaz; bkz. [Çalışma alanı `.env` dosyaları](/tr/gateway/security#workspace-env-files).
 
 ## Doğrudan mesaj politikası ve erişim denetimi
 
-- Desteklenen `dmPolicy` değerleri: `allowlist` (varsayılan), `open` ve `disabled`. Synology Chat'te eşleştirme akışı yoktur; göndericileri, sayısal Synology kullanıcı kimliklerini `allowedUserIds` alanına ekleyerek onaylayın.
+- Desteklenen `dmPolicy` değerleri: `allowlist` (varsayılan), `open` ve `disabled`. Synology Chat'te eşleştirme akışı yoktur; gönderenleri, sayısal Synology kullanıcı kimliklerini `allowedUserIds` alanına ekleyerek onaylayın.
 - `allowedUserIds`, Synology kullanıcı kimliklerinin bir listesini (veya virgülle ayrılmış dizesini) kabul eder.
 - `allowlist` modunda boş bir `allowedUserIds` listesi hatalı yapılandırma olarak değerlendirilir ve Webhook rotası başlatılmaz.
-- `dmPolicy: "open"`, yalnızca `allowedUserIds` içinde `"*"` bulunduğunda herkese açık doğrudan mesajlara izin verir; kısıtlayıcı girdiler kullanıldığında yalnızca eşleşen kullanıcılar sohbet edebilir. Boş bir `allowedUserIds` listesiyle kullanılan `open` da rotayı başlatmayı reddeder.
+- `dmPolicy: "open"`, yalnızca `allowedUserIds` içinde `"*"` bulunduğunda herkese açık doğrudan mesajlara izin verir; kısıtlayıcı girdiler varsa yalnızca eşleşen kullanıcılar sohbet edebilir. Boş bir `allowedUserIds` listesiyle `open` de rotayı başlatmayı reddeder.
 - `dmPolicy: "disabled"` doğrudan mesajları engeller.
-- Yanıt alıcısı bağlama işlemi varsayılan olarak kararlı sayısal `user_id` üzerinde kalır. `channels.synology-chat.dangerouslyAllowNameMatching: true`, yanıt teslimatı için değiştirilebilir kullanıcı adı/takma ad aramasını yeniden etkinleştiren acil durum uyumluluk modudur.
+- Yanıt alıcısı bağlaması varsayılan olarak kararlı sayısal `user_id` üzerinde kalır. `channels.synology-chat.dangerouslyAllowNameMatching: true`, yanıt teslimatı için değiştirilebilir kullanıcı adı/takma ad aramasını yeniden etkinleştiren acil durum uyumluluk modudur.
 
 ## Giden teslimat
 
@@ -113,19 +120,19 @@ openclaw message send --channel synology-chat --target synology-chat:123456 --me
 openclaw message send --channel synology-chat --target synology:123456 --message "Short prefix"
 ```
 
-Giden metin 2000 karakterlik parçalara bölünür. Medya gönderimleri, URL tabanlı dosya teslimatıyla desteklenir: NAS dosyayı indirip ekler (en fazla 32 MB). Giden dosya URL'leri `http` veya `https` kullanmalıdır; özel veya başka bir nedenle engellenmiş ağ hedefleri, OpenClaw URL'yi NAS Webhook'una iletmeden önce reddedilir.
+Giden metin 2000 karakterlik parçalara bölünür. Medya gönderimleri URL tabanlı dosya teslimatıyla desteklenir: NAS dosyayı indirir ve ekler (en fazla 32 MB). Giden dosya URL'leri `http` veya `https` kullanmalıdır; özel ya da başka bir nedenle engellenen ağ hedefleri, OpenClaw URL'yi NAS Webhook'una iletmeden önce reddedilir.
 
 ## Çoklu hesap
 
 `channels.synology-chat.accounts` altında birden fazla Synology Chat hesabı desteklenir.
 Her hesap token'ı, gelen URL'yi, Webhook yolunu, doğrudan mesaj politikasını ve sınırları geçersiz kılabilir.
-Doğrudan mesaj oturumları hesap ve kullanıcı başına yalıtılır; dolayısıyla iki farklı Synology hesabındaki aynı sayısal `user_id`,
-konuşma dökümü durumunu paylaşmaz.
-Etkinleştirilen her hesaba farklı bir `webhookPath` verin. OpenClaw, tam olarak aynı olan yinelenen yolları reddeder
-ve çoklu hesap yapılandırmalarında yalnızca paylaşılan bir Webhook yolunu devralan adlandırılmış hesapları başlatmayı reddeder.
-Adlandırılmış bir hesap için eski devralma davranışına özellikle ihtiyacınız varsa o hesapta veya
-`channels.synology-chat` altında `dangerouslyAllowInheritedWebhookPath: true` ayarını kullanın;
-ancak tam olarak aynı olan yinelenen yollar yine güvenli biçimde reddedilir. Hesap başına açıkça belirtilmiş yolları tercih edin.
+Doğrudan mesaj oturumları hesap ve kullanıcı başına yalıtılır; dolayısıyla iki farklı Synology hesabındaki aynı sayısal `user_id`
+transkript durumunu paylaşmaz.
+Etkinleştirilen her hesaba farklı bir `webhookPath` verin. OpenClaw, tamamen aynı yolları reddeder
+ve çoklu hesap kurulumlarında yalnızca paylaşılan bir Webhook yolunu devralan adlandırılmış hesapları başlatmayı reddeder.
+Adlandırılmış bir hesap için eski davranış devralmasını bilinçli olarak kullanmanız gerekiyorsa söz konusu hesapta veya `channels.synology-chat` konumunda
+`dangerouslyAllowInheritedWebhookPath: true` ayarlayın;
+ancak tamamen aynı yollar yine güvenli biçimde reddedilir. Hesap başına açıkça belirtilmiş yolları tercih edin.
 
 ```json5
 {
@@ -152,35 +159,35 @@ ancak tam olarak aynı olan yinelenen yollar yine güvenli biçimde reddedilir. 
 
 ## Güvenlik notları
 
-- `token` değerini gizli tutun ve sızarsa değiştirin.
-- Kendinden imzalı yerel bir NAS sertifikasına açıkça güvenmediğiniz sürece `allowInsecureSsl: false` olarak bırakın.
-- Gelen Webhook isteklerinin token'ı doğrulanır ve gönderici başına hız sınırı uygulanır (`rateLimitPerMinute`, varsayılan 30).
-- Geçersiz token denetimleri sabit süreli gizli değer karşılaştırması kullanır ve güvenli biçimde reddedilir; tekrarlanan geçersiz token denemeleri kaynak IP'yi geçici olarak kilitler.
+- `token` değerini gizli tutun ve sızarsa yenileyin.
+- Kendinden imzalı yerel bir NAS sertifikasına açıkça güvenmiyorsanız `allowInsecureSsl: false` değerini koruyun.
+- Gelen Webhook isteklerinin token'ı doğrulanır ve gönderen başına hız sınırı uygulanır (`rateLimitPerMinute`, varsayılan 30).
+- Geçersiz token denetimleri sabit süreli gizli değer karşılaştırması kullanır ve güvenli biçimde reddedilir; yinelenen geçersiz token denemeleri kaynak IP'yi geçici olarak kilitler.
 - Gelen mesaj metni, bilinen istem enjeksiyonu kalıplarına karşı temizlenir ve 4000 karakterde kesilir.
-- Üretim ortamı için `dmPolicy: "allowlist"` tercih edin.
-- Eski kullanıcı adı tabanlı yanıt teslimatına açıkça ihtiyacınız yoksa `dangerouslyAllowNameMatching` ayarını kapalı tutun.
-- Çoklu hesap yapılandırmasında paylaşılan yol yönlendirme riskini açıkça kabul etmediğiniz sürece `dangerouslyAllowInheritedWebhookPath` ayarını kapalı tutun.
+- Üretim için `dmPolicy: "allowlist"` tercih edin.
+- Eski kullanıcı adı tabanlı yanıt teslimatına açıkça ihtiyacınız yoksa `dangerouslyAllowNameMatching` kapalı kalsın.
+- Çoklu hesap kurulumunda paylaşılan yol yönlendirme riskini açıkça kabul etmiyorsanız `dangerouslyAllowInheritedWebhookPath` kapalı kalsın.
 
 ## Sorun giderme
 
 - `Missing required fields (token, user_id, text)`:
-  - giden Webhook yükünde zorunlu alanlardan biri eksiktir
-  - Synology token'ı başlıklarda gönderiyorsa Gateway'in/proxy'nin bu başlıkları koruduğundan emin olun
+  - giden Webhook yükünde zorunlu alanlardan biri eksik
+  - Synology token'ı üstbilgilerde gönderiyorsa Gateway'in/proxy'nin bu üstbilgileri koruduğundan emin olun
 - `Invalid token`:
-  - giden Webhook gizli değeri `channels.synology-chat.token` ile eşleşmiyordur
-  - istek yanlış hesaba/Webhook yoluna ulaşıyordur
-  - ters proxy, istek OpenClaw'a ulaşmadan önce token başlığını kaldırmıştır
+  - giden Webhook gizli değeri `channels.synology-chat.token` ile eşleşmiyor
+  - istek yanlış hesap/Webhook yoluna ulaşıyor
+  - ters proxy, istek OpenClaw'a ulaşmadan önce token üstbilgisini kaldırdı
 - `Rate limit exceeded`:
-  - aynı kaynaktan gelen çok sayıda geçersiz token denemesi, bu kaynağı geçici olarak kilitleyebilir
-  - kimliği doğrulanmış göndericiler için ayrıca kullanıcı başına mesaj hız sınırı vardır
+  - aynı kaynaktan çok fazla geçersiz token denemesi, söz konusu kaynağı geçici olarak kilitleyebilir
+  - kimliği doğrulanmış gönderenler için ayrıca kullanıcı başına ayrı bir mesaj hız sınırı vardır
 - `Allowlist is empty. Configure allowedUserIds or use dmPolicy=open with allowedUserIds=["*"].`:
-  - `dmPolicy="allowlist"` etkindir ancak hiçbir kullanıcı yapılandırılmamıştır
+  - `dmPolicy="allowlist"` etkinleştirilmiş ancak hiçbir kullanıcı yapılandırılmamış
 - `User not authorized`:
-  - göndericinin sayısal `user_id` değeri `allowedUserIds` içinde değildir
+  - gönderenin sayısal `user_id` değeri `allowedUserIds` içinde değil
 
-## İlgili konular
+## İlgili
 
-- [Kanallara genel bakış](/tr/channels) — desteklenen tüm kanallar
-- [Gruplar](/tr/channels/groups) — grup sohbeti davranışı ve bahsetme denetimi
-- [Kanal yönlendirme](/tr/channels/channel-routing) — mesajlar için oturum yönlendirmesi
-- [Güvenlik](/tr/gateway/security) — erişim modeli ve sağlamlaştırma
+- [Kanallara Genel Bakış](/tr/channels) — desteklenen tüm kanallar
+- [Gruplar](/tr/channels/groups) — grup sohbeti davranışı ve bahsetme kısıtlaması
+- [Kanal Yönlendirme](/tr/channels/channel-routing) — mesajlar için oturum yönlendirme
+- [Güvenlik](/tr/gateway/security) — erişim modeli ve güvenliği güçlendirme

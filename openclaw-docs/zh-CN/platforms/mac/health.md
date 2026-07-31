@@ -1,45 +1,55 @@
 ---
 read_when:
-    - 调试 Mac 应用健康状态指示器
+    - 调试 Mac 应用健康指示器
 summary: macOS 应用如何报告 Gateway 网关/渠道健康状态
 title: 健康检查（macOS）
 x-i18n:
-    generated_at: "2026-07-11T20:40:42Z"
+    generated_at: "2026-07-26T05:52:59Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: a086c527796dbe453bdee1cc9cbe1e0fc1157de710c8c6de186411fe9aa3bc7b
+    source_hash: 095abdbefa7db7c0d14435e2c5db7d1ebc03afa0c539555a7abdd9170d015fb8
     source_path: platforms/mac/health.md
     workflow: 16
 ---
 
 # macOS 上的健康检查
 
-如何从菜单栏应用读取已关联渠道的健康状态。
+如何从菜单栏应用中读取已链接渠道的健康状态。
 
 ## 菜单栏
 
-状态指示点：
+状态圆点：
 
-- 绿色：已关联且探测健康。
-- 橙色：已关联，但某个渠道探测报告状态降级或未连接。
-- 红色：尚未关联。
+- 绿色：已链接且探测正常。
+- 橙色：已链接，但渠道探测报告状态降级/未连接。
+- 红色：尚未链接。
 
-次要信息行显示“已关联 · 身份验证 12 分钟”，或显示失败原因。
-菜单中的“立即运行健康检查”会触发按需探测。
+第二行显示“已链接 · 身份验证 12 分钟”，或显示失败原因。
+菜单中的“Run Health Check Now”会触发按需探测。
 
 ## 设置
 
-- General 选项卡显示一张健康状态卡片：状态指示点、摘要行（关联状态和身份验证时长），以及可选的失败详情行，并提供 **Retry now** 和 **Open logs** 按钮。
-- **Channels tab** 显示 WhatsApp 和 Telegram 各渠道的状态与控制项（登录二维码、退出登录、探测、最近一次断开连接或错误）。
+- General 选项卡显示健康卡片：状态圆点、摘要行（链接状态 +
+  身份验证时长）以及可选的失败详情行，并带有 **Retry now** 和
+  **Open logs** 按钮。
+- **Channels 选项卡**显示 WhatsApp 和 Telegram 的各渠道状态及控制项（登录二维码、
+  注销、探测、上次断开连接/错误）。
 
 ## 探测的工作原理
 
-应用通过现有的 WebSocket 连接（而非调用 CLI shell 命令）每隔约 60 秒以及按需调用 Gateway 网关的 `health` RPC。该 RPC 加载凭据并报告状态，不会发送消息。应用分别缓存最近一次正常快照和最近一次错误，因此 UI 可以立即加载，且离线时不会闪烁。
+应用通过现有的 WebSocket 连接调用 Gateway 网关的 `health` RPC
+（而非调用 CLI shell），约每 60 秒调用一次，也可按需调用。RPC 会加载
+凭据并报告状态，而不会发送消息。应用分别缓存最后一次
+正常快照和最后一次错误，因此 UI 能够立即加载，
+并且离线时不会闪烁。
 
-## 如有疑问
+## 如果不确定
 
-使用 [Gateway 健康](/zh-CN/gateway/health) 中的 CLI 流程（`openclaw status`、`openclaw status --deep`、`openclaw health --json`），并持续查看 `/tmp/openclaw/openclaw-*.log`，筛选 `web-heartbeat` / `web-reconnect`。
+使用 [Gateway 健康](/zh-CN/gateway/health) 中的 CLI 流程（`openclaw status`、
+`openclaw status --deep`、`openclaw health --json`），并运行
+`openclaw logs --follow`，筛选 `web-heartbeat` / `web-reconnect`。
 
 ## 相关内容
 

@@ -4,11 +4,12 @@ read_when:
 summary: Statuslogica van de menubalk en wat aan gebruikers wordt getoond
 title: Menubalk
 x-i18n:
-    generated_at: "2026-07-12T09:04:30Z"
+    generated_at: "2026-07-27T05:38:58Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 480a85f383a6495c0e45850a322c0c67c4cc35e21d2d29b4bd86f42fdbf9430a
+    source_hash: d53cd15109864b88010f41ccf4c46ea7fff6721bc6632630d83a558084cb2d62
     source_path: platforms/mac/menu-bar.md
     workflow: 16
 ---
@@ -16,28 +17,29 @@ x-i18n:
 ## Wat wordt weergegeven
 
 - De huidige werkstatus van de agent wordt weergegeven in het menubalkpictogram en in de eerste statusrij van het menu.
-- De gezondheidsstatus wordt verborgen zolang er actief werk wordt uitgevoerd; deze keert terug zodra alle sessies inactief zijn.
-- Een hoofditem 'Context' opent een submenu met recente sessies in plaats van deze in het hoofdmenu uit te vouwen.
-- Een blok 'Nodes' in het hoofdmenu vermeldt alleen gekoppelde **apparaten** (uit `node.list`), geen client-/aanwezigheidsvermeldingen.
-- Een hoofdsectie 'Gebruik' verschijnt onder Context wanneer momentopnamen van het providergebruik beschikbaar zijn, gevolgd door kostengegevens indien beschikbaar.
+- De gezondheidsstatus is verborgen zolang er werk actief is; deze keert terug zodra alle sessies inactief zijn.
+- Een hoofditem "Context" opent een submenu met recente sessies in plaats van ze in het hoofdmenu uit te vouwen.
+- Een blok "Nodes" in het hoofdmenu vermeldt alleen gekoppelde **apparaten** (uit `node.list`), geen client-/aanwezigheidsvermeldingen.
+- Een hoofdsectie "Gebruik" verschijnt onder Context wanneer momentopnamen van providergebruik beschikbaar zijn, gevolgd door kostendetails indien beschikbaar.
+- **Snelle chat** opent het zwevende invoerveld voor de hoofdsessie; de huidige algemene sneltoets staat naast het item.
 
 ## Statusmodel
 
 - Bron: `WorkActivityStore` (`apps/macos/Sources/OpenClaw/WorkActivityStore.swift`).
-- Gebeurtenissen komen binnen als `ControlAgentEvent` met een `runId`; de afhandelingsfunctie (`ControlChannel.routeWorkActivity`) leest `sessionKey` uit de gebeurtenispayload en gebruikt standaard `"main"` als deze ontbreekt.
-- Prioriteit: de hoofdsessie (standaard `sessionKey == "main"`) heeft altijd voorrang. Als de hoofdsessie actief is, wordt de status daarvan onmiddellijk weergegeven. Als de hoofdsessie inactief is, wordt in plaats daarvan de meest recent actieve niet-hoofdsessie weergegeven. De opslag wisselt niet tijdens een activiteit; er wordt alleen gewisseld wanneer de huidige sessie inactief wordt of de hoofdsessie actief wordt.
+- Gebeurtenissen komen binnen als `ControlAgentEvent` met een `runId`; de handler (`ControlChannel.routeWorkActivity`) leest `sessionKey` uit de gebeurtenispayload en gebruikt standaard `"main"` als dit ontbreekt.
+- Prioriteit: de hoofdsessie (standaard `sessionKey == "main"`) heeft altijd voorrang. Als de hoofdsessie actief is, wordt de status ervan onmiddellijk weergegeven. Als de hoofdsessie inactief is, wordt in plaats daarvan de laatst actieve niet-hoofdsessie weergegeven. De store wisselt niet tijdens activiteit; deze wisselt alleen wanneer de huidige sessie inactief wordt of de hoofdsessie actief wordt.
 - Activiteitstypen:
   - `job`: uitvoering van opdrachten op hoog niveau (`state: started|streaming|done|error|...`).
-  - `tool`: `phase: start|result` met `name` en optioneel `meta`/`args`.
+  - `tool`: `phase: start|result` met `name`, optioneel `meta`/`args`.
 
-## `IconState`-enum (Swift)
+## IconState-enum (Swift)
 
 - `idle`
 - `workingMain(ActivityKind)`
 - `workingOther(ActivityKind)`
-- `overridden(ActivityKind)` (foutopsporingsoverschrijving)
+- `overridden(ActivityKind)` (debug-overschrijving)
 
-### `ActivityKind` -> badgesymbool
+### ActivityKind -> badgesymbool
 
 `ActivityKind` omvat een `ToolKind` (`bash`, `read`, `write`, `edit`, `attach`, `other`) of een losse `job`. Elk type wordt toegewezen aan een SF Symbols-badge die over het beestjespictogram wordt getekend (`IconState.badgeSymbolName`):
 
@@ -53,46 +55,46 @@ x-i18n:
 ### Visuele toewijzing
 
 - `idle`: normaal beestje, geen badge.
-- `workingMain`: badge met symbool, volledige tint (prominentie `.primary`), 'werk'-animatie van de poten.
-- `workingOther`: badge met symbool, gedempte tint (prominentie `.secondary`), geen renbeweging.
-- `overridden`: gebruikt het gekozen symbool en de gekozen tint, ongeacht de werkelijke activiteit.
+- `workingMain`: badge met symbool, volledige tint (prominentie `.primary`), animatie waarbij de pootjes "werken".
+- `workingOther`: badge met symbool, gedempte tint (prominentie `.secondary`), geen scharrelbeweging.
+- `overridden`: gebruikt het gekozen symbool/de gekozen tint ongeacht de werkelijke activiteit.
 
-## Submenu Context
+## Context-submenu
 
-- Het hoofdmenu toont één rij 'Context' met een aantal sessies/status; hiermee wordt een submenu (`MenuSessionsInjector`) geopend.
-- De kop van het submenu toont het aantal actieve sessies van de afgelopen 24 uur.
-- Elke sessierij behoudt de tokenbalk, leeftijd, het voorbeeld, de schakelaar voor denken/uitgebreide uitvoer en de acties voor opnieuw instellen, comprimeren en verwijderen.
-- Meldingen over laden, een verbroken verbinding en fouten bij het laden van sessies worden in het submenu Context weergegeven.
+- Het hoofdmenu toont één rij "Context" met het aantal sessies/de status; deze opent een submenu (`MenuSessionsInjector`).
+- De kop van het submenu toont het aantal actieve sessies in de afgelopen 24 uur.
+- Elke sessierij behoudt de tokenbalk, ouderdom, voorvertoning, schakelaar voor denken/uitgebreide uitvoer en acties voor opnieuw instellen, comprimeren en verwijderen.
+- Berichten over laden, verbroken verbindingen en fouten bij het laden van sessies worden binnen het Context-submenu weergegeven.
 - De secties voor gebruik en kosten blijven op hoofdniveau onder Context staan, zodat ze in één oogopslag zichtbaar blijven zonder het submenu te openen.
 
 ## Tekst van de statusrij (menu)
 
-- Terwijl er actief wordt gewerkt: `<Session role> · <activity label>` (`"\(roleLabel) · \(activity.label)"` in `MenuContentView`), waarbij het rollabel `Main` of `Other` is.
+- Zolang er werk actief is: `<Session role> · <activity label>` (`"\(roleLabel) · \(activity.label)"` in `MenuContentView`), waarbij het rollabel `Main` of `Other` is.
 - Bij inactiviteit: valt terug op het gezondheidsoverzicht.
 
-## Gebeurtenisverwerking
+## Verwerking van gebeurtenissen
 
-- Bron: `agent`-gebeurtenissen van het besturingskanaal, gerouteerd door `ControlChannel.routeWorkActivity(from:)`.
+- Bron: gebeurtenissen van het besturingskanaal `agent`, gerouteerd door `ControlChannel.routeWorkActivity(from:)`.
 - Geparseerde velden:
   - `stream: "job"` met `data.state` voor starten/stoppen.
-  - `stream: "tool"` met `data.phase`, `data.name` en optioneel `data.meta`/`data.args`.
+  - `stream: "tool"` met `data.phase`, `data.name`, optioneel `data.meta`/`data.args`.
 - Toollabels zijn afkomstig van `ToolDisplayRegistry.resolve(name:args:meta:)`; niet-herkende namen vallen terug op de onbewerkte toolnaam.
 
-## Foutopsporingsoverschrijving
+## Debug-overschrijving
 
-- Settings > Debug > kiezer "Icon override":
+- Settings > Debug > keuzelijst "Icon override":
   - `System (auto)` (standaard)
-  - `Working: main` / `Working: other` (per soort tool: bash, lezen, schrijven, bewerken, overig)
+  - `Working: main` / `Working: other` (per tooltype: bash, lezen, schrijven, bewerken, overig)
   - `Idle`
-- Opgeslagen onder de `UserDefaults`-sleutel `openclaw.iconOverride`; toegewezen aan `IconState.overridden`.
+- Opgeslagen onder sleutel `openclaw.iconOverride` van `UserDefaults`; toegewezen aan `IconState.overridden`.
 
 ## Testchecklist
 
-- Activeer een taak in de hoofdsessie: het pictogram verandert onmiddellijk en de statusrij toont het hoofdlabel.
-- Activeer een taak in een andere sessie terwijl de hoofdsessie inactief is: het pictogram/de status toont de andere sessie en blijft stabiel totdat deze is voltooid.
-- Start de hoofdsessie terwijl een andere sessie actief is: het pictogram schakelt onmiddellijk over naar de hoofdsessie.
-- Snelle opeenvolging van toolactiviteiten: de badge flikkert niet (respijtperiode van 2 seconden voordat een voltooide tool wordt gewist, `WorkActivityStore.toolResultGrace`).
-- De statusrij voor de systeemgezondheid verschijnt opnieuw zodra alle sessies inactief zijn.
+- Start een taak in de hoofdsessie: het pictogram wisselt onmiddellijk en de statusrij toont het hoofdlabel.
+- Start een taak in een niet-hoofdsessie terwijl de hoofdsessie inactief is: het pictogram/de status toont de niet-hoofdsessie en blijft stabiel totdat deze is voltooid.
+- Start de hoofdsessie terwijl een andere sessie actief is: het pictogram wisselt onmiddellijk naar de hoofdsessie.
+- Snelle opeenvolgingen van tools: de badge flikkert niet (respijtperiode van 2s voordat een voltooide tool wordt gewist, `WorkActivityStore.toolResultGrace`).
+- De gezondheidsrij verschijnt opnieuw zodra alle sessies inactief zijn.
 
 ## Gerelateerd
 

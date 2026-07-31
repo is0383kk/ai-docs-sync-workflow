@@ -1,31 +1,32 @@
 ---
 read_when:
-    - شما در حال نصب، پیکربندی یا ممیزی Plugin ‏google-meet هستید
+    - در حال نصب، پیکربندی یا ممیزی Plugin مربوط به google-meet هستید
 summary: Plugin شرکت‌کننده Google Meet برای OpenClaw جهت پیوستن به تماس‌ها از طریق انتقال‌دهنده‌های Chrome یا Twilio.
 title: Plugin گوگل میت
 x-i18n:
-    generated_at: "2026-07-12T10:29:37Z"
+    generated_at: "2026-07-27T14:24:08Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2f0086a8b48f6e120ad391a99d60a14d7682910ca3ad176e41a51b341e9bdb49
+    source_hash: e8ee90e169486d48efc664fb4fdb25133f0198590d3c3e7b3a10df12bf4a5dcb
     source_path: plugins/reference/google-meet.md
     workflow: 16
 ---
 
-# Plugin گوگل میت
+# Plugin ‏Google Meet
 
-Plugin شرکت‌کنندهٔ گوگل میت برای OpenClaw جهت پیوستن به تماس‌ها از طریق انتقال‌دهنده‌های Chrome یا Twilio.
+Plugin شرکت‌کنندهٔ Google Meet برای OpenClaw جهت پیوستن به تماس‌ها از طریق انتقال‌دهنده‌های Chrome یا Twilio.
 
 ## توزیع
 
 - بسته: `@openclaw/google-meet`
-- روش نصب: npm؛ ClawHub
+- مسیر نصب: npm؛ ClawHub
 
 ## سطح
 
-قراردادها: ابزارها
+قراردادها: `tools`، `transcriptSourceProviders`
 
 ## مستندات مرتبط
 
-- [گوگل میت](/fa/plugins/google-meet)
+- [google-meet](/fa/plugins/google-meet)

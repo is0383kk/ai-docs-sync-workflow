@@ -1,59 +1,54 @@
 ---
 read_when:
     - आप web_search के लिए Ollama का उपयोग करना चाहते हैं
-    - आपको बिना कुंजी वाला web_search प्रदाता चाहिए
-    - आप hosted Ollama Web Search को OLLAMA_API_KEY के साथ उपयोग करना चाहते हैं
-    - आपको Ollama Web Search सेटअप मार्गदर्शन चाहिए
-summary: स्थानीय Ollama होस्ट या होस्ट की गई Ollama API के माध्यम से Ollama वेब खोज
+    - आप एक कुंजी-रहित web_search प्रदाता चाहते हैं
+    - आप `OLLAMA_API_KEY` के साथ होस्ट की गई Ollama वेब खोज का उपयोग करना चाहते हैं
+    - आपको Ollama Web Search सेटअप संबंधी मार्गदर्शन चाहिए
+summary: स्थानीय Ollama होस्ट या होस्टेड Ollama API के माध्यम से Ollama वेब खोज
 title: Ollama वेब खोज
 x-i18n:
-    generated_at: "2026-06-29T00:22:07Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:09:37Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 4a30a6a2ed78d0d5f680ca2894e5e015cf99fbae2bcad4601727bbc9f560c124
+    source_hash: edbbd887841339ab4c0c62ab7682a22fe99434a788957a91989fce6942187e9a
     source_path: tools/ollama-search.md
     workflow: 16
 ---
 
-OpenClaw बंडल किए गए `web_search` प्रदाता के रूप में **Ollama Web Search** का समर्थन करता है। यह Ollama की वेब-सर्च API का उपयोग करता है और शीर्षकों, URLs, और स्निपेट्स के साथ संरचित परिणाम लौटाता है।
+OpenClaw, Ollama के वेब-सर्च API से शीर्षक, URL और स्निपेट लौटाने वाले, बंडल किए गए `web_search` प्रदाता के रूप में **Ollama Web Search** का समर्थन करता है।
 
-स्थानीय या स्वयं-होस्ट किए गए Ollama के लिए, इस सेटअप को डिफ़ॉल्ट रूप से API key की आवश्यकता नहीं होती। इसके लिए ये आवश्यक हैं:
-
-- एक Ollama होस्ट जो OpenClaw से पहुंच योग्य हो
-- `ollama signin`
-
-सीधे होस्टेड खोज के लिए, Ollama प्रदाता base URL को `https://ollama.com` पर सेट करें और वास्तविक `OLLAMA_API_KEY` प्रदान करें।
+स्थानीय/स्वयं-होस्ट किए गए Ollama को डिफ़ॉल्ट रूप से किसी API कुंजी की आवश्यकता नहीं होती; इसके लिए पहुँच योग्य Ollama होस्ट और `ollama signin` आवश्यक हैं। सीधे होस्ट की गई खोज (स्थानीय Ollama के बिना) के लिए `baseUrl: "https://ollama.com"` और वास्तविक `OLLAMA_API_KEY` आवश्यक हैं।
 
 ## सेटअप
 
 <Steps>
   <Step title="Ollama शुरू करें">
-    सुनिश्चित करें कि Ollama इंस्टॉल और चल रहा है।
+    सुनिश्चित करें कि Ollama इंस्टॉल है और चल रहा है।
   </Step>
   <Step title="साइन इन करें">
-    चलाएँ:
-
     ```bash
     ollama signin
     ```
-
   </Step>
   <Step title="Ollama Web Search चुनें">
-    चलाएँ:
-
     ```bash
     openclaw configure --section web
     ```
 
-    फिर प्रदाता के रूप में **Ollama Web Search** चुनें।
+    प्रदाता के रूप में **Ollama Web Search** चुनें।
 
   </Step>
 </Steps>
 
-यदि आप पहले से मॉडल्स के लिए Ollama का उपयोग करते हैं, तो Ollama Web Search उसी कॉन्फ़िगर किए गए होस्ट का पुनः उपयोग करता है।
+यदि आप मॉडल के लिए पहले से Ollama का उपयोग करते हैं, तो Ollama Web Search उसी कॉन्फ़िगर किए गए होस्ट का पुनः उपयोग करता है।
 
-## कॉन्फ़िग
+<Note>
+  OpenClaw कभी भी उच्च-प्राथमिकता वाले क्रेडेंशियल-युक्त प्रदाता के स्थान पर Ollama Web Search को स्वतः नहीं चुनता; आपको इसे `tools.web.search.provider: "ollama"` के साथ स्पष्ट रूप से चुनना होगा।
+</Note>
+
+## कॉन्फ़िगरेशन
 
 ```json5
 {
@@ -67,7 +62,7 @@ OpenClaw बंडल किए गए `web_search` प्रदाता के
 }
 ```
 
-वैकल्पिक Ollama होस्ट ओवरराइड:
+वैकल्पिक होस्ट ओवरराइड, केवल वेब खोज के दायरे में:
 
 ```json5
 {
@@ -85,7 +80,7 @@ OpenClaw बंडल किए गए `web_search` प्रदाता के
 }
 ```
 
-यदि आप Ollama को पहले से मॉडल प्रदाता के रूप में कॉन्फ़िगर करते हैं, तो वेब-सर्च प्रदाता इसके बजाय उस होस्ट का पुनः उपयोग कर सकता है:
+या Ollama मॉडल प्रदाता के लिए पहले से कॉन्फ़िगर किए गए होस्ट का पुनः उपयोग करें:
 
 ```json5
 {
@@ -99,13 +94,9 @@ OpenClaw बंडल किए गए `web_search` प्रदाता के
 }
 ```
 
-Ollama मॉडल प्रदाता canonical key के रूप में `baseUrl` का उपयोग करता है। वेब-सर्च प्रदाता OpenAI SDK-शैली कॉन्फ़िग उदाहरणों के साथ compatibility के लिए `models.providers.ollama` पर `baseURL` का भी सम्मान करता है।
+`models.providers.ollama.baseUrl` मानक कुंजी है; OpenAI SDK-शैली के कॉन्फ़िगरेशन उदाहरणों के साथ संगतता के लिए वेब-खोज प्रदाता वहाँ `baseURL` भी स्वीकार करता है। यदि कुछ भी सेट नहीं है, तो OpenClaw डिफ़ॉल्ट रूप से `http://127.0.0.1:11434` का उपयोग करता है।
 
-यदि कोई स्पष्ट Ollama base URL सेट नहीं है, तो OpenClaw `http://127.0.0.1:11434` का उपयोग करता है।
-
-यदि आपके Ollama होस्ट को bearer auth अपेक्षित है, तो OpenClaw उस कॉन्फ़िगर किए गए होस्ट को अनुरोधों के लिए `models.providers.ollama.apiKey` (या मिलते-जुलते env-समर्थित प्रदाता auth) का पुनः उपयोग करता है।
-
-सीधा होस्टेड Ollama Web Search:
+सीधे होस्ट की गई Ollama Web Search (स्थानीय Ollama के बिना):
 
 ```json5
 {
@@ -127,18 +118,16 @@ Ollama मॉडल प्रदाता canonical key के रूप मे�
 }
 ```
 
-## नोट्स
+## प्रमाणीकरण और अनुरोध रूटिंग
 
-- इस प्रदाता के लिए कोई वेब-सर्च-विशिष्ट API key फ़ील्ड आवश्यक नहीं है।
-- यदि Ollama होस्ट auth-संरक्षित है, तो OpenClaw मौजूद होने पर सामान्य Ollama प्रदाता API key का पुनः उपयोग करता है।
-- यदि `baseUrl` `https://ollama.com` है, तो OpenClaw सीधे `https://ollama.com/api/web_search` को कॉल करता है और कॉन्फ़िगर की गई Ollama API key को bearer auth के रूप में भेजता है।
-- यदि कॉन्फ़िगर किया गया होस्ट web search उपलब्ध नहीं कराता और `OLLAMA_API_KEY` सेट है, तो OpenClaw उस env key को स्थानीय होस्ट को भेजे बिना `https://ollama.com/api/web_search` पर वापस जा सकता है।
-- यदि Ollama पहुंच योग्य नहीं है या साइन इन नहीं है, तो OpenClaw सेटअप के दौरान चेतावनी देता है, लेकिन चयन को अवरुद्ध नहीं करता।
-- जब कोई उच्च-प्राथमिकता वाला credentialed प्रदाता कॉन्फ़िगर नहीं है, तो OpenClaw Ollama Web Search को स्वतः-चयनित नहीं करता; इसे `tools.web.search.provider: "ollama"` के साथ स्पष्ट रूप से चुनें।
-- स्थानीय Ollama daemon होस्ट स्थानीय proxy endpoint `/api/experimental/web_search` का उपयोग करते हैं, जो साइन करके Ollama Cloud को फ़ॉरवर्ड करता है।
-- `https://ollama.com` होस्ट public hosted endpoint `/api/web_search` का उपयोग सीधे bearer API-key auth के साथ करते हैं।
+- वेब-खोज-विशिष्ट API कुंजी फ़ील्ड मौजूद नहीं है; कॉन्फ़िगर किया गया होस्ट प्रमाणीकरण-सुरक्षित होने पर प्रदाता `models.providers.ollama.apiKey` (या उससे मेल खाने वाले परिवेश-समर्थित प्रदाता प्रमाणीकरण) का पुनः उपयोग करता है।
+- होस्ट समाधान क्रम: `plugins.entries.ollama.config.webSearch.baseUrl` →
+  `models.providers.ollama.baseUrl` (या `baseURL`) → `http://127.0.0.1:11434`।
+- यदि समाधान किया गया होस्ट `https://ollama.com` है, तो OpenClaw API कुंजी को बियरर प्रमाणीकरण के रूप में उपयोग करके सीधे `https://ollama.com/api/web_search` को कॉल करता है।
+- अन्यथा OpenClaw पहले स्थानीय प्रॉक्सी एंडपॉइंट `/api/experimental/web_search` को कॉल करता है (जो हस्ताक्षर करके अनुरोध को Ollama Cloud पर अग्रेषित करता है), फिर उसी होस्ट पर `/api/web_search` पर फ़ॉलबैक करता है। यदि दोनों विफल होते हैं और `OLLAMA_API_KEY` सेट है, तो वह उस कुंजी के साथ `https://ollama.com/api/web_search` पर एक बार पुनः प्रयास करता है—उसे स्थानीय होस्ट पर भेजे बिना।
+- यदि Ollama पहुँच योग्य नहीं है या उसमें साइन इन नहीं किया गया है, तो OpenClaw सेटअप के दौरान चेतावनी देता है, लेकिन प्रदाता चुनने से नहीं रोकता।
 
 ## संबंधित
 
-- [Web Search अवलोकन](/hi/tools/web) -- सभी प्रदाता और auto-detection
-- [Ollama](/hi/providers/ollama) -- Ollama मॉडल सेटअप और cloud/local मोड
+- [वेब खोज का अवलोकन](/hi/tools/web) -- सभी प्रदाता और स्वतः-पहचान
+- [Ollama](/hi/providers/ollama) -- Ollama मॉडल सेटअप और क्लाउड/स्थानीय मोड

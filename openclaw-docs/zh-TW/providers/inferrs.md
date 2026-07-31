@@ -1,32 +1,33 @@
 ---
 read_when:
-    - 你想要使用本機 inferrs 伺服器執行 OpenClaw
-    - 您正透過 inferrs 提供 Gemma 或其他模型。
-    - 你需要用於 inferrs 的確切 OpenClaw 相容性旗標
-summary: 透過 inferrs（相容 OpenAI 的本機伺服器）執行 OpenClaw
-title: 推斷
+    - 你想要讓 OpenClaw 連接本機 Inferrs 伺服器執行
+    - 你正在透過 Inferrs 提供 Gemma 或其他模型服務
+    - 你需要 inferrs 的確切 OpenClaw 相容性旗標
+summary: 透過 Inferrs（相容於 OpenAI 的本機伺服器）執行 OpenClaw
+title: Inferrs
 x-i18n:
-    generated_at: "2026-07-11T21:42:20Z"
+    generated_at: "2026-07-26T08:03:20Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 8b9b6fe337a2ec6536332dd62840052fd802fad0a5f3d885ce137523266ff3c9
     source_path: providers/inferrs.md
     workflow: 16
 ---
 
-[inferrs](https://github.com/ericcurtin/inferrs) 透過相容 OpenAI 的 `/v1` API 提供本機模型服務。OpenClaw 透過通用的 `openai-completions` 轉接器與其通訊。
+[inferrs](https://github.com/ericcurtin/inferrs) 透過與 OpenAI 相容的 `/v1` API 提供本機模型。OpenClaw 透過通用 `openai-completions` 轉接器與其通訊。
 
 | 屬性               | 值                                                                   |
 | ------------------ | -------------------------------------------------------------------- |
-| 提供者識別碼       | `inferrs`（自訂；於 `models.providers.inferrs` 下設定）              |
-| 外掛               | 無——不是 OpenClaw 內建的提供者外掛                                   |
-| 驗證環境變數       | 不需要；若您的 inferrs 伺服器未啟用驗證，任何值皆可使用               |
-| API                | 相容 OpenAI（`openai-completions`）                                  |
-| 建議的基底 URL     | `http://127.0.0.1:8080/v1`（或您的 inferrs 伺服器監聽位置）           |
+| 提供者 ID          | `inferrs`（自訂；於 `models.providers.inferrs` 下設定）              |
+| 外掛               | 無 — 並非 OpenClaw 內建的提供者外掛                                  |
+| 驗證環境變數       | 不需要；若你的 inferrs 伺服器未啟用驗證，任何值皆可使用               |
+| API                | 與 OpenAI 相容（`openai-completions`）                                 |
+| 建議的基底 URL     | `http://127.0.0.1:8080/v1`（或你的 inferrs 伺服器所監聽的位置）               |
 
 <Note>
-  `inferrs` 是自訂的自託管 OpenAI 相容後端，而非專用的 OpenClaw 提供者外掛：您應在 `models.providers.inferrs` 下設定，而不是選擇新手引導中的驗證選項。如需具備自動探索功能的內建外掛，請參閱 [SGLang](/zh-TW/providers/sglang) 或 [vLLM](/zh-TW/providers/vllm)。
+  `inferrs` 是自訂的自架式 OpenAI 相容後端，而非專用的 OpenClaw 提供者外掛：請在 `models.providers.inferrs` 下設定，而不是選擇上線引導中的驗證選項。若需要支援自動探索的內建外掛，請參閱 [SGLang](/zh-TW/providers/sglang) 或 [vLLM](/zh-TW/providers/vllm)。
 </Note>
 
 ## 開始使用
@@ -96,7 +97,7 @@ x-i18n:
 
 ## 隨需啟動
 
-只有在選取 `inferrs/...` 模型時，OpenClaw 才能自行啟動 `inferrs`。請將 `localService` 新增至相同的提供者項目：
+只有選取 `inferrs/...` 模型時，OpenClaw 才能自行啟動 `inferrs`。請將 `localService` 新增至同一個提供者項目：
 
 ```json5
 {
@@ -143,28 +144,28 @@ x-i18n:
 }
 ```
 
-`command` 必須是絕對路徑。在閘道主機上執行 `which inferrs`，並使用該路徑。完整欄位參考：[本機模型服務](/zh-TW/gateway/local-model-services)。
+`command` 必須是絕對路徑。請在閘道主機上執行 `which inferrs`，並使用該路徑。完整欄位參考：[本機模型服務](/zh-TW/gateway/local-model-services)。
 
 ## 進階設定
 
 <AccordionGroup>
-  <Accordion title="為何 requiresStringContent 很重要">
-    部分 `inferrs` Chat Completions 路由僅接受字串格式的 `messages[].content`，不接受結構化的內容片段陣列。
+  <Accordion title="requiresStringContent 為何重要">
+    某些 `inferrs` Chat Completions 路由僅接受字串 `messages[].content`，不接受結構化的內容部分陣列。
 
     <Warning>
     若 OpenClaw 執行失敗並顯示：
 
     ```text
-    messages[1].content: invalid type: sequence, expected a string
+    messages[1].content: 類型無效：應為字串，卻收到序列
     ```
 
-    請在模型項目中設定 `compat.requiresStringContent: true`。OpenClaw 隨後會在傳送請求前，將純文字內容片段展平為一般字串。
+    請在模型項目中設定 `compat.requiresStringContent: true`。OpenClaw 隨後會在傳送請求前，將純文字內容部分攤平成純字串。
     </Warning>
 
   </Accordion>
 
   <Accordion title="Gemma 與工具結構描述的注意事項">
-    部分 `inferrs` 與 Gemma 的組合可接受小型的直接 `/v1/chat/completions` 請求，但在完整的 OpenClaw 代理程式執行階段回合中會失敗。請先嘗試停用工具結構描述介面：
+    某些 `inferrs` + Gemma 組合可接受小型的直接 `/v1/chat/completions` 請求，但在完整的 OpenClaw 代理程式執行階段回合中會失敗。請先嘗試停用工具結構描述介面：
 
     ```json5
     compat: {
@@ -173,23 +174,23 @@ x-i18n:
     }
     ```
 
-    這可降低較嚴格的本機後端所承受的提示詞壓力。若小型直接請求仍可運作，但一般 OpenClaw 代理程式回合持續在 `inferrs` 內部崩潰，請將其視為上游模型或伺服器限制，而非 OpenClaw 傳輸問題。
+    這可降低較嚴格本機後端的提示詞負荷。若微型直接請求仍可運作，但一般 OpenClaw 代理程式回合持續在 `inferrs` 內當機，請將其視為上游模型或伺服器限制，而非 OpenClaw 傳輸問題。
 
   </Accordion>
 
-  <Accordion title="手動煙霧測試">
-    完成設定後，請測試兩個層級：
+  <Accordion title="手動冒煙測試">
+    完成設定後，請測試這兩層：
 
     ```bash
     curl http://127.0.0.1:8080/v1/chat/completions \
       -H 'content-type: application/json' \
-      -d '{"model":"google/gemma-4-E2B-it","messages":[{"role":"user","content":"What is 2 + 2?"}],"stream":false}'
+      -d '{"model":"google/gemma-4-E2B-it","messages":[{"role":"user","content":"2 + 2 是多少？"}],"stream":false}'
     ```
 
     ```bash
     openclaw infer model run \
       --model inferrs/google/gemma-4-E2B-it \
-      --prompt "What is 2 + 2? Reply with one short sentence." \
+      --prompt "2 + 2 是多少？請用一句簡短的句子回答。" \
       --json
     ```
 
@@ -197,8 +198,8 @@ x-i18n:
 
   </Accordion>
 
-  <Accordion title="代理伺服器式行為">
-    由於 `inferrs` 使用通用的 `openai-completions` 轉接器（而非 `openai-responses`），因此絕不會套用僅限原生 OpenAI 的請求塑形：不會傳送 `service_tier`、Responses 的 `store`、提示詞快取提示，或 OpenAI 推理相容性承載資料塑形。
+  <Accordion title="代理式行為">
+    由於 `inferrs` 使用通用 `openai-completions` 轉接器（而非 `openai-responses`），因此不會套用僅限原生 OpenAI 的請求塑形：不會傳送 `service_tier`、Responses `store`、提示詞快取提示，也不會傳送 OpenAI 推理相容性承載資料的塑形。
   </Accordion>
 </AccordionGroup>
 
@@ -206,39 +207,39 @@ x-i18n:
 
 <AccordionGroup>
   <Accordion title="curl /v1/models 失敗">
-    `inferrs` 未執行、無法連線，或未繫結至您設定的主機／連接埠。請確認伺服器已啟動，且正在該位址上監聽。
+    `inferrs` 未執行、無法連線，或未繫結至你所設定的主機或連接埠。請確認伺服器已啟動，並正在該位址上監聽。
   </Accordion>
 
   <Accordion title="messages[].content 預期為字串">
-    請在模型項目中設定 `compat.requiresStringContent: true`（請參閱上方內容）。
+    請在模型項目中設定 `compat.requiresStringContent: true`（請參閱上方）。
   </Accordion>
 
   <Accordion title="直接呼叫 /v1/chat/completions 成功，但 openclaw infer model run 失敗">
     請設定 `compat.supportsTools: false` 以停用工具結構描述介面（請參閱上方的 Gemma 注意事項）。
   </Accordion>
 
-  <Accordion title="inferrs 在較大的代理程式回合中仍會崩潰">
-    若結構描述錯誤已消失，但 `inferrs` 在較大的代理程式回合中仍會崩潰，請將其視為上游 `inferrs` 或模型限制。請降低提示詞壓力，或切換後端／模型。
+  <Accordion title="inferrs 在較大的代理程式回合中仍會當機">
+    若結構描述錯誤已消失，但 `inferrs` 在較大的代理程式回合中仍會當機，請將其視為上游 `inferrs` 或模型限制。請降低提示詞負荷，或切換後端或模型。
   </Accordion>
 </AccordionGroup>
 
 <Tip>
-如需一般協助，請參閱[疑難排解](/zh-TW/help/troubleshooting)與[常見問題](/zh-TW/help/faq)。
+如需一般協助，請參閱[疑難排解](/zh-TW/help/troubleshooting)和[常見問題](/zh-TW/help/faq)。
 </Tip>
 
 ## 相關內容
 
 <CardGroup cols={2}>
   <Card title="本機模型" href="/zh-TW/gateway/local-models" icon="server">
-    對本機模型伺服器執行 OpenClaw。
+    使用本機模型伺服器執行 OpenClaw。
   </Card>
   <Card title="本機模型服務" href="/zh-TW/gateway/local-model-services" icon="play">
-    依照需求為已設定的提供者啟動本機模型伺服器。
+    為已設定的提供者隨需啟動本機模型伺服器。
   </Card>
   <Card title="閘道疑難排解" href="/zh-TW/gateway/troubleshooting#local-openai-compatible-backend-passes-direct-probes-but-agent-runs-fail" icon="wrench">
-    偵錯可通過探測但在代理程式執行時失敗的本機 OpenAI 相容後端。
+    對通過探測但代理程式執行失敗的本機 OpenAI 相容後端進行偵錯。
   </Card>
   <Card title="模型選擇" href="/zh-TW/concepts/model-providers" icon="layers">
-    所有提供者、模型參照與容錯移轉行為的概覽。
+    所有提供者、模型參照及容錯移轉行為的概覽。
   </Card>
 </CardGroup>

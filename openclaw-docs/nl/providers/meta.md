@@ -1,13 +1,14 @@
 ---
 read_when:
-    - Je wilt Meta met OpenClaw gebruiken
-    - U hebt de omgevingsvariabele MODEL_API_KEY of de CLI-authenticatiekeuze nodig
-summary: Meta-configuratie (authenticatie + selectie van het muse-spark-1.1-model)
+    - Je wilt Meta gebruiken met OpenClaw
+    - Je hebt de omgevingsvariabele MODEL_API_KEY of een CLI-authenticatiekeuze nodig
+summary: Meta-installatie (authenticatie + selectie van het model muse-spark-1.1)
 title: Meta
 x-i18n:
-    generated_at: "2026-07-12T09:19:48Z"
+    generated_at: "2026-07-27T05:30:58Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: f2ce7616d9abc14a2d15ee53ea7725d3e70059af1a38bb61dbfe5b3969106432
     source_path: providers/meta.md
@@ -18,17 +19,17 @@ De **Meta API** gebruikt de OpenAI-compatibele **Responses API** (`POST /v1/resp
 voor het redeneermodel `muse-spark-1.1`. De provider wordt geleverd als een gebundelde OpenClaw-
 plugin.
 
-| Eigenschap            | Waarde                             |
-| --------------------- | ---------------------------------- |
-| Provider-id           | `meta`                             |
-| Plugin                | gebundelde provider                |
-| Omgevingsvariabele voor authenticatie | `MODEL_API_KEY`       |
-| Onboarding-vlag       | `--auth-choice meta-api-key`       |
-| Directe CLI-vlag      | `--meta-api-key <key>`             |
-| API                   | Responses API (`openai-responses`) |
-| Basis-URL             | `https://api.meta.ai/v1`           |
-| Standaardmodel        | `meta/muse-spark-1.1`              |
-| Standaardredenering   | `high` (`reasoning.effort`)        |
+| Eigenschap          | Waarde                              |
+| ------------------- | ----------------------------------- |
+| Provider-id         | `meta`                  |
+| Plugin              | gebundelde provider                 |
+| Auth-omgevingsvariabele | `MODEL_API_KEY`              |
+| Onboarding-vlag     | `--auth-choice meta-api-key`                  |
+| Directe CLI-vlag    | `--meta-api-key <key>`                  |
+| API                 | Responses API (`openai-responses`)  |
+| Basis-URL           | `https://api.meta.ai/v1`                  |
+| Standaardmodel      | `meta/muse-spark-1.1`                  |
+| Standaardredenering | `high` (`reasoning.effort`) |
 
 ## Aan de slag
 
@@ -58,7 +59,7 @@ export MODEL_API_KEY=<key>
     openclaw models list --provider meta
     ```
 
-    Toont de statische catalogusvermelding voor `muse-spark-1.1`. Als `MODEL_API_KEY` niet kan worden gevonden,
+    Toont de statische catalogusvermelding `muse-spark-1.1`. Als `MODEL_API_KEY` niet kan worden omgezet,
     meldt `openclaw models status --json` de ontbrekende referentie onder
     `auth.unusableProfiles`.
 
@@ -78,17 +79,17 @@ openclaw onboard --non-interactive --accept-risk \
 
 | Modelreferentie       | Naam           | Redenering | Contextvenster | Maximale uitvoer |
 | --------------------- | -------------- | ---------- | --------------- | ---------------- |
-| `meta/muse-spark-1.1` | Muse Spark 1.1 | ja         | 1,048,576       | 131,072          |
+| `meta/muse-spark-1.1`    | Muse Spark 1.1 | ja         | 1,048,576       | 131,072          |
 
 Mogelijkheden:
 
-- Tekst- en afbeeldingsinvoer
+- Tekst- en beeldinvoer
 - Toolaanroepen en streaming
 - Redeneerinspanning: `minimal`, `low`, `medium`, `high`, `xhigh` (standaard: `high`)
-- Statusloze, versleutelde herhaling van redeneringen (`store: false`, `include: ["reasoning.encrypted_content"]`)
+- Statusloze, versleutelde herhaling van redenering (`store: false`, `include: ["reasoning.encrypted_content"]`)
 
 <Warning>
-`muse-spark-1.1` accepteert geen `reasoning.effort: "none"`. OpenClaw wijst
+`muse-spark-1.1` accepteert `reasoning.effort: "none"` niet. OpenClaw wijst
 `--thinking off` voor deze provider toe aan `minimal`.
 </Warning>
 
@@ -109,21 +110,21 @@ Mogelijkheden:
 ```
 
 <Note>
-Als de Gateway als daemon wordt uitgevoerd (launchd, systemd, Docker), zorg er dan voor dat
+Als de Gateway als daemon draait (launchd, systemd, Docker), zorg er dan voor dat
 `MODEL_API_KEY` beschikbaar is voor dat proces, bijvoorbeeld in
 `~/.openclaw/.env` of via `env.shellEnv`. Een sleutel die alleen in een
 interactieve shell is geëxporteerd, helpt een beheerde service niet, tenzij de omgevingsvariabele
 afzonderlijk wordt geïmporteerd.
 </Note>
 
-## Snelle test
+## Rooktest
 
 ```bash
 export MODEL_API_KEY=<key>
 pnpm test:live -- extensions/meta/meta.live.test.ts
 ```
 
-Live-tests gebruiken `muse-spark-1.1` met `POST /v1/responses`.
+Livetests gebruiken `muse-spark-1.1` tegen `POST /v1/responses`.
 
 ## Gerelateerd
 
@@ -132,7 +133,7 @@ Live-tests gebruiken `muse-spark-1.1` met `POST /v1/responses`.
     Providers, modelreferenties en failovergedrag kiezen.
   </Card>
   <Card title="Denkmodi" href="/nl/tools/thinking" icon="brain">
-    Niveaus voor redeneerinspanning voor muse-spark-1.1.
+    Niveaus voor redeneersinspanning voor muse-spark-1.1.
   </Card>
   <Card title="Configuratiereferentie" href="/nl/gateway/config-agents#agent-defaults" icon="gear">
     Standaardinstellingen voor agents en modelconfiguratie.

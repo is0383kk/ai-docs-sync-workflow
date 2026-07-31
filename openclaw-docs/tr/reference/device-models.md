@@ -2,32 +2,33 @@
 read_when:
     - Cihaz modeli tanımlayıcı eşlemelerini veya NOTICE/lisans dosyalarını güncelleme
     - Instances kullanıcı arayüzünün cihaz adlarını görüntüleme biçimini değiştirme
-summary: OpenClaw'ın macOS uygulamasında kullanıcı dostu adlar için Apple cihaz modeli tanımlayıcılarını nasıl bünyesine kattığı.
+summary: OpenClaw'un macOS uygulamasında kullanıcı dostu adlar için Apple cihaz modeli tanımlayıcılarını nasıl bünyesine kattığı.
 title: Cihaz modeli veritabanı
 x-i18n:
-    generated_at: "2026-07-12T12:42:51Z"
+    generated_at: "2026-07-26T23:00:20Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 930cd330594072d9c986b8c85c5a68e02dd096e5f0c015e3ee86b767073b93e6
     source_path: reference/device-models.md
     workflow: 16
 ---
 
-macOS yardımcı uygulamasının **Örnekler** kullanıcı arayüzü, Apple model tanımlayıcılarını anlaşılır adlarla eşler (`iPad16,6` -> "iPad Pro 13 inç (M4)", `Mac16,6` -> "MacBook Pro (14 inç, 2024)"). `DeviceModelCatalog` ayrıca her cihaz için bir SF Symbol seçmek üzere tanımlayıcı önekini (bulamazsa cihaz ailesini) kullanır.
+macOS yardımcı uygulamasının **Örnekler** kullanıcı arayüzü, Apple model tanımlayıcılarını anlaşılır adlarla eşler (`iPad16,6` -> "iPad Pro 13 inç (M4)", `Mac16,6` -> "MacBook Pro (14 inç, 2024)"). `DeviceModelCatalog` ayrıca her cihaz için bir SF Symbol seçmek üzere tanımlayıcı önekini (bulunamazsa cihaz ailesini) kullanır.
 
 `apps/macos/Sources/OpenClaw/Resources/DeviceModels/` içindeki dosyalar:
 
-| Dosya                                  | Amaç                                       |
-| -------------------------------------- | ------------------------------------------ |
-| `ios-device-identifiers.json`          | iOS/iPadOS tanımlayıcısı -> ad eşlemesi    |
-| `mac-device-identifiers.json`          | Mac tanımlayıcısı -> ad eşlemesi            |
-| `NOTICE.md`                            | Sabitlenmiş üst kaynak commit SHA'ları      |
-| `LICENSE.apple-device-identifiers.txt` | Üst kaynağın MIT lisansı                    |
+| Dosya                                  | Amaç                                      |
+| -------------------------------------- | ----------------------------------------- |
+| `ios-device-identifiers.json`                     | iOS/iPadOS tanımlayıcısı -> ad eşlemesi   |
+| `mac-device-identifiers.json`                     | Mac tanımlayıcısı -> ad eşlemesi          |
+| `NOTICE.md`                     | Sabitlenmiş üst kaynak commit SHA'ları    |
+| `LICENSE.apple-device-identifiers.txt`                     | Üst kaynağın MIT lisansı                  |
 
 ## Veri kaynağı
 
-MIT lisanslı `kyle-seongwoo-jun/apple-device-identifiers` GitHub deposundan projeye dahil edilmiştir. Derlemelerin belirlenimci olmasını sağlamak için JSON dosyaları, `NOTICE.md` içinde kaydedilen commit SHA'larına sabitlenmiştir.
+MIT lisanslı `kyle-seongwoo-jun/apple-device-identifiers` GitHub deposundan projeye dahil edilmiştir. Derlemelerin belirlenebilir olmasını sağlamak için JSON dosyaları, `NOTICE.md` içinde kaydedilen commit SHA'larına sabitlenmiştir.
 
 ## Veritabanını güncelleme
 

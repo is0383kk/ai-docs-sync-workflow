@@ -4,28 +4,29 @@ read_when:
 summary: OpenClaw Featherless AI 供應商外掛。
 title: Featherless 外掛
 x-i18n:
-    generated_at: "2026-07-11T21:39:25Z"
+    generated_at: "2026-07-26T07:27:56Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b5365b6d07b7828408411c7fd15e0721692bb70e15c8ba01eb3d6d44a5a308bd
+    source_hash: cc85911d6fa5ee416b1abd11bd08466d1e8d245ad3edb03e315fb555b4ed38b3
     source_path: plugins/reference/featherless.md
     workflow: 16
 ---
 
 # Featherless 外掛
 
-OpenClaw Featherless AI 供應商外掛。
+OpenClaw Featherless AI 提供者外掛。
 
 ## 發佈
 
 - 套件：`@openclaw/featherless-provider`
-- 安裝途徑：npm；ClawHub：`clawhub:@openclaw/featherless-provider`
+- 安裝管道：npm；ClawHub：`clawhub:@openclaw/featherless-provider`
 
 ## 介面
 
-供應商：featherless
+提供者：`featherless`
 
 ## 相關文件
 
-- [featherless](/providers/featherless)
+- [featherless](/zh-TW/providers/featherless)

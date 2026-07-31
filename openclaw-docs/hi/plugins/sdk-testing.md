@@ -1,65 +1,35 @@
 ---
 read_when:
-    - आप किसी Plugin के लिए परीक्षण लिख रहे हैं
+    - आप एक Plugin के लिए परीक्षण लिख रहे हैं
     - आपको Plugin SDK से परीक्षण उपयोगिताओं की आवश्यकता है
-    - आप bundled plugins के लिए contract tests को समझना चाहते हैं
+    - आप बंडल किए गए plugins के लिए कॉन्ट्रैक्ट टेस्ट को समझना चाहते हैं
 sidebarTitle: Testing
 summary: OpenClaw plugins के लिए परीक्षण उपयोगिताएँ और पैटर्न
 title: Plugin परीक्षण
 x-i18n:
-    generated_at: "2026-06-28T23:53:37Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T21:32:05Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 8e5f77e9c54a56c9af293061e2cff0ee6112f2b9b4bea3f9604d48b0f05049ef
+    source_hash: 9c6c050826dae3cd2c794d50b2dd95e20e6533d838161cce037742ee5fdf7e0e
     source_path: plugins/sdk-testing.md
     workflow: 16
 ---
 
-OpenClaw
-plugins के लिए test utilities, patterns, और lint enforcement का संदर्भ।
+OpenClaw Plugins के लिए परीक्षण उपयोगिताओं, पैटर्न और लिंट प्रवर्तन का संदर्भ।
 
 <Tip>
-  **test examples खोज रहे हैं?** how-to guides में worked test examples शामिल हैं:
-  [Channel plugin tests](/hi/plugins/sdk-channel-plugins#step-6-test) और
-  [Provider plugin tests](/hi/plugins/sdk-provider-plugins#step-6-test).
+  **परीक्षण उदाहरण खोज रहे हैं?** कैसे-करें मार्गदर्शिकाओं में व्यावहारिक परीक्षण उदाहरण शामिल हैं:
+  [चैनल Plugin परीक्षण](/hi/plugins/sdk-channel-plugins#step-6-test) और
+  [प्रदाता Plugin परीक्षण](/hi/plugins/sdk-provider-plugins#step-6-test)।
 </Tip>
 
-## Test utilities
+## परीक्षण उपयोगिताएँ
 
-ये test-helper subpaths OpenClaw के अपने bundled plugin tests के लिए repo-local source entrypoints हैं। वे third-party plugins के लिए package exports नहीं हैं, और
-वे Vitest या अन्य repo-only test dependencies import कर सकते हैं।
-
-**Plugin API mock import:** `openclaw/plugin-sdk/plugin-test-api`
-
-**Agent runtime contract import:** `openclaw/plugin-sdk/agent-runtime-test-contracts`
-
-**Channel contract import:** `openclaw/plugin-sdk/channel-contract-testing`
-
-**Channel test helper import:** `openclaw/plugin-sdk/channel-test-helpers`
-
-**Channel target test import:** `openclaw/plugin-sdk/channel-target-testing`
-
-**Plugin contract import:** `openclaw/plugin-sdk/plugin-test-contracts`
-
-**Plugin runtime test import:** `openclaw/plugin-sdk/plugin-test-runtime`
-
-**Provider contract import:** `openclaw/plugin-sdk/provider-test-contracts`
-
-**Provider HTTP mock import:** `openclaw/plugin-sdk/provider-http-test-mocks`
-
-**Environment/network test import:** `openclaw/plugin-sdk/test-env`
-
-**Generic fixture import:** `openclaw/plugin-sdk/test-fixtures`
-
-**Node builtin mock import:** `openclaw/plugin-sdk/test-node-mocks`
-
-OpenClaw repo के अंदर, नए bundled
-plugin tests के लिए नीचे दिए गए focused subpaths को प्राथमिकता दें। विस्तृत
-`openclaw/plugin-sdk/testing` barrel केवल legacy compatibility के लिए है।
-Repo guardrails `plugin-sdk/testing` और
-`plugin-sdk/test-utils` से नए वास्तविक imports को अस्वीकार करते हैं; ये नाम compatibility-record tests के लिए केवल deprecated compatibility
-surfaces के रूप में रहते हैं।
+ये उपपथ OpenClaw के अपने बंडल किए गए Plugin परीक्षणों के लिए रिपॉज़िटरी-स्थानीय स्रोत एंट्रीपॉइंट हैं। इन्हें तृतीय-पक्ष
+Plugins के लिए `package.json` एक्सपोर्ट के रूप में प्रकाशित नहीं किया जाता,
+और ये Vitest या केवल रिपॉज़िटरी में उपलब्ध अन्य परीक्षण निर्भरताएँ इंपोर्ट कर सकते हैं।
 
 ```typescript
 import {
@@ -76,6 +46,8 @@ import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-ru
 import { describeOpenAIProviderRuntimeContract } from "openclaw/plugin-sdk/provider-test-contracts";
 import { getProviderHttpMocks } from "openclaw/plugin-sdk/provider-http-test-mocks";
 import { withEnv, withFetchPreconnect, withServer } from "openclaw/plugin-sdk/test-env";
+import { isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
+import { createRequestCaptureJsonFetch } from "openclaw/plugin-sdk/test-media-understanding";
 import {
   bundledPluginRoot,
   createCliRuntimeCapture,
@@ -84,90 +56,93 @@ import {
 import { mockNodeBuiltinModule } from "openclaw/plugin-sdk/test-node-mocks";
 ```
 
-### उपलब्ध exports
+बंडल किए गए Plugin परीक्षणों के लिए इन केंद्रित उपपथों का उपयोग करें। पूर्व
+`openclaw/plugin-sdk/testing` बैरल रिपॉज़िटरी-स्थानीय था, भेजे गए
+पैकेजों से बाहर रखा गया था और अब हटा दिया गया है। पूर्व `openclaw/plugin-sdk/test-utils`
+उपनाम भी इसके साथ हटा दिया गया था। `pnpm run lint:plugins:no-extension-test-core-imports`
+(`scripts/check-no-extension-test-core-imports.ts`) एक्सटेंशन परीक्षणों को
+ऊपर दिए गए केंद्रित परीक्षण उपपथों पर बनाए रखता है।
+
+### उपलब्ध एक्सपोर्ट
 
 | निर्यात                                               | उद्देश्य                                                                                                                                  |
 | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `createTestPluginApi`                                | सीधे रजिस्ट्रेशन यूनिट टेस्ट के लिए न्यूनतम Plugin API मॉक बनाएं। `plugin-sdk/plugin-test-api` से आयात करें                             |
-| `AUTH_PROFILE_RUNTIME_CONTRACT`                      | नेटिव एजेंट रनटाइम अडैप्टर के लिए साझा auth-profile अनुबंध फिक्स्चर। `plugin-sdk/agent-runtime-test-contracts` से आयात करें            |
-| `DELIVERY_NO_REPLY_RUNTIME_CONTRACT`                 | नेटिव एजेंट रनटाइम अडैप्टर के लिए साझा डिलीवरी सप्रेशन अनुबंध फिक्स्चर। `plugin-sdk/agent-runtime-test-contracts` से आयात करें    |
-| `OUTCOME_FALLBACK_RUNTIME_CONTRACT`                  | नेटिव एजेंट रनटाइम अडैप्टर के लिए साझा fallback-classification अनुबंध फिक्स्चर। `plugin-sdk/agent-runtime-test-contracts` से आयात करें |
-| `createParameterFreeTool`                            | नेटिव रनटाइम अनुबंध टेस्ट के लिए dynamic-tool स्कीमा फिक्स्चर बनाएं। `plugin-sdk/agent-runtime-test-contracts` से आयात करें              |
-| `expectChannelInboundContextContract`                | चैनल इनबाउंड कॉन्टेक्स्ट आकार सत्यापित करें। `plugin-sdk/channel-contract-testing` से आयात करें                                                  |
-| `installChannelOutboundPayloadContractSuite`         | चैनल आउटबाउंड पेलोड अनुबंध केस स्थापित करें। `plugin-sdk/channel-contract-testing` से आयात करें                                       |
-| `createStartAccountContext`                          | चैनल अकाउंट lifecycle कॉन्टेक्स्ट बनाएं। `plugin-sdk/channel-test-helpers` से आयात करें                                                  |
-| `installChannelActionsContractSuite`                 | सामान्य चैनल message-action अनुबंध केस स्थापित करें। `plugin-sdk/channel-test-helpers` से आयात करें                                     |
-| `installChannelSetupContractSuite`                   | सामान्य चैनल setup अनुबंध केस स्थापित करें। `plugin-sdk/channel-test-helpers` से आयात करें                                              |
-| `installChannelStatusContractSuite`                  | सामान्य चैनल status अनुबंध केस स्थापित करें। `plugin-sdk/channel-test-helpers` से आयात करें                                             |
-| `expectDirectoryIds`                                 | directory-list फ़ंक्शन से चैनल डायरेक्टरी ids सत्यापित करें। `plugin-sdk/channel-test-helpers` से आयात करें                               |
-| `assertBundledChannelEntries`                        | सत्यापित करें कि बंडल किए गए चैनल entrypoints अपेक्षित सार्वजनिक अनुबंध उजागर करते हैं। `plugin-sdk/channel-test-helpers` से आयात करें                    |
-| `formatEnvelopeTimestamp`                            | नियतात्मक envelope timestamps फ़ॉर्मैट करें। `plugin-sdk/channel-test-helpers` से आयात करें                                                  |
-| `expectPairingReplyText`                             | चैनल pairing reply text सत्यापित करें और उसका कोड निकालें। `plugin-sdk/channel-test-helpers` से आयात करें                                    |
-| `describePluginRegistrationContract`                 | Plugin रजिस्ट्रेशन अनुबंध जांच स्थापित करें। `plugin-sdk/plugin-test-contracts` से आयात करें                                              |
-| `registerSingleProviderPlugin`                       | लोडर स्मोक टेस्ट में एक प्रदाता Plugin रजिस्टर करें। `plugin-sdk/plugin-test-runtime` से आयात करें                                         |
-| `registerProviderPlugin`                             | एक Plugin से सभी प्रदाता प्रकार कैप्चर करें। `plugin-sdk/plugin-test-runtime` से आयात करें                                                 |
-| `registerProviderPlugins`                            | कई Plugins में प्रदाता रजिस्ट्रेशन कैप्चर करें। `plugin-sdk/plugin-test-runtime` से आयात करें                                     |
-| `requireRegisteredProvider`                          | सत्यापित करें कि प्रदाता संग्रह में एक id शामिल है। `plugin-sdk/plugin-test-runtime` से आयात करें                                           |
-| `createRuntimeEnv`                                   | मॉक किया गया CLI/Plugin रनटाइम वातावरण बनाएं। `plugin-sdk/plugin-test-runtime` से आयात करें                                              |
-| `createPluginRuntimeMock`                            | मॉक किया गया Plugin रनटाइम सतह बनाएं। `plugin-sdk/plugin-test-runtime` से आयात करें                                                      |
-| `createPluginSetupWizardStatus`                      | चैनल Plugins के लिए setup status helpers बनाएं। `plugin-sdk/plugin-test-runtime` से आयात करें                                             |
-| `describeOpenAIProviderRuntimeContract`              | provider-family रनटाइम अनुबंध जांच स्थापित करें। `plugin-sdk/provider-test-contracts` से आयात करें                                        |
-| `expectPassthroughReplayPolicy`                      | सत्यापित करें कि प्रदाता replay policies, provider-owned tools और metadata को पास थ्रू करती हैं। `plugin-sdk/provider-test-contracts` से आयात करें         |
-| `runRealtimeSttLiveTest`                             | साझा audio fixtures के साथ लाइव realtime STT प्रदाता टेस्ट चलाएं। `plugin-sdk/provider-test-contracts` से आयात करें                       |
-| `normalizeTranscriptForMatch`                        | fuzzy assertions से पहले लाइव transcript आउटपुट सामान्यीकृत करें। `plugin-sdk/provider-test-contracts` से आयात करें                               |
-| `expectExplicitVideoGenerationCapabilities`          | सत्यापित करें कि वीडियो प्रदाता स्पष्ट generation mode capabilities घोषित करते हैं। `plugin-sdk/provider-test-contracts` से आयात करें                   |
-| `expectExplicitMusicGenerationCapabilities`          | सत्यापित करें कि संगीत प्रदाता स्पष्ट generation/edit capabilities घोषित करते हैं। `plugin-sdk/provider-test-contracts` से आयात करें                   |
-| `mockSuccessfulDashscopeVideoTask`                   | सफल DashScope-संगत वीडियो task response स्थापित करें। `plugin-sdk/provider-test-contracts` से आयात करें                          |
-| `getProviderHttpMocks`                               | opt-in प्रदाता HTTP/auth Vitest mocks तक पहुंचें। `plugin-sdk/provider-http-test-mocks` से आयात करें                                         |
-| `installProviderHttpMockCleanup`                     | प्रत्येक टेस्ट के बाद प्रदाता HTTP/auth mocks रीसेट करें। `plugin-sdk/provider-http-test-mocks` से आयात करें                                        |
-| `installCommonResolveTargetErrorCases`               | target resolution error handling के लिए साझा टेस्ट केस। `plugin-sdk/channel-target-testing` से आयात करें                                  |
-| `shouldAckReaction`                                  | जांचें कि चैनल को ack reaction जोड़ना चाहिए या नहीं। `plugin-sdk/channel-feedback` से आयात करें                                            |
-| `removeAckReactionAfterReply`                        | reply delivery के बाद ack reaction हटाएं। `plugin-sdk/channel-feedback` से आयात करें                                                      |
-| `createTestRegistry`                                 | चैनल Plugin registry फिक्स्चर बनाएं। `plugin-sdk/plugin-test-runtime` या `plugin-sdk/channel-test-helpers` से आयात करें               |
-| `createEmptyPluginRegistry`                          | खाली Plugin registry फिक्स्चर बनाएं। `plugin-sdk/plugin-test-runtime` या `plugin-sdk/channel-test-helpers` से आयात करें                |
-| `setActivePluginRegistry`                            | Plugin रनटाइम टेस्ट के लिए registry फिक्स्चर स्थापित करें। `plugin-sdk/plugin-test-runtime` या `plugin-sdk/channel-test-helpers` से आयात करें   |
-| `createRequestCaptureJsonFetch`                      | media helper टेस्ट में JSON fetch requests कैप्चर करें। `plugin-sdk/test-env` से आयात करें                                                     |
-| `withServer`                                         | अस्थायी local HTTP server के विरुद्ध टेस्ट चलाएं। `plugin-sdk/test-env` से आयात करें                                                      |
-| `createMockIncomingRequest`                          | न्यूनतम incoming HTTP request object बनाएं। `plugin-sdk/test-env` से आयात करें                                                          |
-| `withFetchPreconnect`                                | preconnect hooks इंस्टॉल किए हुए fetch टेस्ट चलाएं। `plugin-sdk/test-env` से आयात करें                                                       |
-| `withEnv` / `withEnvAsync`                           | environment variables को अस्थायी रूप से पैच करें। `plugin-sdk/test-env` से आयात करें                                                               |
-| `createTempHomeEnv` / `withTempHome` / `withTempDir` | अलग-थलग filesystem test fixtures बनाएं। `plugin-sdk/test-env` से आयात करें                                                              |
-| `createMockServerResponse`                           | न्यूनतम HTTP server response mock बनाएं। `plugin-sdk/test-env` से आयात करें                                                            |
-| `createCliRuntimeCapture`                            | टेस्ट में CLI रनटाइम आउटपुट कैप्चर करें। `plugin-sdk/test-fixtures` से आयात करें                                                              |
-| `importFreshModule`                                  | module cache को बायपास करने के लिए fresh query token के साथ ESM module आयात करें। `plugin-sdk/test-fixtures` से आयात करें                             |
-| `bundledPluginRoot` / `bundledPluginFile`            | बंडल किए गए Plugin source या dist fixture paths resolve करें। `plugin-sdk/test-fixtures` से आयात करें                                              |
-| `mockNodeBuiltinModule`                              | narrow Node builtin Vitest mocks स्थापित करें। `plugin-sdk/test-node-mocks` से आयात करें                                                       |
-| `createSandboxTestContext`                           | sandbox test contexts बनाएं। `plugin-sdk/test-fixtures` से आयात करें                                                                      |
-| `writeSkill`                                         | skill fixtures लिखें। `plugin-sdk/test-fixtures` से आयात करें                                                                             |
-| `makeAgentAssistantMessage`                          | एजेंट transcript message fixtures बनाएं। `plugin-sdk/test-fixtures` से आयात करें                                                          |
-| `peekSystemEvents` / `resetSystemEventsForTest`      | system event fixtures का निरीक्षण करें और उन्हें रीसेट करें। `plugin-sdk/test-fixtures` से आयात करें                                                          |
-| `sanitizeTerminalText`                               | assertions के लिए terminal output साफ करें। `plugin-sdk/test-fixtures` से आयात करें                                                          |
-| `countLines` / `hasBalancedFences`                   | chunking output shape सत्यापित करें। `plugin-sdk/test-fixtures` से आयात करें                                                                     |
-| `runProviderCatalog`                                 | टेस्ट dependencies के साथ provider catalog hook निष्पादित करें                                                                                   |
-| `resolveProviderWizardOptions`                       | अनुबंध टेस्ट में provider setup wizard choices resolve करें                                                                                  |
-| `resolveProviderModelPickerEntries`                  | अनुबंध टेस्ट में provider model-picker entries resolve करें                                                                                  |
-| `buildProviderPluginMethodChoice`                    | assertions के लिए provider wizard choice ids बनाएं                                                                                          |
-| `setProviderWizardProvidersResolverForTest`          | अलग-थलग परीक्षणों के लिए प्रदाता विज़ार्ड प्रदाता इंजेक्ट करें                                                                                      |
-| `createProviderUsageFetch`                           | प्रदाता उपयोग fetch fixtures बनाएँ                                                                                                      |
-| `useFrozenTime` / `useRealTime`                      | समय-संवेदनशील परीक्षणों के लिए timers को freeze और restore करें। `plugin-sdk/test-env` से import करें                                                    |
-| `createTestWizardPrompter`                           | mocked setup wizard prompter बनाएँ                                                                                                     |
-| `createRuntimeTaskFlow`                              | अलग-थलग runtime task-flow स्थिति बनाएँ                                                                                                  |
-| `typedCases`                                         | table-driven परीक्षणों के लिए literal types सुरक्षित रखें। `plugin-sdk/test-fixtures` से import करें                                                    |
+| `createTestPluginApi`                                | प्रत्यक्ष पंजीकरण यूनिट परीक्षणों के लिए न्यूनतम Plugin API मॉक बनाएँ। `plugin-sdk/plugin-test-api` से आयात करें                             |
+| `AUTH_PROFILE_RUNTIME_CONTRACT`                      | नेटिव एजेंट रनटाइम अडैप्टरों के लिए साझा प्रमाणीकरण-प्रोफ़ाइल अनुबंध फ़िक्स्चर। `plugin-sdk/agent-runtime-test-contracts` से आयात करें            |
+| `DELIVERY_NO_REPLY_RUNTIME_CONTRACT`                 | नेटिव एजेंट रनटाइम अडैप्टरों के लिए साझा डिलीवरी-दमन अनुबंध फ़िक्स्चर। `plugin-sdk/agent-runtime-test-contracts` से आयात करें    |
+| `OUTCOME_FALLBACK_RUNTIME_CONTRACT`                  | नेटिव एजेंट रनटाइम अडैप्टरों के लिए साझा फ़ॉलबैक-वर्गीकरण अनुबंध फ़िक्स्चर। `plugin-sdk/agent-runtime-test-contracts` से आयात करें |
+| `createParameterFreeTool`                            | नेटिव रनटाइम अनुबंध परीक्षणों के लिए डायनेमिक-टूल स्कीमा फ़िक्स्चर बनाएँ। `plugin-sdk/agent-runtime-test-contracts` से आयात करें              |
+| `expectChannelInboundContextContract`                | चैनल के इनबाउंड संदर्भ का आकार अभिपुष्ट करें। `plugin-sdk/channel-contract-testing` से आयात करें                                                  |
+| `installChannelOutboundPayloadContractSuite`         | चैनल के आउटबाउंड पेलोड अनुबंध मामले इंस्टॉल करें। `plugin-sdk/channel-contract-testing` से आयात करें                                       |
+| `createStartAccountContext`                          | चैनल खाते के जीवनचक्र संदर्भ बनाएँ। `plugin-sdk/channel-test-helpers` से आयात करें                                                  |
+| `installChannelActionsContractSuite`                 | सामान्य चैनल संदेश-क्रिया अनुबंध मामले इंस्टॉल करें। `plugin-sdk/channel-test-helpers` से आयात करें                                     |
+| `installChannelSetupContractSuite`                   | सामान्य चैनल सेटअप अनुबंध मामले इंस्टॉल करें। `plugin-sdk/channel-test-helpers` से आयात करें                                              |
+| `installChannelStatusContractSuite`                  | सामान्य चैनल स्थिति अनुबंध मामले इंस्टॉल करें। `plugin-sdk/channel-test-helpers` से आयात करें                                             |
+| `expectDirectoryIds`                                 | डायरेक्टरी-सूची फ़ंक्शन से चैनल डायरेक्टरी आईडी अभिपुष्ट करें। `plugin-sdk/channel-test-helpers` से आयात करें                               |
+| `assertBundledChannelEntries`                        | अभिपुष्ट करें कि बंडल किए गए चैनल एंट्रीपॉइंट अपेक्षित सार्वजनिक अनुबंध उपलब्ध कराते हैं। `plugin-sdk/channel-test-helpers` से आयात करें                    |
+| `formatEnvelopeTimestamp`                            | नियतात्मक एनवलप टाइमस्टैम्प स्वरूपित करें। `plugin-sdk/channel-test-helpers` से आयात करें                                                  |
+| `expectPairingReplyText`                             | चैनल पेयरिंग उत्तर का टेक्स्ट अभिपुष्ट करें और उसका कोड निकालें। `plugin-sdk/channel-test-helpers` से आयात करें                                    |
+| `describePluginRegistrationContract`                 | Plugin पंजीकरण अनुबंध जाँचें इंस्टॉल करें। `plugin-sdk/plugin-test-contracts` से आयात करें                                              |
+| `registerSingleProviderPlugin`                       | लोडर स्मोक परीक्षणों में एक प्रोवाइडर Plugin पंजीकृत करें। `plugin-sdk/plugin-test-runtime` से आयात करें                                         |
+| `registerProviderPlugin`                             | एक Plugin से सभी प्रोवाइडर प्रकार कैप्चर करें। `plugin-sdk/plugin-test-runtime` से आयात करें                                                 |
+| `registerProviderPlugins`                            | अनेक Plugins में प्रोवाइडर पंजीकरण कैप्चर करें। `plugin-sdk/plugin-test-runtime` से आयात करें                                     |
+| `requireRegisteredProvider`                          | अभिपुष्ट करें कि प्रोवाइडर संग्रह में कोई आईडी मौजूद है। `plugin-sdk/plugin-test-runtime` से आयात करें                                           |
+| `createRuntimeEnv`                                   | मॉक किया गया CLI/Plugin रनटाइम परिवेश बनाएँ। `plugin-sdk/plugin-test-runtime` से आयात करें                                              |
+| `createPluginRuntimeMock`                            | मॉक किया गया Plugin रनटाइम सरफ़ेस बनाएँ। `plugin-sdk/plugin-test-runtime` से आयात करें                                                      |
+| `createPluginSetupWizardStatus`                      | चैनल Plugins के लिए सेटअप स्थिति हेल्पर बनाएँ। `plugin-sdk/plugin-test-runtime` से आयात करें                                             |
+| `createTestWizardPrompter`                           | मॉक किया गया सेटअप विज़ार्ड प्रॉम्प्टर बनाएँ। `plugin-sdk/plugin-test-runtime` से आयात करें                                                       |
+| `createRuntimeTaskFlow`                              | पृथक रनटाइम टास्क-फ़्लो स्थिति बनाएँ। `plugin-sdk/plugin-test-runtime` से आयात करें                                                    |
+| `runProviderCatalog`                                 | परीक्षण निर्भरताओं के साथ प्रोवाइडर कैटलॉग हुक निष्पादित करें। `plugin-sdk/plugin-test-runtime` से आयात करें                                     |
+| `resolveProviderWizardOptions`                       | अनुबंध परीक्षणों में प्रोवाइडर सेटअप विज़ार्ड विकल्पों का समाधान करें। `plugin-sdk/plugin-test-runtime` से आयात करें                                    |
+| `resolveProviderModelPickerEntries`                  | अनुबंध परीक्षणों में प्रोवाइडर मॉडल-पिकर प्रविष्टियों का समाधान करें। `plugin-sdk/plugin-test-runtime` से आयात करें                                    |
+| `buildProviderPluginMethodChoice`                    | अभिपुष्टियों के लिए प्रोवाइडर विज़ार्ड विकल्प आईडी बनाएँ। `plugin-sdk/plugin-test-runtime` से आयात करें                                            |
+| `setProviderWizardProvidersResolverForTest`          | पृथक परीक्षणों के लिए प्रोवाइडर विज़ार्ड प्रोवाइडर इंजेक्ट करें। `plugin-sdk/plugin-test-runtime` से आयात करें                                        |
+| `describeOpenAIProviderRuntimeContract`              | प्रोवाइडर-फ़ैमिली रनटाइम अनुबंध जाँचें इंस्टॉल करें। `plugin-sdk/provider-test-contracts` से आयात करें                                        |
+| `expectPassthroughReplayPolicy`                      | अभिपुष्ट करें कि प्रोवाइडर रीप्ले नीतियाँ प्रोवाइडर-स्वामित्व वाले टूल और मेटाडेटा से होकर अपरिवर्तित रूप से गुज़रती हैं। `plugin-sdk/provider-test-contracts` से आयात करें         |
+| `runRealtimeSttLiveTest`                             | साझा ऑडियो फ़िक्स्चर के साथ लाइव रीयलटाइम STT प्रोवाइडर परीक्षण चलाएँ। `plugin-sdk/provider-test-contracts` से आयात करें                       |
+| `normalizeTranscriptForMatch`                        | फ़ज़ी अभिपुष्टियों से पहले लाइव ट्रांसक्रिप्ट आउटपुट सामान्यीकृत करें। `plugin-sdk/provider-test-contracts` से आयात करें                               |
+| `expectExplicitVideoGenerationCapabilities`          | अभिपुष्ट करें कि वीडियो प्रोवाइडर स्पष्ट जनरेशन मोड क्षमताएँ घोषित करते हैं। `plugin-sdk/provider-test-contracts` से आयात करें                   |
+| `expectExplicitMusicGenerationCapabilities`          | अभिपुष्ट करें कि संगीत प्रोवाइडर स्पष्ट जनरेशन/संपादन क्षमताएँ घोषित करते हैं। `plugin-sdk/provider-test-contracts` से आयात करें                   |
+| `mockSuccessfulDashscopeVideoTask`                   | सफल DashScope-संगत वीडियो टास्क प्रतिक्रिया इंस्टॉल करें। `plugin-sdk/provider-test-contracts` से आयात करें                          |
+| `getProviderHttpMocks`                               | ऑप्ट-इन प्रोवाइडर HTTP/प्रमाणीकरण Vitest मॉक एक्सेस करें। `plugin-sdk/provider-http-test-mocks` से आयात करें                                         |
+| `installProviderHttpMockCleanup`                     | प्रत्येक परीक्षण के बाद प्रोवाइडर HTTP/प्रमाणीकरण मॉक रीसेट करें। `plugin-sdk/provider-http-test-mocks` से आयात करें                                        |
+| `installCommonResolveTargetErrorCases`               | लक्ष्य समाधान त्रुटि प्रबंधन के लिए साझा परीक्षण मामले। `plugin-sdk/channel-target-testing` से आयात करें                                  |
+| `shouldAckReaction`                                  | जाँचें कि किसी चैनल को अभिस्वीकृति प्रतिक्रिया जोड़नी चाहिए या नहीं। `plugin-sdk/channel-feedback` से आयात करें                                            |
+| `removeAckReactionAfterReply`                        | उत्तर की डिलीवरी के बाद अभिस्वीकृति प्रतिक्रिया हटाएँ। `plugin-sdk/channel-feedback` से आयात करें                                                      |
+| `createTestRegistry`                                 | चैनल Plugin रजिस्ट्री फ़िक्स्चर बनाएँ। `plugin-sdk/plugin-test-runtime` या `plugin-sdk/channel-test-helpers` से आयात करें               |
+| `createEmptyPluginRegistry`                          | खाली Plugin रजिस्ट्री फ़िक्स्चर बनाएँ। `plugin-sdk/plugin-test-runtime` या `plugin-sdk/channel-test-helpers` से आयात करें                |
+| `setActivePluginRegistry`                            | Plugin रनटाइम परीक्षणों के लिए रजिस्ट्री फ़िक्स्चर इंस्टॉल करें। `plugin-sdk/plugin-test-runtime` या `plugin-sdk/channel-test-helpers` से आयात करें   |
+| `createRequestCaptureJsonFetch`                      | मीडिया हेल्पर परीक्षणों में JSON फ़ेच अनुरोध कैप्चर करें। `plugin-sdk/test-media-understanding` से आयात करें                                     |
+| `isLiveTestEnabled`                                  | ऑप्ट-इन लाइव प्रोवाइडर परीक्षणों को गेट करें। `plugin-sdk/test-live` से आयात करें                                                                      |
+| `collectProviderApiKeys`                             | लाइव प्रोवाइडर परीक्षणों के लिए क्रेडेंशियल खोजें। `plugin-sdk/test-live-auth` से आयात करें                                                    |
+| `parseProviderModelMap`                              | संगीत/वीडियो लाइव-परीक्षण मॉडल ओवरराइड पार्स करें। `plugin-sdk/test-media-generation` से आयात करें                                              |
+| `withServer`                                         | उपयोग के बाद हटाए जा सकने वाले स्थानीय HTTP सर्वर के विरुद्ध परीक्षण चलाएँ। `plugin-sdk/test-env` से आयात करें                                                      |
+| `createMockIncomingRequest`                          | न्यूनतम इनकमिंग HTTP अनुरोध ऑब्जेक्ट बनाएँ। `plugin-sdk/test-env` से आयात करें                                                          |
+| `withFetchPreconnect`                                | प्रीकनेक्ट हुक इंस्टॉल करके फ़ेच परीक्षण चलाएँ। `plugin-sdk/test-env` से आयात करें                                                       |
+| `withEnv` / `withEnvAsync`                           | परिवेश चर अस्थायी रूप से पैच करें। `plugin-sdk/test-env` से आयात करें                                                               |
+| `createTempHomeEnv` / `withTempHome` / `withTempDir` | पृथक फ़ाइल-सिस्टम परीक्षण फ़िक्स्चर बनाएँ। `plugin-sdk/test-env` से आयात करें                                                              |
+| `createMockServerResponse`                           | न्यूनतम HTTP सर्वर प्रतिक्रिया मॉक बनाएँ। `plugin-sdk/test-env` से आयात करें                                                            |
+| `createProviderUsageFetch`                           | प्रोवाइडर उपयोग फ़ेच फ़िक्स्चर बनाएँ। `plugin-sdk/test-env` से आयात करें                                                                   |
+| `useFrozenTime` / `useRealTime`                      | समय-संवेदी परीक्षणों के लिए टाइमर फ़्रीज़ और पुनर्स्थापित करें। `plugin-sdk/test-env` से आयात करें                                                    |
+| `createCliRuntimeCapture`                            | परीक्षणों में CLI रनटाइम आउटपुट कैप्चर करें। `plugin-sdk/test-fixtures` से आयात करें                                                              |
+| `importFreshModule`                                  | मॉड्यूल कैश को बायपास करने के लिए नए क्वेरी टोकन के साथ ESM मॉड्यूल आयात करें। `plugin-sdk/test-fixtures` से आयात करें                             |
+| `bundledPluginRoot` / `bundledPluginFile`            | बंडल किए गए Plugin स्रोत या डिस्ट फ़िक्स्चर पथों का समाधान करें। `plugin-sdk/test-fixtures` से आयात करें                                              |
+| `mockNodeBuiltinModule`                              | सीमित Node बिल्ट-इन Vitest मॉक इंस्टॉल करें। `plugin-sdk/test-node-mocks` से आयात करें                                                       |
+| `createSandboxTestContext`                           | सैंडबॉक्स परीक्षण संदर्भ बनाएँ। `plugin-sdk/test-fixtures` से आयात करें                                                                      |
+| `writeSkill`                                         | स्किल फ़िक्स्चर लिखें। `plugin-sdk/test-fixtures` से आयात करें                                                                             |
+| `makeAgentAssistantMessage`                          | एजेंट ट्रांसक्रिप्ट संदेश फ़िक्स्चर बनाएँ। `plugin-sdk/test-fixtures` से आयात करें                                                          |
+| `peekSystemEvents` / `resetSystemEventsForTest`      | सिस्टम इवेंट फ़िक्स्चर का निरीक्षण करें और उन्हें रीसेट करें। `plugin-sdk/test-fixtures` से आयात करें                                                          |
+| `sanitizeTerminalText`                               | अभिपुष्टियों के लिए टर्मिनल आउटपुट स्वच्छ करें। `plugin-sdk/test-fixtures` से आयात करें                                                          |
+| `countLines` / `hasBalancedFences`                   | चंकिंग आउटपुट के आकार की पुष्टि करें। `plugin-sdk/test-fixtures` से इम्पोर्ट करें                                                                     |
+| `typedCases`                                         | तालिका-संचालित परीक्षणों के लिए लिटरल प्रकारों को सुरक्षित रखें। `plugin-sdk/test-fixtures` से इम्पोर्ट करें                                                    |
 
-बंडल किए गए Plugin की कॉन्ट्रैक्ट suites भी केवल-टेस्ट
-रजिस्ट्री, मैनिफेस्ट, सार्वजनिक-आर्टिफैक्ट, और runtime fixture helpers के लिए SDK testing subpaths का उपयोग करती हैं। केवल-कोर
-suites जो बंडल किए गए OpenClaw inventory पर निर्भर हैं, `src/plugins/contracts` के अंतर्गत रहती हैं।
-नए extension tests को सीधे broad `plugin-sdk/testing` compatibility barrel, repo `src/**` files, या repo
-`test/helpers/*` bridges import करने के बजाय किसी documented focused SDK subpath जैसे
-`plugin-sdk/plugin-test-api`, `plugin-sdk/channel-contract-testing`,
-`plugin-sdk/agent-runtime-test-contracts`, `plugin-sdk/channel-test-helpers`,
-`plugin-sdk/plugin-test-contracts`, `plugin-sdk/plugin-test-runtime`,
-`plugin-sdk/provider-test-contracts`, `plugin-sdk/provider-http-test-mocks`,
-`plugin-sdk/test-env`, या `plugin-sdk/test-fixtures` पर रखें।
+बंडल किए गए Plugin की कॉन्ट्रैक्ट सुइट केवल परीक्षण वाली रजिस्ट्री, मैनिफ़ेस्ट, सार्वजनिक आर्टिफ़ैक्ट और रनटाइम फ़िक्सचर सहायिकाओं के लिए भी इन SDK परीक्षण उपपथों का उपयोग करती हैं।
+बंडल की गई OpenClaw इन्वेंट्री पर निर्भर केवल-कोर सुइट इसके बजाय
+`src/plugins/contracts` के अंतर्गत रहती हैं।
 
 ### प्रकार
 
-Focused testing subpaths test files में उपयोगी types को भी फिर से export करते हैं:
+केंद्रित परीक्षण उपपथ परीक्षण फ़ाइलों में उपयोगी प्रकारों को भी फिर से निर्यात करते हैं:
 
 ```typescript
 import type {
@@ -178,57 +153,53 @@ import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
 import type { MockFn, PluginRuntime, RuntimeEnv } from "openclaw/plugin-sdk/plugin-test-runtime";
 ```
 
-## Testing target resolution
+## परीक्षण लक्ष्य समाधान
 
-Channel target resolution के लिए standard error cases जोड़ने हेतु `installCommonResolveTargetErrorCases` का उपयोग करें:
+चैनल लक्ष्य समाधान के लिए मानक त्रुटि मामले जोड़ने हेतु `installCommonResolveTargetErrorCases` का उपयोग करें:
 
 ```typescript
 import { describe } from "vitest";
 import { installCommonResolveTargetErrorCases } from "openclaw/plugin-sdk/channel-target-testing";
 
-describe("my-channel target resolution", () => {
+describe("मेरे-चैनल का लक्ष्य समाधान", () => {
   installCommonResolveTargetErrorCases({
     resolveTarget: ({ to, mode, allowFrom }) => {
-      // Your channel's target resolution logic
+      // आपके चैनल का लक्ष्य समाधान तर्क
       return myChannelResolveTarget({ to, mode, allowFrom });
     },
     implicitAllowFrom: ["user1", "user2"],
   });
 
-  // Add channel-specific test cases
-  it("should resolve @username targets", () => {
+  // चैनल-विशिष्ट परीक्षण मामले जोड़ें
+  it("@username लक्ष्यों का समाधान करना चाहिए", () => {
     // ...
   });
 });
 ```
 
-## Testing patterns
+## परीक्षण प्रतिरूप
 
-### Registration contracts की testing
+### पंजीकरण कॉन्ट्रैक्ट का परीक्षण
 
-Unit tests जो `register(api)` को हाथ से लिखा हुआ `api` mock पास करते हैं, OpenClaw के loader acceptance gates को exercise नहीं करते।
-आपके Plugin जिस प्रत्येक registration surface पर निर्भर करता है, उसके लिए कम से कम एक loader-backed smoke test जोड़ें, खासकर hooks और
-memory जैसी exclusive capabilities के लिए।
+`register(api)` को हाथ से लिखा हुआ `api` मॉक देने वाले यूनिट परीक्षण OpenClaw के लोडर स्वीकृति गेट का परीक्षण नहीं करते।
+आपका Plugin जिस प्रत्येक पंजीकरण सतह पर निर्भर है, उसके लिए कम-से-कम एक लोडर-समर्थित स्मोक परीक्षण जोड़ें, विशेष रूप से हुक और मेमोरी जैसी विशिष्ट क्षमताओं के लिए।
 
-जब required metadata missing हो या कोई Plugin ऐसी capability API call करे जिसकी ownership उसके पास नहीं है, तो real loader Plugin registration fail कर देता है। उदाहरण के लिए,
-`api.registerHook(...)` को hook name चाहिए, और
-`api.registerMemoryCapability(...)` के लिए Plugin manifest या exported
-entry में `kind: "memory"` declare होना चाहिए।
+आवश्यक मेटाडेटा अनुपस्थित होने या किसी Plugin द्वारा ऐसी क्षमता API को कॉल करने पर, जिसका वह स्वामी नहीं है, वास्तविक लोडर Plugin पंजीकरण को विफल कर देता है। उदाहरण के लिए,
+`api.registerHook(...)` के लिए हुक नाम आवश्यक है और
+`api.registerMemoryCapability(...)` के लिए Plugin मैनिफ़ेस्ट या निर्यातित
+प्रविष्टि में `kind: "memory"` घोषित होना आवश्यक है।
 
-### Runtime config access की testing
+### रनटाइम कॉन्फ़िगरेशन पहुँच का परीक्षण
 
-`openclaw/plugin-sdk/plugin-test-runtime` से shared Plugin runtime mock को प्राथमिकता दें।
-इसके deprecated `runtime.config.loadConfig()` और `runtime.config.writeConfigFile(...)`
-mocks default रूप से throw करते हैं ताकि tests compatibility APIs के नए usage पकड़ सकें। उन mocks को केवल तब override करें
-जब test स्पष्ट रूप से legacy compatibility behavior cover कर रहा हो।
+`openclaw/plugin-sdk/plugin-test-runtime` से साझा Plugin रनटाइम मॉक को प्राथमिकता दें। इसकी रनटाइम कॉन्फ़िगरेशन सहायिकाएँ वर्तमान स्नैपशॉट और म्यूटेशन API का प्रतिरूपण करती हैं।
 
-### Channel Plugin की unit testing
+### किसी चैनल Plugin का यूनिट परीक्षण
 
 ```typescript
 import { describe, it, expect, vi } from "vitest";
 
-describe("my-channel plugin", () => {
-  it("should resolve account from config", () => {
+describe("मेरा-चैनल Plugin", () => {
+  it("कॉन्फ़िगरेशन से अकाउंट का समाधान करना चाहिए", () => {
     const cfg = {
       channels: {
         "my-channel": {
@@ -242,7 +213,7 @@ describe("my-channel plugin", () => {
     expect(account.token).toBe("test-token");
   });
 
-  it("should inspect account without materializing secrets", () => {
+  it("सीक्रेट को मूर्त रूप दिए बिना अकाउंट का निरीक्षण करना चाहिए", () => {
     const cfg = {
       channels: {
         "my-channel": { token: "test-token" },
@@ -252,22 +223,22 @@ describe("my-channel plugin", () => {
     const inspection = myPlugin.setup.inspectAccount(cfg, undefined);
     expect(inspection.configured).toBe(true);
     expect(inspection.tokenStatus).toBe("available");
-    // No token value exposed
+    // कोई टोकन मान उजागर नहीं किया गया
     expect(inspection).not.toHaveProperty("token");
   });
 });
 ```
 
-### Provider Plugin की unit testing
+### किसी प्रदाता Plugin का यूनिट परीक्षण
 
 ```typescript
 import { describe, it, expect } from "vitest";
 
-describe("my-provider plugin", () => {
-  it("should resolve dynamic models", () => {
+describe("मेरा-प्रदाता Plugin", () => {
+  it("डायनेमिक मॉडल का समाधान करना चाहिए", () => {
     const model = myProvider.resolveDynamicModel({
       modelId: "custom-model-v2",
-      // ... context
+      // ... संदर्भ
     });
 
     expect(model.id).toBe("custom-model-v2");
@@ -275,10 +246,10 @@ describe("my-provider plugin", () => {
     expect(model.api).toBe("openai-completions");
   });
 
-  it("should return catalog when API key is available", async () => {
+  it("API कुंजी उपलब्ध होने पर कैटलॉग लौटाना चाहिए", async () => {
     const result = await myProvider.catalog.run({
       resolveProviderApiKey: () => ({ apiKey: "test-key" }),
-      // ... context
+      // ... संदर्भ
     });
 
     expect(result?.provider?.models).toHaveLength(2);
@@ -286,9 +257,9 @@ describe("my-provider plugin", () => {
 });
 ```
 
-### Plugin runtime को mock करना
+### Plugin रनटाइम को मॉक करना
 
-`createPluginRuntimeStore` का उपयोग करने वाले code के लिए, tests में runtime को mock करें:
+`createPluginRuntimeStore` का उपयोग करने वाले कोड के लिए परीक्षणों में रनटाइम को मॉक करें:
 
 ```typescript
 import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
@@ -296,103 +267,105 @@ import type { PluginRuntime } from "openclaw/plugin-sdk/runtime-store";
 
 const store = createPluginRuntimeStore<PluginRuntime>({
   pluginId: "test-plugin",
-  errorMessage: "test runtime not set",
+  errorMessage: "परीक्षण रनटाइम सेट नहीं है",
 });
 
-// In test setup
+// परीक्षण सेटअप में
 const mockRuntime = {
   agent: {
     resolveAgentDir: vi.fn().mockReturnValue("/tmp/agent"),
-    // ... other mocks
+    // ... अन्य मॉक
   },
   config: {
     current: vi.fn(() => ({}) as const),
     mutateConfigFile: vi.fn(),
     replaceConfigFile: vi.fn(),
   },
-  // ... other namespaces
+  // ... अन्य नेमस्पेस
 } as unknown as PluginRuntime;
 
 store.setRuntime(mockRuntime);
 
-// After tests
+// परीक्षणों के बाद
 store.clearRuntime();
 ```
 
-### Per-instance stubs के साथ testing
+### प्रति-इंस्टेंस स्टब के साथ परीक्षण
 
-Prototype mutation के बजाय per-instance stubs को प्राथमिकता दें:
+प्रोटोटाइप म्यूटेशन के बजाय प्रति-इंस्टेंस स्टब को प्राथमिकता दें:
 
 ```typescript
-// Preferred: per-instance stub
+// अनुशंसित: प्रति-इंस्टेंस स्टब
 const client = new MyChannelClient();
 client.sendMessage = vi.fn().mockResolvedValue({ id: "msg-1" });
 
-// Avoid: prototype mutation
+// इससे बचें: प्रोटोटाइप म्यूटेशन
 // MyChannelClient.prototype.sendMessage = vi.fn();
 ```
 
-## Contract tests (repo के भीतर Plugin)
+## कॉन्ट्रैक्ट परीक्षण (रेपो के भीतर के Plugin)
 
-बंडल किए गए Plugin में contract tests होते हैं जो registration ownership verify करते हैं:
+बंडल किए गए Plugin में कॉन्ट्रैक्ट परीक्षण होते हैं, जो पंजीकरण स्वामित्व सत्यापित करते हैं:
 
 ```bash
-pnpm test -- src/plugins/contracts/
+pnpm test src/plugins/contracts/
 ```
 
-ये tests assert करते हैं:
+ये परीक्षण इसकी पुष्टि करते हैं:
 
-- कौन-से Plugin कौन-से providers register करते हैं
-- कौन-से Plugin कौन-से speech providers register करते हैं
-- Registration shape correctness
-- Runtime contract compliance
+- कौन-से Plugin कौन-से प्रदाता पंजीकृत करते हैं
+- कौन-से Plugin कौन-से वाक् प्रदाता पंजीकृत करते हैं
+- पंजीकरण आकृति की शुद्धता
+- रनटाइम कॉन्ट्रैक्ट का अनुपालन
 
-### Scoped tests चलाना
+### सीमित-दायरे वाले परीक्षण चलाना
 
-किसी specific Plugin के लिए:
+किसी विशिष्ट Plugin के लिए:
 
 ```bash
-pnpm test -- <bundled-plugin-root>/my-channel/
+pnpm test <bundled-plugin-root>/my-channel/
 ```
 
-केवल contract tests के लिए:
+केवल कॉन्ट्रैक्ट परीक्षणों के लिए:
 
 ```bash
-pnpm test -- src/plugins/contracts/shape.contract.test.ts
-pnpm test -- src/plugins/contracts/auth-choice.contract.test.ts
-pnpm test -- src/plugins/contracts/runtime-seams.contract.test.ts
+pnpm test src/plugins/contracts/shape.contract.test.ts
+pnpm test src/plugins/contracts/auth-choice.contract.test.ts
+pnpm test src/plugins/contracts/runtime-seams.contract.test.ts
 ```
 
-## Lint enforcement (repo के भीतर Plugin)
+## लिंट प्रवर्तन (रेपो के भीतर के Plugin)
 
-Repo के भीतर Plugin के लिए `pnpm check` द्वारा तीन rules enforce किए जाते हैं:
+`scripts/run-additional-boundary-checks.mjs` CI में `lint:plugins:*`
+इंपोर्ट-सीमा जाँचों का एक समूह चलाता है; प्रत्येक को स्थानीय रूप से स्वतंत्र भी चलाया जा सकता है:
 
-1. **Monolithic root imports नहीं** -- `openclaw/plugin-sdk` root barrel reject किया जाता है
-2. **Direct `src/` imports नहीं** -- Plugin सीधे `../../src/` import नहीं कर सकते
-3. **Self-imports नहीं** -- Plugin अपना ही `plugin-sdk/<name>` subpath import नहीं कर सकते
+| कमांड                                                        | लागू करता है                                                                                     |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `pnpm run lint:plugins:no-monolithic-plugin-sdk-entry-imports` | बंडल किए गए Plugin मोनोलिथिक `openclaw/plugin-sdk` रूट बैरल को इंपोर्ट नहीं कर सकते।              |
+| `pnpm run lint:plugins:no-extension-src-imports`               | प्रोडक्शन एक्सटेंशन फ़ाइलें रेपो के `src/**` ट्री को सीधे इंपोर्ट नहीं कर सकतीं (`../../src/...`)।  |
+| `pnpm run lint:plugins:no-extension-test-core-imports`         | एक्सटेंशन परीक्षण फ़ाइलें हटाए गए SDK परीक्षण उपनाम या अन्य केवल-कोर परीक्षण सहायिकाएँ इंपोर्ट नहीं कर सकतीं। |
 
-बाहरी Plugin इन lint rules के अधीन नहीं हैं, लेकिन वही
-patterns follow करने की सलाह दी जाती है।
+बाहरी Plugin पर ये लिंट नियम लागू नहीं होते, लेकिन उन्हीं प्रतिरूपों का पालन करने की अनुशंसा की जाती है।
 
-## Test configuration
+## परीक्षण कॉन्फ़िगरेशन
 
-OpenClaw V8 coverage thresholds के साथ Vitest का उपयोग करता है। Plugin tests के लिए:
+OpenClaw सूचनात्मक V8 कवरेज रिपोर्टिंग के साथ Vitest 4 का उपयोग करता है। Plugin परीक्षणों के लिए:
 
 ```bash
-# Run all tests
+# सभी परीक्षण चलाएँ
 pnpm test
 
-# Run specific plugin tests
-pnpm test -- <bundled-plugin-root>/my-channel/src/channel.test.ts
+# विशिष्ट Plugin परीक्षण चलाएँ
+pnpm test <bundled-plugin-root>/my-channel/src/channel.test.ts
 
-# Run with a specific test name filter
-pnpm test -- <bundled-plugin-root>/my-channel/ -t "resolves account"
+# किसी विशिष्ट परीक्षण नाम फ़िल्टर के साथ चलाएँ
+pnpm test <bundled-plugin-root>/my-channel/ -t "अकाउंट का समाधान करता है"
 
-# Run with coverage
+# कवरेज के साथ चलाएँ
 pnpm test:coverage
 ```
 
-यदि local runs memory pressure पैदा करते हैं:
+यदि स्थानीय रन से मेमोरी पर दबाव पड़ता है:
 
 ```bash
 OPENCLAW_VITEST_MAX_WORKERS=1 pnpm test
@@ -400,7 +373,7 @@ OPENCLAW_VITEST_MAX_WORKERS=1 pnpm test
 
 ## संबंधित
 
-- [SDK अवलोकन](/hi/plugins/sdk-overview) -- import conventions
-- [SDK Channel Plugins](/hi/plugins/sdk-channel-plugins) -- channel Plugin interface
-- [SDK Provider Plugins](/hi/plugins/sdk-provider-plugins) -- provider Plugin hooks
-- [Plugins बनाना](/hi/plugins/building-plugins) -- getting started guide
+- [SDK अवलोकन](/hi/plugins/sdk-overview) -- इंपोर्ट परंपराएँ
+- [SDK चैनल Plugin](/hi/plugins/sdk-channel-plugins) -- चैनल Plugin इंटरफ़ेस
+- [SDK प्रदाता Plugin](/hi/plugins/sdk-provider-plugins) -- प्रदाता Plugin हुक
+- [Plugin बनाना](/hi/plugins/building-plugins) -- आरंभिक मार्गदर्शिका

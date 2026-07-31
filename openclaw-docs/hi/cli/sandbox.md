@@ -2,40 +2,61 @@
 read_when: You are managing sandbox runtimes or debugging sandbox/tool-policy behavior.
 status: active
 summary: सैंडबॉक्स रनटाइम प्रबंधित करें और प्रभावी सैंडबॉक्स नीति का निरीक्षण करें
-title: Sandbox CLI
+title: सैंडबॉक्स CLI
 x-i18n:
-    generated_at: "2026-06-28T22:52:30Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:31:53Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: eeba1a5530bb946b334cfe399b7a0c862694ae47c55b2341d7146333e112602a
+    source_hash: ea8311de7702222295f3ba8753304e30f6ed21958e2843f62db5d064f06e24ae
     source_path: cli/sandbox.md
     workflow: 16
 ---
 
-सैंडबॉक्स रनटाइम प्रबंधित करें, ताकि अलग-थलग एजेंट निष्पादन हो सके।
-
-## अवलोकन
-
-OpenClaw सुरक्षा के लिए एजेंटों को अलग-थलग सैंडबॉक्स रनटाइम में चला सकता है। `sandbox` कमांड आपको अपडेट या कॉन्फ़िगरेशन बदलावों के बाद उन रनटाइम को जाँचने और फिर से बनाने में मदद करते हैं।
-
-आज आम तौर पर इसका अर्थ है:
-
-- Docker सैंडबॉक्स कंटेनर
-- SSH सैंडबॉक्स रनटाइम जब `agents.defaults.sandbox.backend = "ssh"`
-- OpenShell सैंडबॉक्स रनटाइम जब `agents.defaults.sandbox.backend = "openshell"`
-
-`ssh` और OpenShell `remote` के लिए, Docker की तुलना में recreate अधिक महत्वपूर्ण है:
-
-- प्रारंभिक सीड के बाद रिमोट वर्कस्पेस ही canonical होता है
-- `openclaw sandbox recreate` चुने गए स्कोप के लिए उस canonical रिमोट वर्कस्पेस को हटाता है
-- अगला उपयोग उसे वर्तमान स्थानीय वर्कस्पेस से फिर से सीड करता है
+अलग-थलग एजेंट निष्पादन के लिए सैंडबॉक्स रनटाइम प्रबंधित करें: Docker कंटेनर, SSH लक्ष्य या OpenShell बैकएंड।
 
 ## कमांड
 
+### `openclaw sandbox list`
+
+स्थिति, बैकएंड, कॉन्फ़िगरेशन मिलान, आयु, निष्क्रिय समय और संबद्ध सत्र/एजेंट के साथ सैंडबॉक्स रनटाइम सूचीबद्ध करें।
+
+```bash
+openclaw sandbox list
+openclaw sandbox list --browser  # केवल ब्राउज़र कंटेनर
+openclaw sandbox list --json
+```
+
+### `openclaw sandbox recreate`
+
+वर्तमान कॉन्फ़िगरेशन के साथ पुनः निर्माण कराने के लिए सैंडबॉक्स रनटाइम हटाएँ। अगली बार एजेंट का उपयोग होने पर रनटाइम स्वचालित रूप से पुनः बनाए जाते हैं।
+
+```bash
+openclaw sandbox recreate --all
+openclaw sandbox recreate --agent mybot        # इसमें agent:mybot:* उप-सत्र शामिल हैं
+openclaw sandbox recreate --session "agent:main:main"
+openclaw sandbox recreate --browser --all      # केवल ब्राउज़र कंटेनर
+openclaw sandbox recreate --all --force        # पुष्टि छोड़ें
+```
+
+विकल्प:
+
+- `--all`: सभी सैंडबॉक्स कंटेनर पुनः बनाएँ
+- `--session <key>`: इसी सटीक स्कोप कुंजी वाला रनटाइम पुनः बनाएँ (जैसा `sandbox list` द्वारा दिखाया गया है); छोटे नाम का विस्तार नहीं
+- `--agent <id>`: एक एजेंट के रनटाइम पुनः बनाएँ (`agent:<id>` और `agent:<id>:*` से मेल खाता है)
+- `--browser`: केवल ब्राउज़र कंटेनर को प्रभावित करें
+- `--force`: पुष्टि प्रॉम्प्ट छोड़ें
+
+`--all`, `--session` या `--agent` में से ठीक एक पास करें।
+
+`ssh` और OpenShell `remote` के लिए पुनः निर्माण Docker की तुलना में अधिक महत्वपूर्ण है: आरंभिक सीडिंग के बाद रिमोट वर्कस्पेस प्रामाणिक होता है, `recreate` चयनित स्कोप के उस प्रामाणिक रिमोट वर्कस्पेस को हटा देता है और अगला रन उसे वर्तमान स्थानीय वर्कस्पेस से दोबारा सीड करता है।
+
 ### `openclaw sandbox explain`
 
-**प्रभावी** सैंडबॉक्स मोड/स्कोप/वर्कस्पेस एक्सेस, सैंडबॉक्स टूल नीति, और elevated gates का निरीक्षण करें (fix-it कॉन्फ़िग कुंजी पथों के साथ)।
+प्रभावी सैंडबॉक्स मोड/स्कोप/वर्कस्पेस पहुँच, सैंडबॉक्स टूल नीति और उन्नत-टूल गेट का निरीक्षण करें (समस्या ठीक करने वाली कॉन्फ़िगरेशन कुंजी के पाथ सहित)।
+
+रिपोर्ट `workspaceRoot` को कॉन्फ़िगर किए गए सैंडबॉक्स रूट के रूप में रखती है और प्रभावी होस्ट वर्कस्पेस, बैकएंड रनटाइम कार्य-निर्देशिका तथा Docker माउंट तालिका अलग-अलग दिखाती है। `workspaceAccess: "rw"` के लिए प्रभावी होस्ट वर्कस्पेस, `workspaceRoot` के अंतर्गत किसी निर्देशिका के बजाय एजेंट वर्कस्पेस होता है।
 
 ```bash
 openclaw sandbox explain
@@ -44,161 +65,60 @@ openclaw sandbox explain --agent work
 openclaw sandbox explain --json
 ```
 
-### `openclaw sandbox list`
+`recreate --session` के विपरीत, यह छोटे सत्र नाम स्वीकार करता है (उदाहरण के लिए `main`) और समाधान किए गए एजेंट के अनुसार उनका विस्तार करता है।
 
-सभी सैंडबॉक्स रनटाइम को उनकी स्थिति और कॉन्फ़िगरेशन के साथ सूचीबद्ध करें।
+## पुनः निर्माण की आवश्यकता क्यों है
 
-```bash
-openclaw sandbox list
-openclaw sandbox list --browser  # केवल ब्राउज़र कंटेनर सूचीबद्ध करें
-openclaw sandbox list --json     # JSON आउटपुट
-```
-
-**आउटपुट में शामिल है:**
-
-- रनटाइम नाम और स्थिति
-- बैकएंड (`docker`, `openshell`, आदि)
-- कॉन्फ़िग लेबल और क्या वह वर्तमान कॉन्फ़िग से मेल खाता है
-- आयु (बनने के बाद से समय)
-- निष्क्रिय समय (अंतिम उपयोग के बाद से समय)
-- संबंधित सत्र/एजेंट
-
-### `openclaw sandbox recreate`
-
-अपडेट किए गए कॉन्फ़िग के साथ फिर से बनाने के लिए सैंडबॉक्स रनटाइम हटाएँ।
-
-```bash
-openclaw sandbox recreate --all                # सभी कंटेनर फिर से बनाएँ
-openclaw sandbox recreate --session main       # विशिष्ट सत्र
-openclaw sandbox recreate --agent mybot        # विशिष्ट एजेंट
-openclaw sandbox recreate --browser            # केवल ब्राउज़र कंटेनर
-openclaw sandbox recreate --all --force        # पुष्टि छोड़ें
-```
-
-**विकल्प:**
-
-- `--all`: सभी सैंडबॉक्स कंटेनर फिर से बनाएँ
-- `--session <key>`: विशिष्ट सत्र के लिए कंटेनर फिर से बनाएँ
-- `--agent <id>`: विशिष्ट एजेंट के लिए कंटेनर फिर से बनाएँ
-- `--browser`: केवल ब्राउज़र कंटेनर फिर से बनाएँ
-- `--force`: पुष्टि प्रॉम्प्ट छोड़ें
-
-<Note>
-एजेंट के अगले उपयोग पर रनटाइम अपने-आप फिर से बनाए जाते हैं।
-</Note>
-
-## उपयोग के मामले
-
-### Docker इमेज अपडेट करने के बाद
-
-```bash
-# नई इमेज पुल करें
-docker pull openclaw-sandbox:latest
-docker tag openclaw-sandbox:latest openclaw-sandbox:bookworm-slim
-
-# नई इमेज उपयोग करने के लिए कॉन्फ़िग अपडेट करें
-# कॉन्फ़िग संपादित करें: agents.defaults.sandbox.docker.image (या agents.list[].sandbox.docker.image)
-
-# कंटेनर फिर से बनाएँ
-openclaw sandbox recreate --all
-```
-
-### सैंडबॉक्स कॉन्फ़िगरेशन बदलने के बाद
-
-```bash
-# कॉन्फ़िग संपादित करें: agents.defaults.sandbox.* (या agents.list[].sandbox.*)
-
-# नया कॉन्फ़िग लागू करने के लिए फिर से बनाएँ
-openclaw sandbox recreate --all
-```
-
-### SSH लक्ष्य या SSH auth सामग्री बदलने के बाद
-
-```bash
-# कॉन्फ़िग संपादित करें:
-# - agents.defaults.sandbox.backend
-# - agents.defaults.sandbox.ssh.target
-# - agents.defaults.sandbox.ssh.workspaceRoot
-# - agents.defaults.sandbox.ssh.identityFile / certificateFile / knownHostsFile
-# - agents.defaults.sandbox.ssh.identityData / certificateData / knownHostsData
-
-openclaw sandbox recreate --all
-```
-
-मुख्य `ssh` बैकएंड के लिए, recreate SSH लक्ष्य पर प्रति-स्कोप रिमोट वर्कस्पेस रूट को हटाता है। अगला रन उसे स्थानीय वर्कस्पेस से फिर से सीड करता है।
-
-### OpenShell स्रोत, नीति, या मोड बदलने के बाद
-
-```bash
-# कॉन्फ़िग संपादित करें:
-# - agents.defaults.sandbox.backend
-# - plugins.entries.openshell.config.from
-# - plugins.entries.openshell.config.mode
-# - plugins.entries.openshell.config.policy
-
-openclaw sandbox recreate --all
-```
-
-OpenShell `remote` मोड के लिए, recreate उस स्कोप के canonical रिमोट वर्कस्पेस को हटाता है। अगला रन उसे स्थानीय वर्कस्पेस से फिर से सीड करता है।
-
-### setupCommand बदलने के बाद
-
-```bash
-openclaw sandbox recreate --all
-# या केवल एक एजेंट:
-openclaw sandbox recreate --agent family
-```
-
-### केवल किसी विशिष्ट एजेंट के लिए
-
-```bash
-# केवल एक एजेंट के कंटेनर अपडेट करें
-openclaw sandbox recreate --agent alfred
-```
-
-## इसकी आवश्यकता क्यों है
-
-जब आप सैंडबॉक्स कॉन्फ़िगरेशन अपडेट करते हैं:
-
-- मौजूदा रनटाइम पुरानी सेटिंग्स के साथ चलते रहते हैं।
-- रनटाइम केवल 24h निष्क्रियता के बाद pruned किए जाते हैं।
-- नियमित रूप से उपयोग किए जाने वाले एजेंट पुराने रनटाइम को अनिश्चित काल तक जीवित रखते हैं।
-
-पुराने रनटाइम को बलपूर्वक हटाने के लिए `openclaw sandbox recreate` का उपयोग करें। अगली बार आवश्यकता होने पर वे वर्तमान सेटिंग्स के साथ अपने-आप फिर से बनाए जाते हैं।
+सैंडबॉक्स कॉन्फ़िगरेशन अपडेट करने से चल रहे कंटेनर प्रभावित नहीं होते: मौजूदा रनटाइम अपनी पुरानी सेटिंग बनाए रखते हैं और निष्क्रिय रनटाइम केवल `prune.idleHours` (डिफ़ॉल्ट 24h) के बाद हटाए जाते हैं। नियमित रूप से उपयोग किए जाने वाले एजेंट पुराने रनटाइम को अनिश्चितकाल तक चालू रख सकते हैं। `openclaw sandbox recreate` पुराने रनटाइम को हटा देता है, ताकि अगले उपयोग पर उसे वर्तमान कॉन्फ़िगरेशन से दोबारा बनाया जा सके।
 
 <Tip>
-मैनुअल बैकएंड-विशिष्ट cleanup की बजाय `openclaw sandbox recreate` को प्राथमिकता दें। यह Gateway की रनटाइम रजिस्ट्री का उपयोग करता है और स्कोप या सत्र कुंजियाँ बदलने पर mismatch से बचाता है।
+मैन्युअल बैकएंड-विशिष्ट सफ़ाई के बजाय `openclaw sandbox recreate` को प्राथमिकता दें। यह Gateway की रनटाइम रजिस्ट्री का उपयोग करता है और स्कोप या सत्र कुंजियाँ बदलने पर बेमेल स्थिति से बचाता है।
 </Tip>
+
+## सामान्य ट्रिगर
+
+| परिवर्तन                                                                                                                                                         | कमांड                                                             |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Docker इमेज अपडेट (`agents.defaults.sandbox.docker.image`)                                                                                                   | `openclaw sandbox recreate --all`                                   |
+| सैंडबॉक्स कॉन्फ़िगरेशन (`agents.defaults.sandbox.*`)                                                                                                                   | `openclaw sandbox recreate --all`                                   |
+| SSH लक्ष्य/प्रमाणीकरण (`agents.defaults.sandbox.ssh.{target,workspaceRoot,identityFile,certificateFile,knownHostsFile,identityData,certificateData,knownHostsData}`) | `openclaw sandbox recreate --all`                                   |
+| OpenShell स्रोत/नीति/मोड (`plugins.entries.openshell.config.{from,mode,policy}`)                                                                           | `openclaw sandbox recreate --all`                                   |
+| `setupCommand`                                                                                                                                                 | `openclaw sandbox recreate --all` (या एक एजेंट के लिए `--agent <id>`) |
+
+<Note>
+अगली बार एजेंट का उपयोग होने पर रनटाइम स्वचालित रूप से पुनः बनाए जाते हैं।
+</Note>
 
 ## रजिस्ट्री माइग्रेशन
 
-OpenClaw सैंडबॉक्स रनटाइम metadata को साझा SQLite state database में संग्रहीत करता है। पुराने installs में अभी भी legacy sandbox registry files हो सकती हैं:
+सैंडबॉक्स रनटाइम मेटाडेटा साझा SQLite स्टेट डेटाबेस में रहता है। पुराने इंस्टॉलेशन में लीगेसी रजिस्ट्री फ़ाइलें हो सकती हैं, जिन्हें नियमित रीड अब दोबारा नहीं लिखते:
 
 - `~/.openclaw/sandbox/containers.json`
 - `~/.openclaw/sandbox/browsers.json`
+- `~/.openclaw/sandbox/containers/` या `~/.openclaw/sandbox/browsers/` के अंतर्गत प्रत्येक कंटेनर/ब्राउज़र के लिए एक JSON शार्ड
 
-कुछ upgrades में `~/.openclaw/sandbox/containers/` या `~/.openclaw/sandbox/browsers/` के अंतर्गत प्रति container/browser एक JSON shard भी हो सकता है। नियमित sandbox runtime reads उन legacy sources को फिर से नहीं लिखते। वैध legacy entries को SQLite में migrate करने के लिए `openclaw doctor --fix` चलाएँ। अमान्य legacy files को quarantine किया जाता है, ताकि एक खराब पुरानी registry वर्तमान runtime entries को छिपा न सके।
+मान्य लीगेसी प्रविष्टियों को SQLite में माइग्रेट करने के लिए `openclaw doctor --fix` चलाएँ। अमान्य लीगेसी फ़ाइलों को क्वारंटीन किया जाता है, ताकि कोई दूषित पुरानी रजिस्ट्री वर्तमान रनटाइम प्रविष्टियों को छिपा न सके।
 
 ## कॉन्फ़िगरेशन
 
-सैंडबॉक्स सेटिंग्स `~/.openclaw/openclaw.json` में `agents.defaults.sandbox` के अंतर्गत रहती हैं (प्रति-एजेंट overrides `agents.list[].sandbox` में जाते हैं):
+सैंडबॉक्स सेटिंग `~/.openclaw/openclaw.json` में `agents.defaults.sandbox` के अंतर्गत रहती हैं (प्रति-एजेंट ओवरराइड `agents.entries.*.sandbox` में रखे जाते हैं):
 
 ```jsonc
 {
   "agents": {
     "defaults": {
       "sandbox": {
-        "mode": "all", // off, non-main, all
-        "backend": "docker", // docker, ssh, openshell
-        "scope": "agent", // session, agent, shared
+        "mode": "all", // बंद, गैर-मुख्य, सभी
+        "backend": "docker", // docker, ssh, openshell (Plugin द्वारा उपलब्ध)
+        "scope": "agent", // सत्र, एजेंट, साझा
         "docker": {
           "image": "openclaw-sandbox:bookworm-slim",
           "containerPrefix": "openclaw-sbx-",
-          // ... more Docker options
+          // ... और Docker विकल्प
         },
         "prune": {
-          "idleHours": 24, // Auto-prune after 24h idle
-          "maxAgeDays": 7, // Auto-prune after 7 days
+          "idleHours": 24, // 24h निष्क्रिय रहने के बाद स्वतः हटाएँ
+          "maxAgeDays": 7, // 7 दिनों के बाद स्वतः हटाएँ
         },
       },
     },

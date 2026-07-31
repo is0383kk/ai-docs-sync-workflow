@@ -1,43 +1,40 @@
 ---
 read_when:
-    - Tlon/Urbit चैनल सुविधाओं पर काम
-summary: Tlon/Urbit समर्थन स्थिति, क्षमताएँ, और कॉन्फ़िगरेशन
+    - Tlon/Urbit चैनल सुविधाओं पर काम करना
+summary: Tlon/Urbit समर्थन स्थिति, क्षमताएँ और कॉन्फ़िगरेशन
 title: Tlon
 x-i18n:
-    generated_at: "2026-06-28T22:40:37Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:23:38Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 1718044541b431ff2437508e7e6659c14206f4aa84ab8b207e0d791dea2a48c5
+    source_hash: d742628d6cf9aaf82d79a8d96b1685229905e9452c9fc4d3a494d2dee8d69943
     source_path: channels/tlon.md
     workflow: 16
 ---
 
-Tlon, Urbit पर बना एक विकेंद्रीकृत मैसेंजर है। OpenClaw आपके Urbit ship से जुड़ता है और
-DMs और group chat संदेशों का जवाब दे सकता है। Group replies के लिए डिफ़ॉल्ट रूप से @ mention आवश्यक है और उन्हें
-allowlists के ज़रिए और सीमित किया जा सकता है।
+Tlon, Urbit पर निर्मित एक विकेंद्रीकृत मैसेंजर है। OpenClaw आपके Urbit शिप से कनेक्ट होता है और
+DM तथा समूह चैट संदेशों का उत्तर देता है। समूह में उत्तर देने के लिए डिफ़ॉल्ट रूप से @ उल्लेख आवश्यक है, जिसके
+ऊपर प्राधिकरण नियम और स्वामी-अनुमोदन प्रवाह लागू होते हैं।
 
-स्थिति: bundled Plugin। DMs, group mentions, thread replies, rich text formatting, और
-image uploads समर्थित हैं। Reactions और polls अभी समर्थित नहीं हैं।
+स्थिति: बंडल किया गया Plugin। DM, समूह उल्लेख, थ्रेड, रिच टेक्स्ट, छवि अपलोड/डाउनलोड और
+स्वामी अनुमोदन प्रणाली समर्थित हैं। प्रतिक्रियाएँ और पोल समर्थित नहीं हैं।
 
-## Bundled Plugin
+## बंडल किया गया Plugin
 
-Tlon मौजूदा OpenClaw releases में bundled Plugin के रूप में आता है, इसलिए सामान्य packaged
-builds को अलग install की आवश्यकता नहीं होती।
+Tlon वर्तमान OpenClaw रिलीज़ में बंडल होकर आता है; पैकेज किए गए बिल्ड के लिए अलग इंस्टॉलेशन आवश्यक नहीं है।
 
-यदि आप किसी पुराने build पर हैं या ऐसे custom install पर हैं जिसमें Tlon शामिल नहीं है, तो
-मौजूदा npm package install करें:
-
-CLI के ज़रिए install करें (npm registry):
+किसी पुराने बिल्ड या इसे बाहर रखने वाले कस्टम इंस्टॉलेशन में, npm से इंस्टॉल करें:
 
 ```bash
 openclaw plugins install @openclaw/tlon
 ```
 
-मौजूदा आधिकारिक release tag का पालन करने के लिए bare package का उपयोग करें। exact
-version केवल तभी pin करें जब आपको reproducible install चाहिए।
+वर्तमान रिलीज़ टैग को ट्रैक करने के लिए केवल पैकेज नाम का उपयोग करें। संस्करण (`@openclaw/tlon@x.y.z`)
+केवल पुनरुत्पाद्य इंस्टॉलेशन के लिए पिन करें।
 
-Local checkout (git repo से चलाते समय):
+स्थानीय चेकआउट से:
 
 ```bash
 openclaw plugins install ./path/to/local/tlon-plugin
@@ -45,17 +42,13 @@ openclaw plugins install ./path/to/local/tlon-plugin
 
 विवरण: [Plugins](/hi/tools/plugin)
 
-## Setup
+## सेटअप
 
-1. सुनिश्चित करें कि Tlon Plugin उपलब्ध है।
-   - मौजूदा packaged OpenClaw releases में यह पहले से bundled है।
-   - पुराने/custom installs इसे ऊपर दिए गए commands से manually जोड़ सकते हैं।
-2. अपना ship URL और login code इकट्ठा करें।
-3. `channels.tlon` configure करें।
-4. gateway restart करें।
-5. bot को DM करें या group channel में mention करें।
+```bash
+openclaw channels add --channel tlon --ship ~sampel-palnet --url https://your-ship-host --code lidlut-tabwed-pillex-ridrup
+```
 
-न्यूनतम config (single account):
+या सीधे कॉन्फ़िग संपादित करें:
 
 ```json5
 {
@@ -65,67 +58,70 @@ openclaw plugins install ./path/to/local/tlon-plugin
       ship: "~sampel-palnet",
       url: "https://your-ship-host",
       code: "lidlut-tabwed-pillex-ridrup",
-      ownerShip: "~your-main-ship", // recommended: your ship, always allowed
+      ownerShip: "~your-main-ship", // अनुशंसित: आपका शिप, हमेशा प्राधिकृत
     },
   },
 }
 ```
 
-## Private/LAN ships
+कॉन्फ़िग सीधे संपादित करने के बाद Gateway को पुनः आरंभ करें। फिर बॉट को DM भेजें या समूह
+चैनल में उसका @ उल्लेख करें।
 
-डिफ़ॉल्ट रूप से, OpenClaw SSRF protection के लिए private/internal hostnames और IP ranges को block करता है।
-यदि आपका ship किसी private network (localhost, LAN IP, या internal hostname) पर चल रहा है,
-तो आपको स्पष्ट रूप से opt in करना होगा:
+## इनबाउंड स्थायित्व
+
+OpenClaw, एजेंट को भेजने से पहले स्वीकार किए गए Tlon DM और समूह-चैट इवेंट सहेजता है। लंबित या पुनः प्रयास योग्य टर्न Gateway के पुनः आरंभ होने के बाद भी बने रहते हैं और कार्य प्रत्येक समूह चैनल या प्रत्यक्ष सहकर्मी के लिए क्रमबद्ध रहता है। स्थिर Urbit संदेश ID भी किसी पुनः वितरित इवेंट को तब तक रोकते हैं, जब तक उसका कतार रिकॉर्ड या संरक्षित पूर्णता रिकॉर्ड मौजूद है।
+
+कतार-से-एजेंट सीमा पर डिलीवरी कम-से-कम-एक-बार होती है: हैंडऑफ़ के दौरान क्रैश होने पर कोई टर्न फिर चल सकता है। इसलिए बाहरी दुष्प्रभाव उत्पन्न करने वाली एजेंट कार्रवाइयों को जहाँ व्यावहारिक हो, पुनरावृत्ति-सुरक्षित रखना चाहिए।
+
+## निजी/LAN शिप
+
+OpenClaw डिफ़ॉल्ट रूप से SSRF सुरक्षा के लिए निजी/आंतरिक होस्टनाम और IP श्रेणियों को ब्लॉक करता है। यदि आपका
+शिप किसी निजी नेटवर्क (localhost, LAN IP, आंतरिक होस्टनाम) पर चलता है, तो स्पष्ट रूप से अनुमति दें:
 
 ```json5
 {
   channels: {
     tlon: {
       url: "http://localhost:8080",
-      allowPrivateNetwork: true,
+      network: {
+        dangerouslyAllowPrivateNetwork: true,
+      },
     },
   },
 }
 ```
 
-यह इन जैसे URLs पर लागू होता है:
+यह `http://localhost:8080`, `http://192.168.x.x:8080` और
+`http://my-ship.local:8080` जैसे लक्ष्यों पर लागू होता है। इसे केवल किसी विश्वसनीय शिप URL के लिए सक्षम करें; यह उस खाते के HTTP अनुरोधों के लिए
+SSRF सुरक्षा अक्षम कर देता है।
 
-- `http://localhost:8080`
-- `http://192.168.x.x:8080`
-- `http://my-ship.local:8080`
+<Note>
+`channels.tlon.allowPrivateNetwork` (समतल कुंजी) अब उपयोग में नहीं है। `openclaw doctor --fix` इसे स्वचालित रूप से
+`channels.tlon.network.dangerouslyAllowPrivateNetwork` में ले जाता है।
+</Note>
 
-⚠️ इसे केवल तभी enable करें जब आप अपने local network पर भरोसा करते हों। यह setting आपके ship URL पर requests के लिए
-SSRF protections disable करती है।
+## समूह चैनल
 
-## Group channels
-
-Auto-discovery डिफ़ॉल्ट रूप से enabled है। आप channels को manually pin भी कर सकते हैं:
+चैनलों को मैन्युअल रूप से पिन करें या स्वतः खोज चालू करें:
 
 ```json5
 {
   channels: {
     tlon: {
       groupChannels: ["chat/~host-ship/general", "chat/~host-ship/support"],
+      autoDiscoverChannels: true,
     },
   },
 }
 ```
 
-Auto-discovery disable करें:
+कॉन्फ़िग में सेट न होने पर `autoDiscoverChannels` का डिफ़ॉल्ट `false` होता है; सेटअप विज़ार्ड
+प्रॉम्प्ट को हाँ पर डिफ़ॉल्ट करता है और स्पष्ट रूप से `true` लिखता है। इसके चालू होने पर OpenClaw स्टार्टअप के समय शामिल समूहों को स्क्राई करता है,
+समूह आमंत्रण स्वीकार किए जाने पर नए चैनलों पर नज़र रखता है और प्रत्येक 2 मिनट में दोबारा जाँच करता है।
 
-```json5
-{
-  channels: {
-    tlon: {
-      autoDiscoverChannels: false,
-    },
-  },
-}
-```
+## अभिगम नियंत्रण
 
-## Access control
-
-DM allowlist (empty = कोई DMs allowed नहीं, approval flow के लिए `ownerShip` का उपयोग करें):
+DM अनुमति-सूची (खाली = प्रेषक के `ownerShip` होने के अलावा किसी DM की अनुमति नहीं):
 
 ```json5
 {
@@ -137,7 +133,8 @@ DM allowlist (empty = कोई DMs allowed नहीं, approval flow के �
 }
 ```
 
-Group authorization (डिफ़ॉल्ट रूप से restricted):
+समूह प्राधिकरण का डिफ़ॉल्ट प्रत्येक चैनल के लिए `restricted` है। आधार-रेखा के लिए `defaultAuthorizedShips` सेट करें
+और प्रत्येक चैनल नेस्ट के अनुसार ओवरराइड करें:
 
 ```json5
 {
@@ -160,9 +157,14 @@ Group authorization (डिफ़ॉल्ट रूप से restricted):
 }
 ```
 
-## Owner और approval system
+बॉट द्वारा किसी थ्रेड में उत्तर दिए जाने के बाद, वह उस थ्रेड के बाद के संदेशों का उत्तर
+दूसरे उल्लेख की आवश्यकता के बिना देता रहता है।
 
-जब unauthorized users interact करने की कोशिश करें, तो approval requests प्राप्त करने के लिए owner ship set करें:
+उन फ़ॉलो-अप के लिए नया स्पष्ट उल्लेख आवश्यक बनाने हेतु `channels.tlon.implicitMentions.threadParticipation: false` सेट करें।
+खाता ओवरराइड `channels.tlon.accounts.<id>.implicitMentions` का उपयोग करते हैं। Tlon वर्तमान में
+`replyToBot` या `quotedBot` तथ्य उत्पन्न नहीं करता, इसलिए इन फ़्लैग का यहाँ कोई प्रभाव नहीं पड़ता।
+
+## स्वामी और अनुमोदन प्रणाली
 
 ```json5
 {
@@ -174,19 +176,36 @@ Group authorization (डिफ़ॉल्ट रूप से restricted):
 }
 ```
 
-owner ship **हर जगह automatically authorized** होता है — DM invites auto-accepted होते हैं और
-channel messages हमेशा allowed होते हैं। आपको owner को `dmAllowlist` या
-`defaultAuthorizedShips` में जोड़ने की आवश्यकता नहीं है।
+स्वामी शिप हर जगह प्राधिकृत होता है: DM आमंत्रण हमेशा स्वतः स्वीकार किए जाते हैं, समूह आमंत्रण
+हमेशा स्वतः स्वीकार किए जाते हैं और चैनल संदेश हमेशा प्राधिकरण पार करते हैं। स्वामी का
+`dmAllowlist`, `defaultAuthorizedShips` या `groupInviteAllowlist` में होना आवश्यक नहीं है।
 
-Set होने पर, owner को इनके लिए DM notifications मिलते हैं:
+जब `ownerShip` सेट हो, तो अनधिकृत अनुरोध केवल छोड़े नहीं जाते—वे लंबित
+अनुमोदन की कतार बनाते हैं और स्वामी को DM भेजते हैं:
 
-- allowlist में नहीं मौजूद ships से DM requests
-- authorization के बिना channels में mentions
-- Group invite requests
+- `dmAllowlist` में न आने वाले शिप से DM अनुरोध
+- उन चैनलों में उल्लेख, जहाँ प्रेषक प्राधिकरण में विफल रहता है
+- `groupInviteAllowlist` में न आने वाले शिप से समूह आमंत्रण (जब स्वतः स्वीकार बंद हो, या चालू हो लेकिन
+  आमंत्रक अनुमति-सूची में न हो)
 
-## Auto-accept settings
+किसी अनुरोध पर कार्रवाई करने के लिए स्वामी DM में उत्तर देता है:
 
-DM invites auto-accept करें (`dmAllowlist` में मौजूद ships के लिए):
+| स्वामी का उत्तर                  | प्रभाव                                               |
+| ---------------------------- | ---------------------------------------------------- |
+| `approve` / `deny` / `block` | सबसे हाल के लंबित अनुमोदन पर कार्रवाई करता है             |
+| `approve <id>` / `deny <id>` | ID द्वारा किसी विशिष्ट अनुमोदन पर कार्रवाई करता है                    |
+| `block`                      | शिप को मूल रूप से ब्लॉक भी करता है, ताकि वह पुनः कनेक्ट न कर सके |
+| `unblock ~ship`              | मूल ब्लॉक को उलटता है                              |
+| `blocked`                    | वर्तमान में ब्लॉक किए गए शिप सूचीबद्ध करता है                        |
+| `pending`                    | लंबित अनुमोदन अनुरोध सूचीबद्ध करता है                      |
+
+`ownerShip` कॉन्फ़िगर न होने पर अनधिकृत DM और चैनल उल्लेख केवल छोड़ दिए जाते और लॉग किए जाते हैं;
+कोई अनुमोदन प्रॉम्प्ट नहीं होता।
+
+## स्वतः स्वीकार सेटिंग
+
+पहले से `dmAllowlist` में मौजूद शिप से DM आमंत्रण स्वतः स्वीकार करें (इस फ़्लैग की परवाह किए बिना स्वामी
+हमेशा स्वतः स्वीकार किया जाता है):
 
 ```json5
 {
@@ -198,7 +217,8 @@ DM invites auto-accept करें (`dmAllowlist` में मौजूद shi
 }
 ```
 
-trusted ships से group invites auto-accept करें:
+अनुमति-सूची से समूह आमंत्रण स्वतः स्वीकार करें (सुरक्षित रूप से विफल: `autoAcceptGroupInvites: true` और
+खाली `groupInviteAllowlist` के साथ, स्वामी के अलावा कोई आमंत्रण स्वीकार नहीं किया जाता):
 
 ```json5
 {
@@ -211,46 +231,53 @@ trusted ships से group invites auto-accept करें:
 }
 ```
 
-`groupInviteAllowlist` खाली होने पर `autoAcceptGroupInvites` fails closed होता है। allowlist को
-उन ships पर set करें जिनके group invites automatically accepted होने चाहिए।
+## Urbit सेटिंग स्टोर के माध्यम से हॉट-रीलोड
 
-## Delivery targets (CLI/Cron)
+ऊपर दी गई अधिकांश सेटिंग (`dmAllowlist`, `groupInviteAllowlist`, `groupChannels`,
+`defaultAuthorizedShips`, `autoDiscoverChannels`, `autoAcceptDmInvites`,
+`autoAcceptGroupInvites`, `ownerShip`, `showModelSignature`) पहली बार चलाने पर शिप के
+`%settings` एजेंट (डेस्क `moltbot`, बकेट `tlon`) में प्रतिबिंबित होती हैं और फिर वहीं से लाइव पढ़ी जाती हैं,
+इसलिए Landscape क्लाइंट या बंडल किए गए skill के सेटिंग कमांड द्वारा किए गए परिवर्तन
+Gateway पुनः आरंभ किए बिना लागू हो जाते हैं। `channelRules` और लंबित अनुमोदन भी वहाँ JSON के रूप में सहेजे जाते हैं। सेटिंग स्टोर में कभी न लिखे गए मानों के लिए
+फ़ाइल कॉन्फ़िग सत्य का स्रोत बना रहता है।
 
-इन्हें `openclaw message send` या Cron delivery के साथ उपयोग करें:
+## डिलीवरी लक्ष्य (CLI/cron)
+
+`openclaw message send` या cron डिलीवरी के साथ उपयोग करें:
 
 - DM: `~sampel-palnet` या `dm/~sampel-palnet`
-- Group: `chat/~host-ship/channel` या `group:~host-ship/channel`
+- समूह: `chat/~host-ship/channel` या `group:~host-ship/channel`
 
-## Bundled skill
+## बंडल किया गया skill
 
-Tlon Plugin में bundled skill ([`@tloncorp/tlon-skill`](https://github.com/tloncorp/tlon-skill))
-शामिल है, जो Tlon operations के लिए CLI access देता है:
+Plugin प्रत्यक्ष Urbit कार्रवाइयों के लिए एक CLI [`@tloncorp/tlon-skill`](https://github.com/tloncorp/tlon-skill) बंडल करता है,
+जो Plugin इंस्टॉल होते ही स्वतः उपलब्ध होता है:
 
-- **Contacts**: profiles get/update करें, contacts list करें
-- **Channels**: list करें, create करें, messages post करें, history fetch करें
-- **Groups**: list करें, create करें, members manage करें
-- **DMs**: messages भेजें, messages पर react करें
-- **Reactions**: posts और DMs में emoji reactions add/remove करें
-- **Settings**: slash commands के ज़रिए Plugin permissions manage करें
+- **गतिविधि**: उल्लेख, उत्तर, अपठित
+- **चैनल**: सूचीबद्ध करना, बनाना, नाम बदलना
+- **संपर्क**: प्रोफ़ाइल सूचीबद्ध करना/पाना/अपडेट करना
+- **समूह**: बनाना, शामिल होना, आमंत्रण/अनुरोध प्रवाह, भूमिकाएँ
+- **हुक**: चैनल हुक प्रबंधित करना
+- **संदेश**: इतिहास, खोज
+- **DM**: भेजना, प्रतिक्रिया देना, स्वीकार/अस्वीकार करना
+- **पोस्ट**: प्रतिक्रिया देना, हटाना
+- **नोटबुक**: डायरी चैनलों पर पोस्ट करना
+- **सेटिंग**: ऊपर दिए गए सेटिंग स्टोर के माध्यम से Plugin कॉन्फ़िग को हॉट-रीलोड करना
 
-Plugin install होने पर skill automatically available होता है।
+## क्षमताएँ
 
-## Capabilities
+| सुविधा         | स्थिति                                        |
+| --------------- | --------------------------------------------- |
+| प्रत्यक्ष संदेश | समर्थित                                     |
+| समूह/चैनल | समर्थित (डिफ़ॉल्ट रूप से उल्लेख-नियंत्रित)          |
+| थ्रेड         | समर्थित (एक बार शामिल होने के बाद उत्तर देता रहता है) |
+| रिच टेक्स्ट       | Markdown को Tlon के मूल प्रारूप में बदला जाता है    |
+| छवियाँ          | इनबाउंड पर डाउनलोड, आउटबाउंड पर अपलोड         |
+| प्रतिक्रियाएँ       | केवल [बंडल किए गए skill](#bundled-skill) के माध्यम से  |
+| पोल           | समर्थित नहीं                                 |
+| मूल कमांड | डिफ़ॉल्ट रूप से केवल स्वामी के लिए                         |
 
-| Feature         | Status                                  |
-| --------------- | --------------------------------------- |
-| Direct messages | ✅ समर्थित                              |
-| Groups/channels | ✅ समर्थित (डिफ़ॉल्ट रूप से mention-gated) |
-| Threads         | ✅ समर्थित (thread में auto-replies)    |
-| Rich text       | ✅ Markdown को Tlon format में converted किया गया |
-| Images          | ✅ Tlon storage पर uploaded             |
-| Reactions       | ✅ [bundled skill](#bundled-skill) के ज़रिए |
-| Polls           | ❌ अभी समर्थित नहीं                    |
-| Native commands | ✅ समर्थित (डिफ़ॉल्ट रूप से केवल owner) |
-
-## Troubleshooting
-
-पहले यह ladder चलाएँ:
+## समस्या निवारण
 
 ```bash
 openclaw status
@@ -259,46 +286,53 @@ openclaw logs --follow
 openclaw doctor
 ```
 
-सामान्य failures:
+सामान्य विफलताएँ:
 
-- **DMs ignored**: sender `dmAllowlist` में नहीं है और approval flow के लिए कोई `ownerShip` configured नहीं है।
-- **Group messages ignored**: channel discovered नहीं हुआ या sender authorized नहीं है।
-- **Connection errors**: जाँचें कि ship URL reachable है; local ships के लिए `allowPrivateNetwork` enable करें।
-- **Auth errors**: verify करें कि login code current है (codes rotate होते हैं)।
+- **DM अनदेखे किए गए**: प्रेषक `dmAllowlist` में नहीं है और अनुमोदन प्रवाह के लिए कोई `ownerShip` कॉन्फ़िगर नहीं है।
+- **समूह संदेश अनदेखे किए गए**: चैनल खोजा/पिन नहीं किया गया, या प्रेषक प्राधिकरण में विफल रहता है और अनुमोदन को कतार में रखने के लिए कोई
+  `ownerShip` नहीं है।
+- **कनेक्शन त्रुटियाँ**: जाँचें कि शिप URL पहुँच योग्य है; स्थानीय शिप के लिए
+  `network.dangerouslyAllowPrivateNetwork` सेट करें।
+- **प्रमाणीकरण त्रुटियाँ**: लॉगिन कोड बदलते रहते हैं—अपने शिप से वर्तमान कोड कॉपी करें।
 
-## Configuration reference
+## कॉन्फ़िगरेशन संदर्भ
 
-पूर्ण configuration: [Configuration](/hi/gateway/configuration)
+पूरा कॉन्फ़िगरेशन: [कॉन्फ़िगरेशन](/hi/gateway/configuration)
 
-Provider options:
+| कुंजी                                                    | अर्थ                                                        |
+| ------------------------------------------------------ | -------------------------------------------------------------- |
+| `channels.tlon.enabled`                                | चैनल स्टार्टअप सक्षम/अक्षम करें।                                |
+| `channels.tlon.ship`                                   | बॉट का Urbit शिप नाम (उदा. `~sampel-palnet`)।                 |
+| `channels.tlon.url`                                    | शिप URL (उदा. `https://sampel-palnet.tlon.network`)।          |
+| `channels.tlon.code`                                   | शिप लॉगिन कोड।                                               |
+| `channels.tlon.network.dangerouslyAllowPrivateNetwork` | localhost/LAN शिप URL की अनुमति दें (SSRF ऑप्ट-इन)।                   |
+| `channels.tlon.ownerShip`                              | स्वामी शिप: हमेशा प्राधिकृत, अनुमोदन अनुरोध प्राप्त करता है।     |
+| `channels.tlon.dmAllowlist`                            | DM भेज सकने वाले शिप (खाली = स्वामी के अलावा कोई नहीं)।              |
+| `channels.tlon.autoAcceptDmInvites`                    | `dmAllowlist` में मौजूद शिप से DM स्वतः स्वीकार करें।                   |
+| `channels.tlon.autoAcceptGroupInvites`                 | `groupInviteAllowlist` से समूह आमंत्रण स्वतः स्वीकार करें।         |
+| `channels.tlon.groupInviteAllowlist`                   | वे शिप जिनके समूह आमंत्रण स्वतः स्वीकार किए जाते हैं।                   |
+| `channels.tlon.autoDiscoverChannels`                   | शामिल समूह चैनल स्वतः खोजें (डिफ़ॉल्ट: `false`)।        |
+| `channels.tlon.implicitMentions.threadParticipation`   | भाग लिए गए थ्रेड के फ़ॉलो-अप को उल्लेख नियंत्रण बायपास करने दें।      |
+| `channels.tlon.groupChannels`                          | मैन्युअल रूप से पिन किए गए चैनल नेस्ट।                                 |
+| `channels.tlon.defaultAuthorizedShips`                 | सभी चैनलों के लिए प्राधिकृत शिप (कोई नियम मेल न खाने पर उपयोग किए जाते हैं)। |
+| `channels.tlon.authorization.channelRules`             | प्रत्येक चैनल नेस्ट के लिए प्रमाणीकरण मोड + अनुमति-सूची।                        |
+| `channels.tlon.showModelSignature`                     | उत्तरों में `_[Generated by <model>]_` जोड़ें।                  |
+| `channels.tlon.responsePrefix`                         | आउटबाउंड उत्तरों से पहले जोड़ा जाने वाला स्थिर उपसर्ग।                   |
+| `channels.tlon.accounts.<id>`                          | अतिरिक्त नामित खाते (बहु-शिप सेटअप)।                 |
 
-- `channels.tlon.enabled`: channel startup enable/disable करें।
-- `channels.tlon.ship`: bot का Urbit ship name (जैसे `~sampel-palnet`)।
-- `channels.tlon.url`: ship URL (जैसे `https://sampel-palnet.tlon.network`)।
-- `channels.tlon.code`: ship login code।
-- `channels.tlon.allowPrivateNetwork`: localhost/LAN URLs allow करें (SSRF bypass)।
-- `channels.tlon.ownerShip`: approval system के लिए owner ship (हमेशा authorized)।
-- `channels.tlon.dmAllowlist`: DM करने के लिए allowed ships (empty = कोई नहीं)।
-- `channels.tlon.autoAcceptDmInvites`: allowlisted ships से DMs auto-accept करें।
-- `channels.tlon.autoAcceptGroupInvites`: allowlisted ships से group invites auto-accept करें।
-- `channels.tlon.groupInviteAllowlist`: वे ships जिनके group invites auto-accepted हो सकते हैं।
-- `channels.tlon.autoDiscoverChannels`: group channels auto-discover करें (default: true)।
-- `channels.tlon.groupChannels`: manually pinned channel nests।
-- `channels.tlon.defaultAuthorizedShips`: सभी channels के लिए authorized ships।
-- `channels.tlon.authorization.channelRules`: per-channel auth rules।
-- `channels.tlon.showModelSignature`: messages में model name append करें।
+## टिप्पणियाँ
 
-## Notes
+- समूह में उत्तर देने के लिए @ उल्लेख (जैसे `~your-bot-ship`) आवश्यक है, जब तक कि बॉट पहले से उस थ्रेड में शामिल न हो।
+- थ्रेड के उत्तर उसी थ्रेड में पहुँचते हैं; बॉट को एजेंट के लिए थ्रेड संदर्भ के अंतिम 10 संदेश भी पहले जोड़कर
+  मिलते हैं।
+- रिच टेक्स्ट (बोल्ड, इटैलिक, कोड, शीर्षक, सूचियाँ) Tlon के मूल प्रारूप में बदल जाता है।
+- चैनल सारांश माँगने वाला इनबाउंड संदेश भेजने पर (उदाहरण के लिए, "इस
+  चैनल का सारांश दें") सामान्य उत्तर प्रवाह के बजाय अंतर्निहित इतिहास सारांशीकरण शुरू हो जाता है।
 
-- Group replies के लिए respond करने हेतु mention (जैसे `~your-bot-ship`) आवश्यक है।
-- Thread replies: यदि inbound message किसी thread में है, तो OpenClaw in-thread reply करता है।
-- Rich text: Markdown formatting (bold, italic, code, headers, lists) Tlon के native format में converted होती है।
-- Images: URLs Tlon storage पर uploaded होते हैं और image blocks के रूप में embedded होते हैं।
+## संबंधित
 
-## Related
-
-- [Channels Overview](/hi/channels) — सभी supported channels
-- [Pairing](/hi/channels/pairing) — DM authentication और pairing flow
-- [Groups](/hi/channels/groups) — group chat behavior और mention gating
-- [Channel Routing](/hi/channels/channel-routing) — messages के लिए session routing
-- [Security](/hi/gateway/security) — access model और hardening
+- [चैनलों का अवलोकन](/hi/channels) — सभी समर्थित चैनल
+- [पेयरिंग](/hi/channels/pairing) — DM प्रमाणीकरण और पेयरिंग प्रवाह
+- [समूह](/hi/channels/groups) — समूह चैट का व्यवहार और उल्लेख नियंत्रण
+- [चैनल रूटिंग](/hi/channels/channel-routing) — संदेशों के लिए सत्र रूटिंग
+- [सुरक्षा](/hi/gateway/security) — अभिगम मॉडल और सुदृढ़ीकरण

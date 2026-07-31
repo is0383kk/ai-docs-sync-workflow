@@ -1,14 +1,15 @@
 ---
 read_when:
-    - cerebras Pluginをインストール、設定、または監査している場合
+    - cerebras Plugin のインストール、設定、または監査を行う場合です
 summary: OpenClaw に Cerebras モデルプロバイダーのサポートを追加します。
 title: Cerebras Plugin
 x-i18n:
-    generated_at: "2026-07-11T22:31:50Z"
+    generated_at: "2026-07-26T09:42:44Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 272a592b6099b7dc30c48e40e004ca01c1113a1fcf65917ac6266987a63ec01f
+    source_hash: 4a393776e3fdb0d7a26e5f01bab84b3b8cd451c077019d9ac725d1079c1bb86f
     source_path: plugins/reference/cerebras.md
     workflow: 16
 ---
@@ -24,8 +25,8 @@ OpenClaw に Cerebras モデルプロバイダーのサポートを追加しま�
 
 ## 提供機能
 
-プロバイダー: cerebras
+プロバイダー: `cerebras`
 
 ## 関連ドキュメント
 
-- [cerebras](/ja-JP/providers/cerebras)
+- [Cerebras](/ja-JP/providers/cerebras)

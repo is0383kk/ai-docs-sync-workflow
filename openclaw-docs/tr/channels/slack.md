@@ -1,57 +1,62 @@
 ---
 read_when:
-    - Slack’i kurma veya Slack soket, HTTP ya da relay modunda hata ayıklama
-summary: Slack kurulumu ve çalışma zamanı davranışı (Socket Mode, HTTP Request URL'leri ve relay modu)
+    - Slack'i ayarlama veya Slack soket, HTTP ya da aktarma modunda hata ayıklama
+summary: Slack kurulumu ve çalışma zamanı davranışı (Socket Mode, HTTP Request URL'leri ve aktarma modu)
 title: Slack
 x-i18n:
-    generated_at: "2026-06-28T00:15:36Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T22:38:42Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 95acddb569b1ddc184609f0918336a7465d409351a0406f48fd5dd92a79ca9d6
+    source_hash: e0f974ddf8e6965b09cede6a16f171434915a994fa3c1fc744d2350399941bee
     source_path: channels/slack.md
     workflow: 16
 ---
 
-DM'ler ve kanallar için Slack uygulama entegrasyonlarıyla üretime hazır. Varsayılan mod Socket Mode'dur; HTTP İstek URL'leri de desteklenir. Relay modu, güvenilir bir yönlendiricinin Slack girişini yönettiği yönetilen dağıtımlar için tasarlanmıştır.
+Slack desteği, Slack uygulama entegrasyonları aracılığıyla DM'leri ve kanalları kapsar. Varsayılan aktarım Socket Mode'dur; HTTP Request URL'leri de desteklenir. Relay modu, güvenilir bir yönlendiricinin Slack girişini yönettiği yönetilen dağıtımlar içindir.
 
 <CardGroup cols={3}>
-  <Card title="Pairing" icon="link" href="/tr/channels/pairing">
+  <Card title="Eşleştirme" icon="link" href="/tr/channels/pairing">
     Slack DM'leri varsayılan olarak eşleştirme modunu kullanır.
   </Card>
-  <Card title="Slash commands" icon="terminal" href="/tr/tools/slash-commands">
+  <Card title="Eğik çizgi komutları" icon="terminal" href="/tr/tools/slash-commands">
     Yerel komut davranışı ve komut kataloğu.
   </Card>
-  <Card title="Channel troubleshooting" icon="wrench" href="/tr/channels/troubleshooting">
-    Kanallar arası tanılama ve onarım çalışma kılavuzları.
+  <Card title="Kanal sorunlarını giderme" icon="wrench" href="/tr/channels/troubleshooting">
+    Kanallar arası tanılama ve onarım çalışma planları.
   </Card>
 </CardGroup>
 
-## Socket Mode veya HTTP İstek URL'lerini seçme
+## Aktarım seçme
 
-Her iki aktarım da üretime hazırdır ve mesajlaşma, slash komutları, App Home ve etkileşim için özellik eşitliğine ulaşır. Özelliklere göre değil, dağıtım şekline göre seçim yapın.
+Socket Mode ve HTTP Request URL'leri; mesajlaşma, eğik çizgi komutları, App Home ve etkileşim özelliklerinde eşdeğerdir. Özelliklere göre değil, dağıtım yapısına göre seçim yapın.
 
-| Konu                         | Socket Mode (varsayılan)                                                                                                                             | HTTP İstek URL'leri                                                                                           |
+| Konu                         | Socket Mode (varsayılan)                                                                                                                             | HTTP Request URL'leri                                                                                           |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Herkese açık Gateway URL'si  | Gerekli değil                                                                                                                                         | Gerekli (DNS, TLS, ters proxy veya tünel)                                                                      |
-| Giden ağ                     | `wss-primary.slack.com` adresine giden WSS erişilebilir olmalıdır                                                                                     | Giden WS yok; yalnızca gelen HTTPS                                                                             |
-| Gerekli token'lar            | Bot token'ı + `connections:write` ile App-Level Token                                                                                                 | Bot token'ı + Signing Secret                                                                                   |
-| Geliştirici dizüstü / güvenlik duvarı arkasında | Olduğu gibi çalışır                                                                                                                   | Herkese açık bir tünel (ngrok, Cloudflare Tunnel, Tailscale Funnel) veya hazırlık Gateway'i gerekir           |
-| Yatay ölçeklendirme          | Uygulama başına, ana bilgisayar başına bir Socket Mode oturumu; birden fazla Gateway ayrı Slack uygulamaları gerektirir                              | Durumsuz POST işleyici; birden fazla Gateway replikası bir yük dengeleyicinin arkasında tek bir uygulamayı paylaşabilir |
-| Tek Gateway'de çoklu hesap   | Desteklenir; her hesap kendi WS bağlantısını açar                                                                                                     | Desteklenir; kayıtların çakışmaması için her hesabın benzersiz bir `webhookPath` değerine (varsayılan `/slack/events`) ihtiyacı vardır |
-| Slash komutu aktarımı        | WS bağlantısı üzerinden teslim edilir; `slash_commands[].url` yok sayılır                                                                             | Slack, `slash_commands[].url` adresine POST gönderir; komutun dağıtılması için alan gereklidir                 |
-| İstek imzalama               | Kullanılmaz (kimlik doğrulama App-Level Token'dır)                                                                                                    | Slack her isteği imzalar; OpenClaw `signingSecret` ile doğrular                                                |
-| Bağlantı koptuğunda kurtarma | Slack SDK otomatik yeniden bağlanma etkindir; OpenClaw ayrıca başarısız Socket Mode oturumlarını sınırlı geri çekilme ile yeniden başlatır. Pong-timeout aktarım ayarı uygulanır. | Kopacak kalıcı bağlantı yoktur; yeniden denemeler Slack tarafından istek bazında yapılır                       |
+| Genel Gateway URL'si         | Gerekli değil                                                                                                                                         | Gerekli (DNS, TLS, ters proxy veya tünel)                                                                       |
+| Giden ağ                     | `wss-primary.slack.com` adresine giden WSS erişilebilir olmalıdır                                                                                          | Giden WS yoktur; yalnızca gelen HTTPS                                                                           |
+| Gerekli token'lar            | Bot kimliği: bot token'ı + `connections:write` içeren App-Level Token; kullanıcı kimliği: kullanıcı token'ı + App-Level Token                         | Bot kimliği: bot token'ı + Signing Secret; kullanıcı kimliği: kullanıcı token'ı + Signing Secret               |
+| Geliştirme dizüstü bilgisayarı / güvenlik duvarı arkası | Olduğu gibi çalışır                                                                                                                  | Genel bir tünel (ngrok, Cloudflare Tunnel, Tailscale Funnel) veya hazırlama Gateway'i gerekir                   |
+| Yatay ölçeklendirme          | Her ana makinedeki her uygulama için bir Socket Mode oturumu; birden fazla Gateway ayrı Slack uygulamaları gerektirir                                 | Durumsuz POST işleyicisi; birden fazla Gateway replikası, yük dengeleyicinin arkasında tek bir uygulamayı paylaşabilir |
+| Tek Gateway'de birden fazla hesap | Desteklenir; her hesap kendi WS bağlantısını açar                                                                                               | Desteklenir; kayıtların çakışmaması için her hesap benzersiz bir `webhookPath` (varsayılan `/slack/events`) gerektirir |
+| Eğik çizgi komutu aktarımı   | WS bağlantısı üzerinden teslim edilir; `slash_commands[].url` yok sayılır                                                                                 | Slack, `slash_commands[].url` adresine POST gönderir; komutun yönlendirilmesi için alan gereklidir                  |
+| İstek imzalama               | Kullanılmaz (kimlik doğrulama App-Level Token ile yapılır)                                                                                            | Slack her isteği imzalar; OpenClaw, `signingSecret` ile doğrular                                             |
+| Bağlantı kesildiğinde kurtarma | Slack SDK otomatik yeniden bağlanmayı etkinleştirir; OpenClaw ayrıca başarısız Socket Mode oturumlarını sınırlı geri çekilmeyle yeniden başlatır. Pong zaman aşımı aktarım ayarı uygulanır. | Kesilecek kalıcı bir bağlantı yoktur; yeniden denemeler Slack tarafından istek başına yapılır                  |
 
 <Note>
-  Tek Gateway ana bilgisayarları, geliştirici dizüstü bilgisayarları ve `*.slack.com` adresine giden bağlantı kurabilen ancak gelen HTTPS kabul edemeyen şirket içi ağlar için **Socket Mode'u seçin**.
+  Tek Gateway'li ana makineler, geliştirme dizüstü bilgisayarları ve `*.slack.com` adresine giden bağlantı kurabilen ancak gelen HTTPS'yi kabul edemeyen şirket içi ağlar için **Socket Mode'u seçin**.
 
-Bir yük dengeleyicinin arkasında birden fazla Gateway replikası çalıştırırken, giden WSS engelliyken gelen HTTPS'ye izin verildiğinde veya Slack Webhook'larını zaten bir ters proxy'de sonlandırıyorsanız **HTTP İstek URL'lerini seçin**.
+Bir yük dengeleyicinin arkasında birden fazla Gateway replikası çalıştırırken, giden WSS engellenmiş ancak gelen HTTPS'ye izin verilmişse veya Slack webhook'larını zaten bir ters proxy'de sonlandırıyorsanız **HTTP Request URL'lerini seçin**.
 </Note>
+
+<Warning>
+  Slack, tek bir uygulama için birden fazla Socket Mode bağlantısını sürdürebilir ve her yükü herhangi bir bağlantıya teslim edebilir. Bu nedenle, bir Slack uygulamasını paylaşan ayrı OpenClaw Gateway'lerinin eşdeğer yönlendirme ve yetkilendirme yapılandırmasına sahip olması gerekir. Aksi takdirde, Gateway başına ayrı bir Slack uygulaması, tek bir Relay girişi veya yük dengeleyicinin arkasında HTTP Request URL'leri kullanın. Bkz. [Socket Mode'u Kullanma](https://docs.slack.dev/apis/events-api/using-socket-mode#using-multiple-connections).
+</Warning>
 
 ### Relay modu
 
-Relay modu, Slack girişini OpenClaw gateway'den ayırır. Güvenilir bir yönlendirici tek Slack Socket Mode bağlantısına sahip olur, bir hedef gateway seçer ve yazılmış bir olayı kimliği doğrulanmış bir websocket üzerinden iletir. Gateway, giden Slack Web API çağrıları için bot token'ını kullanmaya devam eder.
+Relay modu, Slack girişini OpenClaw Gateway'inden ayırır. Güvenilir bir yönlendirici tek Slack Socket Mode bağlantısını yönetir, hedef Gateway'i seçer ve kimliği doğrulanmış bir websocket üzerinden türü belirlenmiş bir olay iletir. Gateway, giden Slack Web API çağrıları için yine kendi bot token'ını kullanır.
 
 ```json5
 {
@@ -69,24 +74,190 @@ Relay modu, Slack girişini OpenClaw gateway'den ayırır. Güvenilir bir yönle
 }
 ```
 
-Relay URL'si localhost'u hedeflemediği sürece `wss://` kullanmalıdır. Bearer token'ı ve yönlendirici rota tablosunu Slack yetkilendirme sınırının parçası olarak ele alın: yönlendirilen olaylar, yetkilendirilmiş etkinleştirmeler olarak normal Slack mesaj işleyicisine girer. Websocket `hello` karesindeki yönlendirici tarafından sağlanan bir `slack_identity`, varsayılan giden kullanıcı adını ve simgeyi ayarlayabilir; çağıran tarafından sağlanan açık kimlik yine önceliklidir. Relay bağlantısı, Socket Mode tarafından kullanılan aynı sınırlı geri çekilme zamanlamasıyla yeniden bağlanır ve bağlantısı her kesildiğinde yönlendirici tarafından sağlanan kimliği temizler.
+Relay URL'si localhost'u hedeflemediği sürece `wss://` kullanmalıdır. Bearer token'ını ve yönlendiricinin rota tablosunu Slack yetkilendirme sınırının bir parçası olarak değerlendirin: yönlendirilen olaylar, yetkilendirilmiş etkinleştirmeler olarak normal Slack mesaj işleyicisine girer. Yönlendiricinin websocket `hello` çerçevesinde sağladığı `slack_identity`, varsayılan giden kullanıcı adını ve simgeyi ayarlayabilir; çağıranın açıkça sağladığı kimlik yine önceliklidir. Relay bağlantısı, Socket Mode ile aynı sınırlı geri çekilme zamanlamasıyla yeniden bağlanır ve bağlantı her kesildiğinde yönlendiricinin sağladığı kimliği temizler.
+
+### Enterprise Grid kuruluş genelindeki kurulumlar
+
+Tek bir Slack hesabı, Enterprise Grid kuruluş genelindeki bir kurulumun kapsadığı her çalışma alanından mesaj alabilir. Doğrudan Socket Mode veya HTTP Request URL'lerini seçin; Relay modu kurumsal hesaplar için desteklenmez. Aşağıdaki iki asgari ayrıcalıklı manifest de yalnızca V1 `message` ve `app_mention` olay yolunu, anlık yanıtları ve dinleyicinin yönettiği durum tepkilerini etkinleştirir.
+
+#### Socket Mode
+
+```json
+{
+  "display_information": {
+    "name": "OpenClaw",
+    "description": "OpenClaw için Slack bağlayıcısı"
+  },
+  "features": {
+    "bot_user": { "display_name": "OpenClaw", "always_online": true }
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "app_mentions:read",
+        "channels:history",
+        "channels:read",
+        "chat:write",
+        "files:read",
+        "files:write",
+        "groups:history",
+        "groups:read",
+        "im:history",
+        "im:read",
+        "mpim:history",
+        "mpim:read",
+        "reactions:write",
+        "users:read"
+      ]
+    }
+  },
+  "settings": {
+    "org_deploy_enabled": true,
+    "socket_mode_enabled": true,
+    "event_subscriptions": {
+      "bot_events": [
+        "app_mention",
+        "message.channels",
+        "message.groups",
+        "message.im",
+        "message.mpim"
+      ]
+    }
+  }
+}
+```
+
+Bir Enterprise Grid Org Admin veya Org Owner'ın uygulamayı onaylamasını, kuruluş düzeyinde yüklemesini ve kurulumun kapsayacağı çalışma alanlarını seçmesini sağlayın. OpenClaw'ı başlatmadan önce uygulamanın hedeflenen her çalışma alanında kullanılabildiğini doğrulayın. Socket Mode için `connections:write` içeren uygulama düzeyinde bir token oluşturun, ardından kuruluş kurulumundaki bot token'ını kopyalayın. Kuruluşta yüklenen bot token'ını kullanan hesabı yapılandırın:
+
+```json5
+{
+  channels: {
+    slack: {
+      enabled: true,
+      mode: "socket",
+      enterpriseOrgInstall: true,
+      appToken: { source: "env", provider: "default", id: "SLACK_APP_TOKEN" },
+      botToken: { source: "env", provider: "default", id: "SLACK_BOT_TOKEN" },
+      dmPolicy: "open",
+      allowFrom: ["*"],
+      groupPolicy: "allowlist",
+      channels: {
+        C0123456789: { requireMention: true },
+      },
+    },
+  },
+}
+```
+
+#### HTTP Request URL'leri
+
+Gateway'in genel bir HTTPS uç noktası olduğunda ve Socket Mode bağlantısı açmadığında HTTP modunu kullanın. Örnek URL'yi Gateway'in genel `webhookPath` URL'siyle (varsayılan `/slack/events`) değiştirin:
+
+```json
+{
+  "display_information": {
+    "name": "OpenClaw",
+    "description": "OpenClaw için Slack bağlayıcısı"
+  },
+  "features": {
+    "bot_user": { "display_name": "OpenClaw", "always_online": true }
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "app_mentions:read",
+        "channels:history",
+        "channels:read",
+        "chat:write",
+        "files:read",
+        "files:write",
+        "groups:history",
+        "groups:read",
+        "im:history",
+        "im:read",
+        "mpim:history",
+        "mpim:read",
+        "reactions:write",
+        "users:read"
+      ]
+    }
+  },
+  "settings": {
+    "org_deploy_enabled": true,
+    "event_subscriptions": {
+      "request_url": "https://gateway-host.example.com/slack/events",
+      "bot_events": [
+        "app_mention",
+        "message.channels",
+        "message.groups",
+        "message.im",
+        "message.mpim"
+      ]
+    }
+  }
+}
+```
+
+Bir Enterprise Grid Org Admin veya Org Owner'ın uygulamayı onaylamasını, kuruluş düzeyinde yüklemesini ve kurulumun kapsayacağı çalışma alanlarını seçmesini sağlayın. Slack, Request URL'yi doğruladıktan sonra kuruluş kurulumunun bot token'ını ve uygulamanın **Basic Information -> App Credentials -> Signing Secret** değerini kopyalayın. Kurumsal hesabı aynı Request URL yolu ile yapılandırın:
+
+```json5
+{
+  channels: {
+    slack: {
+      enabled: true,
+      mode: "http",
+      enterpriseOrgInstall: true,
+      botToken: { source: "env", provider: "default", id: "SLACK_BOT_TOKEN" },
+      signingSecret: {
+        source: "env",
+        provider: "default",
+        id: "SLACK_SIGNING_SECRET",
+      },
+      webhookPath: "/slack/events",
+      dmPolicy: "open",
+      allowFrom: ["*"],
+      groupPolicy: "allowlist",
+      channels: {
+        C0123456789: { requireMention: true },
+      },
+    },
+  },
+}
+```
+
+Başlangıçta OpenClaw, `enterpriseOrgInstall` değerini Slack `auth.test` ile doğrular. İşaret olmadan kuruluşta yüklenmiş bir token veya işaretle birlikte bir çalışma alanı token'ı başlangıcın başarısız olmasına neden olur. Kuruluma hangi çalışma alanlarının izin verdiği konusunda doğruluk kaynağı Slack olmaya devam eder; ardından OpenClaw, teslim edilen her olaya yapılandırılmış kanal, kullanıcı, DM ve bahsetme politikalarını uygular. Enterprise V1, kuruluş kurulumları döngü önleme için çalışma alanıyla nitelendirilmiş kararlı bir bot kimliği sağlamadığından, `allowBots` değerinden bağımsız olarak bot tarafından oluşturulan tüm `message` ve `app_mention` olaylarını yönlendirmeden önce reddeder.
+
+Enterprise desteği kasıtlı olarak doğrudan Socket Mode veya HTTP `message` ve `app_mention` olaylarıyla ve bunların anlık yanıtlarıyla sınırlıdır. Relay modu, eğik çizgi komutları, etkileşimler, App Home, tepki olayı dinleyicileri, sabitlenen öğeler, Slack eylem araçları, Slack'e özgü onaylar, bağlamalar, kuyruğa alınmış veya zamanlanmış teslimat ve proaktif gönderimler kurumsal hesaplarda kullanılamaz. Giden alındı bildirimi, yazıyor ve durum tepkileri, dinleyicinin yönettiği Slack istemcisi üzerinden desteklenir ve `reactions:write` gerektirir; gelen tepki bildirimleri ve tepki eylemi araçları kullanılamaz.
+
+Anında yanıtlar; parçalar, medya, meta veriler, kimlik yedeği, bağlantı önizlemeleri ve alındılar için standart Slack teslim davranışını yeniden kullanır, ancak yalnızca doğrulanmış, dinleyiciye ait istemci etkin olay çevrimi içinde kaldığı sürece. Bellek içi gönderim kuyruğu ve ileti dizisine katılım kayıtları, söz konusu olayın çalışma alanına göre bölümlenir; istemcinin kendisi hiçbir zaman serileştirilmez veya kalıcı hâle getirilmez.
+
+Kanal ilkesi anahtarları ve `dm.groupChannels` girdileri, ham ve kararlı Slack kanal kimliklerini veya
+`channel:<id>` biçimini kullanmalıdır. OpenClaw, çalışma zamanı eşleştirmesi için her iki biçimi de ham kanal kimliğine normalleştirir; `slack:`, `group:` ve `mpim:` ön ekleri başlatmanın başarısız olmasına neden olur.
+Kullanıcı ilkesi girdileri kararlı Slack kullanıcı kimliklerini kullanmalıdır; adlar, kısa adlar, görünen adlar ve e-posta adresleri başlatmanın başarısız olmasına neden olur. Kimlikler, Slack'in standart büyük harfli ön ekini ve gövdesini kullanmalıdır (örneğin `C0123456789` veya `U0123456789`); küçük harfli ve kısa benzerleri başlatmanın başarısız olmasına neden olur. Kurumsal hesaplar
+`dangerouslyAllowNameMatching` özelliğini etkinleştiremez. Kurumsal hesaplar genel
+`mentionPatterns.mode` değerini ayarlayabilir, ancak yalın Slack kanal kimlikleri çalışma alanıyla nitelendirilmediğinden ve çalışma alanları arasında yeniden kullanılabildiğinden `mentionPatterns.allowIn` ve
+`mentionPatterns.denyIn` başlatmanın başarısız olmasına neden olur. Çalışma alanı kurulumları mevcut kapsamlı bahsetme kalıbı davranışını korur. Kabul edilen her çalışma alanı, Slack kimlikleri çakışsa bile ayrı yönlendirme, oturum, transkript, yinelenenleri ayıklama, geçmiş ve önbellek kimliği alır. `message` akışı içinde sıradan kullanıcı mesajları ve kullanıcı tarafından oluşturulan `file_share` olayları desteklenir; diğer mesaj alt türleri yetkilendirme veya sistem olayı işlemeden önce reddedilir.
+
+Kurumsal DM'ler ya devre dışı bırakılmalı (`dm.enabled=false` veya
+`dmPolicy="disabled"`) ya da `dmPolicy="open"` ile açıkça açılmalı ve değişmez `"*"` değerini içeren etkin bir hesap `allowFrom` ayarına sahip olmalıdır. Boş bir izin listesi veya `"*"` olmadan kullanıcıya özgü kimlikler başlatmanın başarısız olmasına neden olur. Slack kullanıcı kimlikleri bu yetkilendirme depolarında çalışma alanıyla nitelendirilmediğinden eşleştirme ve kullanıcı başına DM izin listeleri reddedilir. Kanal ve gönderen ilkesi kanal mesajlarına uygulanmaya devam eder.
 
 ## Kurulum
-
-Kanalı yapılandırmadan önce Slack'i kurun:
 
 ```bash
 openclaw plugins install @openclaw/slack
 ```
 
-`plugins install`, plugin'i kaydeder ve etkinleştirir. Slack uygulamasını ve aşağıdaki kanal ayarlarını yapılandırana kadar plugin yine de hiçbir şey yapmaz. Genel plugin davranışı ve kurulum kuralları için [Plugins](/tr/tools/plugin) bölümüne bakın.
+`plugins install`, Plugin'i kaydeder ve etkinleştirir. Aşağıdaki Slack uygulaması ve kanal ayarlarını yapılandırana kadar hiçbir işlem yapmaz. Genel Plugin kurulum kuralları için [Pluginler](/tr/tools/plugin) bölümüne bakın.
 
 ## Hızlı kurulum
 
+Bu bölümdeki manifestler, çalışma alanı kapsamlı bir kurulum oluşturur. Enterprise Grid kuruluş kurulumu için bunun yerine özel
+[kuruluş genelindeki manifesti ve iş akışını](#enterprise-grid-org-wide-installs) kullanın.
+
 <Tabs>
-  <Tab title="Socket Mode (default)">
+  <Tab title="Socket Mode (varsayılan)">
     <Steps>
-      <Step title="Create a new Slack app">
+      <Step title="Yeni bir Slack uygulaması oluşturun">
         [api.slack.com/apps](https://api.slack.com/apps/new) sayfasını açın → **Create New App** → **From a manifest** → çalışma alanınızı seçin → aşağıdaki manifestlerden birini yapıştırın → **Next** → **Create**.
 
         <CodeGroup>
@@ -95,7 +266,7 @@ openclaw plugins install @openclaw/slack
 {
   "display_information": {
     "name": "OpenClaw",
-    "description": "Slack connector for OpenClaw"
+    "description": "OpenClaw için Slack bağlayıcısı"
   },
   "features": {
     "bot_user": { "display_name": "OpenClaw", "always_online": true },
@@ -104,21 +275,21 @@ openclaw plugins install @openclaw/slack
       "messages_tab_enabled": true,
       "messages_tab_read_only_enabled": false
     },
-    "assistant_view": {
-      "assistant_description": "OpenClaw connects Slack assistant threads to OpenClaw agents.",
+    "agent_view": {
+      "agent_description": "OpenClaw, Slack Agent View konuşmalarını OpenClaw aracılarının kullanımına bağlar.",
       "suggested_prompts": [
-        { "title": "What can you do?", "message": "What can you help me with?" },
+        { "title": "Neler yapabilirsiniz?", "message": "Bana hangi konularda yardımcı olabilirsiniz?" },
         {
-          "title": "Summarize this channel",
-          "message": "Summarize the recent activity in this channel."
+          "title": "Bu kanalı özetle",
+          "message": "Bu kanaldaki son etkinlikleri özetle."
         },
-        { "title": "Draft a reply", "message": "Help me draft a reply." }
+        { "title": "Yanıt taslağı hazırla", "message": "Bir yanıt taslağı hazırlamama yardım et." }
       ]
     },
     "slash_commands": [
       {
         "command": "/openclaw",
-        "description": "Send a message to OpenClaw",
+        "description": "OpenClaw'a mesaj gönder",
         "should_escape": false
       }
     ]
@@ -158,8 +329,7 @@ openclaw plugins install @openclaw/slack
       "bot_events": [
         "app_home_opened",
         "app_mention",
-        "assistant_thread_context_changed",
-        "assistant_thread_started",
+        "app_context_changed",
         "channel_rename",
         "member_joined_channel",
         "member_left_channel",
@@ -181,7 +351,7 @@ openclaw plugins install @openclaw/slack
 {
   "display_information": {
     "name": "OpenClaw",
-    "description": "Slack connector for OpenClaw"
+    "description": "OpenClaw için Slack bağlayıcısı"
   },
   "features": {
     "bot_user": { "display_name": "OpenClaw", "always_online": true },
@@ -190,21 +360,21 @@ openclaw plugins install @openclaw/slack
       "messages_tab_enabled": true,
       "messages_tab_read_only_enabled": false
     },
-    "assistant_view": {
-      "assistant_description": "OpenClaw connects Slack assistant threads to OpenClaw agents.",
+    "agent_view": {
+      "agent_description": "OpenClaw, Slack Agent View konuşmalarını OpenClaw aracılarının kullanımına bağlar.",
       "suggested_prompts": [
-        { "title": "What can you do?", "message": "What can you help me with?" },
+        { "title": "Neler yapabilirsiniz?", "message": "Bana hangi konularda yardımcı olabilirsiniz?" },
         {
-          "title": "Summarize this channel",
-          "message": "Summarize the recent activity in this channel."
+          "title": "Bu kanalı özetle",
+          "message": "Bu kanaldaki son etkinlikleri özetle."
         },
-        { "title": "Draft a reply", "message": "Help me draft a reply." }
+        { "title": "Yanıt taslağı hazırla", "message": "Bir yanıt taslağı hazırlamama yardım et." }
       ]
     },
     "slash_commands": [
       {
         "command": "/openclaw",
-        "description": "Send a message to OpenClaw",
+        "description": "OpenClaw'a mesaj gönder",
         "should_escape": false
       }
     ]
@@ -233,8 +403,7 @@ openclaw plugins install @openclaw/slack
       "bot_events": [
         "app_home_opened",
         "app_mention",
-        "assistant_thread_context_changed",
-        "assistant_thread_started",
+        "app_context_changed",
         "message.channels",
         "message.groups",
         "message.im"
@@ -247,17 +416,17 @@ openclaw plugins install @openclaw/slack
         </CodeGroup>
 
         <Note>
-          **Recommended**, Slack plugin'inin tam özellik kümesiyle eşleşir: App Home, slash komutları, dosyalar, tepkiler, sabitlemeler, grup DM'leri ve emoji/kullanıcı grubu okumaları. Çalışma alanı politikası kapsamları kısıtladığında **Minimal** seçeneğini seçin; DM'leri, kanal/grup geçmişini, bahsetmeleri ve slash komutlarını kapsar ancak dosyaları, tepkileri, sabitlemeleri, grup DM (`mpim:*`), `emoji:read` ve `usergroups:read` kapsamlarını çıkarır. Kapsam başına gerekçe ve ek slash komutları gibi eklemeli seçenekler için [Manifest ve kapsam kontrol listesi](#manifest-and-scope-checklist) bölümüne bakın.
+          **Önerilen**, Slack Plugin'inin tüm özellikleriyle eşleşir: App Home, eğik çizgi komutları, dosyalar, tepkiler, sabitlenenler, grup DM'leri ve emoji/kullanıcı grubu okumaları. Çalışma alanı ilkesi kapsamları kısıtladığında **Asgari** seçeneğini kullanın; DM'leri, kanal/grup geçmişini, bahsetmeleri ve eğik çizgi komutlarını kapsar ancak dosyaları, tepkileri, sabitlenenleri, grup DM'sini (`mpim:*`), `emoji:read` ve `usergroups:read` özelliklerini çıkarır. Kapsam başına gerekçeler ve ek eğik çizgi komutları gibi ilave seçenekler için [Manifest ve kapsam denetim listesi](#manifest-and-scope-checklist) bölümüne bakın.
         </Note>
 
         Slack uygulamayı oluşturduktan sonra:
 
-        - **Basic Information -> App-Level Tokens -> Generate Token and Scopes**: `connections:write` ekleyin, kaydedin, App-Level Token'ı kopyalayın.
-        - **Install App -> Install to Workspace**: Bot User OAuth Token'ı kopyalayın.
+        - **Basic Information -> App-Level Tokens -> Generate Token and Scopes**: `connections:write` ekleyin, kaydedin ve App-Level Token değerini kopyalayın.
+        - **Install App -> Install to Workspace**: Bot User OAuth Token değerini kopyalayın.
 
       </Step>
 
-      <Step title="Configure OpenClaw">
+      <Step title="OpenClaw'ı yapılandırın">
 
         Önerilen SecretRef kurulumu:
 
@@ -280,7 +449,7 @@ openclaw config patch --file ./slack.socket.patch.json5 --dry-run
 openclaw config patch --file ./slack.socket.patch.json5
 ```
 
-        Env yedeği (yalnızca varsayılan hesap):
+        Ortam değişkeni yedeği (yalnızca varsayılan hesap):
 
 ```bash
 SLACK_APP_TOKEN=slack-app-token-example
@@ -289,7 +458,7 @@ SLACK_BOT_TOKEN=slack-bot-token-example
 
       </Step>
 
-      <Step title="Start gateway">
+      <Step title="Gateway'i başlatın">
 
 ```bash
 openclaw gateway
@@ -300,10 +469,10 @@ openclaw gateway
 
   </Tab>
 
-  <Tab title="HTTP Request URLs">
+  <Tab title="HTTP İstek URL'leri">
     <Steps>
-      <Step title="Create a new Slack app">
-        [api.slack.com/apps](https://api.slack.com/apps/new) adresini açın → **Yeni Uygulama Oluştur** → **Bir manifestten** → çalışma alanınızı seçin → aşağıdaki manifestlerden birini yapıştırın → `https://gateway-host.example.com/slack/events` değerini herkese açık Gateway URL'nizle değiştirin → **İleri** → **Oluştur**.
+      <Step title="Yeni bir Slack uygulaması oluşturun">
+        [api.slack.com/apps](https://api.slack.com/apps/new) sayfasını açın → **Create New App** → **From a manifest** → çalışma alanınızı seçin → aşağıdaki manifestlerden birini yapıştırın → `https://gateway-host.example.com/slack/events` değerini genel Gateway URL'nizle değiştirin → **Next** → **Create**.
 
         <CodeGroup>
 
@@ -311,7 +480,7 @@ openclaw gateway
 {
   "display_information": {
     "name": "OpenClaw",
-    "description": "Slack connector for OpenClaw"
+    "description": "OpenClaw için Slack bağlayıcısı"
   },
   "features": {
     "bot_user": { "display_name": "OpenClaw", "always_online": true },
@@ -320,21 +489,21 @@ openclaw gateway
       "messages_tab_enabled": true,
       "messages_tab_read_only_enabled": false
     },
-    "assistant_view": {
-      "assistant_description": "OpenClaw connects Slack assistant threads to OpenClaw agents.",
+    "agent_view": {
+      "agent_description": "OpenClaw, Slack Agent View konuşmalarını OpenClaw aracılarının kullanımına bağlar.",
       "suggested_prompts": [
-        { "title": "What can you do?", "message": "What can you help me with?" },
+        { "title": "Neler yapabilirsiniz?", "message": "Bana hangi konularda yardımcı olabilirsiniz?" },
         {
-          "title": "Summarize this channel",
-          "message": "Summarize the recent activity in this channel."
+          "title": "Bu kanalı özetle",
+          "message": "Bu kanaldaki son etkinlikleri özetle."
         },
-        { "title": "Draft a reply", "message": "Help me draft a reply." }
+        { "title": "Yanıt taslağı hazırla", "message": "Bir yanıt taslağı hazırlamama yardım et." }
       ]
     },
     "slash_commands": [
       {
         "command": "/openclaw",
-        "description": "Send a message to OpenClaw",
+        "description": "OpenClaw'a mesaj gönder",
         "should_escape": false,
         "url": "https://gateway-host.example.com/slack/events"
       }
@@ -375,8 +544,7 @@ openclaw gateway
       "bot_events": [
         "app_home_opened",
         "app_mention",
-        "assistant_thread_context_changed",
-        "assistant_thread_started",
+        "app_context_changed",
         "channel_rename",
         "member_joined_channel",
         "member_left_channel",
@@ -403,7 +571,7 @@ openclaw gateway
 {
   "display_information": {
     "name": "OpenClaw",
-    "description": "Slack connector for OpenClaw"
+    "description": "OpenClaw için Slack bağlayıcısı"
   },
   "features": {
     "bot_user": { "display_name": "OpenClaw", "always_online": true },
@@ -412,21 +580,21 @@ openclaw gateway
       "messages_tab_enabled": true,
       "messages_tab_read_only_enabled": false
     },
-    "assistant_view": {
-      "assistant_description": "OpenClaw connects Slack assistant threads to OpenClaw agents.",
+    "agent_view": {
+      "agent_description": "OpenClaw, Slack Agent View konuşmalarını OpenClaw ajanlarına bağlar.",
       "suggested_prompts": [
-        { "title": "What can you do?", "message": "What can you help me with?" },
+        { "title": "Neler yapabilirsin?", "message": "Bana hangi konularda yardımcı olabilirsin?" },
         {
-          "title": "Summarize this channel",
-          "message": "Summarize the recent activity in this channel."
+          "title": "Bu kanalı özetle",
+          "message": "Bu kanaldaki son etkinlikleri özetle."
         },
-        { "title": "Draft a reply", "message": "Help me draft a reply." }
+        { "title": "Bir yanıt taslağı hazırla", "message": "Bir yanıt taslağı hazırlamama yardım et." }
       ]
     },
     "slash_commands": [
       {
         "command": "/openclaw",
-        "description": "Send a message to OpenClaw",
+        "description": "OpenClaw'a mesaj gönder",
         "should_escape": false,
         "url": "https://gateway-host.example.com/slack/events"
       }
@@ -456,8 +624,7 @@ openclaw gateway
       "bot_events": [
         "app_home_opened",
         "app_mention",
-        "assistant_thread_context_changed",
-        "assistant_thread_started",
+        "app_context_changed",
         "message.channels",
         "message.groups",
         "message.im"
@@ -475,21 +642,21 @@ openclaw gateway
         </CodeGroup>
 
         <Note>
-          **Önerilen**, Slack plugininin tam özellik setiyle eşleşir; **Minimal**, kısıtlayıcı çalışma alanları için dosyaları, tepkileri, pinleri, grup DM'lerini (`mpim:*`), `emoji:read` ve `usergroups:read` kapsamlarını çıkarır. Kapsam bazında gerekçe için [Manifest ve kapsam kontrol listesi](#manifest-and-scope-checklist) bölümüne bakın.
+          **Önerilen**, Slack plugininin tüm özellikleriyle eşleşir; **Minimal**, kısıtlayıcı çalışma alanları için dosyaları, tepkileri, sabitlenenleri, grup DM'lerini (`mpim:*`), `emoji:read` ve `usergroups:read` öğelerini çıkarır. Her kapsamın gerekçesi için [Manifest ve kapsam denetim listesine](#manifest-and-scope-checklist) bakın.
         </Note>
 
         <Info>
-          Üç URL alanının (`slash_commands[].url`, `event_subscriptions.request_url` ve `interactivity.request_url` / `message_menu_options_url`) tümü aynı OpenClaw uç noktasını işaret eder. Slack'in manifest şeması bunların ayrı ayrı adlandırılmasını gerektirir, ancak OpenClaw yük türüne göre yönlendirdiği için tek bir `webhookPath` (varsayılan `/slack/events`) yeterlidir. `slash_commands[].url` olmadan eğik çizgi komutları HTTP modunda sessizce işlem yapmaz.
+          Üç URL alanının (`slash_commands[].url`, `event_subscriptions.request_url` ve `interactivity.request_url` / `message_menu_options_url`) tümü aynı OpenClaw uç noktasına yönelir. Slack'in manifest şeması bunların ayrı ayrı adlandırılmasını gerektirir, ancak OpenClaw yük türüne göre yönlendirme yaptığından tek bir `webhookPath` (varsayılan `/slack/events`) yeterlidir. `slash_commands[].url` içermeyen eğik çizgi komutları HTTP modunda sessizce hiçbir işlem yapmaz.
         </Info>
 
         Slack uygulamayı oluşturduktan sonra:
 
-        - **Temel Bilgiler → Uygulama Kimlik Bilgileri**: istek doğrulaması için **İmzalama Sırrını** kopyalayın.
-        - **Uygulamayı Kur -> Çalışma Alanına Kur**: Bot Kullanıcısı OAuth Token'ını kopyalayın.
+        - **Basic Information → App Credentials**: istek doğrulaması için **Signing Secret** değerini kopyalayın.
+        - **Install App -> Install to Workspace**: Bot User OAuth Token değerini kopyalayın.
 
       </Step>
 
-      <Step title="Configure OpenClaw">
+      <Step title="OpenClaw'ı yapılandır">
 
         Önerilen SecretRef kurulumu:
 
@@ -514,14 +681,14 @@ openclaw config patch --file ./slack.http.patch.json5
 ```
 
         <Note>
-        Çok hesaplı HTTP için benzersiz Webhook yolları kullanın
+        Çok hesaplı HTTP için benzersiz webhook yolları kullanın
 
-        Kayıtların çakışmaması için her hesaba ayrı bir `webhookPath` (varsayılan `/slack/events`) verin.
+        Kayıtların çakışmaması için her hesaba farklı bir `webhookPath` (varsayılan `/slack/events`) verin.
         </Note>
 
       </Step>
 
-      <Step title="Start gateway">
+      <Step title="Gateway'i başlat">
 
 ```bash
 openclaw gateway
@@ -533,9 +700,73 @@ openclaw gateway
   </Tab>
 </Tabs>
 
-## Socket Mode aktarım ayarı
+## Kullanıcı kimliği (gerçek bir kişi olarak paylaşım yapma)
 
-OpenClaw, Socket Mode için Slack SDK istemcisi pong zaman aşımını varsayılan olarak 15 saniyeye ayarlar. Aktarım ayarlarını yalnızca çalışma alanına veya ana makineye özgü ayar gerektiğinde geçersiz kılın:
+Kullanıcı kimliği, OpenClaw'ın Slack uygulamasını yetkilendiren insan adına içerik okumasına ve paylaşmasına olanak tanır. `userToken` işlem yapan kimliktir; eşlik eden bir Slack uygulaması, Events API trafiğini Socket Mode veya bir HTTP Request URL üzerinden taşır. Eşlik eden uygulamanın bot kullanıcısına veya bot token'ına ihtiyacı yoktur.
+
+Eşlik eden uygulamayı şu şekilde kurun:
+
+1. **OAuth & Permissions -> User Token Scopes** altında, kullanıcı kapsamlı şu izinleri ekleyin:
+
+   - geçmiş: `channels:history`, `groups:history`, `im:history`, `mpim:history`
+   - konuşma arama: `channels:read`, `groups:read`, `im:read`, `mpim:read`
+   - kişiler: `users:read`
+   - paylaşım yapma: `chat:write` (mesajlar yetkilendiren kullanıcı adına paylaşılır)
+   - DM açma: `im:write`, `mpim:write`
+
+2. **Event Subscriptions -> Subscribe to events on behalf of users** altında, şu kullanıcı olaylarını ekleyin. Bunları yalnızca bot olayları listesine eklemeyin:
+
+   - `message.channels`
+   - `message.groups`
+   - `message.im`
+   - `message.mpim`
+
+3. Bir olay taşıma yöntemi seçin:
+
+   - **Socket Mode:** Socket Mode'u etkinleştirin ve `connections:write` ile uygulama düzeyinde bir token oluşturun. Bunu `appToken` olarak yapılandırın.
+   - **HTTP Request URL:** Event Subscriptions öğesini herkese açık OpenClaw Slack uç noktasına yönlendirin ve **Basic Information -> App Credentials -> Signing Secret** değerini kopyalayın. Bunu `signingSecret` olarak yapılandırın.
+
+4. Uygulamayı yükleyin veya yeniden yükleyin, hedeflenen insan olarak yetkilendirin ve elde edilen kullanıcı OAuth token'ını `userToken` içine kopyalayın.
+
+Socket Mode yapılandırması:
+
+```json5
+{
+  channels: {
+    slack: {
+      identity: "user",
+      userToken: "<xoxp>",
+      appToken: "<xapp>",
+    },
+  },
+}
+```
+
+HTTP Request URL yapılandırması:
+
+```json5
+{
+  channels: {
+    slack: {
+      identity: "user",
+      mode: "http",
+      userToken: "<xoxp>",
+      signingSecret: "<signing-secret>",
+      webhookPath: "/slack/events",
+    },
+  },
+}
+```
+
+<Warning>
+  DM'ler ve grup DM'leri yalnızca yukarıdaki kullanıcı kapsamlı olay aboneliği üzerinden çalışır. Bir bot, insanlar arasındaki bir 1:1 DM'ine katılamaz veya mevcut bir grup DM'ine eklenemez. Eşlik eden uygulama görünmez bir altyapıdır: diğer Slack üyeleri mesajları bir OpenClaw botundan değil, yetkilendiren insandan görür.
+</Warning>
+
+OpenClaw, çözümlenen insan kimliğinin yazdığı kullanıcı kapsamlı mesaj olaylarını otomatik olarak bırakır; böylece gönderdiği mesajlar kendi kendine yanıtları tetiklemez.
+
+## Socket Mode taşıma ayarları
+
+OpenClaw, Socket Mode için Slack SDK istemcisinin pong zaman aşımını varsayılan olarak 15 saniyeye ayarlar. Taşıma ayarlarını yalnızca çalışma alanına veya ana makineye özgü ayarlama gerektiğinde geçersiz kılın:
 
 ```json5
 {
@@ -552,18 +783,18 @@ OpenClaw, Socket Mode için Slack SDK istemcisi pong zaman aşımını varsayıl
 }
 ```
 
-Bunu yalnızca Slack websocket pong/sunucu ping zaman aşımlarını günlüğe kaydeden veya bilinen olay döngüsü açlığı olan ana makinelerde çalışan Socket Mode çalışma alanları için kullanın. `clientPingTimeout`, SDK bir istemci pingi gönderdikten sonraki pong bekleme süresidir; `serverPingTimeout`, Slack sunucu pingleri için bekleme süresidir. Uygulama mesajları ve olayları, aktarım canlılığı sinyalleri değil uygulama durumudur.
+Bunu yalnızca Slack websocket pong/sunucu ping zaman aşımlarını günlüğe kaydeden veya olay döngüsünde bilinen tıkanmaların bulunduğu ana makinelerde çalışan Socket Mode çalışma alanları için kullanın. `clientPingTimeout`, SDK bir istemci pingi gönderdikten sonraki pong bekleme süresidir; `serverPingTimeout`, Slack sunucu pinglerinin bekleme süresidir. Uygulama mesajları ve olayları taşıma canlılığı sinyalleri değil, uygulama durumu olarak kalır.
 
 Notlar:
 
-- `socketMode`, HTTP İstek URL'si modunda yok sayılır.
-- Temel `channels.slack.socketMode` ayarları, geçersiz kılınmadığı sürece tüm Slack hesaplarına uygulanır. Hesap bazında geçersiz kılmalar `channels.slack.accounts.<accountId>.socketMode` kullanır; bu bir nesne geçersiz kılması olduğundan, o hesap için istediğiniz her socket ayar alanını ekleyin.
-- Yalnızca `clientPingTimeout` için bir OpenClaw varsayılanı vardır (`15000`). `serverPingTimeout` ve `pingPongLoggingEnabled`, yalnızca yapılandırıldığında Slack SDK'ya geçirilir.
-- Socket Mode yeniden başlatma geri çekilmesi yaklaşık 2 saniyeden başlar ve yaklaşık 30 saniyede sınırlanır. Kurtarılabilir başlatma, başlatma beklemesi ve bağlantı kesilme hataları kanal durana kadar yeniden denenir. Geçersiz kimlik doğrulama, iptal edilmiş tokenlar veya eksik kapsamlar gibi kalıcı hesap ve kimlik bilgisi hataları ise sonsuza kadar yeniden denemek yerine hızlıca başarısız olur.
+- `socketMode`, HTTP Request URL modunda yok sayılır.
+- Temel `channels.slack.socketMode` ayarları, geçersiz kılınmadıkları sürece tüm Slack hesaplarına uygulanır. Hesaba özgü geçersiz kılmalar `channels.slack.accounts.<accountId>.socketMode` kullanır; bu bir nesne geçersiz kılması olduğundan, ilgili hesap için istediğiniz tüm soket ayarlama alanlarını ekleyin.
+- Yalnızca `clientPingTimeout` için bir OpenClaw varsayılanı (`15000`) vardır. `serverPingTimeout` ve `pingPongLoggingEnabled`, yalnızca yapılandırıldıklarında Slack SDK'ya aktarılır.
+- Socket Mode yeniden başlatma geri çekilmesi yaklaşık 2 saniyede başlar ve yaklaşık 30 saniyede üst sınıra ulaşır. Kurtarılabilir başlatma, başlatmayı bekleme ve bağlantı kesilmesi hataları, kanal durana kadar yeniden denenir. Geçersiz kimlik doğrulama, iptal edilmiş token'lar veya eksik kapsamlar gibi kalıcı hesap ve kimlik bilgisi hataları sonsuza kadar yeniden denenmek yerine hızla başarısız olur.
 
-## Manifest ve kapsam kontrol listesi
+## Manifest ve kapsam denetim listesi
 
-Temel Slack uygulama manifesti Socket Mode ve HTTP İstek URL'leri için aynıdır. Yalnızca `settings` bloğu (ve eğik çizgi komutu `url`) farklıdır.
+Temel Slack uygulama manifesti, Socket Mode ve HTTP Request URL'leri için aynıdır. Yalnızca `settings` bloğu (ve eğik çizgi komutunun `url` değeri) farklıdır.
 
 Temel manifest (Socket Mode varsayılanı):
 
@@ -571,7 +802,7 @@ Temel manifest (Socket Mode varsayılanı):
 {
   "display_information": {
     "name": "OpenClaw",
-    "description": "Slack connector for OpenClaw"
+    "description": "OpenClaw için Slack bağlayıcısı"
   },
   "features": {
     "bot_user": { "display_name": "OpenClaw", "always_online": true },
@@ -580,21 +811,21 @@ Temel manifest (Socket Mode varsayılanı):
       "messages_tab_enabled": true,
       "messages_tab_read_only_enabled": false
     },
-    "assistant_view": {
-      "assistant_description": "OpenClaw connects Slack assistant threads to OpenClaw agents.",
+    "agent_view": {
+      "agent_description": "OpenClaw, Slack Agent View konuşmalarını OpenClaw ajanlarına bağlar.",
       "suggested_prompts": [
-        { "title": "What can you do?", "message": "What can you help me with?" },
+        { "title": "Neler yapabilirsin?", "message": "Bana hangi konularda yardımcı olabilirsin?" },
         {
-          "title": "Summarize this channel",
-          "message": "Summarize the recent activity in this channel."
+          "title": "Bu kanalı özetle",
+          "message": "Bu kanaldaki son etkinlikleri özetle."
         },
-        { "title": "Draft a reply", "message": "Help me draft a reply." }
+        { "title": "Bir yanıt taslağı hazırla", "message": "Bir yanıt taslağı hazırlamama yardım et." }
       ]
     },
     "slash_commands": [
       {
         "command": "/openclaw",
-        "description": "Send a message to OpenClaw",
+        "description": "OpenClaw'a mesaj gönder",
         "should_escape": false
       }
     ]
@@ -634,8 +865,7 @@ Temel manifest (Socket Mode varsayılanı):
       "bot_events": [
         "app_home_opened",
         "app_mention",
-        "assistant_thread_context_changed",
-        "assistant_thread_started",
+        "app_context_changed",
         "channel_rename",
         "member_joined_channel",
         "member_left_channel",
@@ -653,7 +883,7 @@ Temel manifest (Socket Mode varsayılanı):
 }
 ```
 
-**HTTP İstek URL'leri modu** için `settings` değerini HTTP varyantıyla değiştirin ve her eğik çizgi komutuna `url` ekleyin. Herkese açık URL gereklidir:
+**HTTP Request URLs modu** için `settings` öğesini HTTP varyantıyla değiştirin ve her eğik çizgi komutuna `url` ekleyin. Herkese açık URL gereklidir:
 
 ```json
 {
@@ -661,7 +891,7 @@ Temel manifest (Socket Mode varsayılanı):
     "slash_commands": [
       {
         "command": "/openclaw",
-        "description": "Send a message to OpenClaw",
+        "description": "OpenClaw'a mesaj gönder",
         "should_escape": false,
         "url": "https://gateway-host.example.com/slack/events"
       }
@@ -673,8 +903,7 @@ Temel manifest (Socket Mode varsayılanı):
       "bot_events": [
         "app_home_opened",
         "app_mention",
-        "assistant_thread_context_changed",
-        "assistant_thread_started",
+        "app_context_changed",
         "channel_rename",
         "member_joined_channel",
         "member_left_channel",
@@ -699,142 +928,146 @@ Temel manifest (Socket Mode varsayılanı):
 
 ### Ek manifest ayarları
 
-Yukarıdaki varsayılanları genişleten farklı özellikleri gösterin.
+Yukarıdaki varsayılanları genişleten farklı özellikleri kullanıma sunun.
 
-Varsayılan manifest, Slack Uygulama Ana Sayfası **Ana Sayfa** sekmesini etkinleştirir ve `app_home_opened` olayına abone olur. Bir çalışma alanı üyesi Ana Sayfa sekmesini açtığında OpenClaw, `views.publish` ile güvenli bir varsayılan Ana Sayfa görünümü yayımlar; konuşma yükü veya özel yapılandırma dahil edilmez. **Mesajlar** sekmesi Slack DM'leri için etkin kalır. Manifest ayrıca `features.assistant_view`, `assistant:write`, `assistant_thread_started` ve `assistant_thread_context_changed` ile Slack asistan iş parçacıklarını etkinleştirir; asistan iş parçacıkları kendi OpenClaw iş parçacığı oturumlarına yönlendirilir ve Slack tarafından sağlanan iş parçacığı bağlamını agent için kullanılabilir tutar.
+Varsayılan bildirim, Slack Uygulama Ana Sayfası **Home** sekmesini etkinleştirir ve `app_home_opened` olayına abone olur. Bir çalışma alanı üyesi Home sekmesini açtığında OpenClaw, `views.publish` ile güvenli bir varsayılan Home görünümü yayımlar; hiçbir konuşma yükü veya özel yapılandırma eklenmez. Tek eğik çizgi komutu modu etkinleştirildiğinde komut ipucu `channels.slack.slashCommand.name` kullanır; yerel komutları kullanan veya eğik çizgi komutu kullanmayan kurulumlarda bu ipucu gösterilmez. Slack DM'leri için **Messages** sekmesi etkin kalır. Yeni uygulamalar `features.agent_view`, `assistant:write` ve `app_context_changed` aracılığıyla Slack Agent View kullanır. Görünür her Agent View kökü kendi OpenClaw ileti dizisi oturumuna yönlendirilir ve Slack'in sıralı etkin görünüm varlıkları aracıya yalnızca güvenilmeyen bağlam olarak ulaşır.
+
+Zaten `features.assistant_view` kullanan mevcut uygulamalar geçerli bildirimlerini koruyabilir. OpenClaw, bu kurulumlar için `assistant_thread_started` ve `assistant_thread_context_changed` olaylarını işlemeye devam eder. Slack, Assistant View'dan Agent View'a geçişi geri döndürülemez hâle getirir ve sonrasında kullanıcıların tam yenileme yapmasını gerektirir; bu nedenle tüm çalışma alanını taşımayı planlayana kadar mevcut bir uygulamada `assistant_view` değerini değiştirmeyin.
 
 <AccordionGroup>
   <Accordion title="İsteğe bağlı yerel eğik çizgi komutları">
 
-    Birden çok [yerel eğik çizgi komutu](#commands-and-slash-behavior), bazı ayrıntılarla tek bir yapılandırılmış komut yerine kullanılabilir:
+    Bazı ayrıntılar dikkate alınarak tek bir yapılandırılmış komut yerine birden çok [yerel eğik çizgi komutu](#commands-and-slash-behavior) kullanılabilir:
 
-    - `/status` yerine `/agentstatus` kullanın, çünkü `/status` komutu ayrılmıştır.
-    - Aynı anda en fazla 25 eğik çizgi komutu kullanılabilir hale getirilebilir.
+    - `/status` komutu ayrılmış olduğundan `/status` yerine `/agentstatus` kullanın.
+    - Bir Slack uygulamasında aynı anda en fazla 25 eğik çizgi komutu kaydedilebilir (Slack platformu sınırı).
 
-    Mevcut `features.slash_commands` bölümünüzü [kullanılabilir komutlar](/tr/tools/slash-commands#command-list) listesinin bir alt kümesiyle değiştirin:
+    OpenClaw, etkinleştirilen yerel komutlar için işleyiciler kaydeder; ancak Slack bildirim girdileri yöneticiler tarafından yönetilmeye devam eder ve çalışma zamanında eşitlenmez. Bildirime `/login` değerini manuel olarak ekleyin; aşağıdaki örnek, 25 komut sınırında kalmak için isteğe bağlı `/side` diğer adı yerine bunu içerir. `/login` her yerde gösterilebilir, ancak eşleştirme kodlarını yalnızca özel sohbetlerde veya Web Kullanıcı Arayüzü'nde verir.
+
+    Mevcut `features.slash_commands` bölümünüzü [kullanılabilir komutların](/tr/tools/slash-commands#command-list) bir alt kümesiyle değiştirin:
 
     <Tabs>
-      <Tab title="Socket Mode (default)">
+      <Tab title="Socket Mode (varsayılan)">
 
 ```json
 {
   "slash_commands": [
     {
       "command": "/new",
-      "description": "Start a new session",
+      "description": "Yeni bir oturum başlat",
       "usage_hint": "[model]"
     },
     {
       "command": "/reset",
-      "description": "Reset the current session"
+      "description": "Geçerli oturumu sıfırla"
     },
     {
       "command": "/compact",
-      "description": "Compact the session context",
+      "description": "Oturum bağlamını sıkıştır",
       "usage_hint": "[instructions]"
     },
     {
       "command": "/stop",
-      "description": "Stop the current run"
+      "description": "Geçerli çalıştırmayı durdur"
     },
     {
       "command": "/session",
-      "description": "Manage thread-binding expiry",
-      "usage_hint": "idle <duration|off> or max-age <duration|off>"
+      "description": "İleti dizisi bağlama süresinin dolmasını yönet",
+      "usage_hint": "boşta <duration|off> veya azami yaş <duration|off>"
     },
     {
       "command": "/think",
-      "description": "Set the thinking level",
+      "description": "Düşünme düzeyini ayarla",
       "usage_hint": "<level>"
     },
     {
       "command": "/verbose",
-      "description": "Toggle verbose output",
+      "description": "Ayrıntılı çıktıyı aç veya kapat",
       "usage_hint": "on|off|full"
     },
     {
       "command": "/fast",
-      "description": "Show or set fast mode",
+      "description": "Hızlı modu göster veya ayarla",
       "usage_hint": "[status|on|off]"
     },
     {
       "command": "/reasoning",
-      "description": "Toggle reasoning visibility",
+      "description": "Akıl yürütme görünürlüğünü aç veya kapat",
       "usage_hint": "[on|off|stream]"
     },
     {
       "command": "/elevated",
-      "description": "Toggle elevated mode",
+      "description": "Yükseltilmiş modu aç veya kapat",
       "usage_hint": "[on|off|ask|full]"
     },
     {
       "command": "/exec",
-      "description": "Show or set exec defaults",
+      "description": "Çalıştırma varsayılanlarını göster veya ayarla",
       "usage_hint": "host=<auto|sandbox|gateway|node> security=<deny|allowlist|full> ask=<off|on-miss|always> node=<id>"
     },
     {
       "command": "/approve",
-      "description": "Approve or deny pending approval requests",
+      "description": "Bekleyen onay isteklerini onayla veya reddet",
       "usage_hint": "<id> <decision>"
     },
     {
       "command": "/model",
-      "description": "Show or set the model",
+      "description": "Modeli göster veya ayarla",
       "usage_hint": "[name|#|status]"
     },
     {
       "command": "/models",
-      "description": "List providers/models",
+      "description": "Sağlayıcıları/modelleri listele",
       "usage_hint": "[provider] [page] [limit=<n>|size=<n>|all]"
     },
     {
       "command": "/help",
-      "description": "Show the short help summary"
+      "description": "Kısa yardım özetini göster"
     },
     {
       "command": "/commands",
-      "description": "Show the generated command catalog"
+      "description": "Oluşturulan komut kataloğunu göster"
     },
     {
       "command": "/tools",
-      "description": "Show what the current agent can use right now",
+      "description": "Geçerli aracının şu anda neleri kullanabileceğini göster",
       "usage_hint": "[compact|verbose]"
     },
     {
       "command": "/agentstatus",
-      "description": "Show runtime status, including provider usage/quota when available"
+      "description": "Kullanılabilir olduğunda sağlayıcı kullanımı/kotası dâhil çalışma zamanı durumunu göster"
     },
     {
       "command": "/tasks",
-      "description": "List active/recent background tasks for the current session"
+      "description": "Geçerli oturumun etkin/yakın tarihli arka plan görevlerini listele"
     },
     {
       "command": "/context",
-      "description": "Explain how context is assembled",
+      "description": "Bağlamın nasıl oluşturulduğunu açıkla",
       "usage_hint": "[list|detail|json]"
     },
     {
       "command": "/whoami",
-      "description": "Show your sender identity"
+      "description": "Gönderen kimliğinizi göster"
     },
     {
       "command": "/skill",
-      "description": "Run a skill by name",
+      "description": "Bir beceriyi adına göre çalıştır",
       "usage_hint": "<name> [input]"
     },
     {
       "command": "/btw",
-      "description": "Ask a side question without changing session context",
+      "description": "Oturum bağlamını değiştirmeden bir yan soru sor",
       "usage_hint": "<question>"
     },
     {
-      "command": "/side",
-      "description": "Ask a side question without changing session context",
-      "usage_hint": "<question>"
+      "command": "/login",
+      "description": "Codex oturum açma işlemini eşleştir",
+      "usage_hint": "[codex|openai]"
     },
     {
       "command": "/usage",
-      "description": "Control the usage footer or show cost summary",
+      "description": "Kullanım alt bilgisini denetle veya maliyet özetini göster",
       "usage_hint": "off|tokens|full|cost"
     }
   ]
@@ -842,7 +1075,7 @@ Varsayılan manifest, Slack Uygulama Ana Sayfası **Ana Sayfa** sekmesini etkinl
 ```
 
       </Tab>
-      <Tab title="HTTP Request URLs">
+      <Tab title="HTTP İstek URL'leri">
         Yukarıdaki Socket Mode ile aynı `slash_commands` listesini kullanın ve her girdiye `"url": "https://gateway-host.example.com/slack/events"` ekleyin. Örnek:
 
 ```json
@@ -850,13 +1083,13 @@ Varsayılan manifest, Slack Uygulama Ana Sayfası **Ana Sayfa** sekmesini etkinl
   "slash_commands": [
     {
       "command": "/new",
-      "description": "Start a new session",
+      "description": "Yeni bir oturum başlat",
       "usage_hint": "[model]",
       "url": "https://gateway-host.example.com/slack/events"
     },
     {
       "command": "/help",
-      "description": "Show the short help summary",
+      "description": "Kısa yardım özetini göster",
       "url": "https://gateway-host.example.com/slack/events"
     }
   ]
@@ -870,9 +1103,9 @@ Varsayılan manifest, Slack Uygulama Ana Sayfası **Ana Sayfa** sekmesini etkinl
 
   </Accordion>
   <Accordion title="İsteğe bağlı yazarlık kapsamları (yazma işlemleri)">
-    Giden mesajların varsayılan Slack uygulama kimliği yerine etkin agent kimliğini (özel kullanıcı adı ve simge) kullanmasını istiyorsanız `chat:write.customize` bot kapsamını ekleyin.
+    Giden iletilerin varsayılan Slack uygulama kimliği yerine etkin aracı kimliğini (özel kullanıcı adı ve simge) kullanmasını istiyorsanız `chat:write.customize` bot kapsamını ekleyin.
 
-    Emoji simgesi kullanıyorsanız Slack `:emoji_name:` söz dizimini bekler.
+    Emoji simgesi kullanırsanız Slack, `:emoji_name:` söz dizimini bekler.
 
   </Accordion>
   <Accordion title="İsteğe bağlı kullanıcı belirteci kapsamları (okuma işlemleri)">
@@ -891,61 +1124,63 @@ Varsayılan manifest, Slack Uygulama Ana Sayfası **Ana Sayfa** sekmesini etkinl
 
 ## Belirteç modeli
 
-- Socket Mode için `botToken` + `appToken` gereklidir.
-- HTTP modu `botToken` + `signingSecret` gerektirir.
-- Relay modu `botToken` ile birlikte `relay.url`, `relay.authToken` ve `relay.gatewayId` gerektirir; uygulama belirteci veya imzalama gizli anahtarı kullanmaz.
+- Bot kimliği (varsayılan), Socket Mode için `botToken` + `appToken`; HTTP modu için ise `botToken` + `signingSecret` gerektirir.
+- Kullanıcı kimliği, Socket Mode için `userToken` + `appToken`; HTTP modu için ise `userToken` + `signingSecret` gerektirir. Bot belirteci kullanmaz.
+- Aktarma modu, `botToken` ile birlikte `relay.url`, `relay.authToken` ve `relay.gatewayId` gerektirir; uygulama belirteci veya imzalama sırrı kullanmaz.
 - `botToken`, `appToken`, `signingSecret`, `relay.authToken` ve `userToken` düz metin
   dizelerini veya SecretRef nesnelerini kabul eder.
-- Yapılandırma belirteçleri env yedeğini geçersiz kılar.
-- `SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN` env yedeği yalnızca varsayılan hesaba uygulanır.
-- `userToken` yalnızca yapılandırma üzerinden ayarlanır (env yedeği yoktur) ve varsayılan olarak salt okunur davranışa (`userTokenReadOnly: true`) ayarlanır.
+- Yapılandırma belirteçleri, ortam geri dönüşünü geçersiz kılar.
+- `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN` ve `SLACK_USER_TOKEN` ortam geri dönüşlerinin her biri yalnızca varsayılan hesap için geçerlidir.
+- `userToken` varsayılan olarak salt okunur davranışı (`userTokenReadOnly: true`) kullanır.
 
 Durum anlık görüntüsü davranışı:
 
 - Slack hesap incelemesi, kimlik bilgisi başına `*Source` ve `*Status`
-  alanlarını izler (`botToken`, `appToken`, `signingSecret`, `userToken`).
-- Durum `available`, `configured_unavailable` veya `missing` olur.
-- `configured_unavailable`, hesabın SecretRef veya başka bir satır içi olmayan gizli kaynak üzerinden yapılandırıldığı, ancak geçerli komut/çalışma zamanı yolunun gerçek değeri çözemediği anlamına gelir.
-- HTTP modunda `signingSecretStatus` dahil edilir; Socket Mode’da
-  gerekli çift `botTokenStatus` + `appTokenStatus` olur.
+  alanlarını (`botToken`, `appToken`, `signingSecret`, `userToken`) izler.
+- Durum `available`, `configured_unavailable` veya `missing` değeridir.
+- `configured_unavailable`, hesabın SecretRef veya satır içi olmayan başka bir sır kaynağı aracılığıyla yapılandırıldığı, ancak geçerli komut/çalışma zamanı yolunun gerçek değeri
+  çözümleyemediği anlamına gelir.
+- HTTP modunda `signingSecretStatus` dâhil edilir. Socket Mode, bot kimliği için
+  `botTokenStatus` + `appTokenStatus`, kullanıcı kimliği için ise
+  `userTokenStatus` + `appTokenStatus` kullanır.
 
 <Tip>
-Eylemler/dizin okumaları için, yapılandırıldığında kullanıcı belirteci tercih edilebilir. Yazmalarda bot belirteci tercih edilmeye devam eder; kullanıcı belirteciyle yazmalara yalnızca `userTokenReadOnly: false` olduğunda ve bot belirteci kullanılamadığında izin verilir.
+Bot kimliği için eylemler ve dizin okumaları isteğe bağlı bir kullanıcı belirtecini tercih edebilir; `userTokenReadOnly: false` geri dönüşe izin vermediği sürece yazma işlemleri bot belirtecini kullanmaya devam eder. `identity: "user"` için okuma ve yazma işlemleri her zaman `userToken` kullanır.
 </Tip>
 
-## Eylemler ve kapılar
+## Eylemler ve geçitler
 
 Slack eylemleri `channels.slack.actions.*` tarafından denetlenir.
 
-Geçerli Slack araçlarında kullanılabilir eylem grupları:
+Geçerli Slack araçlarında kullanılabilen eylem grupları:
 
 | Grup       | Varsayılan |
 | ---------- | ---------- |
-| messages   | enabled |
-| reactions  | enabled |
-| pins       | enabled |
-| memberInfo | enabled |
-| emojiList  | enabled |
+| messages   | etkin      |
+| reactions  | etkin      |
+| pins       | etkin      |
+| memberInfo | etkin      |
+| emojiList  | etkin      |
 
-Geçerli Slack mesaj eylemleri arasında `send`, `upload-file`, `download-file`, `read`, `edit`, `delete`, `pin`, `unpin`, `list-pins`, `member-info` ve `emoji-list` bulunur. `download-file`, gelen dosya yer tutucularında gösterilen Slack dosya kimliklerini kabul eder ve görüntüler için görüntü önizlemeleri, diğer dosya türleri için yerel dosya meta verileri döndürür.
+Geçerli Slack ileti eylemleri arasında `send`, `upload-file`, `download-file`, `read`, `edit`, `delete`, `pin`, `unpin`, `list-pins`, `member-info` ve `emoji-list` bulunur. `download-file`, gelen dosya yer tutucularında gösterilen Slack dosya kimliklerini kabul eder ve görüntüler için görüntü önizlemelerini, diğer dosya türleri içinse yerel dosya meta verilerini döndürür.
 
 ## Erişim denetimi ve yönlendirme
 
-  <Tabs>
-  <Tab title="DM ilkesi">
-    `channels.slack.dmPolicy` DM erişimini denetler. `channels.slack.allowFrom` kurallı DM izin listesidir.
+<Tabs>
+  <Tab title="DM politikası">
+    `channels.slack.dmPolicy`, DM erişimini denetler. `channels.slack.allowFrom`, standart DM izin listesidir.
 
     - `pairing` (varsayılan)
     - `allowlist`
-    - `open` (`channels.slack.allowFrom` içinde `"*"` bulunmasını gerektirir)
+    - `open` (`channels.slack.allowFrom` değerinin `"*"` içermesini gerektirir)
     - `disabled`
 
     DM bayrakları:
 
-    - `dm.enabled` (varsayılan true)
+    - `dm.enabled` (varsayılan olarak true)
     - `channels.slack.allowFrom`
     - `dm.allowFrom` (eski)
-    - `dm.groupEnabled` (grup DM'leri varsayılan olarak false)
+    - `dm.groupEnabled` (grup DM'lerinde varsayılan olarak false)
     - `dm.groupChannels` (isteğe bağlı MPIM izin listesi)
 
     Çoklu hesap önceliği:
@@ -954,33 +1189,33 @@ Geçerli Slack mesaj eylemleri arasında `send`, `upload-file`, `download-file`,
     - Adlandırılmış hesaplar, kendi `allowFrom` değerleri ayarlanmamışsa `channels.slack.allowFrom` değerini devralır.
     - Adlandırılmış hesaplar `channels.slack.accounts.default.allowFrom` değerini devralmaz.
 
-    Eski `channels.slack.dm.policy` ve `channels.slack.dm.allowFrom` uyumluluk için hâlâ okunur. `openclaw doctor --fix`, erişimi değiştirmeden yapabildiğinde bunları `dmPolicy` ve `allowFrom` değerlerine taşır.
+    Eski `channels.slack.dm.policy` ve `channels.slack.dm.allowFrom`, uyumluluk amacıyla hâlâ okunur. `openclaw doctor --fix`, erişimi değiştirmeden yapabildiğinde bunları `dmPolicy` ve `allowFrom` değerlerine taşır.
 
     DM'lerde eşleştirme `openclaw pairing approve slack <code>` kullanır.
 
   </Tab>
 
-  <Tab title="Kanal ilkesi">
-    `channels.slack.groupPolicy` kanal işlemeyi denetler:
+  <Tab title="Kanal politikası">
+    `channels.slack.groupPolicy`, kanal işlemeyi denetler:
 
     - `open`
     - `allowlist`
     - `disabled`
 
-    Kanal izin listesi `channels.slack.channels` altında bulunur ve yapılandırma anahtarları olarak **kararlı Slack kanal kimlikleri** (örneğin `C12345678`) kullanmalıdır.
+    Kanal izin listesi `channels.slack.channels` altında bulunur ve yapılandırma anahtarları olarak **kararlı Slack kanal kimliklerini kullanmalıdır** (örneğin `C12345678`).
 
-    Çalışma zamanı notu: `channels.slack` tamamen eksikse (yalnızca env kurulumu), çalışma zamanı `groupPolicy="allowlist"` değerine geri döner ve bir uyarı kaydeder (`channels.defaults.groupPolicy` ayarlanmış olsa bile).
+    Çalışma zamanı notu: `channels.slack` tamamen eksikse (yalnızca ortam değişkenleriyle kurulum), çalışma zamanı `groupPolicy="allowlist"` değerine geri döner ve (`channels.defaults.groupPolicy` ayarlanmış olsa bile) bir uyarı kaydeder.
 
     Ad/kimlik çözümleme:
 
-    - kanal izin listesi girdileri ve DM izin listesi girdileri, token erişimi izin verdiğinde başlangıçta çözümlenir
-    - çözümlenmemiş kanal adı girdileri yapılandırıldığı gibi tutulur, ancak varsayılan olarak yönlendirme için yok sayılır
-    - gelen yetkilendirme ve kanal yönlendirme varsayılan olarak önce kimlik temellidir; doğrudan kullanıcı adı/slug eşleşmesi `channels.slack.dangerouslyAllowNameMatching: true` gerektirir
+    - kanal izin listesi girdileri ve DM izin listesi girdileri, belirteç erişimi izin verdiğinde başlangıçta çözümlenir
+    - çözümlenemeyen kanal adı girdileri yapılandırıldıkları biçimde korunur ancak varsayılan olarak yönlendirmede yok sayılır
+    - gelen yetkilendirme ve kanal yönlendirme varsayılan olarak önce kimliğe göre yapılır; doğrudan kullanıcı adı/kısa ad eşleştirmesi `channels.slack.dangerouslyAllowNameMatching: true` gerektirir
 
     <Warning>
-    Ada dayalı anahtarlar (`#channel-name` veya `channel-name`) `groupPolicy: "allowlist"` altında eşleşmez. Kanal araması varsayılan olarak önce kimlik temellidir, bu nedenle ada dayalı bir anahtar hiçbir zaman başarıyla yönlendirilmez ve o kanaldaki tüm iletiler sessizce engellenir. Bu, yönlendirme için kanal anahtarının gerekmediği ve ada dayalı bir anahtarın çalışıyor gibi göründüğü `groupPolicy: "open"` değerinden farklıdır.
+    Ada dayalı anahtarlar (`#channel-name` veya `channel-name`), `groupPolicy: "allowlist"` altında **eşleşmez**. Kanal araması varsayılan olarak önce kimliğe göre yapıldığından, ada dayalı bir anahtar hiçbir zaman başarıyla yönlendirilmez ve o kanaldaki tüm mesajlar sessizce engellenir. Bu durum, kanal anahtarının yönlendirme için gerekli olmadığı ve ada dayalı bir anahtarın çalışıyor gibi göründüğü `groupPolicy: "open"` davranışından farklıdır.
 
-    Anahtar olarak her zaman Slack kanal kimliğini kullanın. Bulmak için: Slack'te kanala sağ tıklayın → **Bağlantıyı kopyala** — kimlik (`C...`) URL'nin sonunda görünür.
+    Anahtar olarak her zaman Slack kanal kimliğini kullanın. Kimliği bulmak için: Slack'te kanala sağ tıklayın → **Copy link** — kimlik (`C...`) URL'nin sonunda görünür.
 
     Doğru:
 
@@ -990,7 +1225,7 @@ Geçerli Slack mesaj eylemleri arasında `send`, `upload-file`, `download-file`,
         slack: {
           groupPolicy: "allowlist",
           channels: {
-            C12345678: { allow: true, requireMention: true },
+            C12345678: { enabled: true, requireMention: true },
           },
         },
       },
@@ -1005,7 +1240,7 @@ Geçerli Slack mesaj eylemleri arasında `send`, `upload-file`, `download-file`,
         slack: {
           groupPolicy: "allowlist",
           channels: {
-            "#eng-my-channel": { allow: true, requireMention: true },
+            "#eng-my-channel": { enabled: true, requireMention: true },
           },
         },
       },
@@ -1016,68 +1251,78 @@ Geçerli Slack mesaj eylemleri arasında `send`, `upload-file`, `download-file`,
   </Tab>
 
   <Tab title="Bahsetmeler ve kanal kullanıcıları">
-    Kanal iletileri varsayılan olarak bahsetme geçidine tabidir.
+    Kanal mesajları varsayılan olarak bahsetme koşuluna tabidir.
 
     Bahsetme kaynakları:
 
     - açık uygulama bahsetmesi (`<@botId>`)
     - bot kullanıcısı ilgili kullanıcı grubunun üyesiyse Slack kullanıcı grubu bahsetmesi (`<!subteam^S...>`); `usergroups:read` gerektirir
-    - bahsetme regex desenleri (`agents.list[].groupChat.mentionPatterns`, geri dönüş `messages.groupChat.mentionPatterns`)
-    - örtük bot yanıtı konu davranışı (`thread.requireExplicitMention` `true` olduğunda devre dışıdır)
+    - bahsetme regex kalıpları (`agents.entries.*.groupChat.mentionPatterns`, geri dönüş olarak `messages.groupChat.mentionPatterns`)
+    - botun kendi Slack mesajına verilen yanıtlar (`implicitMentions.replyToBot`)
+    - botun katıldığı ileti dizilerindeki takip mesajları (`implicitMentions.threadParticipation`)
 
-    Kanal başına denetimler (`channels.slack.channels.<id>`; adlar yalnızca başlangıç çözümlemesi veya `dangerouslyAllowNameMatching` üzerinden):
+    Kanal başına denetimler (`channels.slack.channels.<id>`; adlar yalnızca başlangıç çözümlemesi veya `dangerouslyAllowNameMatching` aracılığıyla):
 
     - `requireMention`
+    - `ignoreOtherMentions`
+    - `replyToMode` (`off|first|all|batched`; bu kanal için hesap/sohbet türü yanıt modunu geçersiz kılar)
     - `users` (izin listesi)
     - `allowBots`
     - `skills`
     - `systemPrompt`
     - `tools`, `toolsBySender`
     - `toolsBySender` anahtar biçimi: `channel:`, `id:`, `e164:`, `username:`, `name:` veya `"*"` joker karakteri
-      (eski öneksiz anahtarlar hâlâ yalnızca `id:` ile eşlenir)
+      (önek içermeyen eski anahtarlar hâlâ yalnızca `id:` ile eşlenir)
 
-    `allowBots`, kanallar ve özel kanallar için tutucudur: bot tarafından yazılan oda mesajları yalnızca gönderen bot o odanın `users` izin listesinde açıkça yer aldığında veya `channels.slack.allowFrom` içindeki en az bir açık Slack sahipliği kimliği o anda odanın üyesi olduğunda kabul edilir. Joker karakterler ve görünen ad sahipliği girdileri sahip varlığını karşılamaz. Sahip varlığı Slack `conversations.members` kullanır; uygulamanın oda türü için eşleşen okuma kapsamına sahip olduğundan emin olun (`channels:read` genel kanallar için, `groups:read` özel kanallar için). Üye araması başarısız olursa OpenClaw, bot tarafından yazılan oda mesajını düşürür.
+    `ignoreOtherMentions` (varsayılan `false`), başka bir kullanıcıdan veya kullanıcı grubundan bahsedip bu bottan bahsetmeyen kanal mesajlarını atar. DM'ler ve grup DM'leri (MPIM'ler) etkilenmez. Filtre, `auth.test` üzerinden çözümlenmiş bir bot kullanıcı kimliği gerektirir; bu kimlik kullanılamıyorsa (örneğin yalnızca kullanıcı belirtecine sahip bir kimlik), geçit açık kalır ve mesajlar değiştirilmeden geçer.
 
-    Kabul edilen bot tarafından yazılmış Slack mesajları, paylaşılan [bot döngüsü koruması](/tr/channels/bot-loop-protection) kullanır. Varsayılan bütçe için `channels.defaults.botLoopProtection` yapılandırın, ardından bir çalışma alanı veya kanal farklı bir sınıra ihtiyaç duyduğunda `channels.slack.botLoopProtection` ya da `channels.slack.channels.<id>.botLoopProtection` ile geçersiz kılın.
+    `allowBots`, kanallar ve özel kanallar için ihtiyatlı davranır: bot tarafından oluşturulan oda mesajları yalnızca gönderen bot o odanın `users` izin listesinde açıkça yer alıyorsa veya `channels.slack.allowFrom` içindeki en az bir açık Slack sahibi kimliği o anda odanın üyesiyse kabul edilir. Joker karakterler ve görünen ad biçimindeki sahip girdileri, sahip bulunma koşulunu karşılamaz. Sahip bulunma denetimi Slack `conversations.members` kullanır; uygulamanın oda türü için uygun okuma kapsamına sahip olduğundan emin olun (herkese açık kanallar için `channels:read`, özel kanallar için `groups:read`). Üye araması başarısız olursa OpenClaw, bot tarafından oluşturulan oda mesajını atar.
+
+    Kabul edilen, bot tarafından oluşturulmuş Slack mesajları ortak [bot döngüsü korumasını](/tr/channels/bot-loop-protection) kullanır. Varsayılan bütçe için `channels.defaults.botLoopProtection` yapılandırın, ardından bir çalışma alanı veya kanal farklı bir sınır gerektirdiğinde `channels.slack.botLoopProtection` ya da `channels.slack.channels.<id>.botLoopProtection` ile geçersiz kılın.
 
   </Tab>
 </Tabs>
 
 ## İleti dizileri, oturumlar ve yanıt etiketleri
 
-- DM'ler `direct` olarak; kanallar `channel` olarak; MPIM'ler `group` olarak yönlendirilir.
-- Slack rota bağlamaları ham eş kimliklerini ve `channel:C12345678`, `user:U12345678` ve `<@U12345678>` gibi Slack hedef biçimlerini kabul eder.
-- Varsayılan `session.dmScope=main` ile Slack DM'leri aracının ana oturumuna daraltılır.
+- DM'ler `direct`; kanallar `channel`; MPIM'ler ise `group` olarak yönlendirilir.
+- Slack yönlendirme bağlamaları, ham eş kimliklerinin yanı sıra `channel:C12345678`, `user:U12345678` ve `<@U12345678>` gibi Slack hedef biçimlerini kabul eder.
+- Varsayılan `session.dmScope=main` ile sıradan Slack DM'leri ana ajan oturumunda birleştirilir. Agent View kökleri ve mevcut Assistant View ileti dizileri, `:thread:<threadTs>` oturumları olarak yalıtılmış kalır.
 - Kanal oturumları: `agent:<agentId>:slack:channel:<channelId>`.
-- Sıradan üst düzey kanal mesajları, `replyToMode` `off` olmadığında bile kanal başına oturumda kalır.
-- Slack ileti dizisi yanıtları, giden yanıt ileti dizileri `replyToMode="off"` ile devre dışı bırakılmış olsa bile, oturum son ekleri için üst Slack `thread_ts` değerini kullanır (`:thread:<threadTs>`).
-- OpenClaw, bu kökün görünür bir Slack ileti dizisi başlatması beklendiğinde uygun bir üst düzey kanal kökünü `agent:<agentId>:slack:channel:<channelId>:thread:<rootTs>` içine eker; böylece kök ve sonraki ileti dizisi yanıtları tek bir OpenClaw oturumunu paylaşır. Bu, `app_mention` olayları, açık bot veya yapılandırılmış bahsetme deseni eşleşmeleri ve `off` olmayan `replyToMode` ile `requireMention: false` kanalları için geçerlidir.
+- Sıradan üst düzey kanal mesajları, `replyToMode` değeri `off` olmasa bile kanal başına oturumda kalır.
+- Slack kanalı, MPIM, Agent View ve Assistant View ileti dizisi yanıtları, oturum son ekleri için üst Slack `thread_ts` değerini kullanır (`:thread:<threadTs>`). Sıradan DM yanıt dizileri, temel DM oturumunda bir kullanıcı arayüzü olanağı olarak kalır.
+- OpenClaw, görünür bir Slack ileti dizisi başlatması beklenen uygun bir üst düzey kanal kökünü `agent:<agentId>:slack:channel:<channelId>:thread:<rootTs>` içine başlangıç verisi olarak ekler; böylece kök ve sonraki ileti dizisi yanıtları aynı OpenClaw oturumunu paylaşır. Bu, `app_mention` olayları, açık bot veya yapılandırılmış bahsetme kalıbı eşleşmeleri ve `requireMention: false` olup `replyToMode` değeri `off` olmayan kanallar için geçerlidir.
 - `channels.slack.thread.historyScope` varsayılanı `thread`; `thread.inheritParent` varsayılanı `false` değeridir.
-- `channels.slack.thread.initialHistoryLimit`, yeni bir ileti dizisi oturumu başladığında kaç mevcut ileti dizisi mesajının getirileceğini denetler (varsayılan `20`; devre dışı bırakmak için `0` ayarlayın).
-- `channels.slack.thread.requireExplicitMention` (varsayılan `false`): `true` olduğunda örtük ileti dizisi bahsetmelerini bastırır; böylece bot, ileti dizisine zaten katılmış olsa bile yalnızca ileti dizileri içindeki açık `@bot` bahsetmelerine yanıt verir. Bu olmadan, botun katıldığı bir ileti dizisindeki yanıtlar `requireMention` geçidini atlar.
+- `channels.slack.thread.initialHistoryLimit`, yeni bir ileti dizisi oturumu başladığında mevcut ileti dizisinden kaç mesajın getirileceğini denetler (varsayılan `20`; devre dışı bırakmak için `0` olarak ayarlayın).
+- `channels.slack.implicitMentions.replyToBot`, botun kendi mesajına verilen bir yanıtın bahsetme geçidini atlayıp atlamayacağını denetler (varsayılan `true`).
+- `channels.slack.implicitMentions.threadParticipation`, botun yanıt verdiği bir ileti dizisindeki takip mesajlarının bahsetme geçidini atlayıp atlamayacağını denetler (varsayılan `true`). Bu takip mesajlarında yeni ve açık bir bahsetme gerektirmek için `false` olarak ayarlayın. `openclaw doctor --fix`, eski `channels.slack.thread.requireExplicitMention` anahtarını bu pozitif standart bayrağa taşır.
+- Hesap geçersiz kılmaları `channels.slack.accounts.<id>.implicitMentions`; ortak varsayılanlar `channels.defaults.implicitMentions` altında bulunur.
 
 Yanıt ileti dizisi denetimleri:
 
+- `channels.slack.channels.<id>.replyToMode`: Slack kanalı/özel kanal mesajları için kanal başına geçersiz kılma
 - `channels.slack.replyToMode`: `off|first|all|batched` (varsayılan `off`)
 - `channels.slack.replyToModeByChatType`: `direct|group|channel` başına
-- doğrudan sohbetler için eski yedek: `channels.slack.dm.replyToMode`
+- doğrudan sohbetler için eski geri dönüş: `channels.slack.dm.replyToMode`
 
-Manuel yanıt etiketleri desteklenir:
+Elle belirtilen yanıt etiketleri desteklenir:
 
 - `[[reply_to_current]]`
 - `[[reply_to:<id>]]`
 
-`message` aracından açık Slack ileti dizisi yanıtları için, Slack'ten ileti dizisi yanıtını üst kanala da yayımlamasını istemek üzere `action: "send"` ve `threadId` veya `replyTo` ile `replyBroadcast: true` ayarlayın. Bu, Slack'in `chat.postMessage` `reply_broadcast` bayrağına eşlenir ve medya yüklemeleri için değil, yalnızca metin veya Block Kit gönderimleri için desteklenir.
+`message` aracından açık Slack ileti dizisi yanıtları göndermek için `replyBroadcast: true` değerini `action: "send"` ile ve `threadId` ya da `replyTo` değerini ayarlayarak Slack'ten ileti dizisi yanıtını üst kanalda da yayımlamasını isteyin. Bu, Slack'in `chat.postMessage` `reply_broadcast` bayrağıyla eşlenir ve medya yüklemelerinde değil, yalnızca metin veya Block Kit gönderimlerinde desteklenir.
 
-Bir `message` araç çağrısı bir Slack ileti dizisi içinde çalıştığında ve aynı kanalı hedeflediğinde, OpenClaw normalde mevcut Slack ileti dizisini `replyToMode` uyarınca devralır. Bunun yerine yeni bir üst kanal mesajını zorlamak için `action: "send"` veya `action: "upload-file"` üzerinde `topLevel: true` ayarlayın. `threadId: null` aynı üst düzey çıkış seçeneği olarak kabul edilir.
+Bir `message` araç çağrısı Slack ileti dizisi içinde çalışıp aynı kanalı hedeflediğinde OpenClaw, normalde geçerli hesap, sohbet türü veya kanal başına `replyToMode` ayarına göre mevcut Slack ileti dizisini devralır. Otomatik yanıtlar ve aynı kanala yönelik `send` ya da `upload-file` çağrıları aynı kanal başına geçersiz kılmayı kullanır. Bunun yerine üst kanalda yeni bir mesaj göndermeyi zorlamak için `action: "send"` veya `action: "upload-file"` üzerinde `topLevel: true` ayarlayın. `threadId: null` aynı üst düzey devre dışı bırakma seçeneği olarak kabul edilir.
 
 <Note>
-`replyToMode="off"`, açık `[[reply_to_*]]` etiketleri dahil giden Slack yanıt ileti dizilerini devre dışı bırakır. Gelen Slack ileti dizisi oturumlarını düzleştirmez: bir Slack ileti dizisi içinde zaten yayımlanmış mesajlar yine de `:thread:<threadTs>` oturumuna yönlendirilir. Bu, açık etiketlerin `"off"` modunda hâlâ dikkate alındığı Telegram'dan farklıdır. Slack ileti dizileri mesajları kanaldan gizlerken Telegram yanıtları satır içinde görünür kalır.
+`replyToMode="off"`, açık `[[reply_to_*]]` etiketleri dâhil olmak üzere isteğe bağlı giden Slack yanıt ileti dizilerini devre dışı bırakır. Agent View ve Assistant View, Slack tarafından yönetilen ileti dizisi deneyimleridir; bu nedenle yanıtları ve durumları bu ayardan bağımsız olarak görünür kökte kalır. Diğer gelen Slack ileti dizisi oturumlarını düzleştirmez. Bu davranış, açık etiketlerin `"off"` modunda da uygulandığı Telegram'dan farklıdır. Slack ileti dizileri mesajları kanaldan gizlerken Telegram yanıtları satır içinde görünür kalır.
 </Note>
 
 ## Onay tepkileri
 
-`ackReaction`, OpenClaw gelen bir mesajı işlerken bir onay emojisi gönderir. `ackReactionScope`, bu emojinin gerçekte _ne zaman_ gönderileceğine karar verir.
+`ackReaction`, OpenClaw gelen bir mesajı işlerken bir onay emojisi gönderir. `ackReactionScope`, bu emojinin gerçekte _ne zaman_ gönderileceğini belirler.
+
+Varsayılan olarak onay emojisi sabit kalırken Slack'in yerel ajan/asistan ileti dizisi durumu, dönüşümlü yükleme mesajlarıyla ilerlemeyi gösterir. Bunun yerine kuyruğa alındı/düşünüyor/araç/tamamlandı/hata tepki yaşam döngüsünü etkinleştirmek için `messages.statusReactions.enabled: true` ayarlayın.
 
 ### Emoji (`ackReaction`)
 
@@ -1086,7 +1331,7 @@ Bir `message` araç çağrısı bir Slack ileti dizisi içinde çalıştığınd
 - `channels.slack.accounts.<accountId>.ackReaction`
 - `channels.slack.ackReaction`
 - `messages.ackReaction`
-- aracı kimliği emoji yedeği (`agents.list[].identity.emoji`, aksi halde `"eyes"` / 👀)
+- ajan kimliği emojisi geri dönüşü (`agents.entries.*.identity.emoji`, aksi takdirde `"eyes"` / 👀)
 
 Notlar:
 
@@ -1095,25 +1340,25 @@ Notlar:
 
 ### Kapsam (`messages.ackReactionScope`)
 
-Slack sağlayıcısı kapsamı `messages.ackReactionScope` değerinden okur (varsayılan `"group-mentions"`). Bugün Slack hesabı veya Slack kanal düzeyinde geçersiz kılma yoktur; değer Gateway genelinde küreseldir.
+Slack sağlayıcısı kapsamı `messages.ackReactionScope` üzerinden okur (varsayılan `"group-mentions"`). Şu anda Slack hesabı veya Slack kanalı düzeyinde geçersiz kılma yoktur; değer Gateway genelinde geçerlidir.
 
 Değerler:
 
-- `"all"`: DM'lerde ve gruplarda tepki ver.
+- `"all"`: ortam oda olayları dâhil olmak üzere DM'lerde ve gruplarda tepki ver.
 - `"direct"`: yalnızca DM'lerde tepki ver.
-- `"group-all"`: her grup mesajında tepki ver (DM yok).
-- `"group-mentions"` (varsayılan): gruplarda tepki ver, ancak yalnızca bottan bahsedildiğinde (veya kabul etmiş grup bahsedilebilirlerinde). **DM'ler hariç tutulur.**
+- `"group-all"`: ortam oda olayları dışında her grup mesajına tepki ver (DM'ler hariç).
+- `"group-mentions"` (varsayılan): gruplarda yalnızca bottan bahsedildiğinde (veya katılımı etkinleştirmiş grup bahsedilebilirlerinde) tepki ver. **DM'ler hariç tutulur.**
 - `"off"` / `"none"`: hiçbir zaman tepki verme.
 
 <Note>
-Varsayılan kapsam (`"group-mentions"`) doğrudan mesajlarda onay tepkilerini tetiklemez. Yapılandırılmış `ackReaction` değerini (örneğin `"eyes"`) gelen Slack DM'lerinde görmek için `messages.ackReactionScope` değerini `"direct"` veya `"all"` olarak ayarlayın. `messages.ackReactionScope`, Slack sağlayıcısı başlatılırken okunur; bu nedenle değişikliğin etkili olması için Gateway yeniden başlatması gerekir.
+Varsayılan kapsam (`"group-mentions"`), doğrudan mesajlarda veya ortam oda olaylarında onay tepkilerini tetiklemez. Yapılandırılmış `ackReaction` değerini (örneğin `"eyes"`) gelen Slack DM'lerinde ve sessiz oda olaylarında görmek için `messages.ackReactionScope` değerini `"all"` olarak ayarlayın. `messages.ackReactionScope`, Slack sağlayıcısı başlatılırken okunur; bu nedenle değişikliğin etkili olması için Gateway'in yeniden başlatılması gerekir.
 </Note>
 
 ```json5
 {
   messages: {
     ackReaction: "eyes",
-    ackReactionScope: "all", // react in DMs and groups
+    ackReactionScope: "all", // DM'lerde ve gruplarda tepki ver
   },
 }
 ```
@@ -1123,13 +1368,13 @@ Varsayılan kapsam (`"group-mentions"`) doğrudan mesajlarda onay tepkilerini te
 `channels.slack.streaming`, canlı önizleme davranışını denetler:
 
 - `off`: canlı önizleme akışını devre dışı bırak.
-- `partial` (varsayılan): önizleme metnini en son kısmi çıktı ile değiştir.
-- `block`: parçalı önizleme güncellemeleri ekle.
+- `partial` (varsayılan): önizleme metnini en son kısmi çıktıyla değiştir.
+- `block`: parçalı önizleme güncellemelerini sona ekle.
 - `progress`: oluşturma sırasında ilerleme durumu metnini göster, ardından son metni gönder.
-- `streaming.preview.toolProgress`: taslak önizleme etkin olduğunda araç/ilerleme güncellemelerini aynı düzenlenen önizleme mesajına yönlendirir (varsayılan: `true`). Ayrı araç/ilerleme mesajlarını korumak için `false` ayarlayın.
-- `streaming.preview.commandText` / `streaming.progress.commandText`: ham komut/exec metnini gizlerken kompakt araç ilerleme satırlarını korumak için `status` olarak ayarlayın (varsayılan: `raw`).
+- `streaming.preview.toolProgress`: taslak önizlemesi etkinken araç/ilerleme güncellemelerini düzenlenen aynı önizleme mesajına yönlendir (varsayılan: `true`). Araç/ilerleme mesajlarını ayrı tutmak için `false` ayarlayın.
+- `streaming.preview.commandText` / `streaming.progress.commandText`: ham komut/çalıştırma metnini gizlerken kompakt araç ilerleme satırlarını korumak için `status` olarak ayarlayın (varsayılan: `raw`).
 
-Kompakt ilerleme satırlarını korurken ham komut/exec metnini gizleyin:
+Kompakt ilerleme satırlarını korurken ham komut/çalıştırma metnini gizleyin:
 
 ```json
 {
@@ -1147,18 +1392,18 @@ Kompakt ilerleme satırlarını korurken ham komut/exec metnini gizleyin:
 }
 ```
 
-`channels.slack.streaming.nativeTransport`, `channels.slack.streaming.mode` `partial` olduğunda Slack yerel metin akışını denetler (varsayılan: `true`).
+`channels.slack.streaming.nativeTransport`, `channels.slack.streaming.mode` değeri `partial` olduğunda Slack'in yerel metin akışını denetler (varsayılan: `true`).
 
-Slack yerel ilerleme görev kartları, ilerleme modu için isteğe bağlıdır. İş çalışırken Slack'e yerel bir plan/görev kartı göndermek, ardından tamamlandığında aynı görev kartını güncellemek için `channels.slack.streaming.mode="progress"` ile `channels.slack.streaming.progress.nativeTaskCards` değerini `true` olarak ayarlayın. Bu bayrak olmadan, ilerleme modu taşınabilir taslak önizleme davranışını korur.
+Slack'in yerel ilerleme görev kartları, ilerleme modu için isteğe bağlıdır. Çalışma sürerken Slack'e özgü bir plan/görev kartı göndermek ve tamamlandığında aynı görev kartını güncellemek için `channels.slack.streaming.progress.nativeTaskCards` değerini `true` olarak `channels.slack.streaming.mode="progress"` ile ayarlayın. Bu bayrak olmadan ilerleme modu, taşınabilir taslak önizleme davranışını korur.
 
-- Yerel metin akışının ve Slack asistan ileti dizisi durumunun görünmesi için bir yanıt ileti dizisi kullanılabilir olmalıdır. İleti dizisi seçimi yine `replyToMode` değerini izler.
-- Kanal, grup sohbeti ve üst düzey DM kökleri, yerel akış kullanılamadığında veya yanıt ileti dizisi olmadığında normal taslak önizlemeyi kullanmaya devam edebilir.
-- Üst düzey Slack DM'leri varsayılan olarak ileti dizisi dışında kalır; bu nedenle Slack'in ileti dizisi tarzı yerel akış/durum önizlemesini göstermezler. OpenClaw bunun yerine DM içinde bir taslak önizleme yayımlar ve düzenler.
+- Yerel metin akışının ve Slack asistan ileti dizisi durumunun görünmesi için bir yanıt ileti dizisi kullanılabilir olmalıdır. İleti dizisi seçimi yine `replyToMode` kuralını izler.
+- Kanal, grup sohbeti ve üst düzey DM kökleri, yerel akış kullanılamadığında veya yanıt ileti dizisi bulunmadığında normal taslak önizlemesini kullanmaya devam edebilir.
+- Üst düzey Slack DM'leri varsayılan olarak ileti dizisi dışında kalır; bu nedenle Slack'in ileti dizisi tarzındaki yerel akış/durum önizlemesini göstermez. Bunun yerine OpenClaw, DM'de bir taslak önizlemesi gönderir ve düzenler.
 - Medya ve metin dışı yükler normal teslimata geri döner.
-- Medya/hata sonları bekleyen önizleme düzenlemelerini iptal eder; uygun metin/blok sonları yalnızca önizlemeyi yerinde düzenleyebildiklerinde boşaltılır.
-- Akış yanıt ortasında başarısız olursa OpenClaw kalan yükler için normal teslimata geri döner.
+- Medya/hata nihai sonuçları bekleyen önizleme düzenlemelerini iptal eder; uygun metin/blok nihai sonuçları yalnızca önizlemeyi yerinde düzenleyebildiklerinde gönderilir.
+- Akış yanıtın ortasında başarısız olursa OpenClaw, kalan yükler için normal teslimata geri döner.
 
-Slack yerel metin akışı yerine taslak önizleme kullanın:
+Slack yerel metin akışı yerine taslak önizlemesini kullanın:
 
 ```json5
 {
@@ -1173,7 +1418,7 @@ Slack yerel metin akışı yerine taslak önizleme kullanın:
 }
 ```
 
-Slack yerel ilerleme görev kartlarını kabul edin:
+Slack yerel ilerleme görev kartlarını etkinleştirin:
 
 ```json5
 {
@@ -1193,14 +1438,14 @@ Slack yerel ilerleme görev kartlarını kabul edin:
 
 Eski anahtarlar:
 
-- `channels.slack.streamMode` (`replace | status_final | append`), `channels.slack.streaming.mode` için eski bir çalışma zamanı takma adıdır.
-- Boole `channels.slack.streaming`, `channels.slack.streaming.mode` ve `channels.slack.streaming.nativeTransport` için eski bir çalışma zamanı takma adıdır.
-- Eski `channels.slack.nativeStreaming`, `channels.slack.streaming.nativeTransport` için bir çalışma zamanı takma adıdır.
-- Kalıcı Slack akış yapılandırmasını kurallı anahtarlara yeniden yazmak için `openclaw doctor --fix` çalıştırın.
+- `channels.slack.streamMode` (`replace | status_final | append`), `channels.slack.streaming.mode` için eski bir diğer addır.
+- boolean `channels.slack.streaming`, `channels.slack.streaming.mode` ve `channels.slack.streaming.nativeTransport` için eski bir diğer addır.
+- Üst düzey `channels.slack.chunkMode` ve `channels.slack.nativeStreaming`, `channels.slack.streaming.chunkMode` ve `channels.slack.streaming.nativeTransport` için eski diğer adlardır.
+- Eski diğer adlar çalışma zamanında okunmaz; kalıcı Slack akış yapılandırmasını standart anahtarlarla yeniden yazmak için `openclaw doctor --fix` komutunu çalıştırın.
 
-## Yazıyor tepkisi yedeği
+## Yazıyor tepkisi geri dönüşü
 
-`typingReaction`, OpenClaw bir yanıtı işlerken gelen Slack mesajına geçici bir tepki ekler, ardından çalışma bittiğinde bunu kaldırır. Bu, varsayılan bir "yazıyor..." durum göstergesi kullanan ileti dizisi yanıtlarının dışında en kullanışlıdır.
+`typingReaction`, OpenClaw bir yanıtı işlerken gelen Slack mesajına geçici bir tepki ekler ve çalıştırma tamamlandığında bunu kaldırır. Bu özellik en çok, varsayılan bir "yazıyor..." durum göstergesi kullanan ileti dizisi yanıtlarının dışında yararlıdır.
 
 Çözümleme sırası:
 
@@ -1210,25 +1455,37 @@ Eski anahtarlar:
 Notlar:
 
 - Slack kısa kodlar bekler (örneğin `"hourglass_flowing_sand"`).
-- Tepki en iyi çaba esasına göredir ve yanıt veya hata yolu tamamlandıktan sonra temizlik otomatik olarak denenir.
+- Tepki, mümkün olan en iyi şekilde uygulanır ve yanıt ya da hata yolu tamamlandıktan sonra otomatik olarak temizlenmeye çalışılır.
 
-## Medya, parçalama ve teslimat
+## Sesli giriş
+
+Bugün Slack'te OpenClaw ile konuşmak için OpenClaw uygulamasına bir Slack ses klibi gönderin. Slackbot'un dikte mikrofonu, uygulama API'si olmayan ve Slack'e ait ayrı bir özelliktir.
+
+- **[Slackbot sesli diktesi](https://slack.com/help/articles/202026038-How-to-use-Slackbot)** kullanıcının özel Slackbot görüşmesinde bulunur. Slack, kaydı bir Slackbot istemine dönüştürür ancak Events API aracılığıyla üçüncü taraf Slack uygulamalarına ses dosyası, dikte olayı, istem veya giriş kaynağı işaretçisi göndermez. OpenClaw Slack Plugin'i bunu etkinleştiremez veya alamaz.
+- **[Slack ses klipleri](https://slack.com/help/articles/4406235165587-Record-audio-and-video-clips-in-Slack)**, OpenClaw DM'sinde, kanalında veya ileti dizisinde gönderilebilen, Slack'te depolanan dosyalardır. OpenClaw, erişilebilir bir klibi bot belirteciyle indirir, Slack'in klip MIME meta verilerini normalleştirir ve ortak [ses transkripsiyonu işlem hattına](/tr/nodes/audio) gönderir. Önerilen uygulama manifesti, gerekli `files:read` kapsamını içerir.
+
+Ses klipleri ile Slackbot diktesinin gizlilik açısından farklı anlamları vardır: Klipler Slack dosya saklama politikasına tabidir ve OpenClaw bunları transkripsiyon için indirir; Slack ise dikte sesinin depolanmadığını belirtir.
+
+`requireMention: true` bulunan bir kanalda, altyazısız bir ses klibi yapılandırılmış bir bahsetme kalıbının seslendirilmesiyle eşiği karşılayabilir (`agents.entries.*.groupChat.mentionPatterns`, yoksa `messages.groupChat.mentionPatterns` kullanılır). OpenClaw, klibi indirmeden veya yazıya dökmeden önce göndereni yetkilendirir; ardından yalnızca transkript eşleşirse klibi kabul eder. Başarısız veya eşleşmeyen spekülatif bir transkript, indirilen kliple birlikte atılır; kanal geçmişinde saklanmaz. Yerel Slack `@bot` kimliği konuşmadan çıkarılamaz; bu nedenle seslendirilen bir ad kalıbı yapılandırın veya yazılı bir bahsetme ekleyin. Transkript yankılama etkinse yankı yalnızca kabulden sonra gönderilir.
+
+## Medya, parçalara ayırma ve teslimat
 
 <AccordionGroup>
   <Accordion title="Gelen ekler">
-    Slack dosya ekleri, Slack tarafından barındırılan özel URL'lerden indirilir (token ile kimlik doğrulamalı istek akışı) ve getirme başarılı olduğunda ve boyut sınırları izin verdiğinde medya deposuna yazılır. Dosya yer tutucuları Slack `fileId` değerini içerir; böylece aracılar özgün dosyayı `download-file` ile getirebilir.
+    Slack dosya ekleri, Slack tarafından barındırılan özel URL'lerden indirilir (belirteçle kimliği doğrulanan istek akışı) ve getirme başarılı olduğunda ve boyut sınırları izin verdiğinde medya deposuna yazılır. Dosya yer tutucuları, aracıların özgün dosyayı `download-file` ile getirebilmesi için Slack `fileId` değerini içerir.
 
-    İndirmeler sınırlı boşta kalma ve toplam zaman aşımları kullanır. Slack dosya alma işlemi takılır veya başarısız olursa OpenClaw mesajı işlemeye devam eder ve dosya yer tutucusuna geri döner.
+    İndirmeler sınırlı boşta kalma ve toplam zaman aşımları kullanır. Slack dosyasının alınması duraklar veya başarısız olursa OpenClaw mesajı işlemeye devam eder ve dosya yer tutucusuna geri döner.
 
-    Çalışma zamanı gelen boyut üst sınırı, `channels.slack.mediaMaxMb` ile geçersiz kılınmadığı sürece varsayılan olarak `20MB` olur.
+    Çalışma zamanındaki gelen boyut üst sınırı, `channels.slack.mediaMaxMb` tarafından geçersiz kılınmadığı sürece varsayılan olarak `20MB` değeridir.
 
   </Accordion>
 
   <Accordion title="Giden metin ve dosyalar">
-    - metin parçaları `channels.slack.textChunkLimit` kullanır (varsayılan 4000)
-    - `channels.slack.chunkMode="newline"` paragraf öncelikli bölmeyi etkinleştirir
-    - dosya gönderimleri Slack yükleme API'lerini kullanır ve ileti dizisi yanıtlarını (`thread_ts`) içerebilir
-    - giden medya üst sınırı yapılandırıldığında `channels.slack.mediaMaxMb` değerini izler; aksi halde kanal gönderimleri medya hattındaki MIME türü varsayılanlarını kullanır
+    - Metin parçaları `channels.slack.textChunkLimit` kullanır (varsayılan `8000`, Slack'in kendi mesaj uzunluğu sınırıyla kısıtlanır)
+    - `channels.slack.streaming.chunkMode="newline"` önce paragrafa göre bölmeyi etkinleştirir
+    - Dosya gönderimleri Slack yükleme API'lerini kullanır ve ileti dizisi yanıtları (`thread_ts`) içerebilir
+    - Uzun dosya açıklamaları, yükleme yorumu olarak Slack açısından güvenli ilk metin parçasını kullanır ve kalan parçaları takip mesajları olarak gönderir
+    - Giden medya üst sınırı, yapılandırılmışsa `channels.slack.mediaMaxMb` değerini izler; aksi takdirde kanal gönderimleri medya işlem hattındaki MIME türü varsayılanlarını kullanır
 
   </Accordion>
 
@@ -1236,16 +1493,16 @@ Notlar:
     Tercih edilen açık hedefler:
 
     - DM'ler için `user:<id>`
-    - kanallar için `channel:<id>`
+    - Kanallar için `channel:<id>`
 
-    Yalnızca metin/blok Slack DM'leri doğrudan kullanıcı kimliklerine gönderi yayımlayabilir; dosya yüklemeleri ve ileti dizili gönderimler önce Slack konuşma API'leri aracılığıyla DM'yi açar, çünkü bu yollar somut bir konuşma kimliği gerektirir.
+    Yalnızca metin/blok içeren Slack DM'leri doğrudan kullanıcı kimliklerine gönderilebilir; dosya yüklemeleri ve ileti dizisi gönderimleri ise bu yollar somut bir görüşme kimliği gerektirdiğinden önce Slack görüşme API'leri aracılığıyla DM'yi açar.
 
   </Accordion>
 </AccordionGroup>
 
-## Komutlar ve slash davranışı
+## Komutlar ve eğik çizgi davranışı
 
-Slash komutları Slack'te tek bir yapılandırılmış komut veya birden çok yerel komut olarak görünür. Komut varsayılanlarını değiştirmek için `channels.slack.slashCommand` yapılandırın:
+Eğik çizgi komutları Slack'te tek bir yapılandırılmış komut veya birden fazla yerel komut olarak görünür. Komut varsayılanlarını değiştirmek için `channels.slack.slashCommand` yapılandırmasını ayarlayın:
 
 - `enabled: false`
 - `name: "openclaw"`
@@ -1256,33 +1513,148 @@ Slash komutları Slack'te tek bir yapılandırılmış komut veya birden çok ye
 /openclaw /help
 ```
 
-Yerel komutlar Slack uygulamanızda [ek manifest ayarları](#additional-manifest-settings) gerektirir ve bunun yerine küresel yapılandırmalarda `channels.slack.commands.native: true` veya `commands.native: true` ile etkinleştirilir.
+Yerel komutlar, Slack uygulamanızda [ek manifest ayarları](#additional-manifest-settings) gerektirir ve bunun yerine genel yapılandırmalardaki `channels.slack.commands.native: true` veya `commands.native: true` ile etkinleştirilir.
 
-- Yerel komut otomatik modu Slack için **kapalıdır**, bu nedenle `commands.native: "auto"` Slack yerel komutlarını etkinleştirmez.
+- Yerel komut otomatik modu Slack için **kapalıdır**; bu nedenle `commands.native: "auto"`, Slack yerel komutlarını etkinleştirmez.
 
 ```txt
 /help
 ```
 
-Yerel bağımsız değişken menüleri, seçilen bir seçenek değerini göndermeden önce bir onay modali gösteren uyarlanabilir bir işleme stratejisi kullanır:
+Yerel bağımsız değişken menüleri öncelik sırasına göre aşağıdakilerden biri olarak oluşturulur:
 
-- en fazla 5 seçenek: düğme blokları
-- 6-100 seçenek: statik seçim menüsü
-- 100'den fazla seçenek: etkileşim seçenek işleyicileri kullanılabilir olduğunda eşzamansız seçenek filtrelemeli dış seçim
-- Slack sınırları aşıldı: kodlanmış seçenek değerleri düğmelere geri döner
+- Yeterince kısa 3-5 seçenek: taşma ("...") menüsü
+- 100'den fazla seçenek ve zaman uyumsuz seçenek filtreleme kullanılabilir: harici seçim
+- 1-2 seçenek veya kodlanmış değeri seçim için fazla uzun olan herhangi bir seçenek: düğme blokları
+- Diğer durumlarda (6-100 seçenek veya zaman uyumsuz filtreleme olmadan 100'den fazla seçenek): menü başına 100 seçenek olacak şekilde parçalara ayrılmış statik seçim menüsü
 
 ```txt
 /think
 ```
 
-Slash oturumları `agent:<agentId>:slack:slash:<userId>` gibi yalıtılmış anahtarlar kullanır ve komut yürütmelerini yine `CommandTargetSessionKey` kullanarak hedef konuşma oturumuna yönlendirir.
+Eğik çizgi oturumları `agent:<agentId>:slack:slash:<userId>` gibi yalıtılmış anahtarlar kullanır ve komut yürütmelerini yine `CommandTargetSessionKey` kullanarak hedef görüşme oturumuna yönlendirir.
+
+## Yerel grafikler
+
+Slack'in herkese açık [`data_visualization` Block Kit bloğu](https://docs.slack.dev/reference/block-kit/blocks/data-visualization-block/)
+mesajlarda çizgi, çubuk, alan ve pasta grafiklerini oluşturur. OpenClaw, taşınabilir
+`presentation` `chart` bloğunu bu yerel biçime eşler; normal
+`chat:write` mesaj erişiminin ötesinde ek OAuth kapsamı, dosya yükleme,
+görüntü oluşturucu veya Slack yapılandırması gerekmez.
+
+```json
+{
+  "blocks": [
+    {
+      "type": "chart",
+      "chartType": "bar",
+      "title": "Üç aylık gelir",
+      "categories": ["Q1", "Q2"],
+      "series": [{ "name": "Gelir", "values": [120, 145] }],
+      "xLabel": "Çeyrek"
+    }
+  ]
+}
+```
+
+Slack'in sınırları yerel oluşturmadan önce uygulanır:
+
+- Başlık ve isteğe bağlı eksen etiketleri: 50 karakter
+- Pasta: 1-12 pozitif dilim
+- Çizgi/çubuk/alan: benzersiz adlandırılmış 1-12 seri ve 1-20 ortak kategori
+- Dilim, kategori ve seri etiketleri: 20 karakter
+- Her seri, her kategori için bir sonlu değer içermelidir; pasta dışındaki değerler
+  negatif olabilir
+
+Her yerel grafik ayrıca ekran okuyucular, bildirimler, oturum yansıtma ve bloğu
+oluşturamayan istemciler için üst düzey bir metin gösterimi taşır. Diğer OpenClaw
+kanallarına yapılan standart sunum gönderimleri, yerel grafik desteğini bildirmedikleri
+sürece aynı belirlenimci grafik verilerini metin olarak alır. Aşamalı kullanıma sunma
+sırasında Slack grafiği `invalid_blocks` ile reddederse OpenClaw, reddedilen yerel
+veri bloklarını kaldırır, varsa diğer denetimleri korur ve eksiksiz grafik gösterimini
+görünür metin olarak gönderir.
+
+Slack şu anda mesaj başına en fazla iki `data_visualization` bloğunu kabul eder. Bir
+sunum ikiden fazla geçerli grafik içerdiğinde OpenClaw bunların sırasını korur ve
+her mesajda en fazla iki grafik olacak şekilde takip mesajlarında yerel oluşturmaya
+devam eder.
+
+Slack'in [geliştirici duyurusu](https://docs.slack.dev/changelog/2026/06/16/block-kit-data-visualization-block/)
+bloğu uygulamalara yönelik bir Block Kit özelliği olarak belgeler ve ücretli plan
+kısıtlaması yayımlamaz. Business+/Enterprise uygunluk ifadesi, bir uygulamanın önceden
+yapılandırılmış bir Block Kit grafiği göndermesinden ayrı olan Slackbot'un otomatik
+yapay zekâ grafik üretimi için geçerlidir. Grafikler yalnızca mesaj bloklarıdır;
+App Home, modal veya Canvas içeriği değildir.
+
+## Yerel tablolar
+
+Slack'in mevcut [`data_table` Block Kit bloğu](https://docs.slack.dev/reference/block-kit/blocks/data-table-block/)
+mesajlarda yapılandırılmış satırları ve sütunları oluşturur. OpenClaw, açık bir
+taşınabilir `presentation` `table` bloğunu `data_table` biçimine eşler; Slack'in
+eski [`table` bloğunu](https://docs.slack.dev/reference/block-kit/blocks/table-block/)
+kullanmaz. Normal `chat:write` mesaj erişiminin ötesinde ek OAuth kapsamı veya
+Slack yapılandırması gerekmez.
+
+```json
+{
+  "blocks": [
+    {
+      "type": "table",
+      "caption": "Açık işlem hattı",
+      "headers": ["Hesap", "Aşama", "ARR"],
+      "rows": [
+        ["Acme", "Kazanıldı", 125000],
+        ["Globex", "İnceleme", 82000]
+      ],
+      "rowHeaderColumnIndex": 0
+    }
+  ]
+}
+```
+
+OpenClaw, başlık ve dize hücrelerini Slack `raw_text` hücrelerine eşler. Sayısal
+hücreler `raw_number` biçimine eşlenir ve sonlu sayısal değer, yerel sıralama ve
+filtreleme için korunur. `rowHeaderColumnIndex`, mevcut olduğunda, sıfır tabanlı bu
+sütunu Slack satır başlıkları olarak işaretler.
+
+Slack'in yayımlanan `data_table` sınırları yerel oluşturmadan önce uygulanır:
+
+- 1-20 sütun
+- 1-100 veri satırı ve başlık satırı
+- Her satırda aynı sayıda hücre
+- Tek bir mesajdaki tüm tablo hücrelerinde toplam en fazla 10.000 karakter
+
+Mesaj toplam karakter sınırı içinde kaldığı sürece birden fazla geçerli tablo bloğu
+yerel olarak oluşturulabilir. Yerel zarf içinde oluşturulamayan bir tablo, satırları
+veya hücreleri kaybetmek yerine eksiksiz belirlenimci metne dönüşür. Bu metin tek bir
+Slack mesajını aşarsa gönderimler ve eğik çizgi yanıtları sıralı metin parçaları
+kullanır. Tablo düzenlemeleri, mevcut bir mesajdaki satırları sessizce kesmek yerine
+açık bir boyut hatasıyla başarısız olur.
+
+Taşınabilir sunumdan üretilen her yerel tablo ayrıca ekran okuyucular, bildirimler, oturum yansıtma ve
+bloğu işleyemeyen istemciler için üst düzey bir metin gösterimi taşır. Ham grafik ve tablo değerleri
+yedek gösterimde değişmez kalır; böylece `<@U123>` gibi hücre verileri bir Slack bahsine dönüşmez.
+Slack, yerel grafik veya tablo bloklarını `invalid_blocks` ile reddederse OpenClaw,
+sınırlandırılmış tek bir kurtarma adımında tüm yerel veri bloklarını kaldırır, düğmeler ve seçimler gibi
+geçerli eşdüzey blokları korur ve Slack biçimlendirmesi devre dışı bırakılmış olarak grafik ve tablo
+metninin tamamını görünür biçimde gönderir. Eğik çizgi komutu teslimi, komut genelinde
+Slack'in beş çağrılık `response_url` bütçesini izler. Her yanıt grubundan önce,
+kalan çağrılara sığan eksiksiz bir plan seçer veya bu grubu göndermeden önce başarısız olur.
+
+Yalnızca açık `presentation` tablo blokları yerel tablolara yükseltilir.
+Markdown dikey çizgi tabloları, yazıldıkları biçimde metin olarak kalır; OpenClaw tablo
+yapısını veya hücre türlerini tahmin etmez. Mevcut güvenilir Slack yerel üreticileri,
+ham blokları `channelData.slack.blocks` üzerinden geçirmeye devam edebilir; OpenClaw geçerli ham
+`data_table` hücrelerinden yedek metin türetirken, hatalı özel bloklar
+başlıklarına veya genel Block Kit yedek gösterimine indirgenebilir. Taşınabilir ajan, CLI
+ve plugin çıktısı `presentation` kullanmalıdır.
 
 ## Etkileşimli yanıtlar
 
-Slack, ajan tarafından yazılmış etkileşimli yanıt denetimlerini işleyebilir, ancak bu özellik varsayılan olarak devre dışıdır.
-Yeni ajan, CLI ve Plugin çıktısı için paylaşılan
+Slack, ajan tarafından oluşturulan etkileşimli yanıt denetimlerini işleyebilir ancak bu özellik varsayılan olarak devre dışıdır.
+Yeni ajan, CLI ve plugin çıktıları için paylaşılan
 `presentation` düğmelerini veya seçim bloklarını tercih edin. Bunlar aynı Slack etkileşim
-yolunu kullanırken diğer kanallarda da geriye uyumlu şekilde basitleşir.
+yolunu kullanırken diğer kanallarda da uygun bir yedek gösterime indirgenir.
 
 Genel olarak etkinleştirin:
 
@@ -1316,81 +1688,87 @@ Veya yalnızca bir Slack hesabı için etkinleştirin:
 }
 ```
 
-Etkinleştirildiğinde, ajanlar kullanımdan kaldırılmış yalnızca Slack'e özgü yanıt direktifleri yaymaya devam edebilir:
+Etkinleştirildiğinde ajanlar, kullanımdan kaldırılmış yalnızca Slack'e özgü yanıt yönergelerini yine de yayımlayabilir:
 
 - `[[slack_buttons: Approve:approve, Reject:reject]]`
 - `[[slack_select: Choose a target | Canary:canary, Production:production]]`
 
-Bu direktifler Slack Block Kit'e derlenir ve tıklamaları veya seçimleri
+Bu yönergeler Slack Block Kit'e derlenir ve tıklamaları veya seçimleri
 mevcut Slack etkileşim olayı yolu üzerinden geri yönlendirir. Bunları eski
-istemler ve Slack'e özgü kaçış yolları için tutun; yeni taşınabilir
-denetimler için paylaşılan sunumu kullanın.
+istemler ve Slack'e özgü kaçış yolları için koruyun; yeni taşınabilir denetimler için
+paylaşılan sunumu kullanın.
 
-Direktif derleyici API'leri de yeni üretici kodu için kullanımdan kaldırılmıştır:
+Yönerge derleyici API'leri de yeni üretici kodları için kullanımdan kaldırılmıştır:
 
 - `compileSlackInteractiveReplies(...)`
 - `parseSlackOptionsLine(...)`
 - `isSlackInteractiveRepliesEnabled(...)`
 - `buildSlackInteractiveBlocks(...)`
 
-Yeni Slack'te işlenen denetimler için `presentation` yüklerini ve
+Slack tarafından işlenen yeni denetimler için `presentation` yüklerini ve
 `buildSlackPresentationBlocks(...)` kullanın.
 
 Notlar:
 
-- Bu, Slack'e özgü eski UI'dır. Diğer kanallar Slack Block
-  Kit direktiflerini kendi düğme sistemlerine çevirmez.
-- Etkileşimli geri çağrı değerleri, ajan tarafından yazılmış ham değerler değil, OpenClaw tarafından oluşturulan opak belirteçlerdir.
-- Oluşturulan etkileşimli bloklar Slack Block Kit sınırlarını aşacaksa, OpenClaw geçersiz bir blok yükü göndermek yerine özgün metin yanıtına geri döner.
+- Bu, Slack'e özgü eski kullanıcı arayüzüdür. Diğer kanallar Slack Block
+  Kit yönergelerini kendi düğme sistemlerine dönüştürmez.
+- Etkileşimli geri çağırma değerleri, ajan tarafından yazılmış ham değerler değil, OpenClaw tarafından oluşturulan opak belirteçlerdir.
+- Oluşturulan etkileşimli bloklar Slack Block Kit sınırlarını aşacaksa OpenClaw, geçersiz bir blok yükü göndermek yerine özgün metin yanıtına geri döner.
 
-### Plugin sahipli modal gönderimleri
+### Plugin'e ait modal gönderimleri
 
-Etkileşimli bir işleyici kaydeden Slack Plugin'leri, OpenClaw yükü
-ajan tarafından görülebilen sistem olayı için sıkıştırmadan önce modal
-`view_submission` ve `view_closed` yaşam döngüsü olaylarını da alabilir.
-Bir Slack modali açarken bu yönlendirme desenlerinden birini kullanın:
+Etkileşimli bir işleyici kaydeden Slack pluginleri, OpenClaw yükü
+ajanın görebildiği sistem olayı için sıkıştırmadan önce modal
+`view_submission` ve `view_closed` yaşam döngüsü olaylarını da alabilir. Bir Slack modalı
+açarken şu yönlendirme kalıplarından birini kullanın:
 
 - `callback_id` değerini `openclaw:<namespace>:<payload>` olarak ayarlayın.
-- Veya mevcut bir `callback_id` değerini koruyun ve modal `private_metadata` içine `pluginInteractiveData:
-"<namespace>:<payload>"` koyun.
+- Ya da mevcut bir `callback_id` değerini koruyun ve modalın `private_metadata` alanına `pluginInteractiveData:
+"<namespace>:<payload>"` yerleştirin.
 
-İşleyici `ctx.interaction.kind` değerini `view_submission` veya
-`view_closed` olarak, normalleştirilmiş `inputs` değerlerini ve Slack'ten gelen tam ham
-`stateValues` nesnesini alır. Yalnızca geri çağrı kimliğiyle yönlendirme, Plugin işleyicisini çağırmak için yeterlidir; modal aynı zamanda ajan tarafından görülebilen bir sistem olayı üretmeliyse mevcut modal `private_metadata` kullanıcı/oturum yönlendirme alanlarını ekleyin. Ajan kompakt, redakte edilmiş bir `Slack interaction: ...` sistem olayı alır. İşleyici
-`systemEvent.summary`, `systemEvent.reference` veya `systemEvent.data` döndürürse, bu
-alanlar kompakt olaya eklenir; böylece ajan, eksiksiz form yükünü görmeden
-Plugin sahipli depolamaya başvurabilir.
+İşleyici, `ctx.interaction.kind` değerini `view_submission` veya
+`view_closed` olarak, normalleştirilmiş `inputs` değerini ve Slack'ten gelen tam ham
+`stateValues` nesnesini alır. Yalnızca geri çağırma kimliğine göre yönlendirme, plugin işleyicisini
+çağırmak için yeterlidir; modalın ayrıca ajanın görebildiği bir sistem olayı üretmesi gerektiğinde
+mevcut modal `private_metadata` kullanıcı/oturum yönlendirme alanlarını ekleyin. Ajan,
+sıkıştırılmış ve gizli bilgileri çıkarılmış bir `Slack interaction: ...` sistem olayı alır. İşleyici
+`systemEvent.summary`, `systemEvent.reference` veya `systemEvent.data` döndürürse bu
+alanlar söz konusu sıkıştırılmış olaya eklenir; böylece ajan, form yükünün tamamını görmeden
+plugin'e ait depolamaya başvurabilir.
 
 ## Slack'te yerel onaylar
 
-Slack, Web UI veya terminale geri dönmek yerine etkileşimli düğmeler ve etkileşimlerle yerel bir onay istemcisi olarak davranabilir.
+Slack, Web kullanıcı arayüzüne veya terminale geri dönmek yerine etkileşimli düğmeler ve etkileşimlerle yerel bir onay istemcisi olarak çalışabilir.
 
-- Exec ve Plugin onayları Slack'e özgü Block Kit istemleri olarak işlenebilir.
-- `channels.slack.execApprovals.*`, yerel exec onay istemcisi etkinleştirme ve DM/kanal yönlendirme yapılandırması olarak kalır.
+- Exec ve plugin onayları, Slack'e özgü Block Kit istemleri olarak işlenebilir.
+- `channels.slack.execApprovals.*`, yerel exec onay istemcisini etkinleştirme ve DM/kanal yönlendirme yapılandırması olarak kalır.
 - Exec onayı DM'leri `channels.slack.execApprovals.approvers` veya `commands.ownerAllowFrom` kullanır.
-- Plugin onayları, Slack kaynak oturum için yerel onay istemcisi olarak etkinse veya `approvals.plugin` kaynak Slack oturumuna ya da bir Slack hedefine yönlendiriyorsa Slack'e özgü düğmeler kullanır.
-- Plugin onayı DM'leri `channels.slack.allowFrom`, adlandırılmış hesap `allowFrom` veya hesap varsayılan rotasından Slack Plugin onaylayıcılarını kullanır.
-- Onaylayıcı yetkilendirmesi yine zorunlu tutulur: yalnızca exec onaylayıcıları, aynı zamanda Plugin onaylayıcısı değillerse Plugin isteklerini onaylayamaz.
+- Slack, kaynak oturum için yerel onay istemcisi olarak etkinleştirildiğinde veya `approvals.plugin` kaynak Slack oturumuna ya da bir Slack hedefine yönlendirme yaptığında, plugin onayları Slack'e özgü düğmeleri kullanır.
+- Plugin onayı DM'leri, `channels.slack.allowFrom` içindeki Slack plugin onaylayanlarını, adlandırılmış hesap `allowFrom` değerini veya hesabın varsayılan rotasını kullanır.
+- Onaylayan yetkilendirmesi uygulanmaya devam eder: yalnızca exec onaylayabilenler, aynı zamanda plugin onaylayanı olmadıkça plugin isteklerini onaylayamaz.
 
-Bu, diğer kanallarla aynı paylaşılan onay düğmesi yüzeyini kullanır. Slack uygulama ayarlarınızda `interactivity` etkin olduğunda, onay istemleri doğrudan konuşmada Block Kit düğmeleri olarak işlenir.
-Bu düğmeler mevcut olduğunda birincil onay UX'i bunlardır; OpenClaw
-yalnızca araç sonucu sohbet onaylarının kullanılamadığını veya manuel onayın tek yol olduğunu söylediğinde manuel bir `/approve` komutu eklemelidir.
+Bu, diğer kanallarla aynı paylaşılan onay düğmesi yüzeyini kullanır. Slack uygulama ayarlarınızda `interactivity` etkinleştirildiğinde onay istemleri, konuşmanın doğrudan içinde Block Kit düğmeleri olarak işlenir.
+Bu düğmeler mevcut olduğunda birincil onay kullanıcı deneyimi bunlardır; OpenClaw
+yalnızca araç sonucu sohbet onaylarının kullanılamadığını veya tek yolun manuel onay olduğunu belirtiyorsa
+manuel bir `/approve` komutu eklemelidir.
 
 Yapılandırma yolu:
 
 - `channels.slack.execApprovals.enabled`
-- `channels.slack.execApprovals.approvers` (isteğe bağlı; mümkün olduğunda `commands.ownerAllowFrom` değerine geri döner)
+- `channels.slack.execApprovals.approvers` (isteğe bağlıdır; mümkün olduğunda `commands.ownerAllowFrom` değerine geri döner)
 - `channels.slack.execApprovals.target` (`dm` | `channel` | `both`, varsayılan: `dm`)
 - `agentFilter`, `sessionFilter`
 
-Slack, `enabled` ayarlanmamışsa veya `"auto"` ise ve en az bir
-exec onaylayıcı çözümleniyorsa yerel exec onaylarını otomatik olarak etkinleştirir. Slack, Slack Plugin onaylayıcıları çözümlendiğinde ve istek yerel istemci filtreleriyle eşleştiğinde bu yerel istemci
-yolu üzerinden yerel Plugin onaylarını da işleyebilir. Slack'i yerel onay istemcisi olarak açıkça devre dışı bırakmak için
-`enabled: false` ayarlayın. Onaylayıcılar çözümlendiğinde yerel onayları zorla açmak için `enabled: true` ayarlayın. Slack exec onaylarını devre dışı bırakmak,
-`approvals.plugin` üzerinden etkinleştirilen yerel Slack Plugin onayı teslimini devre dışı bırakmaz; Plugin onayı
-teslimi bunun yerine Slack Plugin onaylayıcılarını kullanır.
+`enabled` ayarlanmamışsa veya `"auto"` ise ve en az bir
+exec onaylayanı çözümlenirse Slack, yerel exec onaylarını otomatik olarak etkinleştirir. Slack plugin
+onaylayanları çözümlendiğinde ve istek yerel istemci filtreleriyle eşleştiğinde Slack, bu yerel istemci
+yolu üzerinden yerel plugin onaylarını da işleyebilir. Slack'i yerel onay istemcisi olarak açıkça devre
+dışı bırakmak için `enabled: false` ayarlayın. Onaylayanlar çözümlendiğinde yerel onayları zorla
+etkinleştirmek için `enabled: true` ayarlayın. Slack exec onaylarını devre dışı bırakmak,
+`approvals.plugin` üzerinden etkinleştirilen yerel Slack plugin onayı teslimini devre dışı bırakmaz;
+plugin onayı teslimi bunun yerine Slack plugin onaylayanlarını kullanır.
 
-Açık Slack exec onay yapılandırması olmadan varsayılan davranış:
+Açık bir Slack exec onayı yapılandırması olmadığındaki varsayılan davranış:
 
 ```json5
 {
@@ -1400,8 +1778,8 @@ Açık Slack exec onay yapılandırması olmadan varsayılan davranış:
 }
 ```
 
-Açık Slack'e özgü yapılandırma yalnızca onaylayıcıları geçersiz kılmak, filtre eklemek veya
-kaynak sohbet teslimine dahil olmak istediğinizde gereklidir:
+Açık Slack yerel yapılandırması yalnızca onaylayanları geçersiz kılmak, filtre eklemek veya
+kaynak sohbete teslimi etkinleştirmek istediğinizde gereklidir:
 
 ```json5
 {
@@ -1417,44 +1795,73 @@ kaynak sohbet teslimine dahil olmak istediğinizde gereklidir:
 }
 ```
 
-Paylaşılan `approvals.exec` iletimi ayrıdır. Bunu yalnızca exec onayı istemlerinin başka sohbetlere veya açık bant dışı hedeflere de
-yönlendirilmesi gerektiğinde kullanın. Paylaşılan `approvals.plugin` iletimi de
-ayrıdır; Slack yerel teslimi, bu geri dönüşü yalnızca Slack Plugin
-onayı isteğini yerel olarak işleyebildiğinde bastırır.
+Paylaşılan `approvals.exec` yönlendirmesi ayrıdır. Bunu yalnızca exec onayı istemlerinin ayrıca
+diğer sohbetlere veya açık bant dışı hedeflere yönlendirilmesi gerektiğinde kullanın. Paylaşılan
+`approvals.plugin` yönlendirmesi de ayrıdır; Slack yerel teslimi, yalnızca Slack plugin onayı
+isteğini yerel olarak işleyebildiğinde bu yedek gösterimi engeller.
 
-Aynı sohbette `/approve`, komutları zaten destekleyen Slack kanallarında ve DM'lerde de çalışır. Tam onay iletme modeli için [Exec onayları](/tr/tools/exec-approvals) bölümüne bakın.
+Aynı sohbet içindeki `/approve`, komutları zaten destekleyen Slack kanallarında ve DM'lerde de çalışır. Eksiksiz onay yönlendirme modeli için [Exec onayları](/tr/tools/exec-approvals) bölümüne bakın.
 
-## Olaylar ve operasyonel davranış
+## Olaylar ve işletim davranışı
 
 - Mesaj düzenlemeleri/silmeleri sistem olaylarına eşlenir.
-- Konu yayınları ("Kanala da gönder" konu yanıtları) normal kullanıcı mesajları olarak işlenir.
+- İleti dizisi yayınları ("Also send to channel" ileti dizisi yanıtları) normal kullanıcı mesajları olarak işlenir.
 - Tepki ekleme/kaldırma olayları sistem olaylarına eşlenir.
-- Üye katılma/ayrılma, kanal oluşturulma/yeniden adlandırılma ve sabitleme ekleme/kaldırma olayları sistem olaylarına eşlenir.
-- `configWrites` etkin olduğunda `channel_id_changed` kanal yapılandırma anahtarlarını taşıyabilir.
-- Kanal konu/amaç meta verileri güvenilmeyen bağlam olarak değerlendirilir ve yönlendirme bağlamına enjekte edilebilir.
-- Konu başlatıcı ve ilk konu geçmişi bağlamı tohumlaması, geçerli olduğunda yapılandırılmış gönderen izin listelerine göre filtrelenir.
-- Blok eylemleri, kısayollar ve modal etkileşimleri zengin yük alanlarıyla yapılandırılmış `Slack interaction: ...` sistem olayları yayar:
+- Üye katılma/ayrılma, kanal oluşturma/yeniden adlandırma ve sabitleme ekleme/kaldırma olayları sistem olaylarına eşlenir.
+- İsteğe bağlı iletişim durumu yoklaması, gözlemlenen bir insan katılımcının `away` durumundan `active` durumuna geçişini, katılımcının en son etkin olan uygun Slack oturumuna eşleyebilir. Varsayılan olarak kapalıdır.
+- `configWrites` etkinleştirildiğinde `channel_id_changed` kanal yapılandırma anahtarlarını taşıyabilir.
+- Kanal konusu/amacı meta verileri güvenilmeyen bağlam olarak değerlendirilir ve yönlendirme bağlamına eklenebilir.
+- Agent View `app_context` varlıkları Slack uygunluk sırasına göre doğrulanır ve yalnızca yapılandırılmış güvenilmeyen bağlam olarak sunulur; bağlamın atlanması, eski varlıkları yeniden kullanmak yerine dönüşü temizler.
+- İleti dizisi başlatıcısı ve ilk ileti dizisi geçmişi bağlamı yerleştirme işlemleri, geçerli olduğunda yapılandırılmış gönderen izin listelerine göre filtrelenir.
+- Blok eylemleri, kısayollar ve modal etkileşimleri, zengin yük alanlarına sahip yapılandırılmış `Slack interaction: ...` sistem olayları yayımlar:
   - blok eylemleri: seçilen değerler, etiketler, seçici değerleri ve `workflow_*` meta verileri
-  - genel kısayollar: geri çağrı ve aktör meta verileri, aktörün doğrudan oturumuna yönlendirilir
-  - mesaj kısayolları: geri çağrı, aktör, kanal, konu ve seçili mesaj bağlamı
-  - yönlendirilmiş kanal meta verileri ve form girdileriyle modal `view_submission` ve `view_closed` olayları
+  - genel kısayollar: geri çağırma ve aktör meta verileri; aktörün doğrudan oturumuna yönlendirilir
+  - mesaj kısayolları: geri çağırma, aktör, kanal, ileti dizisi ve seçili mesaj bağlamı
+  - yönlendirilmiş kanal meta verileri ve form girdileri içeren modal `view_submission` ve `view_closed` olayları
 
-Slack uygulama yapılandırmanızda genel veya mesaj kısayolları tanımlayın ve boş olmayan herhangi bir geri çağrı kimliği kullanın. OpenClaw eşleşen kısayol yüklerini onaylar, diğer Slack etkileşimleriyle aynı DM/kanal gönderen politikasını uygular ve temizlenmiş olayı yönlendirilen ajan oturumu için kuyruğa alır. Tetikleyici kimlikleri ve yanıt URL'leri ajan bağlamından redakte edilir.
+Slack uygulama yapılandırmanızda genel veya mesaj kısayolları tanımlayın ve boş olmayan herhangi bir geri çağırma kimliği kullanın. OpenClaw, eşleşen kısayol yüklerini onaylar, diğer Slack etkileşimleriyle aynı DM/kanal gönderen politikasını uygular ve arındırılmış olayı yönlendirilen ajan oturumu için kuyruğa alır. Tetikleyici kimlikleri ve yanıt URL'leri ajan bağlamından çıkarılır.
+
+### İletişim durumu olayları
+
+Slack, iletişim durumu değişikliklerini Events API veya Socket Mode üzerinden göndermez. Bunun yerine OpenClaw, mesajları normal Slack erişim ve yönlendirme denetimlerinden geçen insan katılımcılar için [`users.getPresence`](https://docs.slack.dev/reference/methods/users.getPresence/) yoklaması yapabilir.
+
+```json5
+{
+  channels: {
+    slack: {
+      presenceEvents: { mode: "auto" },
+      channels: {
+        C0123456789: { presenceEvents: { mode: "on" } },
+        C0987654321: { presenceEvents: { mode: "off" } },
+      },
+    },
+  },
+}
+```
+
+- `off` (varsayılan): iletişim durumu zamanlayıcısı veya Slack API çağrısı yoktur.
+- `auto`: son 24 saat içinde etkin olan, en fazla 8 gözlemlenen insan katılımcıya sahip DM'leri, MPIM'leri ve Slack ileti dizilerini izler. Üst düzey kanal oturumları hariç tutulur.
+- `on`: aynı konuşmaları katılımcı sınırı olmadan izler ve üst düzey kanal oturumlarını dahil eder. Bir kanalı zorla dahil etmek veya hariç tutmak için kanal başına geçersiz kılma kullanın.
+
+OpenClaw, Slack hesabı başına dakikada en fazla 45 benzersiz kullanıcıyı yoklar, ilk sonucu ajanı uyandırmadan başlangıç değeri olarak kaydeder ve yalnızca gözlemlenen bir `away` durumundan `active` durumuna geçişte uyandırır. Kişi birkaç ileti dizisine katılsa bile Slack hesabı ve kullanıcı başına kalıcı 8 saatlik bir bekleme süresi uygulanır. Olay yalnızca söz konusu kişinin en son etkin olan uygun konuşmasına yönlendirilir ve ajana kısa bir selamlama gönderip göndermemeye karar vermeden önce belleğe/wiki'ye ve bilinen saat dilimi bağlamına başvurmasını söyler. Ajan sessiz kalabilir.
+
+Bot belirteci, önerilen manifestte zaten bulunan `users:read` kapsamına ihtiyaç duyar. İletişim durumu olayları, Enterprise Grid kuruluş geneli kurulumlarda kullanılamaz.
 
 ## Yapılandırma referansı
 
 Birincil referans: [Yapılandırma referansı - Slack](/tr/gateway/config-channels#slack).
 
-<Accordion title="Yüksek sinyalli Slack alanları">
+<Accordion title="Önemli Slack alanları">
 
-- mod/kimlik doğrulama: `mode`, `botToken`, `appToken`, `signingSecret`, `webhookPath`, `accounts.*`
+- mod/kimlik doğrulama: `identity`, `mode`, `enterpriseOrgInstall`, `botToken`, `appToken`, `userToken`, `signingSecret`, `webhookPath`, `accounts.*`
 - DM erişimi: `dm.enabled`, `dmPolicy`, `allowFrom` (eski: `dm.policy`, `dm.allowFrom`), `dm.groupEnabled`, `dm.groupChannels`
-- uyumluluk anahtarı: `dangerouslyAllowNameMatching` (son çare; gerekmedikçe kapalı tutun)
-- kanal erişimi: `groupPolicy`, `channels.*`, `channels.*.users`, `channels.*.requireMention`
-- konular/geçmiş: `replyToMode`, `replyToModeByChatType`, `thread.*`, `historyLimit`, `dmHistoryLimit`, `dms.*.historyLimit`
-- teslim: `textChunkLimit`, `chunkMode`, `mediaMaxMb`, `streaming`, `streaming.nativeTransport`, `streaming.preview.toolProgress`
-- önizlemeler: `unfurlLinks` (varsayılan: `false`), `chat.postMessage` bağlantı/medya önizlemesi denetimi için `unfurlMedia`; bağlantı önizlemelerine geri dönmek için `unfurlLinks: true` ayarlayın
-- operasyonlar/özellikler: `configWrites`, `commands.native`, `slashCommand.*`, `actions.*`, `userToken`, `userTokenReadOnly`
+- uyumluluk anahtarı: `dangerouslyAllowNameMatching` (acil durum; gerekmedikçe kapalı tutun)
+- kanal erişimi: `groupPolicy`, `channels.*`, `channels.*.users`, `channels.*.requireMention`, `implicitMentions.*`
+- iş parçacığı/geçmiş: `replyToMode`, `replyToModeByChatType`, `thread.*`, `historyLimit`, `dmHistoryLimit`, `dms.*.historyLimit`
+- varlıkla uyandırmalar: `presenceEvents.mode`, `channels.*.presenceEvents.mode` (`off|auto|on`; varsayılan `off`)
+- teslimat: `textChunkLimit`, `streaming.chunkMode`, `mediaMaxMb`, `streaming`, `streaming.nativeTransport`, `streaming.preview.toolProgress`
+- önizlemeler: `unfurlLinks` (varsayılan: `false`), `chat.postMessage` bağlantı/medya önizleme denetimi için `unfurlMedia`; bağlantı önizlemelerini yeniden etkinleştirmek için `unfurlLinks: true` değerini ayarlayın
+- işlemler/özellikler: `configWrites`, `commands.native`, `slashCommand.*`, `actions.*`, `userToken`, `userTokenReadOnly`
 
 </Accordion>
 
@@ -1462,14 +1869,14 @@ Birincil referans: [Yapılandırma referansı - Slack](/tr/gateway/config-channe
 
 <AccordionGroup>
   <Accordion title="Kanallarda yanıt yok">
-    Sırayla kontrol edin:
+    Sırasıyla şunları kontrol edin:
 
     - `groupPolicy`
-    - kanal izin listesi (`channels.slack.channels`) — **anahtarlar kanal kimlikleri olmalıdır** (`C12345678`), adlar değil (`#channel-name`). Ad tabanlı anahtarlar, kanal yönlendirmesi varsayılan olarak kimlik öncelikli olduğundan `groupPolicy: "allowlist"` altında sessizce başarısız olur. Bir kimlik bulmak için: Slack'te kanala sağ tıklayın → **Bağlantıyı kopyala** — URL'nin sonundaki `C...` değeri kanal kimliğidir.
+    - kanal izin listesi (`channels.slack.channels`) — **anahtarlar kanal kimlikleri olmalıdır** (`C12345678`), adlar (`#channel-name`) değil. Kanal yönlendirmesi varsayılan olarak önce kimliği kullandığından, ada dayalı anahtarlar `groupPolicy: "allowlist"` altında sessizce başarısız olur. Bir kimliği bulmak için: Slack'te kanala sağ tıklayın → **Copy link** — URL'nin sonundaki `C...` değeri kanal kimliğidir.
     - `requireMention`
     - kanal başına `users` izin listesi
-    - `messages.groupChat.visibleReplies`: normal grup/kanal istekleri varsayılan olarak `"automatic"` kullanır. `"message_tool"` seçtiyseniz ve günlükler `message(action=send)` çağrısı olmadan asistan metni gösteriyorsa, model görünür message-tool yolunu kaçırmıştır. Son metin bu modda özel kalır; bastırılmış yük meta verileri için gateway ayrıntılı günlüğünü inceleyin veya her normal asistan son yanıtının eski yol üzerinden gönderilmesini istiyorsanız bunu `"automatic"` olarak ayarlayın.
-    - `messages.groupChat.unmentionedInbound`: `"room_event"` ise, bahsedilmeyen izinli kanal sohbeti ortam bağlamıdır ve ajan `message` aracını çağırmadıkça sessiz kalır. [Ortam oda olayları](/tr/channels/ambient-room-events) bölümüne bakın.
+    - `messages.groupChat.visibleReplies`: normal grup/kanal istekleri varsayılan olarak `"automatic"` değerini kullanır. `"message_tool"` seçeneğini etkinleştirdiyseniz ve günlüklerde `message(action=send)` çağrısı olmadan asistan metni görünüyorsa model, görünür mesaj aracı yolunu kullanmamıştır. Bu modda son metin özel kalır; engellenen yük meta verileri için Gateway ayrıntılı günlüğünü inceleyin veya her normal asistan son yanıtının eski yol üzerinden gönderilmesini istiyorsanız bunu `"automatic"` olarak ayarlayın.
+    - `messages.groupChat.unmentionedInbound`: `"room_event"` ise, bahsedilmeden izin verilen kanal sohbetleri ortam bağlamıdır ve aracı `message` aracını çağırmadıkça sessiz kalır. Bkz. [Ortam odası olayları](/tr/channels/ambient-room-events).
 
 ```json5
 {
@@ -1492,15 +1899,15 @@ openclaw doctor
   </Accordion>
 
   <Accordion title="DM mesajları yok sayılıyor">
-    Kontrol edin:
+    Şunları kontrol edin:
 
     - `channels.slack.dm.enabled`
     - `channels.slack.dmPolicy` (veya eski `channels.slack.dm.policy`)
     - eşleştirme onayları / izin listesi girdileri (`dmPolicy: "open"` yine de `channels.slack.allowFrom: ["*"]` gerektirir)
-    - grup DM'leri MPIM işlemeyi kullanır; `channels.slack.dm.groupEnabled` etkinleştirin ve yapılandırılmışsa MPIM'i `channels.slack.dm.groupChannels` içine ekleyin
+    - grup DM'leri MPIM işlemeyi kullanır; `channels.slack.dm.groupEnabled` seçeneğini etkinleştirin ve yapılandırılmışsa MPIM'i `channels.slack.dm.groupChannels` içine ekleyin
     - Slack Assistant DM olayları: `drop message_changed` ifadesinden bahseden ayrıntılı günlükler
-      genellikle Slack'in mesaj meta verilerinde kurtarılabilir bir insan gönderen olmadan
-      düzenlenmiş bir Assistant konu olayı gönderdiği anlamına gelir
+      genellikle Slack'in mesaj meta verilerinde kurtarılabilir bir insan gönderici
+      bulunmayan, düzenlenmiş bir Assistant iş parçacığı olayı gönderdiği anlamına gelir
 
 ```bash
 openclaw pairing list slack
@@ -1509,52 +1916,52 @@ openclaw pairing list slack
   </Accordion>
 
   <Accordion title="Socket modu bağlanmıyor">
-    Slack uygulama ayarlarında bot + uygulama belirteçlerini ve Socket Mode etkinleştirmesini doğrulayın.
-    App-Level Token `connections:write` gerektirir ve Bot User OAuth Token
-    bot belirteci, uygulama belirteciyle aynı Slack uygulamasına/çalışma alanına ait olmalıdır.
+    Slack uygulama ayarlarında bot ve uygulama token'larını ve Socket Mode'un etkinleştirildiğini doğrulayın.
+    App-Level Token için `connections:write` gerekir ve Bot User OAuth Token
+    bot token'ı, uygulama token'ıyla aynı Slack uygulamasına/çalışma alanına ait olmalıdır.
 
-    `openclaw channels status --probe --json` çıktısı `botTokenStatus` veya
+    `openclaw channels status --probe --json`, `botTokenStatus` veya
     `appTokenStatus: "configured_unavailable"` gösteriyorsa Slack hesabı
     yapılandırılmıştır ancak mevcut çalışma zamanı SecretRef destekli
-    değeri çözememiştir.
+    değeri çözümleyememiştir.
 
     `slack socket mode failed to start; retry ...` gibi günlükler kurtarılabilir
     başlatma hatalarıdır. Eksik kapsamlar, iptal edilmiş token'lar ve geçersiz kimlik doğrulama ise
-    bunun yerine hızlı başarısız olur. Bir `slack token mismatch ...` günlüğü, bot token'ının ve uygulama token'ının
+    hemen başarısız olur. `slack token mismatch ...` günlüğü, bot token'ı ile uygulama token'ının
     farklı Slack uygulamalarına ait göründüğü anlamına gelir; Slack uygulaması kimlik bilgilerini düzeltin.
 
   </Accordion>
 
-  <Accordion title="HTTP mode not receiving events">
-    Doğrulayın:
+  <Accordion title="HTTP modu olayları almıyor">
+    Şunları doğrulayın:
 
     - imzalama sırrı
-    - webhook yolu
+    - Webhook yolu
     - Slack Request URL'leri (Events + Interactivity + Slash Commands)
     - HTTP hesabı başına benzersiz `webhookPath`
-    - herkese açık URL TLS'i sonlandırır ve istekleri Gateway yoluna iletir
-    - Slack uygulamasının `request_url` yolu, `channels.slack.webhookPath` ile tam olarak eşleşir (varsayılan `/slack/events`)
+    - herkese açık URL'nin TLS'yi sonlandırdığı ve istekleri Gateway yoluna ilettiği
+    - Slack uygulamasının `request_url` yolunun `channels.slack.webhookPath` ile tam olarak eşleştiği (varsayılan `/slack/events`)
 
-    Hesap anlık görüntülerinde `signingSecretStatus: "configured_unavailable"`
-    görünürse, HTTP hesabı yapılandırılmıştır ancak mevcut çalışma zamanı
-    SecretRef destekli imzalama sırrını çözememiştir.
+    Hesap anlık görüntülerinde `signingSecretStatus: "configured_unavailable"` görünüyorsa
+    HTTP hesabı yapılandırılmıştır ancak mevcut çalışma zamanı
+    SecretRef destekli imzalama sırrını çözümleyememiştir.
 
-    Yinelenen bir `slack: webhook path ... already registered` günlüğü, iki HTTP
-    hesabının aynı `webhookPath` değerini kullandığı anlamına gelir; her hesaba ayrı bir yol verin.
+    Yinelenen `slack: webhook path ... already registered` günlüğü, iki HTTP
+    hesabının aynı `webhookPath` değerini kullandığı anlamına gelir; her hesaba farklı bir yol verin.
 
   </Accordion>
 
-  <Accordion title="Native/slash commands not firing">
-    Şunu amaçlayıp amaçlamadığınızı doğrulayın:
+  <Accordion title="Yerel/eğik çizgi komutları çalışmıyor">
+    Şunlardan hangisini amaçladığınızı doğrulayın:
 
-    - Slack'te kayıtlı eşleşen slash commands ile yerel komut modu (`channels.slack.commands.native: true`)
-    - veya tek slash command modu (`channels.slack.slashCommand.enabled: true`)
+    - Slack'te kayıtlı eşleşen eğik çizgi komutlarıyla yerel komut modu (`channels.slack.commands.native: true`)
+    - veya tek eğik çizgi komutu modu (`channels.slack.slashCommand.enabled: true`)
 
-    Slack, slash commands'ı otomatik olarak oluşturmaz veya kaldırmaz. `commands.native: "auto"` Slack yerel komutlarını etkinleştirmez; `true` kullanın ve Slack uygulamasında eşleşen komutları oluşturun. HTTP modunda, her Slack slash command Gateway URL'sini içermelidir. Socket Mode'da komut yükleri websocket üzerinden gelir ve Slack `slash_commands[].url` değerini yok sayar.
+    Slack, eğik çizgi komutlarını otomatik olarak oluşturmaz veya kaldırmaz. `commands.native: "auto"`, Slack yerel komutlarını etkinleştirmez; `true` kullanın ve Slack uygulamasında eşleşen komutları oluşturun. HTTP modunda her Slack eğik çizgi komutu Gateway URL'sini içermelidir. Socket Mode'da komut yükleri websocket üzerinden gelir ve Slack `slash_commands[].url` değerini yok sayar.
 
-    Ayrıca `commands.useAccessGroups`, DM yetkilendirmesini, kanal izin listelerini
+    Ayrıca `commands.useAccessGroups`, DM yetkilendirmesi, kanal izin listeleri
     ve kanal başına `users` izin listelerini kontrol edin. Slack, engellenen
-    slash-command gönderenleri için geçici hatalar döndürür, örneğin:
+    eğik çizgi komutu göndericileri için geçici hatalar döndürür; bunlar arasında şunlar bulunur:
 
     - `This channel is not allowed.`
     - `You are not authorized to use this command here.`
@@ -1562,90 +1969,93 @@ openclaw pairing list slack
   </Accordion>
 </AccordionGroup>
 
-## Ek görüş referansı
+## Ek medya referansı
 
-Slack dosya indirmeleri başarılı olduğunda ve boyut sınırları izin verdiğinde Slack, indirilen medyayı agent turuna ekleyebilir. Görüntü dosyaları medya anlama yolundan geçirilebilir veya doğrudan görüş yetenekli bir yanıt modeline iletilebilir; diğer dosyalar görüntü girdisi olarak ele alınmak yerine indirilebilir dosya bağlamı olarak tutulur.
+Slack dosya indirmeleri başarılı olduğunda ve boyut sınırları izin verdiğinde Slack, indirilen medyayı aracı turuna ekleyebilir. Ses kliplerinin dökümü oluşturulabilir, görüntü dosyaları medya anlama yolundan geçebilir veya doğrudan görsel işleme yeteneğine sahip bir yanıt modeline iletilebilir; diğer dosyalar ise indirilebilir dosya bağlamı olarak kullanılabilir kalır.
 
 ### Desteklenen medya türleri
 
 | Medya türü                     | Kaynak               | Mevcut davranış                                                                  | Notlar                                                                     |
 | ------------------------------ | -------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| JPEG / PNG / GIF / WebP görüntüleri | Slack dosya URL'si       | İndirilir ve görüş yetenekli işleme için tura eklenir                   | Dosya başına sınır: `channels.slack.mediaMaxMb` (varsayılan 20 MB)                 |
-| PDF dosyaları                      | Slack dosya URL'si       | İndirilir ve `download-file` veya `pdf` gibi araçlar için dosya bağlamı olarak sunulur | Slack gelen akışı, PDF'leri otomatik olarak görüntü-görüş girdisine dönüştürmez |
-| Diğer dosyalar                    | Slack dosya URL'si       | Mümkün olduğunda indirilir ve dosya bağlamı olarak sunulur                              | İkili dosyalar görüntü girdisi olarak ele alınmaz                               |
-| Thread yanıtları                 | Thread başlatıcı dosyaları | Yanıtın doğrudan medyası yoksa kök ileti dosyaları bağlam olarak hydrate edilebilir  | Yalnızca dosya içeren başlatıcılar bir ek yer tutucusu kullanır                          |
-| Çoklu görüntü iletileri           | Birden fazla Slack dosyası | Her dosya bağımsız olarak değerlendirilir                                              | Slack işleme, ileti başına sekiz dosyayla sınırlıdır                     |
+| Slack ses klipleri              | Slack dosya URL'si       | İndirilir ve paylaşılan ses dökümü oluşturma üzerinden yönlendirilir                          | `files:read` ve çalışan bir `tools.media.audio` modeli veya CLI gerektirir      |
+| JPEG / PNG / GIF / WebP görüntüleri | Slack dosya URL'si       | İndirilir ve görsel işleme yeteneğine sahip kullanım için tura eklenir                   | Dosya başına sınır: `channels.slack.mediaMaxMb` (varsayılan 20 MB)                 |
+| PDF dosyaları                      | Slack dosya URL'si       | İndirilir ve `download-file` veya `pdf` gibi araçlar için dosya bağlamı olarak sunulur | Slack'ten gelen PDF'ler otomatik olarak görüntü tabanlı görsel girdiye dönüştürülmez |
+| Diğer dosyalar                    | Slack dosya URL'si       | Mümkün olduğunda indirilir ve dosya bağlamı olarak sunulur                              | İkili dosyalar görüntü girdisi olarak değerlendirilmez                               |
+| İş parçacığı yanıtları                 | İş parçacığı başlangıç dosyaları | Yanıtta doğrudan medya yoksa kök mesaj dosyaları bağlam olarak yüklenebilir  | Yalnızca dosya içeren başlangıçlar bir ek yer tutucusu kullanır                          |
+| Çok dosyalı mesajlar            | Birden fazla Slack dosyası | Her dosya bağımsız olarak değerlendirilir                                              | Slack işlemesi mesaj başına sekiz dosyayla sınırlıdır                     |
 
-### Gelen akış hattı
+### Gelen veri işlem hattı
 
-Dosya ekleri olan bir Slack iletisi geldiğinde:
+Dosya ekleri içeren bir Slack mesajı geldiğinde:
 
 1. OpenClaw, bot token'ını kullanarak dosyayı Slack'in özel URL'sinden indirir.
-2. Başarılı olursa dosya medya deposuna yazılır.
+2. Başarılı olduğunda dosya medya deposuna yazılır.
 3. İndirilen medya yolları ve içerik türleri gelen bağlama eklenir.
-4. Görüntü yetenekli model/araç yolları bu bağlamdaki görüntü eklerini kullanabilir.
-5. Görüntü olmayan dosyalar, bunları işleyebilen araçlar için dosya meta verisi veya medya referansı olarak kullanılabilir kalır.
+4. Ses klipleri paylaşılan döküm oluşturma işlem hattına yönlendirilir; görüntü işleyebilen model/araç yolları aynı bağlamdaki görüntü eklerini kullanabilir.
+5. Diğer dosyalar, bunları işleyebilen araçlar için dosya meta verileri veya medya referansları olarak kullanılabilir kalır.
 
-### Thread kök eki kalıtımı
+### İş parçacığı kökü ek devralımı
 
-Bir ileti bir thread içinde geldiğinde (`thread_ts` üst öğesi varsa):
+Bir mesaj bir iş parçacığına geldiğinde (`thread_ts` üst öğesine sahipse):
 
-- Yanıtın kendisinde doğrudan medya yoksa ve dahil edilen kök iletide dosyalar varsa, Slack kök dosyaları thread başlatıcı bağlamı olarak hydrate edebilir.
-- Doğrudan yanıt ekleri, kök ileti eklerine göre önceliklidir.
-- Yalnızca dosyaları olan ve metni olmayan bir kök ileti, geri dönüşün yine de dosyalarını içerebilmesi için bir ek yer tutucusuyla temsil edilir.
+- Yanıtın kendisinde doğrudan medya yoksa ve eklenen kök mesajda dosyalar varsa Slack, kök dosyaları iş parçacığı başlangıç bağlamı olarak yükleyebilir.
+- Kök dosyaları yalnızca yeni veya sıfırlanmış bir iş parçacığı oturumu başlatılırken yüklenir. Sonraki yalnızca metin içeren yanıtlar mevcut oturum bağlamını yeniden kullanır ve kök dosyalarını yeni medya olarak yeniden eklemez.
+- Doğrudan yanıt ekleri, kök mesaj eklerine göre önceliklidir.
+- Yalnızca dosyaları olan ve metni olmayan bir kök mesaj, geri dönüşün yine de dosyalarını içerebilmesi için bir ek yer tutucusuyla temsil edilir.
 
-### Çoklu ek işleme
+### Birden fazla eki işleme
 
-Tek bir Slack iletisi birden fazla dosya eki içerdiğinde:
+Tek bir Slack mesajı birden fazla dosya eki içerdiğinde:
 
-- Her ek, medya akış hattı üzerinden bağımsız olarak işlenir.
-- İndirilen medya referansları ileti bağlamında birleştirilir.
+- Her ek, medya işlem hattı üzerinden bağımsız olarak işlenir.
+- İndirilen medya referansları mesaj bağlamında birleştirilir.
 - İşleme sırası, olay yükündeki Slack dosya sırasını izler.
-- Bir ekin indirilmesindeki hata diğerlerini engellemez.
+- Bir ekin indirilememesi diğerlerini engellemez.
 
 ### Boyut, indirme ve model sınırları
 
-- **Boyut sınırı**: Dosya başına varsayılan 20 MB. `channels.slack.mediaMaxMb` ile yapılandırılabilir.
-- **İndirme hataları**: Slack'in sunamadığı dosyalar, süresi dolmuş URL'ler, erişilemeyen dosyalar, aşırı büyük dosyalar ve Slack kimlik doğrulama/giriş HTML yanıtları, desteklenmeyen biçimler olarak raporlanmak yerine atlanır.
-- **Görüş modeli**: Görüntü analizi, görüşü desteklediğinde etkin yanıt modelini veya `agents.defaults.imageModel` konumunda yapılandırılan görüntü modelini kullanır.
+- **Boyut sınırı**: Dosya başına varsayılan 20 MB. `channels.slack.mediaMaxMb` üzerinden yapılandırılabilir.
+- **Ses dökümü sınırı**: İndirilen dosya bir döküm sağlayıcısına veya CLI'ye gönderildiğinde, seçilen ses işleyebilen `tools.media.models[]` girdisinin `maxBytes` değeri de geçerlidir.
+- **İndirme hataları**: Slack'in sunamadığı dosyalar, süresi dolmuş URL'ler, erişilemeyen dosyalar, boyut sınırını aşan dosyalar ve Slack kimlik doğrulama/oturum açma HTML yanıtları, desteklenmeyen biçimler olarak bildirilmek yerine atlanır.
+- **Görsel modeli**: Görüntü analizi, görsel işlemeyi desteklediğinde etkin yanıt modelini veya `agents.defaults.imageModel` konumunda yapılandırılan görüntü modelini kullanır.
 
 ### Bilinen sınırlar
 
-| Senaryo                               | Mevcut davranış                                                             | Geçici çözüm                                                                 |
-| -------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Süresi dolmuş Slack dosya URL'si                 | Dosya atlanır; hata gösterilmez                                                 | Dosyayı Slack'e yeniden yükleyin                                                |
-| Görüş modeli yapılandırılmamış            | Görüntü ekleri medya referansları olarak saklanır, ancak görüntü olarak analiz edilmez | `agents.defaults.imageModel` yapılandırın veya görüş yetenekli bir yanıt modeli kullanın |
-| Çok büyük görüntüler (varsayılan olarak > 20 MB) | Boyut sınırı nedeniyle atlanır                                                         | Slack izin veriyorsa `channels.slack.mediaMaxMb` değerini artırın                       |
-| İletilmiş/paylaşılmış ekler           | Metin ve Slack barındırmalı görüntü/dosya medyası en iyi çaba ile işlenir                       | Doğrudan OpenClaw thread'inde yeniden paylaşın                                   |
-| PDF ekleri                        | Dosya/medya bağlamı olarak saklanır, otomatik olarak görüntü görüşü üzerinden yönlendirilmez  | Dosya meta verisi için `download-file` veya PDF analizi için `pdf` aracını kullanın   |
+| Senaryo                                      | Mevcut davranış                                                                   | Geçici çözüm                                                                    |
+| --------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Süresi dolmuş Slack dosya URL'si                        | Dosya atlanır; hata gösterilmez                                                       | Dosyayı Slack'e yeniden yükleyin                                                   |
+| Ses transkripsiyonu kullanılamıyor               | Klip ekli kalır ancak transkript oluşturulmaz                                | `tools.media.audio` yapılandırın veya desteklenen bir yerel transkripsiyon CLI'si yükleyin  |
+| Altyazısız klip, bahsetme geçidini aşmaz | Özel spekülatif transkripsiyondan sonra bırakılır; transkript ve indirme silinir | Söylenen ad için bir bahsetme kalıbı yapılandırın, yazılı bir bot bahsetmesi ekleyin veya DM kullanın |
+| Görüntü modeli yapılandırılmamış                   | Görsel ekleri medya referansları olarak depolanır ancak görsel olarak analiz edilmez       | `agents.defaults.imageModel` yapılandırın veya görüntü özellikli bir yanıt modeli kullanın    |
+| Çok büyük görseller (varsayılan olarak > 20 MB)        | Boyut sınırına göre atlanır                                                               | Slack izin veriyorsa `channels.slack.mediaMaxMb` değerini artırın                          |
+| İletilen/paylaşılan ekler                  | Metin ile Slack'te barındırılan görsel/dosya medyası mümkün olduğunca işlenir                             | Doğrudan OpenClaw ileti dizisinde yeniden paylaşın                                      |
+| PDF ekleri                               | Dosya/medya bağlamı olarak depolanır, görsel görüntü analizine otomatik olarak yönlendirilmez        | Dosya meta verileri için `download-file` veya PDF analizi için `pdf` aracını kullanın      |
 
 ### İlgili belgeler
 
-- [Medya anlama akış hattı](/tr/nodes/media-understanding)
+- [Medya anlama işlem hattı](/tr/nodes/media-understanding)
+- [Ses ve sesli notlar](/tr/nodes/audio)
 - [PDF aracı](/tr/tools/pdf)
-- Epik: [#51349](https://github.com/openclaw/openclaw/issues/51349) — Slack ek görüşünü etkinleştirme
-- Regresyon testleri: [#51353](https://github.com/openclaw/openclaw/issues/51353)
-- Canlı doğrulama: [#51354](https://github.com/openclaw/openclaw/issues/51354)
 
 ## İlgili
 
 <CardGroup cols={2}>
-  <Card title="Pairing" icon="link" href="/tr/channels/pairing">
-    Bir Slack kullanıcısını gateway ile eşleştirin.
+  <Card title="Eşleştirme" icon="link" href="/tr/channels/pairing">
+    Bir Slack kullanıcısını Gateway ile eşleştirin.
   </Card>
-  <Card title="Groups" icon="users" href="/tr/channels/groups">
+  <Card title="Gruplar" icon="users" href="/tr/channels/groups">
     Kanal ve grup DM davranışı.
   </Card>
-  <Card title="Channel routing" icon="route" href="/tr/channels/channel-routing">
-    Gelen iletileri agent'lara yönlendirin.
+  <Card title="Kanal yönlendirme" icon="route" href="/tr/channels/channel-routing">
+    Gelen mesajları aracılara yönlendirin.
   </Card>
-  <Card title="Security" icon="shield" href="/tr/gateway/security">
+  <Card title="Güvenlik" icon="shield" href="/tr/gateway/security">
     Tehdit modeli ve sağlamlaştırma.
   </Card>
-  <Card title="Configuration" icon="sliders" href="/tr/gateway/configuration">
-    Yapılandırma düzeni ve öncelik.
+  <Card title="Yapılandırma" icon="sliders" href="/tr/gateway/configuration">
+    Yapılandırma düzeni ve önceliği.
   </Card>
-  <Card title="Slash commands" icon="terminal" href="/tr/tools/slash-commands">
+  <Card title="Eğik çizgi komutları" icon="terminal" href="/tr/tools/slash-commands">
     Komut kataloğu ve davranışı.
   </Card>
 </CardGroup>

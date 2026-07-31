@@ -1,15 +1,16 @@
 ---
 read_when:
     - Bir model sağlayıcısı seçmek istiyorsunuz
-    - Desteklenen LLM arka uçlarına hızlıca göz atmanız gerekiyor
+    - Desteklenen LLM arka uçlarına hızlı bir genel bakışa ihtiyacınız var
 summary: OpenClaw tarafından desteklenen model sağlayıcıları (LLM'ler)
 title: Sağlayıcı dizini
 x-i18n:
-    generated_at: "2026-07-12T12:40:09Z"
+    generated_at: "2026-07-26T23:37:02Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: b59843b53265500866e87ee8d888892dacd6045bdb9401a1e7ec08ad4f364090
+    source_hash: e98910f016e461dedcd06e40a2933631bbd6ac09ceebd340bab82f14805e06a6
     source_path: providers/index.md
     workflow: 16
 ---
@@ -17,7 +18,7 @@ x-i18n:
 OpenClaw birçok LLM sağlayıcısını kullanabilir. Bir sağlayıcı seçin, kimlik doğrulaması yapın, ardından
 varsayılan modeli `provider/model` olarak ayarlayın.
 
-Sohbet kanalı belgelerini (WhatsApp/Telegram/Discord/Slack/Mattermost (plugin)/vb.) mı arıyorsunuz? [Kanallar](/tr/channels) bölümüne bakın.
+Sohbet kanalı belgelerini mi arıyorsunuz (WhatsApp/Telegram/Discord/Slack/Mattermost (plugin)/vb.)? Bkz. [Kanallar](/tr/channels).
 
 ## Hızlı başlangıç
 
@@ -38,10 +39,11 @@ Sohbet kanalı belgelerini (WhatsApp/Telegram/Discord/Slack/Mattermost (plugin)/
 - [Anthropic (API + Claude CLI)](/tr/providers/anthropic)
 - [Arcee AI (Trinity modelleri)](/tr/providers/arcee)
 - [Azure Speech](/tr/providers/azure-speech)
+- [Baseten (Inkling + Model API'leri)](/providers/baseten)
 - [BytePlus (Uluslararası)](/tr/concepts/model-providers#byteplus-international)
 - [Cerebras](/tr/providers/cerebras)
 - [Chutes](/tr/providers/chutes)
-- [ClawRouter (yönetilen çoklu sağlayıcı yönlendirmesi)](/tr/providers/clawrouter)
+- [ClawRouter (yönetilen çok sağlayıcılı yönlendirme)](/tr/providers/clawrouter)
 - [Cloudflare AI Gateway](/tr/providers/cloudflare-ai-gateway)
 - [Cohere](/tr/providers/cohere)
 - [ComfyUI](/tr/providers/comfy)
@@ -49,7 +51,7 @@ Sohbet kanalı belgelerini (WhatsApp/Telegram/Discord/Slack/Mattermost (plugin)/
 - [ds4 (yerel DeepSeek V4)](/tr/providers/ds4)
 - [ElevenLabs](/tr/providers/elevenlabs)
 - [fal](/tr/providers/fal)
-- [Featherless AI](/providers/featherless)
+- [Featherless AI](/tr/providers/featherless)
 - [Fireworks](/tr/providers/fireworks)
 - [GitHub Copilot](/tr/providers/github-copilot)
 - [GMI Cloud](/tr/providers/gmi)
@@ -59,7 +61,7 @@ Sohbet kanalı belgelerini (WhatsApp/Telegram/Discord/Slack/Mattermost (plugin)/
 - [Hugging Face (Çıkarım)](/tr/providers/huggingface)
 - [inferrs (yerel modeller)](/tr/providers/inferrs)
 - [Kilocode](/tr/providers/kilocode)
-- [LiteLLM (birleşik Gateway)](/tr/providers/litellm)
+- [LiteLLM (birleşik gateway)](/tr/providers/litellm)
 - [LM Studio (yerel modeller)](/tr/providers/lmstudio)
 - [LongCat](/tr/providers/longcat)
 - [MiniMax](/tr/providers/minimax)
@@ -76,7 +78,6 @@ Sohbet kanalı belgelerini (WhatsApp/Telegram/Discord/Slack/Mattermost (plugin)/
 - [Perplexity (web araması)](/tr/providers/perplexity-provider)
 - [Qianfan](/tr/providers/qianfan)
 - [Qwen Cloud](/tr/providers/qwen)
-- [Qwen OAuth / Portal](/tr/providers/qwen-oauth)
 - [Runway](/tr/providers/runway)
 - [SenseAudio](/tr/providers/senseaudio)
 - [SGLang (yerel modeller)](/tr/providers/sglang)
@@ -96,7 +97,7 @@ Sohbet kanalı belgelerini (WhatsApp/Telegram/Discord/Slack/Mattermost (plugin)/
 ## Paylaşılan genel bakış sayfaları
 
 - [Ek sağlayıcı varyantları](/tr/providers/models#additional-provider-variants) - Anthropic Vertex, Copilot Proxy ve Gemini CLI OAuth
-- [Görsel Oluşturma](/tr/tools/image-generation) - Paylaşılan `image_generate` aracı, sağlayıcı seçimi ve yük devretme
+- [Görüntü Oluşturma](/tr/tools/image-generation) - Paylaşılan `image_generate` aracı, sağlayıcı seçimi ve yük devretme
 - [Müzik Oluşturma](/tr/tools/music-generation) - Paylaşılan `music_generate` aracı, sağlayıcı seçimi ve yük devretme
 - [Video Oluşturma](/tr/tools/video-generation) - Paylaşılan `video_generate` aracı, sağlayıcı seçimi ve yük devretme
 
@@ -111,7 +112,7 @@ Sohbet kanalı belgelerini (WhatsApp/Telegram/Discord/Slack/Mattermost (plugin)/
 
 ## Topluluk araçları
 
-- [Claude Max API Proxy](/tr/providers/claude-max-api-proxy) - Claude abonelik kimlik bilgileri için topluluk proxy'si (kullanmadan önce Anthropic politika ve koşullarını doğrulayın)
+- [Claude Max API Proxy](/tr/providers/claude-max-api-proxy) - Claude abonelik kimlik bilgileri için topluluk proxy'si (kullanmadan önce Anthropic politikalarını/koşullarını doğrulayın)
 
-Tam sağlayıcı kataloğu (xAI, Groq, Mistral vb.) ve gelişmiş yapılandırma için
-[Model sağlayıcıları](/tr/concepts/model-providers) bölümüne bakın.
+Sağlayıcıların tam kataloğu (xAI, Groq, Mistral vb.) ve gelişmiş yapılandırma için
+bkz. [Model sağlayıcıları](/tr/concepts/model-providers).

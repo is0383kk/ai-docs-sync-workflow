@@ -1,189 +1,172 @@
 ---
 read_when:
     - आप OpenClaw, Codex, ACP या किसी अन्य नेटिव एजेंट रनटाइम में से चुन रहे हैं
-    - आप status या config में provider/model/runtime लेबल से भ्रमित हैं
-    - आप किसी नेटिव हार्नेस के लिए समर्थन समानता का दस्तावेज़ीकरण कर रहे हैं
-summary: OpenClaw मॉडल प्रदाताओं, मॉडलों, चैनलों और एजेंट रनटाइम्स को कैसे अलग करता है
-title: एजेंट रनटाइम
+    - आप स्थिति या कॉन्फ़िगरेशन में प्रदाता/मॉडल/रनटाइम लेबलों को लेकर भ्रमित हैं
+    - आप एक नेटिव हार्नेस के लिए समर्थन समानता का दस्तावेज़ीकरण कर रहे हैं
+summary: OpenClaw मॉडल प्रदाताओं, मॉडलों, चैनलों और एजेंट रनटाइम को कैसे अलग करता है
+title: एजेंट रनटाइम्स
 x-i18n:
-    generated_at: "2026-06-28T22:55:54Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:30:16Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: fb818e682ffb11a073ee0053c0e7b7e2ea60239141aab7f96cd82520ded9d22f
+    source_hash: 980d112946535df1566f2df4e3e71abacc2b073b51717c1e85fbb678691d39cb
     source_path: concepts/agent-runtimes.md
     workflow: 16
 ---
 
-एक **एजेंट रनटाइम** वह घटक है जो एक तैयार मॉडल लूप का स्वामी होता है: यह
-प्रॉम्प्ट प्राप्त करता है, मॉडल आउटपुट चलाता है, नेटिव टूल कॉल संभालता है, और
-पूरा हुआ टर्न OpenClaw को लौटाता है.
+एक **एजेंट रनटाइम** एक तैयार मॉडल लूप का स्वामी होता है: यह प्रॉम्प्ट प्राप्त करता है,
+मॉडल आउटपुट संचालित करता है, नेटिव टूल कॉल संभालता है, और पूर्ण टर्न
+OpenClaw को लौटाता है।
 
-रनटाइम को providers के साथ भ्रमित करना आसान है, क्योंकि दोनों मॉडल
-कॉन्फ़िगरेशन के पास दिखाई देते हैं. ये अलग-अलग परतें हैं:
+रनटाइम को प्रोवाइडर समझ लेना आसान है, क्योंकि दोनों मॉडल
+कॉन्फ़िगरेशन के आसपास दिखाई देते हैं। वे अलग-अलग परतें हैं:
 
-| परत          | उदाहरण                                      | इसका अर्थ                                                            |
-| ------------- | -------------------------------------------- | ------------------------------------------------------------------- |
-| Provider      | `openai`, `anthropic`, `github-copilot`      | OpenClaw कैसे प्रमाणित करता है, मॉडल खोजता है, और मॉडल refs को नाम देता है. |
-| मॉडल         | `gpt-5.5`, `claude-opus-4-6`                 | एजेंट टर्न के लिए चुना गया मॉडल.                              |
-| एजेंट रनटाइम | `openclaw`, `codex`, `copilot`, `claude-cli` | निम्न-स्तरीय लूप या backend जो तैयार टर्न निष्पादित करता है.      |
-| चैनल        | Telegram, Discord, Slack, WhatsApp           | जहां संदेश OpenClaw में आते और बाहर जाते हैं.                            |
+| परत          | उदाहरण                                      | अर्थ                                                                       |
+| ------------- | -------------------------------------------- | -------------------------------------------------------------------------- |
+| प्रोवाइडर     | `anthropic`, `github-copilot`, `openai`      | OpenClaw प्रमाणीकरण कैसे करता है, मॉडल कैसे खोजता है और मॉडल रेफ़ को कैसे नाम देता है। |
+| मॉडल         | `claude-opus-4-6`, `gpt-5.6-sol`             | एजेंट टर्न के लिए चयनित मॉडल।                                              |
+| एजेंट रनटाइम | `claude-cli`, `codex`, `copilot`, `openclaw` | तैयार टर्न निष्पादित करने वाला निम्न-स्तरीय लूप या बैकएंड।                 |
+| चैनल         | Discord, Slack, Telegram, WhatsApp           | संदेश OpenClaw में कहाँ प्रवेश करते और उससे बाहर जाते हैं।                 |
 
-आपको कोड में **harness** शब्द भी दिखाई देगा. harness वह implementation है
-जो एजेंट रनटाइम उपलब्ध कराता है. उदाहरण के लिए, bundled Codex harness
-`codex` रनटाइम लागू करता है. सार्वजनिक config provider या model entries पर
-`agentRuntime.id` का उपयोग करता है; पूरे-एजेंट runtime keys legacy हैं और अनदेखे किए जाते हैं.
-`openclaw doctor --fix` पुराने पूरे-एजेंट runtime pins हटाता है और जहां ज़रूरत हो
-legacy runtime model refs को canonical provider/model refs और model-scoped
-runtime policy में फिर से लिखता है.
+**हार्नेस** वह कार्यान्वयन है जो एजेंट रनटाइम उपलब्ध कराता है (कोड
+शब्द)। उदाहरण के लिए, बंडल किया गया Codex हार्नेस `codex` रनटाइम लागू करता है।
+सार्वजनिक कॉन्फ़िगरेशन प्रोवाइडर या मॉडल प्रविष्टियों पर `agentRuntime.id` का उपयोग करता है; पूरे-एजेंट
+रनटाइम कुंजियाँ लेगेसी हैं और अनदेखी की जाती हैं। `openclaw doctor --fix` पुराने
+पूरे-एजेंट रनटाइम पिन हटाता है और जहाँ आवश्यक हो, लेगेसी रनटाइम मॉडल रेफ़ को कैनोनिकल
+प्रोवाइडर/मॉडल रेफ़ तथा मॉडल-स्कोप्ड रनटाइम नीति में पुनर्लिखता है।
 
-दो runtime families हैं:
+दो रनटाइम परिवार:
 
-- **Embedded harnesses** OpenClaw के तैयार agent loop के अंदर चलते हैं. आज इसमें
-  built-in `openclaw` runtime और registered plugin harnesses जैसे
-  `codex` और `copilot` शामिल हैं.
-- **CLI backends** model ref को canonical रखते हुए स्थानीय CLI process चलाते हैं.
-  उदाहरण के लिए, `anthropic/claude-opus-4-8` के साथ
-  model-scoped `agentRuntime.id: "claude-cli"` का अर्थ है "Anthropic
-  मॉडल चुनें, Claude CLI के माध्यम से execute करें." `claude-cli` embedded harness id नहीं है
-  और इसे AgentHarness selection को नहीं दिया जाना चाहिए.
+- **एम्बेडेड हार्नेस** OpenClaw के तैयार एजेंट लूप के भीतर चलते हैं: अंतर्निहित
+  `openclaw` रनटाइम और पंजीकृत Plugin हार्नेस, जैसे
+  `codex` और `copilot`।
+- **CLI बैकएंड** मॉडल रेफ़ को कैनोनिकल रखते हुए एक स्थानीय CLI प्रक्रिया चलाते हैं।
+  उदाहरण के लिए, मॉडल-स्कोप्ड `agentRuntime.id: "claude-cli"` के साथ `anthropic/claude-opus-5` का अर्थ है
+  "Anthropic मॉडल चुनें, Claude CLI के माध्यम से
+  निष्पादित करें।" `claude-cli` कोई एम्बेडेड हार्नेस आईडी नहीं है और इसे
+  AgentHarness चयन को नहीं दिया जाना चाहिए।
 
-`copilot` harness GitHub Copilot CLI के लिए अलग, opt-in external plugin harness है;
-PI, Codex, और GitHub Copilot agent runtime के बीच user-facing decision के लिए
-[GitHub Copilot agent runtime](/hi/plugins/copilot) देखें.
+`copilot` हार्नेस GitHub Copilot CLI के लिए एक अलग, वैकल्पिक बाहरी Plugin हार्नेस है;
+PI, Codex और GitHub Copilot एजेंट रनटाइम के बीच उपयोगकर्ता-सामना निर्णय के लिए
+[GitHub Copilot एजेंट रनटाइम](/hi/plugins/copilot) देखें।
 
-## Codex surfaces
+## Codex सतहें
 
-अधिकांश भ्रम Codex नाम साझा करने वाली कई अलग-अलग surfaces से आता है:
+कई सतहें Codex नाम साझा करती हैं:
 
-| Surface                                          | OpenClaw नाम/config                 | यह क्या करता है                                                                                                   |
-| ------------------------------------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| Native Codex app-server runtime                  | `openai/*` model refs                | Codex app-server के माध्यम से OpenAI embedded agent turns चलाता है. यह सामान्य ChatGPT/Codex subscription setup है. |
-| Codex OAuth auth profiles                        | `openai` OAuth profiles              | ChatGPT/Codex subscription auth संग्रहीत करता है जिसे Codex app-server harness consume करता है.                             |
-| Codex ACP adapter                                | `runtime: "acp"`, `agentId: "codex"` | external ACP/acpx control plane के माध्यम से Codex चलाता है. केवल तब उपयोग करें जब ACP/acpx स्पष्ट रूप से मांगा गया हो.            |
-| Native Codex chat-control command set            | `/codex ...`                         | chat से Codex app-server threads को bind, resume, steer, stop, और inspect करता है.                                |
-| non-agent surfaces के लिए OpenAI Platform API route | `openai/*` plus API-key auth         | images, embeddings, speech, और realtime जैसे direct OpenAI APIs के लिए उपयोग किया जाता है.                                  |
+| सतह                                             | OpenClaw नाम/कॉन्फ़िगरेशन             | यह क्या करती है                                                                                                  |
+| ------------------------------------------------ | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| नेटिव Codex ऐप-सर्वर रनटाइम                     | `openai/*` मॉडल रेफ़                | Codex ऐप-सर्वर के माध्यम से OpenAI एम्बेडेड एजेंट टर्न चलाता है। यह सामान्य ChatGPT/Codex सदस्यता सेटअप है। |
+| Codex OAuth प्रमाणीकरण प्रोफ़ाइल                 | `openai` OAuth प्रोफ़ाइल              | वह ChatGPT/Codex सदस्यता प्रमाणीकरण संग्रहीत करती हैं जिसका उपयोग Codex ऐप-सर्वर हार्नेस करता है।           |
+| Codex ACP अडैप्टर                                | `runtime: "acp"`, `agentId: "codex"` | बाहरी ACP/acpx नियंत्रण तल के माध्यम से Codex चलाता है। केवल तभी उपयोग करें जब ACP/acpx स्पष्ट रूप से माँगा गया हो। |
+| नेटिव Codex चैट-नियंत्रण कमांड सेट              | `/codex ...`                         | चैट से Codex ऐप-सर्वर थ्रेड को बाइंड, फिर से शुरू, निर्देशित, बंद और निरीक्षित करता है।                     |
+| गैर-एजेंट सतहों के लिए OpenAI Platform API रूट | `openai/*` और API-कुंजी प्रमाणीकरण         | इमेज, एम्बेडिंग, स्पीच और रियलटाइम जैसे प्रत्यक्ष OpenAI API।                                                |
 
-ये surfaces जानबूझकर स्वतंत्र हैं. `codex` plugin enable करने से
-native app-server features उपलब्ध हो जाते हैं; `openclaw doctor --fix` legacy
-legacy Codex route repair और stale session pin cleanup का स्वामी है. किसी agent model के लिए
-`openai/*` चुनने का अब अर्थ है "इसे Codex के माध्यम से चलाएं", जब तक कि कोई
-non-agent OpenAI API surface उपयोग में न हो.
+ये सतहें जानबूझकर स्वतंत्र हैं। `codex` Plugin सक्षम करने से
+नेटिव ऐप-सर्वर सुविधाएँ उपलब्ध होती हैं; `openclaw doctor --fix`
+लेगेसी Codex रूट सुधार और पुराने सत्र पिन की सफ़ाई का स्वामी है। किसी एजेंट मॉडल के लिए `openai/*`
+चुनने का अब अर्थ है "इसे Codex के माध्यम से चलाएँ", जब तक कि किसी गैर-एजेंट
+OpenAI API सतह का उपयोग न हो रहा हो।
 
-सामान्य ChatGPT/Codex subscription setup auth के लिए Codex OAuth का उपयोग करता है, लेकिन
-model ref को `openai/*` रखता है और `codex` runtime चुनता है:
+सामान्य ChatGPT/Codex सदस्यता सेटअप प्रमाणीकरण के लिए Codex OAuth का उपयोग करता है, लेकिन
+मॉडल रेफ़ को `openai/*` के रूप में रखता है और `codex` रनटाइम चुनता है:
 
 ```json5
 {
   agents: {
     defaults: {
-      model: "openai/gpt-5.5",
+      model: "openai/gpt-5.6-sol",
     },
   },
 }
 ```
 
-इसका अर्थ है कि OpenClaw एक OpenAI model ref चुनता है, फिर Codex app-server
-runtime से embedded agent turn चलाने को कहता है. इसका अर्थ "API billing का उपयोग करें" नहीं है, और
-इसका अर्थ यह नहीं है कि channel, model provider catalog, या OpenClaw session store
-Codex बन जाता है.
+इसका अर्थ है कि OpenClaw एक OpenAI मॉडल रेफ़ चुनता है, फिर Codex
+ऐप-सर्वर रनटाइम से एम्बेडेड एजेंट टर्न चलाने को कहता है। इसका अर्थ "API
+बिलिंग का उपयोग करना" नहीं है, और इसका अर्थ यह भी नहीं है कि चैनल, मॉडल प्रोवाइडर कैटलॉग या
+OpenClaw सत्र स्टोर Codex बन जाता है।
 
-जब bundled `codex` plugin enabled हो, natural-language Codex control को
-ACP के बजाय native `/codex` command surface (`/codex bind`, `/codex threads`,
-`/codex resume`, `/codex steer`, `/codex stop`) का उपयोग करना चाहिए. Codex के लिए ACP
-केवल तब उपयोग करें जब user स्पष्ट रूप से ACP/acpx मांगे या ACP
-adapter path test कर रहा हो. Claude Code, Gemini CLI, OpenCode, Cursor, और समान external
-harnesses अभी भी ACP का उपयोग करते हैं.
+जब बंडल किया गया `codex` Plugin सक्षम हो, तो स्वाभाविक-भाषा Codex नियंत्रण के लिए ACP के बजाय नेटिव `/codex` कमांड
+सतह (`/codex bind`, `/codex threads`, `/codex resume`, `/codex steer`,
+`/codex stop`) का उपयोग करें। Codex के लिए ACP केवल तभी उपयोग करें जब उपयोगकर्ता स्पष्ट रूप से ACP/acpx माँगे
+या ACP अडैप्टर पथ का परीक्षण कर रहा हो। Claude Code, Gemini CLI, OpenCode, Cursor और इसी तरह के बाहरी
+हार्नेस अब भी ACP का उपयोग करते हैं।
 
-यह agent-facing decision tree है:
+निर्णय वृक्ष:
 
-1. यदि user **Codex bind/control/thread/resume/steer/stop** मांगता है, तो bundled `codex` plugin enabled होने पर
-   native `/codex` command surface का उपयोग करें.
-2. यदि user **Codex as the embedded runtime** मांगता है या सामान्य
-   subscription-backed Codex agent experience चाहता है, तो `openai/<model>` का उपयोग करें.
-3. यदि user स्पष्ट रूप से **OpenClaw for an OpenAI model** चुनता है, तो model ref
-   को `openai/<model>` रखें और provider/model runtime policy को
-   `agentRuntime.id: "openclaw"` पर set करें. चुनी गई `openai` OAuth profile को
-   internally OpenClaw के Codex-auth transport के माध्यम से route किया जाता है.
-4. यदि legacy config में अभी भी **legacy Codex model refs** हैं, तो इसे
-   `openai/<model>` में `openclaw doctor --fix` के साथ repair करें; doctor पुराने model ref से implied होने पर
-   provider/model-scoped `agentRuntime.id: "codex"` जोड़कर Codex auth
-   route बनाए रखता है.
-   Legacy **`codex-cli/*` model refs** उसी `openai/<model>` Codex
-   app-server route में repair होते हैं; OpenClaw अब bundled Codex CLI backend नहीं रखता.
-5. यदि user स्पष्ट रूप से **ACP**, **acpx**, या **Codex ACP adapter** कहता है, तो
-   `runtime: "acp"` और `agentId: "codex"` के साथ ACP का उपयोग करें.
-6. यदि request **Claude Code, Gemini CLI, OpenCode, Cursor, Droid, या
-   किसी अन्य external harness** के लिए है, तो native sub-agent runtime नहीं, ACP/acpx का उपयोग करें.
+1. **Codex बाइंड/नियंत्रण/थ्रेड/फिर से शुरू करना/निर्देशित करना/बंद करना** -> बंडल किया गया `codex` Plugin सक्षम होने पर नेटिव `/codex` कमांड सतह।
+2. **एम्बेडेड रनटाइम के रूप में Codex** या सामान्य सदस्यता-समर्थित Codex एजेंट अनुभव -> `openai/<model>`।
+3. **OpenAI मॉडल के लिए स्पष्ट रूप से चुना गया OpenClaw** -> मॉडल रेफ़ को `openai/<model>` के रूप में रखें और प्रोवाइडर/मॉडल रनटाइम नीति को `agentRuntime.id: "openclaw"` पर सेट करें। चयनित `openai` OAuth प्रोफ़ाइल को आंतरिक रूप से OpenClaw के Codex-प्रमाणीकरण ट्रांसपोर्ट के माध्यम से रूट किया जाता है।
+4. **कॉन्फ़िगरेशन में लेगेसी Codex मॉडल रेफ़** -> `openclaw doctor --fix` से `openai/<model>` में सुधारें; जहाँ पुराने मॉडल रेफ़ से इसका संकेत मिलता था, वहाँ doctor प्रोवाइडर/मॉडल-स्कोप्ड `agentRuntime.id: "codex"` जोड़कर Codex प्रमाणीकरण रूट बनाए रखता है। लेगेसी **`codex-cli/*`** मॉडल रेफ़ उसी `openai/<model>` Codex ऐप-सर्वर रूट में सुधारे जाते हैं; OpenClaw अब बंडल किया गया Codex CLI बैकएंड नहीं रखता।
+5. **ACP, acpx या Codex ACP अडैप्टर स्पष्ट रूप से अनुरोधित** -> `runtime: "acp"` और `agentId: "codex"`।
+6. **Claude Code, Gemini CLI, OpenCode, Cursor, Droid या कोई अन्य बाहरी हार्नेस** -> ACP/acpx, नेटिव सब-एजेंट रनटाइम नहीं।
 
-| आपका मतलब है...                        | उपयोग करें...                                  |
+| आपका आशय है...                           | उपयोग करें...                                  |
 | --------------------------------------- | -------------------------------------------- |
-| Codex app-server chat/thread control    | bundled `codex` plugin से `/codex ...` |
-| Codex app-server embedded agent runtime | `openai/*` agent model refs                  |
-| OpenAI Codex OAuth                      | `openai` OAuth profiles                      |
-| Claude Code या अन्य external harness   | ACP/acpx                                     |
+| Codex ऐप-सर्वर चैट/थ्रेड नियंत्रण      | बंडल किए गए `codex` Plugin से `/codex ...` |
+| Codex ऐप-सर्वर एम्बेडेड एजेंट रनटाइम   | `openai/*` एजेंट मॉडल रेफ़                  |
+| OpenAI Codex OAuth                      | `openai` OAuth प्रोफ़ाइल                      |
+| Claude Code या अन्य बाहरी हार्नेस       | ACP/acpx                                     |
 
-OpenAI-family prefix split के लिए, [OpenAI](/hi/providers/openai) और
-[Model providers](/hi/concepts/model-providers) देखें. Codex runtime support
-contract के लिए, [Codex harness runtime](/hi/plugins/codex-harness-runtime#v1-support-contract) देखें.
+OpenAI-परिवार प्रीफ़िक्स विभाजन के लिए [OpenAI](/hi/providers/openai) और
+[मॉडल प्रोवाइडर](/hi/concepts/model-providers) देखें। Codex रनटाइम समर्थन
+अनुबंध के लिए [Codex हार्नेस रनटाइम](/hi/plugins/codex-harness-runtime#v1-support-contract) देखें।
 
-## Runtime ownership
+## रनटाइम स्वामित्व
 
-अलग-अलग runtimes loop के अलग-अलग हिस्सों के स्वामी होते हैं.
+अलग-अलग रनटाइम लूप के अलग-अलग हिस्सों के स्वामी होते हैं:
 
-| Surface                     | OpenClaw embedded                             | Codex app-server                                                            |
-| --------------------------- | --------------------------------------------- | --------------------------------------------------------------------------- |
-| Model loop owner            | OpenClaw embedded runner के माध्यम से OpenClaw | Codex app-server                                                            |
-| Canonical thread state      | OpenClaw transcript                           | Codex thread, साथ में OpenClaw transcript mirror                               |
-| OpenClaw dynamic tools      | Native OpenClaw tool loop                     | Codex adapter के माध्यम से bridged                                           |
-| Native shell and file tools | OpenClaw path                                 | Codex-native tools, समर्थित होने पर native hooks के माध्यम से bridged            |
-| Context engine              | Native OpenClaw context assembly              | OpenClaw projects context को Codex turn में assemble करता है                     |
-| Compaction                  | OpenClaw या selected context engine           | Codex-native compaction, OpenClaw notifications और mirror maintenance के साथ |
-| Channel delivery            | OpenClaw                                      | OpenClaw                                                                    |
+| सतह                         | OpenClaw एम्बेडेड                                | Codex ऐप-सर्वर                                                                  |
+| --------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------- |
+| मॉडल लूप स्वामी             | OpenClaw एम्बेडेड रनर के माध्यम से OpenClaw     | Codex ऐप-सर्वर                                                                  |
+| कैनोनिकल थ्रेड स्थिति      | OpenClaw ट्रांसक्रिप्ट                           | Codex थ्रेड और OpenClaw ट्रांसक्रिप्ट मिरर                                      |
+| OpenClaw डायनेमिक टूल      | नेटिव OpenClaw टूल लूप                          | Codex अडैप्टर के माध्यम से ब्रिज किए गए                                          |
+| नेटिव शेल और फ़ाइल टूल     | OpenClaw पथ                                     | Codex-नेटिव टूल, समर्थित होने पर नेटिव हुक के माध्यम से ब्रिज किए गए             |
+| संदर्भ इंजन                | नेटिव OpenClaw संदर्भ संयोजन                    | OpenClaw संयोजित संदर्भ को Codex टर्न में प्रक्षेपित करता है                     |
+| Compaction                  | OpenClaw या चयनित संदर्भ इंजन                   | Codex-नेटिव Compaction, OpenClaw सूचनाओं और मिरर रखरखाव के साथ                  |
+| चैनल डिलीवरी               | OpenClaw                                         | OpenClaw                                                                         |
 
-यह ownership split मुख्य design rule है:
+डिज़ाइन नियम: यदि OpenClaw सतह का स्वामी है, तो वह सामान्य Plugin हुक
+व्यवहार प्रदान कर सकता है। यदि नेटिव रनटाइम सतह का स्वामी है, तो OpenClaw को रनटाइम
+इवेंट या नेटिव हुक चाहिए। यदि नेटिव रनटाइम कैनोनिकल थ्रेड स्थिति का स्वामी है,
+तो OpenClaw असमर्थित आंतरिक हिस्सों को पुनर्लिखने के बजाय संदर्भ को मिरर और प्रक्षेपित करता है।
 
-- यदि OpenClaw surface का स्वामी है, तो OpenClaw सामान्य plugin hook behavior उपलब्ध करा सकता है.
-- यदि native runtime surface का स्वामी है, तो OpenClaw को runtime events या native hooks चाहिए.
-- यदि native runtime canonical thread state का स्वामी है, तो OpenClaw को context mirror और project करना चाहिए, unsupported internals फिर से नहीं लिखने चाहिए.
+## रनटाइम चयन
 
-## Runtime selection
+OpenClaw प्रोवाइडर और मॉडल समाधान के बाद इस क्रम में एक एम्बेडेड रनटाइम
+निर्धारित करता है:
 
-OpenClaw provider और model resolution के बाद embedded runtime चुनता है:
+1. **मॉडल-स्कोप्ड रनटाइम नीति** को प्राथमिकता मिलती है। यह कॉन्फ़िगर की गई प्रोवाइडर
+   मॉडल प्रविष्टि या `agents.defaults.models["provider/model"].agentRuntime`
+   / `agents.entries.*.models["provider/model"].agentRuntime` में रहती है। `agents.defaults.models["vllm/*"].agentRuntime` जैसा प्रोवाइडर
+   वाइल्डकार्ड सटीक मॉडल नीति के बाद लागू होता है, ताकि डायनेमिक रूप से खोजे गए प्रोवाइडर मॉडल
+   सटीक प्रति-मॉडल अपवादों को ओवरराइड किए बिना एक रनटाइम साझा कर सकें।
+2. **प्रोवाइडर-स्कोप्ड रनटाइम नीति**: `models.providers.<provider>.agentRuntime`।
+3. **`auto` मोड**: पंजीकृत Plugin रनटाइम समर्थित प्रोवाइडर/मॉडल युग्मों पर दावा कर सकते हैं।
+4. यदि `auto` मोड में कोई भी टर्न पर दावा नहीं करता, तो OpenClaw
+   संगतता रनटाइम के रूप में `openclaw` पर वापस जाता है। रन को सख्त होना आवश्यक हो,
+   तो स्पष्ट रनटाइम आईडी का उपयोग करें।
 
-1. Model-scoped runtime policy जीतती है. यह configured provider
-   model entry में या `agents.defaults.models["provider/model"].agentRuntime` /
-   `agents.list[].models["provider/model"].agentRuntime` में रह सकती है. `agents.defaults.models["vllm/*"].agentRuntime` जैसा provider wildcard exact
-   model policy के बाद लागू होता है, ताकि dynamically discovered provider models एक
-   runtime share कर सकें बिना exact per-model exceptions override किए.
-2. Provider-scoped runtime policy अगली आती है
-   `models.providers.<provider>.agentRuntime` पर.
-3. `auto` mode में, registered plugin runtimes supported provider/model
-   pairs claim कर सकते हैं.
-4. यदि `auto` mode में कोई runtime turn claim नहीं करता, तो OpenClaw
-   compatibility runtime के रूप में `openclaw` का उपयोग करता है. जब run strict होना चाहिए,
-   explicit runtime id का उपयोग करें.
+पूरे-सत्र और पूरे-एजेंट रनटाइम पिन अनदेखे किए जाते हैं: `OPENCLAW_AGENT_RUNTIME`,
+सत्र `agentHarnessId`/`agentRuntimeOverride` स्थिति, `agents.defaults.agentRuntime`,
+और `agents.entries.*.agentRuntime`। पुराने पूरे-एजेंट रनटाइम कॉन्फ़िगरेशन को हटाने और जहाँ आशय
+संरक्षित किया जा सकता है वहाँ लेगेसी रनटाइम मॉडल रेफ़ को बदलने के लिए `openclaw doctor --fix` चलाएँ।
 
-Whole-session और whole-agent runtime pins अनदेखे किए जाते हैं. इसमें
-`OPENCLAW_AGENT_RUNTIME`, session `agentHarnessId`/`agentRuntimeOverride` state,
-`agents.defaults.agentRuntime`, और `agents.list[].agentRuntime` शामिल हैं. stale whole-agent runtime config हटाने और
-जहां OpenClaw intent preserve कर सकता है वहां legacy runtime model refs convert करने के लिए
-`openclaw doctor --fix` चलाएं.
+स्पष्ट प्रोवाइडर/मॉडल Plugin रनटाइम बंद होकर विफल होते हैं: किसी प्रोवाइडर या मॉडल पर `agentRuntime.id: "codex"`
+का अर्थ Codex या स्पष्ट चयन/रनटाइम त्रुटि है—इसे कभी भी चुपचाप
+OpenClaw पर वापस रूट नहीं किया जाता। केवल `auto` किसी बेमेल टर्न को OpenClaw पर रूट कर सकता है।
 
-Explicit provider/model plugin runtimes fail closed करते हैं. उदाहरण के लिए,
-provider या model पर `agentRuntime.id: "codex"` का अर्थ Codex या स्पष्ट
-selection/runtime error है; इसे कभी भी चुपचाप वापस OpenClaw को route नहीं किया जाता.
-
-CLI backend aliases embedded harness ids से अलग हैं. Preferred
-Claude CLI form यह है:
+CLI बैकएंड उपनाम एम्बेडेड हार्नेस आईडी से अलग होते हैं। पसंदीदा Claude CLI स्वरूप:
 
 ```json5
 {
   agents: {
     defaults: {
-      model: "anthropic/claude-opus-4-8",
+      model: "anthropic/claude-opus-5",
       models: {
-        "anthropic/claude-opus-4-8": {
+        "anthropic/claude-opus-5": {
           agentRuntime: { id: "claude-cli" },
         },
       },
@@ -192,31 +175,32 @@ Claude CLI form यह है:
 }
 ```
 
-`claude-cli/claude-opus-4-7` जैसे legacy refs compatibility के लिए supported रहते हैं,
-लेकिन नई config को provider/model canonical रखना चाहिए और execution backend को
-provider/model runtime policy में रखना चाहिए.
+`claude-cli/claude-opus-4-7` जैसे लेगेसी रेफ़ संगतता के लिए
+अब भी समर्थित हैं, लेकिन नए कॉन्फ़िगरेशन को प्रोवाइडर/मॉडल कैनोनिकल रखना चाहिए और
+निष्पादन बैकएंड को प्रोवाइडर/मॉडल रनटाइम नीति में रखना चाहिए।
 
-Legacy `codex-cli/*` refs अलग हैं: doctor उन्हें `openai/*` में migrate करता है ताकि
-वे Codex CLI backend preserve करने के बजाय Codex app-server harness के माध्यम से चलें.
+लेगेसी `codex-cli/*` रेफ़ अलग हैं: doctor उन्हें `openai/*` में माइग्रेट करता है ताकि
+वे Codex CLI बैकएंड संरक्षित करने के बजाय Codex ऐप-सर्वर हार्नेस के माध्यम से चलें।
 
-`auto` mode अधिकांश providers के लिए जानबूझकर conservative है. OpenAI agent
-models exception हैं: unset runtime और `auto` दोनों Codex
-harness में resolve होते हैं. Explicit OpenClaw runtime config
-`openai/*` agent turns के लिए opt-in compatibility route बनी रहती है; जब इसे चुनी हुई `openai` OAuth profile के साथ pair किया जाता है,
-OpenClaw उस path को internally Codex-auth transport के माध्यम से route करता है जबकि
-public model ref को `openai/*` रखता है. Stale OpenAI runtime session pins
-runtime selection द्वारा अनदेखे किए जाते हैं और `openclaw doctor --fix` से साफ किए जा सकते हैं.
+अधिकांश प्रोवाइडर के लिए `auto` मोड जानबूझकर रूढ़िवादी है। OpenAI एजेंट
+मॉडल अपवाद हैं: अनसेट रनटाइम और `auto` दोनों Codex
+हार्नेस में निर्धारित होते हैं। स्पष्ट OpenClaw रनटाइम कॉन्फ़िगरेशन `openai/*` एजेंट टर्न के लिए एक वैकल्पिक संगतता
+रूट बना रहता है; चयनित `openai` OAuth प्रोफ़ाइल के साथ युग्मित होने पर,
+OpenClaw सार्वजनिक मॉडल रेफ़ को `openai/*` के रूप में रखते हुए उस पथ को आंतरिक रूप से Codex-प्रमाणीकरण
+ट्रांसपोर्ट के माध्यम से रूट करता है। पुराने OpenAI रनटाइम सत्र पिन को रनटाइम चयन द्वारा अनदेखा किया जाता है और
+`openclaw doctor --fix` से साफ़ किया जा सकता है।
 
-यदि `openclaw doctor` चेतावनी देता है कि `codex` Plugin सक्षम है जबकि
-लेगेसी Codex मॉडल रेफ config में बने हुए हैं, तो इसे लेगेसी रूट अवस्था मानें। इसे Codex रनटाइम के साथ
-`openai/*` में फिर से लिखने के लिए `openclaw doctor --fix` चलाएं।
+यदि `openclaw doctor` चेतावनी देता है कि `codex` plugin सक्षम है, जबकि पुराने
+Codex मॉडल संदर्भ अभी भी कॉन्फ़िगरेशन में मौजूद हैं, तो इसे पुराने रूट की स्थिति मानें और
+इसे Codex रनटाइम के साथ `openai/*` में फिर से लिखने के लिए
+`openclaw doctor --fix` चलाएँ।
 
 ## GitHub Copilot एजेंट रनटाइम
 
-बाहरी `@openclaw/copilot` Plugin एक वैकल्पिक `copilot` रनटाइम पंजीकृत करता है
-जो GitHub Copilot CLI (`@github/copilot-sdk`) पर आधारित है। यह
-कैननिकल सब्सक्रिप्शन `github-copilot` प्रदाता का दावा करता है और `auto` द्वारा **कभी** चयनित नहीं होता।
-`agentRuntime.id` के जरिए प्रति-मॉडल या प्रति-प्रदाता विकल्प चुनें:
+बाहरी `@openclaw/copilot` plugin, GitHub Copilot CLI (`@github/copilot-sdk`) द्वारा समर्थित,
+ऑप्ट-इन `copilot` रनटाइम पंजीकृत करता है। यह मानक सब्सक्रिप्शन
+`github-copilot` प्रदाता का दावा करता है और `auto` द्वारा **कभी भी** नहीं चुना जाता।
+`agentRuntime.id` के माध्यम से प्रत्येक मॉडल या प्रदाता के लिए ऑप्ट-इन करें:
 
 ```json5
 {
@@ -233,42 +217,42 @@ runtime selection द्वारा अनदेखे किए जाते �
 }
 ```
 
-हार्नेस अपने प्रदाता, रनटाइम, CLI सेशन कुंजी, और auth प्रोफाइल
-उपसर्ग का दावा `extensions/copilot/doctor-contract-api.ts` में करता है, जिसे
-`openclaw doctor` स्वतः लोड करता है। कॉन्फ़िगरेशन, auth, ट्रांसक्रिप्ट मिररिंग,
-Compaction, घोषणात्मक doctor अनुबंध, और व्यापक PI बनाम Codex बनाम
-Copilot SDK निर्णय के लिए, [GitHub Copilot एजेंट रनटाइम](/hi/plugins/copilot) देखें।
+हार्नेस `extensions/copilot/doctor-contract-api.ts` में अपने प्रदाता, रनटाइम, CLI सत्र कुंजी और प्रमाणीकरण प्रोफ़ाइल
+उपसर्ग का दावा करता है, जिसे `openclaw doctor`
+स्वतः लोड करता है। कॉन्फ़िगरेशन, प्रमाणीकरण, ट्रांस्क्रिप्ट मिररिंग, Compaction,
+घोषणात्मक डॉक्टर अनुबंध और व्यापक PI बनाम Codex बनाम Copilot SDK
+निर्णय के लिए, [GitHub Copilot एजेंट रनटाइम](/hi/plugins/copilot) देखें।
 
 ## संगतता अनुबंध
 
-जब कोई रनटाइम OpenClaw नहीं होता, तो उसे दस्तावेज़ित करना चाहिए कि वह किन OpenClaw सतहों का समर्थन करता है।
-रनटाइम दस्तावेज़ों के लिए यह आकार इस्तेमाल करें:
+जब कोई रनटाइम OpenClaw नहीं होता, तो उसके दस्तावेज़ों में यह बताया जाना चाहिए कि वह किन OpenClaw सतहों
+का समर्थन करता है:
 
-| प्रश्न                               | यह क्यों महत्वपूर्ण है                                                                                    |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| मॉडल लूप का स्वामी कौन है?               | यह निर्धारित करता है कि retries, टूल continuation, और अंतिम उत्तर के निर्णय कहां होते हैं।                   |
-| कैननिकल थ्रेड इतिहास का स्वामी कौन है?     | यह निर्धारित करता है कि OpenClaw इतिहास को संपादित कर सकता है या केवल उसे मिरर कर सकता है।                                   |
-| क्या OpenClaw डायनेमिक टूल काम करते हैं?        | मैसेजिंग, सेशन, cron, और OpenClaw-स्वामित्व वाले टूल इस पर निर्भर करते हैं।                                 |
-| क्या डायनेमिक टूल hooks काम करते हैं?            | Plugins OpenClaw-स्वामित्व वाले टूल के आसपास `before_tool_call`, `after_tool_call`, और middleware की अपेक्षा करते हैं। |
-| क्या नेटिव टूल hooks काम करते हैं?             | Shell, patch, और रनटाइम-स्वामित्व वाले टूल को नीति और अवलोकन के लिए नेटिव hook समर्थन चाहिए।        |
-| क्या context engine lifecycle चलता है? | Memory और context Plugins assemble, ingest, after-turn, और Compaction lifecycle पर निर्भर करते हैं।      |
-| कौन सा Compaction डेटा उजागर होता है?       | कुछ Plugins को केवल सूचनाएं चाहिए होती हैं, जबकि दूसरों को रखे/छोड़े गए metadata की जरूरत होती है।                    |
-| क्या जानबूझकर असमर्थित है?     | उपयोगकर्ताओं को वहां OpenClaw समानता नहीं माननी चाहिए जहां नेटिव रनटाइम अधिक अवस्था का स्वामी है।            |
+| प्रश्न                                   | यह क्यों महत्वपूर्ण है                                                                                     |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| मॉडल लूप का स्वामी कौन है?              | यह निर्धारित करता है कि पुनः प्रयास, टूल निरंतरता और अंतिम उत्तर के निर्णय कहाँ होते हैं।                 |
+| मानक थ्रेड इतिहास का स्वामी कौन है?     | यह निर्धारित करता है कि OpenClaw इतिहास संपादित कर सकता है या केवल उसे मिरर कर सकता है।                  |
+| क्या OpenClaw के डायनेमिक टूल काम करते हैं? | मैसेजिंग, सत्र, cron और OpenClaw के स्वामित्व वाले टूल इस पर निर्भर करते हैं।                          |
+| क्या डायनेमिक टूल हुक काम करते हैं?     | Plugins, OpenClaw के स्वामित्व वाले टूल के आसपास `before_tool_call`, `after_tool_call` और मिडलवेयर की अपेक्षा करते हैं। |
+| क्या नेटिव टूल हुक काम करते हैं?        | शेल, पैच और रनटाइम के स्वामित्व वाले टूल को नीति और अवलोकन के लिए नेटिव हुक समर्थन चाहिए।                |
+| क्या कॉन्टेक्स्ट इंजन जीवनचक्र चलता है? | मेमोरी और कॉन्टेक्स्ट plugins, असेंबल, इनजेस्ट, टर्न के बाद और Compaction जीवनचक्र पर निर्भर करते हैं।    |
+| कौन-सा Compaction डेटा प्रदर्शित होता है? | कुछ plugins को केवल सूचनाएँ चाहिए; अन्य को रखे/हटाए गए मेटाडेटा की आवश्यकता होती है।                   |
+| जानबूझकर किसका समर्थन नहीं किया जाता?   | जहाँ नेटिव रनटाइम अधिक स्थिति का स्वामी है, वहाँ उपयोगकर्ताओं को OpenClaw के समकक्ष होने की धारणा नहीं बनानी चाहिए। |
 
-Codex रनटाइम समर्थन अनुबंध
-[Codex हार्नेस रनटाइम](/hi/plugins/codex-harness-runtime#v1-support-contract) में दस्तावेज़ित है।
+Codex रनटाइम समर्थन अनुबंध का दस्तावेज़ीकरण
+[Codex हार्नेस रनटाइम](/hi/plugins/codex-harness-runtime#v1-support-contract) में किया गया है।
 
 ## स्थिति लेबल
 
-स्थिति आउटपुट `Execution` और `Runtime` दोनों लेबल दिखा सकता है। इन्हें
-diagnostics के रूप में पढ़ें, प्रदाता नामों के रूप में नहीं।
+स्थिति आउटपुट में `Execution` और `Runtime` दोनों लेबल दिखाई दे सकते हैं। उन्हें
+निदान के रूप में पढ़ें, प्रदाता के नाम के रूप में नहीं:
 
-- `openai/gpt-5.5` जैसा मॉडल रेफ आपको चयनित प्रदाता/मॉडल बताता है।
-- `codex` जैसी रनटाइम id आपको बताती है कि कौन सा लूप turn निष्पादित कर रहा है।
-- Telegram या Discord जैसा चैनल लेबल आपको बताता है कि बातचीत कहां हो रही है।
+- `openai/gpt-5.6-sol` जैसा मॉडल संदर्भ चुना गया प्रदाता/मॉडल है।
+- `codex` जैसी रनटाइम आईडी, टर्न निष्पादित करने वाला लूप है।
+- Telegram या Discord जैसा चैनल लेबल वह स्थान है जहाँ बातचीत हो रही है।
 
-यदि कोई run अब भी अप्रत्याशित रनटाइम दिखाता है, तो पहले चयनित प्रदाता/मॉडल
-रनटाइम नीति की जांच करें। लेगेसी सेशन रनटाइम pins अब routing तय नहीं करते।
+यदि किसी रन में कोई अप्रत्याशित रनटाइम दिखाई देता है, तो पहले चुने गए प्रदाता/मॉडल की
+रनटाइम नीति की जाँच करें। पुराने सत्र रनटाइम पिन अब रूटिंग तय नहीं करते।
 
 ## संबंधित
 
@@ -276,7 +260,7 @@ diagnostics के रूप में पढ़ें, प्रदाता �
 - [Codex हार्नेस रनटाइम](/hi/plugins/codex-harness-runtime)
 - [GitHub Copilot एजेंट रनटाइम](/hi/plugins/copilot)
 - [OpenAI](/hi/providers/openai)
-- [एजेंट हार्नेस Plugins](/hi/plugins/sdk-agent-harness)
+- [एजेंट हार्नेस plugins](/hi/plugins/sdk-agent-harness)
 - [एजेंट लूप](/hi/concepts/agent-loop)
 - [मॉडल](/hi/concepts/models)
 - [स्थिति](/hi/cli/status)

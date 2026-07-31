@@ -1,145 +1,114 @@
 ---
 read_when:
-    - ACP-आधारित IDE इंटीग्रेशन सेट अप करना
+    - ACP-आधारित IDE एकीकरण सेट अप करना
     - Gateway तक ACP सत्र रूटिंग की डीबगिंग
-summary: IDE एकीकरणों के लिए ACP bridge चलाएँ
+summary: IDE एकीकरणों के लिए ACP ब्रिज चलाएँ
 title: ACP
 x-i18n:
-    generated_at: "2026-06-28T22:46:08Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:26:42Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 79fa816811f78c3fa59577342e568868ef63e88f5262fd954e346ed46b02afc3
+    source_hash: becdcfdd1cc62b206cc92e9b8248c79a2ff63cfc3779d8a124b9713e779ad33c
     source_path: cli/acp.md
     workflow: 16
 ---
 
-[एजेंट क्लाइंट प्रोटोकॉल (ACP)](https://agentclientprotocol.com/) bridge चलाएँ, जो OpenClaw Gateway से बात करता है.
+[Agent Client Protocol (ACP)](https://agentclientprotocol.com/) ब्रिज चलाएँ, जो OpenClaw Gateway से संचार करता है।
 
-यह कमांड IDEs के लिए stdio पर ACP बोलता है और prompts को WebSocket पर Gateway
-को forward करता है. यह ACP sessions को Gateway session keys से mapped रखता है.
+`openclaw acp` IDE के लिए stdio पर ACP का उपयोग करता है और प्रॉम्प्ट को WebSocket पर Gateway को अग्रेषित करता है, साथ ही ACP सत्रों को Gateway सत्र कुंजियों से मैप करके रखता है। यह Gateway-समर्थित ACP ब्रिज है, पूर्ण ACP-नेटिव एडिटर रनटाइम नहीं: यह सत्र रूटिंग, प्रॉम्प्ट डिलीवरी और स्ट्रीमिंग अपडेट पर केंद्रित है।
 
-`openclaw acp` एक Gateway-backed ACP bridge है, पूरा ACP-native editor
-runtime नहीं. यह session routing, prompt delivery, और basic streaming
-updates पर केंद्रित है.
-
-अगर आप चाहते हैं कि कोई external MCP client, ACP harness session host करने के
-बजाय सीधे OpenClaw channel conversations से बात करे, तो इसके बजाय
-[`openclaw mcp serve`](/hi/cli/mcp) उपयोग करें.
+यदि आप चाहते हैं कि कोई बाहरी MCP क्लाइंट ACP हार्नेस सत्र होस्ट करने के बजाय सीधे OpenClaw चैनल वार्तालापों से संचार करे, तो इसके बजाय [`openclaw mcp serve`](/hi/cli/mcp) का उपयोग करें।
 
 ## यह क्या नहीं है
 
-यह पेज अक्सर ACP harness sessions के साथ भ्रमित किया जाता है.
+`openclaw acp` का अर्थ है कि OpenClaw एक ACP सर्वर के रूप में कार्य करता है: कोई IDE या ACP क्लाइंट OpenClaw से कनेक्ट होता है, और OpenClaw उस कार्य को Gateway सत्र में अग्रेषित करता है।
 
-`openclaw acp` का अर्थ है:
-
-- OpenClaw ACP server की तरह काम करता है
-- कोई IDE या ACP client OpenClaw से connect करता है
-- OpenClaw उस work को Gateway session में forward करता है
-
-यह [ACP Agents](/hi/tools/acp-agents) से अलग है, जहाँ OpenClaw `acpx` के माध्यम से
-Codex या Claude Code जैसे external harness को चलाता है.
+यह [ACP Agents](/hi/tools/acp-agents) से अलग है, जहाँ OpenClaw `acpx` के माध्यम से Codex या Claude Code जैसे किसी बाहरी हार्नेस को चलाता है।
 
 त्वरित नियम:
 
-- editor/client OpenClaw से ACP में बात करना चाहता है: `openclaw acp` उपयोग करें
-- OpenClaw को Codex/Claude/Gemini को ACP harness के रूप में launch करना चाहिए: `/acp spawn` और [ACP Agents](/hi/tools/acp-agents) उपयोग करें
+- एडिटर/क्लाइंट ACP के माध्यम से OpenClaw से संचार करना चाहता है: `openclaw acp` का उपयोग करें
+- OpenClaw को Codex/Claude/Gemini को ACP हार्नेस के रूप में लॉन्च करना चाहिए: `/acp spawn` और [ACP Agents](/hi/tools/acp-agents) का उपयोग करें
 
-## Compatibility Matrix
+## संगतता मैट्रिक्स
 
-| ACP area                                                              | Status      | Notes                                                                                                                                                                                                                                            |
-| --------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `initialize`, `newSession`, `prompt`, `cancel`                        | लागू | stdio से Gateway chat/send + abort तक core bridge flow.                                                                                                                                                                                        |
-| `listSessions`, slash commands                                        | लागू | Session list bounded cursor pagination और `cwd` filtering के साथ Gateway session state के विरुद्ध काम करती है, जहाँ Gateway session rows workspace metadata रखते हैं; commands `available_commands_update` के माध्यम से advertised किए जाते हैं.                                |
-| Session lineage metadata                                              | लागू | Session listings और session info snapshots `_meta` में OpenClaw parent और child lineage शामिल करते हैं, ताकि ACP clients private Gateway side channels के बिना subagent graphs render कर सकें.                                                                |
-| `resumeSession`, `closeSession`                                       | लागू | Resume history replay किए बिना ACP session को existing Gateway session से फिर bind करता है. Close active bridge work cancel करता है, pending prompts को cancelled के रूप में resolve करता है, और bridge session state release करता है.                                              |
-| `loadSession`                                                         | आंशिक     | ACP session को Gateway session key से फिर bind करता है और bridge-created sessions के लिए ACP event-ledger history replay करता है. पुराने/no-ledger sessions stored user/assistant text पर fallback करते हैं.                                                             |
-| Prompt content (`text`, embedded `resource`, images)                  | आंशिक     | Text/resources को chat input में flatten किया जाता है; images Gateway attachments बनती हैं.                                                                                                                                                                 |
-| Session modes                                                         | आंशिक     | `session/set_mode` supported है और bridge thought level, tool verbosity, reasoning, usage detail, और elevated actions के लिए शुरुआती Gateway-backed session controls expose करता है. व्यापक ACP-native mode/config surfaces अभी भी scope से बाहर हैं. |
-| Session info और usage updates                                        | आंशिक     | Bridge cached Gateway session snapshots से `session_info_update` और best-effort `usage_update` notifications emit करता है. Usage approximate है और केवल तब भेजा जाता है जब Gateway token totals fresh marked हों.                                        |
-| Tool streaming                                                        | आंशिक     | `tool_call` / `tool_call_update` events में raw I/O, text content, और best-effort file locations शामिल होते हैं जब Gateway tool args/results उन्हें expose करते हैं. Embedded terminals और अधिक समृद्ध diff-native output अभी expose नहीं होते.                        |
-| Exec approvals                                                        | आंशिक     | Active ACP prompt turns के दौरान Gateway exec approval prompts को `session/request_permission` के साथ ACP client तक relay किया जाता है.                                                                                                                    |
-| Per-session MCP servers (`mcpServers`)                                | असमर्थित | Bridge mode per-session MCP server requests को reject करता है. इसके बजाय OpenClaw gateway या agent पर MCP configure करें.                                                                                                                                     |
-| Client filesystem methods (`fs/read_text_file`, `fs/write_text_file`) | असमर्थित | Bridge ACP client filesystem methods को call नहीं करता.                                                                                                                                                                                          |
-| Client terminal methods (`terminal/*`)                                | असमर्थित | Bridge ACP client terminals create नहीं करता या terminal ids को tool calls के माध्यम से stream नहीं करता.                                                                                                                                                       |
-| Session plans / thought streaming                                     | असमर्थित | Bridge currently output text और tool status emit करता है, ACP plan या thought updates नहीं.                                                                                                                                                         |
+| ACP क्षेत्र                                                              | स्थिति      | टिप्पणियाँ                                                                                                                                                                                                                                 |
+| --------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `initialize`, `newSession`, `prompt`, `cancel`                        | कार्यान्वित | stdio से Gateway chat/send + abort तक का मुख्य ब्रिज प्रवाह।                                                                                                                                                                             |
+| `listSessions`, स्लैश कमांड                                        | कार्यान्वित | सत्र सूची सीमित कर्सर पृष्ठांकन और `cwd` फ़िल्टरिंग के साथ Gateway सत्र स्थिति पर काम करती है, जहाँ Gateway सत्र पंक्तियों में कार्यस्थान मेटाडेटा होता है; कमांडों का विज्ञापन `available_commands_update` के माध्यम से किया जाता है।                     |
+| सत्र वंशावली मेटाडेटा                                              | कार्यान्वित | सत्र सूचियों और सत्र जानकारी स्नैपशॉट में `_meta` में OpenClaw पैरेंट और चाइल्ड वंशावली शामिल होती है, ताकि ACP क्लाइंट निजी Gateway साइड चैनलों के बिना उप-एजेंट ग्राफ़ रेंडर कर सकें।                                                     |
+| `resumeSession`, `closeSession`                                       | कार्यान्वित | फिर से शुरू करने पर इतिहास को दोबारा चलाए बिना ACP सत्र को किसी मौजूदा Gateway सत्र से फिर से बाँधा जाता है। बंद करने पर सक्रिय ब्रिज कार्य रद्द हो जाता है, लंबित प्रॉम्प्ट रद्द के रूप में हल हो जाते हैं और ब्रिज सत्र स्थिति जारी कर दी जाती है।                                   |
+| `loadSession`                                                         | आंशिक     | ACP सत्र को Gateway सत्र कुंजी से फिर से बाँधता है और ब्रिज द्वारा बनाए गए सत्रों के लिए ACP इवेंट-लेजर इतिहास को दोबारा चलाता है। पुराने/बिना-लेजर वाले सत्र संग्रहीत उपयोगकर्ता/सहायक टेक्स्ट पर वापस जाते हैं।                                                  |
+| प्रॉम्प्ट सामग्री (`text`, एम्बेडेड `resource`, छवियाँ)                  | आंशिक     | टेक्स्ट/संसाधन चैट इनपुट में समतल हो जाते हैं; छवियाँ Gateway अटैचमेंट बन जाती हैं।                                                                                                                                                            |
+| सत्र मोड                                                         | आंशिक     | `session/set_mode` समर्थित है; ब्रिज विचार स्तर, टूल वर्बोसिटी, रीजनिंग, उपयोग विवरण और उन्नत कार्रवाइयों के लिए Gateway-समर्थित सत्र नियंत्रण उपलब्ध कराता है। व्यापक ACP-नेटिव मोड/कॉन्फ़िग सतहें अभी भी दायरे से बाहर हैं। |
+| विचार स्ट्रीमिंग                                                     | कार्यान्वित | मॉडल की विचार सामग्री `agent_thought_chunk` सत्र अपडेट के रूप में स्ट्रीम होती है। ACP-नेटिव सत्र योजनाएँ उत्सर्जित नहीं होतीं।                                                                                                                    |
+| सत्र जानकारी और उपयोग अपडेट                                        | आंशिक     | ब्रिज कैश किए गए Gateway सत्र स्नैपशॉट से `session_info_update` और सर्वोत्तम-प्रयास `usage_update` सूचनाएँ उत्सर्जित करता है। उपयोग अनुमानित है और केवल तभी भेजा जाता है जब Gateway टोकन योग को ताज़ा चिह्नित किया गया हो।                             |
+| टूल स्ट्रीमिंग                                                        | आंशिक     | जब Gateway टूल आर्ग्युमेंट/परिणाम उन्हें उजागर करते हैं, तब `tool_call`/`tool_call_update` इवेंट में रॉ I/O, टेक्स्ट सामग्री और सर्वोत्तम-प्रयास फ़ाइल स्थान शामिल होते हैं। एम्बेडेड टर्मिनल और अधिक समृद्ध डिफ़-नेटिव आउटपुट उपलब्ध नहीं कराए जाते।                     |
+| निष्पादन अनुमोदन                                                        | आंशिक     | सक्रिय ACP प्रॉम्प्ट टर्न के दौरान Gateway निष्पादन अनुमोदन प्रॉम्प्ट `session/request_permission` के साथ ACP क्लाइंट को रिले किए जाते हैं।                                                                                                               |
+| प्रति-सत्र MCP सर्वर (`mcpServers`)                                | असमर्थित | ब्रिज मोड प्रति-सत्र MCP सर्वर अनुरोधों को अस्वीकार करता है। इसके बजाय OpenClaw Gateway या एजेंट पर MCP कॉन्फ़िगर करें।                                                                                                                          |
+| क्लाइंट फ़ाइल-सिस्टम विधियाँ (`fs/read_text_file`, `fs/write_text_file`) | असमर्थित | ब्रिज ACP क्लाइंट फ़ाइल-सिस्टम विधियों को कॉल नहीं करता।                                                                                                                                                                               |
+| क्लाइंट टर्मिनल विधियाँ (`terminal/*`)                                | असमर्थित | ब्रिज ACP क्लाइंट टर्मिनल नहीं बनाता और न ही टूल कॉल के माध्यम से टर्मिनल आईडी स्ट्रीम करता है।                                                                                                                                            |
 
 ## ज्ञात सीमाएँ
 
-- `loadSession` केवल bridge-created sessions के लिए complete ACP event-ledger history
-  replay कर सकता है. पुराने/no-ledger sessions अभी भी transcript fallback उपयोग करते हैं
-  और historic tool calls या system notices reconstruct नहीं करते.
-- यदि कई ACP clients समान Gateway session key share करते हैं, तो event और cancel
-  routing प्रति client strictly isolated होने के बजाय best-effort होती है. जब आपको clean editor-local
-  turns चाहिए हों, तो default isolated `acp-bridge:<uuid>` sessions को prefer करें.
-- Gateway stop states ACP stop reasons में translate किए जाते हैं, लेकिन वह mapping
-  पूरी तरह ACP-native runtime से कम expressive है.
-- शुरुआती session controls अभी Gateway knobs का focused subset surface करते हैं:
-  thought level, tool verbosity, reasoning, usage detail, और elevated
-  actions. Model selection और exec-host controls अभी ACP config options के रूप में expose नहीं हुए हैं.
-- `session_info_update` और `usage_update` Gateway session
-  snapshots से derived हैं, live ACP-native runtime accounting से नहीं. Usage approximate है,
-  उसमें cost data नहीं होता, और केवल तब emit होता है जब Gateway total token
-  data को fresh mark करता है.
-- Tool follow-along data best-effort है. Bridge known tool args/results में दिखने वाले
-  file paths surface कर सकता है, लेकिन अभी ACP terminals या
-  structured file diffs emit नहीं करता.
-- Exec approval relay active ACP prompt turn तक scoped है; अन्य
-  Gateway sessions से approvals ignore किए जाते हैं.
+- `loadSession` केवल ब्रिज द्वारा बनाए गए सत्रों के लिए पूरा ACP इवेंट-लेजर इतिहास दोबारा चलाता है। पुराने/बिना-लेजर वाले सत्र ट्रांसक्रिप्ट फ़ॉलबैक का उपयोग करते हैं और ऐतिहासिक टूल कॉल या सिस्टम सूचनाओं का पुनर्निर्माण नहीं करते।
+- यदि कई ACP क्लाइंट समान Gateway सत्र कुंजी साझा करते हैं, तो इवेंट और रद्दीकरण रूटिंग प्रत्येक क्लाइंट के लिए सख्ती से पृथक होने के बजाय सर्वोत्तम-प्रयास होती है। जब आपको स्वच्छ एडिटर-स्थानीय टर्न चाहिए, तो डिफ़ॉल्ट पृथक `acp-bridge:<uuid>` सत्रों को प्राथमिकता दें।
+- Gateway की रुकने की स्थितियाँ ACP रुकने के कारणों में अनूदित होती हैं, लेकिन यह मैपिंग पूर्णतः ACP-नेटिव रनटाइम की तुलना में कम अभिव्यंजक है।
+- सत्र नियंत्रण Gateway विकल्पों का एक केंद्रित उपसमुच्चय उपलब्ध कराते हैं: विचार स्तर, टूल वर्बोसिटी, रीजनिंग, उपयोग विवरण और उन्नत कार्रवाइयाँ। मॉडल चयन और निष्पादन-होस्ट नियंत्रण ACP कॉन्फ़िग विकल्पों के रूप में उपलब्ध नहीं हैं।
+- `session_info_update` और `usage_update` लाइव ACP-नेटिव रनटाइम लेखांकन के बजाय Gateway सत्र स्नैपशॉट से प्राप्त होते हैं। उपयोग अनुमानित है, इसमें लागत डेटा नहीं होता और इसे केवल तभी उत्सर्जित किया जाता है जब Gateway कुल टोकन डेटा को ताज़ा चिह्नित करता है।
+- टूल फ़ॉलो-अलॉन्ग डेटा सर्वोत्तम-प्रयास है: ब्रिज ज्ञात टूल आर्ग्युमेंट/परिणामों में दिखाई देने वाले फ़ाइल पथ उपलब्ध कराता है, लेकिन ACP टर्मिनल या संरचित फ़ाइल डिफ़ उत्सर्जित नहीं करता।
+- निष्पादन अनुमोदन रिले सक्रिय ACP प्रॉम्प्ट टर्न तक सीमित है; अन्य Gateway सत्रों के अनुमोदन अनदेखे किए जाते हैं।
 
 ## उपयोग
 
 ```bash
 openclaw acp
 
-# Remote Gateway
+# रिमोट Gateway
 openclaw acp --url wss://gateway-host:18789 --token <token>
 
-# Remote Gateway (token from file)
+# रिमोट Gateway (फ़ाइल से टोकन)
 openclaw acp --url wss://gateway-host:18789 --token-file ~/.openclaw/gateway.token
 
-# Attach to an existing session key
+# किसी मौजूदा सत्र कुंजी से संलग्न करें
 openclaw acp --session agent:main:main
 
-# Attach by label (must already exist)
+# लेबल द्वारा संलग्न करें (पहले से मौजूद होना चाहिए)
 openclaw acp --session-label "support inbox"
 
-# Reset the session key before the first prompt
+# पहले प्रॉम्प्ट से पहले सत्र कुंजी रीसेट करें
 openclaw acp --session agent:main:main --reset-session
 ```
 
-## ACP client (debug)
+## ACP क्लाइंट (डीबग)
 
-IDE के बिना bridge की sanity-check करने के लिए built-in ACP client उपयोग करें.
-यह ACP bridge spawn करता है और आपको interactively prompts type करने देता है.
+IDE के बिना ब्रिज की सामान्य जाँच करने के लिए अंतर्निर्मित ACP क्लाइंट का उपयोग करें। यह ACP ब्रिज को स्पॉन करता है और आपको अंतःक्रियात्मक रूप से प्रॉम्प्ट टाइप करने देता है।
 
 ```bash
 openclaw acp client
 
-# Point the spawned bridge at a remote Gateway
+# स्पॉन किए गए ब्रिज को रिमोट Gateway की ओर इंगित करें
 openclaw acp client --server-args --url wss://gateway-host:18789 --token-file ~/.openclaw/gateway.token
 
-# Override the server command (default: openclaw)
+# सर्वर कमांड ओवरराइड करें (डिफ़ॉल्ट: openclaw)
 openclaw acp client --server "node" --server-args openclaw.mjs acp --url ws://127.0.0.1:19001
 ```
 
-Permission model (client debug mode):
+अनुमति मॉडल (क्लाइंट डीबग मोड):
 
-- Auto-approval allowlist-based है और केवल trusted core tool IDs पर लागू होता है.
-- `read` auto-approval current working directory (`--cwd` set होने पर) तक scoped है.
-- ACP केवल narrow readonly classes को auto-approve करता है: active cwd के अंतर्गत scoped `read` calls और readonly search tools (`search`, `web_search`, `memory_search`). Unknown/non-core tools, out-of-scope reads, exec-capable tools, control-plane tools, mutating tools, और interactive flows को हमेशा explicit prompt approval चाहिए.
-- Server-provided `toolCall.kind` को untrusted metadata माना जाता है (authorization source नहीं).
-- यह ACP bridge policy ACPX harness permissions से अलग है. यदि आप OpenClaw को `acpx` backend के माध्यम से run करते हैं, तो `plugins.entries.acpx.config.permissionMode=approve-all` उस harness session के लिए break-glass "yolo" switch है.
+- स्वतः-अनुमोदन अनुमति-सूची पर आधारित है और केवल विश्वसनीय मुख्य टूल आईडी पर लागू होता है।
+- `read` स्वतः-अनुमोदन वर्तमान कार्यशील डायरेक्टरी (`--cwd` सेट होने पर) तक सीमित है।
+- ACP केवल सीमित रीड-ओनली वर्गों को स्वतः अनुमोदित करता है: सक्रिय cwd के अंतर्गत सीमित `read` कॉल, साथ ही रीड-ओनली खोज टूल (`search`, `web_search`, `memory_search`)। अज्ञात/गैर-मुख्य टूल, दायरे से बाहर रीड, निष्पादन-सक्षम टूल, कंट्रोल-प्लेन टूल, परिवर्तनकारी टूल और अंतःक्रियात्मक प्रवाहों के लिए हमेशा स्पष्ट प्रॉम्प्ट अनुमोदन आवश्यक होता है।
+- सर्वर द्वारा प्रदान किए गए `toolCall.kind` को अविश्वसनीय मेटाडेटा माना जाता है, प्राधिकरण स्रोत नहीं।
+- यह ACP ब्रिज नीति ACPX हार्नेस अनुमतियों से अलग है। यदि आप `acpx` बैकएंड के माध्यम से OpenClaw चलाते हैं, तो `plugins.entries.acpx.config.permissionMode=approve-all` उस हार्नेस सत्र के लिए आपातकालीन "yolo" स्विच है।
 
-## Protocol smoke testing
+## प्रोटोकॉल स्मोक परीक्षण
 
-Protocol-level debugging के लिए, isolated state के साथ Gateway start करें और
-ACP JSON-RPC client के साथ stdio पर `openclaw acp` drive करें. `initialize`,
-`session/new`, absolute `cwd` के साथ `session/list`, `session/resume`,
-`session/close`, duplicate close, और missing resume cover करें.
+प्रोटोकॉल-स्तरीय डीबगिंग के लिए, पृथक स्थिति वाला Gateway शुरू करें और ACP JSON-RPC क्लाइंट के साथ stdio पर `openclaw acp` संचालित करें। `initialize`, `session/new`, एक निरपेक्ष `cwd` के साथ `session/list`, `session/resume`, `session/close`, डुप्लिकेट बंद करना और अनुपस्थित पुनः आरंभ शामिल करें।
 
-Proof में advertised lifecycle capabilities, Gateway-backed
-session row, update notifications, और Gateway `sessions.list` log शामिल होना चाहिए:
+प्रमाण में विज्ञापित जीवनचक्र क्षमताएँ, Gateway-समर्थित सत्र पंक्ति, अपडेट सूचनाएँ और Gateway `sessions.list` लॉग शामिल होने चाहिए:
 
 ```json
 {
@@ -171,39 +140,34 @@ session row, update notifications, और Gateway `sessions.list` log शाम�
 }
 ```
 
-केवल ACP proof के रूप में `openclaw gateway call sessions.list` का उपयोग करने से बचें. वह
-CLI path fresh-token operator scope upgrade request कर सकता है; ACP bridge
-correctness ACP stdio frames और Gateway `sessions.list` log से proven होती है.
+एकमात्र ACP प्रमाण के रूप में `openclaw gateway call sessions.list` का उपयोग करने से बचें। वह CLI पथ नए-टोकन ऑपरेटर स्कोप अपग्रेड का अनुरोध कर सकता है; ACP ब्रिज की शुद्धता ACP stdio फ़्रेम और Gateway `sessions.list` लॉग से प्रमाणित होती है।
 
 ## इसका उपयोग कैसे करें
 
-ACP का उपयोग करें जब कोई IDE (या अन्य client) Agent Client Protocol बोलता हो और आप
-चाहते हों कि वह OpenClaw Gateway session drive करे.
+ACP का उपयोग तब करें जब कोई IDE (या अन्य क्लाइंट) Agent Client Protocol का उपयोग करता हो और आप चाहते हों कि वह OpenClaw Gateway सत्र को संचालित करे।
 
-1. सुनिश्चित करें कि Gateway चल रहा है (local या remote).
-2. Gateway target configure करें (config या flags).
-3. अपने IDE को stdio पर `openclaw acp` run करने के लिए point करें.
+1. सुनिश्चित करें कि Gateway चल रहा है (स्थानीय या रिमोट)।
+2. Gateway लक्ष्य कॉन्फ़िगर करें (कॉन्फ़िग या फ़्लैग)।
+3. अपने IDE को stdio पर `openclaw acp` चलाने के लिए निर्देशित करें।
 
-Example config (persisted):
+उदाहरण कॉन्फ़िग (स्थायी):
 
 ```bash
 openclaw config set gateway.remote.url wss://gateway-host:18789
 openclaw config set gateway.remote.token <token>
 ```
 
-Example direct run (no config write):
+प्रत्यक्ष रूप से चलाने का उदाहरण (कॉन्फ़िग में लिखे बिना):
 
 ```bash
 openclaw acp --url wss://gateway-host:18789 --token <token>
-# preferred for local process safety
+# स्थानीय प्रक्रिया सुरक्षा के लिए प्राथमिकता दें
 openclaw acp --url wss://gateway-host:18789 --token-file ~/.openclaw/gateway.token
 ```
 
-## Agents चुनना
+## एजेंट चुनना
 
-ACP agents को directly pick नहीं करता. यह Gateway session key द्वारा route करता है.
-
-किसी specific agent को target करने के लिए agent-scoped session keys उपयोग करें:
+ACP सीधे एजेंट नहीं चुनता। यह Gateway सत्र कुंजी के आधार पर रूट करता है। किसी विशिष्ट एजेंट को लक्षित करने के लिए एजेंट-स्कोप वाली सत्र कुंजियों का उपयोग करें:
 
 ```bash
 openclaw acp --session agent:main:main
@@ -211,45 +175,35 @@ openclaw acp --session agent:design:main
 openclaw acp --session agent:qa:bug-123
 ```
 
-हर ACP सेशन एक ही Gateway सेशन कुंजी से मैप होता है। एक एजेंट के कई
-सेशन हो सकते हैं; ACP डिफ़ॉल्ट रूप से एक अलग-थलग `acp-bridge:<uuid>` सेशन का उपयोग करता है, जब तक आप
-कुंजी या लेबल को ओवरराइड नहीं करते।
+प्रत्येक ACP सत्र एक ही Gateway सत्र कुंजी से मैप होता है। एक एजेंट के कई सत्र हो सकते हैं; जब तक आप कुंजी या लेबल को ओवरराइड नहीं करते, ACP डिफ़ॉल्ट रूप से एक पृथक `acp-bridge:<uuid>` सत्र का उपयोग करता है।
 
-ब्रिज मोड में प्रति-सेशन `mcpServers` समर्थित नहीं हैं। यदि कोई ACP क्लाइंट
-उन्हें `newSession` या `loadSession` के दौरान भेजता है, तो ब्रिज उन्हें चुपचाप अनदेखा करने के बजाय
-एक स्पष्ट त्रुटि लौटाता है।
+ब्रिज मोड में प्रति-सत्र `mcpServers` समर्थित नहीं हैं। यदि कोई ACP क्लाइंट उन्हें `newSession` या `loadSession` के दौरान भेजता है, तो ब्रिज उन्हें चुपचाप अनदेखा करने के बजाय स्पष्ट त्रुटि लौटाता है।
 
-यदि आप चाहते हैं कि ACPX-समर्थित सेशन OpenClaw Plugin टूल्स या चुने हुए
-बिल्ट-इन टूल्स जैसे `cron` देखें, तो प्रति-सेशन `mcpServers` पास करने की कोशिश करने के बजाय
-Gateway-साइड ACPX MCP ब्रिज सक्षम करें। देखें
-[ACP एजेंट](/hi/tools/acp-agents-setup#plugin-tools-mcp-bridge) और
-[OpenClaw टूल्स MCP ब्रिज](/hi/tools/acp-agents-setup#openclaw-tools-mcp-bridge)।
+यदि आप चाहते हैं कि ACPX-समर्थित सत्र OpenClaw Plugin टूल या `cron` जैसे चुने हुए अंतर्निहित टूल देख सकें, तो प्रति-सत्र `mcpServers` पास करने की कोशिश करने के बजाय Gateway-साइड ACPX MCP ब्रिज सक्षम करें। [ACP एजेंट](/hi/tools/acp-agents-setup#plugin-tools-mcp-bridge) और [OpenClaw टूल MCP ब्रिज](/hi/tools/acp-agents-setup#openclaw-tools-mcp-bridge) देखें।
 
 ## `acpx` से उपयोग करें (Codex, Claude, अन्य ACP क्लाइंट)
 
-यदि आप चाहते हैं कि Codex या Claude Code जैसा कोई कोडिंग एजेंट ACP पर आपके
-OpenClaw बॉट से बात करे, तो इसके बिल्ट-इन `openclaw` लक्ष्य के साथ `acpx` का उपयोग करें।
+यदि आप चाहते हैं कि Codex या Claude Code जैसा कोई कोडिंग एजेंट ACP के माध्यम से आपके OpenClaw बॉट से संवाद करे, तो उसके अंतर्निहित `openclaw` लक्ष्य के साथ `acpx` का उपयोग करें।
 
 सामान्य प्रवाह:
 
 1. Gateway चलाएँ और सुनिश्चित करें कि ACP ब्रिज उस तक पहुँच सकता है।
-2. `acpx openclaw` को `openclaw acp` पर पॉइंट करें।
-3. उस OpenClaw सेशन कुंजी को लक्ष्य बनाएँ जिसे आप कोडिंग एजेंट से उपयोग कराना चाहते हैं।
+2. `acpx openclaw` को `openclaw acp` की ओर इंगित करें।
+3. उस OpenClaw सत्र कुंजी को लक्षित करें जिसका उपयोग कोडिंग एजेंट से करवाना है।
 
 उदाहरण:
 
 ```bash
-# One-shot request into your default OpenClaw ACP session
-acpx openclaw exec "Summarize the active OpenClaw session state."
+# आपके डिफ़ॉल्ट OpenClaw ACP सत्र में एकल अनुरोध
+acpx openclaw exec "सक्रिय OpenClaw सत्र की स्थिति का सारांश दें।"
 
-# Persistent named session for follow-up turns
+# अनुवर्ती चरणों के लिए स्थायी नामित सत्र
 acpx openclaw sessions ensure --name codex-bridge
 acpx openclaw -s codex-bridge --cwd /path/to/repo \
-  "Ask my OpenClaw work agent for recent context relevant to this repo."
+  "मेरे OpenClaw कार्य एजेंट से इस रेपो के लिए प्रासंगिक हालिया संदर्भ माँगें।"
 ```
 
-यदि आप चाहते हैं कि `acpx openclaw` हर बार किसी विशिष्ट Gateway और सेशन कुंजी को
-लक्ष्य बनाए, तो `~/.acpx/config.json` में `openclaw` एजेंट कमांड को ओवरराइड करें:
+यदि आप चाहते हैं कि `acpx openclaw` हर बार किसी विशिष्ट Gateway और सत्र कुंजी को लक्षित करे, तो `~/.acpx/config.json` में `openclaw` एजेंट कमांड को ओवरराइड करें:
 
 ```json
 {
@@ -261,19 +215,17 @@ acpx openclaw -s codex-bridge --cwd /path/to/repo \
 }
 ```
 
-रेपो-लोकल OpenClaw चेकआउट के लिए, dev रनर के बजाय सीधे CLI एंट्रीपॉइंट का उपयोग करें
-ताकि ACP स्ट्रीम साफ रहे। उदाहरण के लिए:
+रेपो-स्थानीय OpenClaw चेकआउट के लिए, डेवलपमेंट रनर के बजाय सीधे CLI एंट्रीपॉइंट का उपयोग करें, ताकि ACP स्ट्रीम साफ़ रहे:
 
 ```bash
 env OPENCLAW_HIDE_BANNER=1 OPENCLAW_SUPPRESS_NOTES=1 node openclaw.mjs acp ...
 ```
 
-यह Codex, Claude Code, या किसी अन्य ACP-सक्षम क्लाइंट को टर्मिनल स्क्रैप किए बिना
-OpenClaw एजेंट से संदर्भात्मक जानकारी खींचने देने का सबसे आसान तरीका है।
+Codex, Claude Code या किसी अन्य ACP-जागरूक क्लाइंट को टर्मिनल स्क्रैप किए बिना OpenClaw एजेंट से संदर्भगत जानकारी प्राप्त करने देने का यह सबसे आसान तरीका है।
 
 ## Zed एडिटर सेटअप
 
-`~/.config/zed/settings.json` में एक कस्टम ACP एजेंट जोड़ें (या Zed का Settings UI उपयोग करें):
+`~/.config/zed/settings.json` में एक कस्टम ACP एजेंट जोड़ें (या Zed के Settings UI का उपयोग करें):
 
 ```json
 {
@@ -288,7 +240,7 @@ OpenClaw एजेंट से संदर्भात्मक जानक�
 }
 ```
 
-किसी विशिष्ट Gateway या एजेंट को लक्ष्य बनाने के लिए:
+किसी विशिष्ट Gateway या एजेंट को लक्षित करने के लिए:
 
 ```json
 {
@@ -313,64 +265,59 @@ OpenClaw एजेंट से संदर्भात्मक जानक�
 
 Zed में, Agent पैनल खोलें और थ्रेड शुरू करने के लिए "OpenClaw ACP" चुनें।
 
-## सेशन मैपिंग
+## सत्र मैपिंग
 
-डिफ़ॉल्ट रूप से, ACP ब्रिज सेशन को `acp-bridge:` प्रीफ़िक्स वाली एक अलग-थलग
-Gateway सेशन कुंजी मिलती है। ये सामान्य-मॉडल ब्रिज सेशन सिंथेटिक हैं और
-पुरानी प्रविष्टि छँटाई तथा प्रविष्टि-संख्या सीमाओं के अधीन हैं। किसी ज्ञात सेशन को पुनः उपयोग करने के लिए,
-सेशन कुंजी या लेबल पास करें:
+डिफ़ॉल्ट रूप से, ACP ब्रिज सत्रों को `acp-bridge:` उपसर्ग वाली पृथक Gateway सत्र कुंजी मिलती है। ये सामान्य-मॉडल ब्रिज सत्र कृत्रिम और अस्थायी होते हैं: इन पर पुराने रिकॉर्ड हटाने की प्रक्रिया लागू होती है और इन्हें संरक्षित मानवीय वार्तालाप सतह नहीं माना जाता। किसी ज्ञात सत्र का पुनः उपयोग करने के लिए सत्र कुंजी या लेबल पास करें:
 
-- `--session <key>`: किसी विशिष्ट Gateway सेशन कुंजी का उपयोग करें।
-- `--session-label <label>`: लेबल के आधार पर मौजूदा सेशन हल करें।
-- `--reset-session`: उस कुंजी के लिए नया सेशन id बनाएँ (वही कुंजी, नया ट्रांसक्रिप्ट)।
+- `--session <key>`: किसी विशिष्ट Gateway सत्र कुंजी का उपयोग करें।
+- `--session-label <label>`: किसी मौजूदा सत्र को लेबल के आधार पर रिज़ॉल्व करें।
+- `--reset-session`: उस कुंजी के लिए नई सत्र आईडी बनाएँ (वही कुंजी, नई ट्रांसक्रिप्ट)।
 
-यदि आपका ACP क्लाइंट मेटाडेटा का समर्थन करता है, तो आप प्रति सेशन ओवरराइड कर सकते हैं:
+यदि आपका ACP क्लाइंट मेटाडेटा का समर्थन करता है, तो आप इसे प्रत्येक सत्र के लिए ओवरराइड कर सकते हैं:
 
 ```json
 {
   "_meta": {
     "sessionKey": "agent:main:main",
-    "sessionLabel": "support inbox",
+    "sessionLabel": "सहायता इनबॉक्स",
     "resetSession": true
   }
 }
 ```
 
-सेशन कुंजियों के बारे में अधिक जानें [/concepts/session](/hi/concepts/session) पर।
+सत्र कुंजियों के बारे में अधिक जानकारी के लिए [/concepts/session](/hi/concepts/session) देखें।
 
 ## विकल्प
 
-- `--url <url>`: Gateway WebSocket URL (कॉन्फ़िगर होने पर डिफ़ॉल्ट gateway.remote.url होता है)।
+- `--url <url>`: Gateway WebSocket URL (कॉन्फ़िगर होने पर डिफ़ॉल्ट: `gateway.remote.url`)।
 - `--token <token>`: Gateway प्रमाणीकरण टोकन।
 - `--token-file <path>`: फ़ाइल से Gateway प्रमाणीकरण टोकन पढ़ें।
 - `--password <password>`: Gateway प्रमाणीकरण पासवर्ड।
 - `--password-file <path>`: फ़ाइल से Gateway प्रमाणीकरण पासवर्ड पढ़ें।
-- `--session <key>`: डिफ़ॉल्ट सेशन कुंजी।
-- `--session-label <label>`: हल करने के लिए डिफ़ॉल्ट सेशन लेबल।
-- `--require-existing`: यदि सेशन कुंजी/लेबल मौजूद नहीं है तो विफल हों।
-- `--reset-session`: पहले उपयोग से पहले सेशन कुंजी रीसेट करें।
-- `--no-prefix-cwd`: प्रॉम्प्ट में कार्यशील डायरेक्टरी को प्रीफ़िक्स न करें।
+- `--session <key>`: डिफ़ॉल्ट सत्र कुंजी।
+- `--session-label <label>`: रिज़ॉल्व करने के लिए डिफ़ॉल्ट सत्र लेबल।
+- `--require-existing`: यदि सत्र कुंजी/लेबल मौजूद न हो, तो विफल हों।
+- `--reset-session`: पहले उपयोग से पहले सत्र कुंजी रीसेट करें।
+- `--no-prefix-cwd`: प्रॉम्प्ट के आगे कार्यशील डायरेक्टरी न जोड़ें।
 - `--provenance <off|meta|meta+receipt>`: ACP उद्गम मेटाडेटा या रसीदें शामिल करें।
 - `--verbose, -v`: stderr पर विस्तृत लॉगिंग।
 
-सुरक्षा नोट:
+सुरक्षा संबंधी नोट:
 
-- कुछ सिस्टम पर `--token` और `--password` स्थानीय प्रोसेस सूचियों में दिखाई दे सकते हैं।
-- `--token-file`/`--password-file` या एनवायरनमेंट वैरिएबल (`OPENCLAW_GATEWAY_TOKEN`, `OPENCLAW_GATEWAY_PASSWORD`) को प्राथमिकता दें।
-- Gateway प्रमाणीकरण समाधान वही साझा अनुबंध अनुसरण करता है जिसे अन्य Gateway क्लाइंट उपयोग करते हैं:
-  - लोकल मोड: env (`OPENCLAW_GATEWAY_*`) -> `gateway.auth.*` -> `gateway.remote.*` फ़ॉलबैक केवल तब जब `gateway.auth.*` सेट न हो (कॉन्फ़िगर-लेकिन-अनसुलझे स्थानीय SecretRefs बंद होकर विफल होते हैं)
+- `--token` और `--password` कुछ सिस्टम पर स्थानीय प्रक्रिया सूचियों में दिखाई दे सकते हैं। `--token-file`/`--password-file` या पर्यावरण चर (`OPENCLAW_GATEWAY_TOKEN`, `OPENCLAW_GATEWAY_PASSWORD`) को प्राथमिकता दें।
+- Gateway प्रमाणीकरण रिज़ॉल्यूशन अन्य Gateway क्लाइंट द्वारा उपयोग किए जाने वाले साझा अनुबंध का पालन करता है:
+  - स्थानीय मोड: पहले env (`OPENCLAW_GATEWAY_*`), फिर `gateway.auth.*`; `gateway.auth.*` अनसेट होने पर ही `gateway.remote.*` का फ़ॉलबैक (कॉन्फ़िगर किया गया लेकिन अनरिज़ॉल्व स्थानीय SecretRef चुपचाप फ़ॉलबैक करने के बजाय विफल हो जाता है)
   - रिमोट मोड: रिमोट प्राथमिकता नियमों के अनुसार env/config फ़ॉलबैक के साथ `gateway.remote.*`
-  - `--url` ओवरराइड-सुरक्षित है और अप्रत्यक्ष config/env क्रेडेंशियल्स का पुनः उपयोग नहीं करता; स्पष्ट `--token`/`--password` (या फ़ाइल वैरिएंट) पास करें
-- ACP रनटाइम बैकएंड चाइल्ड प्रोसेस को `OPENCLAW_SHELL=acp` मिलता है, जिसका उपयोग संदर्भ-विशिष्ट शेल/प्रोफ़ाइल नियमों के लिए किया जा सकता है।
-- `openclaw acp client` शुरू किए गए ब्रिज प्रोसेस पर `OPENCLAW_SHELL=acp-client` सेट करता है।
+  - `--url` ओवरराइड-सुरक्षित है और अप्रत्यक्ष config/env क्रेडेंशियल का पुनः उपयोग नहीं करता; स्पष्ट `--token`/`--password` (या फ़ाइल वाले रूप) पास करें
 
 ### `acp client` विकल्प
 
-- `--cwd <dir>`: ACP सेशन के लिए कार्यशील डायरेक्टरी।
+- `--cwd <dir>`: ACP सत्र के लिए कार्यशील डायरेक्टरी।
 - `--server <command>`: ACP सर्वर कमांड (डिफ़ॉल्ट: `openclaw`)।
-- `--server-args <args...>`: ACP सर्वर को पास किए गए अतिरिक्त आर्ग्युमेंट।
+- `--server-args <args...>`: ACP सर्वर को पास किए जाने वाले अतिरिक्त आर्ग्युमेंट।
 - `--server-verbose`: ACP सर्वर पर विस्तृत लॉगिंग सक्षम करें।
 - `--verbose, -v`: विस्तृत क्लाइंट लॉगिंग।
+- `openclaw acp client` शुरू की गई ब्रिज प्रक्रिया पर `OPENCLAW_SHELL=acp-client` सेट करता है, जिसका उपयोग संदर्भ-विशिष्ट शेल/प्रोफ़ाइल नियमों के लिए किया जा सकता है।
 
 ## संबंधित
 

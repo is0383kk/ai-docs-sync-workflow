@@ -1,21 +1,22 @@
 ---
 read_when:
-    - 您正在將合成 QA 傳輸機制接入本機或 CI 測試執行流程
-    - 你需要隨附的 qa-channel 設定介面
-    - 你正在反覆改進端對端品質保證自動化流程
-summary: 用於確定性 OpenClaw 品質保證情境的合成 Slack 類別頻道外掛
+    - 你正在將合成 QA 傳輸整合至本機或 CI 測試執行中
+    - 你需要內建 qa-channel 的設定介面
+    - 你正在反覆改進端對端 QA 自動化作業
+summary: 用於確定性 OpenClaw QA 情境的合成 Slack 類別頻道外掛
 title: QA 頻道
 x-i18n:
-    generated_at: "2026-07-11T21:07:16Z"
+    generated_at: "2026-07-26T07:44:02Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f33af6ef31515e0cab0ee2540f48f3ffea8aba3d13915dc8cf66111599354187
+    source_hash: a43c35e197116a6bd44b238010eb508aed23dea99ab872d10e6fc853b5f4d4a7
     source_path: channels/qa-channel.md
     workflow: 16
 ---
 
-`qa-channel` 是用於自動化 OpenClaw QA 的儲存庫本機合成訊息傳輸機制（`extensions/qa-channel`，私有套件，不包含在封裝安裝中）。它不是正式環境頻道，而是用來測試真實傳輸機制所使用的相同頻道外掛邊界，同時讓狀態保持確定且完全可檢查。
+`qa-channel` 是用於自動化 OpenClaw QA 的儲存庫本機合成訊息傳輸機制（`extensions/qa-channel`、私有套件，不包含在封裝安裝中）。它不是正式環境頻道，而是用來測試實際傳輸機制所使用的相同頻道外掛邊界，同時確保狀態具確定性且可完整檢查。
 
 ## 功能
 
@@ -24,8 +25,8 @@ x-i18n:
   - `channel:<room>`
   - `group:<room>`
   - `thread:<room>/<thread>`
-- 共用的 `channel:` 和 `group:` 對話會以群組／頻道房間回合的形式呈現給代理程式，因此會測試 Discord、Slack、Telegram 及類似傳輸機制所使用的相同可見回覆與訊息工具路由政策。
-- 以 HTTP 為基礎的合成匯流排，可用於注入傳入訊息、擷取傳出記錄、建立討論串、回應、編輯、刪除，以及搜尋／讀取動作。
+- 共用的 `channel:` 與 `group:` 對話會以群組／頻道聊天室回合的形式呈現給代理程式，因此會測試 Discord、Slack、Telegram 及類似傳輸機制所使用的相同可見回覆與訊息工具路由政策。
+- 以 HTTP 為基礎的合成匯流排，用於注入傳入訊息、擷取傳出記錄、建立討論串、回應、編輯、刪除，以及搜尋／讀取操作。
 - 主機端自我檢查執行器，會將 Markdown 報告寫入 `.artifacts/qa-e2e/`。
 
 ## 設定
@@ -46,33 +47,39 @@ x-i18n:
 
 帳號鍵：
 
-- `enabled`－此帳號的總開關。
-- `name`－選用的顯示標籤。
-- `baseUrl`－合成匯流排 URL。設定此項後，帳號即視為已完成設定。
-- `botUserId`－目標語法中使用的合成機器人使用者 ID（預設值：`openclaw`）。
-- `botDisplayName`－傳出訊息的顯示名稱（預設值：`OpenClaw QA`）。
-- `pollTimeoutMs`－長輪詢等待時間。介於 100 到 30000 之間的整數（預設值：1000）。
-- `allowFrom`－傳送者允許清單（使用者 ID 或 `"*"`；預設值：`["*"]`）。私訊一律採用 `open` 政策；採用允許清單的群組政策也會使用這些合成傳送者 ID。
-- `groupPolicy`－共用房間政策：`"open"`（預設）、`"allowlist"` 或 `"disabled"`。
-- `groupAllowFrom`－選用的共用房間傳送者允許清單。在 `"allowlist"` 下省略此項時，QA Channel 會改用 `allowFrom`。
-- `groups.<room>.requireMention`－在特定群組／頻道房間中，回覆前必須提及機器人（預設值：false）。`groups."*"` 用於設定預設值；每個房間的 `tools`／`toolsBySender` 可設定工具政策覆寫。
-- `defaultTo`－未提供目標時使用的備用目標。
-- `actions.messages`／`actions.reactions`／`actions.search`／`actions.threads`－各動作的工具存取控制。
+- `enabled` — 此帳號的總開關。
+- `name` — 選用的顯示標籤。
+- `baseUrl` — 合成匯流排 URL。設定此值後，帳號即視為已設定。
+- `botUserId` — 目標語法中使用的合成機器人使用者 ID（預設：`openclaw`）。
+- `botDisplayName` — 傳出訊息的顯示名稱（預設：`OpenClaw QA`）。
+- `pollTimeoutMs` — 長輪詢等待時間範圍。介於 100 至 30000 的整數（預設：1000）。
+- `allowFrom` — 傳送者允許清單（使用者 ID 或 `"*"`；預設：`["*"]`）。私訊一律採用
+  `open` 政策；允許清單群組政策也會使用這些合成
+  傳送者 ID。
+- `groupPolicy` — 共用聊天室政策：`"open"`（預設）、`"allowlist"` 或
+  `"disabled"`。
+- `groupAllowFrom` — 選用的共用聊天室傳送者允許清單。在
+  `"allowlist"` 下省略時，QA Channel 會回退使用 `allowFrom`。
+- `groups.<room>.requireMention` — 在特定群組／頻道聊天室中，要求必須提及機器人才會回覆
+  （預設：false）。`groups."*"` 設定預設值；
+  各聊天室的 `tools`／`toolsBySender` 則設定工具政策覆寫。
+- `defaultTo` — 未提供目標時使用的備用目標。
+- `actions.messages`／`actions.reactions`／`actions.search`／`actions.threads` — 各操作的工具存取控制。
 
 頂層的多帳號鍵：
 
-- `accounts`－以帳號 ID 為鍵的具名帳號個別覆寫記錄。
-- `defaultAccount`－設定多個帳號時的偏好帳號 ID。
+- `accounts` — 以帳號 ID 為鍵的具名各帳號覆寫記錄。
+- `defaultAccount` — 設定多個帳號時的偏好帳號 ID。
 
 ## 執行器
 
-主機端自我檢查（將 Markdown 報告寫入 `.artifacts/qa-e2e/`）：
+主機端自我檢查（將 Markdown 報告寫入 `.artifacts/qa-e2e/` 下）：
 
 ```bash
 pnpm qa:e2e
 ```
 
-此命令會透過 `qa-lab` 路由、啟動儲存庫內的 QA 匯流排、啟動 `qa-channel` 執行階段切片，並執行確定性的自我檢查。
+此命令會透過 `qa-lab` 路由、啟動儲存庫內的 QA 匯流排、啟動 `qa-channel` 執行階段切片，並執行具確定性的自我檢查。
 
 完整的儲存庫支援情境套件：
 
@@ -80,20 +87,19 @@ pnpm qa:e2e
 pnpm openclaw qa suite
 ```
 
-針對 QA 閘道通道平行執行情境。如需情境、設定檔和供應商模式的詳細資訊，請參閱 [QA 概觀](/zh-TW/concepts/qa-e2e-automation)。
+針對 QA 閘道通道平行執行情境。情境、設定檔與供應商模式請參閱 [QA 概觀](/zh-TW/concepts/qa-e2e-automation)。
 
-Docker 支援的 QA 網站（閘道與 QA Lab 偵錯工具介面位於同一堆疊中）：
+以 Docker 為基礎的 QA 站台（閘道 + QA Lab 偵錯工具 UI 位於同一堆疊中）：
 
 ```bash
 pnpm qa:lab:up
 ```
 
-建置 QA 網站、啟動 Docker 支援的閘道與 QA Lab 堆疊，並顯示 QA Lab URL。您可以在其中選取情境、選擇模型通道、啟動個別執行，並即時查看結果。QA Lab 偵錯工具與正式發布的 Control UI 套件彼此獨立。
+建置 QA 站台、啟動以 Docker 為基礎的閘道 + QA Lab 堆疊，並輸出 QA Lab URL。接著你可以挑選情境、選擇模型通道、啟動個別執行，並即時查看結果。QA Lab 偵錯工具與隨附的 Control UI 套件彼此獨立。
 
 ## 相關內容
 
-- [QA 概觀](/zh-TW/concepts/qa-e2e-automation)－整體堆疊、傳輸配接器、情境編寫
-- [矩陣 QA](/zh-TW/concepts/qa-matrix)－驅動真實頻道的即時傳輸執行器範例
+- [QA 概觀](/zh-TW/concepts/qa-e2e-automation) — 整體堆疊、傳輸配接器、Matrix 設定檔與情境撰寫
 - [配對](/zh-TW/channels/pairing)
 - [群組](/zh-TW/channels/groups)
 - [頻道概觀](/zh-TW/channels)

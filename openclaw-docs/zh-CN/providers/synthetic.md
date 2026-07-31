@@ -3,13 +3,14 @@ read_when:
     - 你想使用 Synthetic 作为模型提供商
     - 你需要设置 Synthetic API key 或基础 URL
 summary: 在 OpenClaw 中使用 Synthetic 的 Anthropic 兼容 API
-title: 合成的
+title: Synthetic
 x-i18n:
-    generated_at: "2026-07-11T20:54:10Z"
+    generated_at: "2026-07-26T06:31:18Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f1882a34aa1ca52403b92effdbf3b753fd911575af6d8b8aa5d692245b8e8f1b
+    source_hash: c3f6cc89a7b837f57555d176ce78e62a39095d4ef0765c96b6b7b93ffebd7388
     source_path: providers/synthetic.md
     workflow: 16
 ---
@@ -18,19 +19,19 @@ x-i18n:
 OpenClaw 将其内置为 `synthetic` 提供商，并使用 Anthropic
 Messages API。
 
-| 属性 | 值                                    |
-| ---- | ------------------------------------- |
-| 提供商 | `synthetic`                           |
-| 身份验证 | `SYNTHETIC_API_KEY`                   |
-| API  | Anthropic Messages                    |
-| 基础 URL | `https://api.synthetic.new/anthropic` |
+| 属性     | 值                                    |
+| -------- | ------------------------------------- |
+| 提供商   | `synthetic`                    |
+| 身份验证 | `SYNTHETIC_API_KEY`                    |
+| API      | Anthropic Messages                    |
+| 基础 URL | `https://api.synthetic.new/anthropic`                    |
 
 ## 入门指南
 
 <Steps>
-  <Step title="获取 API 密钥">
-    从你的 Synthetic 帐户获取 `SYNTHETIC_API_KEY`，或让新手引导
-    提示你输入一个。
+  <Step title="获取 API key">
+    从你的 Synthetic 账户获取 `SYNTHETIC_API_KEY`，或让新手引导
+    提示你输入。
   </Step>
   <Step title="运行新手引导">
     ```bash
@@ -40,15 +41,15 @@ Messages API。
   <Step title="验证默认模型">
     新手引导会将默认模型设置为：
     ```text
-    synthetic/hf:MiniMaxAI/MiniMax-M2.5
+    synthetic/hf:MiniMaxAI/MiniMax-M3
     ```
   </Step>
 </Steps>
 
 <Warning>
-OpenClaw 的 Anthropic 客户端会自动在基础 URL 后附加 `/v1`，因此请使用
+OpenClaw 的 Anthropic 客户端会自动将 `/v1` 追加到基础 URL，因此请使用
 `https://api.synthetic.new/anthropic`（而不是 `/anthropic/v1`）。如果 Synthetic
-更改了其基础 URL，请覆盖 `models.providers.synthetic.baseUrl`。
+更改了基础 URL，请覆盖 `models.providers.synthetic.baseUrl`。
 </Warning>
 
 ## 配置示例
@@ -58,8 +59,8 @@ OpenClaw 的 Anthropic 客户端会自动在基础 URL 后附加 `/v1`，因此�
   env: { SYNTHETIC_API_KEY: "sk-..." },
   agents: {
     defaults: {
-      model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M2.5" },
-      models: { "synthetic/hf:MiniMaxAI/MiniMax-M2.5": { alias: "MiniMax M2.5" } },
+      model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M3" },
+      models: { "synthetic/hf:MiniMaxAI/MiniMax-M3": { alias: "MiniMax M3" } },
     },
   },
   models: {
@@ -71,12 +72,12 @@ OpenClaw 的 Anthropic 客户端会自动在基础 URL 后附加 `/v1`，因此�
         api: "anthropic-messages",
         models: [
           {
-            id: "hf:MiniMaxAI/MiniMax-M2.5",
-            name: "MiniMax M2.5",
-            reasoning: false,
-            input: ["text"],
+            id: "hf:MiniMaxAI/MiniMax-M3",
+            name: "MiniMax M3",
+            reasoning: true,
+            input: ["text", "image"],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-            contextWindow: 192000,
+            contextWindow: 262144,
             maxTokens: 65536,
           },
         ],
@@ -88,40 +89,28 @@ OpenClaw 的 Anthropic 客户端会自动在基础 URL 后附加 `/v1`，因此�
 
 ## 内置目录
 
-所有 Synthetic 模型的成本均为 `0`（输入/输出/缓存）。
+所有 Synthetic 模型的费用均为 `0`（输入/输出/缓存）。有关服务可用性，请参阅 Synthetic 的
+[当前模型列表](https://dev.synthetic.new/docs/api/models)。
 
-| 模型 ID                                                | 上下文窗口 | 最大令牌数 | 推理 | 输入        |
-| ------------------------------------------------------ | ---------- | ---------- | ---- | ----------- |
-| `hf:MiniMaxAI/MiniMax-M2.5`                            | 192,000    | 65,536     | 否   | 文本        |
-| `hf:moonshotai/Kimi-K2-Thinking`                       | 256,000    | 8,192      | 是   | 文本        |
-| `hf:zai-org/GLM-4.7`                                   | 198,000    | 128,000    | 否   | 文本        |
-| `hf:deepseek-ai/DeepSeek-R1-0528`                      | 128,000    | 8,192      | 否   | 文本        |
-| `hf:deepseek-ai/DeepSeek-V3-0324`                      | 128,000    | 8,192      | 否   | 文本        |
-| `hf:deepseek-ai/DeepSeek-V3.1`                         | 128,000    | 8,192      | 否   | 文本        |
-| `hf:deepseek-ai/DeepSeek-V3.1-Terminus`                | 128,000    | 8,192      | 否   | 文本        |
-| `hf:deepseek-ai/DeepSeek-V3.2`                         | 159,000    | 8,192      | 否   | 文本        |
-| `hf:meta-llama/Llama-3.3-70B-Instruct`                 | 128,000    | 8,192      | 否   | 文本        |
-| `hf:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8` | 524,000    | 8,192      | 否   | 文本        |
-| `hf:moonshotai/Kimi-K2-Instruct-0905`                  | 256,000    | 8,192      | 否   | 文本        |
-| `hf:moonshotai/Kimi-K2.5`                              | 256,000    | 8,192      | 是   | 文本 + 图像 |
-| `hf:openai/gpt-oss-120b`                               | 128,000    | 8,192      | 否   | 文本        |
-| `hf:Qwen/Qwen3-235B-A22B-Instruct-2507`                | 256,000    | 8,192      | 否   | 文本        |
-| `hf:Qwen/Qwen3-Coder-480B-A35B-Instruct`               | 256,000    | 8,192      | 否   | 文本        |
-| `hf:Qwen/Qwen3-VL-235B-A22B-Instruct`                  | 250,000    | 8,192      | 否   | 文本 + 图像 |
-| `hf:zai-org/GLM-4.5`                                   | 128,000    | 128,000    | 否   | 文本        |
-| `hf:zai-org/GLM-4.6`                                   | 198,000    | 128,000    | 否   | 文本        |
-| `hf:zai-org/GLM-5`                                     | 256,000    | 128,000    | 是   | 文本 + 图像 |
-| `hf:deepseek-ai/DeepSeek-V3`                           | 128,000    | 8,192      | 否   | 文本        |
-| `hf:Qwen/Qwen3-235B-A22B-Thinking-2507`                | 256,000    | 8,192      | 是   | 文本        |
+| 模型 ID                                             | 上下文窗口 | 最大 token 数 | 推理 | 输入        |
+| --------------------------------------------------- | ---------- | ------------ | ---- | ----------- |
+| `hf:MiniMaxAI/MiniMax-M3`                                  | 262,144    | 65,536       | 是   | 文本 + 图像 |
+| `hf:moonshotai/Kimi-K2.7-Code`                                  | 262,144    | 8,192        | 是   | 文本 + 图像 |
+| `hf:nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4`                                  | 262,144    | 8,192        | 是   | 文本        |
+| `hf:openai/gpt-oss-120b`                                  | 131,072    | 8,192        | 是   | 文本        |
+| `hf:Qwen/Qwen3.6-27B`                                  | 262,144    | 81,920       | 是   | 文本 + 图像 |
+| `hf:zai-org/GLM-4.7-Flash`                                  | 196,608    | 131,072      | 是   | 文本        |
+| `hf:zai-org/GLM-5.2`                                  | 524,288    | 131,072      | 是   | 文本        |
 
 <Tip>
 模型引用采用 `synthetic/<modelId>` 格式。使用
-`openclaw models list --provider synthetic` 查看你的帐户可用的所有模型。
+`openclaw models list --provider synthetic` 可查看你的
+账户可用的所有模型。
 </Tip>
 
 <AccordionGroup>
   <Accordion title="模型允许列表">
-    如果启用模型允许列表（`agents.defaults.models`），请添加你计划使用的每个
+    如果启用模型允许列表（`agents.defaults.modelPolicy.allow`），请添加你计划使用的每个
     Synthetic 模型。不在允许列表中的模型会对智能体隐藏。
   </Accordion>
 
@@ -140,7 +129,7 @@ OpenClaw 的 Anthropic 客户端会自动在基础 URL 后附加 `/v1`，因此�
     }
     ```
 
-    OpenClaw 仍会自动附加 `/v1`。
+    OpenClaw 仍会自动追加 `/v1`。
 
   </Accordion>
 </AccordionGroup>

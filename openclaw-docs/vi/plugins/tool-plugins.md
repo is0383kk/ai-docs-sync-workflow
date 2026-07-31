@@ -1,38 +1,40 @@
 ---
 read_when:
     - Bạn muốn xây dựng một plugin OpenClaw đơn giản chỉ bổ sung các công cụ cho tác nhân
-    - Bạn muốn sử dụng defineToolPlugin thay vì tự viết siêu dữ liệu manifest của Plugin
-    - Bạn cần dựng khung, tạo, xác thực, kiểm thử hoặc phát hành một plugin chỉ gồm công cụ
+    - Bạn muốn sử dụng defineToolPlugin thay vì tự viết thủ công siêu dữ liệu manifest của Plugin
+    - Bạn cần tạo khung, sinh mã, xác thực, kiểm thử hoặc phát hành một plugin chỉ dành cho công cụ
 sidebarTitle: Tool Plugins
 summary: Xây dựng các công cụ agent có kiểu đơn giản bằng defineToolPlugin và openclaw plugins init/build/validate
 title: Plugin công cụ
 x-i18n:
-    generated_at: "2026-07-12T08:18:37Z"
+    generated_at: "2026-07-19T06:17:56Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 231eba96d4927b7411cb17d79b96e6df09ed111fc8a54eac0ca7717e58803d26
+    source_hash: f6363ccc810e969e1efa2aa0b4208f27244f01db196713fc2dc25cf106b86429
     source_path: plugins/tool-plugins.md
     workflow: 16
 ---
 
-`defineToolPlugin` tạo một Plugin chỉ bổ sung các công cụ mà tác nhân có thể gọi: không có
-kênh, nhà cung cấp mô hình, hook, dịch vụ hoặc backend thiết lập. Hàm này tạo siêu dữ liệu
-manifest mà OpenClaw cần để khám phá công cụ mà không phải tải mã runtime của Plugin.
+`defineToolPlugin` xây dựng một plugin chỉ bổ sung các công cụ mà tác tử có thể gọi: không có
+kênh, nhà cung cấp mô hình, hook, dịch vụ hoặc backend thiết lập. Nó tạo siêu dữ liệu
+manifest mà OpenClaw cần để khám phá các công cụ mà không tải mã runtime của
+plugin.
 
-Đối với các Plugin nhà cung cấp, kênh, hook, dịch vụ hoặc đa khả năng, thay vào đó hãy bắt đầu với
-[Xây dựng Plugin](/vi/plugins/building-plugins), [Plugin kênh](/vi/plugins/sdk-channel-plugins),
+Đối với các plugin nhà cung cấp, kênh, hook, dịch vụ hoặc plugin có nhiều khả năng kết hợp, hãy bắt đầu với
+[Xây dựng plugin](/vi/plugins/building-plugins), [Plugin kênh](/vi/plugins/sdk-channel-plugins),
 hoặc [Plugin nhà cung cấp](/vi/plugins/sdk-provider-plugins).
 
 ## Yêu cầu
 
-- Node 22.19+, Node 23.11+ hoặc Node 24+.
+- Node 22.22.3+, Node 24.15+ hoặc Node 25.9+.
 - Đầu ra gói TypeScript ESM.
-- `typebox` trong `dependencies` (không chỉ trong `devDependencies` - Plugin được tạo sẽ
-  nhập gói này trong thời gian chạy).
+- `typebox` trong `dependencies` (không chỉ `devDependencies` — plugin được tạo
+  sẽ nhập gói này trong runtime).
 - `openclaw >=2026.5.17`, phiên bản đầu tiên xuất
   `openclaw/plugin-sdk/tool-plugin`.
-- Thư mục gốc của gói phân phối `dist/`, `openclaw.plugin.json` và
+- Một thư mục gốc của gói phân phối `dist/`, `openclaw.plugin.json` và
   `package.json`.
 
 ## Bắt đầu nhanh
@@ -50,17 +52,17 @@ npm test
 
 | Tệp                    | Mục đích                                                           |
 | ---------------------- | ----------------------------------------------------------------- |
-| `src/index.ts`         | Điểm vào `defineToolPlugin` với một công cụ `echo`                |
-| `src/index.test.ts`    | Kiểm thử siêu dữ liệu xác nhận danh sách công cụ                  |
-| `tsconfig.json`        | Đầu ra TypeScript NodeNext vào `dist/`                            |
-| `vitest.config.ts`     | Cấu hình Vitest cho `src/**/*.test.ts`                            |
-| `package.json`         | Script, phụ thuộc runtime, `openclaw.extensions: ["./dist/index.js"]` |
-| `openclaw.plugin.json` | Siêu dữ liệu manifest được tạo cho công cụ ban đầu                |
+| `src/index.ts`         | Điểm vào `defineToolPlugin` với một công cụ `echo`                     |
+| `src/index.test.ts`    | Kiểm thử siêu dữ liệu xác nhận danh sách công cụ                             |
+| `tsconfig.json`        | Đầu ra TypeScript NodeNext vào `dist/`                             |
+| `vitest.config.ts`     | Cấu hình Vitest cho `src/**/*.test.ts`                              |
+| `package.json`         | Script, phần phụ thuộc runtime, `openclaw.extensions: ["./dist/index.js"]` |
+| `openclaw.plugin.json` | Siêu dữ liệu manifest được tạo cho công cụ ban đầu                  |
 
 `npm run plugin:build` chạy `npm run build` (tsc), sau đó chạy
 `openclaw plugins build --entry ./dist/index.js`. `npm run plugin:validate`
 xây dựng lại và chạy `openclaw plugins validate --entry ./dist/index.js`.
-Khi xác thực thành công, kết quả sau sẽ được in:
+Khi xác thực thành công, kết quả sau được in ra:
 
 ```text
 Plugin stock-quotes is valid.
@@ -68,18 +70,18 @@ Plugin stock-quotes is valid.
 
 Các tùy chọn của `openclaw plugins init <id>`:
 
-| Cờ                   | Mặc định                 | Tác dụng                                      |
-| -------------------- | ------------------------ | --------------------------------------------- |
-| `--directory <path>` | `<id>`                   | Thư mục đầu ra                                |
-| `--name <name>`      | `<id>` viết kiểu tiêu đề | Tên hiển thị                                  |
-| `--type <type>`      | `tool`                   | Loại khung: `tool` hoặc `provider`            |
-| `--force`            | tắt                      | Ghi đè thư mục đầu ra hiện có                 |
+| Cờ                   | Mặc định            | Tác dụng                                 |
+| -------------------- | ------------------ | -------------------------------------- |
+| `--directory <path>` | `<id>`             | Thư mục đầu ra                       |
+| `--name <name>`      | `<id>` viết hoa kiểu tiêu đề | Tên hiển thị                           |
+| `--type <type>`      | `tool`             | Loại khung: `tool` hoặc `provider`    |
+| `--force`            | tắt                | Ghi đè một thư mục đầu ra hiện có |
 
 ## Viết một công cụ
 
-`defineToolPlugin` nhận định danh Plugin, một lược đồ cấu hình tùy chọn và một
-danh sách công cụ tĩnh. Kiểu tham số và cấu hình được suy luận từ các lược đồ
-TypeBox.
+`defineToolPlugin` nhận danh tính plugin, một schema cấu hình tùy chọn và một
+danh sách công cụ tĩnh. Kiểu tham số và cấu hình được suy ra từ các
+schema TypeBox.
 
 ```typescript
 import { Type } from "typebox";
@@ -101,6 +103,14 @@ export default defineToolPlugin({
       parameters: Type.Object({
         symbol: Type.String({ description: "Ticker symbol, for example OPEN." }),
       }),
+      outputSchema: Type.Object(
+        {
+          symbol: Type.String(),
+          configured: Type.Boolean(),
+          baseUrl: Type.String(),
+        },
+        { additionalProperties: false },
+      ),
       async execute({ symbol }, config, context) {
         context.signal?.throwIfAborted();
         return {
@@ -114,15 +124,15 @@ export default defineToolPlugin({
 });
 ```
 
-Tên công cụ là API ổn định. Hãy chọn tên duy nhất, viết thường và đủ cụ thể
-để tránh xung đột với các công cụ lõi hoặc Plugin khác.
+Tên công cụ là API ổn định. Hãy chọn tên duy nhất, viết thường và
+đủ cụ thể để tránh xung đột với các công cụ lõi hoặc plugin khác.
 
 ## Công cụ tùy chọn và công cụ factory
 
-Đặt `optional: true` khi người dùng cần đưa công cụ vào danh sách cho phép một cách rõ ràng
-trước khi công cụ được gửi đến mô hình. `openclaw plugins build` ghi mục manifest
-`toolMetadata.<tool>.optional` tương ứng, nhờ đó OpenClaw có thể nhận biết công cụ
-là tùy chọn mà không phải tải mã runtime của Plugin.
+Đặt `optional: true` khi người dùng cần đưa công cụ vào danh sách cho phép một cách rõ ràng trước khi
+gửi công cụ đó đến mô hình. `openclaw plugins build` ghi mục manifest
+`toolMetadata.<tool>.optional` tương ứng để OpenClaw có thể nhận biết rằng
+công cụ này là tùy chọn mà không tải mã runtime của plugin.
 
 ```typescript
 tool({
@@ -134,10 +144,10 @@ tool({
 });
 ```
 
-Sử dụng `factory` khi công cụ cần ngữ cảnh công cụ runtime trước khi có thể được
-tạo — để từ chối tham gia một lượt chạy cụ thể, kiểm tra trạng thái sandbox hoặc liên kết
-các trình trợ giúp runtime. Siêu dữ liệu vẫn ở trạng thái tĩnh dù công cụ cụ thể được tạo
-trong thời gian chạy.
+Sử dụng `factory` khi một công cụ cần ngữ cảnh công cụ runtime trước khi có thể được
+tạo — để loại công cụ khỏi một lượt chạy cụ thể, kiểm tra trạng thái sandbox hoặc liên kết
+các trình trợ giúp runtime. Siêu dữ liệu vẫn ở dạng tĩnh dù công cụ cụ thể được xây dựng
+trong runtime.
 
 ```typescript
 tool({
@@ -154,18 +164,18 @@ tool({
 });
 ```
 
-Factory vẫn khai báo trước một tên công cụ cố định. Sử dụng trực tiếp `definePluginEntry`
-khi Plugin tính toán tên công cụ một cách động hoặc kết hợp công cụ
+Các factory vẫn khai báo trước một tên công cụ cố định. Sử dụng trực tiếp `definePluginEntry`
+khi plugin tính toán tên công cụ một cách động hoặc kết hợp công cụ
 với hook, dịch vụ, nhà cung cấp hoặc lệnh.
 
 ## Giá trị trả về
 
-`defineToolPlugin` bọc các giá trị trả về thuần túy vào định dạng kết quả công cụ
+`defineToolPlugin` đóng gói các giá trị trả về thuần túy theo định dạng kết quả công cụ
 của OpenClaw:
 
 - Trả về một chuỗi khi mô hình cần thấy chính xác văn bản đó.
 - Trả về một giá trị tương thích với JSON khi bạn muốn mô hình thấy JSON đã định dạng
-  và OpenClaw lưu giữ giá trị gốc trong `details`.
+  và OpenClaw giữ giá trị gốc trong `details`.
 
 ```typescript
 tool({
@@ -189,13 +199,61 @@ tool({
 });
 ```
 
-Sử dụng công cụ factory khi bạn cần một `AgentToolResult` tùy chỉnh hoặc muốn tái sử dụng
-một phần triển khai `api.registerTool` hiện có.
+Sử dụng công cụ factory khi bạn cần một `AgentToolResult` tùy chỉnh hoặc muốn tái sử dụng một
+triển khai `api.registerTool` hiện có.
+
+## Hợp đồng đầu ra
+
+Thêm `outputSchema` khi một công cụ trả về dữ liệu tương thích với JSON và ổn định. Schema này mô tả
+giá trị gốc được lưu trong `AgentToolResult.details`, không phải văn bản đã định dạng
+trong `content`:
+
+```typescript
+tool({
+  name: "shipment_list",
+  description: "List shipments.",
+  parameters: Type.Object({
+    buyer: Type.Optional(Type.String()),
+  }),
+  outputSchema: Type.Array(
+    Type.Object(
+      {
+        id: Type.String(),
+        buyer: Type.String(),
+        paid: Type.Boolean(),
+        tons: Type.Number(),
+      },
+      { additionalProperties: false },
+    ),
+  ),
+  execute: ({ buyer }) => listShipments(buyer),
+});
+```
+
+[Chế độ mã](/tools/code-mode) và [Tìm kiếm công cụ](/vi/tools/tool-search) chuyển
+schema này thành một gợi ý đầu ra kiểu TypeScript có giới hạn. Nhờ đó, mô hình có thể gọi và
+biến đổi một kết quả đã biết trong một chương trình thay vì dùng thêm một lượt mô hình
+để quan sát cấu trúc của kết quả.
+
+OpenClaw biên dịch schema trước khi thực thi một lệnh gọi danh mục, sau đó xác thực
+giá trị `details` cuối cùng sau các hook công cụ trước khi trả về qua cầu nối.
+Schema không hợp lệ khiến công cụ không thể chạy; kết quả không khớp khiến lệnh gọi đã hoàn tất
+thất bại. Hãy bao gồm mọi biến thể kết quả không ném lỗi, kể cả các biến thể lỗi
+có cấu trúc, hoặc bỏ qua schema khi kết quả không ổn định. Không đưa thông tin bí mật
+hoặc giá trị nhạy cảm vào phần mô tả schema vì siêu dữ liệu đầu ra đáng tin cậy có thể
+hiển thị cho mô hình.
+Sử dụng `{ additionalProperties: false }` trên các lớp đối tượng khi bạn muốn một
+gợi ý đầu ra nhỏ gọn và đầy đủ; các schema mở hoặc bị cắt bớt vẫn khả dụng thông qua
+`tools.describe(...)` nhưng không được quảng bá là hợp đồng chỉ mục nhanh đầy đủ.
+
+Các công cụ factory khai báo `outputSchema` trên `AnyAgentTool` cụ thể mà chúng
+trả về. Khai báo `tool({ factory })` tĩnh không chấp nhận một
+schema đầu ra riêng vì schema đó có thể lệch khỏi công cụ runtime.
 
 ## Cấu hình
 
-`configSchema` là tùy chọn. Nếu bỏ qua, OpenClaw áp dụng một lược đồ đối tượng rỗng
-nghiêm ngặt; manifest được tạo vẫn bao gồm `configSchema`.
+`configSchema` là tùy chọn. Nếu bỏ qua, OpenClaw áp dụng một schema đối tượng rỗng nghiêm ngặt;
+manifest được tạo vẫn bao gồm `configSchema`.
 
 ```typescript
 export default defineToolPlugin({
@@ -206,7 +264,7 @@ export default defineToolPlugin({
 });
 ```
 
-Khi có `configSchema`, đối số `execute` thứ hai được định kiểu từ lược đồ đó:
+Với một `configSchema`, đối số `execute` thứ hai được định kiểu từ schema đó:
 
 ```typescript
 const configSchema = Type.Object({
@@ -229,24 +287,24 @@ export default defineToolPlugin({
 });
 ```
 
-OpenClaw đọc cấu hình Plugin từ mục của Plugin trong cấu hình Gateway. Không
+OpenClaw đọc cấu hình plugin từ mục của plugin trong cấu hình Gateway. Không
 mã hóa cứng thông tin bí mật trong mã nguồn hoặc ví dụ tài liệu; hãy sử dụng cấu hình, biến
-môi trường hoặc SecretRefs theo mô hình bảo mật của Plugin.
+môi trường hoặc SecretRefs theo mô hình bảo mật của plugin.
 
 ## Siêu dữ liệu được tạo
 
-OpenClaw phải đọc manifest của Plugin trước khi nhập mã runtime của Plugin.
+OpenClaw phải đọc manifest plugin trước khi nhập mã runtime của plugin.
 `defineToolPlugin` cung cấp siêu dữ liệu tĩnh cho mục đích này và
 `openclaw plugins build` ghi siêu dữ liệu đó vào gói. Chạy lại trình tạo sau khi
-thay đổi mã định danh, tên, mô tả, lược đồ cấu hình, cơ chế kích hoạt hoặc tên
-công cụ của Plugin:
+thay đổi id, tên, mô tả, schema cấu hình, điều kiện kích hoạt hoặc tên công cụ
+của plugin:
 
 ```bash
 npm run build
 openclaw plugins build --entry ./dist/index.js
 ```
 
-Manifest được tạo cho một Plugin có một công cụ:
+Manifest được tạo cho plugin có một công cụ:
 
 ```json
 {
@@ -268,14 +326,14 @@ Manifest được tạo cho một Plugin có một công cụ:
 }
 ```
 
-`contracts.tools` là hợp đồng khám phá quan trọng: nó cho OpenClaw biết Plugin nào
-sở hữu từng công cụ mà không phải tải runtime của mọi Plugin đã cài đặt. Một
-manifest lỗi thời có thể khiến công cụ biến mất khỏi quá trình khám phá hoặc khiến lỗi
-đăng ký bị quy cho sai Plugin.
+`contracts.tools` là hợp đồng khám phá quan trọng: nó cho OpenClaw biết plugin nào
+sở hữu từng công cụ mà không cần tải runtime của mọi plugin đã cài đặt. Một
+manifest lỗi thời có thể khiến công cụ không xuất hiện trong quá trình khám phá hoặc khiến lỗi đăng ký
+bị quy cho sai plugin.
 
 ## Siêu dữ liệu gói
 
-`openclaw plugins build` cũng đồng bộ `package.json` với điểm vào runtime
+`openclaw plugins build` cũng căn chỉnh `package.json` theo điểm vào runtime
 đã chọn:
 
 ```json
@@ -299,7 +357,7 @@ Phân phối JavaScript đã xây dựng (`./dist/index.js`), không phải đi�
 
 ## Xác thực trong CI
 
-`plugins build --check` thất bại mà không ghi lại tệp khi siêu dữ liệu được tạo
+`plugins build --check` sẽ thất bại mà không ghi lại tệp khi siêu dữ liệu được tạo
 đã lỗi thời:
 
 ```bash
@@ -319,7 +377,7 @@ npm test
 
 ## Cài đặt và kiểm tra cục bộ
 
-Từ một bản checkout OpenClaw riêng biệt hoặc CLI đã cài đặt, hãy cài đặt đường dẫn gói:
+Từ một checkout OpenClaw riêng hoặc CLI đã cài đặt, hãy cài đặt đường dẫn gói:
 
 ```bash
 openclaw plugins install ./stock-quotes
@@ -334,13 +392,13 @@ openclaw plugins install npm-pack:./openclaw-plugin-stock-quotes-0.1.0.tgz
 openclaw plugins inspect stock-quotes --runtime --json
 ```
 
-Sau khi cài đặt, hãy khởi động lại hoặc tải lại Gateway và yêu cầu tác nhân sử dụng
-công cụ. Nếu công cụ không hiển thị, hãy kiểm tra runtime của Plugin và danh mục
+Sau khi cài đặt, hãy khởi động lại hoặc tải lại Gateway và yêu cầu agent sử dụng
+công cụ. Nếu công cụ không hiển thị, hãy kiểm tra runtime của plugin và danh mục
 công cụ có hiệu lực trước khi thay đổi mã (xem [Khắc phục sự cố](#troubleshooting)).
 
 ## Phát hành
 
-Phát hành thông qua ClawHub sau khi gói đã sẵn sàng. `clawhub package publish`
+Phát hành qua ClawHub sau khi gói đã sẵn sàng. `clawhub package publish`
 nhận một nguồn: thư mục cục bộ, kho lưu trữ GitHub (`owner/repo[@ref]`) hoặc
 URL tarball.
 
@@ -355,46 +413,46 @@ Cài đặt bằng bộ định vị ClawHub rõ ràng:
 openclaw plugins install clawhub:your-org/stock-quotes
 ```
 
-Các đặc tả gói npm thuần vẫn được cài đặt từ npm trong giai đoạn chuyển đổi khi ra mắt, nhưng
-ClawHub là bề mặt khám phá và phân phối ưu tiên cho các Plugin
+Các thông số gói npm thuần vẫn được cài đặt từ npm trong giai đoạn chuyển đổi ra mắt, nhưng
+ClawHub là bề mặt khám phá và phân phối ưu tiên dành cho các plugin
 OpenClaw. Xem [Phát hành trên ClawHub](/vi/clawhub/publishing) để biết phạm vi chủ sở hữu và
-quy trình đánh giá bản phát hành.
+quy trình review bản phát hành.
 
 ## Khắc phục sự cố
 
 ### `plugin entry not found: ./dist/index.js`
 
-Tệp điểm vào đã chọn không tồn tại. Chạy `npm run build`, sau đó chạy lại
+Tệp mục nhập đã chọn không tồn tại. Chạy `npm run build`, sau đó chạy lại
 `openclaw plugins build --entry ./dist/index.js` hoặc
 `openclaw plugins validate --entry ./dist/index.js`.
 
 ### `plugin entry does not expose defineToolPlugin metadata`
 
-Điểm vào không xuất một giá trị được tạo bởi `defineToolPlugin`. Hãy xác nhận
+Mục nhập không xuất giá trị được tạo bởi `defineToolPlugin`. Hãy xác nhận rằng
 phần xuất mặc định của mô-đun là kết quả `defineToolPlugin(...)`, hoặc truyền
-điểm vào chính xác bằng `--entry`.
+mục nhập chính xác bằng `--entry`.
 
 ### `openclaw.plugin.json generated metadata is stale`
 
-Manifest không còn khớp với siêu dữ liệu của điểm vào. Chạy:
+Tệp kê khai không còn khớp với siêu dữ liệu mục nhập. Chạy:
 
 ```bash
 npm run build
 openclaw plugins build --entry ./dist/index.js
 ```
 
-Commit cả các thay đổi đối với `openclaw.plugin.json` và `package.json`.
+Commit cả thay đổi `openclaw.plugin.json` và `package.json`.
 
 ### `package.json openclaw.extensions must include ./dist/index.js`
 
-Siêu dữ liệu gói trỏ đến một điểm vào runtime khác. Chạy
-`openclaw plugins build --entry ./dist/index.js` để trình tạo đồng bộ
-siêu dữ liệu gói với điểm vào mà bạn định phân phối.
+Siêu dữ liệu gói trỏ đến một mục nhập runtime khác. Chạy
+`openclaw plugins build --entry ./dist/index.js` để trình tạo căn chỉnh
+siêu dữ liệu gói với mục nhập bạn định phát hành.
 
 ### `Cannot find package 'typebox'`
 
-Plugin đã xây dựng nhập `typebox` trong thời gian chạy. Hãy giữ gói này trong `dependencies`,
-cài đặt lại, xây dựng lại và chạy lại quá trình xác thực.
+Plugin đã xây dựng nhập `typebox` trong thời gian chạy. Giữ nó trong `dependencies`,
+cài đặt lại, xây dựng lại và chạy lại quy trình xác thực.
 
 ### Công cụ không xuất hiện sau khi cài đặt
 
@@ -402,15 +460,15 @@ Kiểm tra các mục sau theo thứ tự:
 
 1. `openclaw plugins inspect <plugin-id> --runtime`
 2. `openclaw plugins validate --root <plugin-root> --entry ./dist/index.js`
-3. `openclaw.plugin.json` có `contracts.tools` với các tên công cụ như mong đợi.
+3. `openclaw.plugin.json` có `contracts.tools` với tên công cụ như dự kiến.
 4. `package.json` có `openclaw.extensions: ["./dist/index.js"]`.
 5. Gateway đã được khởi động lại hoặc tải lại sau khi cài đặt plugin.
 
 ## Xem thêm
 
 - [Xây dựng plugin](/vi/plugins/building-plugins)
-- [Điểm vào của plugin](/vi/plugins/sdk-entrypoints)
+- [Điểm mục nhập Plugin](/vi/plugins/sdk-entrypoints)
 - [Đường dẫn con của Plugin SDK](/vi/plugins/sdk-subpaths)
-- [Tệp kê khai plugin](/vi/plugins/manifest)
+- [Tệp kê khai Plugin](/vi/plugins/manifest)
 - [CLI plugin](/vi/cli/plugins)
-- [Xuất bản lên ClawHub](/vi/clawhub/publishing)
+- [Phát hành trên ClawHub](/vi/clawhub/publishing)

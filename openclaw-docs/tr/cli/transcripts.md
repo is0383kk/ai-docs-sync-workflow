@@ -1,26 +1,30 @@
 ---
 read_when:
-    - Terminalden saklanan transkript özetlerini okumak istiyorsunuz.
+    - Depolanan transkript özetlerini terminalden okumak istiyorsunuz
     - Transkriptlerin Markdown özetinin yoluna ihtiyacınız var
     - Temel transkript depolama düzeninde hata ayıklıyorsunuz
-summary: '`openclaw transcripts` için CLI başvurusu (saklanan transkriptleri listeleme, gösterme ve bulma)'
-title: Transkriptler CLI
+summary: '`openclaw transcripts` için CLI başvurusu (saklanan transkriptleri listeleme, gösterme ve dışa aktarma)'
+title: Transkriptler CLI'si
 x-i18n:
-    generated_at: "2026-07-12T12:11:44Z"
+    generated_at: "2026-07-26T22:42:08Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: dde02e924339c64cf6acd5c4b6162785dcfccf4a1df2aac0d9d52d5306511579
+    source_hash: c04ba637fb46ec271383b2f0d17655e18018e07f489c34dc3fd14ad926f27aa4
     source_path: cli/transcripts.md
     workflow: 16
 ---
 
 # `openclaw transcripts`
 
-`transcripts` agent aracı tarafından yazılan transkriptler için salt okunur inceleyici.
-Yakalama, içe aktarma ve özetleme bu CLI üzerinden değil, söz konusu araç üzerinden çalışır.
+Kalıcı toplantı dökümleri için inceleme ve dışa aktarma komutu. Google Meet,
+Microsoft Teams ve Zoom tarayıcı katılımcıları notları otomatik olarak yakalar;
+`transcripts` aracı ayrıca sağlayıcı yakalamayı ve manuel içe aktarmayı destekler.
 
-Yapıtlar durum dizini altında bulunur:
+Standart döküm durumu, `$OPENCLAW_STATE_DIR/state/openclaw.sqlite` konumundaki paylaşılan SQLite veritabanında
+bulunur. `show` ve `path`, durum dizini altında kullanıcıya
+yönelik yapıtları açıkça oluşturur:
 
 ```text
 $OPENCLAW_STATE_DIR/transcripts/YYYY-MM-DD/<session>/
@@ -30,8 +34,11 @@ $OPENCLAW_STATE_DIR/transcripts/YYYY-MM-DD/<session>/
   summary.md
 ```
 
-Varsayılan durum dizini `~/.openclaw` dizinidir; `OPENCLAW_STATE_DIR` ile geçersiz kılabilirsiniz.
-Tarih dizini oturumun başlangıç zamanından gelir; oturum dizini ise oturum kimliğinden türetilmiş, dosya sistemi açısından güvenli bir kısa addır.
+Bu dosyalar dışa aktarımlardır; ikinci bir çalışma zamanı deposu değildir. OpenClaw,
+yakalama, özetleme veya listeleme sırasında bunları geri okumaz. Varsayılan durum
+dizini `~/.openclaw` konumudur; `OPENCLAW_STATE_DIR` ile geçersiz kılınabilir.
+Tarih dizini oturumun başlangıç zamanından gelir; oturum dizini ise oturum kimliğinden
+türetilen, dosya sistemi açısından güvenli bir kısa addır.
 
 ## Komutlar
 
@@ -49,46 +56,51 @@ openclaw transcripts show <session> --json
 openclaw transcripts path <session> --json
 ```
 
-| Komut                         | Açıklama                                               |
-| ----------------------------- | ------------------------------------------------------ |
-| `list`                        | Saklanan oturumları listeler.                          |
-| `show <session>`              | Saklanan `summary.md` dosyasını yazdırır.              |
-| `path <session>`              | `summary.md` yolunu yazdırır.                          |
-| `path <session> --dir`        | Oturum dizinini yazdırır.                              |
-| `path <session> --metadata`   | `metadata.json` dosyasını yazdırır.                    |
-| `path <session> --transcript` | `transcript.jsonl` dosyasını yazdırır.                 |
-| `--json`                      | Makine tarafından okunabilir çıktı yazdırır (tüm alt komutlar). |
+| Komut                         | Açıklama                                             |
+| ----------------------------- | ---------------------------------------------------- |
+| `list`            | Depolanan oturumları listeler.                       |
+| `show <session>`            | `summary.md` oluşturur ve yazdırır.            |
+| `path <session>`            | `summary.md` yolunu oluşturur ve yazdırır.     |
+| `path <session> --dir`            | Tüm yapıtları oluşturur ve dizinlerini yazdırır.     |
+| `path <session> --metadata`            | `metadata.json` oluşturur ve yazdırır.            |
+| `path <session> --transcript`            | `transcript.jsonl` oluşturur ve yazdırır.            |
+| `--json`            | Makine tarafından okunabilir çıktı yazdırır (herhangi bir alt komut). |
 
-`<session>`, yalnızca oturum kimliğini veya tarih içeren bir seçiciyi
+`<session>`, yalın bir oturum kimliğini veya tarih nitelemeli bir seçiciyi
 (`YYYY-MM-DD/<session>`) kabul eder. Aynı oturum kimliği birden fazla günde
-geçiyorsa nitelikli biçimi kullanın; örneğin `openclaw transcripts show
-2026-05-22/standup`. Varsayılan oturum kimlikleri bir zaman damgası ve rastgele
-bir son ek içerir; bir oturuma yalnızca kimlik aynı gün içinde benzersiz olacaksa
-sabit bir kimlik verin.
+geçiyorsa nitelemeli biçimi kullanın; örneğin `openclaw transcripts show
+2026-05-22/standup`. Varsayılan oturum
+kimlikleri bir zaman damgası ve rastgele bir son ek içerir; bir oturuma yalnızca bu
+kimlik gün içinde benzersiz olduğunda sabit bir kimlik verin.
 
 ## Çıktı
 
-`list`, her oturum için sekmeyle ayrılmış tek bir satır yazdırır: seçici, başlangıç zamanı, başlık,
-özet yolu.
+`list`, her oturum için sekmeyle ayrılmış bir satır yazdırır: seçici,
+başlangıç zamanı, başlık, özet yolu.
 
 ```text
 2026-05-22/standup  2026-05-22T09:00:00.000Z  Haftalık durum toplantısı  /Users/user/.openclaw/transcripts/2026-05-22/standup/summary.md
 ```
 
-Seçici, `show` veya `path` komutuna geri iletilecek en güvenli değerdir.
+Seçici, `show` veya `path` öğesine geri iletilecek en güvenli değerdir.
 
 `list --json`; `sessionId`, `selector`, `date`, `title`,
-`startedAt`, `stoppedAt`, `source`, `path`, `summaryPath`, `hasSummary` alanlarını içeren nesneler döndürür.
+`startedAt`, `stoppedAt`, `source`, `path`, `summaryPath`, `hasSummary`
+alanlarını içeren nesneler döndürür. Depolanan toplantı kaynak URL'leri yalnızca
+kaynağı ve yolu içerir; sorgu dizeleri, parçalar ve gömülü kimlik bilgileri kalıcı
+depolamadan önce kaldırılır.
 
-`show --json`; saklanan oturum meta verilerini, seçiciyi, oturum
+`show --json`, depolanan oturum meta verilerini, seçiciyi, oturum
 dizinini, özet yolunu ve özet Markdown metnini döndürür.
 
-`path --json`, seçilen yolu ve ilgili dosyanın var olup olmadığını döndürür.
+`path --json`, seçilen yolu ve bu yapıtın oluşturulup oluşturulamadığını
+döndürür. Depolanan bir oturum için meta veri ve döküm dışa aktarımları her zaman
+mevcuttur; oturumun özeti oluşana kadar özet yolu `exists: false` bildirir.
 
-## Gün başına birden çok oturum
+## Gün başına birden fazla oturum
 
 Oturumlar önce tarihe, ardından oturum kimliğine göre gruplanır. Bir gündeki on
-toplantı, on kardeş klasöre dönüşür:
+toplantı, aynı düzeyde on klasör hâline gelir:
 
 ```text
 ~/.openclaw/transcripts/2026-05-22/
@@ -97,42 +109,59 @@ toplantı, on kardeş klasöre dönüşür:
   standup/
 ```
 
-Otomasyon için varsayılan olarak oluşturulan kimlikleri kullanın. `standup` gibi sabit bir kimliği yalnızca
-aynı tarihte tekrarlanmayacaksa kullanın.
+Otomasyon için varsayılan olarak oluşturulan kimlikleri kullanın. `standup`
+gibi sabit bir kimliği yalnızca aynı tarihte yinelenmeyecekse kullanın.
 
 ## Eksik özetler
 
-Canlı oturumlar, oturum durduğunda `summary.md` dosyasını yazar; içe aktarılan transkriptler
-ise içe aktarmanın hemen ardından bu dosyayı yazar. Yakalama hâlâ etkinken, durdurma sırasında
-bir sağlayıcı başarısız olduğunda veya herhangi bir konuşma ulaşmadan önce meta veriler
-yazıldığında bir oturum, özeti olmadan `list` içinde görünebilir.
+Canlı oturumlar, oturum durduğunda `summary.md` depolar ve oluşturur;
+içe aktarılan dökümler ise bunu içe aktarmanın hemen ardından yapar. Yakalama hâlâ
+etkinken, bir sağlayıcı durdurma sırasında başarısız olduğunda veya herhangi bir
+ifade ulaşmadan önce meta veriler depolandığında bir oturum özetsiz olarak
+`list` içinde görünebilir.
 
-Salt eklemeli ham transkripti incelemek için `path <session> --transcript`
-komutunu kullanın veya Markdown özetini yeniden oluşturmak için `transcripts`
-aracının `summarize` eylemini çalıştırın.
+Ham, yalnızca sona eklemeli dökümü incelemek için `path <session> --transcript` kullanın
+veya Markdown özetini yeniden oluşturmak için `transcripts` aracının
+`summarize` eylemini çalıştırın.
+
+## Eski dosya deposunu yükseltme
+
+SQLite deposundan önceki OpenClaw sürümleri, standart çalışma zamanı durumunu
+doğrudan `$OPENCLAW_STATE_DIR/transcripts/` altına yazıyordu. Şunu çalıştırın:
+
+```bash
+openclaw doctor --fix
+```
+
+Doctor, eski ağacın tamamını SQLite'a aktarır, satır sayılarını ve sıralamayı
+doğrular, geçiş kayıtlarını kaydeder ve doğrulanan kaynak ağacı zaman damgalı
+bir `transcripts.migrated-*` arşivine taşır. Çalışma zamanı komutları eski dosyalara
+geri dönmez. İçe aktarılan oturumları ve kullandığınız dışa aktarımları
+doğrulayana kadar arşivi saklayın.
 
 ## Yapılandırma
 
-Yakalama isteğe bağlıdır (canlı kaynaklar toplantı sesine katılıp kaydedebilir). Şununla
-etkinleştirin:
+Toplantı dökümü yakalama varsayılan olarak etkindir. Genel olarak devre dışı
+bırakmak için:
 
 ```json
 {
   "transcripts": {
-    "enabled": true,
-    "maxUtterances": 2000
+    "enabled": false
   }
 }
 ```
 
-- `enabled` (varsayılan `false`): aracı etkinleştirir.
-- `maxUtterances` (varsayılan `2000`, 1-10000 aralığıyla sınırlandırılır): oturum başına
-  konuşma arabelleği boyutu.
-
-Otomatik başlatma kaynaklarını `transcripts.autoStart` ile yapılandırın. Her girdi
-mevcut olduğunda etkinleştirilir; ilgili kaynağı devre dışı bırakmak için girdiyi atlayın. `discord-voice`,
-paketle birlikte gelen ve otomatik başlatmayı destekleyen kaynaktır; `guildId` ve
-`channelId` gerektirir:
+- `enabled` (varsayılan `true`): otomatik toplantı notlarını, dökümler
+  aracını ve yapılandırılmış otomatik başlatma kaynaklarını etkinleştirir. Toplantı
+  notlarının ana makinede kalıcı olarak saklanmaması gerekiyorsa bunu
+  `false` olarak ayarlayın. Açıkça istenen toplantı
+  `transcribe` modu, mevcut sınırlı canlı altyazı kuyruğunu korur ancak bu ayar
+  false olduğunda kalıcı satırlar yazmaz.
+  Otomatik başlatma kaynaklarını `transcripts.autoStart` ile yapılandırın. Her girdi
+  mevcut olduğunda etkinleşir; ilgili kaynağı devre dışı bırakmak için girdiyi
+  atlayın. `discord-voice`, paketle birlikte gelen otomatik başlatma destekli
+  kaynaktır ve `guildId` ile `channelId` gerektirir:
 
 ```json
 {
@@ -148,3 +177,10 @@ paketle birlikte gelen ve otomatik başlatmayı destekleyen kaynaktır; `guildId
   }
 }
 ```
+
+Toplantı sağlayıcısı kimlikleri sırasıyla `google-meet`, `teams`
+ve `zoom` değerleridir. Bunların takma adları sırasıyla
+`googlemeet`/`meet`, `teams-meetings`/`microsoft-teams`/`msteams`
+ve `zoom-meetings` değerleridir. Toplantı sağlayıcıları zaten etkin olan bir
+toplantı botu oturumuna bağlanır; normal toplantı katılımları için bir
+`autoStart` girdisi gerekmez.

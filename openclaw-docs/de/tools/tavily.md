@@ -2,14 +2,15 @@
 read_when:
     - Sie möchten eine Tavily-gestützte Websuche
     - Sie benötigen einen Tavily-API-Schlüssel
-    - Sie möchten Tavily als `web_search`-Provider verwenden
+    - Sie möchten Tavily als web_search-Provider verwenden
     - Sie möchten Inhalte aus URLs extrahieren
 summary: Tavily-Such- und Extraktionswerkzeuge
 title: Tavily
 x-i18n:
-    generated_at: "2026-07-12T02:15:45Z"
+    generated_at: "2026-07-26T18:10:43Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 9a61351872eb8aecb0b3ada9b573ee8d3db1dcec3d7bd74074446fbe9dc1f274
     source_path: tools/tavily.md
@@ -21,16 +22,16 @@ x-i18n:
 - als `web_search`-Provider für das generische Suchwerkzeug
 - als explizite Plugin-Werkzeuge: `tavily_search` und `tavily_extract`
 
-Tavily liefert strukturierte, für die Verarbeitung durch LLMs optimierte Ergebnisse mit konfigurierbarer Suchtiefe, Themenfilterung, Domainfiltern, KI-generierten Antwortzusammenfassungen und Inhaltsextraktion aus URLs (einschließlich mit JavaScript gerenderter Seiten).
+Tavily liefert strukturierte, für die Nutzung durch LLMs optimierte Ergebnisse mit konfigurierbarer Suchtiefe, Themenfilterung, Domainfiltern, KI-generierten Antwortzusammenfassungen und Inhaltsextraktion aus URLs (einschließlich mit JavaScript gerenderter Seiten).
 
-| Eigenschaft | Wert                                                                                              |
-| ----------- | ------------------------------------------------------------------------------------------------- |
-| Plugin-ID   | `tavily`                                                                                          |
-| Paket       | `@openclaw/tavily-plugin`                                                                         |
-| Authentifizierung | Umgebungsvariable `TAVILY_API_KEY` oder Konfiguration `apiKey`                              |
-| Basis-URL   | `https://api.tavily.com` (Standard); Umgebungsvariable `TAVILY_BASE_URL` oder Konfiguration `baseUrl` zum Überschreiben |
-| Zeitlimits  | 30 s für die Suche, 60 s für die Extraktion (Standard)                                            |
-| Werkzeuge   | `tavily_search`, `tavily_extract`                                                                 |
+| Eigenschaft | Wert                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------- |
+| Plugin-ID | `tavily`                                                                                      |
+| Paket   | `@openclaw/tavily-plugin`                                                                     |
+| Authentifizierung      | Umgebungsvariable `TAVILY_API_KEY` oder Konfiguration `apiKey`                                                   |
+| Basis-URL  | `https://api.tavily.com` (Standard); Umgebungsvariable `TAVILY_BASE_URL` oder Konfiguration `baseUrl` zum Überschreiben |
+| Zeitüberschreitungen  | 30s für die Suche, 60s für die Extraktion (Standard)                                                             |
+| Werkzeuge     | `tavily_search`, `tavily_extract`                                                             |
 
 ## Erste Schritte
 
@@ -52,7 +53,7 @@ Tavily liefert strukturierte, für die Verarbeitung durch LLMs optimierte Ergebn
             enabled: true,
             config: {
               webSearch: {
-                apiKey: "tvly-...", // optional, wenn TAVILY_API_KEY festgelegt ist
+                apiKey: "tvly-...", // optional if TAVILY_API_KEY is set
                 baseUrl: "https://api.tavily.com",
               },
             },
@@ -75,50 +76,50 @@ Tavily liefert strukturierte, für die Verarbeitung durch LLMs optimierte Ergebn
 </Steps>
 
 <Tip>
-Wenn Sie Tavily beim Onboarding oder unter `openclaw configure --section web` auswählen, wird das offizielle Tavily-Plugin bei Bedarf installiert und aktiviert.
+Wenn Sie Tavily beim Onboarding oder in `openclaw configure --section web` auswählen, wird das offizielle Tavily-Plugin bei Bedarf installiert und aktiviert.
 </Tip>
 
 ## Werkzeugreferenz
 
 ### `tavily_search`
 
-Verwenden Sie dieses Werkzeug, wenn Sie statt der generischen `web_search` Tavily-spezifische Suchoptionen benötigen.
+Verwenden Sie dies, wenn Sie statt der generischen `web_search` Tavily-spezifische Suchoptionen benötigen.
 
-| Parameter         | Typ          | Einschränkungen / Standard             | Beschreibung                                        |
-| ----------------- | ------------ | -------------------------------------- | --------------------------------------------------- |
-| `query`           | Zeichenfolge | erforderlich                           | Zeichenfolge der Suchanfrage.                       |
-| `search_depth`    | Aufzählung   | `basic` (Standard), `advanced`         | `advanced` ist langsamer, liefert aber relevantere Ergebnisse. |
-| `topic`           | Aufzählung   | `general` (Standard), `news`, `finance` | Nach Themenbereich filtern.                        |
-| `max_results`     | Ganzzahl     | 1–20, Standard `5`                     | Anzahl der Ergebnisse.                              |
-| `include_answer`  | Boolesch     | Standard `false`                       | Eine von Tavily KI-generierte Antwortzusammenfassung einbeziehen. |
-| `time_range`      | Aufzählung   | `day`, `week`, `month`, `year`         | Ergebnisse nach Aktualität filtern.                 |
-| `include_domains` | Zeichenfolgen-Array | (keine)                         | Nur Ergebnisse aus diesen Domains einbeziehen.      |
-| `exclude_domains` | Zeichenfolgen-Array | (keine)                         | Ergebnisse aus diesen Domains ausschließen.         |
+| Parameter         | Typ         | Einschränkungen / Standard                  | Beschreibung                                   |
+| ----------------- | ------------ | -------------------------------------- | --------------------------------------------- |
+| `query`           | Zeichenfolge       | erforderlich                               | Suchanfrage.                          |
+| `search_depth`    | Aufzählung         | `basic` (Standard), `advanced`          | `advanced` ist langsamer, bietet aber eine höhere Relevanz.    |
+| `topic`           | Aufzählung         | `general` (Standard), `news`, `finance` | Nach Themenbereich filtern.                       |
+| `max_results`     | Ganzzahl      | 1-20, Standard `5`                      | Anzahl der Ergebnisse.                            |
+| `include_answer`  | boolescher Wert      | Standard `false`                        | Eine von Tavily KI-generierte Antwortzusammenfassung einbeziehen. |
+| `time_range`      | Aufzählung         | `day`, `week`, `month`, `year`         | Ergebnisse nach Aktualität filtern.                    |
+| `include_domains` | Zeichenfolgen-Array | (keine)                                 | Nur Ergebnisse aus diesen Domains einbeziehen.      |
+| `exclude_domains` | Zeichenfolgen-Array | (keine)                                 | Ergebnisse aus diesen Domains ausschließen.           |
 
 Abwägung bei der Suchtiefe:
 
-| Tiefe      | Geschwindigkeit | Relevanz | Am besten geeignet für                       |
-| ---------- | --------------- | -------- | --------------------------------------------- |
-| `basic`    | Schneller       | Hoch     | Allgemeine Suchanfragen (Standard).           |
-| `advanced` | Langsamer       | Am höchsten | Präzise Recherchen und Faktenprüfung.       |
+| Tiefe      | Geschwindigkeit  | Relevanz | Am besten geeignet für                             |
+| ---------- | ------ | --------- | ------------------------------------ |
+| `basic`    | Schneller | Hoch      | Allgemeine Suchanfragen (Standard).   |
+| `advanced` | Langsamer | Am höchsten   | Präzise Recherche und Faktenfindung. |
 
 ### `tavily_extract`
 
-Verwenden Sie dieses Werkzeug, um bereinigte Inhalte aus einer oder mehreren URLs zu extrahieren. Es verarbeitet mit JavaScript gerenderte Seiten und unterstützt die an Suchanfragen ausgerichtete Segmentierung für eine gezielte Extraktion.
+Verwenden Sie dies, um bereinigte Inhalte aus einer oder mehreren URLs zu extrahieren. Das Werkzeug verarbeitet mit JavaScript gerenderte Seiten und unterstützt eine anfragebezogene Segmentierung für die gezielte Extraktion.
 
-| Parameter           | Typ          | Einschränkungen / Standard    | Beschreibung                                                    |
-| ------------------- | ------------ | ----------------------------- | --------------------------------------------------------------- |
-| `urls`              | Zeichenfolgen-Array | erforderlich, 1–20      | URLs, aus denen Inhalte extrahiert werden sollen.                |
-| `query`             | Zeichenfolge | (optional)                    | Extrahierte Segmente nach ihrer Relevanz für diese Anfrage neu sortieren. |
-| `extract_depth`     | Aufzählung   | `basic` (Standard), `advanced` | Verwenden Sie `advanced` für stark JS-basierte Seiten, SPAs oder dynamische Tabellen. |
-| `chunks_per_source` | Ganzzahl     | 1–5; **erfordert `query`**    | Pro URL zurückgegebene Segmente. Führt ohne `query` zu einem Fehler. |
-| `include_images`    | Boolesch     | Standard `false`              | Bild-URLs in die Ergebnisse einbeziehen.                         |
+| Parameter           | Typ         | Einschränkungen / Standard         | Beschreibung                                                 |
+| ------------------- | ------------ | ----------------------------- | ----------------------------------------------------------- |
+| `urls`              | Zeichenfolgen-Array | erforderlich, 1-20                | URLs, aus denen Inhalte extrahiert werden sollen.                               |
+| `query`             | Zeichenfolge       | (optional)                    | Extrahierte Abschnitte nach ihrer Relevanz für diese Anfrage neu sortieren.         |
+| `extract_depth`     | Aufzählung         | `basic` (Standard), `advanced` | Verwenden Sie `advanced` für JS-lastige Seiten, SPAs oder dynamische Tabellen. |
+| `chunks_per_source` | Ganzzahl      | 1-5; **erfordert `query`**     | Pro URL zurückgegebene Abschnitte. Führt zu einem Fehler, wenn der Parameter ohne `query` festgelegt wird.     |
+| `include_images`    | boolescher Wert      | Standard `false`               | Bild-URLs in die Ergebnisse einbeziehen.                              |
 
 Abwägung bei der Extraktionstiefe:
 
-| Tiefe      | Verwendung                                        |
-| ---------- | ------------------------------------------------- |
-| `basic`    | Einfache Seiten. Probieren Sie dies zuerst aus.   |
+| Tiefe      | Verwendungszweck                                |
+| ---------- | ------------------------------------------ |
+| `basic`    | Einfache Seiten. Versuchen Sie dies zuerst.              |
 | `advanced` | Mit JS gerenderte SPAs, dynamische Inhalte und Tabellen. |
 
 <Tip>
@@ -127,43 +128,43 @@ Teilen Sie größere URL-Listen auf mehrere `tavily_extract`-Aufrufe auf (maxima
 
 ## Das richtige Werkzeug auswählen
 
-| Anforderung                                      | Werkzeug          |
-| ------------------------------------------------ | ----------------- |
-| Schnelle Websuche ohne besondere Optionen        | `web_search`      |
-| Suche mit Tiefe, Thema und KI-Antworten           | `tavily_search`   |
-| Inhalte aus bestimmten URLs extrahieren           | `tavily_extract`  |
+| Anforderung                                 | Werkzeug             |
+| ------------------------------------ | ---------------- |
+| Schnelle Websuche ohne besondere Optionen | `web_search`     |
+| Suche mit Tiefe, Thema und KI-Antworten | `tavily_search`  |
+| Inhalte aus bestimmten URLs extrahieren   | `tavily_extract` |
 
 <Note>
-Das generische Werkzeug `web_search` unterstützt mit Tavily als Provider `query` und `count` (bis zu 20 Ergebnisse). Verwenden Sie für Tavily-spezifische Optionen (`search_depth`, `topic`, `include_answer`, Domainfilter und Zeitraum) stattdessen `tavily_search`.
+Das generische Werkzeug `web_search` unterstützt mit Tavily als Provider `query` und `count` (bis zu 20 Ergebnisse). Verwenden Sie für Tavily-spezifische Optionen (`search_depth`, `topic`, `include_answer`, Domainfilter, Zeitraum) stattdessen `tavily_search`.
 </Note>
 
 ## Erweiterte Konfiguration
 
 <AccordionGroup>
-  <Accordion title="Auflösungsreihenfolge des API-Schlüssels">
-    Der Tavily-Client sucht in dieser Reihenfolge nach seinem API-Schlüssel:
+  <Accordion title="Auflösungsreihenfolge für API-Schlüssel">
+    Der Tavily-Client sucht seinen API-Schlüssel in dieser Reihenfolge:
 
     1. `plugins.entries.tavily.config.webSearch.apiKey` (über SecretRefs aufgelöst).
     2. `TAVILY_API_KEY` aus der Gateway-Umgebung.
 
-    Sowohl `tavily_search` als auch `tavily_extract` lösen einen Einrichtungsfehler aus, wenn keines von beiden vorhanden ist.
+    `tavily_search` und `tavily_extract` lösen beide einen Einrichtungsfehler aus, wenn keiner der Werte vorhanden ist.
 
   </Accordion>
 
   <Accordion title="Benutzerdefinierte Basis-URL">
-    Überschreiben Sie `plugins.entries.tavily.config.webSearch.baseUrl` oder legen Sie `TAVILY_BASE_URL` fest, wenn Sie Tavily über einen Proxy bereitstellen. Die Konfiguration hat Vorrang vor der Umgebungsvariablen. Der Standardwert ist `https://api.tavily.com`.
+    Überschreiben Sie `plugins.entries.tavily.config.webSearch.baseUrl` oder legen Sie `TAVILY_BASE_URL` fest, wenn Sie Tavily über einen Proxy bereitstellen. Die Konfiguration hat Vorrang vor der Umgebungsvariable. Der Standardwert ist `https://api.tavily.com`.
   </Accordion>
 
   <Accordion title="`chunks_per_source` erfordert `query`">
-    `tavily_extract` weist Aufrufe zurück, die `chunks_per_source` ohne `query` übergeben. Tavily ordnet Segmente nach ihrer Relevanz für die Suchanfrage, daher ist der Parameter ohne eine solche bedeutungslos.
+    `tavily_extract` lehnt Aufrufe ab, die `chunks_per_source` ohne `query` übergeben. Tavily ordnet Abschnitte nach ihrer Relevanz für die Anfrage, daher ist der Parameter ohne eine solche Anfrage bedeutungslos.
   </Accordion>
 </AccordionGroup>
 
 ## Verwandte Themen
 
 <CardGroup cols={2}>
-  <Card title="Übersicht über die Websuche" href="/de/tools/web" icon="magnifying-glass">
-    Alle Provider und Regeln für die automatische Erkennung.
+  <Card title="Übersicht zur Websuche" href="/de/tools/web" icon="magnifying-glass">
+    Alle Provider und Regeln zur automatischen Erkennung.
   </Card>
   <Card title="Firecrawl" href="/de/tools/firecrawl" icon="fire">
     Suche und Scraping mit Inhaltsextraktion.
@@ -172,6 +173,6 @@ Das generische Werkzeug `web_search` unterstützt mit Tavily als Provider `query
     Neuronale Suche mit Inhaltsextraktion.
   </Card>
   <Card title="Konfiguration" href="/de/gateway/configuration" icon="gear">
-    Vollständiges Konfigurationsschema für Plugin-Einträge und die Werkzeugweiterleitung.
+    Vollständiges Konfigurationsschema für Plugin-Einträge und Werkzeug-Routing.
   </Card>
 </CardGroup>

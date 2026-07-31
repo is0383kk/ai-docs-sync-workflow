@@ -1,46 +1,48 @@
 ---
 read_when:
     - एजेंट के माध्यम से वीडियो जनरेट करना
-    - वीडियो-जनरेशन प्रदाताओं और मॉडलों को कॉन्फ़िगर करना
-    - video_generate टूल पैरामीटर को समझना
+    - वीडियो जनरेशन प्रदाताओं और मॉडल को कॉन्फ़िगर करना
+    - video_generate टूल के पैरामीटरों को समझना
 sidebarTitle: Video generation
-summary: 16 प्रदाता बैकएंड में टेक्स्ट, इमेज या वीडियो संदर्भों से video_generate के माध्यम से वीडियो जनरेट करें
+summary: 16 प्रदाता बैकएंड पर टेक्स्ट, इमेज या वीडियो संदर्भों से video_generate के ज़रिए वीडियो जनरेट करें
 title: वीडियो निर्माण
 x-i18n:
-    generated_at: "2026-06-29T00:25:46Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T21:50:01Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 64c8a3191262613a1acf684496570a6dd8893ebb3a2a7e5ae41337d58555c401
+    source_hash: 4afc9338fdfdc269b50b949b6d1a186e3a2064ed4ee40a41722efea40ae791aa
     source_path: tools/video-generation.md
     workflow: 16
 ---
 
-OpenClaw एजेंट टेक्स्ट प्रॉम्प्ट, संदर्भ इमेज, या
-मौजूदा वीडियो से वीडियो बना सकते हैं। सोलह provider बैकएंड समर्थित हैं, जिनमें
-अलग-अलग मॉडल विकल्प, इनपुट मोड, और फीचर सेट हैं। एजेंट आपके कॉन्फ़िगरेशन और उपलब्ध API
-कुंजियों के आधार पर सही provider अपने-आप चुनता है।
+OpenClaw एजेंट टेक्स्ट प्रॉम्प्ट, संदर्भ छवियों या मौजूदा वीडियो से
+`video_generate` के माध्यम से वीडियो जनरेट करते हैं। सोलह प्रदाता बैकएंड
+समर्थित हैं; एजेंट कॉन्फ़िगरेशन और उपलब्ध API कुंजियों के आधार पर स्वचालित रूप से
+सही बैकएंड चुनता है।
 
 <Note>
-`video_generate` टूल केवल तब दिखाई देता है जब कम-से-कम एक वीडियो-जनरेशन
-provider उपलब्ध हो। यदि यह आपके एजेंट टूल्स में नहीं दिखता, तो कोई
-provider API कुंजी सेट करें या `agents.defaults.videoGenerationModel` कॉन्फ़िगर करें।
+`video_generate` केवल तब दिखाई देता है, जब कम-से-कम एक वीडियो-जनरेशन प्रदाता
+उपलब्ध हो। यदि यह आपके एजेंट टूल में नहीं है, तो प्रदाता API कुंजी सेट करें या
+`agents.defaults.mediaModels.video` कॉन्फ़िगर करें।
 </Note>
 
-OpenClaw वीडियो जनरेशन को तीन runtime मोड के रूप में मानता है:
+`video_generate` के तीन रनटाइम मोड हैं, जिनका निर्धारण कॉल में दिए गए संदर्भ इनपुट
+से होता है:
 
-- `generate` - बिना संदर्भ मीडिया वाले टेक्स्ट-से-वीडियो अनुरोध।
-- `imageToVideo` - अनुरोध में एक या अधिक संदर्भ इमेज शामिल होती हैं।
-- `videoToVideo` - अनुरोध में एक या अधिक संदर्भ वीडियो शामिल होते हैं।
+- `generate` - कोई संदर्भ मीडिया नहीं (टेक्स्ट-टू-वीडियो)।
+- `imageToVideo` - एक या अधिक संदर्भ छवियाँ।
+- `videoToVideo` - एक या अधिक संदर्भ वीडियो।
 
-Providers उन मोड के किसी भी उपसमुच्चय का समर्थन कर सकते हैं। टूल सबमिशन से पहले
-सक्रिय मोड को सत्यापित करता है और `action=list` में समर्थित मोड रिपोर्ट करता है।
+प्रदाता इनमें से किसी भी मोड-समूह का समर्थन कर सकते हैं। टूल सबमिशन से पहले
+सक्रिय मोड को सत्यापित करता है और `action=list` में समर्थित मोड की जानकारी देता है।
 
-## त्वरित शुरुआत
+## तुरंत शुरू करें
 
 <Steps>
   <Step title="प्रमाणीकरण कॉन्फ़िगर करें">
-    किसी भी समर्थित provider के लिए API कुंजी सेट करें:
+    किसी भी समर्थित प्रदाता के लिए API कुंजी सेट करें:
 
     ```bash
     export GEMINI_API_KEY="your-key"
@@ -49,120 +51,114 @@ Providers उन मोड के किसी भी उपसमुच्च�
   </Step>
   <Step title="डिफ़ॉल्ट मॉडल चुनें (वैकल्पिक)">
     ```bash
-    openclaw config set agents.defaults.videoGenerationModel.primary "google/veo-3.1-fast-generate-preview"
+    openclaw config set agents.defaults.mediaModels.video.primary "google/veo-3.1-fast-generate-preview"
     ```
   </Step>
-  <Step title="एजेंट से पूछें">
-    > सूर्यास्त के समय सर्फिंग करते हुए एक दोस्ताना लॉब्स्टर का 5-सेकंड का सिनेमैटिक वीडियो बनाएं।
+  <Step title="एजेंट से कहें">
+    > सूर्यास्त के समय सर्फ़िंग करते हुए एक दोस्ताना लॉब्स्टर का 5-सेकंड का सिनेमाई वीडियो जनरेट करें।
 
-    एजेंट `video_generate` को अपने-आप कॉल करता है। किसी टूल allowlisting
-    की आवश्यकता नहीं है।
+    एजेंट स्वचालित रूप से `video_generate` को कॉल करता है। किसी टूल को अनुमति-सूची में
+    जोड़ने की आवश्यकता नहीं है।
 
   </Step>
 </Steps>
 
-## async जनरेशन कैसे काम करता है
+## एसिंक्रोनस जनरेशन कैसे काम करता है
 
-वीडियो जनरेशन asynchronous होता है। जब एजेंट किसी
-सेशन में `video_generate` कॉल करता है:
+वीडियो जनरेशन एसिंक्रोनस है:
 
-1. OpenClaw अनुरोध provider को सबमिट करता है और तुरंत एक task id लौटाता है।
-2. Provider पृष्ठभूमि में job को प्रोसेस करता है (आमतौर पर provider और resolution के आधार पर 30 सेकंड से कई मिनट; धीमे queue-backed providers कॉन्फ़िगर किए गए timeout तक चल सकते हैं)।
-3. जब वीडियो तैयार हो जाता है, OpenClaw उसी सेशन को एक आंतरिक completion event के साथ जगाता है।
-4. एजेंट सेशन के सामान्य visible-reply मोड के जरिए उपयोगकर्ता को बताता है:
-   automatic होने पर final reply delivery, या जब
-   सेशन को message tool चाहिए हो तब `message(action="send")`। यदि requester सेशन निष्क्रिय है या
-   उसका active wake विफल हो जाता है, और कुछ generated video अभी भी
-   completion reply से गायब है, तो OpenClaw केवल
-   गायब वीडियो के साथ एक idempotent direct fallback भेजता है।
+1. OpenClaw प्रदाता को अनुरोध सबमिट करता है और तुरंत एक टास्क आईडी लौटाता है।
+2. प्रदाता बैकग्राउंड में कार्य को प्रोसेस करता है (प्रदाता और रिज़ॉल्यूशन के आधार पर आमतौर पर 30 सेकंड से कई मिनट तक; धीमे कतार-समर्थित प्रदाता कॉन्फ़िगर किए गए टाइमआउट तक चल सकते हैं)।
+3. वीडियो तैयार होने पर OpenClaw आंतरिक पूर्णता इवेंट के साथ उसी सत्र को सक्रिय करता है।
+4. एजेंट सत्र के सामान्य दृश्यमान-उत्तर मोड के माध्यम से इसकी जानकारी देता है:
+   स्वचालित अंतिम उत्तर, या जब सत्र को संदेश टूल की आवश्यकता हो तब `message(action="send")`।
+   यदि अनुरोधकर्ता सत्र निष्क्रिय है, या उसका सक्रियण विफल हो जाता है और पूर्णता उत्तर में
+   जनरेट किया गया मीडिया अब भी मौजूद नहीं है, तो OpenClaw मीडिया के साथ एक
+   आइडेम्पोटेंट प्रत्यक्ष फ़ॉलबैक भेजता है।
 
-जब कोई job चल रहा हो, उसी
-सेशन में duplicate `video_generate` कॉल दूसरी
-generation शुरू करने के बजाय मौजूदा task status लौटाते हैं। CLI से
-progress जांचने के लिए `openclaw tasks list` या `openclaw tasks show <taskId>` का उपयोग करें।
+जब कोई कार्य चल रहा हो, तो उसी सत्र में डुप्लिकेट `video_generate` कॉल
+एक और जनरेशन शुरू करने के बजाय वर्तमान टास्क की स्थिति लौटाते हैं।
+नया जनरेशन ट्रिगर किए बिना जाँचने के लिए `action: "status"`, या CLI से
+`openclaw tasks list` / `openclaw tasks show <lookup>` का उपयोग करें
+([बैकग्राउंड टास्क](/hi/automation/tasks) देखें)।
 
-Session-backed agent runs के बाहर (उदाहरण के लिए, direct tool invocations),
-टूल inline generation पर fallback करता है और उसी turn में अंतिम media path
+सत्र-समर्थित एजेंट रन के बाहर (उदाहरण के लिए, प्रत्यक्ष टूल इनवोकेशन में),
+टूल इनलाइन जनरेशन का उपयोग करता है और उसी टर्न में अंतिम मीडिया पथ
 लौटाता है।
 
-जब provider bytes लौटाता है, तो generated video files OpenClaw-managed media storage के अंतर्गत
-सहेजी जाती हैं। डिफ़ॉल्ट generated-video save cap
-video media limit का अनुसरण करती है, और `agents.defaults.mediaMaxMb`
-बड़े renders के लिए इसे बढ़ाता है। जब कोई provider hosted output URL भी लौटाता है, तो OpenClaw
-local persistence द्वारा oversized file अस्वीकार किए जाने पर task को विफल करने के बजाय
-वह URL deliver कर सकता है।
+जब प्रदाता बाइट्स लौटाता है, तब जनरेट की गई वीडियो फ़ाइलें OpenClaw-प्रबंधित
+मीडिया स्टोरेज में सहेजी जाती हैं। डिफ़ॉल्ट सीमा 16MB (साझा वीडियो मीडिया
+सीमा) है; बड़े रेंडर के लिए `agents.defaults.mediaMaxMb` इसे बढ़ाता है। जब कोई
+प्रदाता होस्ट किया गया आउटपुट URL भी लौटाता है, तब स्थानीय स्थायित्व द्वारा
+अत्यधिक बड़ी फ़ाइल अस्वीकार होने पर टास्क को विफल करने के बजाय OpenClaw वह URL वितरित करता है।
 
-### Task lifecycle
+### टास्क जीवनचक्र
 
-| State       | अर्थ                                                                                                |
+| स्थिति       | अर्थ                                                                                                |
 | ----------- | ------------------------------------------------------------------------------------------------------ |
-| `queued`    | Task बनाया गया है, provider द्वारा स्वीकार किए जाने की प्रतीक्षा में।                                                   |
-| `running`   | Provider प्रोसेस कर रहा है (आमतौर पर provider और resolution के आधार पर 30 सेकंड से कई मिनट)। |
-| `succeeded` | वीडियो तैयार है; एजेंट जागता है और इसे conversation में पोस्ट करता है।                                         |
-| `failed`    | Provider error या timeout; एजेंट error details के साथ जागता है।                                         |
+| `queued`    | टास्क बनाया गया है और प्रदाता द्वारा स्वीकार किए जाने की प्रतीक्षा कर रहा है।                                                   |
+| `running`   | प्रदाता प्रोसेस कर रहा है (प्रदाता और रिज़ॉल्यूशन के आधार पर आमतौर पर 30 सेकंड से कई मिनट तक)। |
+| `succeeded` | वीडियो तैयार है; एजेंट सक्रिय होकर उसे बातचीत में पोस्ट करता है।                                         |
+| `failed`    | प्रदाता त्रुटि या टाइमआउट; एजेंट त्रुटि विवरण के साथ सक्रिय होता है।                                         |
 
-CLI से status जांचें:
+CLI से स्थिति जाँचें:
 
 ```bash
 openclaw tasks list
-openclaw tasks show <taskId>
-openclaw tasks cancel <taskId>
+openclaw tasks show <lookup>
+openclaw tasks cancel <lookup>
 ```
 
-यदि current session के लिए कोई video task पहले से `queued` या `running` है,
-तो `video_generate` नया task शुरू करने के बजाय मौजूदा task status लौटाता है।
-नई generation trigger किए बिना स्पष्ट रूप से जांचने के लिए `action: "status"` का उपयोग करें।
+## समर्थित प्रदाता
 
-## समर्थित providers
-
-| Provider              | डिफ़ॉल्ट मॉडल                   | टेक्स्ट | इमेज ref                                            | वीडियो ref                                       | प्रमाणीकरण                                     |
+| प्रदाता              | डिफ़ॉल्ट मॉडल                   | टेक्स्ट | छवि संदर्भ                                            | वीडियो संदर्भ                                       | प्रमाणीकरण                                     |
 | --------------------- | ------------------------------- | :--: | ---------------------------------------------------- | ----------------------------------------------- | ---------------------------------------- |
-| Alibaba               | `wan2.6-t2v`                    |  ✓   | हां (remote URL)                                     | हां (remote URL)                                | `MODELSTUDIO_API_KEY`                    |
-| BytePlus (1.0)        | `seedance-1-0-pro-250528`       |  ✓   | 2 इमेज तक (केवल I2V models; पहला + अंतिम frame) | -                                               | `BYTEPLUS_API_KEY`                       |
-| BytePlus Seedance 1.5 | `seedance-1-5-pro-251215`       |  ✓   | 2 इमेज तक (role के जरिए पहला + अंतिम frame)         | -                                               | `BYTEPLUS_API_KEY`                       |
-| BytePlus Seedance 2.0 | `dreamina-seedance-2-0-260128`  |  ✓   | 9 reference images तक                             | 3 videos तक                                  | `BYTEPLUS_API_KEY`                       |
-| ComfyUI               | `workflow`                      |  ✓   | 1 इमेज                                              | -                                               | `COMFY_API_KEY` या `COMFY_CLOUD_API_KEY` |
+| Alibaba               | `wan2.6-t2v`                    |  ✓   | हाँ (रिमोट URL)                                     | हाँ (रिमोट URL)                                | `MODELSTUDIO_API_KEY`                    |
+| BytePlus (बंडल किया गया)    | `seedance-1-0-pro-250528`       |  ✓   | अधिकतम 2 छवियाँ (पहला + अंतिम फ़्रेम)                  | -                                               | `BYTEPLUS_API_KEY`                       |
+| BytePlus 1.5 Plugin   | `seedance-1-5-pro-251215`       |  ✓   | अधिकतम 2 छवियाँ (भूमिका के माध्यम से पहला + अंतिम फ़्रेम)         | -                                               | `BYTEPLUS_API_KEY`                       |
+| BytePlus Seedance 2.0 | `dreamina-seedance-2-0-260128`  |  ✓   | अधिकतम 9 संदर्भ छवियाँ                             | अधिकतम 3 वीडियो                                  | `BYTEPLUS_API_KEY`                       |
+| ComfyUI               | `workflow`                      |  ✓   | 1 छवि                                              | -                                               | `COMFY_API_KEY` या `COMFY_CLOUD_API_KEY` |
 | DeepInfra             | `Pixverse/Pixverse-T2V`         |  ✓   | -                                                    | -                                               | `DEEPINFRA_API_KEY`                      |
-| fal                   | `fal-ai/minimax/video-01-live`  |  ✓   | 1 इमेज; Seedance reference-to-video के साथ 9 तक    | Seedance reference-to-video के साथ 3 videos तक | `FAL_KEY`                                |
-| Google                | `veo-3.1-fast-generate-preview` |  ✓   | 1 इमेज                                              | 1 वीडियो                                         | `GEMINI_API_KEY`                         |
-| MiniMax               | `MiniMax-Hailuo-2.3`            |  ✓   | 1 इमेज                                              | -                                               | `MINIMAX_API_KEY` या MiniMax OAuth       |
-| OpenAI                | `sora-2`                        |  ✓   | 1 इमेज                                              | 1 वीडियो                                         | `OPENAI_API_KEY`                         |
-| OpenRouter            | `google/veo-3.1-fast`           |  ✓   | 4 इमेज तक (पहला/अंतिम frame या references)      | -                                               | `OPENROUTER_API_KEY`                     |
-| Qwen                  | `wan2.6-t2v`                    |  ✓   | हां (remote URL)                                     | हां (remote URL)                                | `QWEN_API_KEY`                           |
-| Runway                | `gen4.5`                        |  ✓   | 1 इमेज                                              | 1 वीडियो                                         | `RUNWAYML_API_SECRET`                    |
+| fal                   | `fal-ai/minimax/video-01-live`  |  ✓   | 1 छवि; Seedance संदर्भ-से-वीडियो के साथ अधिकतम 9    | Seedance संदर्भ-से-वीडियो के साथ अधिकतम 3 वीडियो | `FAL_KEY`                                |
+| Google                | `veo-3.1-fast-generate-preview` |  ✓   | 1 छवि                                              | 1 वीडियो                                         | `GEMINI_API_KEY`                         |
+| MiniMax               | `MiniMax-Hailuo-2.3`            |  ✓   | 1 छवि                                              | -                                               | `MINIMAX_API_KEY` या MiniMax OAuth       |
+| OpenAI                | `sora-2`                        |  ✓   | 1 छवि                                              | 1 वीडियो                                         | `OPENAI_API_KEY`                         |
+| OpenRouter            | `google/veo-3.1-fast`           |  ✓   | अधिकतम 4 छवियाँ (पहला/अंतिम फ़्रेम या संदर्भ)      | -                                               | `OPENROUTER_API_KEY`                     |
+| Qwen                  | `wan2.6-t2v`                    |  ✓   | हाँ (रिमोट URL)                                     | हाँ (रिमोट URL)                                | `QWEN_API_KEY`                           |
+| Runway                | `gen4.5`                        |  ✓   | 1 छवि                                              | 1 वीडियो                                         | `RUNWAYML_API_SECRET`                    |
 | Together              | `Wan-AI/Wan2.2-T2V-A14B`        |  ✓   | केवल `Wan-AI/Wan2.2-I2V-A14B`                        | -                                               | `TOGETHER_API_KEY`                       |
-| Vydra                 | `veo3`                          |  ✓   | 1 इमेज (`kling`)                                    | -                                               | `VYDRA_API_KEY`                          |
-| xAI                   | `grok-imagine-video`            |  ✓   | 1 first-frame image या 7 `reference_image`s तक    | 1 वीडियो                                         | `XAI_API_KEY`                            |
+| Vydra                 | `veo3`                          |  ✓   | 1 छवि (`kling`)                                    | -                                               | `VYDRA_API_KEY`                          |
+| xAI                   | `grok-imagine-video`            |  ✓   | क्लासिक: 1 पहला फ़्रेम या 7 संदर्भ; 1.5: 1 फ़्रेम | क्लासिक: 1 वीडियो                                | `XAI_API_KEY`                            |
 
-कुछ providers अतिरिक्त या वैकल्पिक API key env vars स्वीकार करते हैं। विवरण के लिए
-व्यक्तिगत [provider pages](#related) देखें।
+कुछ प्रदाता अतिरिक्त या वैकल्पिक API कुंजी एनवायरनमेंट वेरिएबल स्वीकार करते हैं। विवरण के लिए
+अलग-अलग [प्रदाता पृष्ठ](#related) देखें।
 
-Runtime पर उपलब्ध providers, models, और
-runtime modes देखने के लिए `video_generate action=list` चलाएं।
+रनटाइम पर उपलब्ध प्रदाताओं, मॉडलों और रनटाइम मोड का निरीक्षण करने के लिए
+`video_generate action=list` चलाएँ।
 
-### Capability matrix
+### क्षमता मैट्रिक्स
 
-`video_generate`, contract tests, और
-shared live sweep द्वारा उपयोग किया गया स्पष्ट mode contract:
+`video_generate`, अनुबंध परीक्षणों और साझा लाइव स्वीप द्वारा उपयोग किया जाने वाला
+स्पष्ट मोड अनुबंध:
 
-| Provider   | `generate` | `imageToVideo` | `videoToVideo` | आज के shared live lanes                                                                                                                 |
+| प्रदाता   | `generate` | `imageToVideo` | `videoToVideo` | आज की साझा लाइव लेन                                                                                                                 |
 | ---------- | :--------: | :------------: | :------------: | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Alibaba    |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; `videoToVideo` छोड़ा गया क्योंकि इस provider को remote `http(s)` video URLs चाहिए                              |
+| Alibaba    |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; `videoToVideo` छोड़ दिया गया है क्योंकि इस प्रदाता को रिमोट `http(s)` वीडियो URL चाहिए                              |
 | BytePlus   |     ✓      |       ✓        |       -        | `generate`, `imageToVideo`                                                                                                              |
-| ComfyUI    |     ✓      |       ✓        |       -        | Shared sweep में नहीं; workflow-specific coverage Comfy tests के साथ रहती है                                                              |
-| DeepInfra  |     ✓      |       -        |       -        | `generate`; native DeepInfra video schemas plugin contract में text-to-video हैं                                                     |
-| fal        |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; `videoToVideo` केवल Seedance reference-to-video उपयोग करते समय                                                  |
-| Google     |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; shared `videoToVideo` छोड़ा गया क्योंकि मौजूदा buffer-backed Gemini/Veo sweep उस input को स्वीकार नहीं करता |
+| ComfyUI    |     ✓      |       ✓        |       -        | साझा स्वीप में नहीं; वर्कफ़्लो-विशिष्ट कवरेज Comfy परीक्षणों में मौजूद है                                                              |
+| DeepInfra  |     ✓      |       -        |       -        | `generate`; नेटिव DeepInfra वीडियो स्कीमा Plugin अनुबंध में टेक्स्ट-टू-वीडियो हैं                                                     |
+| fal        |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; `videoToVideo` केवल Seedance संदर्भ-से-वीडियो का उपयोग करते समय                                                  |
+| Google     |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; साझा `videoToVideo` छोड़ दिया गया है क्योंकि वर्तमान बफ़र-समर्थित Gemini/Veo स्वीप उस इनपुट को स्वीकार नहीं करता |
 | MiniMax    |     ✓      |       ✓        |       -        | `generate`, `imageToVideo`                                                                                                              |
-| OpenAI     |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; shared `videoToVideo` छोड़ा गया क्योंकि इस org/input path को अभी provider-side video edit access चाहिए   |
+| OpenAI     |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; साझा `videoToVideo` छोड़ दिया गया है क्योंकि इस संगठन/इनपुट पथ को वर्तमान में प्रदाता-पक्षीय वीडियो संपादन पहुँच चाहिए   |
 | OpenRouter |     ✓      |       ✓        |       -        | `generate`, `imageToVideo`                                                                                                              |
-| Qwen       |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; `videoToVideo` छोड़ा गया क्योंकि इस provider को remote `http(s)` video URLs चाहिए                              |
-| Runway     |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; `videoToVideo` केवल तब चलता है जब चुना गया model `runway/gen4_aleph` हो                                     |
+| Qwen       |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; `videoToVideo` छोड़ दिया गया है क्योंकि इस प्रदाता को रिमोट `http(s)` वीडियो URL चाहिए                              |
+| Runway     |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; `videoToVideo` केवल तब चलता है जब चयनित मॉडल `runway/gen4_aleph` हो                                     |
 | Together   |     ✓      |       ✓        |       -        | `generate`, `imageToVideo`                                                                                                              |
-| Vydra      |     ✓      |       ✓        |       -        | `generate`; shared `imageToVideo` छोड़ा गया क्योंकि bundled `veo3` text-only है और bundled `kling` को remote image URL चाहिए           |
-| xAI        |     ✓      |       ✓        |       ✓        | `generate`, `imageToVideo`; `videoToVideo` छोड़ा गया क्योंकि इस provider को अभी remote MP4 URL चाहिए                               |
+| Vydra      |     ✓      |       ✓        |       -        | `generate`; साझा `imageToVideo` छोड़ दिया गया है क्योंकि बंडल किया गया `veo3` केवल-टेक्स्ट है और बंडल किए गए `kling` को रिमोट छवि URL चाहिए           |
+| xAI        |     ✓      |       ✓        |       ✓        | क्लासिक सभी मोड का समर्थन करता है; Video 1.5 केवल छवि-से-वीडियो है; रिमोट MP4 इनपुट `videoToVideo` को साझा स्वीप से बाहर रखता है             |
 
-## Tool parameters
+## टूल पैरामीटर
 
 ### आवश्यक
 
@@ -172,145 +168,145 @@ shared live sweep द्वारा उपयोग किया गया स�
 
 ### सामग्री इनपुट
 
-<ParamField path="image" type="string">एकल संदर्भ इमेज (पाथ या URL)।</ParamField>
-<ParamField path="images" type="string[]">कई संदर्भ इमेज (अधिकतम 9)।</ParamField>
+<ParamField path="image" type="string">एकल संदर्भ छवि (पथ या URL)।</ParamField>
+<ParamField path="images" type="string[]">एकाधिक संदर्भ छवियाँ (अधिकतम 9)।</ParamField>
 <ParamField path="imageRoles" type="string[]">
-संयुक्त इमेज सूची के समानांतर वैकल्पिक प्रति-स्थिति भूमिका संकेत।
-Canonical मान: `first_frame`, `last_frame`, `reference_image`।
+संयुक्त छवि सूची के समानांतर, प्रत्येक स्थिति के लिए वैकल्पिक भूमिका संकेत।
+मानक मान: `first_frame`, `last_frame`, `reference_image`।
 </ParamField>
-<ParamField path="video" type="string">एकल संदर्भ वीडियो (पाथ या URL)।</ParamField>
-<ParamField path="videos" type="string[]">कई संदर्भ वीडियो (अधिकतम 4)।</ParamField>
+<ParamField path="video" type="string">एकल संदर्भ वीडियो (पथ या URL)।</ParamField>
+<ParamField path="videos" type="string[]">एकाधिक संदर्भ वीडियो (अधिकतम 4)।</ParamField>
 <ParamField path="videoRoles" type="string[]">
-संयुक्त वीडियो सूची के समानांतर वैकल्पिक प्रति-स्थिति भूमिका संकेत।
-Canonical मान: `reference_video`।
+संयुक्त वीडियो सूची के समानांतर, प्रत्येक स्थिति के लिए वैकल्पिक भूमिका संकेत।
+मानक मान: `reference_video`।
 </ParamField>
 <ParamField path="audioRef" type="string">
-एकल संदर्भ ऑडियो (पाथ या URL)। जब प्रदाता ऑडियो इनपुट का समर्थन करता है, तब
-बैकग्राउंड संगीत या वॉइस संदर्भ के लिए उपयोग किया जाता है।
+एकल संदर्भ ऑडियो (पथ या URL)। जब प्रदाता ऑडियो इनपुट का समर्थन करता है,
+तब इसका उपयोग पृष्ठभूमि संगीत या आवाज़ के संदर्भ के लिए किया जाता है।
 </ParamField>
-<ParamField path="audioRefs" type="string[]">कई संदर्भ ऑडियो (अधिकतम 3)।</ParamField>
+<ParamField path="audioRefs" type="string[]">एकाधिक संदर्भ ऑडियो (अधिकतम 3)।</ParamField>
 <ParamField path="audioRoles" type="string[]">
-संयुक्त ऑडियो सूची के समानांतर वैकल्पिक प्रति-स्थिति भूमिका संकेत।
-Canonical मान: `reference_audio`।
+संयुक्त ऑडियो सूची के समानांतर, प्रत्येक स्थिति के लिए वैकल्पिक भूमिका संकेत।
+मानक मान: `reference_audio`।
 </ParamField>
 
 <Note>
-भूमिका संकेत प्रदाता को यथावत भेजे जाते हैं। Canonical मान
-`VideoGenerationAssetRole` यूनियन से आते हैं, लेकिन प्रदाता अतिरिक्त
-भूमिका स्ट्रिंग स्वीकार कर सकते हैं। `*Roles` ऐरे में संबंधित संदर्भ
-सूची से अधिक प्रविष्टियां नहीं होनी चाहिए; ऑफ-बाय-वन गलतियां स्पष्ट त्रुटि
-के साथ विफल होती हैं। किसी स्लॉट को अनसेट छोड़ने के लिए खाली स्ट्रिंग का उपयोग करें।
-xAI के लिए, इसके `reference_images` जनरेशन मोड का उपयोग करने के लिए हर इमेज भूमिका को
-`reference_image` पर सेट करें; एकल-इमेज इमेज-से-वीडियो के लिए भूमिका छोड़ दें
+भूमिका संकेत प्रदाता को बिना किसी बदलाव के अग्रेषित किए जाते हैं। मानक मान
+`VideoGenerationAssetRole` यूनियन से आते हैं, लेकिन प्रदाता अतिरिक्त भूमिका
+स्ट्रिंग स्वीकार कर सकते हैं। `*Roles` सरणियों में संबंधित
+संदर्भ सूची से अधिक प्रविष्टियाँ नहीं होनी चाहिए; एक स्थान की त्रुटियाँ स्पष्ट त्रुटि के साथ विफल होती हैं।
+किसी स्थान को सेट न रखने के लिए रिक्त स्ट्रिंग का उपयोग करें। xAI के लिए, उसके
+`reference_images` जनरेशन मोड का उपयोग करने हेतु प्रत्येक छवि भूमिका को
+`reference_image` पर सेट करें; एकल-छवि से वीडियो के लिए भूमिका छोड़ दें
 या `first_frame` का उपयोग करें।
 </Note>
 
 ### शैली नियंत्रण
 
 <ParamField path="aspectRatio" type="string">
-  आस्पेक्ट-रेशियो संकेत जैसे `1:1`, `16:9`, `9:16`, `adaptive`, या प्रदाता-विशिष्ट मान। OpenClaw प्रति प्रदाता असमर्थित मानों को सामान्यीकृत करता है या अनदेखा करता है।
+  `1:1`, `16:9`, `9:16`, `adaptive` जैसा पक्षानुपात संकेत या प्रदाता-विशिष्ट मान। OpenClaw प्रत्येक प्रदाता के अनुसार असमर्थित मानों को सामान्यीकृत करता है या अनदेखा करता है।
 </ParamField>
-<ParamField path="resolution" type="string">रिज़ॉल्यूशन संकेत जैसे `480P`, `720P`, `768P`, `1080P`, `4K`, या प्रदाता-विशिष्ट मान। OpenClaw प्रति प्रदाता असमर्थित मानों को सामान्यीकृत करता है या अनदेखा करता है।</ParamField>
+<ParamField path="resolution" type="string">`360P`, `480P`, `540P`, `720P`, `768P`, `1080P`, `4K` जैसा रिज़ॉल्यूशन संकेत या प्रदाता-विशिष्ट मान। OpenClaw प्रत्येक प्रदाता के अनुसार असमर्थित मानों को सामान्यीकृत करता है या अनदेखा करता है।</ParamField>
 <ParamField path="durationSeconds" type="number">
-  सेकंड में लक्षित अवधि (निकटतम प्रदाता-समर्थित मान तक राउंड की गई)।
+  लक्षित अवधि सेकंड में (प्रदाता द्वारा समर्थित निकटतम मान पर पूर्णांकित)।
 </ParamField>
-<ParamField path="size" type="string">जब प्रदाता इसका समर्थन करता है तब आकार संकेत।</ParamField>
+<ParamField path="size" type="string">प्रदाता द्वारा समर्थित होने पर आकार का संकेत।</ParamField>
 <ParamField path="audio" type="boolean">
-  समर्थित होने पर आउटपुट में जनरेट किया गया ऑडियो सक्षम करें। `audioRef*` (इनपुट) से अलग।
+  समर्थित होने पर आउटपुट में जनरेट किया गया ऑडियो सक्षम करें। यह `audioRef*` (इनपुट) से अलग है।
 </ParamField>
-<ParamField path="watermark" type="boolean">समर्थित होने पर प्रदाता वॉटरमार्किंग टॉगल करें।</ParamField>
+<ParamField path="watermark" type="boolean">समर्थित होने पर प्रदाता के वॉटरमार्क को चालू या बंद करें।</ParamField>
 
-`adaptive` एक प्रदाता-विशिष्ट सेंटिनल है: इसे उन प्रदाताओं को यथावत
-भेजा जाता है जो अपनी क्षमताओं में `adaptive` घोषित करते हैं (जैसे BytePlus
-Seedance इसे इनपुट इमेज आयामों से अनुपात अपने-आप पहचानने के लिए उपयोग करता है)।
-जो प्रदाता इसे घोषित नहीं करते, वे टूल परिणाम में `details.ignoredOverrides`
-के माध्यम से मान दिखाते हैं ताकि ड्रॉप दिखाई दे।
+`adaptive` एक प्रदाता-विशिष्ट सेंटिनल है: इसे उन प्रदाताओं को
+बिना किसी बदलाव के अग्रेषित किया जाता है जो अपनी क्षमताओं में `adaptive`
+घोषित करते हैं (उदाहरण के लिए, BytePlus Seedance इनपुट छवि के आयामों से
+अनुपात का स्वतः पता लगाने के लिए इसका उपयोग करता है)। जो प्रदाता इसे घोषित नहीं करते,
+वे टूल परिणाम में `details.ignoredOverrides` के माध्यम से मान दिखाते हैं, ताकि हटाया जाना दृश्यमान रहे।
 
 ### उन्नत
 
 <ParamField path="action" type='"generate" | "status" | "list"' default="generate">
-  `"status"` वर्तमान सेशन टास्क लौटाता है; `"list"` प्रदाताओं का निरीक्षण करता है।
+  `"status"` वर्तमान सत्र का कार्य लौटाता है; `"list"` प्रदाताओं का निरीक्षण करता है।
 </ParamField>
-<ParamField path="model" type="string">प्रदाता/मॉडल ओवरराइड (जैसे `runway/gen4.5`)।</ParamField>
-<ParamField path="filename" type="string">आउटपुट फाइलनाम संकेत।</ParamField>
-<ParamField path="timeoutMs" type="number">मिलीसेकंड में वैकल्पिक प्रदाता ऑपरेशन टाइमआउट। छोड़े जाने पर, OpenClaw कॉन्फ़िगर होने पर `agents.defaults.videoGenerationModel.timeoutMs` का उपयोग करता है, अन्यथा मौजूद होने पर Plugin-लेखित प्रदाता डिफ़ॉल्ट का उपयोग करता है।</ParamField>
+<ParamField path="model" type="string">प्रदाता/मॉडल ओवरराइड (उदाहरण के लिए, `runway/gen4.5`)।</ParamField>
+<ParamField path="filename" type="string">आउटपुट फ़ाइल नाम का संकेत।</ParamField>
+<ParamField path="timeoutMs" type="number">प्रदाता की कार्रवाई के लिए वैकल्पिक टाइमआउट, मिलीसेकंड में। इसे छोड़ने पर, यदि कॉन्फ़िगर किया गया हो तो OpenClaw `agents.defaults.mediaModels.video.timeoutMs` का उपयोग करता है, अन्यथा उपलब्ध होने पर Plugin में निर्धारित प्रदाता डिफ़ॉल्ट का उपयोग करता है।</ParamField>
 <ParamField path="providerOptions" type="object">
-  JSON ऑब्जेक्ट के रूप में प्रदाता-विशिष्ट विकल्प (जैसे `{"seed": 42, "draft": true}`)।
-  typed स्कीमा घोषित करने वाले प्रदाता कुंजियों और प्रकारों को मान्य करते हैं; अज्ञात
-  कुंजियां या असंगतियां fallback के दौरान उम्मीदवार को छोड़ देती हैं। घोषित स्कीमा
-  के बिना प्रदाता विकल्पों को यथावत प्राप्त करते हैं। हर प्रदाता क्या स्वीकार करता है
-  देखने के लिए `video_generate action=list` चलाएं।
+  JSON ऑब्जेक्ट के रूप में प्रदाता-विशिष्ट विकल्प (उदाहरण के लिए, `{"seed": 42, "draft": true}`)।
+  टाइप की गई स्कीमा घोषित करने वाले प्रदाता कुंजियों और प्रकारों को मान्य करते हैं; अज्ञात
+  कुंजियाँ या बेमेल प्रकार फ़ॉलबैक के दौरान उम्मीदवार को छोड़ देते हैं। घोषित स्कीमा के बिना
+  प्रदाताओं को विकल्प बिना किसी बदलाव के प्राप्त होते हैं। प्रत्येक प्रदाता क्या स्वीकार करता है,
+  यह देखने के लिए `video_generate action=list` चलाएँ।
 </ParamField>
 
 <Note>
-सभी प्रदाता सभी पैरामीटर का समर्थन नहीं करते। OpenClaw अवधि को निकटतम
-प्रदाता-समर्थित मान तक सामान्यीकृत करता है, और जब fallback प्रदाता अलग
-कंट्रोल सरफेस दिखाता है, तब आकार-से-आस्पेक्ट-रेशियो जैसे अनुवादित
-ज्यामिति संकेतों को रीमैप करता है। वास्तव में असमर्थित ओवरराइड
-सर्वोत्तम-प्रयास आधार पर अनदेखे किए जाते हैं और टूल परिणाम में चेतावनियों
-के रूप में रिपोर्ट किए जाते हैं। कठोर क्षमता सीमाएं (जैसे बहुत अधिक संदर्भ
-इनपुट) सबमिशन से पहले विफल होती हैं। टूल परिणाम लागू सेटिंग्स रिपोर्ट करते हैं;
-`details.normalization` किसी भी अनुरोधित-से-लागू अनुवाद को कैप्चर करता है।
+सभी प्रदाता सभी पैरामीटर का समर्थन नहीं करते। OpenClaw अवधि को प्रदाता द्वारा
+समर्थित निकटतम मान पर सामान्यीकृत करता है और जब कोई फ़ॉलबैक प्रदाता अलग
+नियंत्रण सतह उपलब्ध कराता है, तो आकार-से-पक्षानुपात जैसे रूपांतरित ज्यामिति संकेतों
+की मैपिंग बदलता है। वास्तव में असमर्थित ओवरराइड सर्वोत्तम प्रयास के आधार पर
+अनदेखे किए जाते हैं और टूल परिणाम में चेतावनियों के रूप में रिपोर्ट किए जाते हैं। कठोर क्षमता सीमाएँ
+(जैसे बहुत अधिक संदर्भ इनपुट) सबमिशन से पहले विफल हो जाती हैं। टूल परिणाम
+लागू सेटिंग्स रिपोर्ट करते हैं; `details.normalization` अनुरोधित-से-लागू
+रूपांतरण को दर्ज करता है।
 </Note>
 
 संदर्भ इनपुट रनटाइम मोड चुनते हैं:
 
-- कोई संदर्भ मीडिया नहीं → `generate`
-- कोई भी इमेज संदर्भ → `imageToVideo`
-- कोई भी वीडियो संदर्भ → `videoToVideo`
-- संदर्भ ऑडियो इनपुट हल किए गए मोड को **नहीं** बदलते; वे इमेज/वीडियो
-  संदर्भों द्वारा चुने गए किसी भी मोड के ऊपर लागू होते हैं, और केवल
-  `maxInputAudios` घोषित करने वाले प्रदाताओं के साथ काम करते हैं।
+- कोई संदर्भ मीडिया नहीं -> `generate`
+- कोई भी छवि संदर्भ -> `imageToVideo`
+- कोई भी वीडियो संदर्भ -> `videoToVideo`
+- संदर्भ ऑडियो इनपुट समाधान किए गए मोड को **नहीं** बदलते; वे छवि/वीडियो
+  संदर्भों द्वारा चुने गए किसी भी मोड के ऊपर लागू होते हैं और केवल उन प्रदाताओं के साथ
+  काम करते हैं जो `maxInputAudios` घोषित करते हैं।
 
-मिश्रित इमेज और वीडियो संदर्भ स्थिर साझा क्षमता सरफेस नहीं हैं।
-प्रति अनुरोध एक संदर्भ प्रकार को प्राथमिकता दें।
+मिश्रित छवि और वीडियो संदर्भ एक स्थिर साझा क्षमता सतह नहीं हैं।
+प्रत्येक अनुरोध में एक ही संदर्भ प्रकार को प्राथमिकता दें।
 
-#### Fallback और typed विकल्प
+#### फ़ॉलबैक और टाइप किए गए विकल्प
 
-कुछ क्षमता जांचें टूल सीमा के बजाय fallback लेयर पर लागू की जाती हैं,
-इसलिए प्राथमिक प्रदाता की सीमाओं से अधिक अनुरोध अभी भी सक्षम fallback पर
-चल सकता है:
+कुछ क्षमता जाँच टूल सीमा के बजाय फ़ॉलबैक परत पर लागू होती हैं,
+इसलिए प्राथमिक प्रदाता की सीमाएँ पार करने वाला अनुरोध भी किसी सक्षम फ़ॉलबैक
+पर चल सकता है:
 
-- कोई `maxInputAudios` (या `0`) घोषित न करने वाला सक्रिय उम्मीदवार तब छोड़ा जाता है जब
-  अनुरोध में ऑडियो संदर्भ हों; अगला उम्मीदवार आज़माया जाता है।
-- सक्रिय उम्मीदवार का `maxDurationSeconds` अनुरोधित `durationSeconds` से कम है
-  और कोई घोषित `supportedDurationSeconds` सूची नहीं है → छोड़ा गया।
-- अनुरोध में `providerOptions` हैं और सक्रिय उम्मीदवार स्पष्ट रूप से typed
-  `providerOptions` स्कीमा घोषित करता है → यदि दी गई कुंजियां स्कीमा में
-  नहीं हैं या मान प्रकार मेल नहीं खाते तो छोड़ा गया। घोषित स्कीमा के बिना
-  प्रदाता विकल्पों को यथावत प्राप्त करते हैं (बैकवर्ड-कम्पैटिबल
-  पास-थ्रू)। कोई प्रदाता खाली स्कीमा (`capabilities.providerOptions: {}`)
-  घोषित करके सभी प्रदाता विकल्पों से बाहर निकल सकता है, जिससे type mismatch
-  जैसा ही skip होता है।
+- जब अनुरोध में ऑडियो संदर्भ होते हैं, तब कोई `maxInputAudios` (या `0`) घोषित न करने वाले सक्रिय उम्मीदवार को छोड़ दिया जाता है; अगला उम्मीदवार आज़माया जाता है। यही
+  सुरक्षा जाँच छवि और वीडियो संदर्भों की संख्या पर
+  `maxInputImages`/`maxInputVideos` के विरुद्ध लागू होती है।
+- सक्रिय उम्मीदवार का `maxDurationSeconds`, अनुरोधित `durationSeconds`
+  से कम है और कोई `supportedDurationSeconds` सूची घोषित नहीं है -> छोड़ दिया जाता है।
+- अनुरोध में `providerOptions` है और सक्रिय उम्मीदवार स्पष्ट रूप से
+  टाइप की गई `providerOptions` स्कीमा घोषित करता है -> यदि दी गई कुंजियाँ
+  स्कीमा में नहीं हैं या मानों के प्रकार मेल नहीं खाते, तो छोड़ दिया जाता है। घोषित
+  स्कीमा के बिना प्रदाताओं को विकल्प बिना किसी बदलाव के प्राप्त होते हैं (पश्चगामी-संगत
+  पास-थ्रू)। कोई प्रदाता रिक्त स्कीमा (`capabilities.providerOptions: {}`) घोषित करके
+  सभी प्रदाता विकल्पों से बाहर हो सकता है, जिससे प्रकार बेमेल होने जैसा ही उम्मीदवार छोड़ना होता है।
 
-किसी अनुरोध में पहला skip कारण `warn` पर लॉग होता है ताकि ऑपरेटर देख सकें
-कि उनका प्राथमिक प्रदाता छोड़ा गया था; बाद के skip `debug` पर लॉग होते हैं
-ताकि लंबी fallback चेन शांत रहें। यदि हर उम्मीदवार छोड़ा जाता है, तो
-संकलित त्रुटि में प्रत्येक का skip कारण शामिल होता है।
+अनुरोध में उम्मीदवार छोड़ने का पहला कारण `warn` स्तर पर लॉग होता है, ताकि ऑपरेटर देख सकें
+कि उनके प्राथमिक प्रदाता को कब छोड़ दिया गया; लंबी फ़ॉलबैक शृंखलाओं को शांत रखने के लिए बाद के कारण
+`debug` स्तर पर लॉग होते हैं। यदि प्रत्येक उम्मीदवार छोड़ दिया जाता है, तो
+समेकित त्रुटि में प्रत्येक के लिए छोड़ने का कारण शामिल होता है।
 
-## क्रियाएं
+## कार्रवाइयाँ
 
-| क्रिया      | यह क्या करती है                                                                                             |
+| कार्रवाई     | यह क्या करती है                                                                                             |
 | ---------- | -------------------------------------------------------------------------------------------------------- |
-| `generate` | डिफ़ॉल्ट। दिए गए prompt और वैकल्पिक संदर्भ इनपुट से वीडियो बनाएं।                             |
-| `status`   | दूसरी जनरेशन शुरू किए बिना वर्तमान सेशन के लिए चल रहे वीडियो टास्क की स्थिति जांचें। |
-| `list`     | उपलब्ध प्रदाता, मॉडल और उनकी क्षमताएं दिखाएं।                                                |
+| `generate` | डिफ़ॉल्ट। दिए गए प्रॉम्प्ट और वैकल्पिक संदर्भ इनपुट से वीडियो बनाएँ।                             |
+| `status`   | कोई अन्य जनरेशन शुरू किए बिना वर्तमान सत्र के प्रगतिरत वीडियो कार्य की स्थिति जाँचें। |
+| `list`     | उपलब्ध प्रदाता, मॉडल और उनकी क्षमताएँ दिखाएँ।                                                |
 
 ## मॉडल चयन
 
-OpenClaw मॉडल को इस क्रम में हल करता है:
+OpenClaw मॉडल का समाधान इस क्रम में करता है:
 
-1. **`model` टूल पैरामीटर** - यदि एजेंट कॉल में एक निर्दिष्ट करता है।
-2. कॉन्फ़िग से **`videoGenerationModel.primary`**।
-3. क्रम में **`videoGenerationModel.fallbacks`**।
-4. **अपने-आप पहचान** - वे प्रदाता जिनके पास मान्य auth है, वर्तमान डिफ़ॉल्ट
-   प्रदाता से शुरू करके, फिर शेष प्रदाता वर्णानुक्रम में।
+1. **`model` टूल पैरामीटर** - यदि एजेंट कॉल में कोई मान निर्दिष्ट करता है।
+2. कॉन्फ़िगरेशन से **`videoGenerationModel.primary`**।
+3. क्रमानुसार **`videoGenerationModel.fallbacks`**।
+4. **स्वतः पहचान** - वे प्रदाता जिनके पास मान्य प्रमाणीकरण है, वर्तमान
+   डिफ़ॉल्ट प्रदाता से शुरू होकर, फिर शेष प्रदाता वर्णानुक्रम में।
 
-यदि कोई प्रदाता विफल होता है, तो अगला उम्मीदवार अपने-आप आज़माया जाता है।
-यदि सभी उम्मीदवार विफल होते हैं, तो त्रुटि में हर प्रयास के विवरण शामिल होते हैं।
+यदि कोई प्रदाता विफल होता है, तो अगला उम्मीदवार स्वचालित रूप से आज़माया जाता है। यदि सभी
+उम्मीदवार विफल होते हैं, तो त्रुटि में प्रत्येक प्रयास का विवरण शामिल होता है।
 
-केवल स्पष्ट `model`, `primary`, और `fallbacks` प्रविष्टियों का उपयोग करने के लिए
-`agents.defaults.mediaGenerationAutoProviderFallback: false` सेट करें।
+प्रमाणीकृत प्रदाताओं के बीच स्वचालित फ़ॉलबैक हमेशा सक्षम रहता है। प्रति-कॉल
+`model` प्रामाणिक रहता है।
 
 ```json5
 {
@@ -319,129 +315,140 @@ OpenClaw मॉडल को इस क्रम में हल करता �
       videoGenerationModel: {
         primary: "google/veo-3.1-fast-generate-preview",
         fallbacks: ["runway/gen4.5", "qwen/wan2.6-t2v"],
+        timeoutMs: 180000, // वैकल्पिक प्रति-टूल प्रदाता अनुरोध टाइमआउट ओवरराइड
       },
     },
   },
 }
 ```
 
-## प्रदाता नोट्स
+## प्रदाता संबंधी टिप्पणियाँ
 
 <AccordionGroup>
   <Accordion title="Alibaba">
-    DashScope / Model Studio async endpoint का उपयोग करता है। संदर्भ इमेज और
-    वीडियो remote `http(s)` URLs होने चाहिए।
+    DashScope / Model Studio के एसिंक्रोनस एंडपॉइंट का उपयोग करता है। संदर्भ छवियाँ और
+    वीडियो दूरस्थ `http(s)` URL होने चाहिए।
   </Accordion>
-  <Accordion title="BytePlus (1.0)">
-    प्रदाता id: `byteplus`।
+  <Accordion title="BytePlus (बंडल किया हुआ)">
+    प्रदाता आईडी: `byteplus`।
 
     मॉडल: `seedance-1-0-pro-250528` (डिफ़ॉल्ट),
-    `seedance-1-0-pro-t2v-250528`, `seedance-1-0-pro-fast-251015`,
-    `seedance-1-0-lite-t2v-250428`, `seedance-1-0-lite-i2v-250428`।
-
-    T2V मॉडल (`*-t2v-*`) इमेज इनपुट स्वीकार नहीं करते; I2V मॉडल और
-    सामान्य `*-pro-*` मॉडल एकल संदर्भ इमेज (पहला फ्रेम) का समर्थन करते हैं।
-    इमेज को positionally पास करें या `role: "first_frame"` सेट करें।
-    इमेज दिए जाने पर T2V मॉडल IDs अपने-आप संबंधित I2V वैरिएंट में स्विच
-    हो जाते हैं।
-
-    समर्थित `providerOptions` कुंजियां: `seed` (number), `draft` (boolean -
-    480p बाध्य करता है), `camera_fixed` (boolean).
-
-  </Accordion>
-  <Accordion title="BytePlus Seedance 1.5">
-    [`@openclaw/byteplus-modelark`](https://www.npmjs.com/package/@openclaw/byteplus-modelark)
-    Plugin की आवश्यकता है। प्रदाता id: `byteplus-seedance15`। मॉडल:
     `seedance-1-5-pro-251215`।
 
-    एकीकृत `content[]` API का उपयोग करता है। अधिकतम 2 इनपुट इमेज
-    (`first_frame` + `last_frame`) का समर्थन करता है। सभी इनपुट remote `https://`
-    URLs होने चाहिए। हर इमेज पर `role: "first_frame"` / `"last_frame"` सेट करें, या
-    इमेज को positionally पास करें।
+    एकीकृत `content[]` API का उपयोग करता है। अधिकतम 2 इनपुट छवियों
+    (`first_frame` + `last_frame`) का समर्थन करता है। छवियों को स्थिति के अनुसार पास करें या प्रत्येक
+    छवि का `role` स्पष्ट रूप से सेट करें।
 
-    `aspectRatio: "adaptive"` इनपुट इमेज से अनुपात अपने-आप पहचानता है।
-    `audio: true` `generate_audio` पर मैप होता है। `providerOptions.seed`
-    (number) आगे भेजा जाता है।
+    समर्थित `providerOptions` कुंजियाँ: `seed` (संख्या), `draft` (बूलियन -
+    480p को बाध्य करता है), `camera_fixed` (बूलियन)।
+
+  </Accordion>
+  <Accordion title="BytePlus Seedance 1.5 Plugin">
+    [`@openclaw/byteplus-modelark`](https://www.npmjs.com/package/@openclaw/byteplus-modelark)
+    Plugin की आवश्यकता है (बाहरी, बंडल नहीं किया हुआ)। प्रदाता आईडी: `byteplus-seedance15`। मॉडल:
+    `seedance-1-5-pro-251215`।
+
+    एकीकृत `content[]` API का उपयोग करता है। अधिकतम 2 इनपुट छवियों
+    (`first_frame` + `last_frame`) का समर्थन करता है। सभी इनपुट दूरस्थ `https://`
+    URL होने चाहिए। प्रत्येक छवि पर `role: "first_frame"` / `"last_frame"` सेट करें या
+    छवियों को स्थिति के अनुसार पास करें।
+
+    `aspectRatio: "adaptive"` इनपुट छवि से अनुपात का स्वतः पता लगाता है।
+    `audio: true`, `generate_audio` पर मैप होता है। `providerOptions.seed`
+    (संख्या) अग्रेषित की जाती है।
 
   </Accordion>
   <Accordion title="BytePlus Seedance 2.0">
     [`@openclaw/byteplus-modelark`](https://www.npmjs.com/package/@openclaw/byteplus-modelark)
-    Plugin की आवश्यकता है। प्रदाता id: `byteplus-seedance2`। मॉडल:
+    Plugin की आवश्यकता है (बाहरी, बंडल नहीं किया हुआ)। प्रदाता आईडी: `byteplus-seedance2`। मॉडल:
     `dreamina-seedance-2-0-260128`,
     `dreamina-seedance-2-0-fast-260128`।
 
-    एकीकृत `content[]` API का उपयोग करता है। 9 तक संदर्भ इमेज,
-    3 संदर्भ वीडियो, और 3 संदर्भ ऑडियो का समर्थन करता है। सभी इनपुट remote
-    `https://` URLs होने चाहिए। हर asset पर `role` सेट करें - समर्थित मान:
+    एकीकृत `content[]` API का उपयोग करता है। अधिकतम 9 संदर्भ छवियों,
+    3 संदर्भ वीडियो और 3 संदर्भ ऑडियो का समर्थन करता है। सभी इनपुट दूरस्थ
+    `https://` URL होने चाहिए। प्रत्येक एसेट पर `role` सेट करें - समर्थित मान:
     `"first_frame"`, `"last_frame"`, `"reference_image"`,
     `"reference_video"`, `"reference_audio"`।
 
-    `aspectRatio: "adaptive"` इनपुट इमेज से अनुपात अपने-आप पहचानता है।
-    `audio: true` `generate_audio` पर मैप होता है। `providerOptions.seed`
-    (number) आगे भेजा जाता है।
+    `aspectRatio: "adaptive"` इनपुट छवि से अनुपात का स्वतः पता लगाता है।
+    `audio: true`, `generate_audio` पर मैप होता है। `providerOptions.seed`
+    (संख्या) अग्रेषित की जाती है।
 
   </Accordion>
   <Accordion title="ComfyUI">
-    Workflow-आधारित स्थानीय या cloud execution. कॉन्फ़िगर किए गए graph के माध्यम से text-to-video और
-    image-to-video का समर्थन करता है।
+    वर्कफ़्लो-संचालित स्थानीय या क्लाउड निष्पादन। कॉन्फ़िगर किए गए ग्राफ़ के माध्यम से
+    टेक्स्ट-से-वीडियो और इमेज-से-वीडियो का समर्थन करता है।
   </Accordion>
   <Accordion title="fal">
-    लंबे समय तक चलने वाले jobs के लिए queue-backed flow का उपयोग करता है। OpenClaw चल रहे fal queue job को timed
-    out मानने से पहले default रूप से 20 मिनट तक प्रतीक्षा करता है। अधिकांश fal video models
-    एकल image reference स्वीकार करते हैं। Seedance 2.0 reference-to-video
-    models अधिकतम 9 images, 3 videos, और 3 audio references स्वीकार करते हैं, जिनमें
-    कुल reference files अधिकतम 12 हो सकती हैं।
+    लंबे समय तक चलने वाले कार्यों के लिए कतार-समर्थित प्रवाह का उपयोग करता है। OpenClaw किसी
+    प्रगतिरत fal कतार कार्य को टाइम आउट मानने से पहले डिफ़ॉल्ट रूप से अधिकतम 20
+    मिनट तक प्रतीक्षा करता है। अधिकांश fal वीडियो मॉडल
+    एकल इमेज संदर्भ स्वीकार करते हैं। Seedance 2.0 संदर्भ-से-वीडियो
+    मॉडल अधिकतम 9 इमेज, 3 वीडियो और 3 ऑडियो संदर्भ स्वीकार करते हैं, जिनमें
+    कुल संदर्भ फ़ाइलों की अधिकतम संख्या 12 होती है।
   </Accordion>
   <Accordion title="Google (Gemini / Veo)">
-    एक image या एक video reference का समर्थन करता है। Generated-audio requests को
-    Gemini API path पर warning के साथ अनदेखा किया जाता है क्योंकि वह API वर्तमान Veo video generation के लिए
-    `generateAudio` parameter को reject करती है।
+    एक इमेज या एक वीडियो संदर्भ का समर्थन करता है। Gemini API पथ पर
+    जनरेटेड-ऑडियो अनुरोधों को चेतावनी के साथ अनदेखा कर दिया जाता है, क्योंकि वह API
+    वर्तमान Veo वीडियो जनरेशन के लिए `generateAudio` पैरामीटर अस्वीकार करता है।
   </Accordion>
   <Accordion title="MiniMax">
-    केवल एकल image reference. MiniMax `768P` और `1080P`
-    resolutions स्वीकार करता है; `720P` जैसे requests को submission से पहले सबसे निकटतम
-    समर्थित value में normalize किया जाता है।
+    केवल एकल इमेज संदर्भ। MiniMax `768P` और `1080P`
+    रिज़ॉल्यूशन स्वीकार करता है; `720P` जैसे अनुरोधों को सबमिशन से पहले निकटतम
+    समर्थित मान में सामान्यीकृत किया जाता है।
   </Accordion>
   <Accordion title="OpenAI">
-    केवल `size` override forward किया जाता है। अन्य style overrides
-    (`aspectRatio`, `resolution`, `audio`, `watermark`) warning के साथ
-    अनदेखे किए जाते हैं।
+    केवल `size` ओवरराइड अग्रेषित किया जाता है। अन्य शैली ओवरराइड
+    (`aspectRatio`, `resolution`, `audio`, `watermark`) को
+    चेतावनी के साथ अनदेखा कर दिया जाता है।
   </Accordion>
   <Accordion title="OpenRouter">
-    OpenRouter की asynchronous `/videos` API का उपयोग करता है। OpenClaw
-    job submit करता है, `polling_url` को poll करता है, और या तो `unsigned_urls` या
-    documented job content endpoint डाउनलोड करता है। bundled `google/veo-3.1-fast` default
-    4/6/8 second durations, `720P`/`1080P` resolutions, और
-    `16:9`/`9:16` aspect ratios विज्ञापित करता है।
+    OpenRouter के एसिंक्रोनस `/videos` API का उपयोग करता है। OpenClaw
+    कार्य सबमिट करता है, `polling_url` को पोल करता है, और `unsigned_urls` या
+    प्रलेखित कार्य-सामग्री एंडपॉइंट में से किसी एक से डाउनलोड करता है। बंडल किया गया `google/veo-3.1-fast` डिफ़ॉल्ट
+    4/6/8 सेकंड की अवधियाँ, `720P`/`1080P` रिज़ॉल्यूशन और
+    `16:9`/`9:16` आस्पेक्ट रेशियो घोषित करता है।
   </Accordion>
   <Accordion title="Qwen">
-    Alibaba जैसा ही DashScope backend. Reference inputs remote
-    `http(s)` URLs होने चाहिए; local files को पहले ही reject कर दिया जाता है।
+    Alibaba के समान DashScope बैकएंड। संदर्भ इनपुट दूरस्थ
+    `http(s)` URL होने चाहिए; स्थानीय फ़ाइलें पहले ही अस्वीकार कर दी जाती हैं।
   </Accordion>
   <Accordion title="Runway">
-    data URIs के माध्यम से local files का समर्थन करता है। Video-to-video के लिए
-    `runway/gen4_aleph` आवश्यक है। Text-only runs `16:9` और `9:16` aspect
-    ratios expose करते हैं।
+    डेटा URI के माध्यम से स्थानीय फ़ाइलों का समर्थन करता है। वीडियो-से-वीडियो के लिए
+    `runway/gen4_aleph` आवश्यक है। केवल-टेक्स्ट रन में `16:9` और `9:16` आस्पेक्ट
+    रेशियो उपलब्ध होते हैं।
   </Accordion>
   <Accordion title="Together">
-    केवल एकल image reference.
+    केवल एकल इमेज संदर्भ।
   </Accordion>
   <Accordion title="Vydra">
-    auth-dropping redirects से बचने के लिए सीधे `https://www.vydra.ai/api/v1` का उपयोग करता है।
-    `veo3` केवल text-to-video के रूप में bundled है; `kling` को
-    remote image URL चाहिए।
+    प्रमाणीकरण हटाने वाले रीडायरेक्ट से बचने के लिए सीधे `https://www.vydra.ai/api/v1` का
+    उपयोग करता है। `veo3` केवल टेक्स्ट-से-वीडियो के रूप में बंडल किया गया है; `kling` के लिए
+    दूरस्थ इमेज URL आवश्यक है।
   </Accordion>
   <Accordion title="xAI">
-    text-to-video, single first-frame image-to-video, xAI `reference_images` के माध्यम से अधिकतम 7
-    `reference_image` inputs, और remote
-    video edit/extend flows का समर्थन करता है।
+    डिफ़ॉल्ट `grok-imagine-video` मॉडल टेक्स्ट-से-वीडियो, एकल
+    प्रथम-फ़्रेम इमेज-से-वीडियो, xAI `reference_images` के माध्यम से अधिकतम 7
+    `reference_image` इनपुट और दूरस्थ वीडियो संपादन/विस्तार प्रवाह का समर्थन करता है। जनरेशन डिफ़ॉल्ट रूप से
+    `480P` का उपयोग करता है; `aspectRatio` छोड़े जाने पर एकल-इमेज इमेज-से-वीडियो
+    स्रोत अनुपात प्राप्त करता है। वीडियो संपादन/विस्तार इनपुट ज्यामिति प्राप्त करते हैं और
+    आस्पेक्ट-रेशियो या रिज़ॉल्यूशन ओवरराइड स्वीकार नहीं करते। विस्तार 2-10
+    सेकंड स्वीकार करता है।
+
+    `grok-imagine-video-1.5` केवल इमेज-से-वीडियो है: ठीक एक इमेज प्रदान करें।
+    यह 1-15 सेकंड और `480P`, `720P` या `1080P` का समर्थन करता है, जिसका डिफ़ॉल्ट
+    `480P` है; स्रोत इमेज अनुपात प्राप्त करने के लिए `aspectRatio` छोड़ दें। पूर्वावलोकन
+    और दिनांकित 1.5 पहचानकर्ताओं को समान सत्यापन मिलता है और उन्हें
+    अपरिवर्तित अग्रेषित किया जाता है।
+
   </Accordion>
 </AccordionGroup>
 
-## प्रदाता capability modes
+## प्रदाता क्षमता मोड
 
-shared video-generation contract केवल flat aggregate limits के बजाय mode-specific capabilities का समर्थन करता है।
-नए provider implementations को explicit mode blocks को प्राथमिकता देनी चाहिए:
+साझा वीडियो-जनरेशन अनुबंध केवल समतल समग्र सीमाओं के बजाय
+मोड-विशिष्ट क्षमताओं का समर्थन करता है। नए प्रदाता कार्यान्वयनों को
+स्पष्ट मोड ब्लॉक को प्राथमिकता देनी चाहिए:
 
 ```typescript
 capabilities: {
@@ -466,59 +473,58 @@ capabilities: {
 }
 ```
 
-`maxInputImages` और `maxInputVideos` जैसे flat aggregate fields transform-mode support विज्ञापित करने के लिए
-**पर्याप्त नहीं** हैं। Providers को
-`generate`, `imageToVideo`, और `videoToVideo` स्पष्ट रूप से declare करने चाहिए ताकि live
-tests, contract tests, और shared `video_generate` tool mode support को
-deterministically validate कर सकें।
+`maxInputImages` और `maxInputVideos` जैसे समतल समग्र फ़ील्ड
+रूपांतरण-मोड समर्थन घोषित करने के लिए **पर्याप्त नहीं** हैं। प्रदाताओं को
+`generate`, `imageToVideo` और `videoToVideo` स्पष्ट रूप से घोषित करने चाहिए, ताकि लाइव
+परीक्षण, अनुबंध परीक्षण और साझा `video_generate` टूल
+मोड समर्थन को नियतात्मक रूप से सत्यापित कर सकें।
 
-जब किसी provider में एक model के पास बाकी की तुलना में wider reference-input support हो, तो
-mode-wide limit बढ़ाने के बजाय `maxInputImagesByModel`, `maxInputVideosByModel`, या
+जब किसी प्रदाता का एक मॉडल अन्य मॉडलों की तुलना में अधिक व्यापक संदर्भ-इनपुट समर्थन देता हो,
+तो मोड-व्यापी सीमा बढ़ाने के बजाय `maxInputImagesByModel`, `maxInputVideosByModel` या
 `maxInputAudiosByModel` का उपयोग करें।
 
-## Live tests
+## लाइव परीक्षण
 
-shared bundled providers के लिए opt-in live coverage:
+साझा बंडल किए गए प्रदाताओं के लिए ऑप्ट-इन लाइव कवरेज:
 
 ```bash
 OPENCLAW_LIVE_TEST=1 pnpm test:live -- extensions/video-generation-providers.live.test.ts
 ```
 
-Repo wrapper:
+रेपो रैपर:
 
 ```bash
 pnpm test:live:media video
 ```
 
-यह live file default रूप से stored auth profiles से पहले already-exported provider env vars का उपयोग करती है,
-और default रूप से release-safe smoke चलाती है:
+यह लाइव फ़ाइल डिफ़ॉल्ट रूप से संग्रहीत प्रमाणीकरण प्रोफ़ाइल से पहले पहले से एक्सपोर्ट किए गए प्रदाता एनवायरनमेंट वेरिएबल का उपयोग करती है,
+और डिफ़ॉल्ट रूप से रिलीज़-सुरक्षित स्मोक परीक्षण चलाती है:
 
-- sweep में हर non-FAL provider के लिए `generate`.
-- एक-second lobster prompt.
-- प्रति-provider operation cap
-  `OPENCLAW_LIVE_VIDEO_GENERATION_TIMEOUT_MS` से (`180000` default रूप से).
+- `generate` स्वीप में प्रत्येक गैर-FAL प्रदाता के लिए।
+- एक-सेकंड का लॉब्स्टर प्रॉम्प्ट।
+- `OPENCLAW_LIVE_VIDEO_GENERATION_TIMEOUT_MS` से प्रति-प्रदाता ऑपरेशन सीमा
+  (डिफ़ॉल्ट रूप से `180000`)।
 
-FAL opt-in है क्योंकि provider-side queue latency release
-time पर हावी हो सकती है:
+FAL ऑप्ट-इन है, क्योंकि प्रदाता-पक्ष की कतार विलंबता रिलीज़
+समय पर हावी हो सकती है:
 
 ```bash
 pnpm test:live:media video --video-providers fal
 ```
 
-shared sweep जिन declared transform modes को local media के साथ सुरक्षित रूप से exercise कर सकता है, उन्हें भी चलाने के लिए
-`OPENCLAW_LIVE_VIDEO_GENERATION_FULL_MODES=1` set करें:
+घोषित रूपांतरण मोड भी चलाने के लिए `OPENCLAW_LIVE_VIDEO_GENERATION_FULL_MODES=1` सेट करें,
+जिनका साझा स्वीप स्थानीय मीडिया के साथ सुरक्षित रूप से प्रयोग कर सकता है:
 
-- `capabilities.imageToVideo.enabled` होने पर `imageToVideo`.
-- `capabilities.videoToVideo.enabled` होने पर `videoToVideo` और जब
-  provider/model shared
-  sweep में buffer-backed local video input स्वीकार करता हो।
+- `imageToVideo`, जब `capabilities.imageToVideo.enabled`।
+- `videoToVideo`, जब `capabilities.videoToVideo.enabled` और
+  प्रदाता/मॉडल साझा स्वीप में बफ़र-समर्थित स्थानीय वीडियो इनपुट स्वीकार करता हो।
 
-आज shared `videoToVideo` live lane `runway` को केवल तब cover करता है जब आप
-`runway/gen4_aleph` select करते हैं।
+वर्तमान में साझा `videoToVideo` लाइव लेन केवल तभी `runway` को कवर करती है,
+जब आप `runway/gen4_aleph` चुनते हैं।
 
-## Configuration
+## कॉन्फ़िगरेशन
 
-अपने OpenClaw config में default video-generation model set करें:
+अपने OpenClaw कॉन्फ़िगरेशन में डिफ़ॉल्ट वीडियो-जनरेशन मॉडल सेट करें:
 
 ```json5
 {
@@ -536,24 +542,24 @@ shared sweep जिन declared transform modes को local media के सा
 या CLI के माध्यम से:
 
 ```bash
-openclaw config set agents.defaults.videoGenerationModel.primary "qwen/wan2.6-t2v"
+openclaw config set agents.defaults.mediaModels.video.primary "qwen/wan2.6-t2v"
 ```
 
 ## संबंधित
 
 - [Alibaba Model Studio](/hi/providers/alibaba)
-- [Background tasks](/hi/automation/tasks) - async video generation के लिए task tracking
+- [पृष्ठभूमि कार्य](/hi/automation/tasks) - एसिंक्रोनस वीडियो जनरेशन के लिए कार्य ट्रैकिंग
 - [BytePlus](/hi/concepts/model-providers#byteplus-international)
 - [ComfyUI](/hi/providers/comfy)
-- [Configuration reference](/hi/gateway/config-agents#agent-defaults)
+- [कॉन्फ़िगरेशन संदर्भ](/hi/gateway/config-agents#agent-defaults)
 - [fal](/hi/providers/fal)
 - [Google (Gemini)](/hi/providers/google)
 - [MiniMax](/hi/providers/minimax)
-- [Models](/hi/concepts/models)
+- [मॉडल](/hi/concepts/models)
 - [OpenAI](/hi/providers/openai)
 - [Qwen](/hi/providers/qwen)
 - [Runway](/hi/providers/runway)
 - [Together AI](/hi/providers/together)
-- [Tools overview](/hi/tools)
+- [टूल का अवलोकन](/hi/tools)
 - [Vydra](/hi/providers/vydra)
 - [xAI](/hi/providers/xai)

@@ -1,23 +1,24 @@
 ---
 read_when:
-    - Je hebt een andere installatiemethode nodig dan de snelstartgids Aan de slag
-    - U wilt implementeren op een cloudplatform
-    - U moet bijwerken, migreren of verwijderen
+    - Je hebt een andere installatiemethode nodig dan de snelstart Aan de slag
+    - Je wilt implementeren op een cloudplatform
+    - Je moet bijwerken, migreren of verwijderen
 summary: OpenClaw installeren - installatiescript, npm/pnpm/bun, vanuit de broncode, Docker en meer
 title: Installeren
 x-i18n:
-    generated_at: "2026-07-12T09:03:48Z"
+    generated_at: "2026-07-27T06:19:01Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: cc819cc6c1d57af0739a7d11f0f2834479ddabbca0571b105b8cb9325e87b145
+    source_hash: dc6c6c33294852c90d2d2904b78ff8b0483b8e72a380d5835c5bdda67547de0c
     source_path: install/index.md
     workflow: 16
 ---
 
 ## Systeemvereisten
 
-- **Node 22.19+, 23.11+ of 24+** - Node 24 is het standaarddoel; het installatiescript regelt dit automatisch.
+- **Node 22.22.3+, 24.15+ of 25.9+** - Node 24 is het standaarddoel; het installatiescript regelt dit automatisch.
 - **macOS, Linux of Windows** - Windows-gebruikers kunnen beginnen met de systeemeigen Windows Hub-app, het PowerShell-installatieprogramma voor de CLI of een WSL2-Gateway. Zie [Windows](/nl/platforms/windows).
 - `pnpm` is alleen nodig als je vanuit de broncode bouwt.
 
@@ -26,7 +27,7 @@ x-i18n:
 De snelste installatiemethode. Het detecteert je besturingssysteem, installeert indien nodig Node, installeert OpenClaw en start de configuratie.
 
 <Note>
-Gebruikers van Windows-desktops kunnen ook de systeemeigen aanvullende app [Windows Hub](/nl/platforms/windows#recommended-windows-hub) installeren, die configuratie, systeemvakstatus, chat, Node-modus en lokale MCP-modus bevat.
+Gebruikers van Windows-desktop kunnen ook de systeemeigen begeleidende app [Windows Hub](/nl/platforms/windows#recommended-windows-hub) installeren. Deze bevat configuratie, systeemvakstatus, chat, Node-modus en lokale MCP-modus.
 </Note>
 
 <Tabs>
@@ -63,17 +64,17 @@ Zie [Interne werking van het installatieprogramma](/nl/install/installer) voor a
 
 ### Installatieprogramma met lokaal voorvoegsel (`install-cli.sh`)
 
-Gebruik dit als je OpenClaw en Node onder een lokaal voorvoegsel zoals
-`~/.openclaw` wilt bewaren, zonder afhankelijk te zijn van een systeembrede Node-installatie:
+Gebruik dit wanneer je OpenClaw en Node onder een lokaal voorvoegsel wilt bewaren, zoals
+`~/.openclaw`, zonder afhankelijk te zijn van een systeembrede Node-installatie:
 
 ```bash
 curl -fsSL https://openclaw.ai/install-cli.sh | bash
 ```
 
-Het ondersteunt standaard installaties via npm, plus installaties vanuit een git-checkout binnen dezelfde
-voorvoegselstroom. Volledige referentie: [Interne werking van het installatieprogramma](/nl/install/installer#install-clish).
+Het ondersteunt standaard installaties via npm en daarnaast installaties vanuit een git-checkout
+binnen dezelfde voorvoegselstroom. Volledige naslag: [Interne werking van het installatieprogramma](/nl/install/installer#install-clish).
 
-Al geïnstalleerd? Schakel tussen pakket- en git-installaties met
+Al geïnstalleerd? Wissel tussen pakket- en git-installaties met
 `openclaw update --channel dev` en `openclaw update --channel stable`. Zie
 [Bijwerken](/nl/install/updating#switch-between-npm-and-git-installs).
 
@@ -103,7 +104,7 @@ Als je Node al zelf beheert:
     ```
 
     <Note>
-    pnpm vereist expliciete goedkeuring voor pakketten met bouwscripts. Voer `pnpm approve-builds -g` uit na de eerste installatie.
+    pnpm vereist expliciete goedkeuring voor pakketten met buildscripts. Voer `pnpm approve-builds -g` uit na de eerste installatie.
     </Note>
 
   </Tab>
@@ -114,7 +115,7 @@ Als je Node al zelf beheert:
     ```
 
     <Note>
-    Bun wordt ondersteund voor het globale installatiepad van de CLI. Voor de Gateway-runtime blijft Node de aanbevolen runtime voor de daemon.
+    Bun kan het globale pakket installeren, maar het resulterende uitvoerbare bestand `openclaw` vereist een ondersteunde Node-runtime, omdat de status van OpenClaw gebruikmaakt van `node:sqlite`.
     </Note>
 
   </Tab>
@@ -132,9 +133,9 @@ pnpm link --global
 openclaw onboard --install-daemon
 ```
 
-Je kunt de koppeling ook overslaan en `pnpm openclaw ...` vanuit de repository gebruiken. Zie [Configuratie](/nl/start/setup) voor volledige ontwikkelwerkstromen.
+Je kunt de koppeling ook overslaan en `pnpm openclaw ...` vanuit de repository gebruiken. Zie [Configuratie](/nl/start/setup) voor volledige ontwikkelworkflows.
 
-### Installeren vanuit de hoofdcheckout op GitHub
+### Installeren vanuit de main-checkout op GitHub
 
 ```bash
 curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git --version main
@@ -144,10 +145,10 @@ curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -
 
 <CardGroup cols={2}>
   <Card title="Docker" href="/nl/install/docker" icon="container">
-    Implementaties in containers of zonder grafische omgeving.
+    Implementaties in containers of zonder grafische interface.
   </Card>
   <Card title="Podman" href="/nl/install/podman" icon="container">
-    Rootless containeralternatief voor Docker.
+    Rootloos containeralternatief voor Docker.
   </Card>
   <Card title="Nix" href="/nl/install/nix" icon="snowflake">
     Declaratieve installatie via een Nix-flake.
@@ -156,7 +157,7 @@ curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -
     Geautomatiseerde inrichting van een machinepark.
   </Card>
   <Card title="Bun" href="/nl/install/bun" icon="zap">
-    Gebruik van alleen de CLI via de Bun-runtime.
+    Optioneel installatieprogramma voor afhankelijkheden en uitvoerder van pakketscripts.
   </Card>
 </CardGroup>
 
@@ -172,7 +173,7 @@ Als je na de installatie beheerd opstarten wilt:
 
 - macOS: LaunchAgent via `openclaw onboard --install-daemon` of `openclaw gateway install`
 - Linux/WSL2: systemd-gebruikersservice via dezelfde opdrachten
-- Systeemeigen Windows: eerst een geplande taak, met als terugvaloptie een aanmeldingsitem per gebruiker in de map Opstarten als het maken van de taak wordt geweigerd
+- Systeemeigen Windows: eerst een geplande taak, met als terugvaloptie een aanmeldingsitem per gebruiker in de opstartmap als het maken van de taak wordt geweigerd
 
 ## Hosting en implementatie
 
@@ -209,10 +210,10 @@ Northflank, Oracle Cloud, Raspberry Pi en meer), of implementeer declaratief op
 
 ## Probleemoplossing: `openclaw` niet gevonden
 
-Dit is bijna altijd een PATH-probleem: de globale bin-map van npm staat niet in de `PATH` van je shell. Zie [Problemen met Node.js oplossen](/nl/install/node#troubleshooting) voor de volledige oplossing, inclusief het Windows-pad.
+Bijna altijd een PATH-probleem: de globale binaire map van npm staat niet in `PATH` van je shell. Zie [Probleemoplossing voor Node.js](/nl/install/node#troubleshooting) voor de volledige oplossing, inclusief het Windows-pad.
 
 ```bash
 node -v           # Is Node geïnstalleerd?
 npm prefix -g     # Waar staan globale pakketten?
-echo "$PATH"      # Staat de globale bin-map in PATH?
+echo "$PATH"      # Staat de globale binaire map in PATH?
 ```

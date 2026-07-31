@@ -1,26 +1,27 @@
 ---
 read_when:
-    - راه‌اندازی پشتیبانی Signal
+    - راه‌اندازی پشتیبانی از Signal
     - اشکال‌زدایی ارسال/دریافت Signal
-summary: پشتیبانی Signal از طریق signal-cli (سرویس بومی یا کانتینر bbernhard)، مسیرهای راه‌اندازی و مدل شماره تلفن
+summary: پشتیبانی از Signal از طریق signal-cli (دیمون بومی یا کانتینر bbernhard)، مسیرهای راه‌اندازی و مدل شماره تلفن
 title: Signal
 x-i18n:
-    generated_at: "2026-07-12T09:36:05Z"
+    generated_at: "2026-07-27T13:44:43Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: db2497d0d6dcdc61cf9f7388929f9ee107602c9ed97bd248e20e67519e878b8b
+    source_hash: 744f817e425d378e9f3e160df534019a6fc865227eb3fc68959a12ad46c0b714
     source_path: channels/signal.md
     workflow: 16
 ---
 
-Signal یک Plugin کانال قابل دانلود است (`@openclaw/signal`). Gateway از طریق HTTP با `signal-cli` ارتباط برقرار می‌کند: یا دیمن بومی (JSON-RPC + SSE) یا کانتینر [bbernhard/signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api) (REST + WebSocket). OpenClaw کتابخانهٔ libsignal را در خود تعبیه نمی‌کند.
+Signal یک plugin کانال قابل‌دانلود است (`@openclaw/signal`). Gateway از طریق HTTP با `signal-cli` ارتباط برقرار می‌کند: یا دیمن بومی (JSON-RPC + SSE) یا کانتینر [bbernhard/signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api)‏ (REST + WebSocket). ‏OpenClaw، ‏libsignal را درون خود تعبیه نمی‌کند.
 
 ## مدل شماره (ابتدا این بخش را بخوانید)
 
 - Gateway به یک **دستگاه Signal** متصل می‌شود: حساب `signal-cli`.
 - اجرای ربات روی **حساب شخصی Signal شما** باعث می‌شود پیام‌های خودتان را نادیده بگیرد (محافظت در برابر حلقه).
-- برای حالت «من به ربات پیام می‌دهم و پاسخ می‌دهد»، از یک **شمارهٔ جداگانه برای ربات** استفاده کنید.
+- برای حالت «به ربات پیام می‌دهم و پاسخ می‌دهد»، از یک **شماره جداگانه برای ربات** استفاده کنید.
 
 ## نصب
 
@@ -28,15 +29,15 @@ Signal یک Plugin کانال قابل دانلود است (`@openclaw/signal`).
 openclaw plugins install @openclaw/signal
 ```
 
-مشخصات Plugin بدون پیشوند ابتدا ClawHub را امتحان می‌کنند و سپس به npm بازمی‌گردند. برای اجبار یک منبع، از `openclaw plugins install clawhub:@openclaw/signal` یا `npm:@openclaw/signal` استفاده کنید. `plugins install`، Plugin را ثبت و فعال می‌کند؛ به مرحلهٔ جداگانهٔ `enable` نیازی نیست. برای قواعد عمومی نصب، [Pluginها](/fa/tools/plugin) را ببینید.
+مشخصات ساده plugin ابتدا ClawHub و سپس npm را به‌عنوان مسیر جایگزین امتحان می‌کند. با `openclaw plugins install clawhub:@openclaw/signal` یا `npm:@openclaw/signal` یک منبع را اجباراً انتخاب کنید. `plugins install`، ‏plugin را ثبت و فعال می‌کند؛ به مرحله جداگانه `enable` نیازی نیست. برای قواعد عمومی نصب، به [Pluginها](/fa/tools/plugin) مراجعه کنید.
 
 ## راه‌اندازی سریع
 
 <Steps>
   <Step title="انتخاب شماره">
-    از یک **شمارهٔ جداگانهٔ Signal** برای ربات استفاده کنید (توصیه می‌شود).
+    برای ربات از یک **شماره جداگانه Signal** استفاده کنید (توصیه می‌شود).
   </Step>
-  <Step title="نصب Plugin">
+  <Step title="نصب plugin">
     ```bash
     openclaw plugins install @openclaw/signal
     ```
@@ -45,14 +46,17 @@ openclaw plugins install @openclaw/signal
     ```bash
     openclaw channels add
     ```
-    راهنما تشخیص می‌دهد که آیا `signal-cli` در `PATH` قرار دارد و اگر موجود نباشد، نصب آن را پیشنهاد می‌کند: در Linux x86-64 ساخت بومی رسمی GraalVM را دانلود می‌کند، یا در macOS و معماری‌های دیگر آن را از طریق Homebrew نصب می‌کند. سپس شمارهٔ ربات و مسیر `signal-cli` را درخواست می‌کند.
-  </Step>
-  <Step title="پیوند یا ثبت حساب">
-    - **پیوند QR (سریع‌ترین):** `signal-cli link -n "OpenClaw"`، سپس با Signal اسکن کنید. [مسیر A](#setup-path-a-link-existing-signal-account-qr) را ببینید.
-    - **ثبت‌نام پیامکی:** شمارهٔ اختصاصی همراه با کپچا و تأیید پیامکی. [مسیر B](#setup-path-b-register-dedicated-bot-number-sms-linux) را ببینید.
+    راهنما تشخیص می‌دهد که آیا `signal-cli` در `PATH` وجود دارد و اگر موجود نباشد، نصب آن را پیشنهاد می‌کند: در Linux x86-64 بیلد بومی رسمی GraalVM را دانلود می‌کند، یا در macOS و معماری‌های دیگر آن را از طریق Homebrew نصب می‌کند. سپس شماره ربات و مسیر `signal-cli` را درخواست می‌کند.
+
+    برای راه‌اندازی غیرتعاملی، `openclaw channels add --channel signal` همچنین `--signal-number <e164>` را برای شماره تلفن ربات و نیز `--http-host <host>` و `--http-port <port>` را برای نقطه پایانی دیمن Signal می‌پذیرد (پیش‌فرض `127.0.0.1:8080`).
 
   </Step>
-  <Step title="بررسی و جفت‌سازی">
+  <Step title="پیوند دادن یا ثبت حساب">
+    - **پیوند QR (سریع‌ترین):** ‏`signal-cli link -n "OpenClaw"`، سپس با Signal اسکن کنید. به [مسیر A](#setup-path-a-link-existing-signal-account-qr) مراجعه کنید.
+    - **ثبت‌نام پیامکی:** شماره اختصاصی همراه با کپچا و تأیید پیامکی. به [مسیر B](#setup-path-b-register-dedicated-bot-number-sms-linux) مراجعه کنید.
+
+  </Step>
+  <Step title="تأیید و جفت‌سازی">
     ```bash
     openclaw gateway call channels.status --params '{"probe":true}'
     ```
@@ -68,7 +72,10 @@ openclaw plugins install @openclaw/signal
     signal: {
       enabled: true,
       account: "+15551234567",
-      cliPath: "signal-cli",
+      transport: {
+        kind: "managed-native",
+        cliPath: "signal-cli",
+      },
       dmPolicy: "pairing",
       allowFrom: ["+15557654321"],
     },
@@ -76,33 +83,32 @@ openclaw plugins install @openclaw/signal
 }
 ```
 
-| فیلد         | توضیحات                                                     |
-| ------------ | ----------------------------------------------------------- |
-| `account`    | شماره‌تلفن ربات با قالب E.164 (`+15551234567`)              |
-| `cliPath`    | مسیر `signal-cli` (اگر در `PATH` باشد، `signal-cli`)         |
-| `configPath` | پوشهٔ پیکربندی signal-cli که به‌صورت `--config` ارسال می‌شود |
-| `dmPolicy`   | سیاست دسترسی پیام مستقیم (`pairing` توصیه می‌شود)            |
-| `allowFrom`  | شماره‌تلفن‌ها یا مقادیر `uuid:<id>` مجاز به ارسال پیام مستقیم |
+| فیلد       | توضیحات                                       |
+| ----------- | ------------------------------------------------- |
+| `account`   | شماره تلفن ربات با قالب E.164 ‏(`+15551234567`) |
+| `transport` | اتصال Signal متعلق به حساب و حالت فرایند  |
+| `dmPolicy`  | سیاست دسترسی پیام مستقیم (‏`pairing` توصیه می‌شود)          |
+| `allowFrom` | شماره‌های تلفن یا مقادیر `uuid:<id>` مجاز برای ارسال پیام مستقیم |
 
-پشتیبانی از چند حساب: از `channels.signal.accounts` همراه با پیکربندی مختص هر حساب و `name` اختیاری استفاده کنید. برای الگوی مشترک، [کانال‌های چندحسابی](/fa/gateway/config-channels#multi-account-all-channels) را ببینید.
+پشتیبانی از چند حساب: از `channels.signal.accounts` همراه با پیکربندی مختص هر حساب و `name` اختیاری استفاده کنید. هر حساب نام‌گذاری‌شده مالک `transport` خود است و آن را از انتقال سطح بالا به ارث نمی‌برد. انتقال سطح بالا فقط به حساب ضمنی `default` تعلق دارد. برای الگوی مشترک، به [کانال‌های چندحسابی](/fa/gateway/config-channels#multi-account-all-channels) مراجعه کنید.
 
-## چیستی آن
+## ماهیت آن
 
 - مسیریابی قطعی: پاسخ‌ها همیشه به Signal بازمی‌گردند.
-- پیام‌های مستقیم نشست اصلی عامل را به‌اشتراک می‌گذارند؛ گروه‌ها مجزا هستند (`agent:<agentId>:signal:group:<groupId>`).
-- به‌طور پیش‌فرض، Signal می‌تواند به‌روزرسانی‌های پیکربندی ناشی از `/config set|unset` را بنویسد (به `commands.config: true` نیاز دارد). با `channels.signal.configWrites: false` غیرفعالش کنید.
+- پیام‌های مستقیم نشست اصلی عامل را به‌اشتراک می‌گذارند؛ گروه‌ها ایزوله هستند (`agent:<agentId>:signal:group:<groupId>`).
+- به‌طور پیش‌فرض، Signal ممکن است به‌روزرسانی‌های پیکربندی فعال‌شده توسط `/config set|unset` را بنویسد (به `commands.config: true` نیاز دارد). با `channels.signal.configWrites: false` غیرفعال کنید.
 
-## مسیر راه‌اندازی A: پیوند حساب موجود Signal ‏(QR)
+## مسیر راه‌اندازی A: پیوند دادن حساب موجود Signal ‏(QR)
 
-1. `signal-cli` را نصب کنید (ساخت JVM یا بومی)، یا اجازه دهید `openclaw channels add` آن را برایتان نصب کند.
+1. `signal-cli` را نصب کنید (بیلد JVM یا بومی)، یا اجازه دهید `openclaw channels add` آن را برای شما نصب کند.
 2. یک حساب ربات را پیوند دهید: `signal-cli link -n "OpenClaw"`، سپس کد QR را در Signal اسکن کنید.
 3. Signal را پیکربندی و Gateway را راه‌اندازی کنید.
 
-## مسیر راه‌اندازی B: ثبت شمارهٔ اختصاصی ربات (پیامک، Linux)
+## مسیر راه‌اندازی B: ثبت شماره اختصاصی ربات (پیامک، Linux)
 
-از این روش برای یک شمارهٔ اختصاصی ربات به‌جای پیوند حساب موجود برنامهٔ Signal استفاده کنید. جریان زیر روی Ubuntu 24 آزمایش شده است.
+از این روش برای یک شماره اختصاصی ربات، به‌جای پیوند دادن حساب موجود برنامه Signal، استفاده کنید. جریان زیر روی Ubuntu 24 آزمایش شده است.
 
-1. شماره‌ای تهیه کنید که بتواند پیامک دریافت کند (یا برای تلفن ثابت، تأیید صوتی). شمارهٔ اختصاصی ربات از تعارض حساب/نشست جلوگیری می‌کند.
+1. شماره‌ای تهیه کنید که بتواند پیامک دریافت کند (یا برای تلفن ثابت، تأیید صوتی). شماره اختصاصی ربات از تداخل حساب/نشست جلوگیری می‌کند.
 2. `signal-cli` را روی میزبان Gateway نصب کنید:
 
 ```bash
@@ -113,7 +119,7 @@ sudo ln -sf /opt/signal-cli /usr/local/bin/
 signal-cli --version
 ```
 
-اگر از ساخت JVM (`signal-cli-${VERSION}.tar.gz`) استفاده می‌کنید، ابتدا یک JRE نصب کنید. `signal-cli` را به‌روز نگه دارید؛ بالادست اشاره می‌کند که با تغییر APIهای سرور Signal، نسخه‌های قدیمی ممکن است از کار بیفتند.
+اگر از بیلد JVM ‏(`signal-cli-${VERSION}.tar.gz`) استفاده می‌کنید، ابتدا یک JRE نصب کنید. `signal-cli` را به‌روز نگه دارید؛ در بالادست ذکر شده است که با تغییر APIهای سرور Signal، نسخه‌های قدیمی ممکن است از کار بیفتند.
 
 3. شماره را ثبت و تأیید کنید:
 
@@ -121,71 +127,85 @@ signal-cli --version
 signal-cli -a +<BOT_PHONE_NUMBER> register
 ```
 
-اگر کپچا لازم است (برای تکمیل این مرحله دسترسی به مرورگر ضروری است):
+اگر کپچا لازم است (برای تکمیل این مرحله دسترسی به مرورگر لازم است):
 
 1. `https://signalcaptchas.org/registration/generate.html` را باز کنید.
-2. کپچا را تکمیل و مقصد پیوند `signalcaptcha://...` را از "Open Signal" کپی کنید.
-3. در صورت امکان، فرمان را از همان IP خارجی نشست مرورگر اجرا کنید (توکن‌های کپچا به‌سرعت منقضی می‌شوند).
-4. بلافاصله ثبت‌نام و تأیید کنید:
+2. کپچا را تکمیل کنید و مقصد پیوند `signalcaptcha://...` را از "Open Signal" کپی کنید.
+3. در صورت امکان، دستور را از همان IP خارجی نشست مرورگر اجرا کنید (توکن‌های کپچا به‌سرعت منقضی می‌شوند).
+4. بلافاصله ثبت و تأیید کنید:
 
 ```bash
 signal-cli -a +<BOT_PHONE_NUMBER> register --captcha '<SIGNALCAPTCHA_URL>'
 signal-cli -a +<BOT_PHONE_NUMBER> verify <VERIFICATION_CODE>
 ```
 
-4. OpenClaw را پیکربندی کنید، Gateway را از نو راه‌اندازی کنید و کانال را بررسی کنید:
+4. ‏OpenClaw را پیکربندی کنید، Gateway را دوباره راه‌اندازی کنید و کانال را تأیید کنید:
 
 ```bash
 # اگر Gateway را به‌عنوان سرویس systemd کاربر اجرا می‌کنید:
 systemctl --user restart openclaw-gateway.service
 
-# سپس بررسی کنید:
+# سپس تأیید کنید:
 openclaw doctor
 openclaw channels status --probe
 ```
 
-5. فرستندهٔ پیام مستقیم خود را جفت کنید:
-   - هر پیامی را به شمارهٔ ربات ارسال کنید.
+5. فرستنده پیام مستقیم خود را جفت کنید:
+   - هر پیامی را به شماره ربات ارسال کنید.
    - روی سرور تأیید کنید: `openclaw pairing approve signal <PAIRING_CODE>`.
-   - برای جلوگیری از نمایش "Unknown contact"، شمارهٔ ربات را به‌عنوان مخاطب در تلفن خود ذخیره کنید.
+   - برای جلوگیری از نمایش "Unknown contact"، شماره ربات را به‌عنوان مخاطب در تلفن خود ذخیره کنید.
 
 <Warning>
-ثبت حساب یک شماره‌تلفن با `signal-cli` ممکن است احراز هویت نشست اصلی برنامهٔ Signal آن شماره را باطل کند. شمارهٔ اختصاصی ربات را ترجیح دهید، یا برای حفظ راه‌اندازی فعلی برنامهٔ تلفن خود از حالت پیوند QR استفاده کنید.
+ثبت حساب شماره تلفن با `signal-cli` می‌تواند نشست برنامه اصلی Signal را برای آن شماره از احراز هویت خارج کند. یک شماره اختصاصی ربات را ترجیح دهید، یا برای حفظ تنظیمات فعلی برنامه تلفن خود از حالت پیوند QR استفاده کنید.
 </Warning>
 
-مراجع بالادست:
+منابع بالادست:
 
-- راهنمای `signal-cli`: `https://github.com/AsamK/signal-cli`
+- ‏README مربوط به `signal-cli`: ‏`https://github.com/AsamK/signal-cli`
 - جریان کپچا: `https://github.com/AsamK/signal-cli/wiki/Registration-with-captcha`
-- جریان پیوند: `https://github.com/AsamK/signal-cli/wiki/Linking-other-devices-(Provisioning)`
+- جریان پیوند دادن: `https://github.com/AsamK/signal-cli/wiki/Linking-other-devices-(Provisioning)`
 
-## حالت دیمن خارجی (httpUrl)
+## حالت دیمن بومی خارجی
 
-برای مدیریت مستقل `signal-cli` (شروع سرد و کند JVM، مقداردهی اولیهٔ کانتینر، پردازنده‌های مشترک)، دیمن را جداگانه اجرا و OpenClaw را به آن متصل کنید:
+برای مدیریت `signal-cli` توسط خودتان (شروع سرد کُند JVM، مقداردهی اولیه کانتینر، CPUهای اشتراکی)، دیمن را جداگانه اجرا کنید و OpenClaw را به آن هدایت کنید:
+
+برای راه‌اندازی غیرتعاملی، در صورت نیاز نوع نقطه پایانی را صریحاً انتخاب کنید:
+
+```bash
+openclaw channels add --channel signal --signal-number +15551234567 \
+  --http-url http://127.0.0.1:8080 --signal-transport external-native
+```
 
 ```json5
 {
   channels: {
     signal: {
-      httpUrl: "http://127.0.0.1:8080",
-      autoStart: false,
+      transport: {
+        kind: "external-native",
+        url: "http://127.0.0.1:8080",
+      },
     },
   },
 }
 ```
 
-این کار ایجاد خودکار فرایند و انتظار OpenClaw هنگام راه‌اندازی را رد می‌کند. برای شروع‌های کندی که به‌صورت خودکار ایجاد می‌شوند، `channels.signal.startupTimeoutMs` را تنظیم کنید.
+این کار ایجاد خودکار و انتظار هنگام راه‌اندازی OpenClaw را رد می‌کند. برای دیمن مدیریت‌شده‌ای که آهسته شروع می‌شود، `channels.signal.transport.startupTimeoutMs` را تنظیم کنید.
 
 ## حالت کانتینر (bbernhard/signal-cli-rest-api)
 
-به‌جای اجرای بومی `signal-cli`، از کانتینر Docker‏ [bbernhard/signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api) استفاده کنید که `signal-cli` را پشت یک رابط REST + WebSocket قرار می‌دهد.
+به‌جای اجرای بومی `signal-cli`، از کانتینر Docker ‏[bbernhard/signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api) استفاده کنید که `signal-cli` را پشت رابط REST + WebSocket قرار می‌دهد.
+
+```bash
+openclaw channels add --channel signal --signal-number +15551234567 \
+  --http-url http://signal-cli:8080 --signal-transport container
+```
 
 الزامات:
 
-- برای دریافت بی‌درنگ پیام، کانتینر **باید** با `MODE=json-rpc` اجرا شود.
+- کانتینر برای دریافت بلادرنگ پیام‌ها **باید** با `MODE=json-rpc` اجرا شود.
 - پیش از اتصال OpenClaw، حساب Signal خود را داخل کانتینر ثبت یا پیوند دهید.
 
-نمونهٔ سرویس `docker-compose.yml`:
+نمونه سرویس `docker-compose.yml`:
 
 ```yaml
 signal-cli:
@@ -206,92 +226,119 @@ signal-cli:
     signal: {
       enabled: true,
       account: "+15551234567",
-      httpUrl: "http://signal-cli:8080",
-      autoStart: false,
-      apiMode: "container", // یا "auto" برای تشخیص خودکار
+      transport: {
+        kind: "container",
+        url: "http://signal-cli:8080",
+      },
     },
   },
 }
 ```
 
-`apiMode` تعیین می‌کند OpenClaw از کدام پروتکل استفاده کند:
+`transport.kind` تعیین می‌کند OpenClaw از کدام پروتکل و چرخه‌عمر فرایند استفاده کند:
 
-| مقدار         | رفتار                                                                                           |
-| ------------- | ----------------------------------------------------------------------------------------------- |
-| `"auto"`      | (پیش‌فرض) هر دو انتقال را می‌آزماید؛ پخش جریانی دریافت WebSocket کانتینر را اعتبارسنجی می‌کند     |
-| `"native"`    | اجبار signal-cli بومی (JSON-RPC در `/api/v1/rpc` و SSE در `/api/v1/events`)                       |
-| `"container"` | اجبار کانتینر bbernhard ‏(REST در `/v2/send` و WebSocket در `/v1/receive/{account}`)              |
+| مقدار               | رفتار                                                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `"managed-native"`  | signal-cli بومی را اجرا می‌کند و از JSON-RPC در `/api/v1/rpc` به‌همراه SSE در `/api/v1/events` استفاده می‌کند؛ `url` ممکن است نقطه پایانی اتصالی متمایز از نشانی اتصال دیمن انتخاب کند |
+| `"external-native"` | به دیمن بومی signal-cli که از قبل در حال اجرا است متصل می‌شود                                                                                                       |
+| `"container"`       | به REST مربوط به bbernhard در `/v2/send` و WebSocket در `/v1/receive/{account}` متصل می‌شود                                                                             |
 
-وقتی `apiMode` برابر با `"auto"` باشد، OpenClaw برای جلوگیری از آزمون‌های تکراری، حالت تشخیص‌داده‌شده را برای هر نشانی دیمن به‌مدت ۳۰ ثانیه در حافظهٔ نهان نگه می‌دارد (اگر هر دو انتقال سالم باشند، حالت بومی اولویت دارد). دریافت کانتینری تنها پس از ارتقای `/v1/receive/{account}` به WebSocket برای پخش جریانی انتخاب می‌شود که به `MODE=json-rpc` نیاز دارد.
+راه‌اندازی و `openclaw doctor --fix` ممکن است برای شناسایی نوع دقیق یک نقطه پایانی موجود، آن را یک‌بار کاوش کنند. عملیات زمان اجرا پروتکل‌ها را به‌طور خودکار تشخیص نمی‌دهند یا تغییر نمی‌دهند.
 
-حالت کانتینر، در مواردی که کانتینر APIهای متناظر را ارائه می‌دهد، از همان عملیات Signal در حالت بومی پشتیبانی می‌کند: ارسال، دریافت، پیوست‌ها، نشانگرهای تایپ، رسیدهای خواندن/مشاهده، واکنش‌ها، گروه‌ها و متن سبک‌بندی‌شده. OpenClaw فراخوانی‌های RPC بومی Signal را به بارهای REST کانتینر تبدیل می‌کند، از جمله شناسه‌های گروه `group.{base64(internal_id)}` و `text_mode: "styled"` برای متن قالب‌بندی‌شده.
+حالت کانتینر، در مواردی که کانتینر APIهای متناظر را ارائه کند، از همان عملیات Signal در حالت بومی پشتیبانی می‌کند: ارسال، دریافت، پیوست‌ها، نشانگرهای تایپ، رسیدهای خواندن/مشاهده‌شدن، واکنش‌ها، گروه‌ها و متن سبک‌دهی‌شده. OpenClaw فراخوانی‌های RPC بومی Signal را به بارهای REST کانتینر ترجمه می‌کند، از جمله شناسه‌های گروه `group.{base64(internal_id)}` و `text_mode: "styled"` برای متن قالب‌بندی‌شده.
 
 نکات عملیاتی:
 
-- در حالت کانتینر از `autoStart: false` استفاده کنید؛ هنگامی که `apiMode: "container"` انتخاب شده است، OpenClaw نباید یک دیمن بومی ایجاد کند.
-- برای دریافت از `MODE=json-rpc` استفاده کنید. `MODE=normal` ممکن است `/v1/about` را سالم نشان دهد، اما `/v1/receive/{account}` به WebSocket ارتقا نمی‌یابد؛ بنابراین OpenClaw در حالت `auto` پخش جریانی دریافت کانتینر را انتخاب نمی‌کند.
-- وقتی `httpUrl` به REST API‏ bbernhard اشاره دارد، `apiMode: "container"` را تنظیم کنید؛ وقتی به JSON-RPC/SSE بومی `signal-cli` اشاره دارد، `"native"` را تنظیم کنید؛ و وقتی استقرار ممکن است متفاوت باشد، از `"auto"` استفاده کنید.
-- دانلود پیوست‌ها در حالت کانتینر از همان محدودیت‌های بایتی رسانه در حالت بومی پیروی می‌کند. اگر سرور `Content-Length` را ارسال کند، پاسخ‌های بیش‌ازحد بزرگ پیش از قرارگرفتن کامل در بافر رد می‌شوند؛ در غیر این صورت، هنگام پخش جریانی رد می‌شوند.
+- برای دریافت از `MODE=json-rpc` استفاده کنید. `MODE=normal` می‌تواند باعث شود `/v1/about` سالم به‌نظر برسد، اما `/v1/receive/{account}` به WebSocket ارتقا نمی‌یابد؛ بنابراین کاوش جریان دریافت کانتینر شکست می‌خورد.
+- `kind: "container"` را برای API ‏REST مربوط به bbernhard و `kind: "external-native"` را برای JSON-RPC/SSE بومی `signal-cli` تنظیم کنید.
+- دانلود پیوست در کانتینر از همان محدودیت‌های بایتی رسانه در حالت بومی پیروی می‌کند. وقتی سرور `Content-Length` را ارسال کند، پاسخ‌های بیش‌ازحد بزرگ پیش از بافر شدن کامل رد می‌شوند؛ در غیر این صورت هنگام جریان‌یابی رد می‌شوند.
 
 ## کنترل دسترسی (پیام‌های مستقیم + گروه‌ها)
 
 پیام‌های مستقیم:
 
 - پیش‌فرض: `channels.signal.dmPolicy = "pairing"`.
-- فرستندگان ناشناس یک کد جفت‌سازی دریافت می‌کنند؛ پیام‌ها تا زمان تأیید نادیده گرفته می‌شوند (کدها پس از ۱ ساعت منقضی می‌شوند).
+- فرستندگان ناشناس یک کد جفت‌سازی دریافت می‌کنند؛ پیام‌ها تا زمان تأیید نادیده گرفته می‌شوند (کدها پس از 1 ساعت منقضی می‌شوند).
 - از طریق `openclaw pairing list signal` و `openclaw pairing approve signal <CODE>` تأیید کنید.
 - جفت‌سازی، تبادل توکن پیش‌فرض برای پیام‌های مستقیم Signal است. جزئیات: [جفت‌سازی](/fa/channels/pairing)
-- فرستندگانی که فقط UUID دارند (از `sourceUuid`) به‌شکل `uuid:<id>` در `channels.signal.allowFrom` ذخیره می‌شوند.
+- فرستندگان فقط دارای UUID (از `sourceUuid`) به‌شکل `uuid:<id>` در `channels.signal.allowFrom` ذخیره می‌شوند.
 
 گروه‌ها:
 
 - `channels.signal.groupPolicy = open | allowlist | disabled`.
-- وقتی `allowlist` تنظیم شده باشد، `channels.signal.groupAllowFrom` کنترل می‌کند کدام گروه‌ها یا فرستندگان می‌توانند پاسخ‌های گروهی را فعال کنند؛ ورودی‌ها می‌توانند شناسه‌های گروه Signal (خام، `group:<id>` یا `signal:group:<id>`)، شماره‌تلفن فرستنده، مقادیر `uuid:<id>` یا `*` باشند.
-- `channels.signal.groups["<group-id>" | "*"]` می‌تواند رفتار گروه را با `requireMention`، `tools` و `toolsBySender` بازنویسی کند.
-- برای بازنویسی‌های مختص هر حساب در راه‌اندازی‌های چندحسابی، از `channels.signal.accounts.<id>.groups` استفاده کنید.
-- قراردادن یک گروه در فهرست مجاز از طریق `groupAllowFrom` به‌خودی‌خود الزام اشاره را غیرفعال نمی‌کند. ورودی مشخصاً پیکربندی‌شدهٔ `channels.signal.groups["<group-id>"]` همهٔ پیام‌های گروه را پردازش می‌کند، مگر آنکه `requireMention: true` صراحتاً تنظیم شده باشد.
-- نکتهٔ زمان اجرا: اگر `channels.signal` کاملاً وجود نداشته باشد، زمان اجرا برای بررسی گروه‌ها به `groupPolicy="allowlist"` بازمی‌گردد (حتی اگر `channels.defaults.groupPolicy` تنظیم شده باشد).
+- `channels.signal.groupAllowFrom` تعیین می‌کند وقتی `allowlist` تنظیم شده است، کدام گروه‌ها یا فرستندگان می‌توانند پاسخ‌های گروهی را فعال کنند؛ ورودی‌ها می‌توانند شناسه‌های گروه Signal (خام، `group:<id>`، یا `signal:group:<id>`)، شماره‌تلفن‌های فرستنده، مقادیر `uuid:<id>`، یا `*` باشند.
+- `channels.signal.groups["<group-id>" | "*"]` می‌تواند رفتار گروه را با `requireMention`، `tools`، و `toolsBySender` بازنویسی کند.
+- برای بازنویسی‌های مختص هر حساب در پیکربندی‌های چندحسابی، از `channels.signal.accounts.<id>.groups` استفاده کنید.
+- افزودن یک گروه Signal به فهرست مجاز از طریق `groupAllowFrom`، به‌خودی‌خود محدودسازی بر پایه اشاره را غیرفعال نمی‌کند. یک ورودی `channels.signal.groups["<group-id>"]` که به‌طور مشخص پیکربندی شده باشد، همه پیام‌های گروه را پردازش می‌کند، مگر اینکه `requireMention=true` تنظیم شده باشد.
+- با `requireMention=true`، اشاره‌های بومی @ در Signal با استفاده از فراداده ساختاریافته اشاره و بر اساس شماره‌تلفن حساب ربات یا `accountUuid` تطبیق داده می‌شوند. `mentionPatterns` پیکربندی‌شده همچنان به‌عنوان جایگزین متن ساده باقی می‌مانند.
+- نکته زمان اجرا: اگر `channels.signal` کاملاً وجود نداشته باشد، زمان اجرا برای بررسی‌های گروه به `groupPolicy="allowlist"` بازمی‌گردد (حتی اگر `channels.defaults.groupPolicy` تنظیم شده باشد).
 
-## نحوهٔ کار (رفتار)
+گروه محدودشده بر پایه اشاره با زمینه محدود:
 
-- حالت بومی: `signal-cli` به‌صورت دیمن اجرا می‌شود؛ Gateway رویدادها را از طریق SSE می‌خواند.
+```json5
+{
+  channels: {
+    signal: {
+      account: "+15551234567",
+      accountUuid: "bot-signal-uuid",
+      groupPolicy: "allowlist",
+      groupAllowFrom: ["group:<signal-group-id>"],
+      historyLimit: 8,
+      groups: {
+        "<signal-group-id>": { requireMention: true },
+      },
+    },
+  },
+  messages: {
+    groupChat: {
+      mentionPatterns: ["\\bopenclaw\\b"],
+    },
+  },
+}
+```
+
+پیام‌های مجاز گروه که به ربات اشاره نمی‌کنند بی‌پاسخ می‌مانند و فقط در پنجره محدود تاریخچه در انتظار نگه‌داری می‌شوند. هنگامی که بعداً یک اشاره بومی @ یا اشاره متنی جایگزین ربات را فعال کند، OpenClaw آن زمینه اخیر را در نظر می‌گیرد و به همان گروه پاسخ می‌دهد. بدنه پیوست‌های نادیده‌گرفته‌شده دانلود نمی‌شود؛ ممکن است آن‌ها فقط به‌شکل جای‌نگهدارهای فشرده رسانه در زمینه در انتظار ظاهر شوند.
+
+## نحوه کار (رفتار)
+
+- حالت بومی: `signal-cli` به‌عنوان یک دیمن اجرا می‌شود؛ Gateway رویدادها را از طریق SSE می‌خواند.
 - حالت کانتینر: Gateway از طریق REST API ارسال و از طریق WebSocket دریافت می‌کند.
-- پیام‌های ورودی به پوشش مشترک کانال نرمال‌سازی می‌شوند.
-- پاسخ‌ها همیشه به همان شماره یا گروه بازمی‌گردند.
-- پاسخ به پیام‌های ورودی، هنگامی که پشتیبان زمان‌مهر و نویسندهٔ پیام ورودی را بپذیرد، شامل فرادادهٔ نقل‌قول بومی Signal است؛ اگر فرادادهٔ نقل‌قول موجود نباشد یا رد شود، OpenClaw پاسخ را به‌صورت پیام عادی ارسال می‌کند.
-- استفاده از نقل‌قول بومی را با `channels.signal.replyToMode = off | first | all | batched` یا برای بازنویسی مختص نوع گفتگو با `channels.signal.replyToModeByChatType.direct/group` پیکربندی کنید. مقادیر سطح حساب در `channels.signal.accounts.<id>` اولویت دارند.
+- پیام‌های ورودی در پوش پیام مشترک کانال نرمال‌سازی می‌شوند.
+- پاسخ‌ها همیشه به همان شماره یا گروه بازگردانده می‌شوند.
+- پاسخ به پیام‌های ورودی، هنگامی که بک‌اند مهر زمانی و نویسنده پیام ورودی را بپذیرد، شامل فراداده بومی نقل‌قول Signal است؛ اگر فراداده نقل‌قول وجود نداشته باشد یا رد شود، OpenClaw پاسخ را به‌صورت یک پیام عادی ارسال می‌کند.
+- استفاده از نقل‌قول بومی را با `channels.signal.replyToMode = off | first | all | batched`، یا برای بازنویسی مختص نوع گفت‌وگو با `channels.signal.replyToModeByChatType.direct/group` پیکربندی کنید. مقادیر سطح حساب زیر `channels.signal.accounts.<id>` اولویت دارند.
 
 ## رسانه + محدودیت‌ها
 
-- متن خروجی بر اساس `channels.signal.textChunkLimit` به قطعه‌ها تقسیم می‌شود (پیش‌فرض ۴۰۰۰).
-- قطعه‌بندی اختیاری بر اساس خط جدید: `channels.signal.chunkMode="newline"` را تنظیم کنید تا متن پیش از قطعه‌بندی بر اساس طول، در خطوط خالی (مرزهای پاراگراف) تقسیم شود.
-- پیوست‌ها پشتیبانی می‌شوند (به‌صورت base64 از `signal-cli` دریافت می‌شوند).
-- اگر `contentType` موجود نباشد، پیوست‌های یادداشت صوتی از نام فایل `signal-cli` به‌عنوان MIME جایگزین استفاده می‌کنند تا رونویسی صوت همچنان بتواند یادداشت‌های صوتی AAC را طبقه‌بندی کند.
-- سقف پیش‌فرض رسانه: `channels.signal.mediaMaxMb` (پیش‌فرض ۸).
-- برای صرف‌نظر از بارگیری رسانه از `channels.signal.ignoreAttachments` استفاده کنید.
-- زمینهٔ تاریخچهٔ گروه از `channels.signal.historyLimit` (یا `channels.signal.accounts.*.historyLimit`) استفاده می‌کند و در صورت نبود آن به `messages.groupChat.historyLimit` بازمی‌گردد. برای غیرفعال‌سازی آن را روی `0` تنظیم کنید (پیش‌فرض ۵۰).
+- متن خروجی بر اساس `channels.signal.textChunkLimit` به قطعه‌ها تقسیم می‌شود (پیش‌فرض 4000).
+- تقسیم اختیاری بر اساس خط جدید: `channels.signal.streaming.chunkMode="newline"` را تنظیم کنید تا پیش از تقسیم بر اساس طول، متن در خطوط خالی (مرز پاراگراف‌ها) تقسیم شود.
+- پیوست‌ها پشتیبانی می‌شوند (base64 از `signal-cli` دریافت می‌شود).
+- پیوست‌های یادداشت صوتی، هنگامی که `contentType` وجود ندارد، از نام فایل `signal-cli` به‌عنوان جایگزین MIME استفاده می‌کنند تا رونویسی صوت همچنان بتواند یادداشت‌های صوتی AAC را طبقه‌بندی کند.
+- سقف پیش‌فرض رسانه: `channels.signal.mediaMaxMb` (پیش‌فرض 8).
+- برای رد کردن دانلود رسانه در هر انتقالی، از `channels.signal.ignoreAttachments` استفاده کنید.
+- زمینه تاریخچه گروه از `channels.signal.historyLimit` (یا `channels.signal.accounts.*.historyLimit`) استفاده می‌کند و در صورت نبود آن به `messages.groupChat.historyLimit` بازمی‌گردد. برای غیرفعال‌سازی، `0` را تنظیم کنید (پیش‌فرض 50).
 
-## نشانگر تایپ و رسیدهای خواندن
+## نشانگر تایپ + رسید خواندن
 
-- **نشانگرهای تایپ**: OpenClaw سیگنال‌های تایپ را از طریق `signal-cli sendTyping` ارسال می‌کند و تا زمانی که پاسخ در حال اجرا است، آن‌ها را تازه‌سازی می‌کند.
-- **رسیدهای خواندن**: وقتی `channels.signal.sendReadReceipts` برابر true باشد، OpenClaw رسیدهای خواندن را برای پیام‌های خصوصی مجاز ارسال می‌کند.
+- **نشانگرهای تایپ**: OpenClaw سیگنال‌های تایپ را از طریق `signal-cli sendTyping` ارسال می‌کند و تا زمانی که پاسخ در حال اجرا است آن‌ها را تازه‌سازی می‌کند.
+- **رسیدهای خواندن**: وقتی `channels.signal.sendReadReceipts` درست باشد، OpenClaw رسیدهای خواندن را برای پیام‌های مستقیم مجاز ارسال می‌کند.
 - `signal-cli` رسیدهای خواندن گروه‌ها را ارائه نمی‌کند.
 
-## واکنش‌های وضعیت چرخهٔ حیات
+## واکنش‌های وضعیت چرخه عمر
 
-برای اینکه Signal چرخهٔ مشترک واکنش‌های در صف/در حال فکر/ابزار/Compaction/انجام‌شده/خطا را در نوبت‌های ورودی نمایش دهد، `messages.statusReactions.enabled: true` را تنظیم کنید. Signal از مهر زمانی پیام ورودی به‌عنوان هدف واکنش استفاده می‌کند؛ واکنش‌های گروهی با شناسهٔ گروه Signal و فرستندهٔ اصلی به‌عنوان نویسندهٔ هدف ارسال می‌شوند.
+`messages.statusReactions.enabled: true` را تنظیم کنید تا Signal چرخه واکنش مشترک صف‌شده/در حال فکر/ابزار/Compaction/انجام‌شده/خطا را در نوبت‌های ورودی نشان دهد. Signal از مهر زمانی پیام ورودی به‌عنوان هدف واکنش استفاده می‌کند؛ واکنش‌های گروه با شناسه گروه Signal به‌همراه فرستنده اصلی به‌عنوان نویسنده هدف ارسال می‌شوند.
 
-واکنش‌های وضعیت همچنین به یک واکنش تأیید دریافت و یک `messages.ackReactionScope` منطبق (`direct`، `group-all`، `group-mentions` یا `all`) نیاز دارند. برای غیرفعال‌کردن واکنش‌های وضعیت Signal، `channels.signal.reactionLevel: "off"` را تنظیم کنید.
+واکنش‌های وضعیت همچنین به یک واکنش تأیید دریافت و یک `messages.ackReactionScope` منطبق (`direct`، `group-all`، `group-mentions`، یا `all`) نیاز دارند. برای غیرفعال‌سازی واکنش‌های وضعیت Signal، `channels.signal.reactionLevel: "off"` را تنظیم کنید.
 
-`messages.removeAckAfterReply: true` واکنش وضعیت نهایی را پس از مدت نگه‌داری پیکربندی‌شده پاک می‌کند. در غیر این صورت، Signal پس از وضعیت نهایی انجام‌شده/خطا، واکنش اولیهٔ تأیید دریافت را بازمی‌گرداند.
+Signal پس از وضعیت نهایی انجام‌شده/خطا، واکنش تأیید دریافت اولیه را بازیابی می‌کند.
 
 ## واکنش‌ها (ابزار پیام)
 
-از `message action=react` همراه با `channel=signal` استفاده کنید.
+از `message action=react` به‌همراه `channel=signal` استفاده کنید.
 
-- هدف‌ها: شمارهٔ E.164 یا UUID فرستنده (از `uuid:<id>` موجود در خروجی جفت‌سازی استفاده کنید؛ UUID بدون پیشوند نیز کار می‌کند).
+- هدف‌ها: شماره E.164 یا UUID فرستنده (از `uuid:<id>` در خروجی جفت‌سازی استفاده کنید؛ UUID بدون پیشوند نیز کار می‌کند).
 - `messageId` مهر زمانی Signal برای پیامی است که به آن واکنش نشان می‌دهید.
-- واکنش‌های گروهی به `targetAuthor` یا `targetAuthorUuid` نیاز دارند.
+- واکنش‌های گروه به `targetAuthor` یا `targetAuthorUuid` نیاز دارند.
 
 ```text
 message action=react channel=signal target=uuid:123e4567-e89b-12d3-a456-426614174000 messageId=1737630212345 emoji=🔥
@@ -304,29 +351,33 @@ message action=react channel=signal target=signal:group:<groupId> targetAuthor=u
 - `channels.signal.actions.reactions`: فعال/غیرفعال‌کردن کنش‌های واکنش (پیش‌فرض true).
 - `channels.signal.reactionLevel`: `off | ack | minimal | extensive` (پیش‌فرض `minimal`).
   - `off`/`ack` واکنش‌های عامل را غیرفعال می‌کند (ابزار پیام `react` خطا می‌دهد).
-  - `minimal`/`extensive` واکنش‌های عامل را فعال می‌کند و سطح راهنمایی را تعیین می‌کند.
-- جایگزین‌های مخصوص هر حساب: `channels.signal.accounts.<id>.actions.reactions`، `channels.signal.accounts.<id>.reactionLevel`.
+  - `minimal`/`extensive` واکنش‌های عامل را فعال و سطح راهنمایی را تعیین می‌کند.
+- بازنویسی‌های مختص هر حساب: `channels.signal.accounts.<id>.actions.reactions`، `channels.signal.accounts.<id>.reactionLevel`.
 
 ## واکنش‌های تأیید
 
-درخواست‌های تأیید اجرای Signal و Plugin از بلوک‌های مسیریابی سطح‌بالای `approvals.exec` و `approvals.plugin` استفاده می‌کنند. Signal بلوک `channels.signal.execApprovals` ندارد.
+درخواست‌های تأیید اجرای Signal و Plugin از بلوک‌های مسیریابی سطح بالای `approvals.exec` و `approvals.plugin` استفاده می‌کنند. Signal بلوک `channels.signal.execApprovals` ندارد.
 
 - `👍` یک‌بار تأیید می‌کند.
 - `👎` رد می‌کند.
-- وقتی یک درخواست امکان تأیید دائمی را ارائه می‌دهد، از `/approve <id> allow-always` استفاده کنید.
+- وقتی یک درخواست تأیید دائمی ارائه می‌دهد، از `/approve <id> allow-always` استفاده کنید.
 
-حل واکنش تأیید به تأییدکنندگان صریح Signal در `channels.signal.allowFrom`، `channels.signal.defaultTo` یا فیلدهای منطبق در سطح حساب نیاز دارد. درخواست‌های تأیید اجرای مستقیم در همان گفت‌وگو همچنان می‌توانند بدون تأییدکنندگان صریح، گزینهٔ جایگزین محلی و تکراری `/approve` را پنهان کنند؛ در تأییدهای گروهی بدون تأییدکننده، گزینهٔ جایگزین محلی همچنان قابل مشاهده می‌ماند.
+حل واکنش تأیید به تأییدکنندگان صریح Signal از `channels.signal.allowFrom`، `channels.signal.defaultTo`، یا فیلدهای منطبق سطح حساب نیاز دارد. درخواست‌های تأیید اجرای مستقیم در همان گفت‌وگو همچنان می‌توانند جایگزین محلی تکراری `/approve` را بدون تأییدکنندگان صریح پنهان کنند؛ تأییدهای گروهی بدون تأییدکننده، جایگزین محلی را قابل‌مشاهده نگه می‌دارند.
+
+## واکنش‌های پرسش
+
+برای یک درخواست `ask_user` شامل یک پرسش غیرمحرمانه تک‌گزینشی و یک تا چهار گزینه، Signal در کنار برچسب گزینه‌ها `1️⃣` تا `4️⃣` را نشان می‌دهد. برای پاسخ، با شماره منطبق به درخواست تحویل‌شده واکنش نشان دهید. OpenClaw تأیید می‌کند که واکنش، پیام نوشته‌شده توسط ربات را هدف گرفته است، سپس شماره را از طریق Gateway به گزینه متعارف نگاشت می‌کند. لمس‌های منقضی یا تکراری نادیده گرفته می‌شوند. درخواست‌های چندپرسشی، چندگزینشی و متن آزاد همچنان فقط با پاسخ متنی قابل پاسخ‌گویی هستند؛ قواعد عادی پذیرش پیام مستقیم/گروه Signal، فرستنده را مجاز می‌کنند.
 
 ## هدف‌های تحویل (CLI/Cron)
 
-- پیام‌های خصوصی: `signal:+15551234567` (یا E.164 ساده).
-- پیام‌های خصوصی UUID: `uuid:<id>` (یا UUID ساده).
+- پیام‌های مستقیم: `signal:+15551234567` (یا E.164 ساده).
+- پیام‌های مستقیم UUID: `uuid:<id>` (یا UUID بدون پیشوند).
 - گروه‌ها: `signal:group:<groupId>`.
-- نام‌های کاربری: `username:<name>` (اگر حساب Signal شما از آن پشتیبانی کند).
+- نام‌های کاربری: `username:<name>` (اگر حساب Signal شما پشتیبانی کند).
 
 ## نام‌های مستعار
 
-برای هدف‌های تکرارشوندهٔ Signal، نام‌های مستعار پایداری پیکربندی کنید. نام‌های مستعار فقط پیکربندی سمت OpenClaw هستند؛ آن‌ها مخاطبان Signal را ایجاد یا ویرایش نمی‌کنند.
+برای نام‌های پایدار در هدف‌های تکرارشونده Signal، نام مستعار پیکربندی کنید. نام‌های مستعار فقط پیکربندی سمت OpenClaw هستند؛ آن‌ها مخاطبان Signal را ایجاد یا ویرایش نمی‌کنند.
 
 ```json5
 {
@@ -346,10 +397,10 @@ message action=react channel=signal target=signal:group:<groupId> targetAuthor=u
 در هر جایی که هدف‌های تحویل Signal پذیرفته می‌شوند، از نام‌های مستعار استفاده کنید:
 
 ```bash
-openclaw message send --channel signal --target signal:ops --message "Deployment is complete"
+openclaw message send --channel signal --target signal:ops --message "استقرار کامل شد"
 ```
 
-نام‌های مستعار هر حساب، نام‌های مستعار سطح‌بالا را به ارث می‌برند و می‌توانند نام‌هایی را اضافه یا بازنویسی کنند:
+نام‌های مستعار مختص هر حساب، نام‌های مستعار سطح بالا را به ارث می‌برند و می‌توانند نام‌هایی را اضافه یا بازنویسی کنند:
 
 ```json5
 {
@@ -370,7 +421,7 @@ openclaw message send --channel signal --target signal:ops --message "Deployment
 }
 ```
 
-`openclaw directory peers list --channel signal` و `openclaw directory groups list --channel signal` نام‌های مستعار پیکربندی‌شده را فهرست می‌کنند. فهرست Signal بر پیکربندی متکی است؛ مخاطبان Signal را به‌صورت زنده واکشی نمی‌کند و حساب Signal را تغییر نمی‌دهد.
+`openclaw directory peers list --channel signal` و `openclaw directory groups list --channel signal` نام‌های مستعار پیکربندی‌شده را فهرست می‌کنند. فهرست Signal مبتنی بر پیکربندی است؛ مخاطبان Signal را به‌صورت زنده واکشی نمی‌کند و حساب Signal را تغییر نمی‌دهد.
 
 ## عیب‌یابی
 
@@ -384,36 +435,36 @@ openclaw doctor
 openclaw channels status --probe
 ```
 
-سپس در صورت نیاز، وضعیت جفت‌سازی پیام خصوصی را بررسی کنید:
+سپس در صورت نیاز، وضعیت جفت‌سازی پیام مستقیم را تأیید کنید:
 
 ```bash
 openclaw pairing list signal
 ```
 
-خطاهای رایج:
+خرابی‌های رایج:
 
-- دیمن در دسترس است اما پاسخی وجود ندارد: تنظیمات حساب/دیمن (`httpUrl`، `account`) و حالت دریافت را بررسی کنید.
-- پیام‌های خصوصی نادیده گرفته می‌شوند: تأیید جفت‌سازی فرستنده در انتظار است.
-- پیام‌های گروهی نادیده گرفته می‌شوند: محدودیت فرستنده/اشاره در گروه مانع تحویل می‌شود.
+- دیمن در دسترس است اما پاسخی نمی‌آید: `account`، `transport.kind`، نشانی انتقال، و حالت دریافت را بررسی کنید.
+- پیام‌های مستقیم نادیده گرفته می‌شوند: فرستنده در انتظار تأیید جفت‌سازی است.
+- پیام‌های گروه نادیده گرفته می‌شوند: محدودسازی بر پایه فرستنده/اشاره گروه، تحویل را مسدود می‌کند.
 - خطاهای اعتبارسنجی پیکربندی پس از ویرایش: `openclaw doctor --fix` را اجرا کنید.
-- Signal در اطلاعات تشخیصی وجود ندارد: تأیید کنید که `channels.signal.enabled: true` تنظیم شده است.
+- Signal در تشخیص‌ها وجود ندارد: `channels.signal.enabled: true` را تأیید کنید.
 
-بررسی‌های تکمیلی:
+بررسی‌های بیشتر:
 
 ```bash
 openclaw pairing list signal
 pgrep -af signal-cli
-grep -i "signal" "/tmp/openclaw/openclaw-$(date +%Y-%m-%d).log" | tail -20
+openclaw logs --plain --limit 500 | grep -i "signal" | tail -20
 ```
 
-برای روند بررسی اولیه: [عیب‌یابی کانال‌ها](/fa/channels/troubleshooting).
+برای روند بررسی مشکل: [عیب‌یابی کانال‌ها](/fa/channels/troubleshooting).
 
 ## نکات امنیتی
 
-- `signal-cli` کلیدهای حساب را به‌صورت محلی ذخیره می‌کند (معمولاً در `~/.local/share/signal-cli/data/`).
-- پیش از مهاجرت یا بازسازی سرور، از وضعیت حساب Signal نسخهٔ پشتیبان تهیه کنید.
-- مگر اینکه صراحتاً دسترسی گسترده‌تری به پیام‌های خصوصی می‌خواهید، `channels.signal.dmPolicy: "pairing"` را حفظ کنید.
-- تأیید پیامکی فقط برای فرایندهای ثبت‌نام یا بازیابی لازم است، اما از دست‌دادن کنترل شماره/حساب می‌تواند ثبت‌نام مجدد را دشوار کند.
+- `signal-cli` کلیدهای حساب را به‌صورت محلی ذخیره می‌کند (معمولاً `~/.local/share/signal-cli/data/`).
+- پیش از مهاجرت یا بازسازی سرور، از وضعیت حساب Signal پشتیبان تهیه کنید.
+- مگر اینکه صریحاً دسترسی گسترده‌تر به پیام مستقیم بخواهید، `channels.signal.dmPolicy: "pairing"` را حفظ کنید.
+- تأیید پیامکی فقط برای فرایندهای ثبت‌نام یا بازیابی لازم است، اما ازدست‌دادن کنترل شماره/حساب می‌تواند ثبت‌نام مجدد را پیچیده کند.
 
 ## مرجع پیکربندی (Signal)
 
@@ -421,50 +472,51 @@ grep -i "signal" "/tmp/openclaw/openclaw-$(date +%Y-%m-%d).log" | tail -20
 
 گزینه‌های ارائه‌دهنده:
 
-- `channels.signal.enabled`: فعال/غیرفعال‌کردن راه‌اندازی کانال.
-- `channels.signal.apiMode`: `auto | native | container` (پیش‌فرض: auto). [حالت کانتینر](#container-mode-bbernhardsignal-cli-rest-api) را ببینید.
-- `channels.signal.account`: شمارهٔ E.164 حساب ربات.
-- `channels.signal.cliPath`: مسیر `signal-cli`.
-- `channels.signal.configPath`: پوشهٔ اختیاری `signal-cli --config`.
-- `channels.signal.httpUrl`: نشانی کامل دیمن (مقادیر میزبان/درگاه را بازنویسی می‌کند).
-- `channels.signal.httpHost`، `channels.signal.httpPort`: نشانی اتصال دیمن (پیش‌فرض `127.0.0.1:8080`).
-- `channels.signal.autoStart`: اجرای خودکار دیمن (اگر `httpUrl` تنظیم نشده باشد، پیش‌فرض true است).
-- `channels.signal.startupTimeoutMs`: مهلت انتظار برای راه‌اندازی بر حسب میلی‌ثانیه (حداقل ۱۰۰۰، سقف ۱۲۰۰۰۰؛ پیش‌فرض ۳۰۰۰۰).
-- `channels.signal.receiveMode`: `on-start | manual`.
-- `channels.signal.ignoreAttachments`: صرف‌نظر از بارگیری پیوست‌ها.
-- `channels.signal.ignoreStories`: نادیده‌گرفتن استوری‌های دیمن.
-- `channels.signal.sendReadReceipts`: ارسال رسیدهای خواندن.
-- `channels.signal.dmPolicy`: `pairing | allowlist | open | disabled` (پیش‌فرض: pairing).
-- `channels.signal.allowFrom`: فهرست مجاز پیام‌های خصوصی (E.164 یا `uuid:<id>`). حالت `open` به `"*"` نیاز دارد. Signal نام کاربری ندارد؛ از شناسه‌های تلفن/UUID استفاده کنید.
-- `channels.signal.aliases`: نام‌های مستعار سمت OpenClaw برای هدف‌های تحویل پیام خصوصی یا گروهی.
-- `channels.signal.groupPolicy`: `open | allowlist | disabled` (پیش‌فرض: allowlist).
+- `channels.signal.enabled`: راه‌اندازی کانال را فعال/غیرفعال می‌کند.
+- `channels.signal.account`: قالب E.164 برای حساب ربات.
+- `channels.signal.accountUuid`: UUID اختیاری حساب ربات برای تشخیص بومی @mention و محافظت در برابر حلقه.
+- `channels.signal.transport`: انتقال متعلق به حساب. برای پیش‌فرض‌های بومی مدیریت‌شده، آن را حذف کنید.
+- `channels.signal.transport.kind`: `managed-native | external-native | container`.
+- `channels.signal.transport.url`: برای `external-native` و `container` الزامی است؛ برای `managed-native` زمانی اختیاری است که نقطه پایانی اتصال آن با آدرس اتصال daemon متفاوت باشد.
+- `channels.signal.transport.cliPath`: مسیر بومی مدیریت‌شده به `signal-cli`.
+- `channels.signal.transport.configPath`: پوشه اختیاری بومی مدیریت‌شده `signal-cli --config`.
+- `channels.signal.transport.httpHost`, `channels.signal.transport.httpPort`: آدرس اتصال daemon بومی مدیریت‌شده (پیش‌فرض `127.0.0.1:8080`).
+- `channels.signal.transport.startupTimeoutMs`: زمان انتظار راه‌اندازی بومی مدیریت‌شده برحسب میلی‌ثانیه (حداقل 1000، حداکثر 120000؛ پیش‌فرض 30000).
+- `channels.signal.transport.receiveMode`: `on-start | manual` بومی مدیریت‌شده.
+- `channels.signal.ignoreAttachments`: بارگیری پیوست‌های ورودی را برای این حساب نادیده می‌گیرد.
+- `channels.signal.transport.ignoreStories`: کلید تغییر وضعیت استوری بومی مدیریت‌شده.
+- `channels.signal.sendReadReceipts`: رسیدهای خواندن را ارسال می‌کند.
+- `channels.signal.dmPolicy`: `pairing | allowlist | open | disabled` (پیش‌فرض: جفت‌سازی).
+- `channels.signal.allowFrom`: فهرست مجاز DM‏ (E.164 یا `uuid:<id>`). ‏`open` به `"*"` نیاز دارد. Signal نام کاربری ندارد؛ از شناسه‌های تلفن/UUID استفاده کنید.
+- `channels.signal.aliases`: نام‌های مستعار سمت OpenClaw برای مقصدهای تحویل DM یا گروه.
+- `channels.signal.groupPolicy`: `open | allowlist | disabled` (پیش‌فرض: فهرست مجاز).
 - `channels.signal.groupAllowFrom`: فهرست مجاز گروه؛ شناسه‌های گروه Signal (خام، `group:<id>` یا `signal:group:<id>`)، شماره‌های E.164 فرستنده یا مقادیر `uuid:<id>` را می‌پذیرد.
-- `channels.signal.groups`: بازنویسی‌های مخصوص هر گروه با کلید شناسهٔ گروه Signal (یا `"*"`). فیلدهای پشتیبانی‌شده: `requireMention`، `tools`، `toolsBySender`.
-- `channels.signal.accounts.<id>.groups`: نسخهٔ مخصوص هر حساب از `channels.signal.groups` برای پیکربندی‌های چندحسابی.
-- `channels.signal.accounts.<id>.aliases`: نام‌های مستعار مخصوص هر حساب که با نام‌های مستعار سطح‌بالا ادغام می‌شوند.
-- `channels.signal.replyToMode`: حالت نقل‌قول بومی پاسخ، `off | first | all | batched` (پیش‌فرض: `all`).
-- `channels.signal.replyToModeByChatType.direct`، `channels.signal.replyToModeByChatType.group`: بازنویسی‌های نقل‌قول بومی پاسخ بر اساس نوع گفت‌وگو.
-- `channels.signal.accounts.<id>.replyToMode`، `channels.signal.accounts.<id>.replyToModeByChatType.direct`، `channels.signal.accounts.<id>.replyToModeByChatType.group`: بازنویسی‌های نقل‌قول پاسخ مخصوص هر حساب.
-- `channels.signal.historyLimit`: حداکثر تعداد پیام‌های گروهی که در زمینه گنجانده می‌شوند (۰ غیرفعال می‌کند).
-- `channels.signal.dmHistoryLimit`: محدودیت تاریخچهٔ پیام خصوصی بر حسب نوبت‌های کاربر. بازنویسی‌های مخصوص هر کاربر: `channels.signal.dms["<phone_or_uuid>"].historyLimit`.
-- `channels.signal.textChunkLimit`: اندازهٔ قطعهٔ خروجی بر حسب نویسه (پیش‌فرض ۴۰۰۰).
-- `channels.signal.chunkMode`: مقدار `length` (پیش‌فرض) یا `newline` برای تقسیم در خطوط خالی (مرزهای پاراگراف) پیش از قطعه‌بندی بر اساس طول.
-- `channels.signal.mediaMaxMb`: سقف رسانهٔ ورودی/خروجی بر حسب مگابایت (پیش‌فرض ۸).
+- `channels.signal.groups`: بازنویسی‌های هر گروه با کلید شناسه گروه Signal (یا `"*"`). فیلدهای پشتیبانی‌شده: `requireMention`، `tools`، `toolsBySender`.
+- `channels.signal.accounts.<id>.groups`: نسخه هر حساب از `channels.signal.groups` برای پیکربندی‌های چندحسابی.
+- `channels.signal.accounts.<id>.aliases`: نام‌های مستعار هر حساب که با نام‌های مستعار سطح بالا ادغام می‌شوند.
+- `channels.signal.replyToMode`: حالت نقل‌قول پاسخ بومی، `off | first | all | batched` (پیش‌فرض: `all`).
+- `channels.signal.replyToModeByChatType.direct`, `channels.signal.replyToModeByChatType.group`: بازنویسی‌های نقل‌قول پاسخ بومی برای هر نوع گفت‌وگو.
+- `channels.signal.accounts.<id>.replyToMode`, `channels.signal.accounts.<id>.replyToModeByChatType.direct`, `channels.signal.accounts.<id>.replyToModeByChatType.group`: بازنویسی‌های نقل‌قول پاسخ برای هر حساب.
+- `channels.signal.historyLimit`: حداکثر تعداد پیام‌های گروه که به‌عنوان زمینه گنجانده می‌شوند (0 غیرفعال می‌کند).
+- `channels.signal.dmHistoryLimit`: محدودیت تاریخچه DM برحسب نوبت‌های کاربر. بازنویسی‌های هر کاربر: `channels.signal.dms["<phone_or_uuid>"].historyLimit`.
+- `channels.signal.textChunkLimit`: اندازه قطعه خروجی برحسب نویسه (پیش‌فرض 4000).
+- `channels.signal.streaming.chunkMode`: ‏`length` (پیش‌فرض) یا `newline` برای تقسیم در خطوط خالی (مرز پاراگراف‌ها) پیش از قطعه‌بندی بر اساس طول.
+- `channels.signal.mediaMaxMb`: سقف رسانه ورودی/خروجی برحسب MB (پیش‌فرض 8).
 - `channels.signal.reactionLevel`: `off | ack | minimal | extensive` (پیش‌فرض `minimal`). [واکنش‌ها](#reactions-message-tool) را ببینید.
-- `channels.signal.reactionNotifications`: `off | own | all | allowlist` (پیش‌فرض `own`) — تعیین می‌کند عامل چه زمانی از واکنش‌های ورودی دیگران مطلع شود.
-- `channels.signal.reactionAllowlist`: فرستندگانی که وقتی `reactionNotifications: "allowlist"` است، واکنش‌هایشان عامل را مطلع می‌کند.
-- `channels.signal.blockStreaming`، `channels.signal.blockStreamingCoalesce`: کنترل‌های پخش جریانی در حالت بلوکی که میان کانال‌ها مشترک هستند. [پخش جریانی](/fa/concepts/streaming) را ببینید.
+- `channels.signal.reactionNotifications`: `off | own | all | allowlist` (پیش‌فرض `own`) - زمانی که عامل از واکنش‌های ورودی دیگران مطلع می‌شود.
+- `channels.signal.reactionAllowlist`: فرستندگانی که واکنش‌هایشان در حالت `reactionNotifications: "allowlist"` عامل را مطلع می‌کند.
+- `channels.signal.streaming.block.enabled`, `channels.signal.streaming.block.coalesce`: کنترل‌های استریم حالت بلوکی که میان کانال‌ها مشترک‌اند. [استریم](/fa/concepts/streaming) را ببینید.
 
 گزینه‌های سراسری مرتبط:
 
-- `agents.list[].groupChat.mentionPatterns` (Signal از اشاره‌های بومی پشتیبانی نمی‌کند).
-- `messages.groupChat.mentionPatterns` (گزینهٔ جایگزین سراسری).
-- `messages.responsePrefix`.
+- `agents.entries.*.groupChat.mentionPatterns` (راهکار جایگزین متن ساده؛ @mentionهای بومی Signal زمانی از فراداده ساخت‌یافته تشخیص داده می‌شوند که هویت حساب ربات پیکربندی شده باشد).
+- `messages.groupChat.mentionPatterns` (راهکار جایگزین سراسری).
+- `channels.signal.responsePrefix` یا یک `responsePrefix` در سطح حساب.
 
 ## مرتبط
 
-- [نمای کلی کانال‌ها](/fa/channels) - همهٔ کانال‌های پشتیبانی‌شده
-- [جفت‌سازی](/fa/channels/pairing) - احراز هویت پیام خصوصی و روند جفت‌سازی
-- [گروه‌ها](/fa/channels/groups) - رفتار گفت‌وگوی گروهی و محدودیت اشاره
+- [نمای کلی کانال‌ها](/fa/channels) - همه کانال‌های پشتیبانی‌شده
+- [جفت‌سازی](/fa/channels/pairing) - احراز هویت DM و جریان جفت‌سازی
+- [گروه‌ها](/fa/channels/groups) - رفتار گفت‌وگوی گروهی و کنترل بر اساس اشاره
 - [مسیریابی کانال](/fa/channels/channel-routing) - مسیریابی نشست برای پیام‌ها
 - [امنیت](/fa/gateway/security) - مدل دسترسی و مقاوم‌سازی

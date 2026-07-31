@@ -1,20 +1,21 @@
 ---
 read_when:
-    - Je wilt auto-Compaction en /compact begrijpen
-    - Je debugt lange sessies die contextlimieten bereiken
-summary: Hoe OpenClaw lange gesprekken samenvat om binnen modellimieten te blijven
+    - Je wilt auto-compaction en /compact begrijpen
+    - Je debugt lange sessies die tegen contextlimieten aanlopen
+summary: Hoe OpenClaw lange gesprekken samenvat om binnen de modellimieten te blijven
 title: Compaction
 x-i18n:
-    generated_at: "2026-06-27T17:25:26Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T05:30:20Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 71c1665055574622926a4f13ee82b97f1c45e679a895db78da983919c0a5458f
+    source_hash: eb1f794fa60affd602378bcff8b07786bfeca55ab3fa09d5fa7214a05fa48806
     source_path: concepts/compaction.md
     workflow: 16
 ---
 
-Elk model heeft een contextvenster: het maximale aantal tokens dat het kan verwerken. Wanneer een gesprek die limiet nadert, vat OpenClaw oudere berichten **samen via Compaction** zodat de chat kan doorgaan.
+Elk model heeft een contextvenster: het maximale aantal tokens dat het kan verwerken. Wanneer een gesprek die limiet nadert, **comprimeert** OpenClaw oudere berichten tot een samenvatting, zodat de chat kan doorgaan.
 
 ## Hoe het werkt
 
@@ -22,32 +23,36 @@ Elk model heeft een contextvenster: het maximale aantal tokens dat het kan verwe
 2. De samenvatting wordt opgeslagen in het sessietranscript.
 3. Recente berichten blijven intact.
 
-Wanneer OpenClaw de geschiedenis opsplitst in Compaction-blokken, houdt het toolaanroepen van de assistant gekoppeld aan hun bijbehorende `toolResult`-vermeldingen. Als een splitspunt binnen een toolblok valt, verplaatst OpenClaw de grens zodat het paar bij elkaar blijft en het huidige niet-samengevatte staartdeel behouden blijft.
+OpenClaw houdt toolaanroepen van de assistent gekoppeld aan de bijbehorende `toolResult`-vermeldingen wanneer het een splitsingspunt voor Compaction kiest. Als het punt binnen een toolblok valt, verplaatst OpenClaw de grens zodat het paar bij elkaar blijft en het huidige niet-samengevatte einde behouden blijft.
 
-De volledige gespreksgeschiedenis blijft op schijf staan. Compaction verandert alleen wat het model in de volgende beurt ziet.
+De volledige gespreksgeschiedenis blijft op schijf staan. Compaction verandert alleen wat het model tijdens de volgende beurt ziet.
+
+<Note>
+Nieuwe configuraties stellen `agents.defaults.compaction.mode` standaard in op `"safeguard"` (strengere beveiligingsregels en controles op de kwaliteit van samenvattingen). Stel `mode: "default"` expliciet in om dit uit te schakelen.
+</Note>
 
 ## Automatische Compaction
 
-Automatische Compaction staat standaard aan. Deze wordt uitgevoerd wanneer de sessie de contextlimiet nadert, of wanneer het model een context-overflowfout retourneert (in dat geval voert OpenClaw Compaction uit en probeert het opnieuw).
+Automatische Compaction is standaard ingeschakeld. Deze wordt uitgevoerd wanneer de sessie de contextlimiet nadert, of wanneer het model een contextoverloopfout retourneert (in dat geval voert OpenClaw Compaction uit en probeert het opnieuw).
 
 Je ziet:
 
 - `embedded run auto-compaction start` / `complete` in normale Gateway-logboeken.
-- `🧹 Auto-compaction complete` in uitgebreide modus.
+- `🧹 Auto-compaction complete` in de uitgebreide modus.
 - `/status` met `🧹 Compactions: <count>`.
 
 <Info>
-Voordat Compaction wordt uitgevoerd, herinnert OpenClaw de agent er automatisch aan om belangrijke notities op te slaan in [geheugen](/nl/concepts/memory)-bestanden. Dit voorkomt contextverlies.
+Vóór Compaction herinnert OpenClaw de agent er automatisch aan belangrijke notities op te slaan in [geheugenbestanden](/nl/concepts/memory). Dit voorkomt contextverlies.
 </Info>
 
 <AccordionGroup>
-  <Accordion title="Herkende overflowsignaturen">
-    OpenClaw detecteert context-overflow aan de hand van deze foutpatronen van providers:
+  <Accordion title="Patronen van overloopfouten die OpenClaw herkent">
+    OpenClaw herkent tientallen providerspecifieke foutteksten voor contextoverloop (Anthropic, OpenAI, Bedrock, Gemini, Ollama, OpenRouter en meer). Veelvoorkomende voorbeelden:
 
     - `request_too_large`
     - `context length exceeded`
     - `input exceeds the maximum number of tokens`
-    - `input token count exceeds the maximum number of input tokens`
+    - `input token count exceeds the maximum number of input tokens` (Bedrock)
     - `input is too long for the model`
     - `ollama error: context length exceeded`
 
@@ -58,19 +63,19 @@ Voordat Compaction wordt uitgevoerd, herinnert OpenClaw de agent er automatisch 
 
 Typ `/compact` in een chat om Compaction af te dwingen. Voeg instructies toe om de samenvatting te sturen:
 
-```
-/compact Focus on the API design decisions
+```text
+/compact Richt je op de ontwerpbeslissingen voor de API
 ```
 
-Wanneer `agents.defaults.compaction.keepRecentTokens` is ingesteld, respecteert handmatige Compaction dat OpenClaw-knippunt en behoudt het het recente staartdeel in de opnieuw opgebouwde context. Zonder expliciet behoudsbudget gedraagt handmatige Compaction zich als een harde checkpoint en gaat het alleen verder vanaf de nieuwe samenvatting.
+Wanneer `agents.defaults.compaction.keepRecentTokens` is ingesteld (standaard: 20,000), respecteert handmatige Compaction dat afkappunt en blijft het recente einde in de opnieuw opgebouwde context behouden. Zonder een expliciet behoudbudget werkt handmatige Compaction als een strikt controlepunt en gaat deze uitsluitend verder vanaf de nieuwe samenvatting.
 
 ## Configuratie
 
-Configureer Compaction onder `agents.defaults.compaction` in je `openclaw.json`. De meestgebruikte instellingen staan hieronder; zie voor de volledige referentie [Diepgaande uitleg over sessiebeheer](/nl/reference/session-management-compaction).
+Configureer Compaction onder `agents.defaults.compaction` in je `openclaw.json`. De meest gebruikte instellingen staan hieronder; zie [Uitgebreide informatie over sessiebeheer](/nl/reference/session-management-compaction) voor de volledige referentie.
 
 ### Een ander model gebruiken
 
-Standaard gebruikt Compaction het primaire model van de agent. Stel `agents.defaults.compaction.model` in om samenvatting te delegeren aan een capabeler of gespecialiseerder model. De override accepteert een `provider/model-id`-tekenreeks of een kale alias die is geconfigureerd onder `agents.defaults.models`:
+Compaction gebruikt standaard het primaire model van de agent. Stel `agents.defaults.compaction.model` in om het samenvatten over te dragen aan een krachtiger of gespecialiseerd model. De overschrijving accepteert een `provider/model-id`-tekenreeks of een kale alias die is geconfigureerd onder `agents.defaults.models`:
 
 ```json
 {
@@ -84,9 +89,9 @@ Standaard gebruikt Compaction het primaire model van de agent. Stel `agents.defa
 }
 ```
 
-Kaal geconfigureerde aliassen worden herleid naar hun canonieke provider en model voordat Compaction start. Als een kale waarde zowel overeenkomt met een alias als met een geconfigureerde letterlijke model-ID, wint de letterlijke model-ID. Een niet-overeenkomende kale waarde blijft een model-ID op de actieve provider.
+Kale geconfigureerde aliassen worden vóór het begin van Compaction omgezet naar hun canonieke provider en model. Als een kale waarde overeenkomt met zowel een alias als een geconfigureerde letterlijke model-ID, krijgt de letterlijke model-ID voorrang. Een kale waarde zonder overeenkomst blijft een model-ID bij de actieve provider.
 
-Dit werkt ook met lokale modellen, bijvoorbeeld een tweede Ollama-model dat is bedoeld voor samenvatting:
+Dit werkt ook met lokale modellen, bijvoorbeeld een tweede Ollama-model dat specifiek voor samenvattingen wordt gebruikt:
 
 ```json
 {
@@ -100,34 +105,41 @@ Dit werkt ook met lokale modellen, bijvoorbeeld een tweede Ollama-model dat is b
 }
 ```
 
-Wanneer dit niet is ingesteld, start Compaction met het actieve sessiemodel. Als samenvatting mislukt met een providerfout die in aanmerking komt voor modelfallback, probeert OpenClaw die Compaction-poging opnieuw via de bestaande modelfallbackketen van de sessie. De fallbackkeuze is tijdelijk en wordt niet teruggeschreven naar de sessiestatus. Een expliciete override van `agents.defaults.compaction.model` blijft exact en erft de sessiefallbackketen niet.
+Wanneer dit niet is ingesteld, begint Compaction met het actieve sessiemodel. Als het samenvatten mislukt door een providerfout waarbij modelterugval is toegestaan, probeert OpenClaw die Compaction-poging opnieuw via de bestaande modelterugvalketen van de sessie. De terugvalkeuze is tijdelijk en wordt niet teruggeschreven naar de sessiestatus. Een expliciete overschrijving met `agents.defaults.compaction.model` blijft exact en neemt de terugvalketen van de sessie niet over.
 
-### Identificatoren behouden
+### Behoud van identificatoren
 
-Compaction-samenvatting behoudt standaard ondoorzichtige identificatoren (`identifierPolicy: "strict"`). Overschrijf dit met `identifierPolicy: "off"` om dit uit te schakelen, of met `identifierPolicy: "custom"` plus `identifierInstructions` voor aangepaste richtlijnen.
+De samenvatting door Compaction behoudt standaard ondoorzichtige identificatoren (`identifierPolicy: "strict"`). Overschrijf dit met `identifierPolicy: "off"` om het uit te schakelen. Aangepaste richtlijnen horen thuis in de `summarize()`-implementatie van een Compaction-provider.
 
-### Bytebewaking voor actief transcript
+### Bewaking van het aantal bytes in het actieve transcript
 
-Wanneer `agents.defaults.compaction.maxActiveTranscriptBytes` is ingesteld, activeert OpenClaw normale lokale Compaction vóór een run als de actieve JSONL die grootte bereikt. Dit is nuttig voor langlopende sessies waarbij contextbeheer aan providerzijde de modelcontext gezond kan houden terwijl het lokale transcript blijft groeien. Dit splitst geen ruwe JSONL-bytes; het vraagt de normale Compaction-pijplijn om een semantische samenvatting te maken.
+Wanneer `agents.defaults.compaction.maxActiveTranscriptBytes` is ingesteld, activeert OpenClaw
+vóór een uitvoering normale lokale Compaction als de transcriptgeschiedenis
+die grootte bereikt. Dit is nuttig voor langlopende sessies waarbij contextbeheer
+aan de kant van de provider de modelcontext gezond kan houden terwijl de opgeslagen
+transcriptgeschiedenis blijft groeien. De onbewerkte bytes worden niet gesplitst;
+de normale Compaction-pijplijn wordt gevraagd een semantische samenvatting te maken.
 
 <Warning>
-De bytebewaking vereist `truncateAfterCompaction: true`. Zonder transcriptrotatie zou het actieve bestand niet krimpen en blijft de bewaking inactief.
+De bytebewaking is van toepassing op de actieve SQLite-transcriptgeschiedenis. Verouderde JSONL-
+controlepuntartefacten zijn niet het actieve doel van Compaction.
 </Warning>
 
-### Opvolgertranscripten
+### Opvolgende transcripties
 
-Wanneer `agents.defaults.compaction.truncateAfterCompaction` is ingeschakeld, herschrijft OpenClaw het bestaande transcript niet ter plekke. Het maakt een nieuw actief opvolgertranscript op basis van de Compaction-samenvatting, behouden status en het niet-samengevatte staartdeel, en registreert daarna checkpointmetadata die branch-/herstelflows naar die compacte opvolger verwijst.
-Opvolgertranscripten verwijderen ook exacte dubbele lange gebruikersbeurten die binnen
-een kort retryvenster binnenkomen, zodat retry-stormen van kanalen niet worden meegenomen naar het
-volgende actieve transcript na Compaction.
+Wanneer `agents.defaults.compaction.truncateAfterCompaction` is ingeschakeld, herschrijft OpenClaw het bestaande transcript niet ter plaatse. Het maakt een nieuw actief opvolgend transcript van de Compaction-samenvatting, de behouden status en het niet-samengevatte einde, en registreert vervolgens controlepuntmetagegevens die vertakkings- en herstelprocessen naar die gecomprimeerde opvolger verwijzen.
+Opvolgende transcripties verwijderen ook exact dubbele lange gebruikersbeurten die
+binnen een kort venster voor nieuwe pogingen binnenkomen, zodat stormen van nieuwe
+kanaalpogingen na Compaction niet in het volgende actieve transcript terechtkomen.
 
-OpenClaw schrijft niet langer afzonderlijke `.checkpoint.*.jsonl`-kopieën voor nieuwe
-Compactions. Bestaande verouderde checkpointbestanden kunnen nog steeds worden gebruikt zolang ernaar wordt verwezen
-en worden opgeschoond door normale sessieopschoning.
+OpenClaw schrijft voor nieuwe Compaction-bewerkingen niet langer afzonderlijke
+`.checkpoint.*.jsonl`-kopieën. Bestaande verouderde controlepuntbestanden kunnen nog
+worden gebruikt zolang ernaar wordt verwezen en worden door de normale
+sessieopschoning verwijderd.
 
 ### Compaction-meldingen
 
-Standaard wordt Compaction stil uitgevoerd. Stel `notifyUser` in om korte statusberichten te tonen wanneer Compaction start en voltooid is:
+Compaction wordt standaard stil uitgevoerd. Stel `notifyUser` in om korte statusberichten weer te geven wanneer Compaction begint en eindigt, en om een melding over verminderde werking te tonen wanneer een geheugenoverdracht vóór Compaction is uitgeput, maar het antwoord nog steeds doorgaat:
 
 ```json5
 {
@@ -141,9 +153,9 @@ Standaard wordt Compaction stil uitgevoerd. Stel `notifyUser` in om korte status
 }
 ```
 
-### Geheugenflush
+### Geheugenoverdracht
 
-Vóór Compaction kan OpenClaw een **stille geheugenflush**-beurt uitvoeren om duurzame notities op schijf op te slaan. Stel `agents.defaults.compaction.memoryFlush.model` in wanneer deze onderhoudsbeurt een lokaal model moet gebruiken in plaats van het actieve gespreksmodel:
+Vóór Compaction kan OpenClaw een **stille geheugenoverdracht** uitvoeren om duurzame notities op schijf op te slaan. Stel `agents.defaults.compaction.memoryFlush.model` in wanneer deze onderhoudsbeurt een lokaal model moet gebruiken in plaats van het actieve gespreksmodel:
 
 ```json
 {
@@ -159,13 +171,13 @@ Vóór Compaction kan OpenClaw een **stille geheugenflush**-beurt uitvoeren om d
 }
 ```
 
-De override voor het geheugenflushmodel is exact en erft de actieve sessiefallbackketen niet. Zie [Geheugen](/nl/concepts/memory) voor details en configuratie.
+De overschrijving van het model voor geheugenoverdracht is exact en neemt de terugvalketen van de actieve sessie niet over. Zie [Geheugen](/nl/concepts/memory) voor details en configuratie.
 
 ## Inplugbare Compaction-providers
 
-Plugins kunnen een aangepaste Compaction-provider registreren via `registerCompactionProvider()` op de Plugin-API. Wanneer een provider is geregistreerd en geconfigureerd, delegeert OpenClaw samenvatting daaraan in plaats van aan de ingebouwde LLM-pijplijn.
+Plugins kunnen via `registerCompactionProvider()` in de Plugin-API een aangepaste Compaction-provider registreren. Wanneer een provider is geregistreerd en geconfigureerd, draagt OpenClaw het samenvatten aan deze provider over in plaats van aan de ingebouwde LLM-pijplijn.
 
-Stel de id ervan in je configuratie in om een geregistreerde provider te gebruiken:
+Stel de ID van een geregistreerde provider in je configuratie in om deze te gebruiken:
 
 ```json
 {
@@ -179,35 +191,35 @@ Stel de id ervan in je configuratie in om een geregistreerde provider te gebruik
 }
 ```
 
-Het instellen van een `provider` forceert automatisch `mode: "safeguard"`. Providers ontvangen dezelfde Compaction-instructies en hetzelfde beleid voor het behouden van identificatoren als het ingebouwde pad, en OpenClaw behoudt nog steeds recente-beurt- en gesplitste-beurt-achtervoegselcontext na provideruitvoer.
+Het instellen van een `provider` dwingt automatisch `mode: "safeguard"` af. Providers ontvangen dezelfde Compaction-instructies en hetzelfde beleid voor het behoud van identificatoren als het ingebouwde pad, en OpenClaw behoudt na de provideruitvoer nog steeds de context van recente beurten en achtervoegsels van gesplitste beurten.
 
 <Note>
 Als de provider mislukt of een leeg resultaat retourneert, valt OpenClaw terug op ingebouwde LLM-samenvatting.
 </Note>
 
-## Compaction versus snoeien
+## Compaction versus opschoning
 
-|                  | Compaction                    | Snoeien                          |
-| ---------------- | ----------------------------- | -------------------------------- |
-| **Wat het doet** | Vat oudere gesprekken samen   | Kort oude toolresultaten in      |
-| **Opgeslagen?**  | Ja (in sessietranscript)      | Nee (alleen in geheugen, per aanvraag) |
-| **Bereik**       | Volledig gesprek              | Alleen toolresultaten            |
+|                  | Compaction                              | Opschoning                              |
+| ---------------- | --------------------------------------- | --------------------------------------- |
+| **Wat het doet** | Vat oudere gesprekken samen             | Kort oude toolresultaten in             |
+| **Opgeslagen?**  | Ja (in het sessietranscript)             | Nee (alleen in het geheugen, per verzoek) |
+| **Bereik**       | Volledig gesprek                         | Alleen toolresultaten                    |
 
-[Sessiesnoei](/nl/concepts/session-pruning) is een lichter aanvullend mechanisme dat tooluitvoer inkort zonder samen te vatten.
+[Sessieopschoning](/nl/concepts/session-pruning) is een lichtere aanvulling die tooluitvoer inkort zonder deze samen te vatten.
 
-## Problemen oplossen
+## Probleemoplossing
 
-**Te vaak Compaction?** Het contextvenster van het model is mogelijk klein, of tooluitvoer is mogelijk groot. Probeer [sessiesnoei](/nl/concepts/session-pruning) in te schakelen.
+**Wordt Compaction te vaak uitgevoerd?** Het contextvenster van het model is mogelijk klein, of tooluitvoer is mogelijk groot. Probeer [sessieopschoning](/nl/concepts/session-pruning) in te schakelen.
 
-**Voelt de context na Compaction verouderd aan?** Gebruik `/compact Focus on <topic>` om de samenvatting te sturen, of schakel de [geheugenflush](/nl/concepts/memory) in zodat notities behouden blijven.
+**Voelt de context na Compaction verouderd aan?** Gebruik `/compact Focus on <topic>` om de samenvatting te sturen, of schakel de [geheugenoverdracht](/nl/concepts/memory) in zodat notities behouden blijven.
 
 **Een schone lei nodig?** `/new` start een nieuwe sessie zonder Compaction.
 
-Zie voor geavanceerde configuratie (reserve-tokens, behoud van identificatoren, aangepaste context-engines, server-side Compaction van OpenAI) de [diepgaande uitleg over sessiebeheer](/nl/reference/session-management-compaction).
+Zie [Uitgebreide informatie over sessiebeheer](/nl/reference/session-management-compaction) voor geavanceerde configuratie (gereserveerde tokens, behoud van identificatoren, aangepaste contextengines en Compaction aan de serverzijde van OpenAI).
 
 ## Gerelateerd
 
 - [Sessie](/nl/concepts/session): sessiebeheer en levenscyclus.
-- [Sessiesnoei](/nl/concepts/session-pruning): toolresultaten inkorten.
-- [Context](/nl/concepts/context): hoe context wordt opgebouwd voor agentbeurten.
-- [Hooks](/nl/automation/hooks): lifecycle-hooks voor Compaction (`before_compaction`, `after_compaction`).
+- [Sessieopschoning](/nl/concepts/session-pruning): toolresultaten inkorten.
+- [Context](/nl/concepts/context): hoe context voor agentbeurten wordt opgebouwd.
+- [Hooks](/nl/automation/hooks): levenscyclushooks voor Compaction (`before_compaction`, `after_compaction`).

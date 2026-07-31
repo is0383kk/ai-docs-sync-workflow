@@ -1,12 +1,13 @@
 ---
 read_when:
-    - 您正在安裝、設定或稽核 diffs-language-pack 外掛
-summary: 為預設差異檢視器支援範圍以外的語言新增語法醒目提示。
+    - 你正在安裝、設定或稽核 diffs-language-pack 外掛
+summary: 為預設差異檢視器未涵蓋的語言新增語法醒目提示。
 title: 差異語言套件外掛
 x-i18n:
-    generated_at: "2026-07-11T21:35:35Z"
+    generated_at: "2026-07-26T08:42:49Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: e63f896b937be27bd00a7a728b128ec0d1d5eee91d6f1023862274e32afe5db1
     source_path: plugins/reference/diffs-language-pack.md
@@ -15,7 +16,7 @@ x-i18n:
 
 # Diffs 語言套件外掛
 
-為預設 Diffs 檢視器支援範圍以外的語言新增語法醒目提示。
+為預設 Diffs 檢視器集合以外的語言新增語法醒目提示。
 
 ## 發佈
 
@@ -30,10 +31,10 @@ x-i18n:
 
 ## 新增的語言
 
-基礎 `diffs` 外掛已支援 [Diffs](/zh-TW/tools/diffs) 中記載之常見語言的語法醒目提示。若希望為更多 Shiki 支援的語言提供語法醒目提示，請安裝此語言套件。即使未安裝此套件，這些檔案仍會以可讀的純文字形式顯示。
+基礎 `diffs` 外掛已能醒目提示 [Diffs](/zh-TW/tools/diffs) 中記載的常見語言。需要為更廣泛的 Shiki 支援語言提供語法醒目提示時，請安裝此語言套件。若未安裝此套件，這些檔案仍會以可讀的純文字呈現。
 
-範例包括 Astro、Vue、Svelte、MDX、GraphQL、Terraform/HCL、Nix、Clojure、Elixir、Haskell、OCaml、Scala、Zig、Solidity、Verilog/VHDL、Fortran、MATLAB、LaTeX、Mermaid、Sass/Less/SCSS、Nginx、Apache、CSV、dotenv、INI 及 diff 檔案。
+範例包括 Astro、Vue、Svelte、MDX、GraphQL、Terraform/HCL、Nix、Clojure、Elixir、Haskell、OCaml、Scala、Zig、Solidity、Verilog/VHDL、Fortran、MATLAB、LaTeX、Mermaid、Sass/Less/SCSS、Nginx、Apache、CSV、dotenv、INI 和 diff 檔案。
 
-如需查看 Shiki 上游支援的語言與別名目錄，請參閱 [Shiki 語言](https://shiki.style/languages)。
+如需查看 Shiki 上游的語言與別名目錄，請參閱 [Shiki 語言](https://shiki.style/languages)。
 
 <!-- openclaw-plugin-reference:manual-end -->

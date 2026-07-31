@@ -1,414 +1,405 @@
 ---
 read_when:
     - Het juiste plugin-sdk-subpad kiezen voor een Plugin-import
-    - Gebundelde Plugin-subpaden en helperoppervlakken auditen
-summary: 'Plugin SDK-subpadcatalogus: welke imports waar staan, gegroepeerd per gebied'
-title: Plugin SDK-subpaden
+    - Subpaden en helperinterfaces van gebundelde plugins controleren
+summary: 'Plugin-SDK-subpadcatalogus: welke imports waar staan, gegroepeerd per gebied'
+title: Subpaden van de Plugin SDK
 x-i18n:
-    generated_at: "2026-07-04T10:52:18Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T06:04:40Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2a77f70197aca279d44d2b9db62bf9f936594311bb46c3da682413c3fa1378e5
+    source_hash: 58df43436d0e26f1ffa1383be47fd108655e57d61cf5534d650a4fa2fb7b364c
     source_path: plugins/sdk-subpaths.md
     workflow: 16
 ---
 
-De Plugin SDK wordt beschikbaar gesteld als een reeks smalle openbare subpaden onder
-`openclaw/plugin-sdk/`. Deze pagina catalogiseert de vaak gebruikte subpaden, gegroepeerd op
-doel. De gegenereerde inventaris van compiler-entrypoints staat in
-`scripts/lib/plugin-sdk-entrypoints.json`; package-exports vormen de openbare subset
-na aftrek van repo-lokale test-/interne subpaden die zijn vermeld in
-`scripts/lib/plugin-sdk-private-local-only-subpaths.json`. Maintainers kunnen het
-aantal openbare exports controleren met `pnpm plugin-sdk:surface` en actieve gereserveerde
-helper-subpaden met `pnpm plugins:boundary-report:summary`; ongebruikte gereserveerde
-helper-exports laten het CI-rapport falen in plaats van als sluimerende compatibiliteitsschuld
-in de openbare SDK te blijven.
+De Plugin SDK bevat beperkte openbare subpaden en uitsluitend voor de repository bestemde gebundelde
+helpers onder `openclaw/plugin-sdk/`. Deze pagina inventariseert beide en markeert
+privé-lokale vermeldingen expliciet. Drie bestanden definiëren de grens:
 
-Zie [Plugin SDK-overzicht](/nl/plugins/sdk-overview) voor de handleiding voor Plugin-ontwikkeling.
+- `scripts/lib/plugin-sdk-entrypoints.json`: de onderhouden inventaris van entrypoints
+  die door de build wordt gecompileerd.
+- `scripts/lib/plugin-sdk-private-local-only-subpaths.json`: interne subpaden
+  die zijn uitgesloten van de getypeerde, gedocumenteerde SDK. Productie-entrypoints blijven beschikbaar
+  als uitsluitend JavaScript-hostruntime-exports voor afzonderlijk gepubliceerde officiële
+  plugins; entrypoints die alleen voor tests zijn bedoeld, blijven ongeëxporteerd.
+- `src/plugin-sdk/entrypoints.ts`: classificatiemetadata voor verouderde
+  subpaden, gereserveerde gebundelde helpers, ondersteunde gebundelde façades en
+  openbare oppervlakken die eigendom zijn van plugins.
 
-## Plugin-entry
+Onderhouders controleren het aantal openbare exports met `pnpm plugin-sdk:surface` en
+actieve gereserveerde helpersubpaden met `pnpm plugins:boundary-report:summary`;
+ongebruikte gereserveerde helperexports laten het CI-rapport mislukken in plaats van als
+slapende compatibiliteitsschuld in de openbare SDK te blijven.
 
-| Subpad                         | Belangrijkste exports                                                                                                                                                  |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `plugin-sdk/plugin-entry`      | `definePluginEntry`                                                                                                                                                    |
-| `plugin-sdk/core`              | `defineChannelPluginEntry`, `createChatChannelPlugin`, `createChannelPluginBase`, `defineSetupPluginEntry`, `buildChannelConfigSchema`, `buildJsonChannelConfigSchema` |
-| `plugin-sdk/config-schema`     | `OpenClawSchema`                                                                                                                                                       |
-| `plugin-sdk/provider-entry`    | `defineSingleProviderPluginEntry`                                                                                                                                      |
-| `plugin-sdk/migration`         | Helpers voor migratieprovideritems zoals `createMigrationItem`, redenconstanten, itemstatusmarkeringen, redactietools en `summarizeMigrationItems`                     |
-| `plugin-sdk/migration-runtime` | Runtime-migratiehelpers zoals `copyMigrationFileItem`, `resolvePlannedMigrationTargets`, `withCachedMigrationConfigRuntime` en `writeMigrationReport`                  |
-| `plugin-sdk/health`            | Registratie, detectie, reparatie, selectie, ernst en bevindingstypen voor doctor-healthchecks voor gebundelde health-consumers                                         |
+Zie voor de handleiding voor het schrijven van plugins het [overzicht van de Plugin SDK](/nl/plugins/sdk-overview).
 
-### Verouderde compatibiliteits- en testhelpers
+## Plugin-entrypoint
 
-Verouderde subpaden blijven geëxporteerd voor oudere plugins, maar nieuwe code moet de
-gerichte SDK-subpaden hieronder gebruiken. De onderhouden lijst is
-`scripts/lib/plugin-sdk-deprecated-public-subpaths.json`; CI wijst gebundelde
-productie-imports daaruit af. Brede barrels zoals `compat`, `config-types`,
-`infra-runtime`, `text-runtime` en `zod` zijn alleen voor compatibiliteit. Importeer `zod`
-rechtstreeks vanuit `zod`.
+| Subpad                        | Belangrijkste exports                                                                                                                                                                                             |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plugin-sdk/plugin-entry`      | `definePluginEntry`                                                                                                                                                                                     |
+| `plugin-sdk/core`              | `defineChannelPluginEntry`, `createChatChannelPlugin`, `createChannelPluginBase`, `defineSetupPluginEntry`, `buildChannelConfigSchema`, `buildJsonChannelConfigSchema`, `resolveTailscalePublishedHost` |
+| `plugin-sdk/provider-entry`    | Privé-lokaal na juli 2026; `defineSingleProviderPluginEntry`                                                                                                                                        |
+| `plugin-sdk/migration`         | Privé-lokaal na juli 2026; helpers voor migratieprovideritems, zoals `createMigrationItem`, redenconstanten, itemstatusmarkeringen, redactieroutines en `summarizeMigrationItems`                   |
+| `plugin-sdk/migration-runtime` | Privé-lokaal na juli 2026; runtimemigratiehelpers, zoals `copyMigrationFileItem`, `resolvePlannedMigrationTargets`, `withCachedMigrationConfigRuntime` en `writeMigrationReport`              |
+| `plugin-sdk/health`            | Registratie, detectie, reparatie, selectie, ernst- en bevindingstypen voor Doctor-gezondheidscontroles voor gebundelde gezondheidsconsumenten                                                                                |
 
-OpenClaw's door Vitest ondersteunde subpaden voor testhelpers zijn alleen repo-lokaal en zijn
-geen package-exports meer: `agent-runtime-test-contracts`,
+### Compatibiliteits- en privé-lokale helpers
+
+Alleen de verouderde subpaden uit het latere tijdvenster blijven geëxporteerd. Aliassen uit juli 2026 en
+ongebruikte subpaden zijn verwijderd, terwijl helpers die uitsluitend gebundeld zijn uit het
+openbare pakket zijn verwijderd en hieronder als privé-lokaal zijn gemarkeerd. De onderhouden lijst is
+`scripts/lib/plugin-sdk-deprecated-public-subpaths.json`; CI weigert gebundelde
+`plugin-sdk/text-runtime` zijn uitsluitend voor compatibiliteit en `plugin-sdk/zod` is een
+compatibiliteitsherexport: importeer `zod` rechtstreeks uit `zod`. De brede domein-
+barrels `plugin-sdk/agent-runtime`, `plugin-sdk/channel-lifecycle`,
+`plugin-sdk/conversation-runtime`, `plugin-sdk/hook-runtime`,
+`plugin-sdk/media-runtime`, `plugin-sdk/plugin-runtime` en
+`plugin-sdk/security-runtime` zijn eveneens verouderd ten gunste van gerichte
+subpaden.
+
+De op Vitest gebaseerde testhelpersubpaden van OpenClaw zijn uitsluitend repository-lokaal en zijn niet
+langer pakketexports: `agent-runtime-test-contracts`,
 `channel-contract-testing`, `channel-target-testing`, `channel-test-helpers`,
-`plugin-test-api`, `plugin-test-contracts`, `plugin-test-runtime`,
-`provider-http-test-mocks`, `provider-test-contracts`, `test-env`,
-`test-fixtures`, `test-node-mocks` en `testing`.
+`plugin-state-test-runtime`, `plugin-test-api`, `plugin-test-contracts`,
+`plugin-test-runtime`, `provider-http-test-mocks`, `provider-test-contracts`,
+`reply-payload-testing`, `sqlite-runtime-testing`, `test-env`, `test-fixtures`,
+`test-live`, `test-live-auth`, `test-media-generation`,
+`test-media-understanding`, `test-node-mocks` en `testing`. De privé-oppervlakken voor gebundelde helpers
+`ssrf-runtime-internal` en `codex-native-task-runtime` zijn eveneens uitsluitend repository-
+lokaal.
 
-### Gereserveerde helper-subpaden voor gebundelde plugins
+### Helpersubpaden voor gebundelde plugins
 
-Deze subpaden zijn plugin-eigen compatibiliteitsoppervlakken voor hun eigen gebundelde
-plugin, geen algemene SDK-API's: `plugin-sdk/codex-mcp-projection` en
-`plugin-sdk/codex-native-task-runtime`. Cross-owner extensie-imports worden geblokkeerd
-door guardrails voor package-contracten.
+Helpermodules die uitsluitend gebundeld zijn, zijn na de opschoning van juli 2026 privé-lokaal. Imports tussen verschillende eigenaren worden geblokkeerd door beschermingsregels voor pakketcontracten. `src/plugin-sdk/entrypoints.ts` houdt afzonderlijk de ondersteunde gebundelde façades bij die openbaar blijven: SDK-
+entrypoints die door hun gebundelde plugin worden ondersteund totdat generieke contracten
+`plugin-sdk/qa-runner-runtime`, `plugin-sdk/telegram-account` vervangen,
+verouderd voor nieuwe code; zie de opmerkingen per rij hieronder.
 
-  <AccordionGroup>
+<AccordionGroup>
   <Accordion title="Kanaalsubpaden">
     | Subpad | Belangrijkste exports |
     | --- | --- |
-    | `plugin-sdk/channel-core` | `defineChannelPluginEntry`, `defineSetupPluginEntry`, `createChatChannelPlugin`, `createChannelPluginBase` |
-    | `plugin-sdk/config-schema` | Root-`openclaw.json` Zod-schema-export (`OpenClawSchema`) |
-    | `plugin-sdk/json-schema-runtime` | Gecachete JSON Schema-validatiehelper voor schemas die eigendom zijn van plugins |
-    | `plugin-sdk/channel-setup` | `createOptionalChannelSetupSurface`, `createOptionalChannelSetupAdapter`, `createOptionalChannelSetupWizard`, plus `DEFAULT_ACCOUNT_ID`, `createTopLevelChannelDmPolicy`, `setSetupChannelEnabled`, `splitSetupEntries` |
-    | `plugin-sdk/setup` | Gedeelde helpers voor de installatiewizard, setupvertaler, allowlist-prompts en bouwers voor setupstatussen |
-    | `plugin-sdk/setup-runtime` | `createSetupTranslator`, `createPatchedAccountSetupAdapter`, `createEnvPatchedAccountSetupAdapter`, `createSetupInputPresenceValidator`, `noteChannelLookupFailure`, `noteChannelLookupSummary`, `promptResolvedAllowFrom`, `splitSetupEntries`, `createAllowlistSetupWizardProxy`, `createDelegatedSetupWizardProxy` |
-    | `plugin-sdk/setup-adapter-runtime` | Verouderde compatibiliteitsalias; gebruik `plugin-sdk/setup-runtime` |
+    | `plugin-sdk/channel-core` | `defineChannelPluginEntry`, `defineSetupPluginEntry`, `createChatChannelPlugin`, `createChannelPluginBase`, `createChannelConfigUiHints` |
+    | `plugin-sdk/json-schema-runtime` | Privé-lokaal na juli 2026; gecachte helper voor JSON Schema-validatie van schema's die eigendom zijn van plugins |
+    | `plugin-sdk/channel-setup` | `defineChannelSetupContract`, kanaaleigen typen voor installatievelden/-invoer, `createOptionalChannelSetupSurface`, `createOptionalChannelSetupAdapter`, `createOptionalChannelSetupWizard`, plus `DEFAULT_ACCOUNT_ID`, `createTopLevelChannelDmPolicy`, `setSetupChannelEnabled`, `splitSetupEntries` |
+    | `plugin-sdk/setup` | Gedeelde helpers voor de installatiewizard, installatievertaler, prompts voor toelatingslijsten, builders voor installatiestatussen |
+    | `plugin-sdk/setup-runtime` | `defineChannelSetupContract`, `createSetupTranslator`, `createPatchedAccountSetupAdapter`, `createEnvPatchedAccountSetupAdapter`, `createSetupInputPresenceValidator`, `noteChannelLookupFailure`, `noteChannelLookupSummary`, `promptResolvedAllowFrom`, `splitSetupEntries`, `createAllowlistSetupWizardProxy`, `createDelegatedSetupWizardProxy` |
     | `plugin-sdk/setup-tools` | `formatCliCommand`, `detectBinary`, `extractArchive`, `resolveBrewExecutable`, `formatDocsLink`, `CONFIG_DIR` |
-    | `plugin-sdk/account-core` | Helpers voor configuratie en actiegates met meerdere accounts, helpers voor fallback naar standaardaccount |
-    | `plugin-sdk/account-id` | `DEFAULT_ACCOUNT_ID`, helpers voor account-id-normalisatie |
-    | `plugin-sdk/account-resolution` | Helpers voor accountzoekactie + standaard-fallback |
-    | `plugin-sdk/account-helpers` | Smalle helpers voor accountlijsten/accountacties |
-    | `plugin-sdk/access-groups` | Helpers voor allowlist-parsing van toegangsgroepen en geredigeerde groepsdiagnostiek |
+    | `plugin-sdk/account-core` | Helpers voor configuratie/actiepoorten voor meerdere accounts, terugvalhelpers voor het standaardaccount |
+    | `plugin-sdk/account-id` | `DEFAULT_ACCOUNT_ID`, helpers voor normalisatie van account-id's |
+    | `plugin-sdk/account-resolution` | Helpers voor het opzoeken van accounts en terugval naar de standaardwaarde |
+    | `plugin-sdk/account-helpers` | Beperkte helpers voor accountlijsten/accountacties |
+    | `plugin-sdk/access-groups` | Privé-lokaal na juli 2026; parsing van toelatingslijsten voor toegangsgroepen en helpers voor geredigeerde groepsdiagnostiek |
     | `plugin-sdk/channel-pairing` | `createChannelPairingController` |
-    | `plugin-sdk/channel-reply-pipeline` | Verouderde compatibiliteitsfacade. Gebruik `plugin-sdk/channel-outbound`. |
+    | `plugin-sdk/channel-reply-pipeline` | Verouderde compatibiliteitsfaçade. Gebruik `plugin-sdk/channel-outbound`. |
     | `plugin-sdk/channel-config-helpers` | `createHybridChannelConfigAdapter`, `resolveChannelDmAccess`, `resolveChannelDmAllowFrom`, `resolveChannelDmPolicy`, `normalizeChannelDmPolicy`, `normalizeLegacyDmAliases` |
-    | `plugin-sdk/channel-config-schema` | Gedeelde primitives voor kanaalconfiguratieschema's plus Zod- en directe JSON/TypeBox-bouwers |
-    | `plugin-sdk/bundled-channel-config-schema` | Gebundelde OpenClaw-kanaalconfiguratieschema's alleen voor onderhouden gebundelde plugins |
-    | `plugin-sdk/chat-channel-ids` | `BUNDLED_CHAT_CHANNEL_IDS`, `BUNDLED_CHAT_CHANNEL_ENVELOPE_PREFIXES`, `ChatChannelId`. Canonieke gebundelde/officiële chatkanaal-id's plus formatterlabels/-aliassen voor plugins die envelope-geprefixt tekst moeten herkennen zonder hun eigen tabel hard te coderen. |
-    | `plugin-sdk/channel-config-schema-legacy` | Verouderde compatibiliteitsalias voor configuratieschema's van gebundelde kanalen |
-    | `plugin-sdk/telegram-command-config` | Telegram-helpers voor normalisatie/validatie van aangepaste opdrachten met fallback op gebundeld contract |
-    | `plugin-sdk/command-gating` | Smalle helpers voor opdracht-autorisatiegates |
+    | `plugin-sdk/channel-config-schema` | Gedeelde primitieven voor kanaalconfiguratieschema's, plus Zod- en rechtstreekse JSON-/TypeBox-builders |
+    | `plugin-sdk/bundled-channel-config-schema` | Privé-lokaal na juli 2026; gebundelde OpenClaw-kanaalconfiguratieschema's uitsluitend voor onderhouden gebundelde plugins |
+    | `plugin-sdk/chat-channel-ids` | Privé-lokaal na juli 2026; `BUNDLED_CHAT_CHANNEL_IDS`, `BUNDLED_CHAT_CHANNEL_ENVELOPE_PREFIXES`, `ChatChannelId`. Canonieke kanaal-id's voor gebundelde/officiële chatkanalen, plus formatterlabels/-aliassen voor plugins die tekst met een envelopvoorvoegsel moeten herkennen zonder hun eigen tabel hard te coderen. |
     | `plugin-sdk/channel-policy` | `resolveChannelGroupRequireMention` |
-    | `plugin-sdk/channel-ingress` | Verouderde low-level compatibiliteitsfacade voor kanaalingress. Nieuwe ontvangstpaden moeten `plugin-sdk/channel-ingress-runtime` gebruiken. |
-    | `plugin-sdk/channel-ingress-runtime` | Experimentele high-level runtime-resolver voor kanaalingress en bouwers voor routefeiten voor gemigreerde kanaalontvangstpaden. Geef hier de voorkeur aan boven het samenstellen van effectieve allowlists, opdracht-allowlists en legacy-projecties in elke Plugin. Zie [Kanaalingress-API](/nl/plugins/sdk-channel-ingress). |
-    | `plugin-sdk/channel-lifecycle` | Verouderde compatibiliteitsfacade. Gebruik `plugin-sdk/channel-outbound`. |
-    | `plugin-sdk/channel-outbound` | Berichtlevenscycluscontracten plus opties voor de antwoordpipeline, ontvangstbewijzen, live preview/streaming, levenscyclushelpers, outbound identiteit, payloadplanning, duurzame verzendingen en helpers voor berichtverzendcontext. Zie [Kanaal-outbound-API](/nl/plugins/sdk-channel-outbound). |
-    | `plugin-sdk/channel-message` | Verouderde compatibiliteitsalias voor `plugin-sdk/channel-outbound` plus legacy facades voor antwoorddispatch. |
-    | `plugin-sdk/channel-message-runtime` | Verouderde compatibiliteitsalias voor `plugin-sdk/channel-outbound` plus legacy facades voor antwoorddispatch. |
-    | `plugin-sdk/inbound-envelope` | Gedeelde helpers voor inbound route + envelope-builder |
-    | `plugin-sdk/inbound-reply-dispatch` | Verouderde compatibiliteitsfacade. Gebruik `plugin-sdk/channel-inbound` voor inbound runners en dispatchpredicaten, en `plugin-sdk/channel-outbound` voor helpers voor berichtlevering. |
-    | `plugin-sdk/messaging-targets` | Verouderde alias voor targetparsing; gebruik `plugin-sdk/channel-targets` |
-    | `plugin-sdk/outbound-media` | Gedeelde helpers voor het laden van outbound media en hosted-media-state |
-    | `plugin-sdk/outbound-send-deps` | Verouderde compatibiliteitsfacade. Gebruik `plugin-sdk/channel-outbound`. |
-    | `plugin-sdk/outbound-runtime` | Verouderde compatibiliteitsfacade. Gebruik `plugin-sdk/channel-outbound`. |
-    | `plugin-sdk/poll-runtime` | Smalle helpers voor pollnormalisatie |
-    | `plugin-sdk/thread-bindings-runtime` | Helpers voor levenscyclus en adapters van thread-bindings |
-    | `plugin-sdk/agent-media-payload` | Legacy builder voor agentmediapayloads |
-    | `plugin-sdk/conversation-runtime` | Helpers voor conversatie/thread-binding, pairing en geconfigureerde bindingen |
-    | `plugin-sdk/runtime-config-snapshot` | Helper voor runtimeconfiguratiesnapshot |
+    | `plugin-sdk/channel-ingress-runtime` | Experimentele high-level runtime-resolver voor inkomend kanaalverkeer, resolver voor impliciet-vermeldingsbeleid en builders voor routefeiten voor gemigreerde ontvangstpaden van kanalen. Geef hieraan de voorkeur boven het in elke plugin samenstellen van effectieve toelatingslijsten, toelatingslijsten voor opdrachten en verouderde projecties. Zie [API voor inkomend kanaalverkeer](/nl/plugins/sdk-channel-ingress). |
+    | `plugin-sdk/channel-lifecycle` | Verouderde compatibiliteitsfaçade. Gebruik `plugin-sdk/channel-outbound`. |
+    | `plugin-sdk/channel-outbound` | Contracten voor de levenscyclus van berichten, plus opties voor de antwoordpijplijn, ontvangstbewijzen, livevoorbeelden/streaming, levenscyclushelpers, uitgaande identiteit, payloadplanning, duurzame verzendingen en helpers voor de context van berichtverzending. Zie [API voor uitgaande kanaalberichten](/nl/plugins/sdk-channel-outbound). |
+    | `plugin-sdk/channel-message` | Verouderde compatibiliteitsalias voor `plugin-sdk/channel-outbound`. |
+    | `plugin-sdk/inbound-envelope` | Gedeelde helpers voor inkomende routes en envelopbuilders |
+    | `plugin-sdk/inbound-reply-dispatch` | Verouderde compatibiliteitsfaçade. Gebruik `plugin-sdk/channel-inbound` voor inkomende runners en dispatchpredicaten, en `plugin-sdk/channel-outbound` voor helpers voor berichtbezorging. |
+    | `plugin-sdk/messaging-targets` | Verouderde alias voor doelparsing; gebruik `plugin-sdk/channel-targets` |
+    | `plugin-sdk/outbound-media` | Privé-lokaal na juli 2026; gedeelde helpers voor het laden van uitgaande media en statushelpers voor gehoste media |
+    | `plugin-sdk/poll-runtime` | Privé-lokaal na juli 2026; beperkte helpers voor peilingnormalisatie |
+    | `plugin-sdk/thread-bindings-runtime` | Privé-lokaal na juli 2026; levenscyclus- en adapterhelpers voor threadbinding |
+    | `plugin-sdk/agent-media-payload` | Verouderde compatibiliteitsfaçade voor verouderde `Media*`-payloadprojectie. Geef geordende feiten door via `MsgContext.media` / `toInboundMediaFacts(...)`; importeer lokaal-rootbeleid uit `plugin-sdk/media-local-roots`. |
+    | `plugin-sdk/conversation-runtime` | Verouderde brede barrel voor gespreks-/threadbinding, koppeling en helpers voor geconfigureerde binding; geef de voorkeur aan gerichte bindingsubpaden, zoals `plugin-sdk/thread-bindings-runtime` en `plugin-sdk/session-binding-runtime` |
     | `plugin-sdk/runtime-group-policy` | Helpers voor runtime-resolutie van groepsbeleid |
-    | `plugin-sdk/channel-status` | Gedeelde helpers voor kanaalstatussnapshot/-samenvatting |
-    | `plugin-sdk/channel-config-primitives` | Smalle primitives voor kanaalconfiguratieschema's |
-    | `plugin-sdk/channel-config-writes` | Helpers voor autorisatie van kanaalconfiguratieschrijfacties |
+    | `plugin-sdk/channel-status` | Gedeelde helpers voor momentopnamen/samenvattingen van kanaalstatussen |
+    | `plugin-sdk/channel-config-primitives` | Beperkte primitieven voor kanaalconfiguratieschema's |
+    | `plugin-sdk/channel-config-writes` | Privé-lokaal na juli 2026; autorisatiehelpers voor het schrijven van kanaalconfiguratie |
     | `plugin-sdk/channel-plugin-common` | Gedeelde prelude-exports voor kanaalplugins |
-    | `plugin-sdk/allowlist-config-edit` | Helpers voor allowlist-configuratiebewerking/-lezing |
-    | `plugin-sdk/group-access` | Gedeelde helpers voor groeps-toegangsbeslissingen |
-    | `plugin-sdk/direct-dm`, `plugin-sdk/direct-dm-access` | Verouderde compatibiliteitsfacades. Gebruik `plugin-sdk/channel-inbound`. |
-    | `plugin-sdk/direct-dm-guard-policy` | Smalle helpers voor direct-DM pre-crypto guardbeleid |
-    | `plugin-sdk/discord` | Verouderde Discord-compatibiliteitsfacade voor gepubliceerde `@openclaw/discord@2026.3.13` en bijgehouden eigenaarscompatibiliteit; nieuwe plugins moeten generieke SDK-subpaden voor kanalen gebruiken |
-    | `plugin-sdk/telegram-account` | Verouderde Telegram-compatibiliteitsfacade voor accountresolutie voor bijgehouden eigenaarscompatibiliteit; nieuwe plugins moeten geïnjecteerde runtimehelpers of generieke SDK-subpaden voor kanalen gebruiken |
-    | `plugin-sdk/zalouser` | Verouderde Zalo Personal-compatibiliteitsfacade voor gepubliceerde Lark/Zalo-pakketten die nog steeds autorisatie voor afzenderopdrachten importeren; nieuwe plugins moeten `plugin-sdk/command-auth` gebruiken |
-    | `plugin-sdk/interactive-runtime` | Semantische berichtpresentatie, levering en legacy interactieve antwoordhelpers. Zie [Berichtpresentatie](/nl/plugins/message-presentation) |
-    | `plugin-sdk/channel-inbound` | Gedeelde inbound helpers voor gebeurtenisclassificatie, contextopbouw, formattering, roots, debounce, mention-matching, mentionbeleid en inbound logging |
-    | `plugin-sdk/channel-inbound-debounce` | Smalle inbound debounce-helpers |
-    | `plugin-sdk/channel-mention-gating` | Smalle helpers voor mentionbeleid, mentionmarkers en mentiontekst zonder het bredere inbound runtime-oppervlak |
-    | `plugin-sdk/channel-envelope`, `plugin-sdk/channel-inbound-roots`, `plugin-sdk/channel-location`, `plugin-sdk/channel-logging` | Verouderde compatibiliteitsfacades. Gebruik `plugin-sdk/channel-inbound` of `plugin-sdk/channel-outbound`. |
-    | `plugin-sdk/channel-pairing-paths` | Verouderde compatibiliteitsfacade. Gebruik `plugin-sdk/channel-pairing`. |
-    | `plugin-sdk/channel-reply-options-runtime` | Verouderde compatibiliteitsfacade. Gebruik `plugin-sdk/channel-outbound`. |
-    | `plugin-sdk/channel-streaming` | Verouderde compatibiliteitsfacade. Gebruik `plugin-sdk/channel-outbound`. |
-    | `plugin-sdk/channel-send-result` | Antwoordresultaattypen |
-    | `plugin-sdk/channel-actions` | Helpers voor kanaalberichtacties, plus verouderde native schemahelpers die behouden zijn voor Plugin-compatibiliteit |
-    | `plugin-sdk/channel-route` | Gedeelde routenormalisatie, parsergestuurde targetresolutie, thread-id-stringificatie, dedupe/compacte routesleutels, parsed-target-typen en helpers voor route-/targetvergelijking |
-    | `plugin-sdk/channel-targets` | Helpers voor targetparsing; callers voor routevergelijking moeten `plugin-sdk/channel-route` gebruiken |
-    | `plugin-sdk/channel-contract` | Kanaalcontracttypen |
-    | `plugin-sdk/channel-feedback` | Feedback-/reactiekoppeling |
-    | `plugin-sdk/channel-secret-runtime` | Smalle helpers voor secret-contracten zoals `collectSimpleChannelFieldAssignments`, `getChannelSurface`, `pushAssignment` en typen voor secret targets |
+    | `plugin-sdk/allowlist-config-edit` | Helpers voor het bewerken/lezen van toelatingslijstconfiguratie |
+    | `plugin-sdk/group-access` | Verouderde helpers voor beslissingen over groepstoegang; gebruik `resolveChannelMessageIngress` uit `plugin-sdk/channel-ingress-runtime` |
+    | `plugin-sdk/direct-dm-guard-policy` | Privé-lokaal na juli 2026; beperkte beleidshelpers voor de pre-cryptobescherming van rechtstreekse DM's |
+    | `plugin-sdk/discord` | Verouderde Discord-compatibiliteitsfaçade voor gepubliceerde `@openclaw/discord@2026.3.13` en bijgehouden eigenaarscompatibiliteit; nieuwe plugins moeten generieke subpaden van de kanaal-SDK gebruiken |
+    | `plugin-sdk/telegram-account` | Verouderde Telegram-compatibiliteitsfaçade voor accountresolutie en bijgehouden eigenaarscompatibiliteit; nieuwe plugins moeten geïnjecteerde runtimehelpers of generieke subpaden van de kanaal-SDK gebruiken |
+    | `plugin-sdk/interactive-runtime` | Semantische berichtpresentatie, bezorging en verouderde helpers voor interactieve antwoorden. Zie [Berichtpresentatie](/nl/plugins/message-presentation) |
+    | `plugin-sdk/question-gateway-runtime` | Los door de runtime geschreven `ask_user`-keuzes via de Gateway op vanuit handlers voor kanaalinteracties |
+    | `plugin-sdk/channel-inbound` | Gedeelde inkomende helpers voor gebeurtenisclassificatie, contextopbouw, opmaak, roots, debounce, overeenkomsten met vermeldingen, vermeldingsbeleid en inkomende logboekregistratie |
+    | `plugin-sdk/channel-inbound-debounce` | Beperkte inkomende debouncehelpers |
+    | `plugin-sdk/channel-mention-gating` | Privé-lokaal na juli 2026; beperkte helpers voor vermeldingsbeleid, vermeldingsmarkeringen en vermeldingstekst zonder het bredere inkomende runtimeoppervlak |
+    | `plugin-sdk/channel-streaming` | Verouderde compatibiliteitsfaçade. Gebruik `plugin-sdk/channel-outbound`. |
+    | `plugin-sdk/channel-send-result` | Typen voor antwoordresultaten |
+    | `plugin-sdk/channel-actions` | Helpers voor kanaalberichtacties, plus verouderde systeemeigen schemahelpers die voor plugincompatibiliteit behouden blijven |
+    | `plugin-sdk/channel-route` | Privé-lokaal na juli 2026; gedeelde routenormalisatie, parsergestuurde doelresolutie, omzetting van thread-id's naar tekenreeksen, ontdubbelde/compacte routesleutels, typen voor geparste doelen en helpers voor route-/doelvergelijking |
+    | `plugin-sdk/channel-targets` | Privé-lokaal na juli 2026; helpers voor doelparsing; aanroepers voor routevergelijking moeten `plugin-sdk/channel-route` gebruiken |
+    | `plugin-sdk/channel-contract` | Typen voor kanaalcontracten |
+    | `plugin-sdk/channel-feedback` | Aansluiting voor feedback/reacties |
   </Accordion>
 
-Verouderde channel-helperfamilies blijven alleen beschikbaar voor compatibiliteit
-met gepubliceerde plugins. Het verwijderingsplan is: behoud ze gedurende het
-migratievenster voor externe plugins, houd repo-/gebundelde plugins op
-`channel-inbound` en `channel-outbound`, en verwijder daarna de
-compatibiliteitssubpaden bij de volgende grote SDK-opschoning. Dit geldt voor
-de oude channel message/runtime, channel streaming, toegang tot directe DM's,
-de afgesplitste inbound-helper, reply-options en pairing-path-families.
+Kanaalcompatibiliteitssubpaden uit het latere tijdvenster blijven alleen openbaar tot hun
+registerdatums. Juli-aliassen, zoals toegang tot rechtstreekse DM's, antwoordopties, koppelings-
+paden en afgesplitste kanaalruntimes, zijn verwijderd; helpers die uitsluitend gebundeld zijn,
+zijn privé-lokaal.
 
-  <Accordion title="Provider-subpaden">
+  <Accordion title="Providersubpaden">
     | Subpad | Belangrijkste exports |
     | --- | --- |
-    | `plugin-sdk/provider-entry` | `defineSingleProviderPluginEntry` |
-    | `plugin-sdk/lmstudio` | Ondersteunde LM Studio-providerfacade voor setup, catalogusdetectie en runtime-modelvoorbereiding |
-    | `plugin-sdk/lmstudio-runtime` | Ondersteunde LM Studio-runtimefacade voor standaardinstellingen van lokale servers, modeldetectie, requestheaders en hulpfuncties voor geladen modellen |
-    | `plugin-sdk/provider-setup` | Gecureerde setup-hulpfuncties voor lokale/zelfgehoste providers |
-    | `plugin-sdk/self-hosted-provider-setup` | Gerichte setup-hulpfuncties voor OpenAI-compatibele zelfgehoste providers |
-    | `plugin-sdk/cli-backend` | CLI-backendstandaarden + watchdog-constanten |
-    | `plugin-sdk/provider-auth-runtime` | Runtime-hulpfuncties voor API-sleutelresolutie voor provider-plugins |
-    | `plugin-sdk/provider-oauth-runtime` | Generieke OAuth-callbacktypen voor providers, rendering van callbackpagina's, PKCE/status-hulpfuncties, parsing van autorisatie-invoer, hulpfuncties voor tokenverval en afbreekhulpfuncties |
-    | `plugin-sdk/provider-auth-api-key` | Hulpfuncties voor onboarding/API-sleutels en profielschrijven, zoals `upsertApiKeyProfile` |
-    | `plugin-sdk/provider-auth-result` | Standaard OAuth-auth-result-builder |
-    | `plugin-sdk/provider-env-vars` | Hulpfuncties voor het opzoeken van auth-omgevingsvariabelen van providers |
-    | `plugin-sdk/provider-auth` | `createProviderApiKeyAuthMethod`, `ensureApiKeyFromOptionEnvOrPrompt`, `upsertAuthProfile`, `upsertApiKeyProfile`, `writeOAuthCredentials`, auth-importhulpfuncties voor OpenAI Codex, verouderde compatibiliteitsexport `resolveOpenClawAgentDir` |
-    | `plugin-sdk/provider-model-shared` | `ProviderReplayFamily`, `buildProviderReplayFamilyHooks`, `normalizeModelCompat`, gedeelde builders voor replaybeleid, hulpfuncties voor provider-endpoints en gedeelde hulpfuncties voor normalisatie van model-id's |
-    | `plugin-sdk/provider-catalog-live-runtime` | Hulpfuncties voor live providermodelcatalogi voor beveiligde `/models`-achtige detectie: `buildLiveModelProviderConfig`, `fetchLiveProviderModelRows`, `getCachedLiveProviderModelRows`, `fetchLiveProviderModelIds`, `LiveModelCatalogHttpError`, `clearLiveCatalogCacheForTests`, filtering van model-id's, TTL-cache en statische fallback |
-    | `plugin-sdk/provider-catalog-runtime` | Runtime-hook voor uitbreiding van providercatalogi en registry-seams voor plugin-providers voor contracttests |
-    | `plugin-sdk/provider-catalog-shared` | `findCatalogTemplate`, `buildSingleProviderApiKeyCatalog`, `buildManifestModelProviderConfig`, `supportsNativeStreamingUsageCompat`, `applyProviderNativeStreamingUsageCompat` |
-    | `plugin-sdk/provider-http` | Generieke hulpfuncties voor provider-HTTP/endpointmogelijkheden, provider-HTTP-fouten en multipart-formulierhulpfuncties voor audiotranscriptie |
-    | `plugin-sdk/provider-web-fetch-contract` | Smalle contracthulpfuncties voor web-fetch-configuratie/-selectie, zoals `enablePluginInConfig` en `WebFetchProviderPlugin` |
-    | `plugin-sdk/provider-web-fetch` | Hulpfuncties voor registratie/cache van web-fetch-providers |
-    | `plugin-sdk/provider-web-search-config-contract` | Smalle hulpfuncties voor web-search-configuratie/referenties voor providers die geen plugin-enable-bedrading nodig hebben |
-    | `plugin-sdk/provider-web-search-contract` | Smalle contracthulpfuncties voor web-search-configuratie/referenties, zoals `createWebSearchProviderContractFields`, `enablePluginInConfig`, `resolveProviderWebSearchPluginConfig` en scoped setters/getters voor referenties |
-    | `plugin-sdk/provider-web-search` | Hulpfuncties voor registratie/cache/runtime van web-search-providers |
-    | `plugin-sdk/embedding-providers` | Algemene typen en leeshulpfuncties voor embeddingproviders, waaronder `EmbeddingProviderAdapter`, `getEmbeddingProvider(...)` en `listEmbeddingProviders(...)`; plugins registreren providers via `api.registerEmbeddingProvider(...)` zodat manifest-eigenaarschap wordt afgedwongen |
-    | `plugin-sdk/provider-tools` | `ProviderToolCompatFamily`, `buildProviderToolCompatFamilyHooks` en schema-opschoning + diagnostiek voor DeepSeek/Gemini/OpenAI |
-    | `plugin-sdk/provider-usage` | Snapshottypen voor providergebruik, gedeelde hulpfuncties voor het ophalen van gebruik en provider-fetchers zoals `fetchClaudeUsage` |
-    | `plugin-sdk/provider-stream` | `ProviderStreamFamily`, `buildProviderStreamFamilyHooks`, `composeProviderStreamWrappers`, stream-wrappertypen, compatibiliteit voor tool-calls in platte tekst en gedeelde wrapperhulpfuncties voor Anthropic/Bedrock/DeepSeek V4/Google/Kilocode/Moonshot/OpenAI/OpenRouter/Z.A.I/MiniMax/Copilot |
-    | `plugin-sdk/provider-stream-shared` | Openbare gedeelde hulpfuncties voor provider-stream-wrappers, waaronder `composeProviderStreamWrappers`, `createOpenAICompatibleCompletionsThinkingOffWrapper`, `createPlainTextToolCallCompatWrapper`, `createPayloadPatchStreamWrapper`, `createToolStreamWrapper`, `normalizeOpenAICompatibleReasoningPayload`, `setQwenChatTemplateThinking` en streamhulpprogramma's die compatibel zijn met Anthropic/DeepSeek/OpenAI |
-    | `plugin-sdk/provider-transport-runtime` | Native providertransporthulpfuncties, zoals beveiligde fetch, tekstextractie uit toolresultaten, transportberichttransformaties en schrijfbare transporteventstreams |
-    | `plugin-sdk/provider-onboard` | Hulpfuncties voor patches van onboardingconfiguratie |
-    | `plugin-sdk/global-singleton` | Proceslokale hulpfuncties voor singleton/map/cache |
-    | `plugin-sdk/group-activation` | Smalle hulpfuncties voor groepsactivatiemodus en commandoparsing |
+    | `plugin-sdk/provider-entry` | Privé-lokaal na juli 2026; `defineSingleProviderPluginEntry` |
+    | `plugin-sdk/provider-setup` | Privé-lokaal na juli 2026; samengestelde helpers voor het instellen van lokale/zelfgehoste providers |
+    | `plugin-sdk/cli-backend` | Privé-lokaal na juli 2026; standaardwaarden voor de CLI-backend + watchdog-constanten |
+    | `plugin-sdk/provider-auth-runtime` | Privé-lokaal na juli 2026; runtimehelpers voor providerauthenticatie: OAuth-loopbackflow, tokenuitwisseling, opslag van authenticatie en resolutie van API-sleutels |
+    | `plugin-sdk/provider-oauth-runtime` | Privé-lokaal na juli 2026; generieke OAuth-callbacktypen voor providers, rendering van callbackpagina's, PKCE-/state-helpers, parsing van autorisatie-invoer, helpers voor tokenverloop en afbreekhelpers |
+    | `plugin-sdk/provider-auth-api-key` | Privé-lokaal na juli 2026; helpers voor onboarding met API-sleutels en het schrijven van profielen, zoals `upsertApiKeyProfile` |
+    | `plugin-sdk/provider-auth-result` | Privé-lokaal na juli 2026; standaardbuilder voor OAuth-authenticatieresultaten |
+    | `plugin-sdk/provider-env-vars` | Privé-lokaal na juli 2026; helpers voor het opzoeken van providerauthenticatie via omgevingsvariabelen |
+    | `plugin-sdk/provider-auth` | `createProviderApiKeyAuthMethod`, `ensureApiKeyFromOptionEnvOrPrompt`, `upsertAuthProfile`, `upsertApiKeyProfile`, `writeOAuthCredentials`, helpers voor het importeren van OpenAI Codex-authenticatie, verouderde compatibiliteitsexport `resolveOpenClawAgentDir` |
+    | `plugin-sdk/provider-model-shared` | Privé-lokaal na juli 2026; `ProviderReplayFamily`, `buildProviderReplayFamilyHooks`, `selectPreferredLocalModelId`, `normalizeModelCompat`, gedeelde builders voor replaybeleid, helpers voor providereindpunten en gedeelde helpers voor normalisatie van model-id's |
+    | `plugin-sdk/provider-catalog-live-runtime` | Privé-lokaal na juli 2026; helpers voor live providermodelcatalogi voor beveiligde detectie in `/models`-stijl: `buildLiveModelProviderConfig`, `fetchLiveProviderModelRows`, `getCachedLiveProviderModelRows`, `fetchLiveProviderModelIds`, `LiveModelCatalogHttpError`, `clearLiveCatalogCacheForTests`, filtering van model-id's, TTL-cache en statische fallback |
+    | `plugin-sdk/provider-catalog-runtime` | Runtimehook voor uitbreiding van de providercatalogus en registerkoppelingen voor pluginproviders voor contracttests |
+    | `plugin-sdk/provider-catalog-shared` | Privé-lokaal na juli 2026; `findCatalogTemplate`, `buildSingleProviderApiKeyCatalog`, `buildManifestModelProviderConfig`, `supportsNativeStreamingUsageCompat`, `applyProviderNativeStreamingUsageCompat` |
+    | `plugin-sdk/provider-http` | Privé-lokaal na juli 2026; generieke helpers voor HTTP-/eindpuntmogelijkheden van providers, HTTP-fouten van providers en multipart-formulierhelpers voor audiotranscriptie |
+    | `plugin-sdk/provider-web-fetch-contract` | Privé-lokaal na juli 2026; beperkte contracthelpers voor web-fetchconfiguratie/-selectie, zoals `enablePluginInConfig` en `WebFetchProviderPlugin` |
+    | `plugin-sdk/provider-web-fetch` | Privé-lokaal na juli 2026; helpers voor registratie/caching van web-fetchproviders |
+    | `plugin-sdk/provider-web-search-config-contract` | Privé-lokaal na juli 2026; beperkte configuratie-/referentiehelpers voor webzoekproviders waarvoor geen koppeling voor het inschakelen van plugins nodig is |
+    | `plugin-sdk/provider-web-search-contract` | Privé-lokaal na juli 2026; beperkte contracthelpers voor webzoekconfiguratie/-referenties, zoals `createWebSearchProviderContractFields`, `enablePluginInConfig`, `resolveProviderWebSearchPluginConfig`, en scoped setters/getters voor referenties |
+    | `plugin-sdk/provider-web-search` | Privé-lokaal na juli 2026; runtimehelpers voor registratie/caching van webzoekproviders |
+    | `plugin-sdk/embedding-providers` | Privé-lokaal na juli 2026; algemene typen en leeshelpers voor embeddingproviders, waaronder `EmbeddingProviderAdapter`, `getEmbeddingProvider(...)` en `listEmbeddingProviders(...)`; plugins registreren providers via `api.registerEmbeddingProvider(...)`, zodat eigenaarschap van het manifest wordt afgedwongen |
+    | `plugin-sdk/provider-tools` | Privé-lokaal na juli 2026; `ProviderToolCompatFamily`, `buildProviderToolCompatFamilyHooks` en opschoning + diagnostiek van DeepSeek-/Gemini-/OpenAI-schema's |
+    | `plugin-sdk/provider-usage` | Privé-lokaal na juli 2026; snapshottypen voor providergebruik, gedeelde helpers voor het ophalen van gebruik en providerfetchers zoals `fetchClaudeUsage` |
+    | `plugin-sdk/provider-stream` | Privé-lokaal na juli 2026; `ProviderStreamFamily`, `buildProviderStreamFamilyHooks`, `composeProviderStreamWrappers`, typen voor streamwrappers, compatibiliteit voor toolaanroepen in platte tekst en gedeelde wrapperhelpers voor Anthropic/Google/Kilocode/MiniMax/Moonshot/OpenAI/OpenRouter/Z.AI |
+    | `plugin-sdk/provider-stream-shared` | Privé-lokaal na juli 2026; openbare gedeelde wrapperhelpers voor providerstreams, waaronder `composeProviderStreamWrappers`, `createOpenAICompatibleCompletionsThinkingOffWrapper`, `createPlainTextToolCallCompatWrapper`, `createPayloadPatchStreamWrapper`, `createToolStreamWrapper`, `normalizeOpenAICompatibleReasoningPayload`, `setQwenChatTemplateThinking` en streamhulpprogramma's die compatibel zijn met Anthropic/DeepSeek/OpenAI |
+    | `plugin-sdk/provider-transport-runtime` | Privé-lokaal na juli 2026; native providertransporthelpers, zoals beveiligd ophalen, tekstextractie uit toolresultaten, transformaties van transportberichten en beschrijfbare transportgebeurtenisstreams |
+    | `plugin-sdk/provider-onboard` | Privé-lokaal na juli 2026; helpers voor configuratiepatches tijdens onboarding |
+    | `plugin-sdk/global-singleton` | Privé-lokaal na juli 2026; proceslokale singleton-/map-/cachehelpers |
+    | `plugin-sdk/group-activation` | Privé-lokaal na juli 2026; beperkte helpers voor groepsactiveringsmodi en opdrachtparsing |
   </Accordion>
 
-Snapshots van providergebruik rapporteren normaal een of meer quota-`windows`, elk met
-een label, gebruikt percentage en optionele resettijd. Providers die saldo- of
+Snapshots van providergebruik rapporteren normaal gesproken een of meer quota-`windows`, elk met
+een label, gebruikt percentage en optionele resetdatum. Providers die saldo- of
 accountstatustekst tonen in plaats van resetbare quotavensters, moeten
 `summary` retourneren met een lege `windows`-array in plaats van percentages te verzinnen.
 OpenClaw toont die samenvattingstekst in statusuitvoer; gebruik `error` alleen wanneer het
-gebruiksendpoint is mislukt of geen bruikbare gebruiksgegevens heeft geretourneerd.
+gebruikseindpunt is mislukt of geen bruikbare gebruiksgegevens heeft geretourneerd.
 
-  <Accordion title="Auth- en beveiligingssubpaden">
+  <Accordion title="Subpaden voor authenticatie en beveiliging">
     | Subpad | Belangrijkste exports |
     | --- | --- |
-    | `plugin-sdk/command-auth` | `resolveControlCommandGate`, commandoregistry-hulpfuncties inclusief dynamische opmaak van argumentmenu's, hulpfuncties voor afzenderautorisatie |
-    | `plugin-sdk/command-status` | Builders voor commando-/helpberichten, zoals `buildCommandsMessagePaginated` en `buildHelpMessage` |
-    | `plugin-sdk/approval-auth-runtime` | Hulpfuncties voor approver-resolutie en actie-auth in dezelfde chat |
-    | `plugin-sdk/approval-client-runtime` | Hulpfuncties voor native exec-goedkeuringsprofielen/-filters |
-    | `plugin-sdk/approval-delivery-runtime` | Native adapters voor goedkeuringsmogelijkheden/-levering |
-    | `plugin-sdk/approval-gateway-runtime` | Gedeelde hulpfunctie voor Gateway-resolutie van goedkeuringen |
-    | `plugin-sdk/approval-handler-adapter-runtime` | Lichtgewicht hulpfuncties voor het laden van native goedkeuringsadapters voor hot channel-entrypoints |
-    | `plugin-sdk/approval-handler-runtime` | Bredere runtime-hulpfuncties voor goedkeuringshandlers; geef de voorkeur aan de smallere adapter-/Gateway-seams wanneer die voldoende zijn |
-    | `plugin-sdk/approval-native-runtime` | Hulpfuncties voor native goedkeuringsdoel, accountbinding, route-gate, forwarding-fallback en onderdrukking van lokale native exec-prompts |
-    | `plugin-sdk/approval-reaction-runtime` | Hardcoded bindingen voor goedkeuringsreacties, payloads voor reactieprompts, stores voor reactiedoelen, hulpfuncties voor reactiehinttekst en compatibiliteitsexport voor onderdrukking van lokale native exec-prompts |
-    | `plugin-sdk/approval-reply-runtime` | Hulpfuncties voor antwoordpayloads van exec-/plugin-goedkeuringen |
-    | `plugin-sdk/approval-runtime` | Payloadhulpfuncties voor exec-/plugin-goedkeuringen, hulpfuncties voor native goedkeuringsroutering/runtime en gestructureerde weergavehulpfuncties voor goedkeuringen, zoals `formatApprovalDisplayPath` |
-    | `plugin-sdk/reply-dedupe` | Smalle reset-hulpfuncties voor deduplicatie van inkomende antwoorden |
-    | `plugin-sdk/channel-contract-testing` | Smalle hulpfuncties voor channel-contracttests zonder de brede testing-barrel |
-    | `plugin-sdk/command-auth-native` | Native commando-auth, dynamische opmaak van argumentmenu's en native sessiedoelhulpfuncties |
-    | `plugin-sdk/command-detection` | Gedeelde hulpfuncties voor commandodetectie |
-    | `plugin-sdk/command-primitives-runtime` | Lichtgewicht commandotekstpredikaten voor hot channel-paden |
-    | `plugin-sdk/command-surface` | Normalisatie van commandobody's en commandosurface-hulpfuncties |
+    | `plugin-sdk/command-auth` | Verouderd breed autorisatieoppervlak voor opdrachten (`resolveControlCommandGate`, helpers voor het opdrachtenregister, waaronder dynamische opmaak van menu's voor argumenten, helpers voor afzenderautorisatie); gebruik autorisatie bij kanaalingang/runtime of helpers voor opdrachtstatus |
+    | `plugin-sdk/command-status` | Builders voor opdracht-/helpberichten, zoals `buildCommandsMessagePaginated` en `buildHelpMessage` |
+    | `plugin-sdk/approval-auth-runtime` | Helpers voor het bepalen van goedkeurders en actieautorisatie binnen dezelfde chat |
+    | `plugin-sdk/approval-client-runtime` | Helpers voor profielen/filters voor native uitvoeringsgoedkeuring |
+    | `plugin-sdk/approval-delivery-runtime` | Adapters voor mogelijkheden/levering van native goedkeuringen |
+    | `plugin-sdk/approval-gateway-runtime` | Gedeelde resolver voor de goedkeuringsgateway |
+    | `plugin-sdk/approval-reference-runtime` | Privé-lokaal na juli 2026; deterministische helper voor duurzame locators bij door transport beperkte goedkeuringscallbacks |
+    | `plugin-sdk/approval-handler-adapter-runtime` | Lichtgewicht laadhelpers voor native goedkeuringsadapters voor intensief gebruikte kanaalingangspunten |
+    | `plugin-sdk/approval-handler-runtime` | Bredere runtimehelpers voor goedkeuringshandlers; geef de voorkeur aan de beperktere adapter-/gatewaykoppelingen wanneer die volstaan |
+    | `plugin-sdk/approval-native-runtime` | Helpers voor native goedkeuringsdoelen, accountbinding, routepoorten, doorstuurfallback en onderdrukking van lokale native uitvoeringsprompts |
+    | `plugin-sdk/approval-reaction-runtime` | Privé-lokaal na juli 2026; hardgecodeerde bindingen voor goedkeuringsreacties, payloads voor reactieprompts, opslagplaatsen voor reactiedoelen, helpers voor reactiehinttekst en compatibiliteitsexport voor onderdrukking van lokale native uitvoeringsprompts |
+    | `plugin-sdk/approval-reply-runtime` | Helpers voor antwoordpayloads voor uitvoerings-/plugingoedkeuringen |
+    | `plugin-sdk/approval-runtime` | Payloadhelpers voor uitvoerings-/plugingoedkeuringen, builders voor goedkeuringsmogelijkheden, helpers voor goedkeuringsauthenticatie/-profielen, helpers voor routering/runtime van native goedkeuringen en helpers voor gestructureerde weergave van goedkeuringen, zoals `formatApprovalDisplayPath` |
+    | `plugin-sdk/command-auth-native` | Native opdrachtautorisatie, dynamische opmaak van menu's voor argumenten en helpers voor native sessiedoelen |
+    | `plugin-sdk/command-detection` | Gedeelde helpers voor opdrachtdetectie |
+    | `plugin-sdk/command-primitives-runtime` | Lichtgewicht predicaten voor opdrachttekst voor intensief gebruikte kanaalpaden |
+    | `plugin-sdk/command-surface` | Privé-lokaal na juli 2026; helpers voor normalisatie van opdrachtbody's en opdrachtoppervlakken |
     | `plugin-sdk/allow-from` | `formatAllowFromLowercase` |
-    | `plugin-sdk/provider-auth-login-flow-runtime` | Lazy hulpfuncties voor provider-auth-loginflow voor private channel- en Web UI-device-code-koppeling |
-    | `plugin-sdk/channel-secret-runtime` | Smalle verzamelhulpfuncties voor secret-contracten voor channel-/plugin-secret-surfaces |
-    | `plugin-sdk/secret-ref-runtime` | Smalle `coerceSecretRef`- en SecretRef-typeringhulpfuncties voor parsing van secret-contract/configuratie |
-    | `plugin-sdk/secret-provider-integration` | Type-only SecretRef-providerintegratiemanifest en presetcontracten voor plugins die externe secretprovider-presets publiceren |
-    | `plugin-sdk/security-runtime` | Gedeelde hulpfuncties voor vertrouwen, DM-gating, root-begrensde bestanden/paden inclusief create-only writes, synchrone/asynchrone atomaire bestandsvervanging, writes naar sibling-tempbestanden, fallback voor verplaatsing tussen apparaten, private file-store-hulpfuncties, symlink-parent-guards, externe content, redactie van gevoelige tekst, constant-time secretvergelijking en secretverzamelhulpfuncties |
-    | `plugin-sdk/ssrf-policy` | Hulpfuncties voor host-allowlist en private-network SSRF-beleid |
-    | `plugin-sdk/ssrf-dispatcher` | Smalle hulpfuncties voor pinned-dispatchers zonder het brede infra-runtimeoppervlak |
-    | `plugin-sdk/ssrf-runtime` | Pinned-dispatcher, SSRF-beveiligde fetch, SSRF-fout en SSRF-beleidshulpfuncties |
-    | `plugin-sdk/secret-input` | Hulpfuncties voor parsing van secretinvoer |
-    | `plugin-sdk/webhook-ingress` | Webhook-request-/targethulpfuncties en coercion van raw websocket/body |
-    | `plugin-sdk/webhook-request-guards` | Hulpfuncties voor requestbodygrootte/time-out |
+    | `plugin-sdk/provider-auth-login-flow-runtime` | Privé-lokaal na juli 2026; helpers voor luie aanmeldflows voor providerauthenticatie voor koppeling via apparaatcodes in privékanalen en de Web-UI |
+    | `plugin-sdk/channel-secret-runtime` | Verouderd breed oppervlak voor geheimcontracten (`collectSimpleChannelFieldAssignments`, `getChannelSurface`, `pushAssignment`, typen voor geheime doelen); geef de voorkeur aan de gerichte subpaden hieronder |
+    | `plugin-sdk/channel-secret-basic-runtime` | Beperkte exports voor geheimcontracten en builders voor doelregisters voor niet-TTS-geheimoppervlakken van kanalen/plugins |
+    | `plugin-sdk/channel-secret-tts-runtime` | Privé-lokaal na juli 2026; beperkte helpers voor toewijzing van geneste TTS-geheimen in kanalen |
+    | `plugin-sdk/secret-ref-runtime` | Beperkte SecretRef-typering, resolutie en opzoeking van paden naar plandoelen voor parsing van geheimcontracten/configuratie |
+    | `plugin-sdk/security-runtime` | Verouderde brede barrel voor vertrouwen, DM-poortcontrole, tot de root begrensde bestands-/padhelpers, waaronder uitsluitend aanmakende schrijfbewerkingen, synchrone/asynchrone atomische bestandsvervanging, tijdelijke schrijfbewerkingen naast het doelbestand, fallback voor verplaatsing tussen apparaten, helpers voor privébestandsopslag, beveiliging van bovenliggende symlinkpaden, externe inhoud, redactie van gevoelige tekst, constante-tijdvergelijking van geheimen en helpers voor het verzamelen van geheimen; geef de voorkeur aan gerichte subpaden voor beveiliging/SSRF/geheimen |
+    | `plugin-sdk/ssrf-policy` | Helpers voor hosttoestaanlijsten en SSRF-beleid voor privénetwerken |
+    | `plugin-sdk/ssrf-dispatcher` | Privé-lokaal na juli 2026; beperkte helpers voor vastgezette dispatchers zonder het brede infrastructuurruntimeoppervlak |
+    | `plugin-sdk/ssrf-runtime` | Helpers voor vastgezette dispatchers, door SSRF beveiligd ophalen, SSRF-fouten en SSRF-beleid |
+    | `plugin-sdk/secret-input` | Helpers voor parsing van geheiminvoer |
+    | `plugin-sdk/webhook-ingress` | Helpers voor Webhook-verzoeken/-doelen en conversie van onbewerkte websockets/body's |
+    | `plugin-sdk/webhook-request-guards` | Helpers voor grootte/time-out van aanvraagbody's en `runDetachedWebhookWork` voor getraceerde verwerking na bevestiging |
   </Accordion>
 
-  <Accordion title="Runtime- en opslagsubpaden">
+  <Accordion title="Runtime and storage subpaths">
     | Subpad | Belangrijkste exports |
     | --- | --- |
-    | `plugin-sdk/runtime` | Brede hulpfuncties voor runtime, logging, back-up en plugininstallatie |
-    | `plugin-sdk/runtime-env` | Smalle hulpfuncties voor runtimeomgeving, logger, time-out, opnieuw proberen en backoff |
-    | `plugin-sdk/browser-config` | Ondersteunde browserconfiguratiefacade voor genormaliseerde profielen/standaardwaarden, CDP-URL-parsing en hulpfuncties voor browserbesturingsauthenticatie |
-    | `plugin-sdk/agent-harness-task-runtime` | Generieke hulpfuncties voor taaklevenscyclus en voltooiingslevering voor door een harness ondersteunde agents die een door de host uitgegeven taakscope gebruiken |
-    | `plugin-sdk/codex-mcp-projection` | Gereserveerde gebundelde Codex-hulpfunctie voor het projecteren van gebruikersconfiguratie voor MCP-servers naar Codex-threadconfiguratie; niet voor plugins van derden |
-    | `plugin-sdk/codex-native-task-runtime` | Privé gebundelde Codex-hulpfunctie voor native taakspiegeling/runtime-bedrading; niet voor plugins van derden |
-    | `plugin-sdk/channel-runtime-context` | Generieke hulpfuncties voor registratie en lookup van kanaalruntimecontext |
+    | `plugin-sdk/runtime` | Helpers voor runtime, logging en back-ups, waarschuwingen voor installatiepaden van plugins en proceshelpers |
+    | `plugin-sdk/runtime-env` | Gerichte helpers voor runtime-omgeving, logger, time-out, opnieuw proberen en back-off |
+    | `plugin-sdk/browser-config` | Privé en lokaal na juli 2026; ondersteunde facade voor browserconfiguratie voor genormaliseerde profielen/standaardwaarden, het parseren van CDP-URL's en helpers voor browserbesturingsauthenticatie |
+    | `plugin-sdk/agent-harness-task-runtime` | Privé en lokaal na juli 2026; generieke helpers voor de taaklevenscyclus en voltooiingslevering voor agents met een harness die een door de host uitgegeven taakbereik gebruiken |
+    | `plugin-sdk/codex-mcp-projection` | Privé en lokaal na juli 2026; gereserveerde gebundelde Codex-helper om de configuratie van de MCP-server van de gebruiker te projecteren naar de Codex-threadconfiguratie; niet voor plugins van derden |
+    | `plugin-sdk/codex-native-task-runtime` | Repo-lokale gebundelde Codex-helper voor native taakspiegeling/runtimebedrading; geen pakketexport |
+    | `plugin-sdk/channel-runtime-context` | Generieke helpers voor registratie en opzoeken van de runtimecontext van kanalen |
     | `plugin-sdk/matrix` | Verouderde Matrix-compatibiliteitsfacade voor oudere kanaalpakketten van derden; nieuwe plugins moeten `plugin-sdk/run-command` rechtstreeks importeren |
-    | `plugin-sdk/mattermost` | Verouderde Mattermost-compatibiliteitsfacade voor oudere kanaalpakketten van derden; nieuwe plugins moeten generieke SDK-subpaden rechtstreeks importeren |
     | `plugin-sdk/runtime-store` | `createPluginRuntimeStore` |
-    | `plugin-sdk/plugin-runtime` | Gedeelde hulpfuncties voor pluginopdrachten, hooks, HTTP en interactieve functies |
-    | `plugin-sdk/hook-runtime` | Gedeelde hulpfuncties voor Webhook/interne hook-pijplijn |
-    | `plugin-sdk/lazy-runtime` | Hulpfuncties voor luie runtime-import/binding, zoals `createLazyRuntimeModule`, `createLazyRuntimeMethod` en `createLazyRuntimeSurface` |
-    | `plugin-sdk/process-runtime` | Hulpfuncties voor procesuitvoering |
-    | `plugin-sdk/cli-runtime` | Hulpfuncties voor CLI-opmaak, wachten, versie, argumentaanroep en luie opdrachtgroepen |
-    | `plugin-sdk/qa-live-transport-scenarios` | Gedeelde scenario-id's voor live transport-QA, hulpfuncties voor basisdekking en hulpfunctie voor scenarioselectie |
-    | `plugin-sdk/gateway-method-runtime` | Gereserveerde Gateway-methode-dispatchhulpfunctie voor plugin-HTTP-routes die `contracts.gatewayMethodDispatch: ["authenticated-request"]` declareren |
-    | `plugin-sdk/gateway-runtime` | Gateway-client, hulpfunctie voor clientstart wanneer event-loop gereed is, Gateway CLI-RPC, Gateway-protocolfouten, resolutie van geadverteerde LAN-hosts en hulpfuncties voor kanaalstatuspatches |
-    | `plugin-sdk/config-contracts` | Gerichte type-only configuratiesurface voor pluginconfiguratievormen zoals `OpenClawConfig` en configuratietypen voor kanalen/providers |
-    | `plugin-sdk/plugin-config-runtime` | Hulpfuncties voor runtime-lookup van pluginconfiguratie, zoals `requireRuntimeConfig`, `resolvePluginConfigObject` en `resolveLivePluginConfigObject` |
-    | `plugin-sdk/config-mutation` | Transactionele hulpfuncties voor configuratiemutatie, zoals `mutateConfigFile`, `replaceConfigFile` en `logConfigUpdated` |
-    | `plugin-sdk/message-tool-delivery-hints` | Gedeelde metadata-hintstrings voor levering van berichttools |
-    | `plugin-sdk/runtime-config-snapshot` | Hulpfuncties voor momentopnamen van de huidige procesconfiguratie, zoals `getRuntimeConfig`, `getRuntimeConfigSnapshot` en setters voor testmomentopnamen |
-    | `plugin-sdk/telegram-command-config` | Normalisatie van Telegram-opdrachtnamen/-beschrijvingen en controles op duplicaten/conflicten, zelfs wanneer de gebundelde Telegram-contractsurface niet beschikbaar is |
-    | `plugin-sdk/text-autolink-runtime` | Detectie van automatische links naar bestandsverwijzingen zonder de brede tekstbarrel |
-    | `plugin-sdk/approval-reaction-runtime` | Hardcoded bindings voor goedkeuringsreacties, payloads voor reactieprompts, stores voor reactiedoelen, hulpfuncties voor reactiehinttekst en compatibiliteitsexport voor onderdrukking van lokale native exec-prompts |
-    | `plugin-sdk/approval-runtime` | Hulpfuncties voor exec/plugin-goedkeuring, builders voor goedkeuringsmogelijkheden, hulpfuncties voor auth/profiel, hulpfuncties voor native routing/runtime en opmaak van gestructureerde weergavepaden voor goedkeuringen |
-    | `plugin-sdk/reply-runtime` | Gedeelde hulpfuncties voor inkomende/reply-runtime, opdelen in chunks, dispatch, Heartbeat, antwoordplanner |
-    | `plugin-sdk/reply-dispatch-runtime` | Smalle hulpfuncties voor reply-dispatch/finalisatie en gesprekslabels |
-    | `plugin-sdk/reply-history` | Gedeelde hulpfuncties voor replygeschiedenis met kort venster. Nieuwe code voor berichtrondes moet `createChannelHistoryWindow` gebruiken; lagere-level maphulpfuncties blijven alleen verouderde compatibiliteitsexports |
-    | `plugin-sdk/reply-reference` | `createReplyReferencePlanner` |
-    | `plugin-sdk/reply-chunking` | Smalle hulpfuncties voor het opdelen van tekst/Markdown in chunks |
-    | `plugin-sdk/session-store-runtime` | Hulpfuncties voor sessieworkflows (`getSessionEntry`, `listSessionEntries`, `patchSessionEntry`, `upsertSessionEntry`), begrensde recente transcripttekstlezingen van gebruiker/assistent per sessie-identiteit, legacy hulpfuncties voor sessiestorepad/sessiesleutel, updated-at-lezingen en alleen-voor-transitie compatibiliteitshulpfuncties voor hele store/bestandspad |
-    | `plugin-sdk/session-transcript-runtime` | Transcriptidentiteit, gescopete hulpfuncties voor doel/lezen/schrijven, publicatie van updates, schrijfvergrendelingen en sleutels voor transcriptgeheugenhits |
-    | `plugin-sdk/sqlite-runtime` | Gerichte SQLite-hulpfuncties voor agentschema, pad en transacties voor first-party runtime |
-    | `plugin-sdk/cron-store-runtime` | Hulpfuncties voor Cron-storepad/laden/opslaan |
-    | `plugin-sdk/state-paths` | Hulpfuncties voor state-/OAuth-mappaden |
-    | `plugin-sdk/plugin-state-runtime` | Plugin-sidecar SQLite keyed-state-typen plus gecentraliseerde connection-pragma en WAL-onderhoudssetup voor plugin-owned databases |
-    | `plugin-sdk/routing` | Hulpfuncties voor route-/sessiesleutel-/accountbinding, zoals `resolveAgentRoute`, `buildAgentSessionKey` en `resolveDefaultAgentBoundAccountId` |
-    | `plugin-sdk/status-helpers` | Gedeelde hulpfuncties voor kanaal-/accountstatussamenvattingen, standaardwaarden voor runtime-state en metadatahulpfuncties voor issues |
-    | `plugin-sdk/target-resolver-runtime` | Gedeelde hulpfuncties voor targetresolver |
-    | `plugin-sdk/string-normalization-runtime` | Hulpfuncties voor slug-/stringnormalisatie |
-    | `plugin-sdk/request-url` | String-URL's extraheren uit fetch-/request-achtige invoer |
-    | `plugin-sdk/run-command` | Getimede opdrachtrunner met genormaliseerde stdout-/stderr-resultaten |
-    | `plugin-sdk/param-readers` | Gemeenschappelijke paramlezers voor tools/CLI |
-    | `plugin-sdk/tool-plugin` | Definieer een eenvoudige getypeerde agent-toolplugin en stel statische metadata beschikbaar voor manifestgeneratie |
-    | `plugin-sdk/tool-payload` | Genormaliseerde payloads extraheren uit toolresultaatobjecten |
-    | `plugin-sdk/tool-send` | Canonieke velden voor verzenddoel extraheren uit toolargs |
-    | `plugin-sdk/sandbox` | Sandbox-backendtypen en hulpfuncties voor SSH-/OpenShell-opdrachten, inclusief fail-fast preflight voor exec-opdrachten |
-    | `plugin-sdk/temp-path` | Gedeelde hulpfuncties voor temp-downloadpaden en privé beveiligde tijdelijke werkruimten |
-    | `plugin-sdk/logging-core` | Subsystemlogger en redactiehulpfuncties |
-    | `plugin-sdk/markdown-table-runtime` | Hulpfuncties voor Markdown-tabelmodus en conversie |
-    | `plugin-sdk/model-session-runtime` | Hulpfuncties voor model-/sessie-override, zoals `applyModelOverrideToSessionEntry` en `resolveAgentMaxConcurrent` |
-    | `plugin-sdk/talk-config-runtime` | Hulpfuncties voor resolutie van Talk-providerconfiguratie |
-    | `plugin-sdk/json-store` | Kleine hulpfuncties voor lezen/schrijven van JSON-state |
-    | `plugin-sdk/json-unsafe-integers` | JSON-parsinghulpfuncties die onveilige integerliterals als strings behouden |
-    | `plugin-sdk/file-lock` | Re-entrant hulpfuncties voor bestandsvergrendeling |
-    | `plugin-sdk/persistent-dedupe` | Schijfondersteunde hulpfuncties voor dedupe-cache |
-    | `plugin-sdk/acp-runtime` | ACP-hulpfuncties voor runtime/sessie en reply-dispatch |
-    | `plugin-sdk/acp-runtime-backend` | Lichtgewicht ACP-hulpfuncties voor backendregistratie en reply-dispatch voor bij opstarten geladen plugins |
-    | `plugin-sdk/acp-binding-resolve-runtime` | Alleen-lezen ACP-bindingsresolutie zonder lifecycle-startupimports |
-    | `plugin-sdk/agent-config-primitives` | Smalle primitives voor agentschema-runtimeconfiguratie |
-    | `plugin-sdk/boolean-param` | Losse boolean-paramlezer |
-    | `plugin-sdk/dangerous-name-runtime` | Hulpfuncties voor resolutie van gevaarlijke-naammatching |
-    | `plugin-sdk/device-bootstrap` | Hulpfuncties voor apparaat-bootstrap en pairingtokens |
-    | `plugin-sdk/extension-shared` | Gedeelde primitives voor passieve kanalen, status en ambient proxyhulpfuncties |
-    | `plugin-sdk/models-provider-runtime` | Hulpfuncties voor `/models`-opdracht/providerantwoorden |
-    | `plugin-sdk/skill-commands-runtime` | Hulpfuncties voor het weergeven van Skill-opdrachten |
-    | `plugin-sdk/native-command-registry` | Hulpfuncties voor native opdrachtregister/build/serialisatie |
-    | `plugin-sdk/agent-harness` | Experimentele trusted-plugin surface voor low-level agent-harnassen: harnastypen, hulpfuncties voor actieve-runsturing/afbreken, OpenClaw-toolbridgehulpfuncties, runtime-plan-toolbeleidshulpfuncties, classificatie van terminale uitkomsten, hulpfuncties voor opmaak/detail van toolvoortgang en hulpprogramma's voor pogingresultaten |
-    | `plugin-sdk/provider-zai-endpoint` | Verouderde endpointdetectiefacade die eigendom is van de Z.AI-provider; gebruik de openbare API van de Z.AI-plugin |
-    | `plugin-sdk/async-lock-runtime` | Proceslokale async-lockhulpfunctie voor kleine runtime-statebestanden |
-    | `plugin-sdk/channel-activity-runtime` | Hulpfunctie voor kanaalactiviteitstelemetrie |
-    | `plugin-sdk/concurrency-runtime` | Hulpfunctie voor begrensde async-taakconcurrency |
-    | `plugin-sdk/dedupe-runtime` | Hulpfuncties voor in-memory en persistent-backed dedupe-cache |
-    | `plugin-sdk/delivery-queue-runtime` | Hulpfunctie voor het leegtrekken van uitgaande pending-delivery |
-    | `plugin-sdk/file-access-runtime` | Veilige hulpfuncties voor lokale bestanden en paden van mediabronnen |
-    | `plugin-sdk/heartbeat-runtime` | Hulpfuncties voor Heartbeat-wake, events en zichtbaarheid |
-    | `plugin-sdk/number-runtime` | Hulpfunctie voor numerieke coercion |
-    | `plugin-sdk/secure-random-runtime` | Hulpfuncties voor beveiligde tokens/UUID's |
-    | `plugin-sdk/system-event-runtime` | Hulpfuncties voor systeemeventwachtrij |
-    | `plugin-sdk/transport-ready-runtime` | Hulpfunctie om te wachten op transportgereedheid |
-    | `plugin-sdk/exec-approvals-runtime` | Hulpfuncties voor exec-goedkeuringsbeleidsbestanden zonder de brede infra-runtimebarrel |
+    | `plugin-sdk/plugin-runtime` | Verouderde brede barrel voor helpers voor pluginopdrachten, hooks, HTTP en interactie; geef de voorkeur aan gerichte runtime-subpaden voor plugins |
+    | `plugin-sdk/hook-runtime` | Verouderde brede barrel voor helpers voor de Webhook-/interne-hookpijplijn; geef de voorkeur aan gerichte subpaden voor hooks en de pluginruntime |
+    | `plugin-sdk/lazy-runtime` | Helpers voor luie runtime-import en -binding, zoals `createLazyRuntimeModule`, `createLazyRuntimeMethod` en `createLazyRuntimeSurface` |
+    | `plugin-sdk/process-runtime` | Privé en lokaal na juli 2026; procesuitvoeringshelpers |
+    | `plugin-sdk/node-host` | Privé en lokaal na juli 2026; helpers voor het oplossen van uitvoerbare bestanden op een Node-host en het hervatten van een PTY |
+    | `plugin-sdk/cli-runtime` | Privé en lokaal na juli 2026; verouderde brede barrel voor CLI-opmaak, wachten, versiebeheer, aanroepen met argumenten en helpers voor luie opdrachtgroepen; geef de voorkeur aan gerichte CLI-/runtime-subpaden |
+    | `plugin-sdk/qa-runner-runtime` | Privé en lokaal na juli 2026; ondersteunde facade die QA-scenario's voor plugins beschikbaar stelt via het CLI-opdrachtoppervlak |
+    | `plugin-sdk/tts-runtime` | Privé en lokaal na juli 2026; ondersteunde facade voor configuratieschema's en runtimehelpers voor tekst-naar-spraak |
+    | `plugin-sdk/gateway-method-runtime` | Gereserveerde helper voor verzending van Gateway-methoden voor HTTP-routes van plugins die `contracts.gatewayMethodDispatch: ["authenticated-request"]` declareren |
+    | `plugin-sdk/gateway-runtime` | Gateway-client, helper voor het starten van een client wanneer de gebeurtenislus gereed is, Gateway-CLI-RPC, fouten in het Gateway-protocol, oplossing van geadverteerde LAN-hosts en helpers voor het bijwerken van de kanaalstatus |
+    | `plugin-sdk/config-contracts` | Gericht configuratieoppervlak met alleen typen voor configuratievormen van plugins, zoals `OpenClawConfig`, en configuratietypen voor kanalen/providers |
+    | `plugin-sdk/plugin-config-runtime` | Verouderde compatibiliteitsfacade voor runtimehelpers voor pluginconfiguratie; nieuwe plugins gebruiken `api.pluginConfig` plus gerichte configuratiecontracten, snapshots en mutatiehelpers |
+    | `plugin-sdk/config-mutation` | Transactionele helpers voor configuratiemutatie, zoals `mutateConfigFile`, `replaceConfigFile` en `logConfigUpdated` |
+    | `plugin-sdk/message-tool-delivery-hints` | Privé en lokaal na juli 2026; gedeelde hintteksten voor leveringsmetadata van berichttools |
+    | `plugin-sdk/runtime-config-snapshot` | Helpers voor snapshots van de huidige procesconfiguratie, zoals `getRuntimeConfig`, `getRuntimeConfigSnapshot` en setters voor testsnapshots |
+    | `plugin-sdk/text-autolink-runtime` | Privé en lokaal na juli 2026; detectie van automatische koppelingen voor bestandsverwijzingen zonder de brede tekstbarrel |
+    | `plugin-sdk/reply-runtime` | Gedeelde runtimehelpers voor inkomende berichten en antwoorden, segmentering, verzending, Heartbeat en antwoordplanner |
+    | `plugin-sdk/reply-dispatch-runtime` | Gerichte helpers voor het verzenden/afronden van antwoorden en gesprekslabels |
+    | `plugin-sdk/reply-history` | Gedeelde helpers voor antwoordgeschiedenis binnen een kort tijdvenster. Nieuwe code voor berichtbeurten moet `createChannelHistoryWindow` gebruiken; helpers voor maps op lager niveau blijven uitsluitend verouderde compatibiliteitsexports |
+    | `plugin-sdk/reply-reference` | Privé en lokaal na juli 2026; `createReplyReferencePlanner` |
+    | `plugin-sdk/reply-chunking` | Gerichte helpers voor het segmenteren van tekst/Markdown |
+    | `plugin-sdk/session-store-runtime` | Helpers voor sessieworkflows (`getSessionEntry`, `listSessionEntries`, `patchSessionEntry`, `upsertSessionEntry`), helpers voor herstel/levenscyclus (`deleteSessionEntry`, `cleanupSessionLifecycleArtifacts`, `resolveSessionStoreBackupPaths`), markeringshelpers voor tijdelijke `sessionFile`-waarden, begrensde uitlezingen van recente transcripttekst van gebruiker/assistent op basis van sessie-identiteit, helpers voor het pad van de sessieopslag/sessiesleutel en uitlezingen van het bijwerkingstijdstip, zonder brede imports voor configuratieschrijfacties/-onderhoud |
+    | `plugin-sdk/session-transcript-runtime` | Privé en lokaal na juli 2026; transcriptidentiteit, begrensde onbewerkte en zichtbare cursors, bereikgebonden helpers voor doelen/lezen/schrijven, projectie van zichtbare berichtitems, publicatie van updates, schrijfvergrendelingen en sleutels voor treffers in het transcriptgeheugen |
+    | `plugin-sdk/sqlite-runtime` | Privé en lokaal na juli 2026; gerichte helpers voor het SQLite-agentschema, paden en transacties voor de interne runtime, zonder besturing van de databaselevenscyclus |
+    | `plugin-sdk/cron-store-runtime` | Privé en lokaal na juli 2026; helpers voor het pad, laden en opslaan van de Cron-opslag |
+    | `plugin-sdk/state-paths` | Helpers voor paden naar status-/OAuth-mappen |
+    | `plugin-sdk/plugin-state-runtime` | Privé en lokaal na juli 2026; plugingebonden contracten voor status met sleutels, BLOB's en coöperatieve SQLite-leases, plus verbindingspragma, geverifieerd WAL-onderhoud en atomaire migratiehelpers voor STRICT-schema's. Lease-callbacks ontvangen een afbreeksignaal en getypeerde fouten maken onderscheid tussen time-out, annulering, verloren eigenaarschap, ongeldige invoer en opslagfouten |
+    | `plugin-sdk/routing` | Helpers voor bindingen van routes, sessiesleutels en accounts, zoals `resolveAgentRoute`, `buildAgentSessionKey` en `resolveDefaultAgentBoundAccountId` |
+    | `plugin-sdk/status-helpers` | Gedeelde helpers voor statusoverzichten van kanalen/accounts, standaardwaarden voor runtimestatus en metadatahelpers voor problemen |
+    | `plugin-sdk/target-resolver-runtime` | Privé en lokaal na juli 2026; gedeelde helpers voor doelresolutie |
+    | `plugin-sdk/string-normalization-runtime` | Privé en lokaal na juli 2026; helpers voor normalisatie van slugs/tekenreeksen |
+    | `plugin-sdk/request-url` | Privé en lokaal na juli 2026; tekenreeks-URL's extraheren uit fetch-/request-achtige invoer |
+    | `plugin-sdk/run-command` | Opdrachtrunner met tijdslimiet en genormaliseerde stdout-/stderr-resultaten |
+    | `plugin-sdk/param-readers` | Algemene readers voor tool-/CLI-parameters |
+    | `plugin-sdk/tool-plugin` | Een eenvoudige getypeerde agenttool-plugin definiëren en statische metadata beschikbaar stellen voor het genereren van manifests |
+    | `plugin-sdk/tool-payload` | Privé en lokaal na juli 2026; genormaliseerde payloads extraheren uit toolresultaatobjecten |
+    | `plugin-sdk/tool-send` | Canonieke velden voor verzenddoelen extraheren uit toolargumenten |
+    | `plugin-sdk/sandbox` | Privé en lokaal na juli 2026; typen voor sandboxbackends en helpers voor SSH-/OpenShell-opdrachten, inclusief een voorafgaande controle voor snel falende exec-opdrachten |
+    | `plugin-sdk/temp-path` | Gedeelde helpers voor tijdelijke downloadpaden en privé, beveiligde tijdelijke werkruimten |
+    | `plugin-sdk/logging-core` | Helpers voor subsysteemlogging en redactie |
+    | `plugin-sdk/markdown-table-runtime` | Privé en lokaal na juli 2026; helpers voor de modus en conversie van Markdown-tabellen |
+    | `plugin-sdk/model-session-runtime` | Helpers voor model-/sessieoverschrijvingen, zoals `applyModelOverrideToSessionEntry` en `resolveAgentMaxConcurrent` |
+    | `plugin-sdk/talk-config-runtime` | Privé en lokaal na juli 2026; helpers voor het oplossen van de configuratie van Talk-providers |
+    | `plugin-sdk/json-store` | Kleine helpers voor het lezen/schrijven van JSON-status |
+    | `plugin-sdk/json-unsafe-integers` | Privé en lokaal na juli 2026; helpers voor het parseren van JSON die onveilige gehele getalliteralen als tekenreeksen behouden |
+    | `plugin-sdk/file-lock` | Privé en lokaal na juli 2026; herintreedbare helpers voor bestandsvergrendeling plus Doctor-veilige terugwinning van aantoonbaar verouderde, ongewijzigde en buiten gebruik gestelde sidecars voor vergrendelingen |
+    | `plugin-sdk/persistent-dedupe` | Helpers voor een schijfgebaseerde deduplicatiecache |
+    | `plugin-sdk/ingress-effect-once` | Duurzame claim-/commitbeveiliging voor niet-idempotente neveneffecten bij binnenkomst |
+    | `plugin-sdk/acp-runtime` | Privé en lokaal na juli 2026; helpers voor ACP-runtime/-sessies en antwoordverzending |
+    | `plugin-sdk/acp-runtime-backend` | Privé en lokaal na juli 2026; lichtgewicht helpers voor ACP-backendregistratie en antwoordverzending voor bij het opstarten geladen plugins |
+    | `plugin-sdk/acp-binding-resolve-runtime` | Privé en lokaal na juli 2026; alleen-lezenoplossing van ACP-bindingen zonder imports voor het starten van de levenscyclus |
+    | `plugin-sdk/agent-config-primitives` | Verouderde configuratieschemaprimitieven voor de agentruntime; importeer schemaprimitieven vanuit een onderhouden, door een plugin beheerd oppervlak |
+    | `plugin-sdk/boolean-param` | Flexibele reader voor booleaanse parameters |
+    | `plugin-sdk/dangerous-name-runtime` | Privé en lokaal na juli 2026; resolutiehelpers voor overeenkomsten met gevaarlijke namen |
+    | `plugin-sdk/device-bootstrap` | Helpers voor het initialiseren van apparaten en koppeltokens, inclusief `BOOTSTRAP_HANDOFF_OPERATOR_SCOPES` |
+    | `plugin-sdk/extension-shared` | Gedeelde basishelpers voor passieve kanalen, status en omgevingsproxy's |
+    | `plugin-sdk/models-provider-runtime` | Helpers voor antwoorden op `/models`-opdrachten/providers |
+    | `plugin-sdk/skill-commands-runtime` | Helpers voor het weergeven van Skill-opdrachten |
+    | `plugin-sdk/native-command-registry` | Helpers voor het register, bouwen en serialiseren van native opdrachten |
+    | `plugin-sdk/agent-harness` | Experimenteel oppervlak voor vertrouwde plugins voor agent-harnesses op laag niveau: harnesstypen, helpers om actieve uitvoeringen bij te sturen/af te breken, helpers voor de OpenClaw-toolbridge, helpers voor toolbeleid in runtimeplannen, classificatie van terminalresultaten, helpers voor de opmaak/details van toolvoortgang en hulpprogramma's voor pogingresultaten |
+    | `plugin-sdk/async-lock-runtime` | Privé en lokaal na juli 2026; proceslokale asynchrone vergrendelingshelper voor kleine runtimestatusbestanden |
+    | `plugin-sdk/channel-activity-runtime` | Privé en lokaal na juli 2026; telemetriehelper voor kanaalactiviteit |
+    | `plugin-sdk/concurrency-runtime` | Privé en lokaal na juli 2026; begrensde helper voor gelijktijdige asynchrone taken |
+    | `plugin-sdk/dedupe-runtime` | Helpers voor deduplicatiecaches in het geheugen en met persistente opslag |
+    | `plugin-sdk/delivery-queue-runtime` | Privé en lokaal na juli 2026; helper voor het leegmaken van wachtende uitgaande leveringen |
+    | `plugin-sdk/file-access-runtime` | Privé en lokaal na juli 2026; veilige padhelpers voor lokale bestanden en mediabronnen |
+    | `plugin-sdk/heartbeat-runtime` | Privé en lokaal na juli 2026; helpers voor het wekken, gebeurtenissen en zichtbaarheid van Heartbeat |
+    | `plugin-sdk/expect-runtime` | Privé en lokaal na juli 2026; assertiehelper voor vereiste waarden bij aantoonbare runtime-invarianten |
+    | `plugin-sdk/number-runtime` | Privé en lokaal na juli 2026; helper voor numerieke conversie |
+    | `plugin-sdk/secure-random-runtime` | Privé en lokaal na juli 2026; helpers voor beveiligde tokens/UUID's |
+    | `plugin-sdk/system-event-runtime` | Privé en lokaal na juli 2026; helpers voor de wachtrij van systeemgebeurtenissen |
+    | `plugin-sdk/transport-ready-runtime` | Privé en lokaal na juli 2026; helper om te wachten tot het transport gereed is |
+    | `plugin-sdk/exec-approvals-runtime` | Privé en lokaal na juli 2026; bestandshelpers voor het goedkeuringsbeleid voor exec zonder de brede infra-runtimebarrel |
     | `plugin-sdk/infra-runtime` | Verouderde compatibiliteitsshim; gebruik de gerichte runtime-subpaden hierboven |
-    | `plugin-sdk/collection-runtime` | Kleine hulpfuncties voor begrensde cache |
-    | `plugin-sdk/diagnostic-runtime` | Hulpfuncties voor diagnostische vlaggen, events en tracecontext |
-    | `plugin-sdk/error-runtime` | Foutgrafiek, opmaak, gedeelde hulpfuncties voor foutclassificatie, `isApprovalNotFoundError` |
-    | `plugin-sdk/fetch-runtime` | Omwikkelde fetch, proxy, EnvHttpProxyAgent-optie en hulpfuncties voor pinned lookup |
-    | `plugin-sdk/runtime-fetch` | Dispatcher-bewuste runtime-fetch zonder proxy-/guarded-fetchimports |
-    | `plugin-sdk/inline-image-data-url-runtime` | Hulpfuncties voor sanitizer en signatuursniffing van inline afbeeldingsdata-URL's zonder de brede mediaruntime-surface |
-    | `plugin-sdk/response-limit-runtime` | Begrensde response-body-lezer zonder de brede mediaruntime-surface |
-    | `plugin-sdk/session-binding-runtime` | Huidige conversatiebindingsstate zonder geconfigureerde bindingsrouting of pairingstores |
-    | `plugin-sdk/session-store-runtime` | Hulpfuncties voor sessiestore zonder brede configuratieschrijfbewerkingen/onderhoudsimports |
-    | `plugin-sdk/sqlite-runtime` | Gerichte SQLite-hulpfuncties voor agentschema, pad en transacties zonder lifecyclecontrols voor databases |
-    | `plugin-sdk/context-visibility-runtime` | Contextzichtbaarheidsresolutie en aanvullende contextfiltering zonder brede configuratie-/securityimports |
-    | `plugin-sdk/string-coerce-runtime` | Smalle hulpfuncties voor primitive record-/stringcoercion en normalisatie zonder Markdown-/loggingimports |
-    | `plugin-sdk/host-runtime` | Hulpfuncties voor normalisatie van hostnaam en SCP-host |
-    | `plugin-sdk/retry-runtime` | Hulpfuncties voor retryconfiguratie en retryrunner |
-    | `plugin-sdk/agent-runtime` | Hulpfuncties voor agentmap/identiteit/werkruimte, inclusief `resolveAgentDir`, `resolveDefaultAgentDir` en verouderde compatibiliteitsexport `resolveOpenClawAgentDir` |
-    | `plugin-sdk/directory-runtime` | Configuratiegestuurde directoryquery/dedup |
-    | `plugin-sdk/keyed-async-queue` | `KeyedAsyncQueue` |
+    | `plugin-sdk/collection-runtime` | Kleine begrensde cachehelpers |
+    | `plugin-sdk/diagnostic-runtime` | Helpers voor diagnostische vlaggen, gebeurtenissen en traceercontext |
+    | `plugin-sdk/error-runtime` | Helpers voor foutgrafieken, opmaak, conversie van onbekende waarden en gedeelde foutclassificatie, `PlatformMessageNotDispatchedError`, `isApprovalNotFoundError` |
+    | `plugin-sdk/fetch-runtime` | Privé en lokaal na juli 2026; helpers voor omhulde fetch, proxy's, EnvHttpProxyAgent-opties en vastgezette lookups |
+    | `plugin-sdk/runtime-fetch` | Privé en lokaal na juli 2026; dispatcherbewuste runtime-fetch zonder imports voor proxy/beveiligde fetch |
+    | `plugin-sdk/inline-image-data-url-runtime` | Privé en lokaal na juli 2026; helpers voor het opschonen van inline afbeeldingsgegevens-URL's en het detecteren van signatures zonder het brede mediaruntimeoppervlak |
+    | `plugin-sdk/response-limit-runtime` | Privé en lokaal na juli 2026; readers voor responsebody's begrensd op bytes, inactiviteit en deadline, zonder het brede mediaruntimeoppervlak |
+    | `plugin-sdk/session-binding-runtime` | Privé en lokaal na juli 2026; huidige status van gespreksbindingen zonder geconfigureerde routering van bindingen of koppelopslag |
+    | `plugin-sdk/context-visibility-runtime` | Privé en lokaal na juli 2026; oplossing van contextzichtbaarheid en filtering van aanvullende context zonder brede configuratie-/beveiligingsimports |
+    | `plugin-sdk/string-coerce-runtime` | Gerichte primitieve helpers voor conversie en normalisatie van records/tekenreeksen zonder imports voor Markdown/logging |
+    | `plugin-sdk/html-entity-runtime` | Privé en lokaal na juli 2026; HTML5-entiteitsdecodering in één doorgang, beëindigd door puntkomma's, zonder brede teksthulpprogramma's |
+    | `plugin-sdk/text-utility-runtime` | Privé-lokaal na juli 2026; laag-niveauhelpers voor tekst en paden, inclusief HTML-escaping van vijf entiteiten |
+    | `plugin-sdk/widget-html` | Detectie van volledige documenten, groottevalidatie en fouten in toolinvoer voor zelfstandige HTML-widgets |
+    | `plugin-sdk/host-runtime` | Privé-lokaal na juli 2026; helpers voor de normalisatie van hostnamen en SCP-hosts |
+    | `plugin-sdk/retry-runtime` | Privé-lokaal na juli 2026; helpers voor configuratie en uitvoering van nieuwe pogingen |
+    | `plugin-sdk/agent-runtime` | Verouderde brede barrel voor helpers voor agentmappen, -identiteiten en -werkruimten, inclusief `resolveAgentDir`, `resolveDefaultAgentDir` en de verouderde compatibiliteitsexport `resolveOpenClawAgentDir`; geef de voorkeur aan gerichte subpaden voor agents en runtimes |
+    | `plugin-sdk/directory-runtime` | Door configuratie ondersteunde mapquery en deduplicatie |
+    | `plugin-sdk/keyed-async-queue` | Privé-lokaal na juli 2026; `KeyedAsyncQueue` |
   </Accordion>
 
-  <Accordion title="Mogelijkheids- en testsubpaden">
+  <Accordion title="Subpaden voor mogelijkheden en tests">
     | Subpad | Belangrijkste exports |
     | --- | --- |
-    | `plugin-sdk/media-runtime` | Gedeelde helpers voor media ophalen/transformeren/opslaan, waaronder `saveRemoteMedia`, `saveResponseMedia`, `readRemoteMediaBuffer` en verouderde `fetchRemoteMedia`; geef de voorkeur aan opslaghelpers boven bufferlezingen wanneer een URL OpenClaw-media moet worden |
-    | `plugin-sdk/media-mime` | Gerichte MIME-normalisatie, koppeling van bestandsextensies, MIME-detectie en helpers voor mediasoorten |
-    | `plugin-sdk/media-store` | Gerichte mediastore-helpers zoals `saveMediaBuffer` en `saveMediaStream` |
-    | `plugin-sdk/media-generation-runtime` | Gedeelde failover-helpers voor mediageneratie, kandidaatselectie en meldingen voor ontbrekende modellen |
-    | `plugin-sdk/media-understanding` | Providertypen voor mediabegrip plus providergerichte helperexports voor beeld/audio/gestructureerde extractie |
-    | `plugin-sdk/text-chunking` | Helpers voor tekst- en markdownchunking/rendering, conversie van markdown-tabellen, verwijderen van directive-tags en safe-text-hulpprogramma's |
-    | `plugin-sdk/text-chunking` | Helper voor uitgaande tekstchunking |
-    | `plugin-sdk/speech` | Speech-providertypen plus providergerichte exports voor directives, registry, validatie, OpenAI-compatibele TTS-builder en speech-helpers |
-    | `plugin-sdk/speech-core` | Gedeelde speech-providertypen, registry, directive, normalisatie en speech-helperexports |
-    | `plugin-sdk/realtime-transcription` | Providertypen voor realtime transcriptie, registry-helpers en gedeelde helper voor WebSocket-sessies |
-    | `plugin-sdk/realtime-bootstrap-context` | Realtime profielbootstrap-helper voor begrensde contextinjectie van `IDENTITY.md`, `USER.md` en `SOUL.md` |
-    | `plugin-sdk/realtime-voice` | Providertypen voor realtime voice, registry-helpers en gedeelde helpers voor realtime voice-gedrag, inclusief tracking van uitvoeractiviteit |
-    | `plugin-sdk/image-generation` | Providertypen voor beeldgeneratie plus helpers voor beeldassets/data-URL's en de OpenAI-compatibele beeldproviderbuilder |
-    | `plugin-sdk/image-generation-core` | Gedeelde typen, failover, auth en registry-helpers voor beeldgeneratie |
-    | `plugin-sdk/music-generation` | Provider-, aanvraag- en resultaattypen voor muziekgeneratie |
-    | `plugin-sdk/music-generation-core` | Gedeelde typen voor muziekgeneratie, failover-helpers, provideropzoeking en parsing van model-ref |
-    | `plugin-sdk/video-generation` | Provider-, aanvraag- en resultaattypen voor videogeneratie |
-    | `plugin-sdk/video-generation-core` | Gedeelde typen voor videogeneratie, failover-helpers, provideropzoeking en parsing van model-ref |
-    | `plugin-sdk/transcripts` | Gedeelde providertypen voor transcriptbronnen, registry-helpers, sessiebeschrijvingen en uitingsmetadata |
-    | `plugin-sdk/webhook-targets` | Webhook-doelregistry en helpers voor route-installatie |
-    | `plugin-sdk/webhook-path` | Verouderde compatibiliteitsalias; gebruik `plugin-sdk/webhook-ingress` |
+    | `plugin-sdk/media-runtime` | Verouderde brede mediabarrel met onder meer `saveRemoteMedia`, `saveResponseMedia`, `readRemoteMediaBuffer` en de verouderde `fetchRemoteMedia`; geef de voorkeur aan `plugin-sdk/media-store`, `plugin-sdk/media-mime`, `plugin-sdk/outbound-media` en subpaden voor de runtime van mogelijkheden, en geef de voorkeur aan opslaghelpers boven het lezen van buffers wanneer een URL OpenClaw-media moet worden |
+    | `plugin-sdk/media-local-roots` | Gerichte helpers voor `getAgentScopedMediaLocalRoots(...)` en beleidsbewuste helpers voor `getAgentScopedMediaLocalRootsForSources(...)` voor lokale medialeesbewerkingen die eigendom zijn van de plugin |
+    | `plugin-sdk/media-mime` | Gerichte helpers voor MIME-normalisatie, toewijzing van bestandsextensies, MIME-detectie en mediasoorten |
+    | `plugin-sdk/media-store` | Gerichte helpers voor mediaopslag, zoals `saveMediaBuffer` en `saveMediaStream` |
+    | `plugin-sdk/media-generation-runtime` | Privé-lokaal na juli 2026; gedeelde helpers voor failover bij mediageneratie, selectie van kandidaten en meldingen over ontbrekende modellen |
+    | `plugin-sdk/media-understanding` | Verouderde compatibiliteitsfacade voor providertypen en helpers voor mediabegrip; nieuwe providers registreren zich via de geïnjecteerde plugin-API en behouden aanvraaghelpers binnen de plugin |
+    | `plugin-sdk/text-chunking` | Uitgaande tekst en bereiksegmentering met behoud van offsets, segmentering van Markdown/renderhelpers, tokenisatie van HTML-tags met inachtneming van citaten, conversie van Markdown-tabellen, verwijdering van instructietags en hulpprogramma's voor veilige tekst |
+    | `plugin-sdk/speech` | Privé-lokaal na juli 2026; spraakprovidertypen plus providergerichte exports voor instructies, registers, validatie, een OpenAI-compatibele TTS-builder en spraakhelpers |
+    | `plugin-sdk/speech-core` | Privé-lokaal na juli 2026; gedeelde exports voor spraakprovidertypen, registers, instructies, normalisatie en spraakhelpers |
+    | `plugin-sdk/speech-settings` | Lichtgewicht primitieven voor het oplossen en normaliseren van TTS-configuratie, zonder providerregisters of syntheseruntime |
+    | `plugin-sdk/realtime-transcription` | Privé-lokaal na juli 2026; providertypen voor realtime transcriptie, registerhelpers en een gedeelde WebSocket-sessiehelper |
+    | `plugin-sdk/realtime-bootstrap-context` | Privé-lokaal na juli 2026; bootstraphelper voor realtime profielen voor begrensde contextinjectie van `IDENTITY.md`, `USER.md` en `SOUL.md` |
+    | `plugin-sdk/realtime-voice` | Privé-lokaal na juli 2026; providertypen voor realtime spraak, registerhelpers, gedeelde poorten voor audio-energie/spraakaanvang en helpers voor realtime spraakgedrag, waaronder het transportonafhankelijke sessieharnas en het bijhouden van uitvoeractiviteit |
+    | `plugin-sdk/meeting-runtime` | Sessieruntime voor browservergaderingen, realtime audio-engines/-transporten, `MeetingPlatformAdapter`, browser-/Node-besturing, agentconsultatie, delegatie van spraakoproepen, installatiecontroles en SoX-opdrachthelpers |
+    | `plugin-sdk/image-generation` | Privé-lokaal na juli 2026; providertypen voor afbeeldingsgeneratie plus helpers voor afbeeldingsassets/data-URL's en de OpenAI-compatibele afbeeldingsproviderbuilder |
+    | `plugin-sdk/image-generation-core` | Privé-lokaal na juli 2026; gedeelde typen, failover-, authenticatie- en registerhelpers voor afbeeldingsgeneratie |
+    | `plugin-sdk/music-generation` | Privé-lokaal na juli 2026; provider-/aanvraag-/resultaattypen voor muziekgeneratie |
+    | `plugin-sdk/video-generation` | Privé-lokaal na juli 2026; provider-/aanvraag-/resultaattypen voor videogeneratie |
+    | `plugin-sdk/video-generation-core` | Privé-lokaal na juli 2026; gedeelde typen voor videogeneratie, failoverhelpers, provideropzoeking en verwerking van modelreferenties |
+    | `plugin-sdk/transcripts` | Privé-lokaal na juli 2026; gedeelde providertypen voor transcriptbronnen, registerhelpers, een bridgefactory voor vergaderproviders, sessiebeschrijvingen en metadata van uitingen |
+    | `plugin-sdk/webhook-targets` | Privé-lokaal na juli 2026; register voor Webhook-doelen en helpers voor het installeren van routes |
     | `plugin-sdk/web-media` | Gedeelde helpers voor het laden van externe/lokale media |
-    | `plugin-sdk/zod` | Verouderde compatibiliteits-re-export; importeer `zod` rechtstreeks uit `zod` |
-    | `plugin-sdk/testing` | Repo-lokale verouderde compatibiliteitsbarrel voor legacy OpenClaw-tests. Nieuwe repotests moeten in plaats daarvan gerichte lokale testsubpaden importeren, zoals `plugin-sdk/agent-runtime-test-contracts`, `plugin-sdk/plugin-test-runtime`, `plugin-sdk/channel-test-helpers`, `plugin-sdk/test-env` of `plugin-sdk/test-fixtures` |
-    | `plugin-sdk/plugin-test-api` | Repo-lokale minimale `createTestPluginApi`-helper voor unit tests voor directe Plugin-registratie zonder repo-testhelperbruggen te importeren |
-    | `plugin-sdk/agent-runtime-test-contracts` | Repo-lokale contractfixtures voor native agent-runtime-adapters voor auth-, delivery-, fallback-, tool-hook-, prompt-overlay-, schema- en transcriptprojectietests |
-    | `plugin-sdk/channel-test-helpers` | Repo-lokale kanaalgerichte testhelpers voor generieke acties/setup/statuscontracten, directory-asserties, opstartlevenscyclus van accounts, send-config-threading, runtime-mocks, statusproblemen, uitgaande delivery en hookregistratie |
-    | `plugin-sdk/channel-target-testing` | Repo-lokale gedeelde suite voor foutgevallen bij doelresolutie voor kanaaltests |
-    | `plugin-sdk/plugin-test-contracts` | Repo-lokale contracthelpers voor Plugin-pakketten, registratie, openbare artefacten, directe imports, runtime-API en import-side-effects |
-    | `plugin-sdk/provider-test-contracts` | Repo-lokale contracthelpers voor provider-runtime, auth, discovery, onboard, catalog, wizard, mediamogelijkheden, replaybeleid, realtime STT live-audio, web-search/fetch en stream |
-    | `plugin-sdk/provider-http-test-mocks` | Repo-lokale opt-in Vitest HTTP/auth-mocks voor providertests die `plugin-sdk/provider-http` uitvoeren |
-    | `plugin-sdk/test-fixtures` | Repo-lokale generieke fixtures voor CLI-runtime-capture, sandboxcontext, skill-writer, agent-message, system-event, module-reload, gebundeld Plugin-pad, terminal-text, chunking, auth-token en typed-case |
-    | `plugin-sdk/test-node-mocks` | Repo-lokale gerichte mockhelpers voor ingebouwde Node-modules voor gebruik binnen Vitest `vi.mock("node:*")`-factories |
+    | `plugin-sdk/zod` | Verouderde compatibiliteitsherexport; importeer `zod` rechtstreeks uit `zod` |
+    | `plugin-sdk/plugin-test-api` | Minimale repo-lokale helper voor `createTestPluginApi` voor eenheidstests van directe pluginregistratie zonder bruggen naar repo-testhelpers te importeren |
+    | `plugin-sdk/agent-runtime-test-contracts` | Repo-lokale fixtures voor het contract van de systeemeigen agent-runtimeadapter voor tests van authenticatie, aflevering, fallback, toolhooks, promptoverlays, schema's en transcriptprojectie |
+    | `plugin-sdk/channel-test-helpers` | Repo-lokale kanaalgerichte testhelpers voor algemene contracten voor acties/installatie/status, directorycontroles, de opstartlevenscyclus van accounts, het doorgeven van verzendconfiguratie, runtimemocks, statusproblemen, uitgaande aflevering en hookregistratie |
+    | `plugin-sdk/channel-target-testing` | Repo-lokale gedeelde suite met foutgevallen voor doelresolutie voor kanaaltests |
+    | `plugin-sdk/channel-contract-testing` | Repo-lokale gerichte testhelpers voor kanaalcontracten zonder de brede testbarrel |
+    | `plugin-sdk/plugin-test-contracts` | Repo-lokale helpers voor contracten rond pluginpakketten, registratie, openbare artefacten, directe imports, runtime-API's en neveneffecten van imports |
+    | `plugin-sdk/plugin-state-test-runtime` | Repo-lokale testhelpers voor de pluginstatusopslag, ingress-wachtrij en statusdatabase |
+    | `plugin-sdk/provider-test-contracts` | Repo-lokale helpers voor contracten rond providerruntime, authenticatie, ontdekking, onboarding, catalogi, wizards, mediamogelijkheden, herhalingsbeleid, live realtime STT-audio, zoeken/ophalen op het web en streams |
+    | `plugin-sdk/provider-http-test-mocks` | Privé-lokaal na juli 2026; optionele repo-lokale Vitest-mocks voor HTTP/authenticatie voor providertests die `plugin-sdk/provider-http` uitvoeren |
+    | `plugin-sdk/reply-payload-testing` | Repo-lokale helpers voor het koppelen van metadata aan fixtures voor antwoordpayloads |
+    | `plugin-sdk/sqlite-runtime-testing` | Repo-lokale SQLite-levenscyclushelpers voor first-party-tests |
+    | `plugin-sdk/test-fixtures` | Repo-lokale fixtures voor algemene vastlegging van de CLI-runtime, sandboxcontext, het schrijven van skills, agentberichten, systeemgebeurtenissen, het herladen van modules, paden van gebundelde plugins, terminaltekst, segmentering, authenticatietokens en getypeerde gevallen |
+    | `plugin-sdk/test-node-mocks` | Repo-lokale gerichte mockhelpers voor ingebouwde Node-modules voor gebruik binnen Vitest-factory's voor `vi.mock("node:*")` |
   </Accordion>
 
   <Accordion title="Geheugensubpaden">
     | Subpad | Belangrijkste exports |
     | --- | --- |
-    | `plugin-sdk/memory-core` | Gebundeld memory-core-helperoppervlak voor manager/config/file/CLI-helpers |
-    | `plugin-sdk/memory-core-engine-runtime` | Runtimefacade voor geheugenindex/-zoekfunctie |
-    | `plugin-sdk/memory-core-host-embedding-registry` | Lichtgewicht registry-helpers voor providers van geheugenembeddings |
-    | `plugin-sdk/memory-core-host-engine-foundation` | Engine-exports voor memory host foundation |
-    | `plugin-sdk/memory-core-host-engine-embeddings` | Contracten voor memory host embeddings, registry-toegang, lokale provider en generieke batch-/remote-helpers. `registerMemoryEmbeddingProvider` op dit oppervlak is verouderd; gebruik de generieke embeddingprovider-API voor nieuwe providers. |
-    | `plugin-sdk/memory-core-host-engine-qmd` | Engine-exports voor memory host QMD |
-    | `plugin-sdk/memory-core-host-engine-storage` | Engine-exports voor memory host storage |
-    | `plugin-sdk/memory-core-host-multimodal` | Multimodale memory host-helpers |
-    | `plugin-sdk/memory-core-host-query` | Queryhelpers voor memory host |
-    | `plugin-sdk/memory-core-host-secret` | Secret-helpers voor memory host |
-    | `plugin-sdk/memory-core-host-events` | Verouderde compatibiliteitsalias; gebruik `plugin-sdk/memory-host-events` |
-    | `plugin-sdk/memory-core-host-status` | Statushelpers voor memory host |
-    | `plugin-sdk/memory-core-host-runtime-cli` | CLI-runtimehelpers voor memory host |
-    | `plugin-sdk/memory-core-host-runtime-core` | Core-runtimehelpers voor memory host |
-    | `plugin-sdk/memory-core-host-runtime-files` | Bestands-/runtimehelpers voor memory host |
-    | `plugin-sdk/memory-host-core` | Leverancieronafhankelijke alias voor core-runtimehelpers van memory host |
-    | `plugin-sdk/memory-host-events` | Leverancieronafhankelijke alias voor event-journal-helpers van memory host |
-    | `plugin-sdk/memory-host-files` | Verouderde compatibiliteitsalias; gebruik `plugin-sdk/memory-core-host-runtime-files` |
-    | `plugin-sdk/memory-host-markdown` | Gedeelde managed-markdown-helpers voor plugins rond geheugen |
-    | `plugin-sdk/memory-host-search` | Active Memory-runtimefacade voor toegang tot search-manager |
-    | `plugin-sdk/memory-host-status` | Verouderde compatibiliteitsalias; gebruik `plugin-sdk/memory-core-host-status` |
+    | `plugin-sdk/memory-core-host-embedding-registry` | Privé-lokaal na juli 2026; lichtgewicht registerhelpers voor providers van geheugenembeddings |
+    | `plugin-sdk/memory-core-host-engine-foundation` | Exports van de basismotor voor de geheugenhost |
+    | `plugin-sdk/memory-core-host-engine-embeddings` | Privé-lokaal na juli 2026; contracten voor embeddings van de geheugenhost, registertoegang, lokale provider en algemene batch-/externe helpers. `registerMemoryEmbeddingProvider` op dit oppervlak is verouderd; gebruik voor nieuwe providers de algemene API voor embeddingproviders. |
+    | `plugin-sdk/memory-core-host-engine-qmd` | Privé-lokaal na juli 2026; exports van de QMD-engine van de geheugenhost |
+    | `plugin-sdk/memory-core-host-engine-storage` | Privé-lokaal na juli 2026; exports van de opslagengine van de geheugenhost |
+    | `plugin-sdk/memory-core-host-secret` | Privé-lokaal na juli 2026; geheimhelpers van de geheugenhost |
+    | `plugin-sdk/memory-core-host-status` | Privé-lokaal na juli 2026; statushelpers van de geheugenhost |
+    | `plugin-sdk/memory-core-host-runtime-cli` | Privé-lokaal na juli 2026; CLI-runtimehelpers van de geheugenhost |
+    | `plugin-sdk/memory-core-host-runtime-core` | Privé-lokaal na juli 2026; kernruntimehelpers van de geheugenhost |
+    | `plugin-sdk/memory-core-host-runtime-files` | Privé-lokaal na juli 2026; bestands-/runtimehelpers van de geheugenhost |
+    | `plugin-sdk/memory-host-core` | Verouderde compatibiliteitsfacade voor leveranciersonafhankelijke helpers van de geheugenhost. Nieuwe geheugenplugins gebruiken geïnjecteerde geheugenmogelijkheden en door de host voorbereide prompts; begeleidende plugins gebruiken de behouden facade nog voor het ontdekken van openbare artefacten totdat er een gerichte leesinterface bestaat. |
+    | `plugin-sdk/memory-host-events` | Privé-lokaal na juli 2026; leveranciersonafhankelijke alias voor gebeurtenisjournaalhelpers van de geheugenhost |
+    | `plugin-sdk/memory-host-markdown` | Privé-lokaal na juli 2026; gedeelde helpers voor beheerde Markdown voor geheugengerelateerde plugins |
+    | `plugin-sdk/memory-host-search` | Privé-lokaal na juli 2026; runtimefacade voor Active Memory voor toegang tot de zoekmanager |
   </Accordion>
 
   <Accordion title="Gereserveerde subpaden voor gebundelde helpers">
-    Gereserveerde gebundelde-helper-SDK-subpaden zijn smalle eigenaarspecifieke oppervlakken voor
-    gebundelde Plugin-code. Ze worden bijgehouden in de SDK-inventaris zodat pakketbuilds
-    en aliasing deterministisch blijven, maar het zijn geen algemene API's
-    voor Plugin-ontwikkeling. Nieuwe herbruikbare hostcontracten moeten generieke SDK-subpaden gebruiken,
-    zoals `plugin-sdk/gateway-runtime`, `plugin-sdk/security-runtime` en
-    `plugin-sdk/plugin-config-runtime`.
+    Gereserveerde SDK-subpaden voor gebundelde helpers zijn gerichte, eigenaarspecifieke oppervlakken voor
+    gebundelde plugincode. Ze worden bijgehouden in de SDK-inventaris, zodat pakket-
+    builds en aliasing deterministisch blijven, maar het zijn geen algemene API's
+    voor het ontwikkelen van plugins. Nieuwe herbruikbare hostcontracten moeten algemene SDK-subpaden gebruiken,
+    zoals `plugin-sdk/gateway-runtime` en `plugin-sdk/ssrf-runtime`.
 
     | Subpad | Eigenaar en doel |
     | --- | --- |
-    | `plugin-sdk/codex-mcp-projection` | Gebundelde Codex-Plugin-helper voor het projecteren van MCP-serverconfiguratie van gebruikers naar Codex app-server-threadconfiguratie |
-    | `plugin-sdk/codex-native-task-runtime` | Gebundelde Codex-Plugin-helper voor het spiegelen van native Codex app-server-subagents naar OpenClaw-taakstatus |
+    | `plugin-sdk/codex-mcp-projection` | Privé-lokaal na juli 2026; helper voor de gebundelde Codex-plugin om de configuratie van de MCP-server van de gebruiker te projecteren naar de threadconfiguratie van de Codex-appserver (gereserveerde pakketexport) |
+    | `plugin-sdk/codex-native-task-runtime` | Helper voor de gebundelde Codex-plugin om systeemeigen subagents van de Codex-appserver te spiegelen naar de taakstatus van OpenClaw (alleen repo-lokaal, geen pakketexport) |
 
   </Accordion>
 </AccordionGroup>
 
 ## Gerelateerd
 
-- [Overzicht van Plugin SDK](/nl/plugins/sdk-overview)
-- [Installatie van Plugin SDK](/nl/plugins/sdk-setup)
+- [Overzicht van de plugin-SDK](/nl/plugins/sdk-overview)
+- [Installatie van de plugin-SDK](/nl/plugins/sdk-setup)
 - [Plugins bouwen](/nl/plugins/building-plugins)

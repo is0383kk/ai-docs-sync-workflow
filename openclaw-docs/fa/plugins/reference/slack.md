@@ -1,19 +1,20 @@
 ---
 read_when:
     - در حال نصب، پیکربندی یا ممیزی Plugin مربوط به Slack هستید
-summary: Plugin کانال Slack برای OpenClaw جهت کانال‌ها، پیام‌های مستقیم، فرمان‌ها و رویدادهای برنامه.
-title: Plugin اسلک
+summary: Plugin کانال Slack در OpenClaw برای کانال‌ها، پیام‌های مستقیم، فرمان‌ها و رویدادهای برنامه.
+title: Plugin ‏Slack
 x-i18n:
-    generated_at: "2026-07-12T10:31:41Z"
+    generated_at: "2026-07-27T14:30:18Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 602ccb21ce084219d922860d186664bbb098fd034117893dc7359d79495bedd6
+    source_hash: bc5b593ef4361a52024f068febd8982fefdf3af1957373b1e5d7d1b9ef8b0a77
     source_path: plugins/reference/slack.md
     workflow: 16
 ---
 
-# Plugin مربوط به Slack
+# Plugin ‏Slack
 
 Plugin کانال Slack برای OpenClaw جهت کانال‌ها، پیام‌های مستقیم، فرمان‌ها و رویدادهای برنامه.
 
@@ -24,7 +25,7 @@ Plugin کانال Slack برای OpenClaw جهت کانال‌ها، پیام‌
 
 ## سطح
 
-کانال‌ها: slack؛ Skills
+کانال‌ها: `slack`؛ Skills
 
 ## مستندات مرتبط
 

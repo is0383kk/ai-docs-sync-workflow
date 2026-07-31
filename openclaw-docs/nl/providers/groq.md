@@ -1,31 +1,32 @@
 ---
 read_when:
-    - Je wilt Groq met OpenClaw gebruiken
+    - Je wilt Groq gebruiken met OpenClaw
     - Je hebt de omgevingsvariabele voor de API-sleutel of de CLI-authenticatiekeuze nodig
     - Je configureert Whisper-audiotranscriptie op Groq
-summary: Groq-configuratie (authenticatie + modelselectie + Whisper-transcriptie)
+summary: Groq-installatie (authenticatie + modelselectie + Whisper-transcriptie)
 title: Groq
 x-i18n:
-    generated_at: "2026-07-12T09:19:21Z"
+    generated_at: "2026-07-27T05:13:28Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: f04f9365127c72aa2f976f453e5d11657b19d6b4a57de1179b88924744db1dc1
     source_path: providers/groq.md
     workflow: 16
 ---
 
-[Groq](https://groq.com) biedt ultrasnelle inferentie op modellen met open gewichten (Llama, Gemma, Kimi, Qwen, GPT OSS en meer) met behulp van aangepaste LPU-hardware. De Groq-plugin registreert zowel een OpenAI-compatibele chatprovider als een provider voor mediabegrip van audio.
+[Groq](https://groq.com) biedt ultrasnelle inferentie op modellen met open gewichten (Llama, Gemma, Kimi, Qwen, GPT OSS en meer) met aangepaste LPU-hardware. De Groq-plugin registreert zowel een OpenAI-compatibele chatprovider als een provider voor mediabegrip van audio.
 
-| Eigenschap                   | Waarde                                   |
-| ---------------------------- | ---------------------------------------- |
-| Provider-id                  | `groq`                                   |
-| Plugin                       | officieel extern pakket                  |
-| Omgevingsvariabele voor auth | `GROQ_API_KEY`                           |
-| API                          | OpenAI-compatibel (`openai-completions`) |
-| Basis-URL                    | `https://api.groq.com/openai/v1`         |
-| Audiotranscriptie            | `whisper-large-v3-turbo` (standaard)     |
-| Aanbevolen standaardchatmodel | `groq/llama-3.3-70b-versatile`          |
+| Eigenschap             | Waarde                                   |
+| ---------------------- | ---------------------------------------- |
+| Provider-id            | `groq`                       |
+| Plugin                 | officieel extern pakket                  |
+| Omgevingsvariabele voor authenticatie | `GROQ_API_KEY`       |
+| API                    | OpenAI-compatibel (`openai-completions`)   |
+| Basis-URL              | `https://api.groq.com/openai/v1`                       |
+| Audiotranscriptie      | `whisper-large-v3-turbo` (standaard)           |
+| Voorgestelde standaard voor chat | `groq/llama-3.3-70b-versatile`           |
 
 ## Plugin installeren
 
@@ -80,22 +81,22 @@ export GROQ_API_KEY=gsk_...
 
 ## Ingebouwde catalogus
 
-OpenClaw wordt geleverd met een door een manifest ondersteunde Groq-catalogus met zowel modellen met als zonder redeneervermogen. Voer `openclaw models list --provider groq` uit om de statische vermeldingen voor je geïnstalleerde versie te bekijken, of raadpleeg [console.groq.com/docs/models](https://console.groq.com/docs/models) voor de gezaghebbende lijst van Groq.
+OpenClaw wordt geleverd met een door een manifest ondersteunde Groq-catalogus met zowel modellen met als zonder redeneervermogen. Voer `openclaw models list --provider groq` uit om de statische rijen voor je geïnstalleerde versie te bekijken, of raadpleeg [console.groq.com/docs/models](https://console.groq.com/docs/models) voor de gezaghebbende lijst van Groq.
 
-| Modelreferentie                                  | Naam                    | Redeneren | Invoer            | Context |
-| ------------------------------------------------ | ----------------------- | --------- | ----------------- | ------- |
-| `groq/llama-3.3-70b-versatile`                   | Llama 3.3 70B Versatile | nee       | tekst             | 131,072 |
-| `groq/llama-3.1-8b-instant`                      | Llama 3.1 8B Instant    | nee       | tekst             | 131,072 |
-| `groq/meta-llama/llama-4-scout-17b-16e-instruct` | Llama 4 Scout 17B       | nee       | tekst + afbeelding | 131,072 |
-| `groq/openai/gpt-oss-120b`                       | GPT OSS 120B            | ja        | tekst             | 131,072 |
-| `groq/openai/gpt-oss-20b`                        | GPT OSS 20B             | ja        | tekst             | 131,072 |
-| `groq/openai/gpt-oss-safeguard-20b`              | Safety GPT OSS 20B      | ja        | tekst             | 131,072 |
-| `groq/qwen/qwen3-32b`                            | Qwen3 32B               | ja        | tekst             | 131,072 |
-| `groq/groq/compound`                             | Compound                | ja        | tekst             | 131,072 |
-| `groq/groq/compound-mini`                        | Compound Mini           | ja        | tekst             | 131,072 |
+| Modelreferentie                                  | Naam                    | Redeneren | Invoer       | Context |
+| ------------------------------------------------ | ----------------------- | --------- | ------------ | ------- |
+| `groq/llama-3.3-70b-versatile`                               | Llama 3.3 70B Versatile | nee       | tekst        | 131,072 |
+| `groq/llama-3.1-8b-instant`                               | Llama 3.1 8B Instant    | nee       | tekst        | 131,072 |
+| `groq/meta-llama/llama-4-scout-17b-16e-instruct`                               | Llama 4 Scout 17B       | nee       | tekst + afbeelding | 131,072 |
+| `groq/openai/gpt-oss-120b`                               | GPT OSS 120B            | ja        | tekst        | 131,072 |
+| `groq/openai/gpt-oss-20b`                               | GPT OSS 20B             | ja        | tekst        | 131,072 |
+| `groq/openai/gpt-oss-safeguard-20b`                               | Safety GPT OSS 20B      | ja        | tekst        | 131,072 |
+| `groq/qwen/qwen3-32b`                               | Qwen3 32B               | ja        | tekst        | 131,072 |
+| `groq/groq/compound`                               | Compound                | ja        | tekst        | 131,072 |
+| `groq/groq/compound-mini`                               | Compound Mini           | ja        | tekst        | 131,072 |
 
 <Tip>
-  De catalogus ontwikkelt zich met elke OpenClaw-release. `openclaw models list --provider groq` toont de vermeldingen die bekend zijn bij je geïnstalleerde versie; vergelijk deze met [console.groq.com/docs/models](https://console.groq.com/docs/models) voor nieuw toegevoegde of verouderde modellen.
+  De catalogus evolueert met elke OpenClaw-release. `openclaw models list --provider groq` toont de rijen die bekend zijn bij je geïnstalleerde versie; vergelijk deze met [console.groq.com/docs/models](https://console.groq.com/docs/models) voor nieuw toegevoegde of uitgefaseerde modellen.
 </Tip>
 
 ## Redeneermodellen
@@ -106,15 +107,15 @@ Zie [Denkmodi](/nl/tools/thinking) voor de gedeelde `/think`-niveaus en hoe Open
 
 ## Audiotranscriptie
 
-De Groq-plugin registreert ook een **provider voor mediabegrip van audio**, zodat spraakberichten via het gedeelde `tools.media.audio`-oppervlak kunnen worden getranscribeerd.
+De plugin van Groq registreert ook een **provider voor mediabegrip van audio**, zodat spraakberichten via het gedeelde `tools.media.audio`-oppervlak kunnen worden getranscribeerd.
 
 | Eigenschap                 | Waarde                                    |
 | -------------------------- | ----------------------------------------- |
-| Gedeeld configuratiepad    | `tools.media.audio`                       |
-| Standaardbasis-URL         | `https://api.groq.com/openai/v1`          |
-| Standaardmodel             | `whisper-large-v3-turbo`                  |
+| Gedeeld configuratiepad    | `tools.media.audio`                        |
+| Standaardbasis-URL         | `https://api.groq.com/openai/v1`                        |
+| Standaardmodel             | `whisper-large-v3-turbo`                        |
 | Automatische prioriteit    | 20                                        |
-| API-eindpunt               | OpenAI-compatibel `/audio/transcriptions` |
+| API-eindpunt               | OpenAI-compatibel `/audio/transcriptions`      |
 
 Groq instellen als de standaardbackend voor audio:
 
@@ -135,13 +136,13 @@ Groq instellen als de standaardbackend voor audio:
     Als de Gateway als beheerde service wordt uitgevoerd (launchd, systemd, Docker), moet `GROQ_API_KEY` zichtbaar zijn voor dat proces — niet alleen voor je interactieve shell.
 
     <Warning>
-      Een sleutel die alleen in een interactieve shell is geëxporteerd, helpt een launchd- of systemd-daemon niet, tenzij die omgeving daar ook wordt geïmporteerd. Stel de sleutel in `~/.openclaw/.env` of via `env.shellEnv` in om deze leesbaar te maken voor het Gateway-proces.
+      Een sleutel die alleen in een interactieve shell is geëxporteerd, helpt een launchd- of systemd-daemon niet, tenzij die omgeving daar ook wordt geïmporteerd. Stel de sleutel in `~/.openclaw/.env` of via `env.shellEnv` in om deze leesbaar te maken voor het gatewayproces.
     </Warning>
 
   </Accordion>
 
   <Accordion title="Aangepaste Groq-model-id's">
-    OpenClaw accepteert tijdens runtime elke Groq-model-id. Gebruik de exacte id die Groq toont en zet er `groq/` voor. De statische catalogus dekt de veelvoorkomende gevallen; id's die niet in de catalogus staan, vallen terug op de standaard OpenAI-compatibele sjabloon.
+    OpenClaw accepteert tijdens runtime elke Groq-model-id. Gebruik de exacte id die Groq toont en voeg `groq/` als voorvoegsel toe. De statische catalogus omvat de gangbare gevallen; voor id's die niet in de catalogus staan, wordt teruggevallen op de standaard OpenAI-compatibele sjabloon.
 
     ```json5
     {

@@ -1,36 +1,31 @@
 ---
 read_when:
     - आप किसी बाहरी सिस्टम से TaskFlows को ट्रिगर या संचालित करना चाहते हैं
-    - आप बंडल किए गए webhooks Plugin को कॉन्फ़िगर कर रहे हैं
-summary: 'Webhooks Plugin: विश्वसनीय बाहरी ऑटोमेशन के लिए प्रमाणित TaskFlow ingress'
+    - आप बंडल किए गए वेबहुक Plugin को कॉन्फ़िगर कर रहे हैं
+summary: 'Webhooks Plugin: विश्वसनीय बाहरी स्वचालन के लिए प्रमाणीकृत TaskFlow इनग्रेस'
 title: Webhooks Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:55:06Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:17:22Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 9d21d96f680fa24d4a53c1ed5759f800d3cfdc3336789c42c15266edd8ce9e80
+    source_hash: 77e455450d6183635c76a1e8002feeb287deb4ff242dbd555ef9d0f2b21ce5f6
     source_path: plugins/webhooks.md
     workflow: 16
 ---
 
-Webhooks Plugin प्रमाणीकृत HTTP routes जोड़ता है जो बाहरी
-automation को OpenClaw TaskFlows से bind करते हैं।
+Webhooks Plugin प्रमाणित HTTP रूट जोड़ता है, ताकि कोई विश्वसनीय बाहरी
+सिस्टम (Zapier, n8n, कोई CI जॉब, कोई आंतरिक सेवा) कस्टम Plugin लिखे बिना
+HTTP के माध्यम से प्रबंधित OpenClaw TaskFlows बना और संचालित कर सके।
 
-इसे तब उपयोग करें जब आप Zapier, n8n, CI job, या किसी
-internal service जैसी trusted system से managed TaskFlows बनवाना और चलवाना चाहते हों, बिना पहले custom
-Plugin लिखे।
+Plugin Gateway प्रक्रिया के भीतर चलता है। किसी रिमोट Gateway के लिए, इसे
+उस होस्ट पर इंस्टॉल और कॉन्फ़िगर करें, फिर Gateway को पुनः आरंभ करें। यह बिना
+किसी कॉन्फ़िगर किए गए रूट के उपलब्ध होता है, इसलिए कम-से-कम एक रूट जोड़ने तक यह कोई कार्रवाई नहीं करता।
 
-## यह कहाँ चलता है
+## रूट कॉन्फ़िगर करें
 
-Webhooks Plugin Gateway process के अंदर चलता है।
-
-यदि आपका Gateway किसी दूसरी machine पर चलता है, तो Plugin को उस
-Gateway host पर install और configure करें, फिर Gateway को restart करें।
-
-## routes configure करें
-
-`plugins.entries.webhooks.config` के अंतर्गत config सेट करें:
+कॉन्फ़िगरेशन को `plugins.entries.webhooks.config` के अंतर्गत सेट करें:
 
 ```json5
 {
@@ -59,52 +54,50 @@ Gateway host पर install और configure करें, फिर Gateway क
 }
 ```
 
-Route fields:
+रूट फ़ील्ड:
 
-- `enabled`: वैकल्पिक, default `true` है
-- `path`: वैकल्पिक, default `/plugins/webhooks/<routeId>` है
-- `sessionKey`: आवश्यक session जो bound TaskFlows का owner होता है
-- `secret`: आवश्यक shared secret या SecretRef
-- `controllerId`: बनाए गए managed flows के लिए वैकल्पिक controller id
-- `description`: वैकल्पिक operator note
+| फ़ील्ड          | आवश्यक | डिफ़ॉल्ट                       | टिप्पणियाँ                                         |
+| -------------- | -------- | ----------------------------- | --------------------------------------------- |
+| `enabled`      | नहीं       | `true`                        |                                               |
+| `path`         | नहीं       | `/plugins/webhooks/<routeId>` | सभी रूट में अद्वितीय होना चाहिए।                 |
+| `sessionKey`   | हाँ      | -                             | वह सेशन जिसके स्वामित्व में संबद्ध TaskFlows हैं।        |
+| `secret`       | हाँ      | -                             | सादा स्ट्रिंग या SecretRef (नीचे)।          |
+| `controllerId` | नहीं       | `webhooks/<routeId>`          | डिफ़ॉल्ट `create_flow` नियंत्रक के रूप में उपयोग किया जाता है। |
+| `description`  | नहीं       | -                             | केवल ऑपरेटर के लिए टिप्पणी।                           |
 
-Supported `secret` inputs:
+`secret` सादा स्ट्रिंग या SecretRef स्वीकार करता है: `{ source: "env" | "file" | "exec", provider: "default", id: "..." }`।
 
-- Plain string
-- SecretRef जिसमें `source: "env" | "file" | "exec"` हो
+SecretRefs का समाधान Gateway के स्टार्टअप कॉन्फ़िगरेशन स्नैपशॉट में किया जाता है। जब किसी रूट के
+सीक्रेट का समाधान नहीं हो पाता, तो Gateway चलता रहता है और वही रूट
+पंजीकृत लेकिन निष्क्रिय रहता है: अनुरोधों को सामान्य प्रमाणीकरण विफलता मिलती है (`401`)।
+अन्य रूट उपलब्ध रहते हैं। SecretRef स्रोत ठीक करें, फिर नया स्नैपशॉट सक्रिय
+करने के लिए Gateway को रीलोड या पुनः आरंभ करें। सार्वजनिक अनुरोध पथ पर
+SecretRef मानों का समाधान कभी नहीं किया जाता।
 
-यदि secret-backed route startup पर अपना secret resolve नहीं कर पाता, तो Plugin
-broken endpoint expose करने के बजाय उस route को skip करता है और warning log करता है।
+## सुरक्षा मॉडल
 
-## Security model
+प्रत्येक रूट अपने कॉन्फ़िगर किए गए `sessionKey` के TaskFlow अधिकार के साथ कार्य करता है: यह
+उस सेशन के स्वामित्व वाले किसी भी TaskFlow का निरीक्षण और परिवर्तन कर सकता है। TaskFlow एक्सेस
+हमेशा `api.runtime.tasks.managedFlows.bindSession(...)` के माध्यम से होता है, इसलिए कोई
+रूट कभी भी अपने संबद्ध सेशन के बाहर कार्य नहीं कर सकता। प्रभाव क्षेत्र सीमित करने के लिए:
 
-हर route को अपने configured
-`sessionKey` की TaskFlow authority के साथ act करने के लिए trusted माना जाता है।
+- प्रत्येक रूट के लिए एक मजबूत, अद्वितीय सीक्रेट उपयोग करें।
+- इनलाइन सादे टेक्स्ट वाले सीक्रेट के बजाय SecretRef को प्राथमिकता दें।
+- रूट को वर्कफ़्लो के अनुकूल सबसे सीमित सेशन से संबद्ध करें।
+- केवल वही विशिष्ट Webhook पथ उपलब्ध कराएँ जिसकी आपको आवश्यकता है।
 
-इसका अर्थ है कि route उस session के owned TaskFlows को inspect और mutate कर सकता है, इसलिए
-आपको चाहिए:
+प्रत्येक पथ के लिए अनुरोध संसाधन क्रम: HTTP विधि (केवल `POST`) और
+`Content-Type: application/json` जाँच, फिर निश्चित-विंडो दर सीमांकन (प्रत्येक path+client-IP कुंजी पर प्रति 60-सेकंड विंडो में 120
+अनुरोध, अधिकतम 4,096 ट्रैक की गई
+कुंजियाँ), फिर प्रगति पर मौजूद अनुरोधों की सीमा (प्रति कुंजी 8 समवर्ती अनुरोध, अधिकतम
+4,096 ट्रैक की गई कुंजियाँ), फिर साझा-सीक्रेट प्रमाणीकरण, फिर 256 KB /
+15-सेकंड की JSON बॉडी रीड। किसी शुरुआती जाँच में विफल होने वाले अनुरोध
+बाद की जाँचों तक कभी नहीं पहुँचते।
 
-- प्रति route strong unique secret उपयोग करें
-- inline plaintext secrets के बजाय secret references को प्राथमिकता दें
-- routes को workflow के लिए उपयुक्त सबसे narrow session से bind करें
-- केवल वही specific Webhook path expose करें जिसकी आपको जरूरत है
+## अनुरोध प्रारूप
 
-Plugin लागू करता है:
-
-- Shared-secret authentication
-- Request body size और timeout guards
-- Fixed-window rate limiting
-- In-flight request limiting
-- `api.runtime.tasks.managedFlows.bindSession(...)` के माध्यम से owner-bound TaskFlow access
-
-## Request format
-
-इनके साथ `POST` requests भेजें:
-
-- `Content-Type: application/json`
-- `Authorization: Bearer <secret>` या `x-openclaw-webhook-secret: <secret>`
-
-Example:
+`Content-Type: application/json` और `Authorization: Bearer <secret>` या `x-openclaw-webhook-secret: <secret>` में से किसी एक के साथ
+`POST` अनुरोध भेजें:
 
 ```bash
 curl -X POST https://gateway.example.com/plugins/webhooks/zapier \
@@ -113,29 +106,29 @@ curl -X POST https://gateway.example.com/plugins/webhooks/zapier \
   -d '{"action":"create_flow","goal":"Review inbound queue"}'
 ```
 
-## Supported actions
+## समर्थित क्रियाएँ
 
-Plugin वर्तमान में ये JSON `action` values स्वीकार करता है:
+| क्रिया             | उद्देश्य                                                            |
+| ------------------ | ------------------------------------------------------------------ |
+| `create_flow`      | रूट के सेशन के लिए एक प्रबंधित TaskFlow बनाएँ।                 |
+| `get_flow`         | आईडी द्वारा एक TaskFlow प्राप्त करें।                                          |
+| `list_flows`       | रूट के सेशन के TaskFlows सूचीबद्ध करें।                            |
+| `find_latest_flow` | सबसे हाल में अपडेट किया गया TaskFlow प्राप्त करें।                          |
+| `resolve_flow`     | अपारदर्शी टोकन द्वारा TaskFlow का समाधान करें।                                |
+| `get_task_summary` | किसी TaskFlow का कार्य सारांश प्राप्त करें।                             |
+| `set_waiting`      | वैकल्पिक स्थिति/प्रतीक्षा डेटा के साथ TaskFlow को प्रतीक्षारत चिह्नित करें।            |
+| `resume_flow`      | प्रतीक्षारत/अवरुद्ध TaskFlow को फिर से शुरू करें।                                 |
+| `finish_flow`      | TaskFlow को पूर्ण चिह्नित करें।                                          |
+| `fail_flow`        | TaskFlow को विफल चिह्नित करें।                                            |
+| `request_cancel`   | सहकारी रद्दीकरण का अनुरोध करें।                                  |
+| `cancel_flow`      | TaskFlow रद्द करें (यदि चाइल्ड अभी भी सक्रिय हैं, तो `202` लौटाया जा सकता है)। |
+| `run_task`         | किसी मौजूदा TaskFlow के भीतर एक प्रबंधित चाइल्ड कार्य बनाएँ।           |
 
-- `create_flow`
-- `get_flow`
-- `list_flows`
-- `find_latest_flow`
-- `resolve_flow`
-- `get_task_summary`
-- `set_waiting`
-- `resume_flow`
-- `finish_flow`
-- `fail_flow`
-- `request_cancel`
-- `cancel_flow`
-- `run_task`
+परिवर्तनकारी क्रियाओं (`set_waiting`, `resume_flow`, `finish_flow`, `fail_flow`,
+`request_cancel`) को आशावादी समवर्ती नियंत्रण के लिए `flowId` और `expectedRevision`
+की आवश्यकता होती है; कोई पुराना संशोधन `409 revision_conflict` लौटाता है।
 
 ### `create_flow`
-
-Route के bound session के लिए managed TaskFlow बनाता है।
-
-Example:
 
 ```json
 {
@@ -148,14 +141,9 @@ Example:
 
 ### `run_task`
 
-मौजूदा managed TaskFlow के अंदर managed child task बनाता है।
-
-Allowed runtimes हैं:
-
-- `subagent`
-- `acp`
-
-Example:
+अनुमत `runtime` मान: `subagent`, `acp`। `startedAt`, `lastEventAt`, और
+`progressSummary` केवल तभी मान्य हैं जब `status`, `"running"` हो; उन्हें
+किसी अन्य स्थिति के साथ भेजने पर `400 invalid_request` लौटता है।
 
 ```json
 {
@@ -167,9 +155,7 @@ Example:
 }
 ```
 
-## Response shape
-
-Successful responses return:
+## प्रतिक्रिया संरचना
 
 ```json
 {
@@ -178,8 +164,6 @@ Successful responses return:
   "result": {}
 }
 ```
-
-Rejected requests return:
 
 ```json
 {
@@ -191,10 +175,17 @@ Rejected requests return:
 }
 ```
 
-Plugin जानबूझकर Webhook responses से owner/session metadata scrub करता है।
+प्रवाह और कार्य दृश्य कभी भी स्वामी/सेशन मेटाडेटा शामिल नहीं करते, इसलिए प्रतिक्रियाएँ
+रूट के संबद्ध `sessionKey` को लीक नहीं कर सकतीं। `code` मानों में `not_found`,
+`not_managed`, `revision_conflict`, `persist_failed`, `cancel_requested`,
+`cancel_pending`, `terminal`, `invalid_request`, `request_rejected`, और
+क्रिया-विशिष्ट फ़ॉलबैक कोड (`mutation_rejected`, `create_rejected`,
+`task_not_created`, `cancel_rejected`) शामिल हैं, जब कोई परिवर्तन ऐसे
+कारण से अस्वीकार किया जाता है जिसे ऊपर दिए गए नामित कोड में शामिल नहीं किया गया है।
 
-## संबंधित docs
+## संबंधित
 
-- [Plugin runtime SDK](/hi/plugins/sdk-runtime)
-- [Hooks और webhooks overview](/hi/automation/hooks)
-- [CLI webhooks](/hi/cli/webhooks)
+- [हुक्स](/hi/automation/hooks) - आंतरिक घटना-संचालित हुक्स बनाम यह HTTP-आधारित TaskFlow ब्रिज
+- [Gateway Webhooks (`hooks.*` कॉन्फ़िगरेशन)](/hi/automation/cron-jobs#webhooks) - अलग सामान्य Gateway HTTP एंडपॉइंट सुविधा; इस Plugin के रूट के समान नहीं
+- [Plugin रनटाइम SDK](/hi/plugins/sdk-runtime)
+- [CLI Webhooks](/hi/cli/webhooks)

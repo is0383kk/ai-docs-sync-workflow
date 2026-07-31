@@ -1,31 +1,32 @@
 ---
 read_when:
-    - 您正在安裝、設定或稽核 nvidia 外掛
-summary: 為 OpenClaw 新增 NVIDIA 模型供應商支援。
+    - 你正在安裝、設定或稽核 nvidia 外掛
+summary: 新增 OpenClaw 對 NVIDIA 模型供應商的支援。
 title: NVIDIA 外掛
 x-i18n:
-    generated_at: "2026-07-11T21:37:04Z"
+    generated_at: "2026-07-26T08:29:14Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 4d2ea102071e09fc60385a3f2bcbb4e1a636e7b87d9a3e541bac551bea7d9dbd
+    source_hash: c8878f544205c5d013b723a2a55136d98aed529bc146430fb23731692a914dc3
     source_path: plugins/reference/nvidia.md
     workflow: 16
 ---
 
 # NVIDIA 外掛
 
-為 OpenClaw 新增 NVIDIA 模型供應商支援。
+為 OpenClaw 新增 NVIDIA 模型提供者支援。
 
-## 發行方式
+## 發行
 
 - 套件：`@openclaw/nvidia-provider`
-- 安裝方式：隨 OpenClaw 內附
+- 安裝途徑：隨附於 OpenClaw
 
-## 提供介面
+## 介面
 
-供應商：nvidia
+提供者：`nvidia`
 
 ## 相關文件
 
-- [nvidia](/zh-TW/providers/nvidia)
+- [NVIDIA](/zh-TW/providers/nvidia)

@@ -1,31 +1,30 @@
 ---
 read_when:
     - आप टर्मिनल से संग्रहीत ट्रांसक्रिप्ट सारांश पढ़ना चाहते हैं
-    - आपको प्रतिलेखों के Markdown सारांश का पथ चाहिए
-    - आप मुख्य प्रतिलेख संग्रहण लेआउट को डीबग कर रहे हैं
-summary: '`openclaw transcripts` के लिए CLI संदर्भ (संग्रहीत ट्रांसक्रिप्ट की सूची बनाना, दिखाना और उनका स्थान पता लगाना)'
-title: प्रतिलेख CLI
+    - आपको ट्रांसक्रिप्ट के Markdown सारांश का पथ चाहिए
+    - आप मुख्य ट्रांसक्रिप्ट स्टोरेज लेआउट को डीबग कर रहे हैं
+summary: '`openclaw transcripts` के लिए CLI संदर्भ (संग्रहीत ट्रांसक्रिप्ट सूचीबद्ध करें, दिखाएँ और निर्यात करें)'
+title: ट्रांसक्रिप्ट CLI
 x-i18n:
-    generated_at: "2026-06-28T22:54:10Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T17:43:51Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: ae6010cfb4e051182f1c48d0d728b30d054542e1e7983ff15a2432840193f9c0
+    source_hash: c04ba637fb46ec271383b2f0d17655e18018e07f489c34dc3fd14ad926f27aa4
     source_path: cli/transcripts.md
     workflow: 16
 ---
 
 # `openclaw transcripts`
 
-OpenClaw के core `transcripts` tool द्वारा लिखे गए transcripts का निरीक्षण करें। यह CLI
-केवल-पढ़ने योग्य है; capture, import, और summarization agent tool और
-कॉन्फ़िगर किए गए auto-start sources के स्वामित्व में हैं।
+स्थायी मीटिंग ट्रांसक्रिप्ट के लिए निरीक्षण और निर्यात कमांड। Google Meet,
+Microsoft Teams और Zoom के ब्राउज़र प्रतिभागी नोट्स को स्वचालित रूप से कैप्चर करते हैं;
+`transcripts` एजेंट टूल प्रदाता कैप्चर और मैन्युअल आयात का भी समर्थन करता है।
 
-CLI का उपयोग तब करें जब आप कल के notes ढूंढना चाहते हों, Markdown file को
-किसी editor में खोलना चाहते हों, किसी transcript को दूसरे tool में देना चाहते हों, या debug करना चाहते हों कि कोई session
-disk पर कहाँ रखा गया। यह capture शुरू या बंद नहीं करता।
-
-Artifacts OpenClaw state directory के अंतर्गत रहते हैं:
+कैनोनिकल ट्रांसक्रिप्ट स्थिति साझा SQLite डेटाबेस में
+`$OPENCLAW_STATE_DIR/state/openclaw.sqlite` पर रहती है। `show` और `path` स्पष्ट रूप से
+स्थिति डायरेक्टरी के अंतर्गत उपयोगकर्ता-दृश्य आर्टिफ़ैक्ट बनाते हैं:
 
 ```text
 $OPENCLAW_STATE_DIR/transcripts/YYYY-MM-DD/<session>/
@@ -35,11 +34,13 @@ $OPENCLAW_STATE_DIR/transcripts/YYYY-MM-DD/<session>/
   summary.md
 ```
 
-Default state directory `~/.openclaw` है; अलग directory उपयोग करने के लिए `OPENCLAW_STATE_DIR` set करें।
-date directory session start time से आती है, और
-session directory session id से निकला हुआ एक सुरक्षित filesystem segment है।
+ये फ़ाइलें निर्यात हैं, दूसरा रनटाइम स्टोर नहीं। OpenClaw कैप्चर,
+सारांश निर्माण या सूचीकरण के दौरान इन्हें वापस नहीं पढ़ता। डिफ़ॉल्ट स्थिति डायरेक्टरी
+`~/.openclaw` है; इसे `OPENCLAW_STATE_DIR` से ओवरराइड करें। तारीख की डायरेक्टरी
+सत्र के आरंभ समय से आती है; सत्र डायरेक्टरी सत्र आईडी से प्राप्त एक
+फ़ाइल-सिस्टम-सुरक्षित स्लग है।
 
-## Commands
+## कमांड
 
 ```bash
 openclaw transcripts list
@@ -55,51 +56,49 @@ openclaw transcripts show <session> --json
 openclaw transcripts path <session> --json
 ```
 
-- `list`: stored sessions, date-qualified selector, start time, title, और `summary.md` path सूचीबद्ध करें।
-- `show <session>`: stored `summary.md` print करें।
-- `path <session>`: `summary.md` path print करें।
-- `path <session> --dir`: session directory print करें।
-- `path <session> --metadata`: `metadata.json` print करें।
-- `path <session> --transcript`: `transcript.jsonl` print करें।
-- `--json`: machine-readable output print करें।
+| कमांड                       | विवरण                                          |
+| ----------------------------- | ---------------------------------------------------- |
+| `list`                        | संग्रहीत सत्रों की सूची दिखाएँ।                                |
+| `show <session>`              | `summary.md` को प्रिंट और निर्मित करें।                  |
+| `path <session>`              | `summary.md` पथ को निर्मित और प्रिंट करें।         |
+| `path <session> --dir`        | सभी आर्टिफ़ैक्ट निर्मित करें और उनकी डायरेक्टरी प्रिंट करें। |
+| `path <session> --metadata`   | `metadata.json` को निर्मित और प्रिंट करें।               |
+| `path <session> --transcript` | `transcript.jsonl` को निर्मित और प्रिंट करें।            |
+| `--json`                      | मशीन-पठनीय आउटपुट प्रिंट करें (कोई भी उपकमांड)।      |
 
-जब कोई human session id कई दिनों में दोहराया जाता है, तो `list` से date-qualified selector का उपयोग करें,
-उदाहरण के लिए `openclaw transcripts show 2026-05-22/standup`।
-Default session ids में timestamp और random suffix शामिल होते हैं; fixed
-session ids केवल तब configure करें जब वे दिन के भीतर unique हों।
+`<session>` केवल सत्र आईडी या तारीख-युक्त चयनकर्ता
+(`YYYY-MM-DD/<session>`) में से किसी एक को स्वीकार करता है। जब समान सत्र आईडी
+एक से अधिक दिनों में मौजूद हो, तो तारीख-युक्त रूप का उपयोग करें, उदाहरण के लिए `openclaw transcripts show
+2026-05-22/standup`। डिफ़ॉल्ट सत्र आईडी में टाइमस्टैम्प और यादृच्छिक
+प्रत्यय शामिल होता है; किसी सत्र को निश्चित आईडी केवल तभी दें जब वह आईडी उस दिन के भीतर अद्वितीय हो।
 
-## Output
+## आउटपुट
 
-`list` प्रति line एक session print करता है:
+`list` प्रत्येक सत्र के लिए टैब से पृथक एक पंक्ति प्रिंट करता है: चयनकर्ता, आरंभ समय, शीर्षक,
+सारांश पथ।
 
 ```text
-2026-05-22/standup  2026-05-22T09:00:00.000Z  Weekly standup  /Users/alex/.openclaw/transcripts/2026-05-22/standup/summary.md
+2026-05-22/standup  2026-05-22T09:00:00.000Z  साप्ताहिक स्टैंडअप  /Users/user/.openclaw/transcripts/2026-05-22/standup/summary.md
 ```
 
-Output tab-separated है। Columns selector, start time, title, और
-summary path हैं। Selector `show` या `path` को वापस pass करने के लिए सबसे सुरक्षित value है।
+`show` या `path` को वापस देने के लिए चयनकर्ता सबसे सुरक्षित मान है।
 
-`list --json` इनके साथ objects print करता है:
+`list --json`, `sessionId`, `selector`, `date`, `title`,
+`startedAt`, `stoppedAt`, `source`, `path`, `summaryPath`, `hasSummary` वाले ऑब्जेक्ट लौटाता है।
+संग्रहीत मीटिंग स्रोत URL में केवल ओरिजिन और पथ होते हैं; क्वेरी स्ट्रिंग,
+फ़्रैगमेंट और एम्बेड किए गए क्रेडेंशियल स्थायी रूप से संग्रहीत करने से पहले हटा दिए जाते हैं।
 
-- `sessionId`
-- `selector`
-- `date`
-- `title`
-- `startedAt`
-- `stoppedAt`
-- `source`
-- `path`
-- `summaryPath`
-- `hasSummary`
+`show --json` संग्रहीत सत्र मेटाडेटा, चयनकर्ता, सत्र
+डायरेक्टरी, सारांश पथ और सारांश का Markdown टेक्स्ट लौटाता है।
 
-`show --json` stored session metadata, selector, session directory,
-summary path, और summary Markdown text लौटाता है। `path --json` selected path
-और यह कि वह file मौजूद है या नहीं, लौटाता है।
+`path --json` चयनित पथ और उस आर्टिफ़ैक्ट को
+निर्मित किया जा सका या नहीं, यह लौटाता है। संग्रहीत सत्र के लिए मेटाडेटा और ट्रांसक्रिप्ट निर्यात हमेशा मौजूद होते हैं;
+सत्र का सारांश उपलब्ध होने तक सारांश पथ `exists: false` रिपोर्ट करता है।
 
-## दिन में कई meetings
+## प्रतिदिन अनेक सत्र
 
-Transcripts sessions को date के अनुसार, फिर session id के अनुसार group करता है। एक
-दिन में दस meetings दस sibling folders बन जाती हैं:
+सत्र पहले तारीख और फिर सत्र आईडी के अनुसार समूहित होते हैं। एक दिन में दस मीटिंग
+दस समान-स्तरीय फ़ोल्डर बन जाती हैं:
 
 ```text
 ~/.openclaw/transcripts/2026-05-22/
@@ -108,35 +107,55 @@ Transcripts sessions को date के अनुसार, फिर session id
   standup/
 ```
 
-अधिकांश automation के लिए default generated ids का उपयोग करें। `standup` जैसा fixed id
-केवल तब उपयोग करें जब वही id उसी date पर दो बार उपयोग नहीं होगा।
+ऑटोमेशन के लिए डिफ़ॉल्ट रूप से जनरेट की गई आईडी का उपयोग करें। `standup` जैसी निश्चित आईडी का उपयोग केवल
+तभी करें जब वह समान तारीख को दोबारा उपयोग नहीं होगी।
 
-## Missing summaries
+## अनुपलब्ध सारांश
 
-Live sessions session बंद होने पर `summary.md` लिखते हैं। Imported transcripts
-import के तुरंत बाद `summary.md` लिखते हैं। कोई session अभी भी
-`list` में summary के बिना दिखाई दे सकता है जब capture active हो, stop के दौरान provider fail हुआ हो,
-या किसी भी utterances के आने से पहले metadata लिखा गया हो।
+लाइव सत्र रुकने पर `summary.md` को संग्रहीत और निर्मित करते हैं;
+आयातित ट्रांसक्रिप्ट आयात के तुरंत बाद ऐसा करते हैं। कोई सत्र
+कैप्चर सक्रिय रहने के दौरान, रोकते समय प्रदाता के विफल होने पर,
+या कोई कथन आने से पहले मेटाडेटा संग्रहीत होने पर, सारांश के बिना `list` में दिखाई दे सकता है।
 
-append-only transcript का निरीक्षण करने के लिए `path <session> --transcript` का उपयोग करें, और
-Markdown summary दोबारा generate करने के लिए `transcripts` tool action `summarize` का उपयोग करें।
+कच्चे केवल-जोड़ने-योग्य ट्रांसक्रिप्ट का निरीक्षण करने के लिए `path <session> --transcript` का उपयोग करें,
+या Markdown सारांश दोबारा जनरेट करने के लिए `transcripts` टूल की `summarize` क्रिया चलाएँ।
 
-## Configuration
+## पुराने फ़ाइल स्टोर को अपग्रेड करना
 
-Transcript capture opt-in है क्योंकि live sources meeting
-audio में शामिल होकर उसे record कर सकते हैं। Top-level `transcripts.enabled` के साथ tool enable करें:
+SQLite स्टोर से पहले के OpenClaw रिलीज़ कैनोनिकल रनटाइम स्थिति को
+सीधे `$OPENCLAW_STATE_DIR/transcripts/` के अंतर्गत लिखते थे। चलाएँ:
+
+```bash
+openclaw doctor --fix
+```
+
+Doctor पूरी पुरानी ट्री को SQLite में आयात करता है, पंक्ति गणना और
+क्रम को सत्यापित करता है, माइग्रेशन रसीदें दर्ज करता है और सत्यापित स्रोत ट्री को
+टाइमस्टैम्प-युक्त `transcripts.migrated-*` आर्काइव में ले जाता है। रनटाइम कमांड
+पुरानी फ़ाइलों पर फ़ॉलबैक नहीं करते। आयातित सत्रों और अपने उपयोग वाले
+किसी भी निर्यात को सत्यापित करने तक आर्काइव रखें।
+
+## कॉन्फ़िगरेशन
+
+मीटिंग ट्रांसक्रिप्ट कैप्चर डिफ़ॉल्ट रूप से सक्षम है। इसे वैश्विक रूप से बंद करने के लिए:
 
 ```json
 {
   "transcripts": {
-    "enabled": true,
-    "maxUtterances": 2000
+    "enabled": false
   }
 }
 ```
 
-`openclaw.json` में `transcripts.autoStart` के साथ auto-start sources configure करें।
-हर entry मौजूद होने से enabled होती है; किसी source को disable करने के लिए उसकी entry छोड़ दें।
+- `enabled` (डिफ़ॉल्ट `true`): स्वचालित मीटिंग नोट्स, ट्रांसक्रिप्ट
+  टूल और कॉन्फ़िगर किए गए ऑटो-स्टार्ट स्रोतों को सक्षम करें। जब मीटिंग
+  नोट्स को होस्ट पर स्थायी रूप से संग्रहीत नहीं किया जाना चाहिए, तो इसे `false` पर सेट करें। स्पष्ट रूप से अनुरोध किया गया मीटिंग
+  `transcribe` मोड अपने मौजूदा सीमित लाइव-कैप्शन टेल को बनाए रखता है, लेकिन
+  यह सेटिंग false होने पर स्थायी पंक्तियाँ नहीं लिखता।
+  ऑटो-स्टार्ट स्रोतों को `transcripts.autoStart` से कॉन्फ़िगर करें। प्रत्येक प्रविष्टि
+  मौजूद होने पर सक्षम होती है; उस स्रोत को अक्षम करने के लिए उसकी प्रविष्टि छोड़ दें। `discord-voice`
+  बंडल किया गया ऑटो-स्टार्ट-सक्षम स्रोत है और इसे `guildId` तथा
+  `channelId` की आवश्यकता होती है:
 
 ```json
 {
@@ -147,13 +166,13 @@ audio में शामिल होकर उसे record कर सकत�
         "providerId": "discord-voice",
         "guildId": "1234567890",
         "channelId": "2345678901"
-      },
-      {
-        "providerId": "slack-huddle",
-        "accountId": "workspace",
-        "channelId": "C123"
       }
     ]
   }
 }
 ```
+
+मीटिंग प्रदाता आईडी `google-meet`, `teams` और `zoom` हैं। इनके उपनाम
+क्रमशः `googlemeet`/`meet`, `teams-meetings`/`microsoft-teams`/`msteams` और
+`zoom-meetings` हैं। मीटिंग प्रदाता पहले से सक्रिय
+मीटिंग बॉट सत्र से जुड़ते हैं; सामान्य मीटिंग में शामिल होने के लिए `autoStart` प्रविष्टि की आवश्यकता नहीं होती।

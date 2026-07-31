@@ -2,65 +2,65 @@
 read_when:
     - 設定頻道外掛（驗證、存取控制、多帳號）
     - 疑難排解各頻道的設定鍵
-    - 稽核私訊政策、群組政策或提及閘控
-summary: 頻道設定：Slack、Discord、Telegram、WhatsApp、Matrix、iMessage 等頻道的存取控制、配對與各頻道金鑰
+    - 稽核私訊政策、群組政策或提及門檻控制
+summary: 頻道設定：Slack、Discord、Telegram、WhatsApp、Matrix、iMessage 等頻道的存取控制、配對及各頻道專用金鑰
 title: 設定 — 頻道
 x-i18n:
-    generated_at: "2026-07-12T14:27:24Z"
+    generated_at: "2026-07-26T08:32:26Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 15
+    prompt_version: 32
     provider: openai
-    source_hash: af161d396b2dc40e3ccb5f00ca4815fc1ad782f96f98dc4a74d65be958530da6
+    source_hash: e346648287d275d84a9c082a3bb13edaee751d53546d8231dcf1525bf9adafc2
     source_path: gateway/config-channels.md
     workflow: 16
 ---
 
-`channels.*` 下的各頻道設定鍵：私訊與群組存取、多帳號設定、提及閘控，以及 Slack、Discord、Telegram、WhatsApp、Matrix、iMessage 和其他頻道外掛的個別頻道設定鍵。
+`channels.*` 下的各頻道設定鍵：私訊與群組存取、多帳號設定、提及閘門，以及 Slack、Discord、Telegram、WhatsApp、Matrix、iMessage 和其他頻道外掛的各頻道專用鍵。
 
-關於代理程式、工具、閘道執行階段及其他頂層設定鍵，請參閱[設定參考](/zh-TW/gateway/configuration-reference)。
+關於代理程式、工具、閘道執行階段及其他頂層鍵，請參閱[設定參考](/zh-TW/gateway/configuration-reference)。
 
 ## 頻道
 
-當頻道的設定區段存在時，每個頻道都會自動啟動（除非設定 `enabled: false`）。Telegram 和 iMessage 隨核心 `openclaw` 套件一同提供。其他官方頻道（Discord、Slack、WhatsApp、Matrix、Microsoft Teams、IRC、Google Chat、Signal、Mattermost 等）會以獨立外掛形式安裝，使用 `openclaw plugins install <spec>`；完整清單與安裝規格請參閱[頻道](/zh-TW/channels)。
+當頻道的設定區段存在時，每個頻道都會自動啟動（除非 `enabled: false`）。Telegram 和 iMessage 隨核心 `openclaw` 套件一併提供。其他官方頻道（Discord、Slack、WhatsApp、Matrix、Microsoft Teams、IRC、Google Chat、Signal、Mattermost 等）則透過 `openclaw plugins install <spec>` 安裝為個別外掛；如需完整清單和安裝規格，請參閱[頻道](/zh-TW/channels)。
 
 ### 私訊與群組存取
 
-所有頻道都支援私訊政策與群組政策：
+所有頻道都支援私訊政策和群組政策：
 
-| 私訊政策            | 行為                                                            |
+| 私訊政策           | 行為                                                        |
 | ------------------- | --------------------------------------------------------------- |
-| `pairing`（預設）   | 未知的傳送者會收到一次性配對碼；擁有者必須核准                  |
-| `allowlist`         | 僅允許 `allowFrom` 中的傳送者（或已配對的允許儲存區）            |
-| `open`              | 允許所有傳入私訊（需要 `allowFrom: ["*"]`）                     |
-| `disabled`          | 忽略所有傳入私訊                                                |
+| `pairing`（預設） | 未知傳送者會取得一次性配對碼；擁有者必須核准 |
+| `allowlist`         | 僅限 `allowFrom` 中的傳送者（或已配對的允許儲存區）             |
+| `open`              | 允許所有傳入私訊（需要 `allowFrom: ["*"]`）             |
+| `disabled`          | 忽略所有傳入私訊                                          |
 
-| 群組政策              | 行為                                                   |
+| 群組政策          | 行為                                               |
 | --------------------- | ------------------------------------------------------ |
-| `allowlist`（預設）   | 僅允許符合已設定允許清單的群組                         |
-| `open`                | 略過群組允許清單（提及閘控仍會套用）                   |
-| `disabled`            | 封鎖所有群組／聊天室訊息                               |
+| `allowlist`（預設） | 僅限符合已設定允許清單的群組          |
+| `open`                | 略過群組允許清單（提及閘門仍然適用） |
+| `disabled`            | 封鎖所有群組／聊天室訊息                          |
 
 <Note>
-當提供者未設定 `groupPolicy` 時，`channels.defaults.groupPolicy` 會設定其預設值。
-配對碼會在 1 小時後到期。待處理的配對要求上限為**每個帳號 3 個**（依頻道與帳號 ID 劃分範圍）。
-如果提供者區塊完全缺失（不存在 `channels.<provider>`），執行階段群組政策會退回 `allowlist`（預設拒絕），並在啟動時發出警告。
+當提供者的 `groupPolicy` 未設定時，`channels.defaults.groupPolicy` 會設定預設值。
+配對碼會在 1 小時後到期。待處理的配對要求上限為**每個帳號 3 個**（依頻道和帳號 ID 劃分範圍）。
+若提供者區塊完全缺失（不存在 `channels.<provider>`），執行階段群組政策會退回 `allowlist`（預設拒絕），並顯示啟動警告。
 </Note>
 
 ### 頻道模型覆寫
 
-使用 `channels.modelByChannel` 將特定頻道 ID 或私訊對象固定至某個模型。值可接受 `provider/model` 或已設定的模型別名。僅當工作階段尚未有作用中的模型覆寫時，才會套用頻道對應（例如透過 `/model` 設定的覆寫）。
+使用 `channels.modelByChannel` 將特定頻道 ID 或私訊對象固定至某個模型。值可接受 `provider/model` 或已設定的模型別名。只有在工作階段尚未有作用中的模型覆寫時，頻道對應才會套用（例如透過 `/model` 設定的覆寫）。
 
-對於群組／討論串對話，設定鍵是頻道特定的群組 ID、主題 ID 或頻道名稱。對於私訊（DM）對話，設定鍵是從頻道傳送者身分衍生的對象識別碼（`nativeDirectUserId`、`origin.from`、`origin.to`、`OriginatingTo`、`From` 或 `SenderId`）。確切的設定鍵格式取決於頻道：
+對於群組／討論串對話，鍵是頻道特定的群組 ID、主題 ID 或頻道名稱。對於私訊（DM）對話，鍵是從頻道傳送者身分衍生的對象識別碼（`nativeDirectUserId`、`origin.from`、`origin.to`、`OriginatingTo`、`From` 或 `SenderId`）。確切的鍵格式取決於頻道：
 
-| 頻道     | 私訊設定鍵格式      | 範例                                         |
+| 頻道  | 私訊鍵格式         | 範例                                      |
 | -------- | ------------------- | -------------------------------------------- |
-| Discord  | 原始使用者 ID       | `987654321`                                  |
+| Discord  | 原始使用者 ID         | `987654321`                                  |
 | Feishu   | `feishu:ou_...`     | `feishu:ou_a8b6cab7e945387de5f253775d9b4d85` |
-| Matrix   | Matrix 使用者 ID    | `@user:matrix.org`                           |
+| Matrix   | Matrix 使用者 ID      | `@user:matrix.org`                           |
 | Slack    | `user:U...`         | `user:U12345`                                |
-| Telegram | 原始使用者 ID       | `123456789`                                  |
-| WhatsApp | 電話號碼或 JID      | `15551234567`                                |
+| Telegram | 原始使用者 ID         | `123456789`                                  |
+| WhatsApp | 電話號碼或 JID | `15551234567`                                |
 
 ```json5
 {
@@ -83,11 +83,11 @@ x-i18n:
 }
 ```
 
-私訊專用設定鍵只會在私訊對話中比對；不會影響群組／討論串路由。
+私訊專用鍵只會在私訊對話中符合；不會影響群組／討論串路由。
 
 ### 頻道預設值與心跳偵測
 
-使用 `channels.defaults` 設定各提供者共用的群組政策與心跳偵測行為：
+使用 `channels.defaults` 在各提供者之間共用群組政策、隱含提及和心跳偵測行為：
 
 ```json5
 {
@@ -95,6 +95,11 @@ x-i18n:
     defaults: {
       groupPolicy: "allowlist", // open | allowlist | disabled
       contextVisibility: "all", // all | allowlist | allowlist_quote
+      implicitMentions: {
+        replyToBot: true,
+        quotedBot: true,
+        threadParticipation: true,
+      },
       heartbeat: {
         showOk: false,
         showAlerts: true,
@@ -105,9 +110,10 @@ x-i18n:
 }
 ```
 
-- `channels.defaults.groupPolicy`：當提供者層級未設定 `groupPolicy` 時使用的備援群組政策。
-- `channels.defaults.contextVisibility`：所有頻道的預設補充上下文可見性模式。值：`all`（預設，包含所有引用／討論串／歷程上下文）、`allowlist`（僅包含來自允許清單中傳送者的上下文）、`allowlist_quote`（與允許清單相同，但保留明確的引用／回覆上下文）。各頻道可使用 `channels.<channel>.contextVisibility` 覆寫。
-- `channels.defaults.heartbeat.showOk`：在心跳偵測輸出中包含狀態正常的頻道（預設為 `false`）。
+- `channels.defaults.groupPolicy`：提供者層級的 `groupPolicy` 未設定時所使用的備援群組政策。
+- `channels.defaults.contextVisibility`：所有頻道的預設補充上下文可見性模式。值：`all`（預設，包含所有引用／討論串／歷史上下文）、`allowlist`（僅包含允許清單中傳送者的上下文）、`allowlist_quote`（與允許清單相同，但保留明確的引用／回覆上下文）。各頻道覆寫：`channels.<channel>.contextVisibility`。
+- `channels.defaults.implicitMentions`：控制哪些受支援的傳入事實視為提及。`replyToBot`、`quotedBot` 和 `threadParticipation` 各自預設為 `true`，以保留目前行為。可透過 `channels.<channel>.implicitMentions` 依頻道覆寫，或透過 `channels.<channel>.accounts.<id>.implicitMentions` 依帳號覆寫；每個旗標都會依帳號 -> 頻道 -> 預設值獨立解析。名稱採肯定形式：將旗標設為 `false`，即可阻止該事實略過提及閘門。原生明確提及一律允許；如果頻道不會產生該事實，旗標便不會生效。如需目前的產生者矩陣，請參閱[提及閘門](/zh-TW/channels/groups#mention-gating-default)。這些設定不會變更傳出回覆／討論串模式或已授權的命令處理。
+- `channels.defaults.heartbeat.showOk`：在心跳偵測輸出中包含健康的頻道狀態（預設為 `false`）。
 - `channels.defaults.heartbeat.showAlerts`：在心跳偵測輸出中包含降級／錯誤狀態（預設為 `true`）。
 - `channels.defaults.heartbeat.useIndicator`：以精簡指示器樣式呈現心跳偵測輸出（預設為 `true`）。
 
@@ -119,26 +125,13 @@ WhatsApp 透過閘道的網頁頻道（Baileys Web）執行。存在已連結的
 {
   web: {
     enabled: true,
-    heartbeatSeconds: 60,
-    whatsapp: {
-      keepAliveIntervalMs: 25000,
-      connectTimeoutMs: 60000,
-      defaultQueryTimeoutMs: 60000,
-    },
-    reconnect: {
-      initialMs: 2000,
-      maxMs: 30000,
-      factor: 1.8,
-      jitter: 0.25,
-      maxAttempts: 12, // 0 = 永遠重試
-    },
   },
   channels: {
     whatsapp: {
       dmPolicy: "pairing", // pairing | allowlist | open | disabled
       allowFrom: ["+15555550123", "+447700900123"],
       textChunkLimit: 4000,
-      chunkMode: "length", // length | newline
+      streaming: { chunkMode: "length" }, // length | newline
       mediaMaxMb: 50,
       sendReadReceipts: true, // 藍色勾號（自我聊天模式中為 false）
       groups: {
@@ -151,9 +144,7 @@ WhatsApp 透過閘道的網頁頻道（Baileys Web）執行。存在已連結的
 }
 ```
 
-- `web.whatsapp.keepAliveIntervalMs`（預設為 `25000`）、`connectTimeoutMs`（預設為 `60000`）和 `defaultQueryTimeoutMs`（預設為 `60000`）可調整 Baileys 通訊端。
-- `web.reconnect` 預設值：`initialMs: 2000`、`maxMs: 30000`、`factor: 1.8`、`jitter: 0.25`、`maxAttempts: 12`。`maxAttempts: 0` 會持續重試，而不會放棄。
-- 頂層 `bindings[]` 中 `type: "acp"` 的項目可為 WhatsApp 私訊與群組設定持續性 ACP 繫結。在 `match.peer.id` 中使用 E.164 直撥號碼或 WhatsApp 群組 JID。欄位語意共用於 [ACP 代理程式](/zh-TW/tools/acp-agents#persistent-channel-bindings)。
+- 含有 `type: "acp"` 的頂層 `bindings[]` 項目，會為 WhatsApp 私訊和群組設定持久性 ACP 繫結。在 `match.peer.id` 中使用 E.164 直撥號碼或 WhatsApp 群組 JID。欄位語意共用於 [ACP 代理程式](/zh-TW/tools/acp-agents#persistent-channel-bindings)。
 
 <Accordion title="多帳號 WhatsApp">
 
@@ -173,8 +164,8 @@ WhatsApp 透過閘道的網頁頻道（Baileys Web）執行。存在已連結的
 }
 ```
 
-- 傳出命令預設使用 `default` 帳號（如果存在）；否則使用排序後第一個已設定的帳號 ID。
-- 當 `channels.whatsapp.defaultAccount` 符合已設定的帳號 ID 時，此選用設定會覆寫該備援預設帳號選擇。
+- 如果帳號 `default` 存在，傳出命令預設使用該帳號；否則使用第一個已設定的帳號 ID（排序後）。
+- 當選用的 `channels.whatsapp.defaultAccount` 符合已設定的帳號 ID 時，會覆寫該備援預設帳號選擇。
 - 舊版單帳號 Baileys 驗證目錄會由 `openclaw doctor` 遷移至 `whatsapp/default`。
 - 各帳號覆寫：`channels.whatsapp.accounts.<id>.sendReadReceipts`、`channels.whatsapp.accounts.<id>.dmPolicy`、`channels.whatsapp.accounts.<id>.allowFrom`。
 
@@ -194,24 +185,24 @@ WhatsApp 透過閘道的網頁頻道（Baileys Web）執行。存在已連結的
         "*": { requireMention: true },
         "-1001234567890": {
           allowFrom: ["@admin"],
-          systemPrompt: "保持回答簡短。",
+          systemPrompt: "讓回答保持簡短。",
           topics: {
             "99": {
               requireMention: false,
               skills: ["search"],
-              systemPrompt: "請緊扣主題。",
+              systemPrompt: "不要偏離主題。",
             },
           },
         },
       },
       customCommands: [
         { command: "backup", description: "Git 備份" },
-        { command: "generate", description: "建立圖片" },
+        { command: "generate", description: "建立影像" },
       ],
       historyLimit: 50,
       replyToMode: "first", // off | first | all | batched
       linkPreview: true,
-      streaming: "partial", // off | partial | block | progress（預設：partial）
+      streaming: { mode: "partial" }, // off | partial | block | progress（預設：partial）
       actions: { reactions: true, sendMessage: true },
       reactionNotifications: "own", // off | own | all
       mediaMaxMb: 100,
@@ -236,14 +227,14 @@ WhatsApp 透過閘道的網頁頻道（Baileys Web）執行。存在已連結的
 }
 ```
 
-- Bot 權杖：`channels.telegram.botToken` 或 `channels.telegram.tokenFile`（僅限一般檔案；拒絕符號連結），預設帳號會以 `TELEGRAM_BOT_TOKEN` 作為備援。
-- `apiRoot` 僅是 Telegram Bot API 根目錄。請使用 `https://api.telegram.org` 或你的自架／代理根目錄，不要使用 `https://api.telegram.org/bot<TOKEN>`；`openclaw doctor --fix` 會移除意外加上的尾端 `/bot<TOKEN>` 後綴。
-- 對於在 `--local` 模式下自架的 Bot API 伺服器，`trustedLocalFileRoots` 會列出 OpenClaw 可讀取的主機路徑。將伺服器資料磁碟區掛載至 OpenClaw 主機，並設定其資料根目錄或各權杖目錄；`/var/lib/telegram-bot-api` 下的容器路徑會對應至這些根目錄。其他絕對路徑仍會遭到拒絕。
-- 當 `channels.telegram.defaultAccount` 符合已設定的帳號 ID 時，此選用設定會覆寫預設帳號選擇。
-- 在多帳號設定（2 個以上的帳號 ID）中，請設定明確的預設帳號（`channels.telegram.defaultAccount` 或 `channels.telegram.accounts.default`），以避免備援路由；當此設定缺失或無效時，`openclaw doctor` 會發出警告。
+- 機器人權杖：`channels.telegram.botToken` 或 `channels.telegram.tokenFile`（僅限一般檔案；拒絕符號連結），並以 `TELEGRAM_BOT_TOKEN` 作為預設帳號的備援。
+- `apiRoot` 僅是 Telegram Bot API 根目錄。請使用 `https://api.telegram.org` 或你的自架／Proxy 根目錄，而非 `https://api.telegram.org/bot<TOKEN>`；`openclaw doctor --fix` 會移除意外附加於尾端的 `/bot<TOKEN>` 後綴。
+- 對於採用 `--local` 模式的自架 Bot API 伺服器，`trustedLocalFileRoots` 會列出 OpenClaw 可讀取的主機路徑。請將伺服器資料磁碟區掛載至 OpenClaw 主機，並設定其資料根目錄或各權杖目錄；`/var/lib/telegram-bot-api` 下的容器路徑會對應至這些根目錄。其他絕對路徑仍會遭拒絕。
+- 當選用的 `channels.telegram.defaultAccount` 符合已設定的帳號 ID 時，會覆寫預設帳號選擇。
+- 在多帳號設定（2 個以上的帳號 ID）中，請設定明確的預設值（`channels.telegram.defaultAccount` 或 `channels.telegram.accounts.default`），以避免備援路由；缺少或無效時，`openclaw doctor` 會發出警告。
 - `configWrites: false` 會封鎖由 Telegram 發起的設定寫入（超級群組 ID 遷移、`/config set|unset`）。
-- 頂層 `bindings[]` 中 `type: "acp"` 的項目可為論壇主題設定持續性 ACP 繫結（在 `match.peer.id` 中使用標準的 `chatId:topic:topicId`）。欄位語意共用於 [ACP 代理程式](/zh-TW/tools/acp-agents#persistent-channel-bindings)。
-- Telegram 串流預覽使用 `sendMessage` + `editMessageText`（適用於私訊與群組聊天）。
+- 含有 `type: "acp"` 的頂層 `bindings[]` 項目，會為論壇主題設定持久性 ACP 繫結（在 `match.peer.id` 中使用標準 `chatId:topic:topicId`）。欄位語意共用於 [ACP 代理程式](/zh-TW/tools/acp-agents#persistent-channel-bindings)。
+- Telegram 串流預覽使用 `sendMessage` + `editMessageText`（可用於私訊和群組聊天）。
 - `network.dnsResultOrder` 預設為 `"ipv4first"`，以避免常見的 IPv6 擷取失敗。
 - 重試政策：請參閱[重試政策](/zh-TW/concepts/retry)。
 
@@ -292,7 +283,7 @@ WhatsApp 透過閘道的網頁頻道（Baileys Web）執行。存在已連結的
               requireMention: true,
               users: ["987654321098765432"],
               skills: ["docs"],
-              systemPrompt: "僅提供簡短回答。",
+              systemPrompt: "Short answers only.",
             },
           },
         },
@@ -301,7 +292,7 @@ WhatsApp 透過閘道的網頁頻道（Baileys Web）執行。存在已連結的
       textChunkLimit: 2000,
       suppressEmbeds: true,
       streaming: {
-        mode: "progress", // off | partial | block | progress（Discord 預設：progress）
+        mode: "progress", // off | partial | block | progress (Discord default: progress)
         chunkMode: "length", // length | newline
         progress: {
           label: "auto",
@@ -360,42 +351,43 @@ WhatsApp 透過閘道的網頁頻道（Baileys Web）執行。存在已連結的
 ```
 
 - 權杖：`channels.discord.token`，預設帳號會以 `DISCORD_BOT_TOKEN` 作為備援。
-- 提供明確 Discord `token` 的直接對外呼叫會使用該權杖進行呼叫；帳號的重試／政策設定仍取自作用中執行階段快照內所選的帳號。
-- 選用的 `channels.discord.defaultAccount` 若與已設定的帳號 ID 相符，會覆寫預設帳號選擇。
-- 傳送目標請使用 `user:<id>`（DM）或 `channel:<id>`（伺服器頻道）；不接受單獨的數字 ID。
-- 伺服器 slug 使用小寫，並將空格替換為 `-`；頻道鍵使用經 slug 化的名稱（不含 `#`）。建議優先使用伺服器 ID。
-- 預設會忽略機器人撰寫的訊息。`allowBots: true` 會啟用這些訊息；使用 `allowBots: "mentions"` 可僅接受提及該機器人的機器人訊息（仍會過濾自身訊息）。
-- 支援接收機器人撰寫訊息的頻道可以使用共用的[機器人迴圈防護](/zh-TW/channels/bot-loop-protection)。請透過 `channels.defaults.botLoopProtection` 設定配對預算基準，只有在某個頻道或帳號介面需要不同限制時才進行覆寫。
-- `channels.discord.guilds.<id>.ignoreOtherMentions`（以及頻道覆寫）會捨棄提及其他使用者或角色、但未提及該機器人的訊息（不包含 @everyone/@here）。
-- `channels.discord.mentionAliases` 會在傳送前，將穩定的對外 `@handle` 文字對應至 Discord 使用者 ID，因此即使暫時性目錄快取為空，仍能以確定性方式提及已知的團隊成員。各帳號的覆寫位於 `channels.discord.accounts.<accountId>.mentionAliases`。
-- `maxLinesPerMessage`（預設為 `17`）即使訊息少於 2000 個字元，也會拆分行數過多的訊息。
-- `channels.discord.suppressEmbeds` 預設為 `true`，因此除非停用，否則對外 URL 不會展開為 Discord 連結預覽。明確的 `embeds` 承載資料仍會正常傳送；每則訊息的工具呼叫可透過 `suppressEmbeds` 覆寫。
-- `channels.discord.threadBindings` 控制 Discord 討論串繫結路由：
-  - `enabled`：Discord 對討論串繫結工作階段功能的覆寫（`/focus`、`/unfocus`、`/agents`、`/session idle`、`/session max-age`，以及繫結的傳送／路由）
-  - `idleHours`：Discord 對閒置自動取消聚焦時數的覆寫（`0` 表示停用）
-  - `maxAgeHours`：Discord 對硬性最長存續時數的覆寫（`0` 表示停用）
-  - `spawnSessions`：控制 `sessions_spawn({ thread: true })` 與 ACP 討論串衍生時自動建立／繫結討論串的開關（預設：`true`）
-  - `defaultSpawnContext`：討論串繫結衍生所使用的原生子代理程式情境（預設為 `"fork"`）
-- 含有 `type: "acp"` 的頂層 `bindings[]` 項目，會為頻道與討論串設定持久性 ACP 繫結（請在 `match.peer.id` 中使用頻道／討論串 ID）。欄位語意共用於 [ACP 代理程式](/zh-TW/tools/acp-agents#persistent-channel-bindings)。
+- 提供明確 Discord `token` 的直接對外呼叫會使用該權杖執行呼叫；帳號重試／政策設定仍取自作用中執行階段快照內所選的帳號。
+- 若選用的 `channels.discord.defaultAccount` 符合已設定的帳號 ID，便會覆寫預設帳號選擇。
+- 使用 `user:<id>`（私訊）或 `channel:<id>`（伺服器頻道）作為傳送目標；不接受單獨的數字 ID。
+- 伺服器代稱使用小寫，並以 `-` 取代空格；頻道索引鍵使用轉換為代稱的名稱（不含 `#`）。建議優先使用伺服器 ID。
+- 預設會忽略由機器人撰寫的訊息。`allowBots: true` 可啟用這類訊息；使用 `allowBots: "mentions"` 可僅接受提及該機器人的機器人訊息（仍會過濾機器人自己的訊息）。
+- 支援接收機器人所撰寫訊息的頻道，可以使用共用的[機器人迴圈防護](/zh-TW/channels/bot-loop-protection)。請設定 `channels.defaults.botLoopProtection` 作為配對預算基準，僅在某個頻道或帳號需要不同限制時才個別覆寫。
+- `channels.discord.guilds.<id>.ignoreOtherMentions`（以及頻道覆寫）會捨棄提及其他使用者或身分組、卻未提及該機器人的訊息（不包括 @everyone/@here）。
+- `channels.discord.mentionAliases` 會在傳送前，將穩定的對外 `@handle` 文字對應至 Discord 使用者 ID，因此即使暫時性的目錄快取為空，也能以確定性的方式提及已知的團隊成員。各帳號的覆寫設定位於 `channels.discord.accounts.<accountId>.mentionAliases` 下。
+- `maxLinesPerMessage`（預設為 `17`）即使訊息少於 2000 個字元，也會分割行數過多的訊息。
+- `channels.discord.suppressEmbeds` 預設為 `true`，因此除非停用，對外 URL 不會展開成 Discord 連結預覽。明確的 `embeds` 承載資料仍會正常傳送；每則訊息的工具呼叫可使用 `suppressEmbeds` 覆寫。
+- `channels.discord.threadBindings` 控制 Discord 執行緒繫結路由：
+  - `enabled`：Discord 對執行緒繫結工作階段功能的覆寫（`/focus`、`/unfocus`、`/agents`、`/session idle`、`/session max-age`，以及繫結的傳送／路由）
+  - `idleHours`：Discord 對閒置後自動取消聚焦時數的覆寫（`0` 表示停用）
+  - `maxAgeHours`：Discord 對絕對最長存續時數的覆寫（`0` 表示停用）
+  - `spawnSessions`：控制 `sessions_spawn({ thread: true })` 與 ACP 執行緒衍生自動建立／繫結執行緒的開關（預設：`true`）
+  - `defaultSpawnContext`：執行緒繫結衍生的原生子代理程式情境（預設為 `"fork"`）
+- 含有 `type: "acp"` 的頂層 `bindings[]` 項目，可設定頻道與執行緒的持久 ACP 繫結（在 `match.peer.id` 中使用頻道／執行緒 ID）。欄位語意共用於 [ACP 代理程式](/zh-TW/tools/acp-agents#persistent-channel-bindings)。
 - `channels.discord.ui.components.accentColor` 設定 Discord components v2 容器的強調色。
-- `channels.discord.agentComponents.ttlMs` 控制已傳送 Discord 元件回呼維持註冊的時間。預設為 `1800000`（30 分鐘），上限為 `86400000`（24 小時）。各帳號的覆寫位於 `channels.discord.accounts.<accountId>.agentComponents.ttlMs`。建議使用能滿足工作流程的最短 TTL。
-- `channels.discord.voice` 啟用 Discord 語音頻道對話，以及選用的自動加入、LLM 和 TTS 覆寫。純文字 Discord 設定預設會關閉語音；請設定 `channels.discord.voice.enabled=true` 以選擇啟用。
-- `channels.discord.voice.model` 可選擇性覆寫 Discord 語音頻道回應所使用的 LLM 模型。
-- `channels.discord.voice.daveEncryption`（預設為 `true`）和 `channels.discord.voice.decryptionFailureTolerance`（預設為 `24`）會直接傳遞至 `@discordjs/voice` 的 DAVE 選項。
-- `channels.discord.voice.connectTimeoutMs` 控制 `/vc join` 與自動加入嘗試時，初次等候 `@discordjs/voice` Ready 的時間（預設為 `30000`）。
-- `channels.discord.voice.reconnectGraceMs` 控制語音工作階段中斷連線後，可花多長時間進入重新連線訊號狀態，超過後 OpenClaw 便會將其銷毀（預設為 `15000`）。
-- Discord 語音播放不會因其他使用者的開始說話事件而中斷。為避免回授迴圈，OpenClaw 會在 TTS 播放期間忽略新的語音擷取。
-- 此外，OpenClaw 會在重複發生解密失敗後，離開並重新加入語音工作階段，以嘗試恢復語音接收。
-- `channels.discord.streaming` 是標準的串流模式鍵。Discord 預設使用 `streaming.mode: "progress"`，因此工具／工作進度會顯示在同一則持續編輯的預覽訊息中；設定 `streaming.mode: "off"` 可停用此功能。舊版扁平鍵（`streamMode`、`chunkMode`、`blockStreaming`、`draftChunk`、`blockStreamingCoalesce`）不再由執行階段讀取；請執行 `openclaw doctor --fix` 以遷移持久化設定。
-- `channels.discord.autoPresence` 會將執行階段可用性對應至機器人上線狀態（健康 => online、降級 => idle、耗盡 => dnd），並允許選用的狀態文字覆寫。
+- `channels.discord.agentComponents.ttlMs` 控制已傳送的 Discord 元件回呼保持註冊的時間。預設為 `1800000`（30 分鐘），上限為 `86400000`（24 小時）。各帳號的覆寫設定位於 `channels.discord.accounts.<accountId>.agentComponents.ttlMs` 下。建議採用能滿足工作流程的最短 TTL。
+- `channels.discord.voice` 啟用 Discord 語音頻道對話，以及選用的自動加入、LLM 與 TTS 覆寫。僅文字的 Discord 設定預設會關閉語音；設定 `channels.discord.voice.enabled=true` 即可選擇啟用。
+- `channels.discord.voice.model` 可選擇性覆寫用於 Discord 語音頻道回應的 LLM 模型。
+- `channels.discord.voice.daveEncryption`（預設為 `true`）與 `channels.discord.voice.decryptionFailureTolerance`（預設為 `24`）會直接傳遞至 `@discordjs/voice` DAVE 選項。
+- `channels.discord.voice.connectTimeoutMs` 控制 `/vc join` 與自動加入嘗試最初等待 `@discordjs/voice` Ready 的時間（預設為 `30000`）。
+- `channels.discord.voice.reconnectGraceMs` 控制語音工作階段中斷連線後，在 OpenClaw 將其銷毀之前，可花費多長時間進入重新連線訊號狀態（預設為 `15000`）。
+- Discord 語音播放不會被其他使用者的開始說話事件中斷。為避免回授迴圈，OpenClaw 會在 TTS 播放期間忽略新的語音擷取。
+- 此外，在重複發生解密失敗後，OpenClaw 會透過離開再重新加入語音工作階段，嘗試復原語音接收。
+- `channels.discord.streaming` 是標準的串流模式索引鍵。Discord 預設為 `streaming.mode: "progress"`，因此工具／工作進度會顯示在同一則持續編輯的預覽訊息中；設定 `streaming.mode: "off"` 即可停用。執行階段已不再讀取舊版扁平索引鍵（`streamMode`、`chunkMode`、`blockStreaming`、`draftChunk`、`blockStreamingCoalesce`）；請執行 `openclaw doctor --fix` 以遷移持久化設定。
+- `channels.discord.autoPresence` 將執行階段可用性對應至機器人狀態（健康 => online、降級 => idle、耗盡 => dnd），並允許選用的狀態文字覆寫。
+- `channels.discord.guilds.<id>.presenceEvents` 會將人員可用性抵達事件，以代理程式系統事件的形式路由至一個已設定的 Discord 頻道。符合資格的成員必須能查看 `channelId`；公開執行緒會繼承上層可見性，而私人執行緒還要求具備成員資格或 Manage Threads。`users` 可進一步縮小該受眾範圍。它會從完整的 `GUILD_CREATE` 快照建立目前在線成員的初始狀態、路由所觀察到的離線轉在線轉換，並將未曾出現之成員後續首次發出的在線訊號視為新近可用，但不會斷言他們是在快照後上線或加入。成員數超過 Discord 75,000 人快照限制的伺服器，必須先收到明確的離線更新。節流調整項目：`reconnectSuppressSeconds`（新閘道工作階段建立後、重建伺服器上線狀態期間的靜默視窗，預設為 300，`0` 表示停用）與 `burstLimit`/`burstWindowSeconds`（每個伺服器成功排入佇列之事件的速率限制，預設為每 60 秒滑動視窗 8 個事件）。恢復的工作階段不會啟動重新連線抑制視窗。現有的每位使用者重新問候冷卻時間仍為八小時。這需要 `channels.discord.intents.presence=true`、Discord Developer Portal 中的特權 Presence Intent，以及已啟用的代理程式心跳偵測。
 - `channels.discord.dangerouslyAllowNameMatching` 會重新啟用可變動的名稱／標籤比對（緊急相容模式）。
-- `channels.discord.execApprovals`：Discord 原生的執行核准傳送與核准者授權。
-  - `enabled`：`true`、`false` 或 `"auto"`（預設）。在自動模式下，若可從 `approvers` 或 `commands.ownerAllowFrom` 解析核准者，便會啟用執行核准。
+- `channels.discord.execApprovals`：Discord 原生執行核准傳送與核准者授權。
+  - `enabled`：`true`、`false` 或 `"auto"`（預設）。在自動模式下，當可從 `approvers` 或 `commands.ownerAllowFrom` 解析核准者時，便會啟用執行核准。
   - `approvers`：允許核准執行要求的 Discord 使用者 ID。省略時會退回使用 `commands.ownerAllowFrom`。
   - `agentFilter`：選用的代理程式 ID 允許清單。省略即可轉送所有代理程式的核准要求。
-  - `sessionFilter`：選用的工作階段鍵模式（子字串或規則運算式）。
-  - `target`：核准提示的傳送位置。`"dm"`（預設）會傳送至核准者的 DM，`"channel"` 會傳送至原始頻道，`"both"` 則會同時傳送至兩者。當目標包含 `"channel"` 時，只有已解析的核准者能使用按鈕。
-  - `cleanupAfterResolve`：設為 `true` 時，會在核准、拒絕或逾時後刪除核准 DM。
+  - `sessionFilter`：選用的工作階段索引鍵模式（子字串或規則運算式）。
+  - `target`：核准提示的傳送位置。`"dm"`（預設）會傳送至核准者的私訊，`"channel"` 會傳送至來源頻道，`"both"` 則會同時傳送至兩者。當目標包含 `"channel"` 時，只有解析出的核准者能使用按鈕。
+  - `cleanupAfterResolve`：若為 `true`，會在核准、拒絕或逾時後刪除核准私訊。
 
 **回應通知模式：** `off`（無）、`own`（機器人的訊息，預設）、`all`（所有訊息）、`allowlist`（所有訊息中來自 `guilds.<id>.users` 的回應）。
 
@@ -411,11 +403,8 @@ WhatsApp 透過閘道的網頁頻道（Baileys Web）執行。存在已連結的
       audience: "https://gateway.example.com/googlechat",
       webhookPath: "/googlechat",
       botUser: "users/1234567890",
-      dm: {
-        enabled: true,
-        policy: "pairing",
-        allowFrom: ["users/1234567890"],
-      },
+      dmPolicy: "pairing",
+      allowFrom: ["users/1234567890"],
       groupPolicy: "allowlist",
       groups: {
         "spaces/AAAA": { allow: true, requireMention: true },
@@ -429,9 +418,9 @@ WhatsApp 透過閘道的網頁頻道（Baileys Web）執行。存在已連結的
 ```
 
 - 服務帳戶 JSON：內嵌（`serviceAccount`）或檔案型（`serviceAccountFile`）。
-- 也支援服務帳戶 SecretRef（`serviceAccountRef`）。
+- `serviceAccount` 可直接接受 SecretRef。
 - 環境變數備援：`GOOGLE_CHAT_SERVICE_ACCOUNT` 或 `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE`（僅限預設帳號）。
-- 傳送目標請使用 `spaces/<spaceId>` 或 `users/<userId>`。
+- 使用 `spaces/<spaceId>` 或 `users/<userId>` 作為傳送目標。
 - `channels.googlechat.dangerouslyAllowNameMatching` 會重新啟用可變動的電子郵件主體比對（緊急相容模式）。
 
 ### Slack
@@ -507,49 +496,53 @@ WhatsApp 透過閘道的網頁頻道（Baileys Web）執行。存在已連結的
 }
 ```
 
-- **Socket 模式**同時需要 `botToken` 和 `appToken`（預設帳號的環境變數備援為 `SLACK_BOT_TOKEN` + `SLACK_APP_TOKEN`）。
-- **HTTP 模式**需要 `botToken` 加上 `signingSecret`（可位於根層級或各帳號層級）。
-- `enterpriseOrgInstall: true` 會讓帳號選用 Slack Enterprise Grid
-  的全組織事件路徑。啟動時會使用 `auth.test` 驗證機器人權杖，
-  若設定的模式與 Slack 的安裝身分不符，啟動就會失敗。
-  Enterprise 私訊必須停用，或使用 `dmPolicy: "open"` 並搭配有效的
-  `allowFrom: ["*"]`。頻道與使用者原則必須使用穩定的 Slack ID；
-  使用可變名稱或不支援的頻道前綴會導致啟動失敗。V1 僅處理直接的
-  Socket Mode 或 HTTP `message` 與 `app_mention` 事件，並立即
-  回覆；不支援中繼、命令、互動、App Home、回應事件接聽器、
-  釘選、動作工具、原生核准、繫結、延遲傳遞及主動傳送。由接聽器
-  負責的確認、輸入狀態和狀態回應，在具備 `reactions:write` 時仍然
-  可用；不支援傳入回應通知及回應動作工具。最低權限資訊清單、設定
-  工作流程及完整限制，請參閱
+- **Socket 模式**需要同時具備 `botToken` 和 `appToken`（預設帳號環境變數備援需要 `SLACK_BOT_TOKEN` + `SLACK_APP_TOKEN`）。
+- **HTTP 模式**需要 `botToken` 加上 `signingSecret`（位於根層級或各帳號中）。
+- **使用者身分**（`identity: "user"`）會以授權者本人身分發文及讀取。Socket 模式需要 `userToken` 加上 `appToken`，HTTP 模式則需要 `userToken` 加上 `signingSecret`。不需要機器人權杖或機器人使用者。使用者範圍與事件訂閱請參閱[使用者身分](/zh-TW/channels/slack#user-identity-post-as-a-real-person)。
+- `enterpriseOrgInstall: true` 會讓帳號加入 Slack Enterprise Grid
+  全組織事件路徑。啟動時會使用 `auth.test` 驗證機器人權杖，若設定的模式
+  與 Slack 的安裝身分不相符，啟動便會失敗。
+  Enterprise 私訊必須停用，或搭配有效的
+  `allowFrom: ["*"]` 使用 `dmPolicy: "open"`。頻道與使用者原則必須使用穩定的 Slack ID；
+  可變動的名稱及不支援的頻道前綴會導致啟動失敗。V1 僅處理
+  直接的 Socket 模式或 HTTP `message` 與 `app_mention` 事件，並立即
+  回覆；不提供中繼、命令、互動、App Home、表情回應事件接聽器、
+  釘選、動作工具、原生核准、繫結、延後傳送及
+  主動傳送。由接聽器負責的確認、輸入中及
+  狀態表情回應仍可透過 `reactions:write` 使用；不提供傳入表情回應
+  通知及表情回應動作工具。最低權限資訊清單、設定工作流程及完整限制
+  請參閱
   [Enterprise Grid 全組織安裝](/zh-TW/channels/slack#enterprise-grid-org-wide-installs)。
-- `socketMode` 會透過公開的 Bolt 接收器 API 傳遞 Slack SDK Socket Mode 傳輸調校設定。僅在調查 ping/pong 逾時或過期的 websocket 行為時使用。`clientPingTimeout` 預設為 `15000`；只有在設定後，才會傳遞 `serverPingTimeout` 和 `pingPongLoggingEnabled`。
+- `socketMode` 會將 Slack SDK Socket 模式的傳輸調校設定傳遞至公開的 Bolt 接收器 API。只有在調查 ping/pong 逾時或過期 websocket 行為時才使用。`clientPingTimeout` 預設為 `15000`；只有設定後才會傳遞 `serverPingTimeout` 和 `pingPongLoggingEnabled`。
 - `botToken`、`appToken`、`signingSecret` 和 `userToken` 接受純文字
   字串或 SecretRef 物件。
 - Slack 帳號快照會公開各認證資訊的來源／狀態欄位，例如
-  `botTokenSource`、`botTokenStatus`、`appTokenStatus`，以及 HTTP 模式中的
-  `signingSecretStatus`。`configured_unavailable` 表示帳號已透過
-  SecretRef 設定，但目前的命令／執行階段路徑無法解析密鑰值。
+  `botTokenSource`、`botTokenStatus`、`userTokenSource`、`userTokenStatus`、
+  `appTokenStatus`，以及 HTTP 模式中的 `signingSecretStatus`。
+  `configured_unavailable` 表示帳號是
+  透過 SecretRef 設定，但目前的命令／執行階段路徑無法
+  解析密碼值。
 - `configWrites: false` 會阻擋由 Slack 發起的設定寫入。
-- 當選用的帳號 ID 與已設定的帳號相符時，可選的 `channels.slack.defaultAccount` 會覆寫預設帳號選擇。
-- `channels.slack.streaming.mode` 是標準的 Slack 串流模式鍵（預設為 `"partial"`）。`channels.slack.streaming.nativeTransport` 控制 Slack 的原生串流傳輸（預設為 `true`）。執行階段不再讀取舊版的 `streamMode`、布林值 `streaming`、`chunkMode`、`blockStreaming`、`blockStreamingCoalesce` 和 `nativeStreaming` 值；請執行 `openclaw doctor --fix`，將持久化設定遷移至 `streaming.{mode,chunkMode,block.enabled,block.coalesce,nativeTransport}`。
-- `unfurlLinks` 和 `unfurlMedia` 會為機器人回覆傳遞 Slack `chat.postMessage` 的連結與媒體展開布林值。`unfurlLinks` 預設為 `false`，因此除非啟用，否則機器人傳出的連結不會在行內展開；若未設定，則會省略 `unfurlMedia`。若要為單一帳號覆寫頂層值，請在 `channels.slack.accounts.<accountId>` 設定任一值。
-- 傳遞目標請使用 `user:<id>`（私訊）或 `channel:<id>`。
+- 當選用的 `channels.slack.defaultAccount` 與已設定的帳號 ID 相符時，會覆寫預設帳號選擇。
+- `channels.slack.streaming.mode` 是標準的 Slack 串流模式鍵（預設為 `"partial"`）。`channels.slack.streaming.nativeTransport` 控制 Slack 的原生串流傳輸（預設為 `true`）。執行階段不再讀取舊版 `streamMode`、布林值 `streaming`、`chunkMode`、`blockStreaming`、`blockStreamingCoalesce` 和 `nativeStreaming` 的值；請執行 `openclaw doctor --fix`，將已保存的設定遷移至 `streaming.{mode,chunkMode,block.enabled,block.coalesce,nativeTransport}`。
+- `unfurlLinks` 和 `unfurlMedia` 會為機器人回覆傳遞 Slack 的 `chat.postMessage` 連結及媒體展開布林值。`unfurlLinks` 預設為 `false`，因此除非啟用，傳出的機器人連結不會在行內展開；除非設定，否則會省略 `unfurlMedia`。若要為單一帳號覆寫頂層值，請在 `channels.slack.accounts.<accountId>` 設定任一值。
+- 傳送目標請使用 `user:<id>`（私訊）或 `channel:<id>`。
 
-**回應通知模式：** `off`、`own`（預設）、`all`、`allowlist`（來自 `reactionAllowlist`）。
+**表情回應通知模式：**`off`、`own`（預設）、`all`、`allowlist`（來自 `reactionAllowlist`）。
 
-**討論串工作階段隔離：** `thread.historyScope` 可設為各討論串獨立（預設），或在頻道中共用。`thread.inheritParent` 會將父頻道逐字稿複製到新討論串。`thread.initialHistoryLimit`（預設為 `20`）限制新討論串工作階段啟動時擷取的現有討論串訊息數量；`0` 會停用討論串歷史記錄擷取。
+**討論串工作階段隔離：**`thread.historyScope` 可設為各討論串獨立（預設），或在頻道內共用。`thread.inheritParent` 會將父頻道逐字記錄複製到新討論串。`thread.initialHistoryLimit`（預設為 `20`）限制新討論串工作階段啟動時擷取的現有討論串訊息數量；`0` 會停用討論串記錄擷取。
 
-- Slack 原生串流及 Slack 助理風格的 “is typing...” 討論串狀態需要回覆討論串目標。頂層私訊預設不在討論串中，因此仍可透過 Slack 草稿的張貼後編輯預覽進行串流，而不會顯示討論串風格的原生串流／狀態預覽。
-- `typingReaction` 會在回覆執行期間，於傳入的 Slack 訊息上加入暫時回應，並在完成時移除。請使用 Slack 表情符號短代碼，例如 `"hourglass_flowing_sand"`。
-- `channels.slack.execApprovals`：Slack 原生核准用戶端傳遞與執行核准者授權。結構描述與 Discord 相同：`enabled`（`true`／`false`／`"auto"`）、`approvers`（Slack 使用者 ID）、`agentFilter`、`sessionFilter`，以及 `target`（`"dm"`、`"channel"` 或 `"both"`）。當 Slack 外掛核准者可解析時，外掛核准可針對源自 Slack 的要求使用此原生用戶端路徑；也可透過 `approvals.plugin`，為源自 Slack 的工作階段或 Slack 目標啟用 Slack 原生外掛核准傳遞。外掛核准使用來自 `allowFrom` 和預設路由的 Slack 外掛核准者，而非執行核准者。
+- Slack 原生串流及 Slack 助理樣式的「正在輸入……」討論串狀態，需要以回覆討論串為目標。頂層私訊預設不在討論串中，因此仍可透過 Slack 草稿的發文與編輯預覽進行串流，而不顯示討論串樣式的原生串流／狀態預覽。
+- `typingReaction` 會在回覆執行期間，為傳入的 Slack 訊息加上暫時的表情回應，完成後再將其移除。請使用 Slack 表情符號短代碼，例如 `"hourglass_flowing_sand"`。
+- `channels.slack.execApprovals`：Slack 原生核准用戶端傳送及執行核准者授權。結構描述與 Discord 相同：`enabled`（`true`/`false`/`"auto"`）、`approvers`（Slack 使用者 ID）、`agentFilter`、`sessionFilter`，以及 `target`（`"dm"`、`"channel"` 或 `"both"`）。當 Slack 外掛核准者能成功解析時，外掛核准可對源自 Slack 的請求使用此原生用戶端路徑；也可透過 `approvals.plugin`，為源自 Slack 的工作階段或 Slack 目標啟用 Slack 原生外掛核准傳送。外掛核准使用 `allowFrom` 中的 Slack 外掛核准者及預設路由，而非執行核准者。
 
-| 動作群組 | 預設值 | 備註                   |
-| ------------ | ------- | ---------------------- |
-| 回應         | 已啟用  | 加入回應 + 列出回應    |
-| 訊息         | 已啟用  | 讀取／傳送／編輯／刪除 |
-| 釘選         | 已啟用  | 釘選／取消釘選／列出   |
-| 成員資訊     | 已啟用  | 成員資訊               |
-| 表情符號清單 | 已啟用  | 自訂表情符號清單       |
+| 動作群組 | 預設值 | 備註                         |
+| -------- | ------ | ---------------------------- |
+| reactions    | 已啟用 | 加上表情回應 + 列出表情回應 |
+| messages     | 已啟用 | 讀取／傳送／編輯／刪除       |
+| pins         | 已啟用 | 釘選／取消釘選／列出         |
+| memberInfo   | 已啟用 | 成員資訊                     |
+| emojiList    | 已啟用 | 自訂表情符號清單             |
 
 ### Mattermost
 
@@ -559,7 +552,7 @@ Mattermost 會安裝為獨立外掛，方式與 Discord、Slack 和 WhatsApp 相
 openclaw plugins install @openclaw/mattermost
 ```
 
-固定版本前，請查看 [npmjs.com/package/@openclaw/mattermost](https://www.npmjs.com/package/@openclaw/mattermost) 以確認目前的 dist-tags。
+固定版本前，請先在 [npmjs.com/package/@openclaw/mattermost](https://www.npmjs.com/package/@openclaw/mattermost) 查看目前的 dist-tags。
 
 ```json5
 {
@@ -576,14 +569,14 @@ openclaw plugins install @openclaw/mattermost
         "team-channel-id": { requireMention: false },
       },
       commands: {
-        native: true, // opt-in
+        native: true, // 選擇性啟用
         nativeSkills: true,
         callbackPath: "/api/channels/mattermost/command",
-        // Optional explicit URL for reverse-proxy/public deployments
+        // 反向 Proxy／公開部署的選用明確 URL
         callbackUrl: "https://gateway.example.com/api/channels/mattermost/command",
       },
       textChunkLimit: 4000,
-      chunkMode: "length",
+      streaming: { chunkMode: "length" },
     },
   },
 }
@@ -595,16 +588,17 @@ openclaw plugins install @openclaw/mattermost
 
 - `commands.callbackPath` 必須是路徑（例如 `/api/channels/mattermost/command`），而非完整 URL。
 - `commands.callbackUrl` 必須解析至 OpenClaw 閘道端點，且 Mattermost 伺服器必須能夠連線。
-- 原生斜線命令回呼會使用 Mattermost 在註冊斜線命令時傳回的各命令
-  權杖進行驗證。如果註冊失敗或未啟用任何命令，OpenClaw 會拒絕回呼並顯示
+- 原生斜線命令回呼會使用 Mattermost 在註冊斜線命令時傳回的
+  各命令權杖進行驗證。如果註冊失敗或未啟用任何
+  命令，OpenClaw 會拒絕回呼並傳回
   `Unauthorized: invalid command token.`
-- 若回呼主機為私人／tailnet／內部主機，Mattermost 可能會要求
+- 對於私人／tailnet／內部回呼主機，Mattermost 可能要求
   `ServiceSettings.AllowedUntrustedInternalConnections` 包含回呼主機／網域。
   請使用主機／網域值，而非完整 URL。
 - `channels.mattermost.configWrites`：允許或拒絕由 Mattermost 發起的設定寫入。
-- `channels.mattermost.requireMention`：要求頻道中必須先有 `@mention` 才回覆。
-- `channels.mattermost.groups.<channelId>.requireMention`：各頻道的提及閘控覆寫（使用 `"*"` 作為預設值）。
-- 當選用的帳號 ID 與已設定的帳號相符時，可選的 `channels.mattermost.defaultAccount` 會覆寫預設帳號選擇。
+- `channels.mattermost.requireMention`：在頻道中回覆前要求 `@mention`。
+- `channels.mattermost.groups.<channelId>.requireMention`：各頻道的提及閘控覆寫（預設使用 `"*"`）。
+- 當選用的 `channels.mattermost.defaultAccount` 與已設定的帳號 ID 相符時，會覆寫預設帳號選擇。
 
 ### Signal
 
@@ -613,7 +607,7 @@ openclaw plugins install @openclaw/mattermost
   channels: {
     signal: {
       enabled: true,
-      account: "+15555550123", // optional account binding
+      account: "+15555550123", // 選用的帳號繫結
       dmPolicy: "pairing",
       allowFrom: ["+15551234567", "uuid:123e4567-e89b-12d3-a456-426614174000"],
       configWrites: true,
@@ -625,21 +619,21 @@ openclaw plugins install @openclaw/mattermost
 }
 ```
 
-**回應通知模式：** `off`、`own`（預設）、`all`、`allowlist`（來自 `reactionAllowlist`）。
+**表情回應通知模式：**`off`、`own`（預設）、`all`、`allowlist`（來自 `reactionAllowlist`）。
 
-- `channels.signal.account`：將頻道啟動固定至特定 Signal 帳號身分。
+- `channels.signal.account`：將頻道啟動固定至特定的 Signal 帳號身分。
 - `channels.signal.configWrites`：允許或拒絕由 Signal 發起的設定寫入。
-- 當選用的帳號 ID 與已設定的帳號相符時，可選的 `channels.signal.defaultAccount` 會覆寫預設帳號選擇。
+- 當選用的 `channels.signal.defaultAccount` 與已設定的帳號 ID 相符時，會覆寫預設帳號選擇。
 
 ### iMessage
 
-OpenClaw 會啟動 `imsg rpc`（透過標準輸入輸出的 JSON-RPC）。不需要常駐程式或連接埠。若主機可授予「訊息」資料庫和「自動化」權限，這是新 OpenClaw iMessage 設定的建議路徑。
+OpenClaw 會產生 `imsg rpc`（透過標準輸入輸出的 JSON-RPC）。不需要常駐程式或連接埠。當主機可授予 Messages 資料庫與「自動化」權限時，這是新 OpenClaw iMessage 設定的建議路徑。
 
-BlueBubbles 支援已移除。`channels.bluebubbles` 在目前的 OpenClaw 中不是受支援的執行階段設定介面。請將舊設定遷移至 `channels.imessage`；簡要說明請參閱 [BlueBubbles 移除與 imsg iMessage 路徑](/zh-TW/announcements/bluebubbles-imessage)，完整轉換表請參閱[從 BlueBubbles 遷移](/zh-TW/channels/imessage-from-bluebubbles)。
+BlueBubbles 支援已移除。`channels.bluebubbles` 在目前的 OpenClaw 中並非受支援的執行階段設定介面。請將舊設定遷移至 `channels.imessage`；簡短說明請參閱 [BlueBubbles 移除及 imsg iMessage 路徑](/zh-TW/announcements/bluebubbles-imessage)，完整轉換表請參閱[從 BlueBubbles 遷移](/zh-TW/channels/imessage-from-bluebubbles)。
 
-如果閘道未在已登入「訊息」的 Mac 上執行，請保留 `channels.imessage.enabled=true`，並將 `channels.imessage.cliPath` 設定為 SSH 包裝函式，由它在該 Mac 上執行 `imsg "$@"`。預設的本機 `imsg` 路徑僅支援 macOS。
+如果閘道未在已登入 Messages 的 Mac 上執行，請保留 `channels.imessage.enabled=true`，並將 `channels.imessage.cliPath` 設為會在該 Mac 上執行 `imsg "$@"` 的 SSH 包裝函式。預設的本機 `imsg` 路徑僅適用於 macOS。
 
-在正式環境傳送中依賴 SSH 包裝函式前，請透過該確切包裝函式驗證一次傳出的 `imsg send`。某些 macOS TCC 狀態會將「訊息」自動化權限指派給 `/usr/libexec/sshd-keygen-wrapper`，這可能導致讀取與探查正常運作，但傳送會因 AppleEvents `-1743` 而失敗；請參閱 [iMessage](/zh-TW/channels/imessage) 上的 SSH 包裝函式疑難排解章節。
+在依賴 SSH 包裝器進行正式環境傳送之前，請透過該確切包裝器驗證一次對外 `imsg send`。某些 macOS TCC 狀態會將「訊息」自動化權限指派給 `/usr/libexec/sshd-keygen-wrapper`，這可能導致讀取和探測正常運作，但傳送卻因 AppleEvents `-1743` 而失敗；請參閱 [iMessage](/zh-TW/channels/imessage) 上的 SSH 包裝器疑難排解章節。
 
 ```json5
 {
@@ -672,21 +666,21 @@ BlueBubbles 支援已移除。`channels.bluebubbles` 在目前的 OpenClaw 中�
 }
 ```
 
-- 選用的 `channels.imessage.defaultAccount` 在符合已設定的帳號 ID 時，會覆寫預設帳號選擇。
-- 需要 Messages 資料庫的「完整磁碟存取權限」。
+- 當選用的 `channels.imessage.defaultAccount` 符合已設定的帳號 ID 時，可選擇性覆寫預設帳號選擇。
+- 需要「完整磁碟存取權」才能存取「訊息」資料庫。
 - 優先使用 `chat_id:<id>` 目標。使用 `imsg chats --limit 20` 列出聊天。
-- `cliPath` 可指向 SSH 包裝程式；設定 `remoteHost`（`host` 或 `user@host`）以透過 SCP 擷取附件。
-- `attachmentRoots` 與 `remoteAttachmentRoots` 會限制傳入附件路徑（預設：`/Users/*/Library/Messages/Attachments`）。
-- SCP 使用嚴格的主機金鑰檢查，因此請確認中繼主機金鑰已存在於 `~/.ssh/known_hosts`。
+- `cliPath` 可指向 SSH 包裝器；請設定 `remoteHost`（`host` 或 `user@host`）以透過 SCP 擷取附件。
+- `attachmentRoots` 和 `remoteAttachmentRoots` 會限制傳入附件的路徑（預設：`/Users/*/Library/Messages/Attachments`）。
+- SCP 使用嚴格的主機金鑰檢查，因此請確保轉送主機金鑰已存在於 `~/.ssh/known_hosts`。
 - `channels.imessage.configWrites`：允許或拒絕由 iMessage 發起的設定寫入。
-- `channels.imessage.sendTransport`：一般傳出回覆偏好的 `imsg` RPC 傳送傳輸方式。`auto`（預設）會在 IMCore 橋接器執行時對現有聊天使用該橋接器，接著回退至 AppleScript；`bridge` 要求透過私有 API 傳遞；`applescript` 強制使用公開的 Messages 自動化路徑。
+- `channels.imessage.sendTransport`：一般對外回覆偏好的 `imsg` RPC 傳送傳輸方式。`auto`（預設）會在 IMCore 橋接器執行時將其用於現有聊天，接著退回使用 AppleScript；`bridge` 要求透過私有 API 傳遞；`applescript` 強制使用公開的「訊息」自動化路徑。
 - `channels.imessage.actions.*`：啟用同時受 `imsg status` / `openclaw channels status --probe` 限制的私有 API 動作。
-- `channels.imessage.includeAttachments` 預設為關閉；若希望代理回合包含傳入媒體，請先將其設為 `true`。
-- 橋接器／閘道重新啟動後，系統會自動復原傳入訊息（GUID 去重，加上過期積壓訊息的時間界線）。現有的 `channels.imessage.catchup.enabled: true` 設定仍會作為已棄用的相容性設定檔受到支援；`catchup` 預設為停用。
-- `channels.imessage.groups`：群組登錄檔與個別群組設定。使用 `groupPolicy: "allowlist"` 時，請設定明確的 `chat_id` 鍵或 `"*"` 萬用字元項目，讓群組訊息能通過登錄檔閘門。
-- 具有 `type: "acp"` 的頂層 `bindings[]` 項目，可將 iMessage 對話繫結至持續性 ACP 工作階段。在 `match.peer.id` 中使用正規化識別代碼或明確的聊天目標（`chat_id:*`、`chat_guid:*`、`chat_identifier:*`）。共用欄位語意：[ACP 代理](/zh-TW/tools/acp-agents#persistent-channel-bindings)。
+- `channels.imessage.includeAttachments` 預設為關閉；若預期代理程式輪次中包含傳入媒體，請先將其設為 `true`。
+- 橋接器／閘道重新啟動後會自動復原傳入內容（GUID 去重加上過時待處理項目的存留時間限制）。現有的 `channels.imessage.catchup.enabled: true` 設定仍會作為已淘汰的相容性設定檔受到支援；`catchup` 預設為停用。
+- `channels.imessage.groups`：群組登錄檔與各群組設定。使用 `groupPolicy: "allowlist"` 時，請設定明確的 `chat_id` 鍵或 `"*"` 萬用字元項目，讓群組訊息能通過登錄檔閘門。
+- 含有 `type: "acp"` 的頂層 `bindings[]` 項目，可將 iMessage 對話繫結至持續性 ACP 工作階段。請在 `match.peer.id` 中使用正規化控制代碼或明確聊天目標（`chat_id:*`、`chat_guid:*`、`chat_identifier:*`）。共用欄位語意：[ACP 代理程式](/zh-TW/tools/acp-agents#persistent-channel-bindings)。
 
-<Accordion title="iMessage SSH 包裝程式範例">
+<Accordion title="iMessage SSH 包裝器範例">
 
 ```bash
 #!/usr/bin/env bash
@@ -728,20 +722,20 @@ Matrix 由外掛支援，並在 `channels.matrix` 下設定。
 ```
 
 - 權杖驗證使用 `accessToken`；密碼驗證使用 `userId` + `password`。
-- `channels.matrix.proxy` 會透過明確的 HTTP(S) Proxy 路由 Matrix HTTP 流量。具名帳號可使用 `channels.matrix.accounts.<id>.proxy` 覆寫此設定。
-- `channels.matrix.network.dangerouslyAllowPrivateNetwork` 允許私人／內部主伺服器。`proxy` 與此網路選擇加入設定是彼此獨立的控制項。
+- `channels.matrix.proxy` 會透過明確的 HTTP(S) Proxy 路由 Matrix HTTP 流量。具名帳號可透過 `channels.matrix.accounts.<id>.proxy` 覆寫此設定。
+- `channels.matrix.network.dangerouslyAllowPrivateNetwork` 允許私人／內部家伺服器。`proxy` 與此網路加入選項是彼此獨立的控制項。
 - `channels.matrix.defaultAccount` 會在多帳號設定中選取偏好的帳號。
-- `channels.matrix.autoJoin` 預設為 `"off"`，因此受邀房間與新的類私訊邀請會被忽略，直到你使用 `autoJoinAllowlist` 設定 `autoJoin: "allowlist"`，或設定 `autoJoin: "always"`。
-- `channels.matrix.execApprovals`：Matrix 原生的執行核准傳遞與核准者授權。
-  - `enabled`：`true`、`false` 或 `"auto"`（預設）。在自動模式下，若可從 `approvers` 或 `commands.ownerAllowFrom` 解析核准者，就會啟用執行核准。
+- `channels.matrix.autoJoin` 預設為 `"off"`，因此在你設定使用 `autoJoinAllowlist` 或 `autoJoin: "always"` 的 `autoJoin: "allowlist"` 前，受邀房間及新的私訊型邀請都會被忽略。
+- `channels.matrix.execApprovals`：Matrix 原生執行核准傳遞與核准者授權。
+  - `enabled`：`true`、`false` 或 `"auto"`（預設）。在自動模式中，若能從 `approvers` 或 `commands.ownerAllowFrom` 解析核准者，便會啟用執行核准。
   - `approvers`：允許核准執行要求的 Matrix 使用者 ID（例如 `@owner:example.org`）。
-  - `agentFilter`：選用的代理 ID 允許清單。省略時會轉送所有代理的核准要求。
-  - `sessionFilter`：選用的工作階段鍵模式（子字串或規則運算式）。
+  - `agentFilter`：選用的代理程式 ID 允許清單。省略即可轉送所有代理程式的核准。
+  - `sessionFilter`：選用的工作階段金鑰模式（子字串或規則運算式）。
   - `target`：核准提示的傳送位置。`"dm"`（預設）、`"channel"`（原始房間）或 `"both"`。
-  - 個別帳號覆寫：`channels.matrix.accounts.<id>.execApprovals`。
-- `channels.matrix.dm.sessionScope` 控制 Matrix 私訊如何分組為工作階段：`per-user`（預設）依路由後的對等端共用，而 `per-room` 則隔離各個私訊房間。
-- Matrix 狀態探測與即時目錄查詢，會使用與執行階段流量相同的 Proxy 原則。
-- 完整的 Matrix 設定、目標規則與設定範例，記載於 [Matrix](/zh-TW/channels/matrix)。
+  - 各帳號覆寫：`channels.matrix.accounts.<id>.execApprovals`。
+- `channels.matrix.dm.sessionScope` 控制 Matrix 私訊如何分組至工作階段：`per-user`（預設）依路由對象共用，而 `per-room` 則會隔離每個私訊房間。
+- Matrix 狀態探測與即時目錄查詢使用和執行階段流量相同的 Proxy 原則。
+- 完整的 Matrix 設定、目標規則與設定範例記載於 [Matrix](/zh-TW/channels/matrix)。
 
 ### Microsoft Teams
 
@@ -760,8 +754,8 @@ Microsoft Teams 由外掛支援，並在 `channels.msteams` 下設定。
 }
 ```
 
-- 此處涵蓋的核心鍵路徑：`channels.msteams`、`channels.msteams.configWrites`。
-- 完整的 Teams 設定（認證資訊、網路鉤子、私訊／群組原則、個別團隊／頻道覆寫）記載於 [Microsoft Teams](/zh-TW/channels/msteams)。
+- 此處涵蓋的核心金鑰路徑：`channels.msteams`、`channels.msteams.configWrites`。
+- 完整的 Teams 設定（認證資訊、網路鉤子、私訊／群組原則、各團隊／各頻道覆寫）記載於 [Microsoft Teams](/zh-TW/channels/msteams)。
 
 ### IRC
 
@@ -786,13 +780,13 @@ IRC 由外掛支援，並在 `channels.irc` 下設定。
 }
 ```
 
-- 此處涵蓋的核心鍵路徑：`channels.irc`、`channels.irc.dmPolicy`、`channels.irc.configWrites`、`channels.irc.nickserv.*`。
-- 選用的 `channels.irc.defaultAccount` 在符合已設定的帳號 ID 時，會覆寫預設帳號選擇。
-- 完整的 IRC 頻道設定（主機／連接埠／TLS／頻道／允許清單／提及閘控）記載於 [IRC](/zh-TW/channels/irc)。
+- 此處涵蓋的核心金鑰路徑：`channels.irc`、`channels.irc.dmPolicy`、`channels.irc.configWrites`、`channels.irc.nickserv.*`。
+- 當選用的 `channels.irc.defaultAccount` 符合已設定的帳號 ID 時，可選擇性覆寫預設帳號選擇。
+- 完整的 IRC 頻道設定（主機／連接埠／TLS／頻道／允許清單／提及閘門）記載於 [IRC](/zh-TW/channels/irc)。
 
 ### 多帳號（所有頻道）
 
-每個頻道可執行多個帳號（各自具有自己的 `accountId`）：
+每個頻道可執行多個帳號（每個帳號都有自己的 `accountId`）：
 
 ```json5
 {
@@ -813,53 +807,55 @@ IRC 由外掛支援，並在 `channels.irc` 下設定。
 }
 ```
 
-- 省略 `accountId` 時會使用 `default`（命令列介面 + 路由）。
-- 環境變數權杖僅套用至**預設**帳號。
-- 基礎頻道設定會套用至所有帳號，除非個別帳號另有覆寫。
-- 使用 `bindings[].match.accountId` 將各帳號路由至不同的代理。
-- 若你仍使用單帳號的頂層頻道設定，並透過 `openclaw channels add`（或頻道上線設定）新增非預設帳號，OpenClaw 會先將帳號範圍的頂層單帳號值提升至頻道帳號對應表，使原始帳號能繼續運作。大多數頻道會將這些值移至 `channels.<channel>.accounts.default`；Matrix 則可保留現有且相符的具名／預設目標。
+- 省略 `accountId` 時，會使用 `default`（命令列介面 + 路由）。
+- 環境權杖只適用於**預設**帳號。
+- 除非各帳號另有覆寫，否則基礎頻道設定會套用至所有帳號。
+- 使用 `bindings[].match.accountId` 將每個帳號路由至不同的代理程式。
+- 如果你仍在使用單帳號頂層頻道設定，並透過 `openclaw channels add`（或頻道上線設定）新增非預設帳號，OpenClaw 會先將帳號範圍的頂層單帳號值提升至頻道帳號對應表，讓原始帳號繼續運作。大多數頻道會將它們移至 `channels.<channel>.accounts.default`；Matrix 則可保留現有相符的具名／預設目標。
 - 現有僅限頻道的繫結（沒有 `accountId`）會繼續比對預設帳號；帳號範圍的繫結仍為選用。
-- `openclaw doctor --fix` 也會將帳號範圍的頂層單帳號值移至為該頻道選定的提升帳號，以修復混合結構。大多數頻道使用 `accounts.default`；Matrix 則可保留現有且相符的具名／預設目標。
+- `openclaw doctor --fix` 也會將帳號範圍的頂層單帳號值移至為該頻道選定的提升帳號，以修復混合結構。大多數頻道使用 `accounts.default`；Matrix 則可保留現有相符的具名／預設目標。
 
 ### 其他外掛頻道
 
-許多外掛頻道設定為 `channels.<id>`，並記載於各自的專屬頻道頁面（例如 Feishu、LINE、Nextcloud Talk、Nostr、QQ Bot、Synology Chat、Twitch 與 Zalo）。
-請參閱完整的頻道索引：[頻道](/zh-TW/channels)。
+許多外掛頻道設定為 `channels.<id>`，並記載於各自專屬的頻道頁面（例如 Feishu、LINE、Nextcloud Talk、Nostr、QQ Bot、Synology Chat、Twitch 和 Zalo）。
+請參閱完整頻道索引：[頻道](/zh-TW/channels)。
 
-### 群組聊天提及閘控
+### 群組聊天提及閘門
 
-群組訊息預設**需要提及**（中繼資料提及或安全的規則運算式模式）。適用於 WhatsApp、Telegram、Discord、Google Chat 與 iMessage 群組聊天。
+群組訊息預設為**需要提及**（中繼資料提及或安全的規則運算式模式）。適用於 WhatsApp、Telegram、Discord、Google Chat 和 iMessage 群組聊天。
 
-可見回覆會獨立控制。一般群組、頻道與內部 WebChat 直接要求預設為自動傳遞最終內容：最終助理文字會透過舊版可見回覆路徑發佈。若可見輸出僅應在代理呼叫 `message(action=send)` 後發佈，請選擇加入 `messages.visibleReplies: "message_tool"` 或 `messages.groupChat.visibleReplies: "message_tool"`。在已選擇加入的僅工具模式中，若模型未呼叫訊息工具便傳回實質性的最終答案，該最終文字會保持私密，閘道詳細記錄會記錄受抑制的承載資料中繼資料，而 OpenClaw 會將一次復原重試排入佇列，要求模型透過 `message(action=send)` 傳遞相同回覆。
+可見回覆會分開控制。一般群組、頻道及內部 WebChat 直接要求預設會自動傳遞最終內容：最終的助理文字會透過舊版可見回覆路徑發布。若模型撰寫的來源回覆只能在代理程式呼叫 `message(action=send)` 後發布，請選用 `messages.visibleReplies: "message_tool"` 或 `messages.groupChat.visibleReplies: "message_tool"`。如果模型在已選用的僅工具模式中未呼叫訊息工具，卻傳回實質性的最終答案，該最終文字會保持私密，閘道詳細記錄會記錄遭抑制的承載資料中繼資料，而 OpenClaw 會將一次復原重試加入佇列，要求模型透過 `message(action=send)` 傳遞相同回覆。
 
-僅工具可見回覆需要能可靠呼叫工具的模型／執行階段，並建議在共用的環境式房間中搭配最新一代模型使用，例如 GPT-5.6 Sol。某些較弱的模型能以最終文字作答，卻無法理解來源可見輸出必須透過 `message(action=send)` 傳送。僅當最終內容具有實質內容、來源回合不是房間事件、傳送原則未拒絕傳遞，且尚未傳送來源回覆時，OpenClaw 才會預設復原常見的最終內容擱置情況。復原限制為一次重試；它會抑制合成重試提示的持久化，並使該重試不進入收集批次，以免與不相關的佇列提示合併。若重試仍然擱置或無法排入佇列，OpenClaw 只會傳遞經清理的診斷訊息，例如 “我已產生回覆，但無法將其傳遞至此聊天。請再試一次。”。原始私密最終文字絕不會標記為自動傳遞至來源。對於反覆擱置回覆的模型，請使用 `"automatic"`，讓最終助理回合成為可見回覆路徑；切換至工具呼叫能力更強的模型；在閘道詳細記錄中檢查受抑制的承載資料摘要；或設定 `messages.groupChat.visibleReplies: "automatic"`，對每個群組／頻道要求使用可見的最終回覆。
+僅工具原則會管理助理來源回覆和一般工具媒體。它不會抑制執行階段擁有的終端輸出，例如已授權的命令回應、持久性完成通知，或所屬控管程式明確歸類為主機擁有的供應商原生產物。主機擁有的產物會透過一般頻道分派路徑傳遞，且仍遵守對外 `sendPolicy` 拒絕。環境 `room_event` 輪次除非是明確命令，否則會保持安靜，即使執行階段輸出標記為主機擁有亦同。
 
-若使用中的工具原則不提供訊息工具，OpenClaw 會回退至自動可見回覆，而非無聲地抑制回應。`openclaw doctor` 會對此不相符情況發出警告。
+僅工具可見回覆需要能可靠呼叫工具的模型／執行階段，並建議在使用最新世代模型（例如 GPT-5.6 Sol）的共用環境房間中採用。某些較弱的模型可以回答最終文字，卻無法理解來源可見輸出必須透過 `message(action=send)` 傳送。OpenClaw 預設只會在最終內容具實質性、來源輪次不是房間事件、傳送原則未拒絕傳遞，且尚未傳送任何來源回覆時，復原常見的擱置最終內容情況。復原僅限一次重試；它會抑制合成重試提示的持久化，並將該重試排除於收集批次之外，因此不會與其他不相關的佇列提示合併。如果重試仍然擱置或無法加入佇列，OpenClaw 只會傳遞經清理的診斷訊息，例如 “我已產生回覆，但無法將其傳遞至此聊天。請再試一次。”原始私密最終文字絕不會標記為自動傳遞至來源。對於反覆擱置回覆的模型，請使用 `"automatic"`，讓最終助理輪次成為可見回覆路徑；或改用工具呼叫能力較強的模型、檢查閘道詳細記錄中的遭抑制承載資料摘要，或設定 `messages.groupChat.visibleReplies: "automatic"`，讓每個群組／頻道要求都使用可見的最終回覆。
 
-此規則適用於一般代理最終文字。外掛擁有的對話繫結，會將所屬外掛傳回的回覆作為已宣告繫結討論串回合的可見回應；該外掛不需要為這些繫結回覆呼叫 `message(action=send)`。
+如果訊息工具在目前啟用的工具政策下不可用，OpenClaw 會改用自動顯示回覆，而不是在不發出提示的情況下隱藏回應。`openclaw doctor` 會針對此不一致發出警告。
+
+此規則適用於一般代理程式的最終文字。由外掛擁有的對話繫結，會在已宣告的繫結討論串回合中，使用擁有該繫結之外掛所傳回的回覆作為顯示回應；外掛不需要為這些繫結回覆呼叫 `message(action=send)`。
 
 **疑難排解：群組 @提及觸發輸入狀態後便無回應（沒有錯誤）**
 
-症狀：群組／頻道中的 @提及會顯示輸入指示器，且閘道記錄回報 `dispatch complete (queuedFinal=false, replies=0)`，但房間中沒有收到任何訊息。傳送給同一代理的私訊則會正常回覆。
+症狀：群組／頻道中的 @提及會顯示輸入指示器，且閘道記錄回報 `dispatch complete (queuedFinal=false, replies=0)`，但聊天室中沒有收到任何訊息。傳送給同一代理程式的私訊則能正常回覆。
 
-原因：群組／頻道的可見回覆模式解析為 `"message_tool"`，因此 OpenClaw 會執行該回合，但除非代理呼叫 `message(action=send)`，否則會抑制最終助理文字。此模式沒有 `NO_REPLY` 合約；未呼叫訊息工具即表示原始最終文字為私密內容。對於具有實質內容的來源回合，OpenClaw 現在會嘗試一次受保護的復原重試；簡短附註、明確要求保持沉默、房間事件、遭傳送原則拒絕的回合，以及已傳遞的回合都不會重試。一般群組與頻道回合預設為 `"automatic"`，因此只有明確將 `messages.groupChat.visibleReplies`（或全域 `messages.visibleReplies`）設為 `"message_tool"` 時，才會出現此症狀。測試框架的 `defaultVisibleReplies` 不適用於此處——群組／頻道解析器會忽略它；它只影響直接／來源聊天（Codex 測試框架會以這種方式抑制直接聊天的最終內容）。
+原因：群組／頻道的顯示回覆模式解析為 `"message_tool"`，因此 OpenClaw 會執行該回合，但除非代理程式呼叫 `message(action=send)`，否則會隱藏助理的最終文字。此模式沒有 `NO_REPLY` 契約；未呼叫訊息工具，表示原始最終文字屬於私密內容。對於具實質內容的來源回合，OpenClaw 現在會嘗試一次受保護的復原重試；簡短註記、明確要求保持沉默、聊天室事件、傳送政策拒絕的回合，以及已送達的回合都不會重試。一般群組與頻道回合預設為 `"automatic"`，因此只有在明確將 `messages.groupChat.visibleReplies`（或全域 `messages.visibleReplies`）設為 `"message_tool"` 時，才會出現此症狀。線束的 `defaultVisibleReplies` 不適用於此處——群組／頻道解析器會忽略它；它只會影響直接／來源聊天（Codex 線束會以此方式隱藏直接聊天的最終回覆）。
 
-修正方式：選擇工具呼叫能力更強的模型、移除明確的 `"message_tool"` 覆寫以回退至 `"automatic"` 預設值，或設定 `messages.groupChat.visibleReplies: "automatic"`，強制每個群組／頻道請求都產生可見回覆。有實質內容但未送達的最終回覆不應再以靜默成功結束；它應透過一次 `message(action=send)` 重試來恢復，或顯示經過清理的傳送失敗診斷。儲存檔案後，閘道會熱重新載入 `messages` 設定；只有在部署中停用檔案監看或設定重新載入時，才需要重新啟動閘道。
+修正方式：選擇工具呼叫能力較強的模型、移除明確的 `"message_tool"` 覆寫以退回 `"automatic"` 預設值，或設定 `messages.groupChat.visibleReplies: "automatic"`，強制每個群組／頻道要求都顯示回覆。具實質內容但未送達的最終回覆不應再以無聲成功結束；它應透過一次 `message(action=send)` 重試完成復原，或顯示經過清理的傳送失敗診斷。儲存檔案後，閘道會熱重新載入 `messages` 設定；只有在部署中停用檔案監看或設定重新載入時，才需要重新啟動閘道。
 
 **提及類型：**
 
-- **中繼資料提及**：平台原生的 @ 提及。在 WhatsApp 自我聊天模式中會忽略。
-- **文字模式**：`agents.list[].groupChat.mentionPatterns` 中的安全規則運算式模式。無效模式和不安全的巢狀重複會被忽略。
-- 只有在可以偵測提及時（原生提及或至少一個模式），才會強制執行提及閘控。
+- **中繼資料提及**：平台原生的 @提及。在 WhatsApp 自我聊天模式中會忽略。
+- **文字模式**：`agents.entries.*.groupChat.mentionPatterns` 中的安全規則運算式模式。無效模式與不安全的巢狀重複會被忽略。
+- 只有在能夠偵測時（原生提及或至少一個模式），才會強制執行提及閘控。
 
 ```json5
 {
   messages: {
-    visibleReplies: "automatic", // 對直接／來源聊天強制使用舊版自動最終回覆
+    visibleReplies: "automatic", // 強制直接／來源聊天使用舊版自動最終回覆
     groupChat: {
       historyLimit: 50,
-      unmentionedInbound: "room_event", // 永遠開啟且未提及的聊天室閒聊會成為安靜的上下文
-      visibleReplies: "message_tool", // 選擇啟用；可見的聊天室回覆必須使用 message(action=send)
+      unmentionedInbound: "room_event", // 永遠啟用且未提及的聊天室閒聊會成為安靜的情境
+      visibleReplies: "message_tool", // 選擇啟用；聊天室回覆必須透過 message(action=send) 才會顯示
     },
   },
   agents: {
@@ -868,11 +864,11 @@ IRC 由外掛支援，並在 `channels.irc` 下設定。
 }
 ```
 
-`messages.groupChat.historyLimit` 設定全域預設值。頻道可以使用 `channels.<channel>.historyLimit`（或個別帳號設定）覆寫。設為 `0` 即可停用。
+`messages.groupChat.historyLimit` 設定全域預設值。頻道可以使用 `channels.<channel>.historyLimit`（或個別帳號設定）覆寫。設定 `0` 即可停用。
 
-`messages.groupChat.unmentionedInbound: "room_event"` 會在支援的頻道上，將永遠開啟但未提及的群組／頻道訊息以安靜的聊天室上下文提交。含提及的訊息、命令及直接訊息仍會視為使用者請求。完整的 Discord、Slack 和 Telegram 範例請參閱[環境聊天室事件](/zh-TW/channels/ambient-room-events)。
+`messages.groupChat.unmentionedInbound: "room_event"` 會在支援的頻道上，將永遠啟用但未提及的群組／頻道訊息提交為安靜的聊天室情境。被提及的訊息、命令及直接訊息仍會視為使用者要求。完整的 Discord、Slack 與 Telegram 範例請參閱[環境聊天室事件](/zh-TW/channels/ambient-room-events)。
 
-`messages.visibleReplies` 是全域來源事件預設值；`messages.groupChat.visibleReplies` 會針對群組／頻道來源事件覆寫該值。未設定 `messages.visibleReplies` 時，直接／來源聊天會使用所選執行階段或測試框架的預設值，但內部 WebChat 直接回合會使用自動最終傳送，以維持 Pi/Codex 提示詞一致性。設定 `messages.visibleReplies: "message_tool"` 可刻意要求可見輸出必須使用 `message(action=send)`。頻道允許清單和提及閘控仍會決定是否處理事件。
+`messages.visibleReplies` 是全域來源事件預設值；`messages.groupChat.visibleReplies` 會針對群組／頻道來源事件覆寫該值。未設定 `messages.visibleReplies` 時，直接／來源聊天會使用所選執行階段或線束的預設值，但內部 WebChat 直接回合會使用自動最終傳送，以維持 Pi／Codex 提示詞的一致性。設定 `messages.visibleReplies: "message_tool"` 可刻意要求必須透過 `message(action=send)` 才能顯示輸出。頻道允許清單與提及閘控仍會決定是否處理事件。
 
 #### 私訊歷史記錄限制
 
@@ -891,11 +887,11 @@ IRC 由外掛支援，並在 `channels.irc` 下設定。
 
 解析順序：個別私訊覆寫 → 提供者預設值 → 無限制（全部保留）。
 
-此解析器會為工作階段金鑰符合標準 `provider:direct:<id>`（或舊版 `provider:dm:<id>`）格式的任何頻道讀取 `channels.<provider>.dmHistoryLimit` 和 `channels.<provider>.dms.<id>.historyLimit`，因此同樣適用於內建與外掛頻道，而不僅限於固定清單。
+此解析器會針對工作階段金鑰遵循標準 `provider:direct:<id>`（或舊版 `provider:dm:<id>`）格式的任何頻道，讀取 `channels.<provider>.dmHistoryLimit` 與 `channels.<provider>.dms.<id>.historyLimit`，因此它同樣適用於內建頻道和外掛頻道，而不僅限於固定清單。
 
 #### 自我聊天模式
 
-將你自己的號碼加入 `allowFrom` 以啟用自我聊天模式（忽略原生 @ 提及，只回應文字模式）：
+將你自己的號碼加入 `allowFrom`，以啟用自我聊天模式（忽略原生 @提及，只回應文字模式）：
 
 ```json5
 {
@@ -922,7 +918,7 @@ IRC 由外掛支援，並在 `channels.irc` 下設定。
 {
   commands: {
     native: "auto", // 在支援時註冊原生命令
-    nativeSkills: "auto", // 在支援時註冊原生 skill 命令
+    nativeSkills: "auto", // 在支援時註冊原生 Skills 命令
     text: true, // 解析聊天訊息中的 /commands
     bash: false, // 允許 !（別名：/bash）
     bashForegroundMs: 2000,
@@ -930,7 +926,7 @@ IRC 由外掛支援，並在 `channels.irc` 下設定。
     mcp: false, // 允許 /mcp
     plugins: false, // 允許 /plugins
     debug: false, // 允許 /debug
-    restart: true, // 允許 /restart + 閘道重新啟動工具
+    restart: true, // 允許 /restart 與外部 SIGUSR1 重新啟動要求
     ownerAllowFrom: ["discord:123456789012345678"],
     ownerDisplay: "raw", // raw | hash
     ownerDisplaySecret: "${OWNER_ID_HASH_SECRET}",
@@ -945,27 +941,27 @@ IRC 由外掛支援，並在 `channels.irc` 下設定。
 
 <Accordion title="命令詳細資料">
 
-- 此區塊設定命令介面。如需目前的內建與隨附命令目錄，請參閱[斜線命令](/zh-TW/tools/slash-commands)。
-- 本頁是**設定鍵參考**，不是完整的命令目錄。頻道／外掛所擁有的命令，例如 QQ Bot `/bot-ping` `/bot-help` `/bot-logs`、LINE `/card`、裝置配對 `/pair`、記憶 `/dreaming`、電話控制 `/phone` 及 Talk `/voice`，均記錄於各自的頻道／外掛頁面和[斜線命令](/zh-TW/tools/slash-commands)中。
+- 此區塊設定命令介面。目前的內建與隨附命令目錄請參閱[斜線命令](/zh-TW/tools/slash-commands)。
+- 此頁是**設定鍵參考資料**，不是完整的命令目錄。頻道／外掛所擁有的命令，例如 QQ Bot `/bot-ping` `/bot-help` `/bot-logs`、LINE `/card`、裝置配對 `/pair`、記憶 `/dreaming`、電話控制 `/phone`，以及 Talk `/voice`，會記錄於各自的頻道／外掛頁面及[斜線命令](/zh-TW/tools/slash-commands)中。
 - 文字命令必須是以 `/` 開頭的**獨立**訊息。
-- `native: "auto"` 會為 Discord/Telegram 開啟原生命令，Slack 則保持關閉。
-- `nativeSkills: "auto"` 會為 Discord/Telegram 開啟原生 skill 命令，Slack 則保持關閉。
-- 依頻道覆寫：`channels.discord.commands.native`（布林值或 `"auto"`）。對 Discord 而言，`false` 會在啟動期間略過原生命令的註冊與清理。
-- 使用 `channels.<provider>.commands.nativeSkills` 依頻道覆寫原生 skill 註冊。
+- `native: "auto"` 會為 Discord／Telegram 啟用原生命令，但不會為 Slack 啟用。
+- `nativeSkills: "auto"` 會為 Discord／Telegram 啟用原生 Skills 命令，但不會為 Slack 啟用。
+- 可依頻道覆寫：`channels.discord.commands.native`（布林值或 `"auto"`）。對 Discord 而言，`false` 會在啟動期間略過原生命令註冊與清理。
+- 使用 `channels.<provider>.commands.nativeSkills` 可依頻道覆寫原生 Skills 註冊。
 - `channels.telegram.customCommands` 會新增額外的 Telegram 機器人選單項目。
-- `bash: true` 會為主機殼層啟用 `! <cmd>`。需要啟用 `tools.elevated.enabled`，且傳送者必須位於 `tools.elevated.allowFrom.<channel>` 中。
-- `config: true` 會啟用 `/config`（讀取／寫入 `openclaw.json`）。對閘道 `chat.send` 用戶端而言，持續性 `/config set|unset` 寫入還需要 `operator.admin`；唯讀的 `/config show` 仍可供一般具有寫入範圍的操作員用戶端使用。
+- `bash: true` 會為主機 shell 啟用 `! <cmd>`。需要 `tools.elevated.enabled`，且傳送者必須位於 `tools.elevated.allowFrom.<channel>` 中。
+- `config: true` 會啟用 `/config`（讀取／寫入 `openclaw.json`）。對於閘道 `chat.send` 用戶端，持續性的 `/config set|unset` 寫入還需要 `operator.admin`；唯讀的 `/config show` 仍可供一般具有寫入範圍的操作員用戶端使用。
 - `mcp: true` 會為 `mcp.servers` 下由 OpenClaw 管理的 MCP 伺服器設定啟用 `/mcp`。
 - `plugins: true` 會啟用 `/plugins`，用於外掛探索、安裝及啟用／停用控制。
-- `channels.<provider>.configWrites` 會依頻道閘控設定變更（預設值：true）。
-- 對多帳號頻道而言，`channels.<provider>.accounts.<id>.configWrites` 也會閘控以該帳號為目標的寫入（例如 `/allowlist --config --account <id>` 或 `/config set channels.<provider>.accounts.<id>...`）。
-- `restart: false` 會停用 `/restart` 和閘道重新啟動工具動作。預設值：`true`。
-- `ownerAllowFrom` 是僅限擁有者命令與受擁有者閘控之頻道動作的明確擁有者允許清單。它與 `allowFrom` 分開。
-- `ownerDisplay: "hash"` 會在系統提示詞中對擁有者 ID 進行雜湊。設定 `ownerDisplaySecret` 以控制雜湊。
-- `allowFrom` 依提供者設定。設定後，它會成為**唯一**的授權來源（頻道允許清單／配對及 `useAccessGroups` 均會被忽略）。
-- 未設定 `allowFrom` 時，`useAccessGroups: false` 允許命令略過存取群組原則。
-- 命令文件對照：
-  - 內建與隨附目錄：[斜線命令](/zh-TW/tools/slash-commands)
+- `channels.<provider>.configWrites` 會依頻道管控設定變更（預設值：true）。
+- 對於多帳號頻道，`channels.<provider>.accounts.<id>.configWrites` 也會管控以該帳號為目標的寫入（例如 `/allowlist --config --account <id>` 或 `/config set channels.<provider>.accounts.<id>...`）。
+- `restart: false` 會停用 `/restart` 與外部 `SIGUSR1` 重新啟動要求。預設值：`true`。
+- `ownerAllowFrom` 是僅限擁有者命令及受擁有者閘控之頻道動作的明確擁有者允許清單。它與 `allowFrom` 分開。
+- `ownerDisplay: "hash"` 會在系統提示詞中雜湊擁有者 ID。設定 `ownerDisplaySecret` 可控制雜湊。
+- `allowFrom` 依提供者設定。設定後，它會成為**唯一**的授權來源（頻道允許清單／配對及 `useAccessGroups` 都會被忽略）。
+- 當未設定 `allowFrom` 時，`useAccessGroups: false` 允許命令略過存取群組政策。
+- 命令文件索引：
+  - 內建與隨附命令目錄：[斜線命令](/zh-TW/tools/slash-commands)
   - 頻道特定命令介面：[頻道](/zh-TW/channels)
   - QQ Bot 命令：[QQ Bot](/zh-TW/channels/qqbot)
   - 配對命令：[配對](/zh-TW/channels/pairing)
@@ -978,6 +974,6 @@ IRC 由外掛支援，並在 `channels.irc` 下設定。
 
 ## 相關內容
 
-- [設定參考](/zh-TW/gateway/configuration-reference) — 頂層鍵
+- [設定參考資料](/zh-TW/gateway/configuration-reference) — 頂層鍵
 - [設定 — 代理程式](/zh-TW/gateway/config-agents)
 - [頻道概覽](/zh-TW/channels)

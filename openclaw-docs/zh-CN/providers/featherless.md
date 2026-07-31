@@ -1,31 +1,32 @@
 ---
 read_when:
-    - 你想将 Featherless AI 与 OpenClaw 搭配使用
+    - 你想在 OpenClaw 中使用 Featherless AI
     - 你需要 Featherless API key 环境变量或模型引用格式
 summary: Featherless AI 设置、模型选择和工具调用
 title: Featherless AI
 x-i18n:
-    generated_at: "2026-07-11T20:52:51Z"
+    generated_at: "2026-07-26T06:20:55Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 9112f7e65b4089bf96933c632d0b62f7fb87d42998d985ca85eb92dc392636b6
     source_path: providers/featherless.md
     workflow: 16
 ---
 
-[Featherless AI](https://featherless.ai) 通过兼容 OpenAI 的 API 提供开放模型。OpenClaw 将 Featherless 安装为官方外部提供商插件，在保持内置目录精简的同时，允许运行时使用 Featherless 的准确模型 ID。
+[Featherless AI](https://featherless.ai) 通过兼容 OpenAI 的 API 提供开放模型。OpenClaw 将 Featherless 安装为官方外部提供商插件，在保持内置目录精简的同时，支持在运行时接收 Featherless 的精确模型 ID。
 
-| 属性 | 值 |
+| 属性            | 值                                       |
 | --------------- | ---------------------------------------- |
-| 提供商 ID | `featherless` |
-| 软件包 | `@openclaw/featherless-provider` |
-| 身份验证环境变量 | `FEATHERLESS_API_KEY` |
-| 新手引导标志 | `--auth-choice featherless-api-key` |
-| 直接 CLI 标志 | `--featherless-api-key <key>` |
-| API | 兼容 OpenAI（`openai-completions`） |
-| 基础 URL | `https://api.featherless.ai/v1` |
-| 默认模型 | `featherless/Qwen/Qwen3-32B` |
+| 提供商 ID       | `featherless`                       |
+| 软件包          | `@openclaw/featherless-provider`                       |
+| 身份验证环境变量 | `FEATHERLESS_API_KEY`                       |
+| 新手引导标志    | `--auth-choice featherless-api-key`                       |
+| 直接 CLI 标志   | `--featherless-api-key <key>`                       |
+| API             | 兼容 OpenAI（`openai-completions`）       |
+| 基础 URL        | `https://api.featherless.ai/v1`                       |
+| 默认模型        | `featherless/Qwen/Qwen3-32B`                       |
 
 ## 设置
 
@@ -65,13 +66,13 @@ openclaw models list --provider featherless
 
 ## 默认模型
 
-该插件使用 `Qwen/Qwen3-32B` 作为设置时的默认模型，因为 Featherless 文档说明 Qwen 3 系列支持原生工具调用。OpenClaw 为其配置 32,768 个 token 的上下文窗口、保守的 4,096 个 token 输出上限，以及 Qwen 聊天模板的思考控制项。
+插件使用 `Qwen/Qwen3-32B` 作为设置默认值，因为 Featherless 文档说明 Qwen 3 系列支持原生工具调用。OpenClaw 为其配置 32,768 token 的上下文窗口、保守的 4,096 token 输出限制，以及 Qwen 聊天模板的思考控制。
 
-目录中的成本字段为零，因为 Featherless 支持多种计费模式，而 OpenClaw 不会嵌入特定于账户的套餐费率或按请求计价费率。
+目录中的成本字段为零，因为 Featherless 支持多种计费模式，而 OpenClaw 不会嵌入特定账户的套餐或按请求计费费率。
 
 ## 其他 Featherless 模型
 
-在 `featherless/` 提供商前缀后使用准确的 Featherless 模型 ID：
+在 `featherless/` 提供商前缀后使用 Featherless 的精确模型 ID：
 
 ```json5
 {
@@ -85,9 +86,9 @@ openclaw models list --provider featherless
 }
 ```
 
-OpenClaw 有意不将 Featherless 的完整公共模型索引复制到选择器中。该索引规模庞大，并且未提供足够的结构化能力元数据，无法安全地对每个文本、视觉、嵌入和推理模型进行分类。因此，未知 ID 会使用保守的纯文本、非推理默认配置：4,096 个 token 的上下文窗口和 1,024 个 token 的输出上限。
+OpenClaw 特意不将 Featherless 的完整公共模型索引复制到选择器中。该索引规模庞大，且没有提供足够的结构化能力元数据，无法安全地对所有文本、视觉、嵌入和推理模型进行分类。因此，未知 ID 会采用保守的纯文本、非推理默认值：4,096 token 的上下文窗口和 1,024 token 的输出限制。
 
-当模型需要不同的元数据时，请添加明确的提供商模型条目：
+当模型需要不同的元数据时，请添加显式的提供商模型条目：
 
 ```json5
 {
@@ -114,14 +115,14 @@ OpenClaw 有意不将 Featherless 的完整公共模型索引复制到选择器�
 }
 ```
 
-添加自定义元数据前，请查看 Featherless 的模型目录，确认当前的模型可用性和能力标签。
+添加自定义元数据前，请查看 Featherless 的模型目录，确认当前模型可用性和能力标签。
 
 ## 故障排查
 
 - `401` 或 `403`：确认 Gateway 网关进程可以访问 `FEATHERLESS_API_KEY`，或重新运行新手引导。
-- 未知模型：在 `featherless/` 前缀后使用 Featherless 提供的准确且区分大小写的 ID。
-- 工具调用以文本形式返回：选择 Featherless 文档中说明支持原生函数调用的模型系列，例如 Qwen 3。
-- 托管式 Gateway 网关无法访问密钥：将其放入 `~/.openclaw/.env` 或该服务加载的其他环境来源中，然后重启 Gateway 网关。
+- 未知模型：请使用 `featherless/` 前缀后 Featherless 提供的区分大小写的精确 ID。
+- 工具调用以文本形式返回：请选择 Featherless 文档中说明支持原生函数调用的模型系列，例如 Qwen 3。
+- 托管 Gateway 网关无法访问密钥：将其放入 `~/.openclaw/.env` 或服务加载的其他环境来源中，然后重启 Gateway 网关。
 
 ## 相关内容
 

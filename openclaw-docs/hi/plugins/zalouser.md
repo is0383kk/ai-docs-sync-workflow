@@ -2,50 +2,51 @@
 read_when:
     - आप OpenClaw में Zalo Personal (अनौपचारिक) समर्थन चाहते हैं
     - आप zalouser Plugin को कॉन्फ़िगर या विकसित कर रहे हैं
-summary: 'Zalo Personal Plugin: QR लॉगिन + नेटिव zca-js के माध्यम से मैसेजिंग (Plugin इंस्टॉल + चैनल कॉन्फ़िगरेशन + टूल)'
+summary: 'Zalo Personal Plugin: नेटिव zca-js के माध्यम से QR लॉगिन + मैसेजिंग (Plugin इंस्टॉल + चैनल कॉन्फ़िगरेशन + टूल)'
 title: Zalo व्यक्तिगत Plugin
 x-i18n:
-    generated_at: "2026-06-28T23:55:30Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T21:34:51Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 405348eac4c08cc6e28b22cfff615fa34c117dedc51a31613545c4057069c20b
+    source_hash: cb0bdaa10340b5d78dc32abf6b0520fda6cf5f65e2e17b551b4e9bd72acfbbf2
     source_path: plugins/zalouser.md
     workflow: 16
 ---
 
-OpenClaw के लिए Zalo Personal समर्थन, एक Plugin के माध्यम से, सामान्य Zalo उपयोगकर्ता खाते को स्वचालित करने के लिए नेटिव `zca-js` का उपयोग करते हुए.
+एक ऐसे plugin के माध्यम से OpenClaw के लिए Zalo Personal समर्थन, जो सामान्य Zalo उपयोगकर्ता खाते को
+स्वचालित करने हेतु मूल `zca-js` का उपयोग करता है। किसी बाहरी `zca`/`openzca` CLI बाइनरी की
+आवश्यकता नहीं है।
 
 <Warning>
-अनौपचारिक ऑटोमेशन से खाता निलंबन या प्रतिबंध हो सकता है। अपने जोखिम पर उपयोग करें।
+अनौपचारिक स्वचालन के कारण खाता निलंबित या प्रतिबंधित हो सकता है। इसका उपयोग अपने जोखिम पर करें।
 </Warning>
 
 ## नामकरण
 
-Channel id `zalouser` है ताकि यह स्पष्ट रहे कि यह एक **व्यक्तिगत Zalo उपयोगकर्ता खाते** को स्वचालित करता है (अनौपचारिक)। हम संभावित भविष्य के आधिकारिक Zalo API एकीकरण के लिए `zalo` को आरक्षित रखते हैं।
+चैनल आईडी `zalouser` है, ताकि यह स्पष्ट हो कि यह एक **व्यक्तिगत Zalo
+उपयोगकर्ता खाते** (अनौपचारिक) को स्वचालित करता है। अलग `zalo` चैनल आईडी आधिकारिक,
+अंतर्निहित Zalo Bot/Webhook एकीकरण के लिए है—[Zalo](/hi/channels/zalo) देखें।
 
 ## यह कहाँ चलता है
 
-यह Plugin **Gateway प्रक्रिया के अंदर** चलता है।
+यह plugin **Gateway प्रक्रिया के भीतर** चलता है। दूरस्थ Gateway के लिए,
+इसे उस होस्ट पर इंस्टॉल/कॉन्फ़िगर करें, फिर Gateway को पुनः प्रारंभ करें।
 
-यदि आप रिमोट Gateway का उपयोग करते हैं, तो इसे **Gateway चलाने वाली मशीन** पर इंस्टॉल/कॉन्फ़िगर करें, फिर Gateway को पुनः आरंभ करें।
+## इंस्टॉल करना
 
-किसी बाहरी `zca`/`openzca` CLI बाइनरी की आवश्यकता नहीं है।
-
-## इंस्टॉल करें
-
-### विकल्प A: npm से इंस्टॉल करें
+### npm से
 
 ```bash
 openclaw plugins install @openclaw/zalouser
 ```
 
-वर्तमान आधिकारिक रिलीज़ टैग का पालन करने के लिए बेयर पैकेज का उपयोग करें। सटीक
-संस्करण केवल तब पिन करें जब आपको पुनरुत्पाद्य इंस्टॉल की आवश्यकता हो।
+वर्तमान आधिकारिक रिलीज़ टैग का अनुसरण करने के लिए बिना संस्करण वाला पैकेज उपयोग करें; किसी सटीक
+संस्करण को केवल तभी पिन करें, जब आपको पुनरुत्पाद्य इंस्टॉलेशन की आवश्यकता हो। इसके बाद Gateway को
+पुनः प्रारंभ करें।
 
-इसके बाद Gateway को पुनः आरंभ करें।
-
-### विकल्प B: स्थानीय फ़ोल्डर से इंस्टॉल करें (dev)
+### स्थानीय फ़ोल्डर से (डेवलपमेंट)
 
 ```bash
 PLUGIN_SRC=./path/to/local/zalouser-plugin
@@ -53,11 +54,11 @@ openclaw plugins install "$PLUGIN_SRC"
 cd "$PLUGIN_SRC" && pnpm install
 ```
 
-इसके बाद Gateway को पुनः आरंभ करें।
+इसके बाद Gateway को पुनः प्रारंभ करें।
 
 ## कॉन्फ़िगरेशन
 
-Channel कॉन्फ़िगरेशन `channels.zalouser` के अंतर्गत रहता है (`plugins.entries.*` नहीं):
+चैनल कॉन्फ़िगरेशन `channels.zalouser` के अंतर्गत होता है (`plugins.entries.*` के अंतर्गत नहीं):
 
 ```json5
 {
@@ -70,25 +71,35 @@ Channel कॉन्फ़िगरेशन `channels.zalouser` के अं�
 }
 ```
 
+DM/समूह पहुँच नियंत्रण, बहु-खाता सेटअप, पर्यावरण चर और समस्या निवारण के लिए
+[Zalo व्यक्तिगत चैनल कॉन्फ़िगरेशन](/hi/channels/zalouser) देखें।
+
 ## CLI
 
 ```bash
 openclaw channels login --channel zalouser
+openclaw channels login --channel zalouser --account <name>
 openclaw channels logout --channel zalouser
 openclaw channels status --probe
 openclaw message send --channel zalouser --target <threadId> --message "Hello from OpenClaw"
+openclaw directory self --channel zalouser
 openclaw directory peers list --channel zalouser --query "name"
+openclaw directory groups list --channel zalouser --query "name"
+openclaw directory groups members --channel zalouser --group-id <id>
 ```
 
-## Agent टूल
+## एजेंट टूल
 
-टूल नाम: `zalouser`
+टूल का नाम: `zalouser`
 
 क्रियाएँ: `send`, `image`, `link`, `friends`, `groups`, `me`, `status`
 
-Channel संदेश क्रियाएँ संदेश प्रतिक्रियाओं के लिए `react` का भी समर्थन करती हैं।
+चैनल संदेश क्रियाएँ (एजेंट टूल नहीं) संदेश
+प्रतिक्रियाओं के लिए `react` का भी समर्थन करती हैं।
 
 ## संबंधित
 
-- [Plugins बनाना](/hi/plugins/building-plugins)
+- [Zalo व्यक्तिगत चैनल कॉन्फ़िगरेशन](/hi/channels/zalouser)
+- [Zalo (आधिकारिक Bot/Webhook चैनल)](/hi/channels/zalo)
+- [plugins बनाना](/hi/plugins/building-plugins)
 - [ClawHub](/hi/clawhub)

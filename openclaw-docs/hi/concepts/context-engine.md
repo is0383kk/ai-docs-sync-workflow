@@ -1,37 +1,38 @@
 ---
 read_when:
-    - आप समझना चाहते हैं कि OpenClaw मॉडल संदर्भ कैसे तैयार करता है
-    - आप लेगेसी इंजन और Plugin इंजन के बीच स्विच कर रहे हैं
-    - आप एक संदर्भ इंजन Plugin बना रहे हैं
+    - आप समझना चाहते हैं कि OpenClaw मॉडल कॉन्टेक्स्ट को कैसे संयोजित करता है
+    - आप पुराने इंजन और Plugin इंजन के बीच स्विच कर रहे हैं
+    - आप एक कॉन्टेक्स्ट इंजन Plugin बना रहे हैं
 sidebarTitle: Context engine
-summary: 'संदर्भ इंजन: प्लगेबल संदर्भ असेंबली, Compaction, और उप-एजेंट जीवनचक्र'
-title: संदर्भ इंजन
+summary: 'कॉन्टेक्स्ट इंजन: प्लग-योग्य कॉन्टेक्स्ट संयोजन, Compaction और सबएजेंट जीवनचक्र'
+title: कॉन्टेक्स्ट इंजन
 x-i18n:
-    generated_at: "2026-06-30T14:04:31Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:31:28Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f0ed65cbb72b14b1a6e8d4d9a394f730a48ada35d77e34c12b3356162b281eec
+    source_hash: 721780790dacebec44e3c7540b225bd853ee66bf5ae066b84df4344614d93a62
     source_path: concepts/context-engine.md
     workflow: 16
 ---
 
-एक **संदर्भ इंजन** यह नियंत्रित करता है कि OpenClaw प्रत्येक रन के लिए मॉडल संदर्भ कैसे बनाता है: कौन-से संदेश शामिल करने हैं, पुराने इतिहास को कैसे सारांशित करना है, और subagent सीमाओं के पार संदर्भ कैसे प्रबंधित करना है।
+एक **कॉन्टेक्स्ट इंजन** नियंत्रित करता है कि OpenClaw प्रत्येक रन के लिए मॉडल कॉन्टेक्स्ट कैसे बनाता है: किन संदेशों को शामिल करना है, पुराने इतिहास का सारांश कैसे बनाना है, और सबएजेंट सीमाओं के आर-पार कॉन्टेक्स्ट कैसे प्रबंधित करना है।
 
-OpenClaw एक अंतर्निहित `legacy` इंजन के साथ आता है और डिफ़ॉल्ट रूप से उसी का उपयोग करता है - अधिकांश उपयोगकर्ताओं को इसे बदलने की आवश्यकता कभी नहीं होती। किसी Plugin इंजन को केवल तभी इंस्टॉल और चुनें जब आप अलग assembly, Compaction, या cross-session recall व्यवहार चाहते हों।
+OpenClaw एक अंतर्निहित `legacy` इंजन के साथ आता है और डिफ़ॉल्ट रूप से उसका उपयोग करता है। कोई Plugin इंजन केवल तभी इंस्टॉल और चुनें, जब आपको अलग असेंबली, Compaction या क्रॉस-सेशन रिकॉल व्यवहार चाहिए।
 
 ## त्वरित शुरुआत
 
 <Steps>
-  <Step title="जांचें कि कौन-सा इंजन सक्रिय है">
+  <Step title="जाँचें कि कौन-सा इंजन सक्रिय है">
     ```bash
     openclaw doctor
-    # or inspect config directly:
+    # या कॉन्फ़िगरेशन को सीधे जाँचें:
     cat ~/.openclaw/openclaw.json | jq '.plugins.slots.contextEngine'
     ```
   </Step>
   <Step title="Plugin इंजन इंस्टॉल करें">
-    संदर्भ इंजन plugins किसी भी अन्य OpenClaw plugin की तरह इंस्टॉल किए जाते हैं।
+    कॉन्टेक्स्ट इंजन Plugins किसी अन्य OpenClaw Plugin की तरह इंस्टॉल किए जाते हैं।
 
     <Tabs>
       <Tab title="npm से">
@@ -39,7 +40,7 @@ OpenClaw एक अंतर्निहित `legacy` इंजन के स�
         openclaw plugins install @martian-engineering/lossless-claw
         ```
       </Tab>
-      <Tab title="स्थानीय पाथ से">
+      <Tab title="स्थानीय पथ से">
         ```bash
         openclaw plugins install -l ./my-context-engine
         ```
@@ -53,78 +54,80 @@ OpenClaw एक अंतर्निहित `legacy` इंजन के स�
     {
       plugins: {
         slots: {
-          contextEngine: "lossless-claw", // must match the plugin's registered engine id
+          contextEngine: "lossless-claw", // Plugin के पंजीकृत इंजन id से मेल खाना आवश्यक है
         },
         entries: {
           "lossless-claw": {
             enabled: true,
-            // Plugin-specific config goes here (see the plugin's docs)
+            // Plugin-विशिष्ट कॉन्फ़िगरेशन यहाँ रखें (Plugin के दस्तावेज़ देखें)
           },
         },
       },
     }
     ```
 
-    इंस्टॉल और कॉन्फ़िगर करने के बाद gateway को फिर से शुरू करें।
+    इंस्टॉल और कॉन्फ़िगर करने के बाद Gateway पुनः आरंभ करें।
 
   </Step>
-  <Step title="legacy पर वापस स्विच करें (वैकल्पिक)">
-    `contextEngine` को `"legacy"` पर सेट करें (या key को पूरी तरह हटा दें - `"legacy"` डिफ़ॉल्ट है)।
+  <Step title="पुराने इंजन पर वापस जाएँ (वैकल्पिक)">
+    `contextEngine` को `"legacy"` पर सेट करें (या कुंजी पूरी तरह हटा दें—`"legacy"` डिफ़ॉल्ट है)।
   </Step>
 </Steps>
 
 ## यह कैसे काम करता है
 
-हर बार जब OpenClaw कोई मॉडल prompt चलाता है, संदर्भ इंजन चार lifecycle बिंदुओं पर भाग लेता है:
+हर बार जब OpenClaw कोई मॉडल प्रॉम्प्ट चलाता है, कॉन्टेक्स्ट इंजन चार जीवनचक्र बिंदुओं पर भाग लेता है:
 
 <AccordionGroup>
-  <Accordion title="1. Ingest">
-    तब कॉल किया जाता है जब session में नया संदेश जोड़ा जाता है। इंजन संदेश को अपने data store में store या index कर सकता है।
+  <Accordion title="1. अंतर्ग्रहण">
+    सेशन में नया संदेश जोड़े जाने पर इसे कॉल किया जाता है। इंजन संदेश को अपने डेटा स्टोर में संग्रहीत या इंडेक्स कर सकता है।
   </Accordion>
-  <Accordion title="2. Assemble">
-    प्रत्येक model run से पहले कॉल किया जाता है। इंजन संदेशों का एक क्रमबद्ध set (और एक वैकल्पिक `systemPromptAddition`) लौटाता है जो token budget में फिट होता है।
+  <Accordion title="2. असेंबल">
+    प्रत्येक मॉडल रन से पहले इसे कॉल किया जाता है। इंजन संदेशों का एक क्रमबद्ध समूह (और एक वैकल्पिक `systemPromptAddition`) लौटाता है, जो टोकन बजट में समा सके।
   </Accordion>
-  <Accordion title="3. Compact">
-    तब कॉल किया जाता है जब context window भर जाती है, या जब उपयोगकर्ता `/compact` चलाता है। इंजन space खाली करने के लिए पुराने history को summarize करता है।
+  <Accordion title="3. कॉम्पैक्ट">
+    कॉन्टेक्स्ट विंडो भर जाने पर या उपयोगकर्ता द्वारा `/compact` चलाने पर इसे कॉल किया जाता है। इंजन स्थान खाली करने के लिए पुराने इतिहास का सारांश बनाता है।
   </Accordion>
-  <Accordion title="4. After turn">
-    run पूरा होने के बाद कॉल किया जाता है। इंजन state को persist कर सकता है, background compaction trigger कर सकता है, या indexes update कर सकता है।
+  <Accordion title="4. टर्न के बाद">
+    रन पूरा होने के बाद इसे कॉल किया जाता है। इंजन स्थिति को स्थायी कर सकता है, पृष्ठभूमि Compaction ट्रिगर कर सकता है या इंडेक्स अपडेट कर सकता है।
   </Accordion>
 </AccordionGroup>
 
-bundled non-ACP Codex harness के लिए, OpenClaw assembled context को Codex developer instructions और current turn prompt में project करके वही lifecycle लागू करता है। Codex अब भी अपने native thread history और native compactor का स्वामी रहता है।
+इंजन बूटस्ट्रैप, सफल टर्न या Compaction के बाद ट्रांसक्रिप्ट रखरखाव (`runtimeContext.rewriteTranscriptEntries()` के माध्यम से सुरक्षित पुनर्लेखन) के लिए एक वैकल्पिक `maintain()` मेथड भी लागू कर सकते हैं। उत्तर को अवरुद्ध करने के बजाय इसे स्थगित कार्य के रूप में चलाने के लिए `info.turnMaintenanceMode: "background"` सेट करें।
 
-### Subagent lifecycle (वैकल्पिक)
+बंडल किए गए गैर-ACP Codex हार्नेस के लिए, OpenClaw असेंबल किए गए कॉन्टेक्स्ट को Codex डेवलपर निर्देशों और वर्तमान टर्न प्रॉम्प्ट में प्रोजेक्ट करके वही जीवनचक्र लागू करता है। Codex अभी भी अपने मूल थ्रेड इतिहास और मूल कॉम्पैक्टर का स्वामित्व रखता है।
 
-OpenClaw दो वैकल्पिक subagent lifecycle hooks कॉल करता है:
+### सबएजेंट जीवनचक्र (वैकल्पिक)
+
+OpenClaw दो वैकल्पिक सबएजेंट जीवनचक्र हुक कॉल करता है:
 
 <ParamField path="prepareSubagentSpawn" type="method">
-  child run शुरू होने से पहले shared context state तैयार करें। hook parent/child session keys, `contextMode` (`isolated` या `fork`), उपलब्ध transcript ids/files, और वैकल्पिक TTL प्राप्त करता है। यदि यह rollback handle लौटाता है, तो preparation सफल होने के बाद spawn असफल होने पर OpenClaw उसे कॉल करता है। Native subagent spawns जो `lightContext` मांगते हैं और `contextMode="isolated"` में resolve होते हैं, जानबूझकर इस hook को skip करते हैं ताकि child, context-engine-managed pre-spawn state के बिना lightweight bootstrap context से शुरू हो।
+  चाइल्ड रन शुरू होने से पहले साझा कॉन्टेक्स्ट स्थिति तैयार करें। हुक को पैरेंट/चाइल्ड सेशन कुंजियाँ, `contextMode` (`isolated` या `fork`), उपलब्ध ट्रांसक्रिप्ट id/फ़ाइलें और वैकल्पिक TTL प्राप्त होते हैं। यदि यह रोलबैक हैंडल लौटाता है, तो तैयारी सफल होने के बाद स्पॉन विफल होने पर OpenClaw उसे कॉल करता है। `lightContext` का अनुरोध करने वाले और `contextMode="isolated"` में रिज़ॉल्व होने वाले मूल सबएजेंट स्पॉन जानबूझकर इस हुक को छोड़ देते हैं, ताकि चाइल्ड कॉन्टेक्स्ट-इंजन-प्रबंधित प्री-स्पॉन स्थिति के बिना हल्के बूटस्ट्रैप कॉन्टेक्स्ट से शुरू हो।
 </ParamField>
 <ParamField path="onSubagentEnded" type="method">
-  subagent session पूरा होने या swept होने पर clean up करें।
+  सबएजेंट सेशन पूरा होने या स्वीप किए जाने पर सफ़ाई करें।
 </ParamField>
 
-### System prompt addition
+### सिस्टम प्रॉम्प्ट में अतिरिक्त सामग्री
 
-`assemble` method एक `systemPromptAddition` string लौटा सकता है। OpenClaw इसे run के लिए system prompt से पहले जोड़ता है। इससे engines static workspace files की आवश्यकता के बिना dynamic recall guidance, retrieval instructions, या context-aware hints inject कर सकते हैं।
+`assemble` मेथड एक `systemPromptAddition` स्ट्रिंग लौटा सकता है। OpenClaw इसे रन के सिस्टम प्रॉम्प्ट के आरंभ में जोड़ता है। इससे इंजन स्थिर वर्कस्पेस फ़ाइलों की आवश्यकता के बिना डायनेमिक रिकॉल मार्गदर्शन, पुनर्प्राप्ति निर्देश या कॉन्टेक्स्ट-जागरूक संकेत इंजेक्ट कर सकते हैं।
 
-## legacy इंजन
+## पुराना इंजन
 
-अंतर्निहित `legacy` इंजन OpenClaw के मूल व्यवहार को संरक्षित रखता है:
+अंतर्निहित `legacy` इंजन OpenClaw का मूल व्यवहार सुरक्षित रखता है:
 
-- **Ingest**: no-op (session manager सीधे message persistence संभालता है)।
-- **Assemble**: pass-through (runtime में मौजूदा sanitize → validate → limit pipeline context assembly संभालती है)।
-- **Compact**: built-in summarization compaction को delegate करता है, जो पुराने messages का एक single summary बनाता है और recent messages को intact रखता है।
-- **After turn**: no-op।
+- **अंतर्ग्रहण**: कोई कार्रवाई नहीं (सेशन मैनेजर संदेशों की स्थायीता सीधे संभालता है)।
+- **असेंबल**: पास-थ्रू (रनटाइम में मौजूदा सैनिटाइज़ → वैलिडेट → लिमिट पाइपलाइन कॉन्टेक्स्ट असेंबली संभालती है)।
+- **कॉम्पैक्ट**: अंतर्निहित सारांशीकरण Compaction को सौंपता है, जो पुराने संदेशों का एक सारांश बनाता है और हाल के संदेशों को अक्षुण्ण रखता है।
+- **टर्न के बाद**: कोई कार्रवाई नहीं।
 
-legacy इंजन tools register नहीं करता या `systemPromptAddition` प्रदान नहीं करता।
+पुराना इंजन टूल पंजीकृत नहीं करता या `systemPromptAddition` उपलब्ध नहीं कराता।
 
-जब कोई `plugins.slots.contextEngine` सेट नहीं है (या यह `"legacy"` पर सेट है), तो यह इंजन अपने-आप उपयोग किया जाता है।
+जब कोई `plugins.slots.contextEngine` सेट नहीं होता (या इसे `"legacy"` पर सेट किया जाता है), तो इस इंजन का स्वचालित रूप से उपयोग किया जाता है।
 
-## Plugin engines
+## Plugin इंजन
 
-एक plugin, plugin API का उपयोग करके context engine register कर सकता है:
+कोई Plugin, Plugin API का उपयोग करके कॉन्टेक्स्ट इंजन पंजीकृत कर सकता है:
 
 ```ts
 import { buildMemorySystemPromptAddition } from "openclaw/plugin-sdk/core";
@@ -138,34 +141,46 @@ export default function register(api) {
     },
 
     async ingest({ sessionId, message, isHeartbeat }) {
-      // Store the message in your data store
+      // संदेश को अपने डेटा स्टोर में संग्रहीत करें
       return { ingested: true };
     },
 
-    async assemble({ sessionId, messages, tokenBudget, availableTools, citationsMode }) {
-      // Return messages that fit the budget
+    async assemble({
+      sessionId,
+      sessionKey,
+      messages,
+      tokenBudget,
+      availableTools,
+      citationsMode,
+    }) {
+      // बजट में समाने वाले संदेश लौटाएँ
       return {
         messages: buildContext(messages, tokenBudget),
         estimatedTokens: countTokens(messages),
         systemPromptAddition: buildMemorySystemPromptAddition({
           availableTools: availableTools ?? new Set(),
           citationsMode,
+          agentSessionKey: sessionKey,
         }),
       };
     },
 
     async compact({ sessionId, force }) {
-      // Summarize older context
+      // पुराने कॉन्टेक्स्ट का सारांश बनाएँ
       return { ok: true, compacted: true };
     },
   }));
 }
 ```
 
-factory `ctx` में वैकल्पिक `config`, `agentDir`, और `workspaceDir`
-values शामिल होते हैं ताकि plugins पहले lifecycle hook के चलने से पहले per-agent या per-workspace state initialize कर सकें।
+फ़ैक्टरी `ctx` में वैकल्पिक `config`, `agentDir` और `workspaceDir`
+मान शामिल होते हैं, ताकि Plugins पहले जीवनचक्र कॉल से पहले प्रति-एजेंट या प्रति-वर्कस्पेस स्थिति
+आरंभ कर सकें। किसी गैर-पुराने `assemble()` कॉल से पहले, होस्ट पंजीकृत
+असिंक्रोनस मेमोरी प्रॉम्प्ट तैयारी पूरी करता है। सिंक्रोनस
+`buildMemorySystemPromptAddition(...)` सहायक उस अपरिवर्तनीय रन स्नैपशॉट को पढ़ता है;
+दिए गए टूल, उद्धरण, एजेंट और सेशन कॉन्टेक्स्ट को बिना बदलाव के पास करें।
 
-फिर इसे config में enable करें:
+फिर इसे कॉन्फ़िगरेशन में सक्षम करें:
 
 ```json5
 {
@@ -182,71 +197,93 @@ values शामिल होते हैं ताकि plugins पहले 
 }
 ```
 
-### ContextEngine interface
+### ContextEngine इंटरफ़ेस
 
-आवश्यक members:
+आवश्यक सदस्य:
 
-| Member             | Kind     | Purpose                                                  |
+| सदस्य             | प्रकार     | उद्देश्य                                                  |
 | ------------------ | -------- | -------------------------------------------------------- |
-| `info`             | Property | Engine id, name, version, और क्या यह compaction own करता है |
-| `ingest(params)`   | Method   | एक single message store करें                                   |
-| `assemble(params)` | Method   | model run के लिए context बनाएं (`AssembleResult` लौटाता है) |
-| `compact(params)`  | Method   | context को summarize/reduce करें                                 |
+| `info`             | प्रॉपर्टी | इंजन id, नाम, संस्करण और क्या यह Compaction का स्वामी है |
+| `ingest(params)`   | मेथड   | एक संदेश संग्रहीत करना                                   |
+| `assemble(params)` | मेथड   | मॉडल रन के लिए कॉन्टेक्स्ट बनाना (`AssembleResult` लौटाता है) |
+| `compact(params)`  | मेथड   | कॉन्टेक्स्ट का सारांश बनाना/कम करना                                 |
 
-`assemble` एक `AssembleResult` लौटाता है जिसमें:
+`assemble` निम्न के साथ एक `AssembleResult` लौटाता है:
 
 <ParamField path="messages" type="Message[]" required>
-  मॉडल को भेजे जाने वाले क्रमबद्ध messages।
+  मॉडल को भेजे जाने वाले क्रमबद्ध संदेश।
 </ParamField>
 <ParamField path="estimatedTokens" type="number" required>
-  assembled context में total tokens का engine estimate। OpenClaw इसे compaction threshold decisions और diagnostic reporting के लिए उपयोग करता है।
+  असेंबल किए गए कॉन्टेक्स्ट में कुल टोकन का इंजन-अनुमान। OpenClaw इसका उपयोग Compaction सीमा संबंधी निर्णयों और नैदानिक रिपोर्टिंग के लिए करता है।
 </ParamField>
 <ParamField path="systemPromptAddition" type="string">
-  system prompt से पहले जोड़ा जाता है।
+  सिस्टम प्रॉम्प्ट के आरंभ में जोड़ा जाता है।
 </ParamField>
 <ParamField path="promptAuthority" type='"assembled" | "preassembly_may_overflow"'>
-  runner preemptive overflow prechecks के लिए कौन-सा token estimate उपयोग करता है, इसे नियंत्रित करता है। डिफ़ॉल्ट `"assembled"` है, जिसका अर्थ है कि जो engines compaction own नहीं करते, उनके लिए केवल assembled prompt का estimate जांचा जाता है। जो engines `ownsCompaction: true` सेट करते हैं, वे अपना prompt admission स्वयं manage करते हैं, इसलिए OpenClaw default रूप से generic pre-prompt precheck skip करता है। `"preassembly_may_overflow"` केवल तब सेट करें जब आपका assembled view underlying transcript में overflow risk छिपा सकता है; फिर runner generic precheck active रखता है और preemptively compact करना है या नहीं तय करते समय assembled estimate और pre-assembly (unwindowed) session-history estimate का maximum लेता है। किसी भी स्थिति में, आपके लौटाए गए messages ही model देखता है - `promptAuthority` केवल precheck को प्रभावित करता है।
+  नियंत्रित करता है कि रनर पूर्व-सक्रिय ओवरफ़्लो
+  पूर्व-जाँचों के लिए किस टोकन अनुमान का उपयोग करता है। डिफ़ॉल्ट `"assembled"` है, जिसका अर्थ है कि Compaction का स्वामित्व न रखने वाले इंजनों के लिए केवल असेंबल किए गए
+  प्रॉम्प्ट के अनुमान की जाँच होती है।
+  `ownsCompaction: true` सेट करने वाले इंजन अपना प्रॉम्प्ट प्रवेश स्वयं प्रबंधित करते हैं,
+  इसलिए OpenClaw डिफ़ॉल्ट रूप से सामान्य प्री-प्रॉम्प्ट पूर्व-जाँच छोड़ देता है। `"preassembly_may_overflow"` केवल तभी सेट करें, जब आपका असेंबल किया गया दृश्य
+  अंतर्निहित ट्रांसक्रिप्ट में ओवरफ़्लो
+  जोखिम छिपा सकता हो; तब रनर सामान्य
+  पूर्व-जाँच सक्रिय रखता है और पूर्व-सक्रिय रूप से
+  कॉम्पैक्ट करने का निर्णय लेते समय असेंबल किए गए अनुमान तथा प्री-असेंबली (बिना विंडो वाले) सेशन-इतिहास अनुमान में से अधिकतम मान लेता है।
+  दोनों ही स्थितियों में, आपके लौटाए गए संदेश ही
+  मॉडल देखता है—`promptAuthority` केवल पूर्व-जाँच को प्रभावित करता है।
+</ParamField>
+<ParamField path="contextProjection" type="ContextEngineProjection">
+  स्थायी बैकएंड थ्रेड वाले होस्ट (उदाहरण के लिए Codex app-server) के लिए वैकल्पिक प्रोजेक्शन जीवनचक्र। स्थिर `epoch` के साथ `mode: "thread_bootstrap"` होस्ट से असेंबल किए गए कॉन्टेक्स्ट को प्रत्येक युग में एक बार इंजेक्ट करने और युग बदलने तक बैकएंड थ्रेड का पुनः उपयोग करने को कहता है, बजाय प्रत्येक टर्न में दोबारा प्रोजेक्ट करने के। सामान्य प्रति-टर्न प्रोजेक्शन के लिए इस फ़ील्ड को छोड़ दें।
 </ParamField>
 
-`compact` एक `CompactResult` लौटाता है। जब compaction active
-transcript rotate करता है, तो `result.sessionId` और `result.sessionFile` successor
-session की पहचान करते हैं जिसे अगले retry या turn में उपयोग करना होगा।
+`compact` एक `CompactResult` लौटाता है। जब Compaction सक्रिय सेशन
+पहचान बदलता है, तो `result.sessionTarget` (सेशन पहचान और स्टोर स्कोप रखने वाला एक टाइप किया हुआ `ContextEngineSessionTarget`)
+उस उत्तराधिकारी सेशन की पहचान करता है जिसका उपयोग अगली पुनः कोशिश या टर्न को करना आवश्यक है;
+`result.sessionId` उत्तराधिकारी id को प्रतिबिंबित करता है।
 
-वैकल्पिक members:
+वैकल्पिक सदस्य:
 
-| Member                         | Kind   | Purpose                                                                                                         |
-| ------------------------------ | ------ | --------------------------------------------------------------------------------------------------------------- |
-| `bootstrap(params)`            | Method | किसी session के लिए engine state initialize करें। जब engine पहली बार session देखता है, तब एक बार कॉल किया जाता है (जैसे, import history)। |
-| `ingestBatch(params)`          | Method | completed turn को batch के रूप में ingest करें। run पूरा होने के बाद, उस turn के सभी messages के साथ एक बार कॉल किया जाता है।     |
-| `afterTurn(params)`            | Method | Post-run lifecycle work (state persist करना, background compaction trigger करना)।                                         |
-| `prepareSubagentSpawn(params)` | Method | child session शुरू होने से पहले shared state set up करें।                                                       |
-| `onSubagentEnded(params)`      | Method | subagent समाप्त होने के बाद clean up करें।                                                                                 |
-| `dispose()`                    | Method | resources release करें। gateway shutdown या plugin reload के दौरान कॉल किया जाता है - per-session नहीं।                           |
+| सदस्य                         | प्रकार   | उद्देश्य                                                                                                                                      |
+| ------------------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bootstrap(params)`            | मेथड | सेशन के लिए इंजन स्थिति आरंभ करना। इंजन द्वारा किसी सेशन को पहली बार देखने पर एक बार कॉल किया जाता है (उदाहरण के लिए, इतिहास आयात करना)।                              |
+| `maintain(params)`             | मेथड | बूटस्ट्रैप, सफल टर्न या Compaction के बाद ट्रांसक्रिप्ट रखरखाव। सुरक्षित पुनर्लेखन के लिए `runtimeContext.rewriteTranscriptEntries()` का उपयोग करें। |
+| `ingestBatch(params)`          | मेथड | पूरे हो चुके टर्न को बैच के रूप में अंतर्ग्रहण करना। रन पूरा होने के बाद उस टर्न के सभी संदेशों के साथ एक बार कॉल किया जाता है।                                  |
+| `afterTurn(params)`            | मेथड | रन-पश्चात जीवनचक्र कार्य (स्थिति को स्थायी करना, पृष्ठभूमि Compaction ट्रिगर करना)।                                                                      |
+| `prepareSubagentSpawn(params)` | मेथड | चाइल्ड सेशन शुरू होने से पहले उसके लिए साझा स्थिति सेट अप करना।                                                                                    |
+| `onSubagentEnded(params)`      | मेथड | सबएजेंट समाप्त होने के बाद सफ़ाई करना।                                                                                                              |
+| `dispose()`                    | मेथड | संसाधन मुक्त करना। Gateway बंद होने या Plugin पुनः लोड होने के दौरान कॉल किया जाता है—प्रति-सेशन नहीं।                                                        |
 
-### Runtime settings
+### रनटाइम सेटिंग्स
 
-OpenClaw के अंदर चलने वाले lifecycle hooks को एक वैकल्पिक
-`runtimeSettings` object मिलता है। यह एक versioned, read-only internal
-producer/consumer API surface है: OpenClaw इसे selected context
-engine के लिए produce करता है, और context engine इसे lifecycle hooks के अंदर consume करता है। इसे users को सीधे render नहीं किया जाता और यह कोई dedicated reporting surface नहीं बनाता।
+OpenClaw के भीतर चलने वाले जीवनचक्र हुक को एक वैकल्पिक
+`runtimeSettings` ऑब्जेक्ट प्राप्त होता है। यह संस्करणित, केवल-पठन आंतरिक
+प्रोड्यूसर/कंज़्यूमर API सतह है: OpenClaw इसे चयनित कॉन्टेक्स्ट
+इंजन के लिए उत्पन्न करता है और कॉन्टेक्स्ट इंजन जीवनचक्र हुक के भीतर इसका उपभोग करता है। इसे
+सीधे उपयोगकर्ताओं के लिए रेंडर नहीं किया जाता और यह कोई समर्पित रिपोर्टिंग सतह नहीं बनाता।
 
 - `schemaVersion`: वर्तमान में `1`
-- `runtime`: OpenClaw host, runtime mode (`normal`, `fallback`, या
-  `degraded`), और वैकल्पिक harness/runtime ids
-- `contextEngineSelection`: selected context engine id और selection source
-- `executionHost`: hook invoke करने वाली surface के लिए host id और label
-- `model`: requested model, resolved model, provider, और वैकल्पिक model family
-- `limits`: prompt token budget और max output tokens, जब ज्ञात हों
-- `diagnostics`: closed fallback और degraded reason codes, जब ज्ञात हों
+- `runtime`: OpenClaw होस्ट, रनटाइम मोड (`normal`, `fallback`, या
+  `degraded`), और वैकल्पिक हार्नेस/रनटाइम आईडी
+- `contextEngineSelection`: चयनित संदर्भ इंजन आईडी और चयन स्रोत
+- `executionHost`: हुक का आह्वान करने वाली सतह की होस्ट आईडी और लेबल
+- `model`: अनुरोधित मॉडल, निर्धारित मॉडल, प्रदाता, और वैकल्पिक मॉडल परिवार
+- `limits`: ज्ञात होने पर प्रॉम्प्ट टोकन बजट और अधिकतम आउटपुट टोकन
+- `diagnostics`: ज्ञात होने पर क्लोज़्ड फ़ॉलबैक और निम्नीकृत कारण कोड
 
-जो fields unknown हो सकती हैं उन्हें `null` के रूप में represent किया जाता है; discriminator fields जैसे runtime mode और selection source non-nullable रहते हैं। Older engines compatible रहते हैं: यदि कोई strict legacy engine `runtimeSettings` को unknown property मानकर reject करता है, तो OpenClaw engine को quarantine करने के बजाय lifecycle call को इसके बिना retry करता है।
+जो फ़ील्ड अज्ञात हो सकते हैं, उन्हें `null` के रूप में दर्शाया जाता है; रनटाइम मोड और चयन स्रोत जैसे
+डिस्क्रिमिनेटर फ़ील्ड नॉन-नलेबल रहते हैं। पुराने इंजन संगत रहते हैं:
+यदि कोई सख्त लेगेसी इंजन `runtimeSettings` को अज्ञात प्रॉपर्टी के रूप में अस्वीकार करता है,
+तो OpenClaw इंजन को क्वारंटीन करने के बजाय उसके बिना लाइफ़साइकल कॉल का
+पुनः प्रयास करता है।
 
-### Host requirements
+### होस्ट आवश्यकताएँ
 
-Context engines `info.hostRequirements` पर host capability requirements घोषित कर सकते हैं।
-OpenClaw operation शुरू करने से पहले इन requirements की जांच करता है और selected runtime उन्हें satisfy नहीं कर सकता तो descriptive error के साथ fail closed करता है।
+संदर्भ इंजन `info.hostRequirements` पर होस्ट क्षमता आवश्यकताएँ घोषित कर सकते हैं।
+OpenClaw ऑपरेशन शुरू करने से पहले इन आवश्यकताओं की जाँच करता है और जब चयनित
+रनटाइम उन्हें पूरा नहीं कर सकता, तो वर्णनात्मक त्रुटि के साथ फ़ेल-क्लोज़्ड होता है।
 
-Agent runs के लिए, जब engine को `assemble()` के माध्यम से actual model prompt control करना हो तो `assemble-before-prompt` declare करें:
+एजेंट रन के लिए, जब इंजन को `assemble()` के माध्यम से
+वास्तविक मॉडल प्रॉम्प्ट नियंत्रित करना आवश्यक हो, तो `assemble-before-prompt` घोषित करें:
 
 ```ts
 info: {
@@ -256,59 +293,60 @@ info: {
     "agent-run": {
       requiredCapabilities: ["assemble-before-prompt"],
       unsupportedMessage:
-        "Use the native Codex or OpenClaw embedded runtime, or select the legacy context engine.",
+        "नेटिव Codex या OpenClaw एम्बेडेड रनटाइम का उपयोग करें, या लेगेसी संदर्भ इंजन चुनें।",
     },
   },
 }
 ```
 
-Native Codex और OpenClaw embedded agent runs `assemble-before-prompt` satisfy करते हैं।
-Generic CLI backends ऐसा नहीं करते, इसलिए जिन engines को इसकी आवश्यकता होती है, उन्हें CLI process शुरू होने से पहले reject कर दिया जाता है।
+नेटिव Codex और OpenClaw एम्बेडेड एजेंट रन `assemble-before-prompt` को पूरा करते हैं।
+जेनेरिक CLI बैकएंड ऐसा नहीं करते, इसलिए इसकी आवश्यकता रखने वाले इंजनों को
+CLI प्रक्रिया शुरू होने से पहले अस्वीकार कर दिया जाता है।
 
-### Failure isolation
+### विफलता पृथक्करण
 
-OpenClaw चयनित Plugin इंजन को मुख्य उत्तर पथ से अलग रखता है। यदि कोई
-गैर-लेगेसी इंजन अनुपस्थित है, अनुबंध सत्यापन में विफल होता है, फैक्टरी
-बनाते समय त्रुटि फेंकता है, या किसी जीवनचक्र विधि से त्रुटि फेंकता है, तो
-OpenClaw उस इंजन को वर्तमान Gateway प्रक्रिया के लिए क्वारंटीन कर देता है और
-context-engine कार्य को अंतर्निहित `legacy` इंजन पर डाउनग्रेड कर देता है। त्रुटि
-विफल ऑपरेशन के साथ लॉग की जाती है ताकि ऑपरेटर एजेंट के मौन हुए बिना Plugin
-की मरम्मत, अपडेट, या उसे अक्षम कर सके।
+OpenClaw चयनित Plugin इंजन को कोर उत्तर पथ से अलग रखता है। यदि कोई
+गैर-लेगेसी इंजन अनुपस्थित है, अनुबंध सत्यापन में विफल होता है, फ़ैक्टरी
+निर्माण के दौरान अपवाद उत्पन्न करता है, या किसी लाइफ़साइकल विधि से अपवाद उत्पन्न करता है,
+तो OpenClaw वर्तमान Gateway प्रक्रिया के लिए उस इंजन को क्वारंटीन करता है और
+संदर्भ-इंजन कार्य को अंतर्निहित `legacy` इंजन पर डाउनग्रेड कर देता है।
+विफल ऑपरेशन के साथ त्रुटि लॉग की जाती है, ताकि ऑपरेटर एजेंट को
+मौन किए बिना Plugin की मरम्मत, अपडेट या उसे अक्षम कर सके।
 
-होस्ट आवश्यकता विफलताएं अलग होती हैं: जब कोई इंजन घोषित करता है कि किसी
-runtime में आवश्यक क्षमता नहीं है, तो OpenClaw रन शुरू करने से पहले fail closed
-करता है। यह उन इंजनों की रक्षा करता है जो असमर्थित होस्ट में चलने पर स्थिति को
-भ्रष्ट कर देंगे।
+होस्ट आवश्यकता विफलताएँ अलग होती हैं: जब कोई इंजन घोषित करता है कि रनटाइम
+में आवश्यक क्षमता नहीं है, तो OpenClaw रन शुरू करने से पहले फ़ेल-क्लोज़्ड होता है।
+यह उन इंजनों की सुरक्षा करता है जो किसी असमर्थित होस्ट में चलने पर स्थिति को
+दूषित कर देंगे।
 
 ### ownsCompaction
 
-`ownsCompaction` नियंत्रित करता है कि रन के लिए OpenClaw runtime की अंतर्निहित in-attempt auto-compaction सक्षम रहे या नहीं:
+`ownsCompaction` नियंत्रित करता है कि रन के लिए OpenClaw रनटाइम का अंतर्निहित इन-अटेम्प्ट ऑटो-कॉम्पैक्शन सक्षम रहता है या नहीं:
 
 <AccordionGroup>
   <Accordion title="ownsCompaction: true">
-    इंजन Compaction व्यवहार का स्वामी होता है। OpenClaw उस रन के लिए OpenClaw runtime की अंतर्निहित auto-compaction और सामान्य pre-prompt overflow precheck को अक्षम करता है, और इंजन का `compact()` कार्यान्वयन `/compact`, provider overflow recovery compaction, और `afterTurn()` में वह जो भी proactive compaction करना चाहता है, उसके लिए जिम्मेदार होता है। जब इंजन `assemble()` से `promptAuthority: "preassembly_may_overflow"` लौटाता है, तब भी OpenClaw pre-prompt overflow safeguard चलाता है।
+    इंजन कॉम्पैक्शन व्यवहार का स्वामी होता है। OpenClaw उस रन के लिए OpenClaw रनटाइम के अंतर्निहित ऑटो-कॉम्पैक्शन और जेनेरिक प्री-प्रॉम्प्ट ओवरफ़्लो प्रीचेक को अक्षम करता है, और इंजन का `compact()` कार्यान्वयन `/compact`, प्रदाता ओवरफ़्लो रिकवरी कॉम्पैक्शन, और `afterTurn()` में किए जाने वाले किसी भी सक्रिय कॉम्पैक्शन के लिए उत्तरदायी होता है। जब इंजन `assemble()` से `promptAuthority: "preassembly_may_overflow"` लौटाता है, तब भी OpenClaw प्री-प्रॉम्प्ट ओवरफ़्लो सुरक्षा उपाय चलाता है।
   </Accordion>
   <Accordion title="ownsCompaction: false or unset">
-    OpenClaw runtime की अंतर्निहित auto-compaction prompt execution के दौरान अभी भी चल सकती है, लेकिन सक्रिय इंजन की `compact()` विधि फिर भी `/compact` और overflow recovery के लिए कॉल की जाती है।
+    प्रॉम्प्ट निष्पादन के दौरान OpenClaw रनटाइम का अंतर्निहित ऑटो-कॉम्पैक्शन अभी भी चल सकता है, लेकिन सक्रिय इंजन की `compact()` विधि को फिर भी `/compact` और ओवरफ़्लो रिकवरी के लिए कॉल किया जाता है।
   </Accordion>
 </AccordionGroup>
 
 <Warning>
-`ownsCompaction: false` का अर्थ यह **नहीं** है कि OpenClaw अपने-आप legacy इंजन के Compaction पथ पर वापस चला जाता है।
+`ownsCompaction: false` का अर्थ यह **नहीं** है कि OpenClaw स्वचालित रूप से लेगेसी इंजन के कॉम्पैक्शन पथ पर फ़ॉलबैक करता है।
 </Warning>
 
-इसका मतलब है कि दो वैध Plugin पैटर्न हैं:
+इसका अर्थ है कि दो मान्य Plugin पैटर्न हैं:
 
 <Tabs>
-  <Tab title="Owning mode">
-    अपना Compaction algorithm लागू करें और `ownsCompaction: true` सेट करें।
+  <Tab title="स्वामित्व मोड">
+    अपना कॉम्पैक्शन एल्गोरिदम लागू करें और `ownsCompaction: true` सेट करें।
   </Tab>
-  <Tab title="Delegating mode">
-    `ownsCompaction: false` सेट करें और OpenClaw के अंतर्निहित Compaction व्यवहार का उपयोग करने के लिए `compact()` से `openclaw/plugin-sdk/core` के `delegateCompactionToRuntime(...)` को कॉल कराएं।
+  <Tab title="प्रत्यायोजन मोड">
+    `ownsCompaction: false` सेट करें और OpenClaw के अंतर्निहित कॉम्पैक्शन व्यवहार का उपयोग करने के लिए `compact()` से `delegateCompactionToRuntime(...)` को `openclaw/plugin-sdk/core` कॉल करवाएँ।
   </Tab>
 </Tabs>
 
-सक्रिय non-owning इंजन के लिए no-op `compact()` असुरक्षित है क्योंकि यह उस इंजन slot के लिए सामान्य `/compact` और overflow-recovery compaction पथ को अक्षम कर देता है।
+सक्रिय गैर-स्वामी इंजन के लिए निष्क्रिय `compact()` असुरक्षित है, क्योंकि यह उस इंजन स्लॉट के सामान्य `/compact` और ओवरफ़्लो-रिकवरी कॉम्पैक्शन पथ को अक्षम कर देता है।
 
 ## कॉन्फ़िगरेशन संदर्भ
 
@@ -316,8 +354,8 @@ runtime में आवश्यक क्षमता नहीं है, त
 {
   plugins: {
     slots: {
-      // Select the active context engine. Default: "legacy".
-      // Set to a plugin id to use a plugin engine.
+      // सक्रिय संदर्भ इंजन चुनें। डिफ़ॉल्ट: "legacy"।
+      // Plugin इंजन का उपयोग करने के लिए इसे Plugin आईडी पर सेट करें।
       contextEngine: "legacy",
     },
   },
@@ -325,38 +363,38 @@ runtime में आवश्यक क्षमता नहीं है, त
 ```
 
 <Note>
-slot रन टाइम पर exclusive होता है - किसी दिए गए रन या Compaction ऑपरेशन के लिए केवल एक पंजीकृत संदर्भ इंजन resolve किया जाता है। अन्य सक्षम `kind: "context-engine"` plugins अभी भी लोड हो सकते हैं और अपना registration code चला सकते हैं; `plugins.slots.contextEngine` केवल यह चुनता है कि OpenClaw को संदर्भ इंजन की आवश्यकता होने पर वह किस पंजीकृत engine id को resolve करे।
+रन टाइम पर स्लॉट अनन्य होता है - किसी दिए गए रन या कॉम्पैक्शन ऑपरेशन के लिए केवल एक पंजीकृत संदर्भ इंजन निर्धारित किया जाता है। अन्य सक्षम `kind: "context-engine"` Plugin फिर भी लोड होकर अपना पंजीकरण कोड चला सकते हैं; `plugins.slots.contextEngine` केवल यह चुनता है कि संदर्भ इंजन की आवश्यकता होने पर OpenClaw किस पंजीकृत इंजन आईडी को निर्धारित करेगा।
 </Note>
 
 <Note>
-**Plugin uninstall:** जब आप वर्तमान में `plugins.slots.contextEngine` के रूप में चयनित Plugin को uninstall करते हैं, तो OpenClaw slot को वापस default (`legacy`) पर reset कर देता है। वही reset व्यवहार `plugins.slots.memory` पर लागू होता है। कोई manual config edit आवश्यक नहीं है।
+**Plugin अनइंस्टॉल:** जब आप वर्तमान में `plugins.slots.contextEngine` के रूप में चयनित Plugin को अनइंस्टॉल करते हैं, तो OpenClaw स्लॉट को वापस डिफ़ॉल्ट (`legacy`) पर रीसेट कर देता है। यही रीसेट व्यवहार `plugins.slots.memory` पर भी लागू होता है। कॉन्फ़िगरेशन को मैन्युअल रूप से संपादित करना आवश्यक नहीं है।
 </Note>
 
-## Compaction और memory से संबंध
+## कॉम्पैक्शन और मेमोरी से संबंध
 
 <AccordionGroup>
-  <Accordion title="Compaction">
-    Compaction संदर्भ इंजन की एक जिम्मेदारी है। legacy इंजन OpenClaw के अंतर्निहित summarization को delegate करता है। Plugin इंजन कोई भी Compaction strategy लागू कर सकते हैं (DAG summaries, vector retrieval, आदि)।
+  <Accordion title="कॉम्पैक्शन">
+    कॉम्पैक्शन संदर्भ इंजन की एक जिम्मेदारी है। लेगेसी इंजन OpenClaw के अंतर्निहित सारांशीकरण को कार्य सौंपता है। Plugin इंजन कोई भी कॉम्पैक्शन रणनीति (DAG सारांश, वेक्टर पुनर्प्राप्ति आदि) लागू कर सकते हैं।
   </Accordion>
-  <Accordion title="Memory plugins">
-    Memory plugins (`plugins.slots.memory`) संदर्भ इंजनों से अलग होते हैं। Memory plugins search/retrieval प्रदान करते हैं; संदर्भ इंजन नियंत्रित करते हैं कि model क्या देखता है। वे साथ काम कर सकते हैं - कोई संदर्भ इंजन assembly के दौरान memory plugin data का उपयोग कर सकता है। जिन Plugin इंजनों को सक्रिय memory prompt path चाहिए, उन्हें `openclaw/plugin-sdk/core` से `buildMemorySystemPromptAddition(...)` को प्राथमिकता देनी चाहिए, जो सक्रिय memory prompt sections को ready-to-prepend `systemPromptAddition` में बदलता है। यदि किसी इंजन को lower-level control चाहिए, तो वह फिर भी `openclaw/plugin-sdk/memory-host-core` से `buildActiveMemoryPromptSection(...)` के माध्यम से raw lines खींच सकता है।
+  <Accordion title="मेमोरी Plugin">
+    मेमोरी Plugin (`plugins.slots.memory`) संदर्भ इंजनों से अलग होते हैं। मेमोरी Plugin खोज/पुनर्प्राप्ति प्रदान करते हैं; संदर्भ इंजन नियंत्रित करते हैं कि मॉडल क्या देखता है। वे साथ मिलकर काम कर सकते हैं - कोई संदर्भ इंजन संयोजन के दौरान मेमोरी Plugin डेटा का उपयोग कर सकता है। सक्रिय मेमोरी प्रॉम्प्ट पथ चाहने वाले Plugin इंजनों को `openclaw/plugin-sdk/core` से `buildMemorySystemPromptAddition(...)` का उपयोग करना चाहिए, जो मेमोरी-Plugin लेआउट को उजागर किए बिना होस्ट द्वारा तैयार मेमोरी प्रॉम्प्ट अनुभागों को पहले जोड़ने के लिए तैयार `systemPromptAddition` में बदल देता है।
   </Accordion>
-  <Accordion title="Session pruning">
-    पुराने tool results को in-memory trim करना फिर भी चलता है, चाहे कौन सा संदर्भ इंजन सक्रिय हो।
+  <Accordion title="सत्र प्रूनिंग">
+    इन-मेमोरी पुराने टूल परिणामों की ट्रिमिंग सक्रिय संदर्भ इंजन से स्वतंत्र रूप से चलती रहती है।
   </Accordion>
 </AccordionGroup>
 
 ## सुझाव
 
 - यह सत्यापित करने के लिए `openclaw doctor` का उपयोग करें कि आपका इंजन सही ढंग से लोड हो रहा है।
-- यदि इंजन बदल रहे हैं, तो मौजूदा sessions अपने वर्तमान history के साथ जारी रहते हैं। नया इंजन भविष्य के runs के लिए नियंत्रण संभालता है।
-- इंजन त्रुटियां लॉग की जाती हैं और चयनित Plugin इंजन वर्तमान Gateway प्रक्रिया के लिए क्वारंटीन किया जाता है। OpenClaw user turns के लिए `legacy` पर वापस चला जाता है ताकि replies जारी रह सकें, लेकिन आपको फिर भी टूटे हुए Plugin की मरम्मत, update, disable, या uninstall करना चाहिए।
-- development के लिए, copy किए बिना local Plugin directory को link करने के लिए `openclaw plugins install -l ./my-engine` का उपयोग करें।
+- इंजन बदलने पर, मौजूदा सत्र अपने वर्तमान इतिहास के साथ जारी रहते हैं। नया इंजन भविष्य के रन संभालता है।
+- इंजन त्रुटियाँ लॉग की जाती हैं और चयनित Plugin इंजन को वर्तमान Gateway प्रक्रिया के लिए क्वारंटीन किया जाता है। उत्तर जारी रह सकें, इसलिए उपयोगकर्ता टर्न के लिए OpenClaw `legacy` पर फ़ॉलबैक करता है, लेकिन आपको फिर भी खराब Plugin की मरम्मत, उसे अपडेट, अक्षम या अनइंस्टॉल करना चाहिए।
+- डेवलपमेंट के लिए, स्थानीय Plugin डायरेक्टरी को कॉपी किए बिना लिंक करने हेतु `openclaw plugins install -l ./my-engine` का उपयोग करें।
 
 ## संबंधित
 
-- [Compaction](/hi/concepts/compaction) - लंबी conversations का summarization
-- [संदर्भ](/hi/concepts/context) - agent turns के लिए context कैसे बनाया जाता है
-- [Plugin Architecture](/hi/plugins/architecture) - context engine plugins को register करना
-- [Plugin manifest](/hi/plugins/manifest) - plugin manifest fields
-- [Plugins](/hi/tools/plugin) - plugin overview
+- [Compaction](/hi/concepts/compaction) - लंबी बातचीत का सारांश बनाना
+- [संदर्भ](/hi/concepts/context) - एजेंट टर्न के लिए संदर्भ कैसे बनाया जाता है
+- [Plugin आर्किटेक्चर](/hi/plugins/architecture) - संदर्भ इंजन Plugin पंजीकृत करना
+- [Plugin मैनिफ़ेस्ट](/hi/plugins/manifest) - Plugin मैनिफ़ेस्ट फ़ील्ड
+- [Plugin](/hi/tools/plugin) - Plugin का अवलोकन

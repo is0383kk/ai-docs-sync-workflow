@@ -4,11 +4,12 @@ read_when:
 summary: 新增 Web 搜索提供商支持。
 title: Perplexity 插件
 x-i18n:
-    generated_at: "2026-07-11T20:46:32Z"
+    generated_at: "2026-07-26T05:56:34Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c649c4dc4df04ca668e924e2644af970d75eab404b8f57579e509aa061994ffe
+    source_hash: 0d483c483a637445c34236d86e627dcf1e1caa63a546056bba8079c482021862
     source_path: plugins/reference/perplexity.md
     workflow: 16
 ---
@@ -19,12 +20,12 @@ x-i18n:
 
 ## 分发
 
-- 软件包：`@openclaw/perplexity-plugin`
-- 安装渠道：npm；ClawHub：`clawhub:@openclaw/perplexity-plugin`
+- 包：`@openclaw/perplexity-plugin`
+- 安装途径：npm；ClawHub：`clawhub:@openclaw/perplexity-plugin`
 
 ## 接口
 
-契约：webSearchProviders
+契约：`webSearchProviders`
 
 ## 相关文档
 

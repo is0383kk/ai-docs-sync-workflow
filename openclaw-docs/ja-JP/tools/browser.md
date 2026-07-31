@@ -1,40 +1,43 @@
 ---
 read_when:
-    - エージェント制御のブラウザ自動化を追加する
-    - OpenClaw が自分の Chrome に干渉する原因をデバッグする
+    - エージェント制御のブラウザ自動化の追加
+    - openclaw が自分の Chrome に干渉する原因のデバッグ
     - macOS アプリでのブラウザ設定とライフサイクルの実装
 summary: 統合ブラウザ制御サービス + アクションコマンド
 title: ブラウザ（OpenClaw 管理）
 x-i18n:
-    generated_at: "2026-07-12T14:51:22Z"
+    generated_at: "2026-07-26T09:46:38Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 15
+    prompt_version: 32
     provider: openai
-    source_hash: cf43bd54994d29d48cfc1e16889ec34af83e885c1dd1b63c287f0df116c7f0bf
+    source_hash: 3afa2dda17520ae6c53fe3f1a7a12e7ca8a1414b2c12b79cf4a09ac8906bb3ca
     source_path: tools/browser.md
     workflow: 16
 ---
 
-OpenClaw は、エージェントが制御する**専用の Chrome/Brave/Edge/Chromium プロファイル**を実行できます。これは Gateway 内部の小さなローカル制御サービス（loopback のみ）を通じて動作し、個人用ブラウザから分離されています。
+OpenClaw は、エージェントが制御する**専用の Chrome/Brave/Edge/Chromium プロファイル**を実行できます。これは Gateway 内部の小さなローカル制御サービス（ループバックのみ）を介して動作し、個人用ブラウザから分離されています。
 
-- **エージェント専用の独立したブラウザ**と考えてください。`openclaw` プロファイルが個人用ブラウザプロファイルに触れることはありません。
-- エージェントは、この分離された環境でタブを開き、ページを読み、クリックし、文字を入力します。
-- 一方、組み込みの `user` プロファイルは、Chrome DevTools MCP を介して、実際にログイン済みの Chrome セッションへ接続します。
+- これは**エージェント専用の独立したブラウザ**と考えてください。`openclaw` プロファイルが個人用ブラウザプロファイルに触れることはありません。
+- エージェントは、この分離された経路でタブを開き、ページを読み、クリックし、入力します。
+- 一方、組み込みの `user` プロファイルは、Chrome DevTools MCP を介して、実際にサインイン済みの Chrome セッションに接続します。
 
 ## 利用できる機能
 
 - **openclaw** という名前の独立したブラウザプロファイル（デフォルトではオレンジ色のアクセント）。
 - 決定論的なタブ制御（一覧表示／開く／フォーカス／閉じる）。
 - エージェント操作（クリック／入力／ドラッグ／選択）、スナップショット、スクリーンショット、PDF。
-- Playwright ベースのプロファイルでは、添付ファイルへの直接ナビゲーションが管理対象のダウンロードディレクトリに保存され、最終 URL のポリシー検証後に `{ url, suggestedFilename, path }` メタデータが返されます。
-- Playwright ベースのエージェント操作で直ちに 1 件以上のダウンロードが開始された場合、同じ管理対象メタデータを含む `downloads` 配列が返されます。
-- ブラウザ Plugin が有効な場合に、スナップショット、安定したタブ、古くなった参照、手動対応が必要な障害からの復旧ループをエージェントに教える、同梱の `browser-automation` skill。
-- オプションのマルチプロファイル対応（`openclaw`、`work`、`remote` など）。
+- Playwright ベースのプロファイルは、添付ファイルへの直接ナビゲーションを管理対象のダウンロードディレクトリに保存し、最終 URL のポリシー検証後に `{ url, suggestedFilename, path }` メタデータを返します。
+- Playwright ベースのエージェント操作は、その操作によって 1 つ以上のダウンロードが直ちに開始された場合、同じ管理対象メタデータを含む `downloads` 配列を返します。
+- ブラウザ Plugin が有効な場合に、スナップショット、
+  安定したタブ、古くなった参照、手動ブロッカーからの復旧ループをエージェントに教える、
+  バンドル済みの `browser-automation` skill。
+- オプションのマルチプロファイル対応（`openclaw`、`work`、`remote`、...）。
 
-このブラウザは、日常的に使用するためのブラウザでは**ありません**。エージェントによる自動化と検証のための、安全で分離された環境です。
+このブラウザは、日常利用するためのものでは**ありません**。エージェントによる
+自動化と検証のための、安全で分離された操作面です。
 
-macOS では、Chrome 系のシステムプロファイルから、独立した管理対象プロファイルへ Cookie を明示的にコピーできます。管理対象ブラウザでは引き続き専用のユーザーデータディレクトリが使用されます。コピーされるのは選択した Cookie のみであり、ローカルストレージと IndexedDB はコピーされません。インポートコマンドと制限については、[プロファイル](#profiles-multi-browser)または [`openclaw browser` CLI リファレンス](/ja-JP/cli/browser)を参照してください。
+macOS では、Chrome 系のシステムプロファイルから独立した管理対象プロファイルへ、Cookie を明示的にコピーできます。管理対象ブラウザは引き続き独自のユーザーデータディレクトリを使用します。コピーされるのは選択した Cookie のみで、ローカルストレージと IndexedDB はコピーされません。インポートコマンドと制限事項については、[プロファイル](#profiles-multi-browser)または[`openclaw browser` CLI リファレンス](/ja-JP/cli/browser)を参照してください。
 
 ## クイックスタート
 
@@ -47,13 +50,15 @@ openclaw browser --browser-profile openclaw open https://example.com
 openclaw browser --browser-profile openclaw snapshot
 ```
 
-「Browser disabled」は、Plugin または `browser.enabled` が無効であることを意味します。[設定](#configuration)および [Plugin の制御](#plugin-control)を参照してください。
+「Browser disabled」は、Plugin または `browser.enabled` が無効であることを意味します。
+[設定](#configuration)と[Plugin の制御](#plugin-control)を参照してください。
 
-`openclaw browser` 自体が存在しない場合、またはエージェントからブラウザツールを利用できないと報告された場合は、[ブラウザコマンドまたはツールが見つからない場合](#missing-browser-command-or-tool)に進んでください。
+`openclaw browser` が完全に見つからない場合、またはエージェントがブラウザツールを
+利用できないと報告する場合は、[ブラウザコマンドまたはツールが見つからない場合](#missing-browser-command-or-tool)に進んでください。
 
 ## Plugin の制御
 
-デフォルトの `browser` ツールは、同梱の Plugin です。同じ `browser` ツール名を登録する別の Plugin に置き換えるには、これを無効にします。
+デフォルトの `browser` ツールは、バンドル済みの Plugin です。同じ `browser` ツール名を登録する別の Plugin に置き換えるには、これを無効にします。
 
 ```json5
 {
@@ -67,13 +72,16 @@ openclaw browser --browser-profile openclaw snapshot
 }
 ```
 
-デフォルトを使用するには、`plugins.entries.browser.enabled` と `browser.enabled=true` の両方が必要です。Plugin のみを無効にすると、`openclaw browser` CLI、`browser.request` Gateway メソッド、エージェントツール、制御サービスが一体として削除されます。置き換え先のために、`browser.*` 設定はそのまま保持されます。
+デフォルトでは、`plugins.entries.browser.enabled` と `browser.enabled=true` の**両方**が必要です。Plugin のみを無効にすると、`openclaw browser` CLI、`browser.request` Gateway メソッド、エージェントツール、制御サービスが一体として削除されます。置き換え用に `browser.*` 設定はそのまま維持されます。
 
-Plugin がサービスを再登録できるようにするため、ブラウザ設定を変更した後は Gateway の再起動が必要です。
+ブラウザ設定を変更した場合、Plugin がサービスを再登録できるように Gateway の再起動が必要です。
 
 ## エージェント向けガイダンス
 
-ツールプロファイルに関する注意: `tools.profile: "coding"` には `web_search` と `web_fetch` が含まれますが、完全な `browser` ツールは含まれません。エージェントまたは生成されたサブエージェントがブラウザ自動化を使用できるようにするには、プロファイル段階で browser を追加します。
+ツールプロファイルに関する注意: `tools.profile: "coding"` には `web_search` と
+`web_fetch` が含まれますが、完全な `browser` ツールは含まれません。エージェントまたは
+生成されたサブエージェントがブラウザ自動化を使用できるようにするには、プロファイル
+段階で browser を追加します。
 
 ```json5
 {
@@ -84,18 +92,27 @@ Plugin がサービスを再登録できるようにするため、ブラウザ�
 }
 ```
 
-単一のエージェントでは、`agents.list[].tools.alsoAllow: ["browser"]` を使用します。サブエージェントポリシーはプロファイルのフィルタリング後に適用されるため、`tools.subagents.tools.allow: ["browser"]` だけでは不十分です。
+単一のエージェントには `agents.entries.*.tools.alsoAllow: ["browser"]` を使用します。
+サブエージェントのポリシーはプロファイルのフィルタリング後に適用されるため、
+`tools.subagents.tools.allow: ["browser"]` だけでは不十分です。
 
-ブラウザ Plugin には、2 段階のエージェント向けガイダンスが含まれています。
+ブラウザ Plugin には、2 段階のエージェント向けガイダンスが付属しています。
 
-- `browser` ツールの説明には、常に有効な簡潔な契約が含まれます。適切なプロファイルを選択し、参照を同じタブ内に維持し、タブの指定には `tabId`／ラベルを使用し、複数手順の作業ではブラウザ skill を読み込みます。
-- 同梱の `browser-automation` skill には、より詳細な操作ループが含まれます。最初にステータスとタブを確認し、作業用タブにラベルを付け、操作前にスナップショットを取得し、UI の変更後に再度スナップショットを取得し、古くなった参照から一度だけ復旧します。また、ログイン／2FA／CAPTCHA、カメラ／マイクによる障害については推測せず、手動操作が必要であると報告します。
+- `browser` ツールの説明には、常に有効な簡潔な契約が含まれています。適切なプロファイルを選択し、
+  参照を同じタブ内に維持し、タブの対象指定には `tabId`/ラベルを使用し、
+  複数ステップの作業ではブラウザ skill を読み込みます。
+- バンドル済みの `browser-automation` skill には、より詳細な操作ループが含まれています。
+  まずステータスとタブを確認し、タスク用タブにラベルを付け、操作前にスナップショットを取得し、UI の変更後に
+  再度スナップショットを取得し、古くなった参照から一度だけ復旧を試み、ログイン／2FA／CAPTCHA や
+  カメラ／マイクのブロッカーについては推測せず、手動操作が必要であると報告します。
 
-Plugin が有効な場合、Plugin に同梱された Skills はエージェントが利用できる Skills の一覧に表示されます。完全な skill の指示は必要に応じて読み込まれるため、通常のターンで完全なトークンコストが発生することはありません。
+Plugin にバンドルされた Skills は、Plugin が有効な場合、エージェントが利用可能な Skills の一覧に表示されます。
+完全な skill の手順は必要に応じて読み込まれるため、通常の
+ターンで完全なトークンコストが発生することはありません。
 
 ## ブラウザコマンドまたはツールが見つからない場合
 
-アップグレード後に `openclaw browser` が不明なコマンドとなる場合、`browser.request` が見つからない場合、またはエージェントからブラウザツールを利用できないと報告された場合、一般的な原因は、`plugins.allow` リストに `browser` が含まれておらず、ルートに `browser` 設定ブロックも存在しないことです。次のように追加します。
+アップグレード後に `openclaw browser` が認識されない、`browser.request` が見つからない、またはエージェントがブラウザツールを利用できないと報告する場合、通常の原因は、`browser` を含まない `plugins.allow` リストがあり、ルートの `browser` 設定ブロックが存在しないことです。次のように追加します。
 
 ```json5
 {
@@ -105,19 +122,29 @@ Plugin が有効な場合、Plugin に同梱された Skills はエージェン�
 }
 ```
 
-ルートに明示的な `browser` ブロック（`browser.enabled=true` や `browser.profiles.<name>` など、`browser` 配下の任意のキー）がある場合、制限付きの `plugins.allow` が設定されていても、同梱のブラウザ Plugin が有効になります。これは同梱チャンネルの設定動作と同じです。`plugins.entries.browser.enabled=true` と `tools.alsoAllow: ["browser"]` は、それだけでは許可リストへの登録の代わりになりません。`plugins.allow` を完全に削除しても、デフォルトの動作に戻ります。
+明示的なルート `browser` ブロック（`browser` 配下の任意のキー。たとえば
+`browser.enabled=true` または `browser.profiles.<name>`）は、制限的な `plugins.allow` のもとでも
+バンドル済みのブラウザ Plugin を有効化し、バンドル済みチャンネルの設定動作と一致します。
+`plugins.entries.browser.enabled=true` と `tools.alsoAllow: ["browser"]` は、それだけでは
+許可リストへの登録の代わりにはなりません。`plugins.allow` を完全に削除しても、デフォルトが復元されます。
 
 ## プロファイル: `openclaw`、`user`、`chrome`
 
-- `openclaw`: 管理対象の分離されたブラウザ（拡張機能は不要）。
-- `user`: **実際にログイン済みの Chrome** セッションに接続する、組み込みの Chrome DevTools MCP 接続プロファイル。OpenClaw が初めて接続するとき、Chrome に操作をブロックする「Allow remote debugging?」プロンプトが表示されるため、誰かがコンピューターの前にいる必要があります。
-- `chrome`: **実際にログイン済みの Chrome** セッション用の組み込み [Chrome 拡張機能](/ja-JP/tools/chrome-extension)プロファイル。リモートデバッグポートではなく OpenClaw ブラウザ拡張機能を通じてタブを操作するため、コンピューターの前に誰もいなくてもスマートフォンから使用でき、「Allow remote debugging?」プロンプトは表示されません。
+- `openclaw`: 管理された分離ブラウザ（拡張機能は不要）。
+- `user`: **実際にサインイン済みの Chrome** セッション用の、組み込み Chrome DevTools MCP 接続プロファイル。OpenClaw が初めて接続するとき、Chrome に処理をブロックする「Allow remote debugging?」
+  プロンプトが表示されるため、誰かがコンピューターの前にいる必要があります。
+- `chrome`: **実際にサインイン済みの Chrome** セッション用の、組み込み[Chrome 拡張機能](/ja-JP/tools/chrome-extension)プロファイル。
+  リモートデバッグポートではなく OpenClaw ブラウザ拡張機能を介してタブを操作するため、
+  「Allow remote debugging?」プロンプトは表示されません。そのため、デスクに誰もいなくても
+  スマートフォンから動作します。
 
-エージェントによるブラウザツール呼び出しでは、次のように選択します。
+エージェントによるブラウザツール呼び出しでは、次のようにします。
 
 - デフォルト: 分離された `openclaw` ブラウザを使用します。
-- 既存のログイン済みセッションが必要で、ユーザーが**コンピューターから離れている**場合（Telegram、WhatsApp など）は、`profile="chrome"`（拡張機能）を優先します。
-- 既存のログイン済みセッションが必要で、ユーザーが接続プロンプトを承認するために**コンピューターの前にいる**場合は、`profile="user"`（Chrome MCP）を優先します。
+- 既存のログイン済みセッションが重要で、ユーザーが**コンピューターから離れている**
+  場合（Telegram、WhatsApp など）は、`profile="chrome"`（拡張機能）を優先します。
+- 既存のログイン済みセッションが重要で、ユーザーが接続プロンプトを承認するため
+  **コンピューターの前にいる**場合は、`profile="user"`（Chrome MCP）を優先します。
 - 特定のブラウザモードを使用する場合、`profile` で明示的に上書きします。
 
 管理対象モードをデフォルトにする場合は、`browser.defaultProfile: "openclaw"` を設定します。
@@ -129,26 +156,18 @@ Plugin が有効な場合、Plugin に同梱された Skills はエージェン�
 ```json5
 {
   browser: {
-    enabled: true, // default: true
-    evaluateEnabled: true, // default: true; false disables act:evaluate (arbitrary JS)
+    enabled: true, // デフォルト: true
+    evaluateEnabled: true, // デフォルト: true。false にすると act:evaluate（任意の JS）が無効になる
     ssrfPolicy: {
-      // dangerouslyAllowPrivateNetwork: true, // opt in only for trusted private-network access
+      // dangerouslyAllowPrivateNetwork: true, // 信頼できるプライベートネットワークへのアクセスでのみ明示的に有効化する
       // hostnameAllowlist: ["*.example.com", "example.com"],
       // allowedHostnames: ["localhost"],
     },
-    // cdpUrl: "http://127.0.0.1:18792", // legacy single-profile override
-    remoteCdpTimeoutMs: 1500, // remote CDP HTTP timeout (ms)
-    remoteCdpHandshakeTimeoutMs: 3000, // remote CDP WebSocket handshake timeout (ms)
-    localLaunchTimeoutMs: 15000, // local managed Chrome discovery timeout (ms)
-    localCdpReadyTimeoutMs: 8000, // local managed post-launch CDP readiness timeout (ms)
-    actionTimeoutMs: 60000, // default browser act timeout (ms)
+    // cdpUrl: "http://127.0.0.1:18792", // 従来の単一プロファイル用オーバーライド
     tabCleanup: {
-      enabled: true, // default: true
-      idleMinutes: 120, // set 0 to disable idle cleanup
-      maxTabsPerSession: 8, // set 0 to disable the per-session cap
-      sweepMinutes: 5,
+      enabled: true, // デフォルト: true
     },
-    // snapshotDefaults: { mode: "efficient" }, // default snapshot mode when the caller omits one
+    // snapshotDefaults: { mode: "efficient" }, // 呼び出し元が省略した場合のデフォルトのスナップショットモード
     defaultProfile: "openclaw",
     color: "#FF4500",
     headless: false,
@@ -180,11 +199,50 @@ Plugin が有効な場合、Plugin に同梱された Skills はエージェン�
 }
 ```
 
-呼び出し元が明示的な `snapshotFormat` または `mode` を渡さない場合、`browser.snapshotDefaults.mode: "efficient"` によってデフォルトの `snapshot` 抽出モードが変更されます。呼び出しごとのスナップショットオプションについては、[ブラウザ制御 API](/ja-JP/tools/browser-control)を参照してください。
+`browser.snapshotDefaults.mode: "efficient"` は、呼び出し元が明示的な `snapshotFormat` または
+`mode` を渡さなかった場合の、デフォルトの `snapshot`
+抽出モードを変更します。呼び出しごとのスナップショットオプションについては、
+[ブラウザ制御 API](/ja-JP/tools/browser-control)を参照してください。
 
-### スクリーンショットのビジョン処理（テキスト専用モデルのサポート）
+### タブクリーンアップの所有権
 
-メインモデルがテキスト専用（ビジョン／マルチモーダル非対応）の場合、ブラウザのスクリーンショットはモデルが読み取れない画像ブロックとして返されます。ブラウザのスクリーンショットでは既存の画像理解設定が再利用されるため、メディア理解用に設定された画像モデルを使用して、ブラウザ固有のモデル設定なしでスクリーンショットをテキストとして説明できます。
+セッションのタブクリーンアップは、OpenClaw ブラウザツールが
+`action: "open"` で作成したタブにのみ適用されます。OpenClaw は、すでに開かれていたタブ、
+ユーザーが開いたタブ、または所有権が不明なタブを引き継ぎません。
+`browser.tabCleanup` ブロックは、プライマリセッションに対する定期的なアイドル状態および上限の
+スイープを制御します。これを無効にしても、明示的なセッションライフサイクルのクリーンアップは無効になりません。
+
+ホストローカルで開いた場合、安定したネイティブ CDP ターゲットとブラウザ
+ID による所有権が共有 SQLite 状態に保存されます。これらのレコードは Gateway の
+再起動後も維持され、`/new` およびその他のセッションライフサイクルクリーンアップの対象であり続けます。
+セッションライフサイクルクリーンアップには、サブエージェント、Cron、ACP セッションの終了が含まれます。
+ツール向けターゲットがネイティブ CDP ターゲットであるレコードは、再起動後も
+アイドル状態およびセッションごとの上限スイープの対象であり続けます。Chrome MCP のターゲットハンドルは
+プロセスローカルであるため、コールド状態の既存セッションレコードは、再起動後に安全に帰属できない
+アクティビティに対してアイドルスイープを行うリスクを避け、ライフサイクルクリーンアップを待機します。
+この永続的な経路は、OpenClaw 管理プロファイル、通常のリモート CDP プロファイル、および明示的な
+`cdpUrl` を持つ既存セッションプロファイルを対象にできます。ただし、OpenClaw がネイティブターゲットと安定した
+ブラウザ ID の両方を解決できる必要があります。永続レコードを閉じる前に、OpenClaw は
+設定されたプロファイルとブラウザインスタンスが引き続き一致していることを確認します。
+
+Chrome MCP `--autoConnect`、`/json/version` の応答に安定したブラウザ ID がない
+CDP エンドポイント、およびネイティブターゲットを解決できないオープン操作は、
+プロセスローカルのベストエフォート追跡のままです。その Gateway プロセスが実行中であれば
+クリーンアップできますが、Gateway の再起動後に自動的に閉じられることはありません。
+永続追跡が利用可能になる前から開いていたタブは、遡及的に引き継がれません。そのようなタブは手動で閉じてください。
+
+クリーンアップはベストエフォートであり、対象となるすべてのタブが
+直ちに閉じられることを保証するものではありません。一時的な所有権確認またはクローズの失敗が発生した場合、永続的な
+クリーンアップは後で再試行できるよう保留されます。再試行は無制限ではありません。ブラウザに
+到達できない状態が続き、タブが 1 日を超えて使用されていない場合、その追跡行は
+廃止され、二度と検証できないタブで永続ストアが埋まらないようにします。
+
+### スクリーンショットの視覚認識（テキスト専用モデルのサポート）
+
+メインモデルがテキスト専用（視覚／マルチモーダル非対応）の場合、ブラウザの
+スクリーンショットは、そのモデルが読み取れない画像ブロックを返します。ブラウザのスクリーンショットは
+既存の画像理解設定を再利用するため、メディア理解用に設定された画像モデルは、
+ブラウザ固有のモデル設定なしでスクリーンショットをテキストとして説明できます。
 
 ```json5
 {
@@ -193,17 +251,17 @@ Plugin が有効な場合、Plugin に同梱された Skills はエージェン�
       image: {
         models: [
           { provider: "bytedance", model: "doubao-seed-2.0-pro" },
-          // Add fallback candidates; first success wins
+          // フォールバック候補を追加。最初の成功が採用される
           { provider: "openai", model: "gpt-4o" },
         ],
       },
-      // Shared media models also work when tagged for image support.
+      // 共有メディアモデルも、画像対応としてタグ付けされていれば使用できる。
       // models: [{ provider: "openai", model: "gpt-4o", capabilities: ["image"] }],
     },
   },
   agents: {
     defaults: {
-      // Existing image-model defaults are also honored.
+      // 既存の画像モデルのデフォルトも適用される。
       // imageModel: { primary: "openai/gpt-4o" },
     },
   },
@@ -213,99 +271,57 @@ Plugin が有効な場合、Plugin に同梱された Skills はエージェン�
 **仕組み:**
 
 1. エージェントが `browser screenshot` を呼び出すと、通常どおり画像がディスクに保存されます。
-2. ブラウザツールは、設定済みのメディア画像モデル、共有メディアモデル、画像モデルのデフォルト、または認証済みの画像プロバイダーを使用してスクリーンショットを説明できるか、既存の画像理解ランタイムに問い合わせます。
-3. ビジョンモデルはテキストによる説明を返します。これは `wrapExternalContent`（プロンプトインジェクション対策）でラップされ、画像ブロックではなくテキストブロックとしてエージェントに返されます。
-4. 画像理解が利用できない場合、スキップされた場合、または失敗した場合、ブラウザは元の画像ブロックを返す動作にフォールバックします。
+2. ブラウザツールは、設定済みのメディア画像モデル、共有メディアモデル、画像モデルのデフォルト、または認証に基づく画像プロバイダーを使用してスクリーンショットを説明できるかどうかを、既存の画像理解ランタイムに問い合わせます。
+3. ビジョンモデルはテキストの説明を返します。これは `wrapExternalContent`（プロンプトインジェクションガード）でラップされ、画像ブロックではなくテキストブロックとしてエージェントに返されます。
+4. 画像理解が利用できない場合、スキップされた場合、または失敗した場合、ブラウザは元の画像ブロックを返すようフォールバックします。
 
-スクリーンショットの画像ブロックは非公開のツール結果です。エージェントは内容を確認できますが、OpenClaw がチャンネルへの返信に自動で添付することはありません。スクリーンショットを共有するには、メッセージツールを使用して明示的に送信するようエージェントに依頼してください。
+スクリーンショットの画像ブロックは非公開のツール結果です。エージェントはそれらを確認できますが、OpenClaw がチャンネルへの返信に自動的に添付することはありません。スクリーンショットを共有するには、メッセージツールを使用して明示的に送信するようエージェントに依頼してください。
 
-モデルのフォールバック、タイムアウト、バイト制限、プロファイル、プロバイダーのリクエスト設定には、既存の `tools.media.image`／`tools.media.models` フィールドを使用します。
+モデルのフォールバック、タイムアウト、バイト制限、プロファイル、プロバイダーのリクエスト設定には、既存の `tools.media.image` / `tools.media.models` フィールドを使用してください。
 
-アクティブなメインモデルがすでにビジョンに対応しており、明示的な画像理解モデルが設定されていない場合、OpenClaw は通常の画像結果を維持し、メインモデルがスクリーンショットを直接読み取れるようにします。
+アクティブなメインモデルがすでにビジョンをサポートしており、明示的な画像理解モデルが設定されていない場合、OpenClaw は通常の画像結果を維持し、メインモデルがスクリーンショットを直接読み取れるようにします。
 
 <AccordionGroup>
 
 <Accordion title="ポートと到達可能性">
 
-- 制御サービスは、`gateway.port` から導出されたポートで local loopback にバインドします（デフォルトの `18791` = Gateway + 2）。`OPENCLAW_GATEWAY_PORT` は `gateway.port` より優先され、どちらを変更しても同じポート群の導出ポートが移動します。
-- ローカルの `openclaw` プロファイルでは、制御ポートの 9 ポート上から始まる範囲（デフォルトは `18800`～`18899`）から `cdpPort`/`cdpUrl` が自動的に割り当てられます。これらを設定するのは、
-  リモート CDP プロファイルまたは既存セッションのエンドポイントへの接続に限ってください。未設定の場合、`cdpUrl` は
-  管理対象のローカル CDP ポートにデフォルト設定されます。
-- `remoteCdpTimeoutMs` は、リモートおよび `attachOnly` の CDP HTTP 到達性
-  チェックと、タブを開く HTTP リクエストに適用されます。`remoteCdpHandshakeTimeoutMs` は、
-  それらの CDP WebSocket ハンドシェイクに適用されます。永続的なリモート Playwright タブ列挙では、
-  この 2 つのうち大きい方を処理期限として使用します。
-- `localLaunchTimeoutMs` は、ローカルで起動された管理対象 Chrome
-  プロセスが CDP HTTP エンドポイントを公開するまでの時間枠です。`localCdpReadyTimeoutMs` は、
-  プロセス検出後に CDP WebSocket が使用可能になるまでの追加の時間枠です。
-  Chromium の起動が遅い Raspberry Pi、低スペックの VPS、または古いハードウェアでは、
-  これらの値を増やしてください。値は `120000` ms 以下の正の整数である必要があり、無効な
-  設定値は拒否されます。
-- 管理対象 Chrome の起動または準備に繰り返し失敗すると、プロファイルごとに
-  サーキットブレーカーが作動します。数回連続して失敗すると、OpenClaw はブラウザツールが呼び出されるたびに
-  Chromium を生成する代わりに、新しい起動試行を短時間停止します。起動時の問題を修正するか、
-  ブラウザが不要な場合は無効にするか、修復後に
-  Gateway を再起動してください。
-- `actionTimeoutMs` は、呼び出し元が `timeoutMs` を渡さない場合に、ブラウザの `act` リクエストへ適用されるデフォルトの時間枠です。長時間の待機が HTTP 境界でタイムアウトせず完了できるように、クライアントトランスポートは小さな猶予時間を追加します。
-- `tabCleanup` は、プライマリエージェントのブラウザセッションで開かれたタブに対するベストエフォートのクリーンアップです。サブエージェント、cron、ACP のライフサイクルクリーンアップでは、セッション終了時に明示的に追跡されているタブを引き続き閉じます。プライマリセッションではアクティブなタブを再利用可能な状態に保ち、アイドル状態または過剰な追跡対象タブをバックグラウンドで閉じます。
+- 制御サービスは、`gateway.port` から派生したポート（デフォルトは `18791` = Gateway + 2）のループバックにバインドします。`OPENCLAW_GATEWAY_PORT` は `gateway.port` より優先され、どちらを使用しても同じポート系列の派生ポートが移動します。
+- ローカルの `openclaw` プロファイルは、制御ポートの9ポート上から始まる範囲（デフォルトは `18800`～`18899`）から `cdpPort`/`cdpUrl` を自動割り当てします。これらを設定するのは、リモート CDP プロファイルまたは既存セッションのエンドポイントへの接続の場合だけにしてください。`cdpUrl` が未設定の場合、管理対象のローカル CDP ポートがデフォルトになります。
+- リモートおよび `attachOnly` の CDP 到達可能性、WebSocket ハンドシェイク、ローカルの管理対象 Chrome の起動には、組み込みの期限が使用されます。
+- 管理対象 Chrome の起動または準備完了が繰り返し失敗すると、プロファイルごとにサーキットブレーカーが作動します。数回連続して失敗すると、ブラウザツールの呼び出しごとに Chromium を起動する代わりに、OpenClaw は新しい起動試行を短時間停止します。起動時の問題を修正するか、ブラウザが不要な場合は無効にするか、修復後に Gateway を再起動してください。
 
 </Accordion>
 
 <Accordion title="SSRF ポリシー">
 
-- ブラウザのナビゲーションとタブを開くリクエストは、事前チェックされます。アクションの実行中およびアクション後の制限付き猶予期間中、保護対象の Playwright 操作（クリック、座標クリック、ホバー、ドラッグ、スクロール、選択、キー押下、入力、フォーム入力、evaluate）は、ポリシーで拒否されたトップレベルおよびサブフレームのドキュメント読み込みを HTTP リクエストのバイト送信前に遮断し、その後、最終的な `http(s)` URL をベストエフォートで再チェックします。
-- OpenClaw が管理する Chrome を新たに起動するたびに、OpenClaw はベストエフォートでネットワーク予測を無効化し、拒否対象の読み込みに対して Chromium で確認されている投機的な事前接続を抑制します。これは多層防御であり、ポリシー境界ではありません。制御サービスの再起動をまたいで再利用されるブラウザや、その他のブラウザバックエンドには、この強化策が適用されない場合があります。Playwright のルーティングは依然としてネットワークファイアウォールではなく、リダイレクトの各ホップ、ポップアップの最初のリクエスト、Service Worker のトラフィック、制限付き保護期間の終了後に実行されるページコード、またはすべてのバックグラウンド／サブリソース経路を遮断するものではありません。完全な外向き通信の分離には、所有者側での分離またはポリシーを適用するプロキシが必要です。
-- 厳格 SSRF モードでは、リモート CDP エンドポイントの検出と `/json/version` プローブ（`cdpUrl`）もチェックされます。
-- Gateway／プロバイダーの `HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`、`NO_PROXY` 環境変数によって、OpenClaw が管理するブラウザが自動的にプロキシ経由になることはありません。プロバイダーのプロキシ設定によってブラウザの SSRF チェックが弱められないように、管理対象 Chrome はデフォルトで直接接続を使用して起動します。
-- OpenClaw が管理するローカル CDP の準備状況プローブと DevTools WebSocket 接続では、起動された正確な local loopback エンドポイントに対して管理対象ネットワークプロキシをバイパスするため、オペレーターのプロキシが local loopback への外向き通信をブロックしている場合でも、`openclaw browser start` は引き続き機能します。
-- 管理対象ブラウザ自体をプロキシ経由にするには、`browser.extraArgs` を介して `--proxy-server=...` や `--proxy-pac-url=...` などの Chrome プロキシフラグを明示的に渡します。厳格 SSRF モードでは、プライベートネットワークへのブラウザアクセスが意図的に有効化されていない限り、明示的なブラウザのプロキシルーティングはブロックされます。
-- `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork` はデフォルトでオフです。プライベートネットワークへのブラウザアクセスを意図的に信頼する場合にのみ有効にしてください。
+- ブラウザのナビゲーションおよびタブを開くリクエストは、事前チェックされます。アクションの実行中および制限されたアクション後の猶予期間中、保護された Playwright 操作（クリック、座標クリック、ホバー、ドラッグ、スクロール、選択、キー入力、テキスト入力、フォーム入力、evaluate）は、HTTP リクエストのバイトが送信される前に、ポリシーで拒否されたトップレベルおよびサブフレームのドキュメント読み込みを遮断し、その後、最終的な `http(s)` URL をベストエフォートで再チェックします。
+- OpenClaw が管理する Chrome を新たに起動するたびに、OpenClaw はベストエフォートでネットワーク予測を無効化し、拒否された読み込みに対して Chromium で確認されている投機的な事前接続を抑止します。これは多層防御であり、ポリシー境界ではありません。制御サービスの再起動をまたいで再利用されるブラウザや、その他のブラウザバックエンドには、この強化策が適用されない可能性があります。Playwright のルーティングは依然としてネットワークファイアウォールではなく、リダイレクトの各段階、ポップアップの最初のリクエスト、Service Worker のトラフィック、制限されたガード期間後に実行されるページコード、またはすべてのバックグラウンド／サブリソース経路を遮断するものではありません。完全な外向き通信の分離には、所有者側での分離またはポリシーを適用するプロキシが必要です。
+- 厳格な SSRF モードでは、リモート CDP エンドポイントの検出および `/json/version` プローブ（`cdpUrl`）もチェックされます。
+- Gateway／プロバイダーの `HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`、および `NO_PROXY` 環境変数によって、OpenClaw 管理ブラウザが自動的にプロキシ経由になることはありません。プロバイダーのプロキシ設定によってブラウザの SSRF チェックが弱まらないように、管理対象 Chrome はデフォルトで直接接続を使用して起動します。
+- OpenClaw が管理するローカル CDP の準備完了プローブおよび DevTools WebSocket 接続は、起動された正確なループバックエンドポイントについて管理対象ネットワークプロキシを迂回するため、オペレーターのプロキシがループバックへの外向き通信をブロックしている場合でも `openclaw browser start` は機能します。
+- 管理対象ブラウザ自体をプロキシ経由にするには、`browser.extraArgs` を通じて `--proxy-server=...` や `--proxy-pac-url=...` などの明示的な Chrome プロキシフラグを渡してください。厳格な SSRF モードでは、プライベートネットワークへのブラウザアクセスが意図的に有効化されていない限り、明示的なブラウザのプロキシルーティングがブロックされます。
+- `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork` はデフォルトで無効です。プライベートネットワークへのブラウザアクセスを意図的に信頼する場合にのみ有効にしてください。
 - `browser.ssrfPolicy.allowPrivateNetwork` は従来のエイリアスとして引き続きサポートされます。
 
 </Accordion>
 
 <Accordion title="プロファイルの動作">
 
-- `attachOnly: true` は、ローカルブラウザを決して起動せず、すでに実行中のブラウザがある場合にのみ接続することを意味します。
-- `headless` はグローバルまたはローカルの管理対象プロファイルごとに設定できます。プロファイルごとの値は `browser.headless` より優先されるため、ローカルで起動する一方のプロファイルをヘッドレスにし、もう一方を表示状態にできます。
-- `POST /start?headless=true` と `openclaw browser start --headless` は、
-  `browser.headless` やプロファイル設定を書き換えることなく、ローカルの管理対象プロファイルを
-  1 回だけヘッドレスで起動するよう要求します。既存セッション、接続専用、および
-  リモート CDP プロファイルでは、OpenClaw がそれらのブラウザプロセスを起動しないため、
-  このオーバーライドは拒否されます。
-- `DISPLAY` または `WAYLAND_DISPLAY` がない Linux ホストでは、環境またはプロファイル／グローバル
-  設定のいずれでも表示モードが明示的に選択されていない場合、ローカルの管理対象プロファイルは
-  自動的にヘッドレスをデフォルトとします。曖昧さのないブラウザレベルの形式
-  `openclaw browser --json status` を使用してください。末尾に指定する `openclaw browser status --json`
-  も、`status` 自体には `--json` が定義されていないため機能します。このコマンドは、
-  `headlessSource` を `env`、`profile`、`config`、
-  `request`、`linux-display-fallback`、または `default` として報告します。
-- `OPENCLAW_BROWSER_HEADLESS=1` は、現在のプロセスにおけるローカル管理対象の起動を
-  強制的にヘッドレスにします。`OPENCLAW_BROWSER_HEADLESS=0` は通常の起動を強制的に
-  表示モードにし、ディスプレイサーバーがない Linux ホストでは対処方法を示すエラーを返します。
-  明示的な `start --headless` リクエストは、その 1 回の起動について引き続き優先されます。
-- ブラウザ制御ルートとプログラムから使用するクライアントは、ディスプレイがない場合のエラーについて
-  人が読める `error` を維持し、安定した理由
-  `no_display_for_headed_profile` を公開します。その `details` には `profile`、
-  `requestedHeadless`、`headlessSource`、`displayPresent` のみが含まれるため、API クライアントは
-  メッセージテキストと照合することなく、適切な修正方法を選択できます。
-- 実行中のローカル管理対象プロファイルに対して、status と doctor は Chrome の
-  ブラウザレベル CDP エンドポイントに問い合わせ、レンダラー、バックエンド、デバイス／ドライバー、機能の
-  状態、ドライバーの回避策、アクセラレーション動画機能を取得します。結果は
-  そのブラウザプロセスについてキャッシュされ、
-  `openclaw browser --json status` で完全に公開されます。受動的な status 呼び出しでは Chrome は起動されません。
-  既存セッション、拡張機能、リモート CDP、サンドボックスブラウザは別扱いのままであり、
-  この管理対象ホスト経路からは検査されません。
-- ヘッドレスの管理対象 Chrome では、引き続き保守的な `--disable-gpu` がデフォルトとして使用されます。
-  診断機能がアクセラレーションを有効にしたり、グローバルなアクセラレーション設定を追加したり、
-  サンドボックスブラウザにデバイスアクセスを付与したりすることはありません。
-- `executablePath` はグローバルまたはローカルの管理対象プロファイルごとに設定できます。プロファイルごとの値は `browser.executablePath` より優先されるため、管理対象プロファイルごとに異なる Chromium ベースのブラウザを起動できます。どちらの形式でも、OS のホームディレクトリを表す `~` を使用できます。
-- `color`（トップレベルおよびプロファイルごと）はブラウザ UI に色を付けるため、どのプロファイルがアクティブかを確認できます。
-- デフォルトのプロファイルは `openclaw`（管理対象のスタンドアロン）です。ログイン済みユーザーブラウザを使用するには、`defaultProfile: "user"` を指定します。
+- `attachOnly: true` は、ローカルブラウザを起動せず、すでに実行中のブラウザがある場合にのみ接続することを意味します。
+- `headless` は、グローバルまたはローカルの管理対象プロファイルごとに設定できます。プロファイルごとの値は `browser.headless` を上書きするため、ローカルで起動した1つのプロファイルをヘッドレスのままにし、別のプロファイルを表示状態にできます。
+- `POST /start?headless=true` および `openclaw browser start --headless` は、`browser.headless` またはプロファイル設定を書き換えることなく、ローカルの管理対象プロファイルに対して1回限りのヘッドレス起動を要求します。既存セッション、接続専用、およびリモート CDP プロファイルでは、OpenClaw がそれらのブラウザプロセスを起動しないため、この上書きは拒否されます。
+- `DISPLAY` または `WAYLAND_DISPLAY` のない Linux ホストでは、環境またはプロファイル／グローバル設定で表示モードが明示的に選択されていない場合、ローカルの管理対象プロファイルは自動的にヘッドレスをデフォルトとします。曖昧さのないブラウザレベルの形式 `openclaw browser --json status` を使用してください。`status` は独自の `--json` を定義していないため、末尾の `openclaw browser status --json` も機能します。このコマンドは、`headlessSource` を `env`、`profile`、`config`、`request`、`linux-display-fallback`、または `default` として報告します。
+- `OPENCLAW_BROWSER_HEADLESS=1` は、現在のプロセスにおけるローカルの管理対象ブラウザの起動を強制的にヘッドレスにします。`OPENCLAW_BROWSER_HEADLESS=0` は通常の起動を強制的に表示モードにし、ディスプレイサーバーのない Linux ホストでは対処方法を示すエラーを返します。ただし、明示的な `start --headless` リクエストは、その1回の起動について引き続き優先されます。
+- ブラウザ制御ルートとプログラムクライアントは、ディスプレイがない場合のエラーについて、人間が読める `error` を維持し、安定した理由 `no_display_for_headed_profile` を公開します。その `details` には `profile`、`requestedHeadless`、`headlessSource`、および `displayPresent` のみが含まれるため、API クライアントはメッセージテキストを照合せずに正しい修復方法を選択できます。
+- 実行中のローカル管理対象プロファイルに対し、status と doctor は Chrome のブラウザレベル CDP エンドポイントを照会し、レンダラー、バックエンド、デバイス／ドライバー、機能の状態、ドライバーの回避策、アクセラレーション動画機能を取得します。結果はそのブラウザプロセスについてキャッシュされ、`openclaw browser --json status` によって完全な形で公開されます。受動的な status 呼び出しでは Chrome は起動されません。既存セッション、拡張機能、リモート CDP、およびサンドボックスブラウザは引き続き別扱いとなり、この管理対象ホスト経路を通じて検査されることはありません。
+- ヘッドレスの管理対象 Chrome でも、保守的な `--disable-gpu` のデフォルトが引き続き使用されます。診断によってアクセラレーションが有効化されたり、グローバルなアクセラレーション設定が追加されたり、サンドボックスブラウザにデバイスアクセスが付与されたりすることはありません。
+- `executablePath` は、グローバルまたはローカルの管理対象プロファイルごとに設定できます。プロファイルごとの値は `browser.executablePath` を上書きするため、管理対象プロファイルごとに異なる Chromium ベースのブラウザを起動できます。どちらの形式でも、OS のホームディレクトリを表す `~` を使用できます。
+- `color`（トップレベルおよびプロファイルごと）はブラウザ UI に色を付け、どのプロファイルがアクティブかを確認できるようにします。
+- デフォルトプロファイルは `openclaw`（管理対象のスタンドアロン）です。サインイン済みのユーザーブラウザを使用するには、`defaultProfile: "user"` を使用してください。
 - 自動検出の順序：Chromium ベースの場合はシステムのデフォルトブラウザ、それ以外は Chrome、Brave、Edge、Chromium、Chrome Canary。
-- `driver: "existing-session"` は、生の CDP の代わりに Chrome DevTools MCP を使用します。Chrome MCP の自動接続を介して接続することも、実行中のブラウザ用 DevTools エンドポイントがすでにある場合は `cdpUrl` を介して接続することもできます。
-- `driver: "extension"` は、[OpenClaw Chrome 拡張機能](/ja-JP/tools/chrome-extension)を介して、ログイン済みの Chrome を操作します。リレーが自身の local loopback エンドポイントを所有するため、これらのプロファイルでは `cdpUrl` を指定できません。これは、コンピューターの前に誰もいない状態でも機能する唯一のログイン済みブラウザモードです。
-- 既存セッションプロファイルをデフォルト以外の Chromium ユーザープロファイル（Brave、Edge など）に接続する場合は、`browser.profiles.<name>.userDataDir` を設定します。このパスでも、OS のホームディレクトリを表す `~` を使用できます。
+- `driver: "existing-session"` は、生の CDP の代わりに Chrome DevTools MCP を使用します。Chrome MCP の自動接続を通じて接続するか、実行中のブラウザ用の DevTools エンドポイントがすでにある場合は `cdpUrl` を通じて接続できます。
+- `driver: "extension"` は、[OpenClaw Chrome 拡張機能](/ja-JP/tools/chrome-extension)を通じてサインイン済みの Chrome を操作します。リレーが自身のループバックエンドポイントを所有するため、これらのプロファイルは `cdpUrl` を受け付けません。これは、コンピューターの前に誰もいない状態でも機能する唯一のサインイン済みブラウザモードです。
+- 既存セッションのプロファイルをデフォルト以外の Chromium ユーザープロファイル（Brave、Edge など）に接続する場合は、`browser.profiles.<name>.userDataDir` を設定してください。この経路では、OS のホームディレクトリを表す `~` も使用できます。
 
 </Accordion>
 
@@ -313,17 +329,14 @@ Plugin が有効な場合、Plugin に同梱された Skills はエージェン�
 
 ## Brave または別の Chromium ベースのブラウザを使用する
 
-**システムのデフォルト**ブラウザが Chromium ベース（Chrome／Brave／Edge など）の場合、
-OpenClaw はそれを自動的に使用します。自動検出をオーバーライドするには、
-`browser.executablePath` を設定します。トップレベルおよびプロファイルごとの `executablePath` 値では、
-OS のホームディレクトリを表す `~` を使用できます。
+**システムのデフォルト**ブラウザが Chromium ベース（Chrome／Brave／Edge など）の場合、OpenClaw はそれを自動的に使用します。自動検出を上書きするには、`browser.executablePath` を設定してください。トップレベルおよびプロファイルごとの `executablePath` 値では、OS のホームディレクトリを表す `~` を使用できます。
 
 ```bash
 openclaw config set browser.executablePath "/usr/bin/google-chrome"
 openclaw config set browser.profiles.work.executablePath "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 ```
 
-または、プラットフォームごとに設定ファイルで指定します。
+または、プラットフォームごとに設定内で指定します。
 
 <Tabs>
   <Tab title="macOS">
@@ -355,32 +368,21 @@ openclaw config set browser.profiles.work.executablePath "/Applications/Google C
   </Tab>
 </Tabs>
 
-プロファイルごとの `executablePath` は、OpenClaw が起動するローカルの管理対象プロファイルにのみ影響します。
-`existing-session` プロファイルは、代わりにすでに実行中のブラウザへ接続し、
-リモート CDP プロファイルは `cdpUrl` の接続先ブラウザを使用します。
+プロファイルごとの `executablePath` は、OpenClaw が起動するローカルの管理対象プロファイルにのみ影響します。`existing-session` プロファイルは代わりにすでに実行中のブラウザへ接続し、リモート CDP プロファイルは `cdpUrl` の接続先ブラウザを使用します。
 
 ## ローカル制御とリモート制御
 
-- **ローカル制御（デフォルト）：** Gateway が local loopback 制御サービスを起動し、ローカルブラウザを起動できます。
-- **リモート制御（Node ホスト）：** ブラウザがあるマシン上で Node ホストを実行します。Gateway はブラウザ操作をそのホストにプロキシします。
-- **リモート CDP：** リモートの Chromium ベースブラウザに接続するには、
-  `browser.profiles.<name>.cdpUrl`（または `browser.cdpUrl`）を設定します。この場合、OpenClaw はローカルブラウザを起動しません。
-- local loopback 上で外部管理されている CDP サービス（たとえば、
-  Docker で `127.0.0.1` に公開された Browserless）についても、`attachOnly: true` を設定します。`attachOnly` のない local loopback CDP は、
-  OpenClaw が管理するローカルブラウザプロファイルとして扱われます。
-- `headless` は、OpenClaw が起動するローカルの管理対象プロファイルにのみ影響します。既存セッションやリモート CDP ブラウザを再起動または変更することはありません。
-- `executablePath` にも同じローカル管理対象プロファイルのルールが適用されます。実行中の
-  ローカル管理対象プロファイルで変更すると、そのプロファイルには再起動／再調整が必要であることが記録され、
-  次回の起動で新しいバイナリが使用されます。
+- **ローカル制御（デフォルト）：** Gateway がループバック制御サービスを開始し、ローカルブラウザを起動できます。
+- **リモート制御（Node ホスト）：** ブラウザがあるマシンで Node ホストを実行します。Gateway はブラウザ操作をそのホストにプロキシします。
+- **リモート CDP：** リモートの Chromium ベースブラウザに接続するには、`browser.profiles.<name>.cdpUrl`（または `browser.cdpUrl`）を設定します。この場合、OpenClaw はローカルブラウザを起動しません。
+- ループバック上の外部管理 CDP サービス（たとえば Docker で `127.0.0.1` に公開された Browserless）の場合は、`attachOnly: true` も設定してください。`attachOnly` のないループバック CDP は、OpenClaw が管理するローカルブラウザプロファイルとして扱われます。
+- `headless` は、OpenClaw が起動するローカルの管理対象プロファイルにのみ影響します。既存セッションまたはリモート CDP ブラウザを再起動したり変更したりすることはありません。
+- `executablePath` にも、同じローカル管理対象プロファイルのルールが適用されます。実行中のローカル管理対象プロファイルでこれを変更すると、そのプロファイルは再起動／再調整の対象としてマークされ、次回の起動で新しいバイナリが使用されます。
 
-停止時の動作はプロファイルモードによって異なります。
+停止時の動作は、プロファイルモードによって異なります。
 
-- ローカル管理対象プロファイル：`openclaw browser stop` は、
-  OpenClaw が起動したブラウザプロセスを停止します
-- 接続専用およびリモート CDP プロファイル：`openclaw browser stop` は、OpenClaw が
-  ブラウザプロセスを起動していなくても、アクティブな制御セッションを閉じ、
-  Playwright／CDP のエミュレーションオーバーライド（ビューポート、
-  カラースキーム、ロケール、タイムゾーン、オフラインモード、および同様の状態）を解除します
+- ローカル管理対象プロファイル：`openclaw browser stop` は、OpenClaw が起動したブラウザプロセスを停止します
+- 接続専用およびリモート CDP プロファイル：`openclaw browser stop` は、OpenClaw がブラウザプロセスを起動していなくても、アクティブな制御セッションを閉じ、Playwright／CDP のエミュレーション上書き（ビューポート、カラースキーム、ロケール、タイムゾーン、オフラインモード、および同様の状態）を解除します
 
 リモート CDP URL には認証情報を含めることができます。
 
@@ -388,29 +390,32 @@ openclaw config set browser.profiles.work.executablePath "/Applications/Google C
 - HTTP Basic 認証（例：`https://user:pass@provider.example`）
 
 OpenClaw は、`/json/*` エンドポイントの呼び出し時および
-CDP WebSocket への接続時に認証情報を維持します。トークンは設定ファイルにコミットせず、
-環境変数またはシークレットマネージャーを使用することを推奨します。
+CDP WebSocket への接続時に認証情報を保持します。トークンを設定ファイルに
+コミットするのではなく、環境変数またはシークレットマネージャーを使用してください。
 
 ## Node ブラウザプロキシ（設定不要のデフォルト）
 
-ブラウザがあるマシン上で **Node ホスト**を実行すると、OpenClaw は
-追加のブラウザ設定なしで、ブラウザツールの呼び出しをその Node へ
-自動的にルーティングできます。これはリモート Gateway のデフォルト経路です。
+ブラウザがあるマシンで **Node ホスト**を実行すると、OpenClaw は追加のブラウザ設定なしで、
+ブラウザツールの呼び出しをその Node に自動的にルーティングできます。
+これはリモート Gateway のデフォルト経路です。
 
-注：
+注記:
 
 - Node ホストは、ローカルのブラウザ制御サーバーを**プロキシコマンド**経由で公開します。
-- プロファイルは Node 自体の `browser.profiles` 設定（ローカルと同じ）から取得されます。
+- プロファイルは Node 自身の `browser.profiles` 設定（ローカルと同じ）から取得されます。
 - プロキシコマンドは、`allowProfiles` の設定にかかわらず、永続的なプロファイル変更（`create-profile`、`delete-profile`、`reset-profile`）を許可しません。これらの変更は Node 上で直接行ってください。
-- `nodeHost.browserProxy.allowProfiles` は省略可能です。空のままにすると、従来のデフォルト動作となり、設定済みのすべてのプロファイルへプロキシ経由で引き続きアクセスできます。
+- `nodeHost.browserProxy.allowProfiles` は任意です。従来のデフォルト動作を使用する場合は空のままにしてください。設定済みのすべてのプロファイルにプロキシ経由で引き続きアクセスできます。
 - `nodeHost.browserProxy.allowProfiles` を設定すると、OpenClaw はこれを最小権限の境界として扱い、プロキシが対象にできるプロファイル名を制限します。
-- 不要な場合は無効にします。
+- 使用しない場合は無効にしてください:
   - Node 側: `nodeHost.browserProxy.enabled=false`
-  - Gateway 側: `gateway.nodes.browser.mode="off"`（接続済みのブラウザ Node を 1 つ選択する `"auto"`、または明示的な Node パラメーターを必須にする `"manual"` も指定できます）
+  - Gateway 側: `gateway.nodes.browser.mode="off"`（接続済みブラウザ Node を1つ選択するための `"auto"`、または明示的な Node パラメーターを必須にするための `"manual"` も指定できます）
 
 ## Browserless（ホスト型リモート CDP）
 
-[Browserless](https://browserless.io) は、HTTPS と WebSocket 経由で CDP 接続 URL を公開するホスト型 Chromium サービスです。OpenClaw はどちらの形式も使用できますが、リモートブラウザプロファイルでは、Browserless の接続ドキュメントに記載されている直接 WebSocket URL を使用するのが最も簡単です。
+[Browserless](https://browserless.io) は、HTTPS および WebSocket 経由で
+CDP 接続 URL を公開するホスト型 Chromium サービスです。OpenClaw はどちらの形式も使用できますが、
+リモートブラウザプロファイルでは、Browserless の接続ドキュメントに記載されている
+直接 WebSocket URL を使用するのが最も簡単です。
 
 例:
 
@@ -419,8 +424,6 @@ CDP WebSocket への接続時に認証情報を維持します。トークンは
   browser: {
     enabled: true,
     defaultProfile: "browserless",
-    remoteCdpTimeoutMs: 2000,
-    remoteCdpHandshakeTimeoutMs: 4000,
     profiles: {
       browserless: {
         cdpUrl: "wss://production-sfo.browserless.io?token=<BROWSERLESS_API_KEY>",
@@ -431,15 +434,18 @@ CDP WebSocket への接続時に認証情報を維持します。トークンは
 }
 ```
 
-注:
+注記:
 
 - `<BROWSERLESS_API_KEY>` を実際の Browserless トークンに置き換えてください。
-- Browserless アカウントに一致するリージョンエンドポイントを選択してください（ドキュメントを参照）。
-- Browserless から HTTPS ベース URL が提供された場合は、直接 CDP 接続用に `wss://` に変換するか、HTTPS URL のままにして OpenClaw に `/json/version` を検出させることができます。
+- Browserless アカウントに対応するリージョンエンドポイントを選択してください（同社のドキュメントを参照）。
+- Browserless から HTTPS ベース URL が提供された場合は、直接 CDP 接続用の
+  `wss://` に変換するか、HTTPS URL のままにして OpenClaw に
+  `/json/version` を検出させることができます。
 
-### 同じホスト上の Browserless Docker
+### 同一ホスト上の Browserless Docker
 
-Browserless を Docker でセルフホストし、OpenClaw をホスト上で実行する場合は、Browserless を外部管理の CDP サービスとして扱います。
+Browserless を Docker でセルフホストし、OpenClaw をホスト上で実行する場合は、
+Browserless を外部管理の CDP サービスとして扱います:
 
 ```json5
 {
@@ -457,33 +463,59 @@ Browserless を Docker でセルフホストし、OpenClaw をホスト上で実
 }
 ```
 
-`browser.profiles.browserless.cdpUrl` のアドレスは、OpenClaw プロセスから到達可能でなければなりません。Browserless も、それに対応する到達可能なエンドポイントを公開する必要があります。Browserless の `EXTERNAL` を、`ws://127.0.0.1:3000`、`ws://browserless:3000`、または安定したプライベート Docker ネットワークアドレスなど、OpenClaw から到達可能な同じ WebSocket ベース URL に設定してください。`/json/version` が、OpenClaw から到達できないアドレスを指す `webSocketDebuggerUrl` を返す場合、CDP HTTP は正常に見えても WebSocket のアタッチは失敗します。
+`browser.profiles.browserless.cdpUrl` のアドレスは、
+OpenClaw プロセスから到達可能でなければなりません。また、Browserless は到達可能な対応エンドポイントを通知する必要があります。
+Browserless の `EXTERNAL` を、`ws://127.0.0.1:3000`、`ws://browserless:3000`、または安定したプライベート Docker
+ネットワークアドレスなど、OpenClaw から到達可能な同じ WebSocket ベースに設定してください。
+`/json/version` が、OpenClaw から到達できないアドレスを指す
+`webSocketDebuggerUrl` を返す場合、CDP HTTP が正常に見えても WebSocket
+アタッチは失敗します。
 
-ループバックの Browserless プロファイルでは、`attachOnly` を未設定のままにしないでください。`attachOnly` がない場合、OpenClaw はループバックポートをローカル管理ブラウザプロファイルとして扱い、そのポートは使用中だが OpenClaw が所有していないと報告することがあります。
+local loopback の Browserless プロファイルでは、`attachOnly` を未設定のままにしないでください。
+`attachOnly` がない場合、OpenClaw は local loopback ポートをローカル管理のブラウザ
+プロファイルとして扱い、そのポートは使用中だが OpenClaw が所有していないと報告する場合があります。
 
 ## 直接 WebSocket CDP プロバイダー
 
-一部のホスト型ブラウザサービスは、標準の HTTP ベースの CDP 検出（`/json/version`）ではなく、**直接 WebSocket** エンドポイントを公開します。OpenClaw は 3 種類の CDP URL 形式を受け入れ、適切な接続方法を自動的に選択します。
+一部のホスト型ブラウザサービスは、標準の HTTP ベースの CDP 検出（`/json/version`）ではなく、
+**直接 WebSocket** エンドポイントを公開します。OpenClaw は3種類の
+CDP URL 形式を受け付け、適切な接続方式を自動的に選択します:
 
 - **HTTP(S) 検出** - `http://host[:port]` または `https://host[:port]`。
-  OpenClaw は `/json/version` を呼び出して WebSocket デバッガー URL を検出し、接続します。WebSocket へのフォールバックはありません。
-- **直接 WebSocket エンドポイント** - `ws://host[:port]/devtools/<kind>/<id>`、または `/devtools/browser|page|worker|shared_worker|service_worker/<id>` パスを持つ `wss://...`。
-  OpenClaw は WebSocket ハンドシェイクで直接接続し、`/json/version` を完全にスキップします。
-- **ベアルート WebSocket** - `/devtools/...` パスのない `ws://host[:port]` または `wss://host[:port]`（例: [Browserless](https://browserless.io)、[Browserbase](https://www.browserbase.com)）。OpenClaw は最初に HTTP `/json/version` 検出を試行します（スキームを `http`/`https` に正規化）。検出結果に `webSocketDebuggerUrl` が含まれていればそれを使用し、含まれていなければベアルートでの直接 WebSocket ハンドシェイクにフォールバックします。公開された WebSocket エンドポイントが CDP ハンドシェイクを拒否しても、設定されたベアルートが受け入れる場合、OpenClaw はそのルートにもフォールバックします。これにより、ローカル Chrome を指すベアな `ws://` でも接続できます。Chrome は `/json/version` から得られるターゲット固有のパスでのみ WebSocket アップグレードを受け入れる一方、ホスト型プロバイダーは、検出エンドポイントが Playwright CDP に適さない短命な URL を公開する場合でも、ルート WebSocket エンドポイントを使用できます。
+  OpenClaw は `/json/version` を呼び出して WebSocket デバッガー URL を検出し、その後
+  接続します。WebSocket へのフォールバックはありません。
+- **直接 WebSocket エンドポイント** - `/devtools/browser|page|worker|shared_worker|service_worker/<id>`
+  パスを持つ `ws://host[:port]/devtools/<kind>/<id>` または
+  `wss://...`。
+  OpenClaw は WebSocket ハンドシェイクを介して直接接続し、
+  `/json/version` を完全にスキップします。
+- **ベア WebSocket ルート** - `/devtools/...` パスを持たない
+  `ws://host[:port]` または `wss://host[:port]`（例: [Browserless](https://browserless.io)、
+  [Browserbase](https://www.browserbase.com)）。OpenClaw は最初に HTTP
+  `/json/version` 検出を試みます（スキームを `http`/`https` に正規化）。
+  検出で `webSocketDebuggerUrl` が返された場合はそれを使用し、それ以外の場合は
+  ベアルートでの直接 WebSocket ハンドシェイクにフォールバックします。通知された
+  WebSocket エンドポイントが CDP ハンドシェイクを拒否しても、設定されたベアルートが
+  受け入れる場合、OpenClaw はそのルートにもフォールバックします。これにより、ローカルの Chrome を指すベア
+  `ws://` でも接続できます。Chrome は `/json/version` から取得したターゲット固有の
+  パスでのみ WebSocket アップグレードを受け入れる一方、ホスト型
+  プロバイダーは、検出エンドポイントが Playwright CDP に適さない
+  短期間有効な URL を通知する場合でも、ルート WebSocket エンドポイントを使用できます。
 
-`openclaw browser doctor` は、ランタイムのアタッチと同じく、検出を先に試し、WebSocket にフォールバックするロジックを使用します。そのため、正常に接続できるベアルート URL が診断で到達不能と報告されることはありません。
+`openclaw browser doctor` は、実行時アタッチと同じ検出優先・WebSocket フォールバック
+ロジックを使用するため、正常に接続できるベアルート URL が診断で
+到達不能と報告されることはありません。
 
 ### Browserbase
 
-[Browserbase](https://www.browserbase.com) は、組み込みの CAPTCHA 解決、ステルスモード、住宅用プロキシを備えたヘッドレスブラウザ実行用クラウドプラットフォームです。
+[Browserbase](https://www.browserbase.com) は、組み込みの CAPTCHA 解決、ステルスモード、住宅用
+プロキシを備えたヘッドレスブラウザを実行するためのクラウドプラットフォームです。
 
 ```json5
 {
   browser: {
     enabled: true,
     defaultProfile: "browserbase",
-    remoteCdpTimeoutMs: 3000,
-    remoteCdpHandshakeTimeoutMs: 5000,
     profiles: {
       browserbase: {
         cdpUrl: "wss://connect.browserbase.com?apiKey=<BROWSERBASE_API_KEY>",
@@ -494,25 +526,27 @@ Browserless を Docker でセルフホストし、OpenClaw をホスト上で実
 }
 ```
 
-注:
+注記:
 
-- [サインアップ](https://www.browserbase.com/sign-up)し、[Overview dashboard](https://www.browserbase.com/overview)から **API Key** をコピーします。
+- [サインアップ](https://www.browserbase.com/sign-up)し、[Overview dashboard](https://www.browserbase.com/overview) から **API Key**
+  をコピーしてください。
 - `<BROWSERBASE_API_KEY>` を実際の Browserbase API キーに置き換えてください。
-- Browserbase は WebSocket 接続時にブラウザセッションを自動作成するため、手動でセッションを作成する必要はありません。
+- Browserbase は WebSocket 接続時にブラウザセッションを自動作成するため、
+  手動でセッションを作成する必要はありません。
 - 現在の無料枠の制限と有料プランについては、[料金](https://www.browserbase.com/pricing)を参照してください。
-- API リファレンス全体、SDK ガイド、統合例については、[Browserbase ドキュメント](https://docs.browserbase.com)を参照してください。
+- 完全な API リファレンス、SDK ガイド、統合例については、
+  [Browserbase ドキュメント](https://docs.browserbase.com)を参照してください。
 
 ### Notte
 
-[Notte](https://www.notte.cc) は、組み込みのステルス機能、住宅用プロキシ、CDP ネイティブ WebSocket Gateway を備えたヘッドレスブラウザ実行用クラウドプラットフォームです。
+[Notte](https://www.notte.cc) は、組み込みのステルス機能、住宅用プロキシ、CDP ネイティブの
+WebSocket Gateway を備えたヘッドレスブラウザを実行するためのクラウドプラットフォームです。
 
 ```json5
 {
   browser: {
     enabled: true,
     defaultProfile: "notte",
-    remoteCdpTimeoutMs: 3000,
-    remoteCdpHandshakeTimeoutMs: 5000,
     profiles: {
       notte: {
         cdpUrl: "wss://us-prod.notte.cc/sessions/connect?token=<NOTTE_API_KEY>",
@@ -523,61 +557,82 @@ Browserless を Docker でセルフホストし、OpenClaw をホスト上で実
 }
 ```
 
-注:
+注記:
 
-- [サインアップ](https://console.notte.cc)し、コンソールの設定ページから **API Key** をコピーします。
+- [サインアップ](https://console.notte.cc)し、コンソールの設定ページから **API Key** を
+  コピーしてください。
 - `<NOTTE_API_KEY>` を実際の Notte API キーに置き換えてください。
-- Notte は WebSocket 接続時にブラウザセッションを自動作成するため、手動でセッションを作成する必要はありません。WebSocket が切断されるとセッションは破棄されます。
+- Notte は WebSocket 接続時にブラウザセッションを自動作成するため、手動で
+  セッションを作成する必要はありません。WebSocket が切断されると、
+  セッションは破棄されます。
 - 現在の無料枠の制限と有料プランについては、[料金](https://www.notte.cc/#pricing)を参照してください。
-- API リファレンス全体、SDK ガイド、統合例については、[Notte ドキュメント](https://docs.notte.cc)を参照してください。
+- 完全な API リファレンス、SDK ガイド、統合例については、
+  [Notte ドキュメント](https://docs.notte.cc)を参照してください。
 
 ## セキュリティ
 
-要点:
+重要なポイント:
 
-- ブラウザ制御はループバック専用です。アクセスは Gateway の認証または Node のペアリングを経由します。
-- スタンドアロンのループバックブラウザ HTTP API は、**共有シークレット認証のみ**を使用します。Gateway トークンによる Bearer 認証、`x-openclaw-password`、または設定済みの Gateway パスワードによる HTTP Basic 認証です。
-- Tailscale Serve の ID ヘッダーと `gateway.auth.mode: "trusted-proxy"` は、このスタンドアロンのループバックブラウザ API を認証**しません**。
-- ブラウザ制御が有効で、共有シークレット認証が設定されていない場合、OpenClaw は起動時にブラウザ制御用の認証情報を自動生成して永続化します。`gateway.auth.mode` が `none` の場合はトークン、`trusted-proxy` の場合はパスワードです（プロセス外のループバッククライアントが解決できるように、`gateway.auth.password` 経由で永続化されます）。そのモードに対して明示的な文字列の認証情報がすでに設定されている場合、または `gateway.auth.mode` が `password` の場合、自動生成はスキップされます。
-- 生成されたものではなく、自分で管理する安定したシークレットを使用する場合は、`gateway.auth.token`、`gateway.auth.password`、`OPENCLAW_GATEWAY_TOKEN`、または `OPENCLAW_GATEWAY_PASSWORD` を明示的に設定してください。
+- ブラウザ制御は local loopback 限定です。アクセスは Gateway の認証または Node のペアリングを経由します。
+- スタンドアロンの local loopback ブラウザ HTTP API は、**共有シークレット認証のみ**を使用します:
+  Gateway トークンの Bearer 認証、`x-openclaw-password`、または設定済みの
+  Gateway パスワードによる HTTP Basic 認証です。
+- Tailscale Serve の ID ヘッダーと `gateway.auth.mode: "trusted-proxy"` は、
+  このスタンドアロンの local loopback ブラウザ API を**認証しません**。
+- ブラウザ制御が有効で共有シークレット認証が設定されていない場合、OpenClaw は
+  起動時にブラウザ制御用の認証情報を自動生成して永続化します:
+  `gateway.auth.mode` が `none` の場合はトークン、`trusted-proxy` の場合は
+  パスワードです（プロセス外の local loopback クライアントが解決できるように、
+  `gateway.auth.password` を介して永続化されます）。そのモード用の明示的な
+  文字列認証情報がすでに設定されている場合、または
+  `gateway.auth.mode` が `password` の場合、自動生成は行われません。
+- 生成されたシークレットではなく、自身で管理する安定したシークレットを使用する場合は、
+  `gateway.auth.token`、`gateway.auth.password`、`OPENCLAW_GATEWAY_TOKEN`、または
+  `OPENCLAW_GATEWAY_PASSWORD` を明示的に設定してください。
 
 リモート CDP のヒント:
 
-- 可能な場合は、暗号化されたエンドポイント（HTTPS または WSS）と短命なトークンを使用してください。
+- 可能な場合は、暗号化されたエンドポイント（HTTPS または WSS）と短期間有効なトークンを使用してください。
 - 長期間有効なトークンを設定ファイルに直接埋め込まないでください。
-- Gateway とすべての Node ホストをプライベートネットワーク（Tailscale）上に置き、公開しないでください。
-- リモート CDP の URL／トークンをシークレットとして扱い、環境変数またはシークレットマネージャーを使用してください。
+- Gateway とすべての Node ホストをプライベートネットワーク（Tailscale）上に配置し、公開を避けてください。
+- リモート CDP の URL/トークンはシークレットとして扱い、環境変数またはシークレットマネージャーを使用してください。
 
 ## プロファイル（複数ブラウザ）
 
-OpenClaw は、名前付きの複数プロファイル（ルーティング設定）をサポートします。プロファイルには次の種類があります。
+OpenClaw は複数の名前付きプロファイル（ルーティング設定）をサポートします。プロファイルには次の種類があります:
 
 - **OpenClaw 管理**: 独自のユーザーデータディレクトリと CDP ポートを持つ専用の Chromium ベースのブラウザインスタンス
-- **リモート**: 明示的な CDP URL（別の場所で実行される Chromium ベースのブラウザ）
-- **既存セッション**: Chrome DevTools MCP の自動接続を使用する既存の Chrome プロファイル
+- **リモート**: 明示的な CDP URL（別の場所で実行されている Chromium ベースのブラウザ）
+- **既存のセッション**: Chrome DevTools MCP の自動接続を介した既存の Chrome プロファイル
 
 デフォルト:
 
 - `openclaw` プロファイルが存在しない場合は自動作成されます。
-- `user` プロファイルは、Chrome MCP による既存セッションへのアタッチ用として組み込まれています。
-- `user` 以外の既存セッションプロファイルはオプトインです。`--driver existing-session` を使用して作成します。
-- ローカル CDP ポートは、デフォルトで **18800-18899** から割り当てられます。
+- `user` プロファイルは、Chrome MCP の既存セッションへのアタッチ用として組み込まれています。
+- 既存セッションプロファイルは `user` 以外ではオプトインです。`--driver existing-session` で作成してください。
+- ローカル CDP ポートはデフォルトで **18800-18899** から割り当てられます。
 - プロファイルを削除すると、そのローカルデータディレクトリはゴミ箱に移動されます。
 
-すべての制御エンドポイントは `?profile=<name>` を受け付けます。CLI では `--browser-profile` を使用します。
+すべての制御エンドポイントは `?profile=<name>` を受け付け、CLI は `--browser-profile` を使用します。
 
-## Chrome DevTools MCP を使用した既存セッション
+## Chrome DevTools MCP を介した既存セッション
 
-OpenClaw は、公式の Chrome DevTools MCP サーバーを介して、実行中の Chromium ベースのブラウザプロファイルにアタッチすることもできます。これにより、そのブラウザプロファイルですでに開かれているタブとログイン状態を再利用できます。
+OpenClaw は、公式の Chrome DevTools MCP サーバーを介して、実行中の Chromium ベースの
+ブラウザプロファイルにアタッチすることもできます。これにより、そのブラウザプロファイルですでに開いている
+タブとログイン状態が再利用されます。
 
-公式の背景情報とセットアップ資料:
+公式の背景情報とセットアップの参考資料:
 
 - [Chrome for Developers: ブラウザセッションで Chrome DevTools MCP を使用する](https://developer.chrome.com/blog/chrome-devtools-mcp-debug-your-browser-session)
 - [Chrome DevTools MCP README](https://github.com/ChromeDevTools/chrome-devtools-mcp)
 
-組み込みプロファイル: `user`。別の名前、色、またはブラウザデータディレクトリを使用する場合は、独自の既存セッションプロファイルを作成してください。
+組み込みプロファイル: `user`。別の名前、色、またはブラウザデータディレクトリを使用する場合は、
+独自の既存セッションプロファイルを作成してください。
 
-デフォルトでは、組み込みの `user` プロファイルは Chrome MCP の自動接続を使用し、ローカルのデフォルト Google Chrome プロファイルを対象とします。Brave、Edge、Chromium、またはデフォルト以外の Chrome プロファイルには `userDataDir` を使用してください。`~` は OS のホームディレクトリに展開されます。
+デフォルトでは、組み込みの `user` プロファイルは Chrome MCP の自動接続を使用し、
+デフォルトのローカル Google Chrome プロファイルを対象にします。Brave、
+Edge、Chromium、またはデフォルト以外の Chrome プロファイルには `userDataDir` を使用してください。`~` は OS のホーム
+ディレクトリに展開されます:
 
 ```json5
 {
@@ -594,11 +649,11 @@ OpenClaw は、公式の Chrome DevTools MCP サーバーを介して、実行�
 }
 ```
 
-次に、対応するブラウザで以下を行います。
+次に、対応するブラウザで以下を行います:
 
-1. リモートデバッグ用のブラウザ検査ページを開きます。
+1. リモートデバッグ用のブラウザの検査ページを開きます。
 2. リモートデバッグを有効にします。
-3. ブラウザを実行したままにし、OpenClaw がアタッチするときに接続確認プロンプトを承認します。
+3. ブラウザを実行したままにし、OpenClaw がアタッチするときに接続プロンプトを承認します。
 
 一般的な検査ページ:
 
@@ -617,73 +672,95 @@ openclaw browser --browser-profile user snapshot --format ai
 
 成功時の状態:
 
-- `status` に `driver: existing-session` と表示される
-- `status` に `transport: chrome-mcp` と表示される
-- `status` に `running: true` と表示される
-- `tabs` にすでに開かれているブラウザタブが一覧表示される
-- `snapshot` が選択されたライブタブの参照を返す
+- `status` は `driver: existing-session` を表示します
+- `status` は `transport: chrome-mcp` を表示します
+- `status` は `running: true` を表示します
+- `tabs` は、すでに開いているブラウザータブを一覧表示します
+- `snapshot` は、選択したライブタブから ref を返します
 
 アタッチが機能しない場合の確認事項:
 
-- 対象の Chromium ベースのブラウザがバージョン `144+` である
-- そのブラウザの検査ページでリモートデバッグが有効になっている
-- ブラウザにアタッチ同意プロンプトが表示され、それを承認した
-- Chrome が明示的な `--remote-debugging-port` を指定して起動されている場合は、Chrome MCP の自動接続に依存せず、`browser.profiles.<name>.cdpUrl` をその DevTools エンドポイントに設定する
-- `openclaw doctor` は、古い拡張機能ベースのブラウザ設定を移行し、デフォルトの自動接続プロファイルについて Chrome がローカルにインストールされているか確認しますが、ブラウザ側のリモートデバッグを有効にすることはできません
+- 対象の Chromium ベースのブラウザーのバージョンが `144+` である
+- そのブラウザーの検査ページでリモートデバッグが有効になっている
+- ブラウザーにアタッチ同意プロンプトが表示され、それを承認した
+- Chrome が明示的な `--remote-debugging-port` を指定して起動された場合は、Chrome MCP の自動接続に
+  依存せず、`browser.profiles.<name>.cdpUrl` をその DevTools エンドポイントに設定する
+- `openclaw doctor` は、古い拡張機能ベースのブラウザー設定を移行し、
+  デフォルトの自動接続プロファイル向けに Chrome がローカルにインストールされているか確認しますが、
+  ブラウザー側のリモートデバッグを有効にすることはできません
 
 エージェントでの使用:
 
-- ユーザーがログイン済みのブラウザー状態を使用する必要がある場合は、`profile="user"` を使用します。
+- ユーザーがログイン済みのブラウザー状態が必要な場合は、`profile="user"` を使用します。
 - カスタムの既存セッションプロファイルを使用する場合は、その明示的なプロファイル名を渡します。
-- このモードは、ユーザーがコンピューターの前にいて、接続プロンプトを承認できる場合にのみ選択してください。
-- Gateway または Node ホストは、`npx chrome-devtools-mcp@latest --autoConnect` を起動できます。
+- ユーザーがコンピューターの前にいて、アタッチプロンプトを承認できる場合にのみ、このモードを選択します。
+- Gateway または Node ホストは `npx chrome-devtools-mcp@latest --autoConnect` を起動できます。
 
-注:
+注意事項:
 
-- このパスは、ログイン済みのブラウザーセッション内で操作できるため、分離された `openclaw` プロファイルよりもリスクが高くなります。
-- OpenClaw はこのドライバー用にブラウザーを起動せず、接続のみを行います。
-- OpenClaw は、ここでは公式の Chrome DevTools MCP `--autoConnect` フローを使用します。`userDataDir` が設定されている場合、そのユーザーデータディレクトリを対象にするため、そのまま渡されます。
-- 既存セッションには、選択したホストまたは接続済みのブラウザー Node 経由で接続できます。Chrome が別の場所にあり、ブラウザー Node が接続されていない場合は、代わりにリモート CDP または Node ホストを使用してください。
-- Chrome MCP のターゲットとスナップショット参照は、1 つの MCP サブプロセスのスコープに限定されます。そのプロセスが再起動した後は、`browser tabs` を再度実行し、ターゲット固有の作業を行う前に新しいターゲットを明示的に選択し、参照を使用する前に新しいスナップショットを取得してください。各参照は、そのターゲットと最新のスナップショットに対してのみ有効です。URL が一致している場合でも、古いエイリアスは置き換え後のタブには引き継がれません。
-- Chrome DevTools MCP は現在、プロセスローカルな数値ページ ID によってページツールをルーティングします。プロセススコープのハンドルにより、サブプロセス置換をまたいだ再利用は防止されますが、隣接するツール呼び出し間でプロセス内のブラウザーコンテキストが置き換えられると、操作の対象が変わる可能性があります。完全にアトミックなルーティングには、安定したターゲット ID に対するアップストリームのページツールサポートが必要です。
+- このパスは、ログイン済みのブラウザーセッション内で操作できるため、分離された
+  `openclaw` プロファイルよりもリスクが高くなります。
+- OpenClaw はこのドライバー用のブラウザーを起動せず、アタッチのみを行います。
+- ここでは、OpenClaw は公式の Chrome DevTools MCP `--autoConnect` フローを使用します。
+  `userDataDir` が設定されている場合、そのユーザーデータディレクトリを対象にするため、そのまま渡されます。
+- 既存セッションは、選択したホスト上、または接続済みのブラウザー Node 経由でアタッチできます。
+  Chrome が別の場所にあり、ブラウザー Node が接続されていない場合は、代わりにリモート CDP または Node ホストを使用します。
+- Chrome MCP のターゲットとスナップショット ref は、1 つの MCP サブプロセスにスコープされます。
+  そのプロセスが再起動した後は、`browser tabs` を再度実行し、ターゲット固有の作業を行う前に
+  新しいターゲットを明示的に選択し、ref を使用する前に新しいスナップショットを取得します。
+  各 ref は、そのターゲットと最新のスナップショットに対してのみ有効です。URL が一致していても、
+  古いエイリアスは置き換え先のタブには引き継がれません。
+- Chrome DevTools MCP は現在、プロセスローカルの数値ページ ID に基づいてページツールを
+  ルーティングします。プロセススコープのハンドルにより、サブプロセス置換をまたいだ再利用は防止されますが、
+  隣接するツール呼び出しの間にプロセス内でブラウザーコンテキストが置き換えられると、操作の対象が
+  切り替わる可能性は残ります。完全にアトミックなルーティングには、安定したターゲット ID に対する
+  アップストリームのページツールサポートが必要です。
 
-### カスタム Chrome MCP の起動
+### カスタム Chrome MCP 起動
 
-デフォルトの `npx chrome-devtools-mcp@latest` フローが要件に合わない場合（オフラインホスト、固定バージョン、ベンダー提供バイナリ）は、プロファイルごとに起動される Chrome DevTools MCP サーバーを上書きします。
+デフォルトの `npx chrome-devtools-mcp@latest` フローが要件に合わない場合
+（オフラインホスト、固定バージョン、ベンダー提供バイナリ）は、プロファイルごとに
+起動される Chrome DevTools MCP サーバーを上書きします:
 
-| フィールド     | 動作                                                                                                                       |
+| フィールド        | 動作                                                                                                               |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------- |
 | `mcpCommand` | `npx` の代わりに起動する実行可能ファイル。そのまま解決され、絶対パスも使用できます。                                          |
 | `mcpArgs`    | `mcpCommand` にそのまま渡される引数配列。デフォルトの `chrome-devtools-mcp@latest --autoConnect` 引数を置き換えます。 |
 
-既存セッションプロファイルに `cdpUrl` が設定されている場合、OpenClaw は `--autoConnect` を省略し、エンドポイントを Chrome MCP に自動的に転送します。
+既存セッションプロファイルに `cdpUrl` が設定されている場合、OpenClaw は
+`--autoConnect` をスキップし、エンドポイントを Chrome MCP に自動的に転送します:
 
 - `http(s)://...` → `--browserUrl <url>`（DevTools HTTP 検出エンドポイント）。
-- `ws(s)://...` → `--wsEndpoint <url>`（直接 CDP WebSocket）。
+- `ws(s)://...` → `--wsEndpoint <url>`（直接接続する CDP WebSocket）。
 
-エンドポイントフラグと `userDataDir` は併用できません。`cdpUrl` が設定されている場合、Chrome MCP の起動時には `userDataDir` が無視されます。これは、Chrome MCP がプロファイルディレクトリを開くのではなく、エンドポイントの背後で実行中のブラウザーに接続するためです。
+エンドポイントフラグと `userDataDir` は併用できません。`cdpUrl` が設定されている場合、
+Chrome MCP はプロファイルディレクトリを開くのではなく、エンドポイントの背後で実行中のブラウザーに
+アタッチするため、Chrome MCP の起動時に `userDataDir` は無視されます。
 
 <Accordion title="既存セッション機能の制限">
 
-管理対象の `openclaw` プロファイルと比べて、既存セッションドライバーにはより多くの制限があります。
+マネージド `openclaw` プロファイルと比べると、既存セッションドライバーにはより多くの制約があります:
 
-- **スクリーンショット** - ページキャプチャと `--ref` 要素キャプチャは使用できますが、CSS `--element` セレクターは使用できません。ページまたは参照ベースの要素スクリーンショットに Playwright は必要ありません。（`--full-page` は、既存セッションだけでなく、どのプロファイルでも `--ref` または `--element` と併用できません。）
-- **操作** - `click`、`type`、`hover`、`scrollIntoView`、`drag`、`select` にはスナップショット参照が必要です（CSS セレクターは使用できません）。`click-coords` は表示中のビューポート座標をクリックし、スナップショット参照を必要としません。`click` は左ボタンのみをサポートします（ボタンの上書きや修飾キーは使用できません）。`type` は `slowly=true` をサポートしません。`fill` または `press` を使用してください。`press` は `delayMs` をサポートしません。`type`、`hover`、`scrollIntoView`、`drag`、`select`、`fill` は、呼び出しごとの `timeoutMs` 上書きをサポートしませんが、`evaluate` はサポートします。`select` は単一の値を受け付けます。`batch` はサポートされていないため、操作を個別に送信してください。
-- **待機 / アップロード / ダイアログ** - `wait --url` は、完全一致、部分文字列、glob パターンをサポートします（管理対象と同じ）。`wait --load networkidle` は既存セッションプロファイルではサポートされません（管理対象プロファイルおよび生の/リモート CDP プロファイルでは動作します）。アップロードフックには `ref` または `inputRef` が必要で、1 回につき 1 ファイルのみ対応し、CSS `element` は使用できません。ダイアログフックは、タイムアウトの上書きや `dialogId` をサポートしません。
-- **ダイアログの可視性** - 管理対象ブラウザーの操作レスポンスには、操作によってモーダルダイアログが開いた場合に `blockedByDialog` と `browserState.dialogs.pending` が含まれます。スナップショットにも保留中のダイアログ状態が含まれます。ダイアログが保留中の場合は、`browser dialog --accept/--dismiss --dialog-id <id>` で応答してください。OpenClaw の外部で処理されたダイアログは、`browserState.dialogs.recent` に表示されます。
-- **管理対象専用機能** - PDF エクスポート、ダウンロードのインターセプト、`responsebody` には、引き続き管理対象ブラウザーパスが必要です。
+- **スクリーンショット** - ページキャプチャと `--ref` 要素キャプチャは機能しますが、CSS `--element` セレクターは機能しません。ページまたは ref ベースの要素スクリーンショットに Playwright は不要です。（`--full-page` は既存セッションに限らず、どのプロファイルでも `--ref` または `--element` と併用できません。）
+- **操作** - `click`、`type`、`hover`、`scrollIntoView`、`drag`、`select` にはスナップショット ref が必要です（CSS セレクターは使用できません）。`click-coords` は表示中のビューポート座標をクリックし、スナップショット ref は不要です。`click` は左ボタンのみに対応します（ボタンの上書きや修飾キーは使用できません）。`type` は `slowly=true` をサポートしていません。`fill` または `press` を使用してください。`press` は `delayMs` をサポートしていません。`type`、`hover`、`scrollIntoView`、`drag`、`select`、`fill` は、呼び出しごとの `timeoutMs` の上書きをサポートしていませんが、`evaluate` はサポートしています。`select` は単一の値を受け付けます。`batch` はサポートされていないため、操作を個別に送信してください。
+- **待機 / アップロード / ダイアログ** - `wait --url` は完全一致、部分文字列、glob パターンをサポートします（マネージドと同じ）。`wait --load networkidle` は既存セッションプロファイルではサポートされません（マネージドおよび raw/リモート CDP プロファイルでは機能します）。アップロードフックには `ref` または `inputRef` が必要で、ファイルは一度に 1 つ、CSS `element` は使用できません。ダイアログフックでは、タイムアウトの上書きや `dialogId` はサポートされません。
+- **ダイアログの可視性** - マネージドブラウザーの操作レスポンスには、操作によってモーダルダイアログが開かれた場合に `blockedByDialog` と `browserState.dialogs.pending` が含まれます。スナップショットにも保留中のダイアログ状態が含まれます。ダイアログが保留中の間は、`browser dialog --accept/--dismiss --dialog-id <id>` で応答してください。OpenClaw の外部で処理されたダイアログは、`browserState.dialogs.recent` の下に表示されます。
+- **マネージド専用機能** - PDF エクスポート、ダウンロードのインターセプト、`responsebody` には、引き続きマネージドブラウザーパスが必要です。
 
 </Accordion>
 
-## 分離保証
+## 分離の保証
 
-- **専用ユーザーデータディレクトリ**: 個人用ブラウザープロファイルには一切触れません。
-- **専用ポート**: 開発ワークフローとの競合を防ぐため、`9222` を使用しません。
-- **決定論的なタブ制御**: `tabs` は最初に `suggestedTargetId` を返し、その後に `t1` などの安定した `tabId` ハンドル、任意のラベル、生の `targetId` を返します。エージェントは `suggestedTargetId` を再利用する必要があります。生の ID はデバッグと互換性のために引き続き使用できます。
+- **専用ユーザーデータディレクトリ**: 個人用ブラウザープロファイルには一切アクセスしません。
+- **専用ポート**: 開発ワークフローとの競合を防ぐため、`9222` を回避します。
+- **決定的なタブ制御**: `tabs` は、最初に `suggestedTargetId` を返し、続いて
+  `t1` などの安定した `tabId` ハンドル、オプションのラベル、生の `targetId` を返します。
+  エージェントは `suggestedTargetId` を再利用する必要があります。生の ID は、
+  デバッグと互換性のために引き続き利用できます。
 
 ## ブラウザーの選択
 
-ローカルで起動する場合、OpenClaw は最初に利用可能なものを選択します。
+ローカルで起動する場合、OpenClaw は最初に利用可能なものを選択します:
 
 1. Chrome
 2. Brave
@@ -696,36 +773,44 @@ openclaw browser --browser-profile user snapshot --format ai
 プラットフォーム:
 
 - macOS: `/Applications` と `~/Applications` を確認します。
-- Linux: `/usr/bin`、`/snap/bin`、`/opt/google`、`/opt/brave.com`、`/usr/lib/chromium`、`/usr/lib/chromium-browser` 配下の一般的な Chrome/Brave/Edge/Chromium の場所に加え、`PLAYWRIGHT_BROWSERS_PATH` または `~/.cache/ms-playwright` 配下の Playwright 管理対象 Chromium を確認します。
+- Linux: `/usr/bin`、`/snap/bin`、`/opt/google`、`/opt/brave.com`、`/usr/lib/chromium`、
+  `/usr/lib/chromium-browser` の配下にある一般的な Chrome/Brave/Edge/Chromium の場所に加え、
+  `PLAYWRIGHT_BROWSERS_PATH` または `~/.cache/ms-playwright` の配下にある Playwright 管理の Chromium を確認します。
 - Windows: 一般的なインストール場所を確認します。
 
-## Control API（任意）
+## 制御 API（オプション）
 
-スクリプト作成とデバッグのために、Gateway は小規模な **loopback 専用 HTTP Control API** と、それに対応する `openclaw browser` CLI（スナップショット、参照、待機機能の強化、JSON 出力、デバッグワークフロー）を公開します。完全なリファレンスについては、[ブラウザー Control API](/ja-JP/tools/browser-control) を参照してください。
+スクリプト作成とデバッグのために、Gateway は小規模な **local loopback 専用 HTTP
+制御 API** と、対応する `openclaw browser` CLI（スナップショット、ref、拡張待機機能、
+JSON 出力、デバッグワークフロー）を公開します。完全なリファレンスについては、
+[ブラウザー制御 API](/ja-JP/tools/browser-control) を参照してください。
 
 ## トラブルシューティング
 
-Linux 固有の問題（特に snap Chromium）については、[ブラウザーのトラブルシューティング](/ja-JP/tools/browser-linux-troubleshooting) を参照してください。
+Linux 固有の問題（特に snap Chromium）については、
+[ブラウザーのトラブルシューティング](/ja-JP/tools/browser-linux-troubleshooting) を参照してください。
 
-WSL2 Gateway と Windows Chrome の分割ホスト構成については、[WSL2 + Windows + リモート Chrome CDP のトラブルシューティング](/ja-JP/tools/browser-wsl2-windows-remote-cdp-troubleshooting) を参照してください。
+WSL2 Gateway と Windows Chrome の分離ホスト構成については、
+[WSL2 + Windows + リモート Chrome CDP のトラブルシューティング](/ja-JP/tools/browser-wsl2-windows-remote-cdp-troubleshooting) を参照してください。
 
-### CDP 起動失敗とナビゲーション SSRF ブロックの違い
+### CDP 起動失敗とナビゲーションの SSRF ブロック
 
-これらは異なる障害クラスであり、それぞれ異なるコードパスを示します。
+これらは異なる種類の障害であり、それぞれ異なるコードパスを示します。
 
-- **CDP の起動または準備完了の失敗**は、OpenClaw がブラウザーのコントロールプレーンが正常であることを確認できないことを意味します。
-- **ナビゲーション SSRF ブロック**は、ブラウザーのコントロールプレーンは正常ですが、ページナビゲーションのターゲットがポリシーによって拒否されたことを意味します。
+- **CDP の起動または準備状態の失敗**は、OpenClaw がブラウザー制御プレーンの正常性を確認できないことを意味します。
+- **ナビゲーションの SSRF ブロック**は、ブラウザー制御プレーンは正常ですが、ページナビゲーションの対象がポリシーによって拒否されたことを意味します。
 
 一般的な例:
 
-- CDP の起動または準備完了の失敗:
+- CDP の起動または準備状態の失敗:
   - `Chrome CDP websocket for profile "openclaw" is not reachable after start`
   - `Remote CDP for profile "<name>" is not reachable at <cdpUrl>`
-  - loopback 外部 CDP サービスが `attachOnly: true` なしで構成されている場合の `Port <port> is in use for profile "<name>" but not by openclaw`
-- ナビゲーション SSRF ブロック:
-  - `start` と `tabs` は引き続き動作する一方で、`open`、`navigate`、スナップショット、またはタブを開くフローがブラウザー/ネットワークポリシーエラーで失敗する
+  - local loopback の外部 CDP サービスが `attachOnly: true` なしで設定されている場合の
+    `Port <port> is in use for profile "<name>" but not by openclaw`
+- ナビゲーションの SSRF ブロック:
+  - `start` と `tabs` は引き続き機能する一方で、`open`、`navigate`、スナップショット、またはタブを開くフローがブラウザー/ネットワークポリシーエラーで失敗する
 
-この 2 つを切り分けるには、次の最小シーケンスを使用します。
+次の最小限の手順で両者を切り分けます:
 
 ```bash
 openclaw browser --browser-profile openclaw start
@@ -735,46 +820,46 @@ openclaw browser --browser-profile openclaw open https://example.com
 
 結果の読み方:
 
-- `start` が `not reachable after start` で失敗する場合は、まず CDP の準備完了状態をトラブルシューティングしてください。
-- `start` は成功するものの `tabs` が失敗する場合、コントロールプレーンはまだ正常ではありません。これはページナビゲーションの問題ではなく、CDP の到達性の問題として扱ってください。
-- `start` と `tabs` は成功するものの `open` または `navigate` が失敗する場合、ブラウザーのコントロールプレーンは起動済みであり、障害はナビゲーションポリシーまたは対象ページにあります。
-- `start`、`tabs`、`open` がすべて成功する場合、基本的な管理対象ブラウザーの制御パスは正常です。
+- `start` が `not reachable after start` で失敗した場合は、まず CDP の準備状態をトラブルシューティングします。
+- `start` が成功しても `tabs` が失敗する場合、制御プレーンは依然として正常ではありません。ページナビゲーションの問題ではなく、CDP の到達性の問題として扱います。
+- `start` と `tabs` が成功しても、`open` または `navigate` が失敗する場合、ブラウザー制御プレーンは稼働しており、障害はナビゲーションポリシーまたは対象ページにあります。
+- `start`、`tabs`、`open` がすべて成功した場合、基本的なマネージドブラウザー制御パスは正常です。
 
 重要な動作の詳細:
 
-- `browser.ssrfPolicy` を構成していない場合でも、ブラウザー構成はデフォルトでフェイルクローズの SSRF ポリシーオブジェクトになります。
-- local loopback の `openclaw` 管理対象プロファイルでは、OpenClaw 自身のローカルコントロールプレーンに対して、CDP ヘルスチェックがブラウザー SSRF 到達性の強制を意図的に省略します。
-- ナビゲーション保護は別個のものです。`start` または `tabs` が成功しても、その後の `open` または `navigate` のターゲットが許可されるとは限りません。
+- `browser.ssrfPolicy` を設定していない場合でも、ブラウザー設定のデフォルトはフェイルクローズの SSRF ポリシーオブジェクトです。
+- local loopback の `openclaw` マネージドプロファイルでは、OpenClaw 自身のローカル制御プレーンに対して、CDP ヘルスチェックがブラウザーの SSRF 到達性適用を意図的にスキップします。
+- ナビゲーション保護は別です。`start` または `tabs` が成功しても、後続の `open` または `navigate` の対象が許可されることを意味しません。
 
 セキュリティガイダンス:
 
-- デフォルトではブラウザー SSRF ポリシーを緩和**しないでください**。
+- デフォルトではブラウザーの SSRF ポリシーを緩和**しないでください**。
 - 広範なプライベートネットワークアクセスよりも、`hostnameAllowlist` や `allowedHostnames` などの限定的なホスト例外を優先してください。
-- `dangerouslyAllowPrivateNetwork: true` は、プライベートネットワークへのブラウザーアクセスが必要で、レビュー済みの意図的に信頼された環境でのみ使用してください。
+- プライベートネットワークへのブラウザーアクセスが必要で、レビュー済みの意図的に信頼された環境でのみ、`dangerouslyAllowPrivateNetwork: true` を使用してください。
 
 ## エージェントツールと制御の仕組み
 
-エージェントは、ブラウザー自動化用に **1 つのツール**を使用できます。
+エージェントには、ブラウザー自動化用の **1 つのツール** が提供されます:
 
 - `browser` - doctor/status/start/stop/tabs/open/focus/close/snapshot/screenshot/navigate/act
 
 対応関係:
 
 - `browser snapshot` は、安定した UI ツリー（AI または ARIA）を返します。
-- `browser act` は、スナップショットの `ref` ID を使用してクリック/入力/ドラッグ/選択を行います。
-- `browser screenshot` は、ピクセルをキャプチャします（ページ全体、要素、またはラベル付き参照）。
-- `browser doctor` は、Gateway、Plugin、プロファイル、ブラウザー、タブの準備完了状態を確認します。
-- `browser` は次を受け付けます。
-  - 名前付きブラウザープロファイル（openclaw、chrome、またはリモート CDP）を選択する `profile`。
-  - ブラウザーの場所を選択する `target`（`sandbox` | `host` | `node`）。
+- `browser act` は、スナップショットの `ref` ID を使用して、クリック、入力、ドラッグ、選択を行います。
+- `browser screenshot` は、ピクセル（ページ全体、要素、またはラベル付き参照）をキャプチャします。
+- `browser doctor` は、Gateway、plugin、プロファイル、ブラウザー、タブの準備状態を確認します。
+- `browser` には、以下を指定できます。
+  - `profile`：名前付きブラウザープロファイル（openclaw、chrome、またはリモート CDP）を選択します。
+  - `target`（`sandbox` | `host` | `node`）：ブラウザーの実行場所を選択します。
   - サンドボックス化されたセッションでは、`target: "host"` に `agents.defaults.sandbox.browser.allowHostControl=true` が必要です。
-  - `target` が省略された場合、サンドボックス化されたセッションではデフォルトが `sandbox`、非サンドボックスセッションではデフォルトが `host` になります。
-  - ブラウザー対応 Node が接続されている場合、`target="host"` または `target="node"` で固定しない限り、ツールは自動的にそこへルーティングすることがあります。
+  - `target` を省略した場合、サンドボックス化されたセッションではデフォルトで `sandbox`、サンドボックス化されていないセッションではデフォルトで `host` が使用されます。
+  - ブラウザー対応 Node が接続されている場合、`target="host"` または `target="node"` を固定しない限り、ツールはその Node に自動的にルーティングされることがあります。
 
-これにより、エージェントの動作が決定論的になり、壊れやすいセレクターを回避できます。
+これにより、エージェントの動作が決定論的に保たれ、壊れやすいセレクターを回避できます。
 
-## 関連情報
+## 関連項目
 
 - [ツールの概要](/ja-JP/tools) - 利用可能なすべてのエージェントツール
-- [サンドボックス化](/ja-JP/gateway/sandboxing) - サンドボックス環境でのブラウザー制御
+- [サンドボックス化](/ja-JP/gateway/sandboxing) - サンドボックス化された環境でのブラウザー制御
 - [セキュリティ](/ja-JP/gateway/security) - ブラウザー制御のリスクと堅牢化

@@ -1,61 +1,64 @@
 ---
 read_when:
     - 將 OpenClaw 部署至 Upstash Box
-    - 你想要一個適用於 OpenClaw 的受管理 Linux 環境，並透過 SSH 通道存取儀表板
-summary: 在 Upstash Box 上託管 OpenClaw，並啟用持續運作與 SSH 通道存取
+    - 你想要一個用於 OpenClaw 的代管 Linux 環境，並透過 SSH 通道存取儀表板
+summary: 在 Upstash Box 上託管 OpenClaw，並使用持續連線與 SSH 通道存取
 title: Upstash Box
 x-i18n:
-    generated_at: "2026-07-11T21:26:52Z"
+    generated_at: "2026-07-26T07:59:18Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 29232c43e0e4940b7445ab8896c9ccd3e81d0fdbdd522d7f50cb8c8057ac18f0
     source_path: install/upstash.md
     workflow: 16
 ---
 
-在 Upstash Box（具備持續運作生命週期支援的受管理 Linux 環境）上執行常駐的 OpenClaw 閘道。
+在 Upstash Box（具備保持運作生命週期支援的受管理 Linux 環境）上執行持續運作的 OpenClaw 閘道。
 
-請使用 SSH 通道存取儀表板。請勿將閘道連接埠直接暴露於公用網際網路。
+使用 SSH 通道存取儀表板。請勿將閘道連接埠直接暴露於公用網際網路。
 
 ## 先決條件
 
 - Upstash 帳戶
-- 可持續運作的 Upstash Box
+- 保持運作的 Upstash Box
 - 本機上的 SSH 用戶端
 
 ## 建立 Box
 
-在 Upstash Console 中建立可持續運作的 Box。記下 Box ID（例如 `right-flamingo-14486`）以及 Box API 金鑰。
+在 Upstash Console 中建立保持運作的 Box。記下 Box ID（例如
+`right-flamingo-14486`）和你的 Box API 金鑰。
 
-Upstash 目前的 OpenClaw Box 操作指南位於
+Upstash 在以下頁面維護其最新的 OpenClaw Box 操作指南：
 [OpenClaw 設定](https://upstash.com/docs/box/guides/openclaw-setup)。
 
 ## 使用 SSH 通道連線
 
-將 OpenClaw 儀表板連接埠轉送到本機。出現提示時，使用 Box API 金鑰作為 SSH 密碼：
+將 OpenClaw 儀表板連接埠轉送至本機。系統提示時，使用你的 Box API 金鑰
+作為 SSH 密碼：
 
 ```bash
 ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -L 18789:127.0.0.1:18789 <box-id>@us-east-1.box.upstash.com
 ```
 
-持續連線選項可減少新手設定期間閒置通道中斷的情況。
+保持連線選項可減少上線設定期間因閒置而中斷通道的情況。
 
 ## 安裝 OpenClaw
 
-在 Box 內執行：
+在 Box 內：
 
 ```bash
 sudo npm install -g openclaw
 ```
 
-## 執行新手設定
+## 執行上線設定
 
 ```bash
 openclaw onboard --install-daemon
 ```
 
-依照提示操作。新手設定完成時，複製儀表板網址和權杖。
+依照提示操作。上線設定完成後，複製儀表板 URL 和權杖。
 
 ## 啟動閘道
 
@@ -66,7 +69,7 @@ openclaw config set gateway.bind lan
 nohup openclaw gateway > gateway.log 2>&1 &
 ```
 
-保持 SSH 通道連線後，在本機開啟儀表板網址：
+在 SSH 通道保持連線時，於本機開啟儀表板 URL：
 
 ```text
 http://127.0.0.1:18789/#token=<your-token>
@@ -82,13 +85,15 @@ nohup openclaw gateway > gateway.log 2>&1 &
 
 ## 疑難排解
 
-如果 SSH 在新手設定期間凍結，請使用乾淨的 SSH 設定和持續連線選項重新連線：
+如果 SSH 在上線設定期間停止回應，請使用乾淨的 SSH 設定和保持連線選項
+重新連線：
 
 ```bash
 ssh -F /dev/null -o ControlMaster=no -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -L 18789:127.0.0.1:18789 <box-id>@us-east-1.box.upstash.com
 ```
 
-這會略過本機 `~/.ssh/config` 中過時的設定，並在網路閒置期間維持通道連線。
+這會略過過時的本機 `~/.ssh/config` 設定，並讓通道在網路閒置期間
+保持連線。
 
 ## 相關內容
 

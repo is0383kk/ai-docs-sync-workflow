@@ -1,34 +1,35 @@
 ---
 read_when:
-    - Je wilt Chutes gebruiken met OpenClaw
-    - Je hebt het OAuth- of API-sleutelconfiguratiepad nodig
-    - U wilt het standaardmodel, aliassen of detectiegedrag
+    - Je wilt Chutes met OpenClaw gebruiken
+    - Je hebt het configuratiepad voor OAuth of de API-sleutel nodig
+    - Je wilt het standaardmodel, aliassen of detectiegedrag
 summary: Chutes-configuratie (OAuth of API-sleutel, modeldetectie, aliassen)
 title: Chutes
 x-i18n:
-    generated_at: "2026-07-12T09:18:32Z"
+    generated_at: "2026-07-27T05:46:13Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: dafa96c4a56b9d38d033b87cc077d359cb71adaf1ca41a0ab6b6cc77b66484a7
+    source_hash: 57ea5112105f19028c1a348b4d7fec4cf7ef12de00b1b2de9c152057bf5033a9
     source_path: providers/chutes.md
     workflow: 16
 ---
 
-[Chutes](https://chutes.ai) biedt catalogi met opensourcemodellen aan via een
-OpenAI-compatibele API. OpenClaw ondersteunt zowel OAuth via de browser als authenticatie met een API-sleutel.
+[Chutes](https://chutes.ai) stelt opensourcemodelcatalogi beschikbaar via een
+OpenAI-compatibele API. OpenClaw ondersteunt zowel browser-OAuth als authenticatie met een API-sleutel.
 
 | Eigenschap       | Waarde                                                  |
 | ---------------- | ------------------------------------------------------- |
-| Provider         | `chutes`                                                |
-| Plugin           | officieel extern pakket (`@openclaw/chutes-provider`)   |
+| Provider         | `chutes`                                      |
+| Plugin           | officieel extern pakket (`@openclaw/chutes-provider`)            |
 | API              | OpenAI-compatibel                                       |
-| Basis-URL        | `https://llm.chutes.ai/v1`                              |
+| Basis-URL        | `https://llm.chutes.ai/v1`                                      |
 | Authenticatie    | OAuth of API-sleutel (zie hieronder)                    |
 | Runtime-omgevingsvariabelen | `CHUTES_API_KEY`, `CHUTES_OAUTH_TOKEN`        |
 
-`CHUTES_OAUTH_TOKEN` levert rechtstreeks een reeds verkregen OAuth-toegangstoken
-(bijvoorbeeld in CI), waarbij de onderstaande interactieve browserstroom wordt overgeslagen.
+`CHUTES_OAUTH_TOKEN` geeft rechtstreeks een al verkregen OAuth-toegangstoken door
+(bijvoorbeeld in CI), waarbij de onderstaande interactieve browserflow wordt overgeslagen.
 
 ## Plugin installeren
 
@@ -39,19 +40,19 @@ openclaw gateway restart
 
 ## Aan de slag
 
-Beide methoden stellen het standaardmodel in op `chutes/zai-org/GLM-4.7-TEE` en registreren
+Beide methoden stellen het standaardmodel in op `chutes/zai-org/GLM-5-TEE` en registreren
 de Chutes-catalogus.
 
 <Tabs>
   <Tab title="OAuth">
     <Steps>
-      <Step title="Voer de OAuth-onboardingstroom uit">
+      <Step title="Voer de OAuth-onboardingflow uit">
         ```bash
         openclaw onboard --auth-choice chutes
         ```
-        OpenClaw start de browserstroom lokaal of toont op externe hosts/hosts zonder grafische interface
-        een URL en een stroom waarbij de omleiding wordt geplakt. OAuth-tokens worden automatisch vernieuwd via de
-        authenticatieprofielen van OpenClaw.
+        OpenClaw start de browserflow lokaal of toont op externe/headless hosts
+        een URL met een flow waarin de omleiding wordt geplakt. OAuth-tokens worden automatisch vernieuwd via
+        OpenClaw-authenticatieprofielen.
       </Step>
     </Steps>
   </Tab>
@@ -61,7 +62,7 @@ de Chutes-catalogus.
         Maak een sleutel aan op
         [chutes.ai/settings/api-keys](https://chutes.ai/settings/api-keys).
       </Step>
-      <Step title="Voer de onboardingstroom voor de API-sleutel uit">
+      <Step title="Voer de onboardingflow voor de API-sleutel uit">
         ```bash
         openclaw onboard --auth-choice chutes-api-key
         ```
@@ -74,36 +75,32 @@ de Chutes-catalogus.
 
 Wanneer Chutes-authenticatie beschikbaar is, bevraagt OpenClaw `GET /v1/models` met die
 referentie en gebruikt het de gedetecteerde modellen, die per referentie 5 minuten in de cache
-worden bewaard. Bij een verlopen/niet-geautoriseerde sleutel (HTTP 401) probeert OpenClaw het eenmaal opnieuw
+blijven. Bij een verlopen/niet-geautoriseerde sleutel (HTTP 401) probeert OpenClaw het één keer opnieuw
 zonder referenties. Als de detectie nog steeds geen rijen retourneert, mislukt of een
-andere niet-2xx-status retourneert, valt het terug op de meegeleverde statische catalogus (detectie met zowel een API-sleutel
-als OAuth gebruikt hetzelfde pad). Als de detectie bij het opstarten mislukt, wordt
-de statische catalogus automatisch gebruikt.
+andere niet-2xx-status retourneert, valt OpenClaw terug op de meegeleverde statische catalogus (zowel detectie met
+een API-sleutel als OAuth-detectie gebruikt hetzelfde pad). Als de detectie bij het opstarten mislukt, wordt de
+statische catalogus automatisch gebruikt.
 
 ## Standaardaliassen
 
-OpenClaw registreert drie handige aliassen voor de Chutes-catalogus:
+OpenClaw registreert twee handige aliassen voor de Chutes-catalogus:
 
-| Alias           | Doelmodel                                             |
-| --------------- | ----------------------------------------------------- |
-| `chutes-fast`   | `chutes/zai-org/GLM-4.7-FP8`                          |
-| `chutes-pro`    | `chutes/deepseek-ai/DeepSeek-V3.2-TEE`                |
-| `chutes-vision` | `chutes/chutesai/Mistral-Small-3.2-24B-Instruct-2506` |
+| Alias           | Doelmodel                              |
+| --------------- | -------------------------------------- |
+| `chutes-pro`    | `chutes/deepseek-ai/DeepSeek-V3.2-TEE` |
+| `chutes-vision` | `chutes/moonshotai/Kimi-K2.5-TEE`      |
 
-## Ingebouwde startcatalogus
+## Ingebouwde startercatalogus
 
-De meegeleverde reservecatalogus bevat 47 modellen. Een representatieve selectie van de huidige referenties:
+De meegeleverde terugvalcatalogus bevat deze vijf modellen die momenteel worden aangeboden:
 
-| Modelreferentie                                      |
-| ----------------------------------------------------- |
-| `chutes/zai-org/GLM-4.7-TEE`                          |
-| `chutes/zai-org/GLM-5-TEE`                            |
-| `chutes/deepseek-ai/DeepSeek-V3.2-TEE`                |
-| `chutes/deepseek-ai/DeepSeek-R1-0528-TEE`             |
-| `chutes/moonshotai/Kimi-K2.5-TEE`                     |
-| `chutes/chutesai/Mistral-Small-3.2-24B-Instruct-2506` |
-| `chutes/Qwen/Qwen3-Coder-Next-TEE`                    |
-| `chutes/openai/gpt-oss-120b-TEE`                      |
+| Modelreferentie                        |
+| -------------------------------------- |
+| `chutes/zai-org/GLM-5-TEE`             |
+| `chutes/deepseek-ai/DeepSeek-V3.2-TEE` |
+| `chutes/moonshotai/Kimi-K2.5-TEE`      |
+| `chutes/MiniMaxAI/MiniMax-M2.5-TEE`    |
+| `chutes/Qwen/Qwen3.5-397B-A17B-TEE`    |
 
 Voer `openclaw models list --all --provider chutes` uit voor de volledige lijst.
 
@@ -113,9 +110,9 @@ Voer `openclaw models list --all --provider chutes` uit voor de volledige lijst.
 {
   agents: {
     defaults: {
-      model: { primary: "chutes/zai-org/GLM-4.7-TEE" },
+      model: { primary: "chutes/zai-org/GLM-5-TEE" },
       models: {
-        "chutes/zai-org/GLM-4.7-TEE": { alias: "Chutes GLM 4.7" },
+        "chutes/zai-org/GLM-5-TEE": { alias: "Chutes GLM 5" },
         "chutes/deepseek-ai/DeepSeek-V3.2-TEE": { alias: "Chutes DeepSeek V3.2" },
       },
     },
@@ -124,17 +121,17 @@ Voer `openclaw models list --all --provider chutes` uit voor de volledige lijst.
 ```
 
 <AccordionGroup>
-  <Accordion title="OAuth-aanpassingen">
-    Pas de OAuth-stroom aan met optionele omgevingsvariabelen:
+  <Accordion title="OAuth-overschrijvingen">
+    Pas de OAuth-flow aan met optionele omgevingsvariabelen:
 
     | Variabele | Doel |
     | -------- | ------- |
-    | `CHUTES_CLIENT_ID` | OAuth-client-id (er wordt om gevraagd als deze niet is ingesteld) |
+    | `CHUTES_CLIENT_ID` | OAuth-client-id (er wordt om gevraagd indien niet ingesteld) |
     | `CHUTES_CLIENT_SECRET` | OAuth-clientgeheim |
     | `CHUTES_OAUTH_REDIRECT_URI` | Omleidings-URI (standaard `http://127.0.0.1:1456/oauth-callback`) |
     | `CHUTES_OAUTH_SCOPES` | Door spaties gescheiden bereiken (standaard `openid profile chutes:invoke`) |
 
-    Raadpleeg de [OAuth-documentatie van Chutes](https://chutes.ai/docs/sign-in-with-chutes/overview)
+    Zie de [Chutes-documentatie over OAuth](https://chutes.ai/docs/sign-in-with-chutes/overview)
     voor vereisten voor omleidingsapps en hulp.
 
   </Accordion>
@@ -158,7 +155,7 @@ Voer `openclaw models list --all --provider chutes` uit voor de volledige lijst.
   <Card title="Chutes" href="https://chutes.ai" icon="arrow-up-right-from-square">
     Chutes-dashboard en API-documentatie.
   </Card>
-  <Card title="Chutes API-sleutels" href="https://chutes.ai/settings/api-keys" icon="key">
-    Maak Chutes API-sleutels aan en beheer ze.
+  <Card title="Chutes-API-sleutels" href="https://chutes.ai/settings/api-keys" icon="key">
+    Maak Chutes-API-sleutels aan en beheer ze.
   </Card>
 </CardGroup>

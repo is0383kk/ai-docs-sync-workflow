@@ -1,101 +1,94 @@
 ---
+doc-schema-version: 1
 read_when:
-    - सार्वजनिक रिलीज़ चैनल परिभाषाएँ खोजी जा रही हैं
+    - सार्वजनिक रिलीज़ चैनल की परिभाषाएँ खोजी जा रही हैं
     - रिलीज़ सत्यापन या पैकेज स्वीकृति चलाना
-    - संस्करण नामकरण और क्रमिक आवृत्ति की तलाश
-summary: रिलीज़ लेन, ऑपरेटर चेकलिस्ट, सत्यापन बॉक्स, संस्करण नामकरण, और आवृत्ति
+    - संस्करण नामकरण और रिलीज़ आवृत्ति की जानकारी खोज रहे हैं
+summary: रिलीज़ लेन, ऑपरेटर चेकलिस्ट, सत्यापन बॉक्स, संस्करण नामकरण और आवृत्ति
 title: रिलीज़ नीति
 x-i18n:
-    generated_at: "2026-07-04T18:05:09Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:28:39Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: d00772c1a2ad62eb7138b1eda581786390835add0a96996114cac2fd77edb367
+    source_hash: de2429f039bb42deabdcfe280b7d91afac3bae3dc24714203ab7a67672dcc10c
     source_path: reference/RELEASING.md
     workflow: 16
 ---
 
-OpenClaw वर्तमान में तीन उपयोगकर्ता-सामने update channels उपलब्ध कराता है:
+OpenClaw चार उपयोगकर्ता-सामना करने वाले अपडेट चैनल उपलब्ध कराता है:
 
-- stable: मौजूदा promoted release channel, जो अलग CLI/channel milestone आने तक अभी भी
-  npm `latest` के माध्यम से resolve होता है
-- beta: prerelease tags जो npm `beta` पर publish होते हैं
-- dev: `main` का moving head
+- stable: npm पर प्रमोट किया गया नियमित रिलीज़ `latest`
+- extended-stable: npm पर पिछले पूर्ण महीने की `.33+` रखरखाव लाइन
+  `extended-stable`
+- beta: npm पर प्रीरिलीज़ टैग `beta`
+- dev: `main` का बदलता हुआ हेड
 
-अलग से, release operators पिछले पूर्ण महीने का core package npm
-`extended-stable` पर publish कर सकते हैं, patch `33` से शुरू करते हुए। current-month regular
-final line npm `latest` पर जारी रहती है; यह operator-side publication split
-अपने-आप CLI update-channel resolution नहीं बदलता।
+Extended-stable नियमित `latest` या `main` चयनकर्ताओं को बदले बिना पिछले महीने का Gateway, आधिकारिक npm plugins और
+Docker इमेज जारी करता है।
+
+Tideclaw अल्फ़ा बिल्ड एक अलग आंतरिक प्रीरिलीज़ ट्रैक (npm dist-tag `alpha`) हैं, जिनका विवरण [NPM वर्कफ़्लो इनपुट](#npm-workflow-inputs) और [रिलीज़ टेस्ट बॉक्स](#release-test-boxes) में दिया गया है।
 
 ## संस्करण नामकरण
 
-- मासिक npm extended-stable release version: `YYYY.M.PATCH`, जहाँ `PATCH >= 33`
-  - Git tag: `vYYYY.M.PATCH`
-- दैनिक/regular final release version: `YYYY.M.PATCH`, जहाँ `PATCH < 33`
-  - Git tag: `vYYYY.M.PATCH`
-- Regular fallback correction release version: `YYYY.M.PATCH-N`
-  - Git tag: `vYYYY.M.PATCH-N`
-- Beta prerelease version: `YYYY.M.PATCH-beta.N`
-  - Git tag: `vYYYY.M.PATCH-beta.N`
-- month या patch को zero-pad न करें
-- June 2026 release process update से शुरू करके, तीसरा component
-  sequential monthly release-train number है, calendar day नहीं। Stable और beta
-  releases current train तय करते हैं; alpha-only tags beta/stable patch number को
-  consume या advance नहीं करते। Pre-update tags और npm versions अपने
-  मौजूदा नाम बनाए रखते हैं और valid रहते हैं; release automation उन्हें
-  year, month, patch, channel, और prerelease या correction
-  number के आधार पर compare करना जारी रखता है।
-- Alpha/nightly builds next unreleased patch train का उपयोग करते हैं और repeated builds के लिए केवल
-  `alpha.N` increment करते हैं। जब उस patch का beta आ जाता है, तो new alpha builds
-  अगले patch पर चले जाते हैं। beta या stable train चुनते समय higher patch
-  numbers वाले legacy alpha-only tags को ignore करें।
-- npm versions immutable होते हैं। यदि कोई beta tag पहले ही publish हो चुका है, तो उसे
-  delete, republish, या reuse न करें; अगला beta number या अगला monthly
-  patch cut करें। क्योंकि transition के दौरान `2026.6.5-beta.1` पहले ही publish हो चुका था,
-  June 2026 release trains को patch `5` या उससे ऊपर का उपयोग करना होगा। नए
-  June 2026 stable या beta trains को `2026.6.2`, `2026.6.3`, या
-  `2026.6.4` के रूप में publish न करें।
-- regular final `2026.6.5` के बाद, अगला नया beta train
-  `2026.6.6-beta.1` है, भले ही
-  higher patch numbers वाले automated alpha-only tags पहले से मौजूद हों।
-- `latest` current regular/daily npm line को follow करना जारी रखता है
-- `beta` का अर्थ current beta install target है
-- `extended-stable` का अर्थ supported trailing-month npm package है, patch
-  `33` से शुरू; patch `34` और उसके बाद वाले उस monthly line पर maintenance releases हैं
-- dedicated monthly extended-stable path केवल core npm package publish करता है। यह
-  plugins, macOS या Windows artifacts, GitHub Release,
-  private-repository dist-tags, Docker images, mobile artifacts, या website
-  downloads publish नहीं करता।
+- मासिक Gateway extended-stable रिलीज़ संस्करण: `YYYY.M.PATCH`, `PATCH >= 33` के साथ, git टैग `vYYYY.M.PATCH`
+- दैनिक/नियमित अंतिम रिलीज़ संस्करण: `YYYY.M.PATCH`, `PATCH < 33` के साथ, git टैग `vYYYY.M.PATCH`
+- नियमित फ़ॉलबैक सुधार रिलीज़ संस्करण: `YYYY.M.PATCH-N`, git टैग `vYYYY.M.PATCH-N`
+- Beta प्रीरिलीज़ संस्करण: `YYYY.M.PATCH-beta.N`, git टैग `vYYYY.M.PATCH-beta.N`
+- अल्फ़ा प्रीरिलीज़ संस्करण: `YYYY.M.PATCH-alpha.N`, git टैग `vYYYY.M.PATCH-alpha.N`
+- महीने या पैच में कभी शून्य-पैडिंग न करें
+- `PATCH` एक क्रमिक मासिक रिलीज़-ट्रेन संख्या है, कैलेंडर दिवस नहीं। नियमित अंतिम और beta रिलीज़ वर्तमान ट्रेन को आगे बढ़ाते हैं; केवल-अल्फ़ा टैग कभी भी beta/नियमित पैच संख्या का उपयोग नहीं करते या उसे आगे नहीं बढ़ाते, इसलिए beta या नियमित ट्रेन चुनते समय अधिक पैच संख्या वाले पुराने केवल-अल्फ़ा टैग अनदेखे करें।
+- अल्फ़ा/रात्रिकालीन बिल्ड अगले अप्रकाशित पैच ट्रेन का उपयोग करते हैं और दोहराए गए बिल्ड के लिए केवल `alpha.N` बढ़ाते हैं। उस पैच का beta आ जाने पर, नए अल्फ़ा बिल्ड अगले पैच पर चले जाते हैं।
+- npm संस्करण अपरिवर्तनीय हैं: प्रकाशित टैग को कभी न हटाएँ, दोबारा प्रकाशित न करें या पुनः उपयोग न करें। इसके बजाय अगली प्रीरिलीज़ संख्या या अगला मासिक पैच जारी करें।
+- `latest` वर्तमान नियमित/दैनिक npm लाइन का अनुसरण करना जारी रखता है; `beta` वर्तमान beta इंस्टॉल लक्ष्य है
+- `extended-stable` का अर्थ समर्थित पिछले-महीने का Gateway वितरण है, जो पैच `33` से शुरू होता है; पैच `34` और उसके बाद के संस्करण उस मासिक लाइन के रखरखाव रिलीज़ हैं
+- नियमित अंतिम और नियमित सुधार रिलीज़ डिफ़ॉल्ट रूप से npm `beta` पर प्रकाशित होते हैं; रिलीज़ ऑपरेटर स्पष्ट रूप से `latest` को लक्षित कर सकते हैं या बाद में जाँचे-परखे beta बिल्ड को प्रमोट कर सकते हैं
+- Gateway extended-stable core, npm पर प्रकाशित किए जा सकने वाले प्रत्येक आधिकारिक plugin,
+  और उसकी Docker इमेज को एक ही सटीक संस्करण पर प्रकाशित करता है; नीचे समर्पित वर्कफ़्लो देखें।
+- प्रत्येक नियमित अंतिम रिलीज़ npm पैकेज, macOS ऐप, हस्ताक्षरित स्टैंडअलोन Android APK और हस्ताक्षरित Windows Hub इंस्टॉलर एक साथ जारी करता है। Beta रिलीज़ सामान्यतः पहले npm/पैकेज पथ को सत्यापित और प्रकाशित करते हैं, जबकि नेटिव ऐप बिल्ड/साइन/नोटराइज़/प्रमोट नियमित अंतिम रिलीज़ के लिए आरक्षित रहता है, जब तक कि स्पष्ट रूप से अनुरोध न किया जाए।
 
-## Release cadence
+## रिलीज़ आवृत्ति
 
-- Releases beta-first आगे बढ़ते हैं
-- Stable केवल latest beta validate होने के बाद follow करता है
-- Maintainers सामान्यतः current `main` से बनाई गई `release/YYYY.M.PATCH` branch से releases cut करते हैं,
-  ताकि release validation और fixes `main` पर नए
-  development को block न करें
-- यदि कोई beta tag push या publish हो चुका है और उसमें fix चाहिए, तो maintainers
-  पुराने beta tag को delete या recreate करने के बजाय अगला `-beta.N` tag cut करते हैं
-- विस्तृत release procedure, approvals, credentials, और recovery notes
-  केवल maintainers के लिए हैं
+- रिलीज़ पहले beta पर जाती हैं; stable केवल नवीनतम beta के सत्यापित होने के बाद आता है
+- अनुरक्षक सामान्यतः वर्तमान `main` से बनाई गई `release/YYYY.M.PATCH` शाखा से रिलीज़ जारी करते हैं, ताकि रिलीज़ सत्यापन और सुधार `main` पर नए विकास को अवरुद्ध न करें
+- यदि कोई beta टैग पुश या प्रकाशित हो चुका है और उसमें सुधार आवश्यक है, तो अनुरक्षक पुराने टैग को हटाने या दोबारा बनाने के बजाय अगला `-beta.N` टैग जारी करते हैं
+- विस्तृत रिलीज़ प्रक्रिया, अनुमोदन, क्रेडेंशियल और पुनर्प्राप्ति नोट केवल अनुरक्षकों के लिए हैं
 
-## मासिक npm-only extended-stable publication
+## मासिक Gateway extended-stable प्रकाशन
 
-यह नीचे दी गई regular release procedure का dedicated exception है। पूर्ण
-month `YYYY.M` के लिए, `extended-stable/YYYY.M.33` बनाएं; `vYYYY.M.33` और
-बाद के maintenance patches उसी branch से publish करें। release tag, branch tip,
-checkout, package version, npm preflight, और Full Release Validation run सभी को
-एक ही commit identify करना होगा। Protected `main` में पहले से patch `33` से नीचे वाला
-strictly later calendar month's final version होना चाहिए; maintenance patches
-`main` के एक month से अधिक advance होने के बाद भी eligible रहते हैं।
+पूर्ण महीने `YYYY.M` के लिए, `extended-stable/YYYY.M.33` बनाएँ और उस शाखा से
+`.33+` प्रकाशित करें। टैग, शाखा, चेकआउट, पैकेज संस्करण, प्रीफ़्लाइट और
+सत्यापन को एक ही कमिट की पहचान करनी चाहिए। `.33` से पहले, संरक्षित `main` में
+पैच `33` से नीचे के किसी बाद के महीने का अंतिम संस्करण होना चाहिए; बाद के रखरखाव पैच
+पात्र बने रहते हैं।
 
-ठीक extended-stable branch से npm preflight और Full Release Validation run करें,
-फिर दोनों run IDs save करें:
+### उम्मीदवार तैयार और स्थिर करें
+
+असंपरीक्षित मेनलाइन रेंज का ऑडिट करें, निजी सुरक्षा कार्य का मिलान करें, एक
+सीमित बैकपोर्ट सेट अनुमोदित करें और एक समन्वित PR लैंड करें। कैनोनिकल
+शाखा को सीधे पुश न करें।
+
+कैनोनिकल शाखा पर, `YYYY.M.P` सेट करें, `pnpm release:prep` चलाएँ और
+प्रकाशित किए जा सकने वाले प्रत्येक आधिकारिक plugin में उसी संस्करण की आवश्यकता रखें। अनुमोदित लेज़र से,
+`### Highlights`,
+`### Changes` और `### Fixes` के साथ एक पूर्ण `## YYYY.M.P` अनुभाग जनरेट और कमिट करें, तथा समतुल्य
+बैकपोर्ट के लिए मूल मर्ज किए गए `main` PR उद्धृत करें। प्रीफ़्लाइट अनुपस्थित या खाली अनुभाग को अस्वीकार करता है।
+
+वर्तमान-main की पूरी Docker रिलीज़-चैनल इकाई साथ लाएँ: वर्कफ़्लो, प्रमोटर,
+नीति, साझा वर्गीकारक, परीक्षण और वर्कफ़्लो सत्यापन। GitHub टैग किए गए
+कमिट से टैग वर्कफ़्लो लोड करता है; अधूरी प्रति बिल्ड के बाद विफल हो सकती है या
+नियमित उपनामों को बदल सकती है। केंद्रित जाँच चलाएँ।
+
+पूरी शाखा-टिप SHA को फ़्रीज़ करें। टैग करने से पहले, उसके सटीक npm बाइट्स का
+प्रीफ़्लाइट करें और उस SHA के विरुद्ध पूर्ण रिलीज़ सत्यापन चलाएँ:
 
 ```bash
+RELEASE_SHA="$(git rev-parse HEAD)"
+
 gh workflow run openclaw-npm-release.yml \
   --ref extended-stable/YYYY.M.33 \
-  -f tag=vYYYY.M.P \
+  -f tag="$RELEASE_SHA" \
   -f preflight_only=true \
   -f npm_dist_tag=extended-stable
 
@@ -105,11 +98,40 @@ gh workflow run full-release-validation.yml \
   -f release_profile=stable
 ```
 
-`release_profile=stable` मौजूदा validation-depth profile है; यह
-npm `extended-stable` dist-tag से अलग है और जानबूझकर unchanged है।
+SHA रूप केवल प्रीफ़्लाइट के लिए है। कैनोनिकल शाखा पर सत्यापन चलाएँ; प्रकाशन
+उसके वर्कफ़्लो रेफ़, हेड/लक्ष्य SHA, रन ID और प्रयास को बाँधता है। दोनों ID और
+सफल `run_attempt` सहेजें; `release-ci/*` साक्ष्य अस्वीकार करें।
 
-दोनों runs सफल होने और npm release environment ready होने के बाद,
-ठीक preflight tarball को promote करें। Patch `P` `33` या उससे greater होना चाहिए:
+संपादन से पहले विफलताओं को वर्गीकृत करें:
+
+- उत्पाद: एक और अनुमोदित बैकपोर्ट PR लैंड करें।
+- फ़्रीज़ किए गए लक्ष्य की टूलिंग: केवल सबसे छोटा संगतता सुधार बैकपोर्ट करें जो
+  पुराने उत्पाद को अपरिवर्तित रखते हुए जाँचता है।
+- प्रदाता, अनुमोदन, रनर या सेवा: उम्मीदवार को अपरिवर्तित रखें और
+  सीमित पुनःप्रयास पथ का उपयोग करें।
+
+शाखा में कोई भी बदलाव दोनों गेट अमान्य कर देता है। उनके पास होने के बाद, सुनिश्चित करें कि टिप अब भी
+`RELEASE_SHA` के बराबर है, फिर हस्ताक्षरित `vYYYY.M.P` पुश करें। बाद के बदलावों के लिए अगला
+पैच आवश्यक है; टैग को कभी न बदलें या हटाएँ। उसका पुश `Docker Release` शुरू करता है।
+
+### npm पैकेज प्रकाशित करें
+
+npm पर प्रकाशित किए जा सकने वाले प्रत्येक आधिकारिक plugin को उसी SHA से प्रकाशित करें और
+सफल रन ID सहेजें:
+
+```bash
+RELEASE_SHA="$(git rev-parse HEAD)"
+gh workflow run plugin-npm-release.yml \
+  --ref extended-stable/YYYY.M.33 \
+  -f publish_scope=all-publishable \
+  -f ref="$RELEASE_SHA" \
+  -f npm_dist_tag=extended-stable
+```
+
+वर्कफ़्लो अपरिवर्तित पैकेजों सहित सभी `all-publishable` पैकेजों को शामिल करता है,
+और प्रत्येक सटीक संस्करण और चयनकर्ता को सत्यापित करता है। पुनःरन प्रकाशित संस्करणों का पुनः उपयोग करते हैं।
+
+फिर तीनों सहेजी गई रन पहचानों के साथ तैयार core टारबॉल प्रकाशित करें:
 
 ```bash
 gh workflow run openclaw-npm-release.yml \
@@ -118,545 +140,267 @@ gh workflow run openclaw-npm-release.yml \
   -f preflight_only=false \
   -f npm_dist_tag=extended-stable \
   -f preflight_run_id=<npm-preflight-run-id> \
-  -f full_release_validation_run_id=<full-validation-run-id>
+  -f full_release_validation_run_id=<full-validation-run-id> \
+  -f full_release_validation_run_attempt=<full-validation-run-attempt> \
+  -f plugin_npm_run_id=<plugin-npm-run-id>
 ```
 
-ऐसे fork या non-production rehearsal के लिए जो जानबूझकर monthly `.33` या protected-`main`
-month policy satisfy नहीं कर सकता, npm preflight और publish dispatches दोनों में
-`-f bypass_extended_stable_guard=true` जोड़ें। default `false` है। bypass केवल
-`npm_dist_tag=extended-stable` के साथ accept होता है और workflow summary में
-record किया जाता है। यह canonical `extended-stable/YYYY.M.33` workflow ref,
-branch-tip/tag/checkout equality, final-tag syntax, package/tag version equality,
-referenced run और manifest identity, tarball provenance, environment approval,
-registry readback, या selector repair evidence को bypass नहीं करता।
+केवल गैर-उत्पादन पूर्वाभ्यास के लिए, प्रीफ़्लाइट और प्रकाशन में
+`-f bypass_extended_stable_guard=true` जोड़ें। यह केवल
+महीना गार्ड को बायपास करता है, कैनोनिकल-रेफ़, SHA/टैग/संस्करण समानता, उद्गम,
+अनुमोदन या रीडबैक जाँच को कभी नहीं। उत्पादन के लिए इसका कभी उपयोग न करें।
 
-publish workflow referenced run identities, prepared tarball digest,
-और दोनों npm registry selectors verify करता है। workflow सफल होने के बाद
-result को स्वतंत्र रूप से confirm करें:
+### सत्यापित करें और पुनर्प्राप्त करें
+
+फ़्रीज़ की गई शाखा के बजाय, एक अलग साफ़ वर्तमान-`main` चेकआउट से चलाएँ:
 
 ```bash
+node --import tsx scripts/openclaw-npm-postpublish-verify.ts YYYY.M.P
 npm view openclaw@YYYY.M.P version --userconfig "$(mktemp)"
 npm view openclaw@extended-stable version --userconfig "$(mktemp)"
 ```
 
-दोनों commands को `YYYY.M.P` return करना होगा। यदि publish सफल होता है लेकिन selector
-readback fail होता है, तो immutable package version को republish न करें। failed workflow की
-always-run summary में print किए गए single
-`npm dist-tag add openclaw@YYYY.M.P extended-stable` repair command का उपयोग करें,
-फिर दोनों independent readbacks repeat करें। prior selector पर rollback एक अलग
-operator decision है, readback repair path नहीं।
+कैनोनिकल शाखा के लिए हस्ताक्षर और npm उद्गम, तथा रिलीज़ SHA से प्रकाशन,
+प्रीफ़्लाइट और टारबॉल-डाइजेस्ट बाइंडिंग आवश्यक करें। दोनों कमांड को
+`YYYY.M.P` लौटाना चाहिए। प्रत्येक तैयार core पैकेज और `all-publishable`
+आधिकारिक plugin को उसके सटीक संस्करण और चयनकर्ता पर सत्यापित करें।
 
-नीचे दी गई regular checklist beta, `latest`, GitHub Release,
-plugins, macOS, Windows, और अन्य platform publication को own करना जारी रखती है। इस npm-only
-extended-stable path के लिए वे steps run न करें।
+यदि केवल रूट चयनकर्ता विफल होता है, तो वर्कफ़्लो सारांश में मुद्रित जनरेट किया गया
+`npm dist-tag add openclaw@YYYY.M.P extended-stable` सुधार कमांड उपयोग करें।
+मौजूदा plugin या अन्य तैयार-core चयनकर्ताओं की मरम्मत अनुमोदित क्रेडेंशियल-पृथक टूलिंग के माध्यम से करें; OIDC स्रोत उन्हें बदल नहीं सकता।
+अपरिवर्तनीय संस्करण को कभी दोबारा प्रकाशित न करें।
 
-## Regular release operator checklist
+GHCR और Docker Hub में सटीक डिफ़ॉल्ट, slim, browser और आर्किटेक्चर
+इमेज, उनके सत्यापन और प्लेटफ़ॉर्म संस्करण सहित, सत्यापित करने के लिए `Docker Release` आवश्यक करें। इसे
+डाइजेस्ट द्वारा केवल
+`extended-stable`, `extended-stable-slim` और `extended-stable-browser` को आगे बढ़ाना चाहिए;
+नियमित उपनाम अपरिवर्तित रहते हैं और स्वचालित रोलबैक अस्वीकार किया जाता है।
 
-यह checklist release flow का public shape है। Private credentials,
-signing, notarization, dist-tag recovery, और emergency rollback details
-maintainer-only release runbook में रहते हैं।
+उपनाम सुधार के लिए, वर्तमान
+`main` से टैग के साथ अनुमोदन-गेटेड `Docker Channel Promotion` चलाएँ। यह डाइजेस्ट, सत्यापन और प्लेटफ़ॉर्म जाँच दोहराता है, स्पष्ट रोलबैक की अनुमति देता है और
+इमेज को कभी दोबारा बिल्ड नहीं करता।
 
-1. वर्तमान `main` से शुरू करें: नवीनतम खींचें, पुष्टि करें कि लक्ष्य commit push हो चुका है,
-   और पुष्टि करें कि वर्तमान `main` CI इतना हरा है कि उससे branch बनाई जा सके।
-2. अंतिम reachable release tag के बाद से merged PRs और सभी direct
-   commits से शीर्ष `CHANGELOG.md` section जनरेट करें। Entries को user-facing रखें,
-   overlapping PR/direct-commit entries को dedupe करें, rewrite commit करें, उसे push करें,
-   और branching से पहले एक बार फिर rebase/pull करें।
-3. Release compatibility records की समीक्षा
-   `src/plugins/compat/registry.ts` और
-   `src/commands/doctor/shared/deprecation-compat.ts` में करें। Expired
-   compatibility केवल तब हटाएं जब upgrade path covered रहे, या दर्ज करें कि इसे
-   जानबूझकर क्यों रखा जा रहा है।
-4. वर्तमान `main` से `release/YYYY.M.PATCH` बनाएं; सामान्य release work
-   सीधे `main` पर न करें।
-5. Intended tag के लिए हर required version location bump करें, फिर
-   `pnpm release:prep` चलाएं। यह plugin versions, plugin inventory, config
-   schema, bundled channel config metadata, config docs baseline, plugin SDK
-   exports, और plugin SDK API baseline को सही क्रम में refresh करता है। Tagging से पहले कोई भी generated
-   drift commit करें। फिर local deterministic preflight चलाएं:
-   `pnpm check:test-types`, `pnpm check:architecture`,
-   `pnpm build && pnpm ui:build`, और `pnpm release:check`।
-6. `OpenClaw NPM Release` को `preflight_only=true` के साथ चलाएं। Tag मौजूद होने से पहले,
-   validation-only preflight के लिए पूरा 40-character release-branch SHA allowed है।
-   Preflight exact checked-out dependency graph के लिए dependency release evidence जनरेट करता है
-   और उसे npm preflight artifact में store करता है। सफल `preflight_run_id` save करें।
-7. Release branch, tag, या full commit SHA के लिए `Full Release Validation` के साथ
-   सभी pre-release tests kick off करें। यह चार बड़े release test boxes के लिए एक manual entrypoint है:
-   Vitest, Docker, QA Lab, और Package।
-8. अगर validation fail होता है, release branch पर fix करें और सबसे छोटी failed
-   file, lane, workflow job, package profile, provider, या model allowlist rerun करें जो
-   fix को prove करे। Full umbrella केवल तब rerun करें जब changed surface
-   prior evidence को stale बना दे।
-9. Tagged beta candidate के लिए, matching
-   `release/YYYY.M.PATCH` branch से
-   `pnpm release:candidate -- --tag vYYYY.M.PATCH-beta.N` चलाएं। Stable के लिए, required Windows source
-   release भी pass करें:
-   `pnpm release:candidate -- --tag vYYYY.M.PATCH --windows-node-tag vX.Y.Z`।
-   Helper local generated-release checks चलाता है, full release validation और npm preflight evidence
-   dispatch या verify करता है, exact prepared tarball के विरुद्ध Parallels
-   fresh/update proof plus Telegram package proof चलाता है, plugin npm और ClawHub plans record करता है,
-   और evidence bundle green होने के बाद ही exact
-   `OpenClaw Release Publish` command print करता है।
-   `OpenClaw Release Publish` selected या सभी publishable plugin
-   packages को npm और उसी set को ClawHub पर parallel में dispatch करता है, और फिर plugin npm publish
-   सफल होते ही matching dist-tag के साथ prepared OpenClaw npm preflight artifact promote करता है।
-   OpenClaw npm publish child सफल होने के बाद, यह complete matching
-   `CHANGELOG.md` section से matching GitHub release/prerelease page create या update करता है।
-   npm `latest` पर प्रकाशित stable releases GitHub latest release बनते हैं; npm `beta` पर रखे गए
-   stable maintenance releases GitHub `latest=false` के साथ create होते हैं। Workflow preflight
-   dependency evidence, full-validation manifest, और postpublish registry
-   verification evidence को post-release incident response के लिए GitHub release पर upload भी करता है।
-   Publish workflow तुरंत child run IDs print करता है, workflow token द्वारा approve किए जा सकने वाले
-   release environment gates auto-approve करता है, failed child jobs को log tails के साथ summarize करता है,
-   OpenClaw npm publish सफल होते ही GitHub release और dependency
-   evidence close out करता है, OpenClaw npm publish हो रहा हो तो ClawHub का wait करता है,
-   फिर `pnpm release:verify-beta` चलाता है और GitHub release, npm package, selected
-   plugin npm packages, selected ClawHub packages, child workflow run IDs, और
-   optional NPM Telegram run ID के लिए postpublish evidence upload करता है। ClawHub path transient CLI
-   dependency install failures retry करता है, एक preview cell flake होने पर भी preview-passing plugins publish करता है,
-   और हर expected plugin version के लिए registry verification के साथ समाप्त होता है ताकि partial publishes
-   visible और retryable रहें। फिर published
-   `openclaw@YYYY.M.PATCH-beta.N` या
-   `openclaw@beta` package के विरुद्ध post-publish
-   package acceptance चलाएं। अगर pushed या published prerelease को fix चाहिए,
-   अगला matching prerelease number काटें; पुराने
-   prerelease को delete या rewrite न करें।
-10. Stable के लिए, केवल तब continue करें जब vetted beta या release candidate के पास
-    required validation evidence हो। Stable npm publish भी
-    `OpenClaw Release Publish` से होकर जाता है, successful preflight artifact को
-    `preflight_run_id` के जरिए reuse करते हुए; stable macOS release readiness के लिए
-    packaged `.zip`, `.dmg`, `.dSYM.zip`, और updated `appcast.xml` भी `main` पर required हैं।
-    macOS publish workflow release assets verify होने के बाद signed appcast को public `main` पर
-    automatically publish करता है; अगर branch protection direct push block करता है,
-    तो यह appcast PR खोलता या update करता है। Stable Windows Hub
-    readiness के लिए OpenClaw GitHub release पर signed `OpenClawCompanion-Setup-x64.exe`,
-    `OpenClawCompanion-Setup-arm64.exe`, और
-    `OpenClawCompanion-SHA256SUMS.txt` assets required हैं।
-    Exact signed `openclaw/openclaw-windows-node` release tag को
-    `windows_node_tag` के रूप में और उसके candidate-approved installer digest map को
-    `windows_node_installer_digests` के रूप में pass करें; `OpenClaw Release Publish`
-    release draft रखता है, `Windows Node Release` dispatch करता है, और publication से पहले सभी तीन
-    assets verify करता है।
-11. Publish के बाद, npm post-publish verifier, optional standalone
-    published-npm Telegram E2E जब post-publish channel proof चाहिए,
-    dist-tag promotion जब जरूरत हो, generated GitHub release page verify करें,
-    release announcement steps चलाएं, फिर stable release finished कहने से पहले [Stable main
-    closeout](#stable-main-closeout) complete करें।
+Slack, Discord और Codex आरंभिक दस्तावेज़ीकृत समर्थन सतहें हैं, रिलीज़ अनुमति-सूची नहीं:
+npm पर प्रकाशित किया जा सकने वाला प्रत्येक आधिकारिक plugin जारी होता है। केवल नियमित
+चेकलिस्ट beta/`latest`, GitHub Releases, ClawHub, नेटिव ऐप, मोबाइल,
+वेबसाइट और निजी dist-tags की स्वामी है; इस Gateway पथ के लिए वे चरण न चलाएँ।
 
-## Stable main closeout
+## नियमित रिलीज़ ऑपरेटर चेकलिस्ट
 
-Stable publication तब तक complete नहीं है जब तक `main` में actual shipped
-release state न हो।
+यह चेकलिस्ट रिलीज़ प्रवाह का सार्वजनिक स्वरूप है। निजी क्रेडेंशियल, हस्ताक्षर, नोटराइज़ेशन, dist-tag पुनर्प्राप्ति और आपातकालीन रोलबैक विवरण केवल अनुरक्षकों की रिलीज़ रनबुक में रहते हैं।
 
-1. Fresh latest `main` से शुरू करें। इसके विरुद्ध `release/YYYY.M.PATCH` audit करें और
-   `main` से absent real fixes forward-port करें। Release-only compatibility,
-   test, या validation adapters को newer `main` में blindly merge न करें।
-2. `main` को shipped stable version पर set करें, speculative next train पर नहीं। Root version change के बाद
-   `pnpm release:prep` चलाएं, फिर
-   `pnpm deps:shrinkwrap:generate`।
-3. `main` पर `CHANGELOG.md` का `## YYYY.M.PATCH` section tagged release branch से exactly match कराएं।
-   जब mac release ने stable `appcast.xml` update publish किया हो तो उसे include करें।
-4. Operator द्वारा explicitly उस release train को start किए जाने तक `main` में
-   `YYYY.M.PATCH+1`, beta version, या empty future changelog
-   section add न करें।
-5. `pnpm release:generated:check`, `pnpm deps:shrinkwrap:check`, और
-   `OPENCLAW_TESTBOX=1 pnpm check:changed` चलाएं। Push करें, फिर stable release
-   done कहने से पहले verify करें कि `origin/main` में shipped version और changelog हैं।
-6. हर private rollback drill के बाद repository variables `RELEASE_ROLLBACK_DRILL_ID` और
-   `RELEASE_ROLLBACK_DRILL_DATE` current रखें।
-   `OpenClaw Stable Main Closeout` stable publication के बाद shipped version, changelog, और appcast ले जाने वाले
-   `main` push से start करता है। यह shipped tag को उसके Full Release
-   Validation और Publish runs से bind करने के लिए immutable postpublish evidence पढ़ता है,
-   फिर stable main state, release, mandatory stable soak, और blocking performance evidence verify करता है।
-   यह GitHub release में immutable closeout manifest और checksum attach करता है। Automatic
-   push trigger उन legacy releases को skip करता है जो immutable postpublish
-   evidence से पहले के हैं; यह उस skip को कभी completed closeout नहीं मानता। Complete
-   closeout के लिए दोनों assets और matching checksum required हैं। Partial manifest
-   identical bytes regenerate करने के लिए अपना recorded `main` SHA और rollback drill replay करता है,
-   फिर missing checksum attach करता है; invalid pair, या manifest के बिना checksum,
-   blocking रहता है। Rollback drill repository variables के बिना push-triggered run closeout complete किए बिना skip करता है;
-   missing या 90-day से अधिक पुराना drill record अभी भी manual evidence-backed
-   closeout को block करता है। Private recovery commands maintainer-only runbook में रहती हैं।
-   Evidence-backed stable closeout को repair या replay करने के लिए ही manual dispatch use करें।
-   Legacy fallback correction tag base-package evidence केवल तब reuse कर सकता है जब
-   correction tag उसी source commit पर resolve हो जिस पर base stable tag है।
-   Different source वाली correction को अपना package
-   evidence publish और verify करना होगा।
+1. वर्तमान `main` से शुरू करें: नवीनतम बदलाव पुल करें, पुष्टि करें कि लक्ष्य कमिट पुश किया गया है और पुष्टि करें कि `main` CI शाखा बनाने के लिए पर्याप्त रूप से हरा है।
+2. उस कमिट से `release/YYYY.M.PATCH` बनाएँ। बैकपोर्ट वैकल्पिक हैं; केवल ऑपरेटर द्वारा चुना गया सेट लागू करें। प्रत्येक आवश्यक संस्करण स्थान को बढ़ाएँ, `pnpm release:prep` चलाएँ, रिलीज़ सुधार और आवश्यक फ़ॉरवर्ड-पोर्ट पूरे करें तथा `src/plugins/compat/registry.ts` और `src/commands/doctor/shared/deprecation-compat.ts` की समीक्षा करें।
+3. उत्पाद-पूर्ण, चेंजलॉग-पूर्व कमिट को **Code SHA** के रूप में फ़्रीज़ करें। निर्धारक स्रोत प्रीफ़्लाइट चलाएँ, फिर `node scripts/full-release-validation-at-sha.mjs --sha <code-sha> --target-ref release/YYYY.M.PATCH` उपयोग करें। यह विश्वसनीय वर्कफ़्लो टूलिंग को पिन करता है, जबकि पूर्ण Vitest, Docker, QA, पैकेज और प्रदर्शन मैट्रिक्स सटीक Code SHA को लक्षित करता है।
+4. संपादन से पहले विफलताओं को वर्गीकृत करें। उत्पाद/कोड विफलता नया Code SHA बनाती है और उस SHA के लिए सफल पूर्ण सत्यापन आवश्यक करती है। वर्कफ़्लो, हार्नेस, क्रेडेंशियल, अनुमोदन या इन्फ़्रास्ट्रक्चर विफलता की मरम्मत उसकी स्वामी सतह में की जाती है और उसी Code SHA के विरुद्ध फिर से चलाई जाती है।
+5. Code SHA सफल होने के बाद ही, अंतिम पहुँच-योग्य जारी किए गए टैग के बाद से मर्ज किए गए PR और सीधे कमिट से शीर्ष `CHANGELOG.md` अनुभाग जनरेट करें। प्रविष्टियों को उपयोगकर्ता-सामना करने वाला और डुप्लिकेट-रहित रखें। जब कोई भिन्न जारी किया गया टैग या बाद का फ़ॉरवर्ड-पोर्ट पहले से जारी PR को पुनः संबद्ध करता है, तो उसे स्पष्ट रूप से `--shipped-ref` के रूप में पास करें।
+6. केवल `CHANGELOG.md` कमिट करें। यह कमिट **Release SHA** है। Code SHA से Release SHA तक का पूर्ण अंतर ठीक `CHANGELOG.md` होना चाहिए; कोई अन्य बदला हुआ पथ रिलीज़ को चरण 2 पर लौटा देता है।
+7. साक्ष्य पुनः उपयोग सक्षम रखते हुए Release SHA के लिए SHA-पिन किया गया पूर्ण रिलीज़ सत्यापन चलाएँ। हल्के पैरेंट को `changelog-only-release-v1` दर्ज करना चाहिए, सफल Code SHA की ओर संकेत करना चाहिए और कोई उत्पाद चाइल्ड लेन डिस्पैच नहीं करनी चाहिए। यह उत्पाद साक्ष्य का पुनः उपयोग करता है; पैकेज बाइट्स का नहीं।
+8. Release SHA/टैग के विरुद्ध `preflight_only=true` के साथ `OpenClaw NPM Release` चलाएँ। सफल `preflight_run_id` सहेजें। यह अंतिम चेंजलॉग वाले सटीक पैकेज बाइट्स को बिल्ड और जाँचता है।
+9. Release SHA को टैग करें, फिर दोनों को दोबारा डिस्पैच करने के बजाय सफल Release-SHA सत्यापन पैरेंट और npm प्रीफ़्लाइट के साथ उम्मीदवार हेल्पर चलाएँ:
 
-## Release preflight
+   ```bash
+   pnpm release:candidate -- \
+     --tag vYYYY.M.PATCH-beta.N \
+     --full-release-run <release-sha-validation-run-id> \
+     --npm-preflight-run <preflight-run-id> \
+     --skip-dispatch
+   ```
 
-- रिलीज़ प्रीफ्लाइट से पहले `pnpm check:test-types` चलाएँ ताकि टेस्ट TypeScript तेज़ स्थानीय `pnpm check` गेट के बाहर भी
-  कवर रहे
-- रिलीज़ प्रीफ्लाइट से पहले `pnpm check:architecture` चलाएँ ताकि व्यापक import
-  cycle और architecture boundary जाँचें तेज़ स्थानीय गेट के बाहर हरी रहें
-- `pnpm release:check` से पहले `pnpm build && pnpm ui:build` चलाएँ ताकि अपेक्षित
-  `dist/*` रिलीज़ artifacts और Control UI bundle pack
-  validation step के लिए मौजूद हों
-- root version bump के बाद और tagging से पहले `pnpm release:prep` चलाएँ। यह
-  हर deterministic release generator चलाता है जो आम तौर पर
-  version/config/API बदलाव के बाद drift करता है: plugin versions, plugin inventory, base config
-  schema, bundled channel config metadata, config docs baseline, plugin SDK
-  exports, और plugin SDK API baseline. `pnpm release:check` उन
-  guards को check mode में फिर से चलाता है और package release checks चलाने से पहले एक
-  pass में मिले हर generated drift failure की रिपोर्ट करता है।
-- Plugin version sync official plugin package versions और मौजूदा
-  `openclaw.compat.pluginApi` floors को default रूप से OpenClaw release version पर अपडेट करता है।
-  उस field को plugin SDK/runtime API floor मानें, सिर्फ package version की copy नहीं:
-  plugin-only releases के लिए जो जानबूझकर पुराने OpenClaw hosts के साथ
-  compatible रहते हैं, floor को सबसे पुराने supported
-  host API पर रखें और उस choice को plugin release proof में document करें।
-- release approval से पहले manual `Full Release Validation` workflow चलाएँ ताकि
-  सभी pre-release test boxes एक entrypoint से शुरू हों। यह branch,
-  tag, या full commit SHA स्वीकार करता है, manual `CI` dispatch करता है, और install smoke, package acceptance, cross-OS
-  package checks, QA Lab parity, Matrix, और Telegram lanes के लिए
-  `OpenClaw Release Checks` dispatch करता है। Stable और full
-  runs में हमेशा exhaustive live/E2E और Docker release-path soak शामिल होते हैं;
-  `run_release_soak=true` explicit beta soak के लिए रखा गया है। Package
-  Acceptance candidate validation के दौरान canonical package Telegram E2E देता है,
-  जिससे दूसरा concurrent live poller बचता है।
-  beta publish करने के बाद `release_package_spec` दें ताकि shipped
-  npm package को release checks, Package Acceptance, और package Telegram
-  E2E में release tarball rebuild किए बिना reuse किया जा सके। `npm_telegram_package_spec`
-  केवल तब दें जब Telegram को बाकी release validation से अलग
-  published package इस्तेमाल करना हो। `package_acceptance_package_spec` तब दें जब Package Acceptance को
-  release package spec से अलग published package इस्तेमाल करना हो। `evidence_package_spec`
-  तब दें जब release evidence report को यह साबित करना हो कि
-  validation published npm package से मेल खाता है, बिना Telegram E2E को force किए।
+   स्थिर रिलीज़ के लिए, `--windows-node-tag vX.Y.Z` भी पास करें। सहायक रिलीज़ नोट की उत्पत्ति, npm प्रीफ़्लाइट बाइट्स, Parallels इंस्टॉल/अपडेट प्रमाण, Telegram पैकेज प्रमाण और plugin प्रकाशन योजनाओं को सत्यापित करता है, फिर प्रकाशन कमांड प्रिंट करता है।
+
+   `OpenClaw Release Publish` चुने गए या प्रकाशन-योग्य सभी plugin पैकेजों को npm पर और समान सेट को ClawHub पर समानांतर रूप से डिस्पैच करता है, फिर plugin का npm प्रकाशन सफल होने पर तैयार OpenClaw npm प्रीफ़्लाइट आर्टिफ़ैक्ट को मेल खाते dist-tag के साथ प्रमोट करता है। रिलीज़ चेकआउट उत्पाद/डेटा रूट बना रहता है, जबकि योजना और अंतिम सत्यापन सटीक विश्वसनीय वर्कफ़्लो-स्रोत चेकआउट से निष्पादित होते हैं, ताकि कोई पुराना रिलीज़ कमिट चुपचाप अप्रचलित रिलीज़ टूलिंग का उपयोग न कर सके। कोई भी प्रकाशन चाइल्ड शुरू होने से पहले, यह सटीक GitHub रिलीज़ बॉडी रेंडर करके कैश करता है। जब पूरा मेल खाता `CHANGELOG.md` अनुभाग GitHub की 125,000-अक्षर सीमा और रेंडरर की मेल खाती 125,000-बाइट सुरक्षा सीमा में समा जाता है, तो पृष्ठ में उसके शीर्षक सहित वही सटीक `## YYYY.M.PATCH` अनुभाग होता है। जब स्रोत अनुभाग समाता नहीं है, तो पृष्ठ सटीक समूहीकृत संपादकीय नोट बनाए रखता है और अत्यधिक बड़े योगदान रिकॉर्ड को टैग-पिन किए गए `CHANGELOG.md` में पूर्ण रिकॉर्ड की स्थायी लिंक से बदल देता है; आंशिक रिकॉर्ड और काटे गए बुलेट कभी प्रकाशित नहीं किए जाते। वर्कफ़्लो `### Release verification` जोड़ने से पहले उस पूर्ण या संक्षिप्त बॉडी को चुनता है; यदि प्रमाण का अंतिम भाग सीमा पार कर देगा, तो यह प्रामाणिक बॉडी बनाए रखता है और इसके बजाय अपरिवर्तनीय संलग्न साक्ष्य पर निर्भर करता है। npm `latest` पर प्रकाशित स्थिर रिलीज़ GitHub की नवीनतम रिलीज़ बन जाती हैं, जबकि npm `beta` पर रखी गई स्थिर रखरखाव रिलीज़ GitHub `latest=false` के साथ बनाई जाती हैं। वर्कफ़्लो रिलीज़ के बाद की घटना-प्रतिक्रिया के लिए प्रीफ़्लाइट निर्भरता साक्ष्य, पूर्ण-सत्यापन मेनिफ़ेस्ट और प्रकाशन-पश्चात रजिस्ट्री सत्यापन साक्ष्य भी GitHub रिलीज़ पर अपलोड करता है। यह चाइल्ड रन ID तुरंत प्रिंट करता है, उन रिलीज़ परिवेश गेट को स्वतः अनुमोदित करता है जिन्हें वर्कफ़्लो टोकन अनुमोदित कर सकता है, विफल चाइल्ड जॉब का लॉग के अंतिम भाग सहित सारांश देता है, ड्राफ़्ट GitHub रिलीज़ पृष्ठ पहले ही बना देता है और OpenClaw npm प्रकाशन के साथ-साथ Windows तथा Android आर्टिफ़ैक्ट प्रमोट करता है, उन चरणों की सफलता के बाद रिलीज़ पृष्ठ और निर्भरता साक्ष्य को अंतिम रूप देता है, जब भी OpenClaw npm प्रकाशित हो रहा हो तब ClawHub की प्रतीक्षा करता है, फिर विश्वसनीय-main बीटा सत्यापक चलाता है और GitHub रिलीज़, npm पैकेज, चुने गए plugin npm पैकेज, चुने गए ClawHub पैकेज, चाइल्ड वर्कफ़्लो रन ID और वैकल्पिक NPM Telegram रन ID के लिए प्रकाशन-पश्चात साक्ष्य अपलोड करता है। ClawHub बूटस्ट्रैप सत्यापक के लिए सटीक विश्वसनीय-main वर्कफ़्लो पथ और SHA, उत्पादक और टर्मिनल रन प्रयास, रिलीज़ SHA, अनुरोधित पैकेज सेट, अपरिवर्तनीय पैकेज आर्टिफ़ैक्ट ट्यूपल और टर्मिनल रजिस्ट्री रीडबैक आर्टिफ़ैक्ट आवश्यक हैं; सफल लेगेसी रिलीज़-ref रन स्वीकार नहीं किया जाता।
+
+   फिर प्रकाशित `openclaw@YYYY.M.PATCH-beta.N` या `openclaw@beta` पैकेज के विरुद्ध प्रकाशन-पश्चात पैकेज स्वीकृति चलाएँ। यदि पुश या प्रकाशित की गई प्रीरिलीज़ में सुधार की आवश्यकता हो, तो अगली मेल खाती प्रीरिलीज़ संख्या जारी करें; पुरानी संख्या को कभी हटाएँ या दोबारा न लिखें।
+
+10. विफल प्रकाशन प्रयास पर, Release SHA को अपरिवर्तित रखें, जब तक कि विफलता किसी उत्पाद या चेंजलॉग दोष को सिद्ध न करे। सफल अपरिवर्तनीय चाइल्ड और आर्टिफ़ैक्ट फिर से शुरू करें; पहले से सफल हो चुके पैकेज संस्करण को कभी दोबारा बिल्ड या प्रकाशित न करें।
+11. स्थिर रिलीज़ के लिए, केवल तभी आगे बढ़ें जब जाँचे गए बीटा या रिलीज़ कैंडिडेट के पास आवश्यक सत्यापन साक्ष्य हों। स्थिर npm प्रकाशन भी `OpenClaw Release Publish` से होकर जाता है और `preflight_run_id` के माध्यम से सफल प्रीफ़्लाइट आर्टिफ़ैक्ट का पुनः उपयोग करता है। स्थिर macOS रिलीज़ तत्परता के लिए पैकेज किए गए `.zip`, `.dmg`, `.dSYM.zip` और `main` पर अपडेट किया हुआ `appcast.xml` भी आवश्यक है; रिलीज़ आर्टिफ़ैक्ट सत्यापित होने के बाद macOS प्रकाशन वर्कफ़्लो हस्ताक्षरित appcast को सार्वजनिक `main` पर स्वचालित रूप से प्रकाशित करता है, या यदि ब्रांच सुरक्षा सीधे पुश को रोकती है तो appcast PR खोलता/अपडेट करता है। स्थिर Windows Hub तत्परता के लिए OpenClaw GitHub रिलीज़ पर हस्ताक्षरित `OpenClawCompanion-Setup-x64.exe`, `OpenClawCompanion-Setup-arm64.exe` और `OpenClawCompanion-SHA256SUMS.txt` आर्टिफ़ैक्ट आवश्यक हैं। सटीक हस्ताक्षरित `openclaw/openclaw-windows-node` रिलीज़ टैग को `windows_node_tag` और उसके कैंडिडेट-अनुमोदित इंस्टॉलर डाइजेस्ट मैप को `windows_node_installer_digests` के रूप में पास करें; `OpenClaw Release Publish` रिलीज़ ड्राफ़्ट बनाए रखता है, `Windows Node Release` डिस्पैच करता है और प्रकाशन से पहले तीनों आर्टिफ़ैक्ट सत्यापित करता है।
+12. प्रकाशन के बाद, npm प्रकाशन-पश्चात सत्यापक, प्रकाशन-पश्चात चैनल प्रमाण की आवश्यकता होने पर वैकल्पिक स्वतंत्र प्रकाशित-npm Telegram E2E, आवश्यकता होने पर dist-tag प्रमोशन चलाएँ, जनरेट किए गए GitHub रिलीज़ पृष्ठ को सत्यापित करें, रिलीज़ घोषणा चरण चलाएँ, फिर स्थिर रिलीज़ को पूर्ण कहने से पहले [स्थिर main समापन](#stable-main-closeout) पूरा करें।
+
+## स्थिर main समापन
+
+स्थिर प्रकाशन तब तक पूरा नहीं होता, जब तक `main` में वास्तव में शिप की गई रिलीज़ स्थिति मौजूद न हो।
+
+1. नवीनतम ताज़ा `main` से शुरू करें। उसके विरुद्ध `release/YYYY.M.PATCH` का ऑडिट करें और `main` में अनुपस्थित वास्तविक सुधारों को फ़ॉरवर्ड-पोर्ट करें। केवल रिलीज़ के लिए बने संगतता, परीक्षण या सत्यापन अडैप्टर को नए `main` में आँख मूँदकर मर्ज न करें।
+2. सामान्य पथ के लिए, `main` को शिप किए गए स्थिर संस्करण पर सेट करें। विलंबित समापन में `main` का उपयोग किया जा सकता है, जब वह बाद के स्थिर OpenClaw CalVer तक आगे बढ़ चुका हो; केवल पिछली रिलीज़ का समापन करने के लिए पहले से शुरू रिलीज़ क्रम को डाउनग्रेड न करें। सत्यापक को फिर भी शिप किए गए सटीक चेंजलॉग अनुभाग और appcast प्रविष्टि की आवश्यकता होती है तथा वह वास्तविक `main` संस्करण और SHA रिकॉर्ड करता है। किसी भी रूट संस्करण परिवर्तन के बाद `pnpm release:prep`, फिर `pnpm deps:shrinkwrap:generate` चलाएँ।
+3. `main` पर `CHANGELOG.md` के `## YYYY.M.PATCH` अनुभाग को टैग की गई रिलीज़ ब्रांच से बिल्कुल मेल कराएँ। यदि mac रिलीज़ ने स्थिर `appcast.xml` अपडेट प्रकाशित किया है, तो उसे शामिल करें।
+4. ऑपरेटर द्वारा उस रिलीज़ क्रम को स्पष्ट रूप से शुरू किए जाने तक `main` में `YYYY.M.PATCH+1`, बीटा संस्करण या भविष्य का खाली चेंजलॉग अनुभाग न जोड़ें।
+5. `pnpm release:generated:check`, `pnpm deps:shrinkwrap:check` और `OPENCLAW_TESTBOX=1 pnpm check:changed` चलाएँ। पुश करें, फिर स्थिर रिलीज़ को पूर्ण कहने से पहले सत्यापित करें कि `origin/main` में शिप किया गया संस्करण और चेंजलॉग मौजूद हैं।
+6. प्रत्येक निजी रोलबैक अभ्यास के बाद रिपॉज़िटरी चर `RELEASE_ROLLBACK_DRILL_ID` और `RELEASE_ROLLBACK_DRILL_DATE` को वर्तमान रखें।
+
+`OpenClaw Stable Main Closeout` स्थिर प्रकाशन के बाद उस `main` पुश से शुरू होता है जिसमें शिप किया गया संस्करण, चेंजलॉग और appcast होते हैं। यह शिप किए गए टैग को उसके पूर्ण रिलीज़ सत्यापन और प्रकाशन रन से बाँधने के लिए अपरिवर्तनीय प्रकाशन-पश्चात साक्ष्य पढ़ता है, फिर स्थिर main स्थिति, रिलीज़, अनिवार्य स्थिर सोक और अवरोधक प्रदर्शन साक्ष्य को सत्यापित करता है। यह GitHub रिलीज़ में अपरिवर्तनीय समापन मेनिफ़ेस्ट और चेकसम संलग्न करता है। स्वचालित पुश ट्रिगर अपरिवर्तनीय प्रकाशन-पश्चात साक्ष्य से पहले की लेगेसी रिलीज़ को छोड़ देता है और उस छोड़े जाने को कभी पूर्ण समापन नहीं मानता।
+
+पूर्ण समापन के लिए आर्टिफ़ैक्ट और मेल खाता चेकसम, दोनों आवश्यक हैं। आंशिक मेनिफ़ेस्ट समान बाइट्स दोबारा जनरेट करने के लिए अपने रिकॉर्ड किए गए `main` SHA और रोलबैक अभ्यास को फिर चलाता है, फिर अनुपस्थित चेकसम संलग्न करता है; अमान्य जोड़ी या मेनिफ़ेस्ट के बिना चेकसम अवरोधक बना रहता है। रोलबैक अभ्यास रिपॉज़िटरी चर के बिना पुश-ट्रिगर किया गया रन समापन पूरा किए बिना छोड़ दिया जाता है; अनुपस्थित या 90 दिन से अधिक पुराना अभ्यास रिकॉर्ड मैनुअल साक्ष्य-समर्थित समापन को भी रोकता है। निजी पुनर्प्राप्ति कमांड केवल मेंटेनर वाले रनबुक में रहते हैं। मैनुअल डिस्पैच का उपयोग केवल साक्ष्य-समर्थित स्थिर समापन की मरम्मत या पुनः संचालन के लिए करें।
+
+यदि Release Publish पैरेंट केवल अपरिवर्तनीय npm/plugin साक्ष्य संलग्न होने के बाद विफल हुआ हो, तो पहले प्रत्येक स्थिर प्लेटफ़ॉर्म आर्टिफ़ैक्ट की मरम्मत करके प्रकाशित करें। फिर कोई मेंटेनर `allow_failed_publish_recovery=true` के साथ समापन को मैनुअल रूप से डिस्पैच कर सकता है; यह मोड केवल पूर्ण हो चुके विफल पैरेंट को स्वीकार करता है और सामान्य macOS/appcast जाँचों के साथ-साथ सटीक Android तथा Windows आर्टिफ़ैक्ट अनुबंध, GitHub SHA-256 डाइजेस्ट, चेकसम सत्यापन, Android उत्पत्ति और सफल पैरेंट-डिस्पैच Windows प्रमोशन भी आवश्यक करता है, जिसकी Authenticode जाँच और कैंडिडेट-अनुमोदित डाइजेस्ट प्रकाशित इंस्टॉलर से मेल खाते हों। स्वचालित पुश समापन इस पुनर्प्राप्ति मोड को कभी सक्षम नहीं करता।
+
+लेगेसी फ़ॉलबैक सुधार टैग केवल तभी बेस-पैकेज साक्ष्य का पुनः उपयोग कर सकता है, जब सुधार टैग उसी स्रोत कमिट पर रिज़ॉल्व हो जिस पर बेस स्थिर टैग होता है। उसकी Android रिलीज़ बेस टैग के सत्यापित APK का पुनः उपयोग करती है और सुधार टैग के लिए उत्पत्ति जोड़ती है। अलग स्रोत वाले सुधार को अपना पैकेज साक्ष्य प्रकाशित और सत्यापित करना होगा तथा अधिक Android `versionCode` का उपयोग करना होगा।
+
+## रिलीज़ प्रीफ़्लाइट
+
+- रिलीज़ प्रीफ़्लाइट से पहले `pnpm check:test-types` चलाएँ, ताकि परीक्षण TypeScript तेज़ स्थानीय `pnpm check` गेट के बाहर भी कवर्ड रहे।
+- रिलीज़ प्रीफ़्लाइट से पहले `pnpm check:architecture` चलाएँ, ताकि अधिक व्यापक इंपोर्ट साइकल और आर्किटेक्चर सीमा जाँचें तेज़ स्थानीय गेट के बाहर सफल रहें।
+- `pnpm release:check` से पहले `pnpm build && pnpm ui:build` चलाएँ, ताकि पैक सत्यापन चरण के लिए अपेक्षित `dist/*` रिलीज़ आर्टिफ़ैक्ट और Control UI बंडल मौजूद हों।
+- रूट संस्करण बढ़ाने के बाद और टैग करने से पहले `pnpm release:prep` चलाएँ। यह प्रत्येक नियतात्मक रिलीज़ जनरेटर चलाता है जिसमें संस्करण/config/API परिवर्तन के बाद सामान्यतः अंतर आ जाता है: plugin संस्करण, npm shrinkwrap, plugin इन्वेंटरी, बेस config स्कीमा, बंडल किए गए चैनल config मेटाडेटा, config दस्तावेज़ बेसलाइन, plugin SDK एक्सपोर्ट, Plugin SDK API अनुबंध मेनिफ़ेस्ट और Control UI लोकेल बंडल। यह तब तक अवरोधित भी करता है, जब तक नेटिव ऐप अनुवाद और प्लेटफ़ॉर्म-जनरेट किए गए लोकेल संसाधन स्रोत इन्वेंटरी से मेल न खाएँ; यदि वे पीछे हों, तो Code SHA को फ़्रीज़ करने से पहले `Native App Locale Refresh` की प्रतीक्षा करें या उसे डिस्पैच करें। `pnpm release:check` उन गार्ड को जाँच मोड में दोबारा चलाता है—जिसमें सख्त लोकेल गेट और plugin SDK सतह बजट शामिल हैं—और पैकेज रिलीज़ जाँच चलाने से पहले एक ही पास में जनरेट किए गए सभी अंतर की विफलताओं की रिपोर्ट करता है।
+- Plugin संस्करण सिंक डिफ़ॉल्ट रूप से प्रकाशन-योग्य `@openclaw/ai` रनटाइम पैकेज, आधिकारिक plugin पैकेज संस्करणों और मौजूदा `openclaw.compat.pluginApi` न्यूनतम सीमाओं को OpenClaw रिलीज़ संस्करण पर अपडेट करता है। उस फ़ील्ड को केवल पैकेज संस्करण की प्रति नहीं, बल्कि plugin SDK/रनटाइम API की न्यूनतम सीमा मानें: उन केवल-plugin रिलीज़ के लिए जो जानबूझकर पुराने OpenClaw होस्ट के साथ संगत रहती हैं, न्यूनतम सीमा को सबसे पुराने समर्थित होस्ट API पर रखें और उस चयन को plugin रिलीज़ प्रमाण में दर्ज करें।
+- एक ही प्रवेश बिंदु से सभी प्रीरिलीज़ टेस्ट बॉक्स शुरू करने के लिए रिलीज़ अनुमोदन से पहले मैनुअल `Full Release Validation` वर्कफ़्लो चलाएँ। यह ब्रांच, टैग या पूरा कमिट SHA स्वीकार करता है, मैनुअल `CI` डिस्पैच करता है और इंस्टॉल स्मोक, पैकेज स्वीकृति, क्रॉस-OS पैकेज जाँच, QA Lab समानता, Matrix तथा Telegram लेन के लिए `OpenClaw Release Checks` डिस्पैच करता है। स्थिर और पूर्ण रन में हमेशा विस्तृत लाइव/E2E और Docker रिलीज़-पथ सोक शामिल होते हैं; `run_release_soak=true` स्पष्ट बीटा सोक के लिए रखा गया है। पैकेज स्वीकृति कैंडिडेट सत्यापन के दौरान प्रामाणिक पैकेज Telegram E2E प्रदान करती है, जिससे दूसरे समवर्ती लाइव पोलर की आवश्यकता नहीं रहती।
+
+  रिलीज़ टारबॉल को दोबारा बिल्ड किए बिना रिलीज़ जाँच, पैकेज स्वीकृति और पैकेज Telegram E2E में शिप किए गए npm पैकेज का पुनः उपयोग करने के लिए बीटा प्रकाशित करने के बाद `release_package_spec` प्रदान करें। केवल तभी `npm_telegram_package_spec` प्रदान करें, जब Telegram को शेष रिलीज़ सत्यापन से अलग प्रकाशित पैकेज का उपयोग करना हो। जब पैकेज स्वीकृति को रिलीज़ पैकेज विनिर्देश से अलग प्रकाशित पैकेज का उपयोग करना हो, तब `package_acceptance_package_spec` प्रदान करें। जब रिलीज़ साक्ष्य रिपोर्ट को Telegram E2E अनिवार्य किए बिना यह सिद्ध करना हो कि सत्यापन प्रकाशित npm पैकेज से मेल खाता है, तब `evidence_package_spec` प्रदान करें।
+
+  ```bash
+  node scripts/full-release-validation-at-sha.mjs \
+    --sha <code-sha> \
+    --target-ref release/YYYY.M.PATCH
+  ```
+
+- जब रिलीज़ कार्य जारी हो और आपको किसी पैकेज उम्मीदवार के लिए साइड-चैनल प्रमाण चाहिए, तब मैन्युअल `Package Acceptance` वर्कफ़्लो चलाएँ। `openclaw@beta`, `openclaw@latest`, या किसी सटीक रिलीज़ संस्करण के लिए `source=npm` का उपयोग करें; वर्तमान `workflow_ref` हार्नेस के साथ किसी विश्वसनीय `package_ref` ब्रांच/टैग/SHA को पैक करने के लिए `source=ref`; आवश्यक SHA-256 और सख्त सार्वजनिक URL नीति वाली सार्वजनिक HTTPS टारबॉल के लिए `source=url`; आवश्यक `trusted_source_id` और SHA-256 का उपयोग करने वाली नामित विश्वसनीय-स्रोत नीति के लिए `source=trusted-url`; या किसी अन्य GitHub Actions रन द्वारा अपलोड की गई टारबॉल के लिए `source=artifact` का उपयोग करें।
+
+  वर्कफ़्लो उम्मीदवार को `package-under-test` में हल करता है, उस टारबॉल के विरुद्ध Docker E2E रिलीज़ शेड्यूलर का पुनः उपयोग करता है, और `telegram_mode=mock-openai` या `telegram_mode=live-frontier` के साथ उसी टारबॉल के विरुद्ध Telegram QA चला सकता है। जब चयनित Docker लेन में `published-upgrade-survivor` शामिल होता है, तो पैकेज आर्टिफ़ैक्ट उम्मीदवार होता है और `published_upgrade_survivor_baseline` प्रकाशित बेसलाइन चुनता है। `update-restart-auth` उम्मीदवार पैकेज का उपयोग इंस्टॉल किए गए CLI और परीक्षणाधीन पैकेज, दोनों के रूप में करता है, ताकि यह उम्मीदवार अपडेट कमांड के प्रबंधित रीस्टार्ट पथ का परीक्षण करे।
+
   उदाहरण:
-  `gh workflow run full-release-validation.yml --ref main -f ref=release/YYYY.M.PATCH`
-- manual `Package Acceptance` workflow तब चलाएँ जब release work जारी रहते हुए package candidate के लिए side-channel proof चाहिए। `source=npm` का उपयोग
-  `openclaw@beta`, `openclaw@latest`, या exact release version के लिए करें; `source=ref`
-  का उपयोग current `workflow_ref` harness के साथ trusted `package_ref` branch/tag/SHA pack करने के लिए करें; `source=url` का उपयोग public HTTPS tarball के लिए करें जिसमें
-  required SHA-256 और strict public URL policy हो; `source=trusted-url` का उपयोग
-  required `trusted_source_id` और SHA-256 वाली named trusted-source policy के लिए करें; या
-  `source=artifact` का उपयोग किसी अन्य GitHub Actions run द्वारा uploaded tarball के लिए करें। यह
-  workflow candidate को
-  `package-under-test` में resolve करता है, उस tarball के विरुद्ध Docker E2E release scheduler reuse करता है,
-  और उसी tarball के विरुद्ध
-  `telegram_mode=mock-openai` या `telegram_mode=live-frontier` के साथ Telegram QA चला सकता है। जब
-  selected Docker lanes में `published-upgrade-survivor` शामिल हो, package
-  artifact candidate होता है और `published_upgrade_survivor_baseline` published baseline चुनता है।
-  `update-restart-auth` candidate package को installed CLI और package-under-test दोनों के रूप में इस्तेमाल करता है ताकि यह
-  candidate update command के managed restart path को exercise करे।
-  उदाहरण: `gh workflow run package-acceptance.yml --ref main -f workflow_ref=main -f source=npm -f package_spec=openclaw@beta -f suite_profile=product -f published_upgrade_survivor_baseline=openclaw@2026.4.26 -f telegram_mode=mock-openai`
-  सामान्य profiles:
-  - `smoke`: install/channel/agent, gateway network, और config reload lanes
-  - `package`: OpenWebUI या live ClawHub के बिना artifact-native package/update/restart/plugin lanes
-  - `product`: package profile के साथ MCP channels, cron/subagent cleanup,
-    OpenAI web search, और OpenWebUI
-  - `full`: OpenWebUI के साथ Docker release-path chunks
-  - `custom`: focused rerun के लिए exact `docker_lanes` selection
-- manual `CI` workflow सीधे तब चलाएँ जब आपको release candidate के लिए केवल deterministic normal
-  CI coverage चाहिए। Manual CI dispatches changed
-  scoping को bypass करते हैं और Linux Node shards, bundled-plugin shards, plugin और
-  channel contract shards, Node 22 compatibility, `check-*`, `check-additional-*`,
-  built-artifact smoke checks, docs checks, Python skills, Windows, macOS, और
-  Control UI i18n lanes को force करते हैं। Standalone manual CI Android केवल तब चलाता है जब
-  `include_android=true` के साथ dispatch किया गया हो; `Full Release Validation` अपने CI child के लिए
-  वह input pass करता है।
-  Android के साथ उदाहरण: `gh workflow run ci.yml --ref release/YYYY.M.PATCH -f include_android=true`
-- release telemetry validate करते समय `pnpm qa:otel:smoke` चलाएँ। यह
-  QA-lab को local OTLP/HTTP receiver के माध्यम से exercise करता है और trace, metric, और log
-  export के साथ bounded trace attributes और content/identifier redaction verify करता है,
-  बिना Opik, Langfuse, या किसी अन्य external collector की आवश्यकता के।
-- collector compatibility validate करते समय `pnpm qa:otel:collector-smoke` चलाएँ।
-  यह local receiver assertions से पहले उसी QA-lab OTLP export को real OpenTelemetry Collector
-  Docker container के माध्यम से route करता है।
-- protected Prometheus scraping validate करते समय `pnpm qa:prometheus:smoke` चलाएँ।
-  यह QA-lab को exercise करता है, unauthenticated scrapes को reject करता है, और verify करता है कि
-  release-critical metric families prompt content, raw identifiers,
-  auth tokens, और local paths से मुक्त रहें।
-- जब आप source-checkout OpenTelemetry और Prometheus smoke lanes को back to back चलाना चाहते हों, `pnpm qa:observability:smoke` चलाएँ।
-- हर tagged release से पहले `pnpm release:check` चलाएँ
-- `OpenClaw NPM Release` preflight npm tarball pack करने से पहले
-  dependency release evidence generate करता है। npm advisory vulnerability gate
-  release-blocking है। transitive manifest risk, dependency ownership/install
-  surface, और dependency change reports केवल release evidence हैं। dependency change report
-  release candidate की तुलना पिछले reachable release tag से करती है।
-- preflight dependency evidence को
-  `openclaw-release-dependency-evidence-<tag>` के रूप में upload करता है और prepared npm preflight artifact के अंदर
-  `dependency-evidence/` के तहत embed भी करता है। real
-  publish path उस preflight artifact को reuse करता है, फिर वही evidence
-  GitHub release में `openclaw-<version>-dependency-evidence.zip` के रूप में attach करता है।
-- tag मौजूद होने के बाद mutating publish sequence के लिए `OpenClaw Release Publish` चलाएँ।
-  इसे `release/YYYY.M.PATCH` से dispatch करें (या main-reachable tag publish करते समय `main` से),
-  release tag, successful OpenClaw npm
-  `preflight_run_id`, और successful `full_release_validation_run_id` pass करें, और default plugin publish scope
-  `all-publishable` रखें जब तक आप जानबूझकर focused repair न चला रहे हों। workflow plugin npm publish, plugin
-  ClawHub publish, और OpenClaw npm publish को serialize करता है ताकि core package अपने externalized plugins से पहले publish न हो।
-- Stable `OpenClaw Release Publish` को matching non-prerelease
-  `openclaw/openclaw-windows-node` release मौजूद होने के बाद exact `windows_node_tag` चाहिए।
-  इसे candidate-approved `windows_node_installer_digests` map भी चाहिए।
-  किसी भी publish child को dispatch करने से पहले, यह verify करता है कि source release
-  published है, non-prerelease है, required x64/ARM64 installers रखता है, और
-  अब भी उस approved map से match करता है। फिर यह OpenClaw release के अभी draft रहते
-  `Windows Node Release` dispatch करता है, pinned installer
-  digest map को unchanged carry करते हुए। child
-  workflow उस exact tag से signed Windows Hub installers download करता है,
-  उन्हें pinned digests से match करता है, verify करता है कि उनके Authenticode
-  signatures Windows runner पर expected OpenClaw Foundation signer का उपयोग करते हैं,
-  SHA-256 manifest लिखता है, और installers plus manifest को
-  canonical OpenClaw GitHub release पर upload करता है, फिर promoted assets को re-download करता है और
-  manifest membership और hashes verify करता है। parent publication से पहले current
-  x64, ARM64, और checksum asset contract verify करता है। Direct recovery
-  unexpected `OpenClawCompanion-*` asset names को reject करता है, उसके बाद expected contract assets को
-  pinned source bytes से replace करता है। `Windows Node Release` को केवल recovery के लिए manually dispatch करें,
-  और हमेशा exact tag pass करें, कभी `latest` नहीं, साथ में approved source release से explicit
-  `expected_installer_digests` JSON map। Website download links को current stable release के exact OpenClaw
-  release asset URLs पर target करना चाहिए, या
-  `releases/latest/download/...` पर केवल GitHub का latest redirect verify करने के बाद कि
-  वह उसी release की ओर point करता है; केवल companion repo release
-  page से link न करें।
-- Release checks अब separate manual workflow में चलते हैं:
-  `OpenClaw Release Checks`
-- `OpenClaw Release Checks` release approval से पहले QA Lab mock parity lane के साथ fast
-  live Matrix profile और Telegram QA lane भी चलाता है। live
-  lanes `qa-live-shared` environment का उपयोग करते हैं; Telegram Convex CI
-  credential leases भी उपयोग करता है। जब आपको full Matrix
-  transport, media, और E2EE inventory parallel में चाहिए, manual `QA-Lab - All Lanes` workflow
-  `matrix_profile=all` और `matrix_shards=true` के साथ चलाएँ।
-- Cross-OS install और upgrade runtime validation public
-  `OpenClaw Release Checks` और `Full Release Validation` का हिस्सा है, जो
-  reusable workflow
-  `.github/workflows/openclaw-cross-os-release-checks-reusable.yml` को directly call करते हैं
-- यह split intentional है: real npm release path को short,
-  deterministic, और artifact-focused रखें, जबकि slower live checks अपनी lane में रहें ताकि वे publish को stall या block न करें
-- secret-bearing release checks को `Full Release
-Validation` के माध्यम से या `main`/release workflow ref से dispatch करना चाहिए ताकि workflow logic और
-  secrets controlled रहें
-- `OpenClaw Release Checks` branch, tag, या full commit SHA स्वीकार करता है, जब तक
-  resolved commit किसी OpenClaw branch या release tag से reachable हो
-- `OpenClaw NPM Release` validation-only preflight भी current
-  full 40-character workflow-branch commit SHA स्वीकार करता है, pushed tag की आवश्यकता के बिना
-- वह SHA path validation-only है और उसे real publish में promote नहीं किया जा सकता
-- SHA mode में workflow केवल package metadata check के लिए `v<package.json version>` synthesize करता है; real publish के लिए अब भी real release tag चाहिए
-- दोनों workflows real publish और promotion path को GitHub-hosted
-  runners पर रखते हैं, जबकि non-mutating validation path बड़े
-  Blacksmith Linux runners का उपयोग कर सकता है
-- वह workflow
-  `OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_CACHE_TEST=1 pnpm test:live:cache`
-  को `OPENAI_API_KEY` और `ANTHROPIC_API_KEY` workflow secrets दोनों का उपयोग करके चलाता है
-- npm release preflight अब separate release checks lane का इंतज़ार नहीं करता
-- release candidate को locally tag करने से पहले,
-  `RELEASE_TAG=vYYYY.M.PATCH-beta.N pnpm release:fast-pretag-check` चलाएँ। helper
-  fast release guardrails, plugin npm/ClawHub release checks, build,
-  UI build, और `release:openclaw:npm:check` को उस order में चलाता है जो GitHub publish workflow शुरू होने से पहले common
-  approval-blocking mistakes पकड़ता है।
-- approval से पहले `RELEASE_TAG=vYYYY.M.PATCH node --import tsx scripts/openclaw-npm-release-check.ts`
-  (या matching beta/correction tag) चलाएँ
-- npm publish के बाद, चलाएँ
-  `node --import tsx scripts/openclaw-npm-postpublish-verify.ts YYYY.M.PATCH`
-  (या मेल खाने वाला बीटा/सुधार संस्करण) ताकि प्रकाशित रजिस्ट्री
-  इंस्टॉल पथ को एक नए अस्थायी प्रीफ़िक्स में सत्यापित किया जा सके
-- बीटा प्रकाशित होने के बाद, `OPENCLAW_NPM_TELEGRAM_PACKAGE_SPEC=openclaw@YYYY.M.PATCH-beta.N OPENCLAW_NPM_TELEGRAM_CREDENTIAL_SOURCE=convex OPENCLAW_NPM_TELEGRAM_CREDENTIAL_ROLE=ci pnpm test:docker:npm-telegram-live` चलाएँ
-  ताकि साझा लीज़ किए गए Telegram क्रेडेंशियल पूल का उपयोग करके प्रकाशित npm पैकेज के विरुद्ध
-  इंस्टॉल किए गए पैकेज की ऑनबोर्डिंग, Telegram सेटअप, और वास्तविक Telegram E2E
-  सत्यापित किए जा सकें। स्थानीय मेंटेनर के एकबारगी रन Convex vars छोड़ सकते हैं और तीनों
-  `OPENCLAW_QA_TELEGRAM_*` env क्रेडेंशियल सीधे पास कर सकते हैं।
-- मेंटेनर मशीन से पूरा पोस्ट-पब्लिश बीटा स्मोक चलाने के लिए, `pnpm release:beta-smoke -- --beta betaN` उपयोग करें। सहायक Parallels npm अपडेट/फ्रेश-टारगेट सत्यापन चलाता है, `NPM Telegram Beta E2E` डिस्पैच करता है, सटीक workflow run को पोल करता है, artifact डाउनलोड करता है, और Telegram रिपोर्ट प्रिंट करता है।
-- मेंटेनर GitHub Actions से भी वही पोस्ट-पब्लिश जाँच
-  मैनुअल `NPM Telegram Beta E2E` workflow के ज़रिए चला सकते हैं। यह जानबूझकर केवल मैनुअल है और
-  हर merge पर नहीं चलता।
-- मेंटेनर रिलीज़ ऑटोमेशन अब preflight-then-promote उपयोग करता है:
-  - वास्तविक npm publish के लिए सफल npm `preflight_run_id` पास होना आवश्यक है
-  - वास्तविक npm publish उसी `main` या
-    `release/YYYY.M.PATCH` branch से डिस्पैच होना चाहिए जिससे सफल preflight run हुआ था
-  - स्थिर npm releases का डिफ़ॉल्ट `beta` होता है
-  - स्थिर npm publish workflow input के ज़रिए स्पष्ट रूप से `latest` को target कर सकता है
-  - token-आधारित npm dist-tag mutation अब
-    `openclaw/releases/.github/workflows/openclaw-npm-dist-tags.yml` में रहती है क्योंकि
-    `npm dist-tag add` को अभी भी `NPM_TOKEN` चाहिए, जबकि source repo
-    OIDC-only publish रखता है
-  - सार्वजनिक `macOS Release` केवल validation-only है; जब कोई tag केवल
-    release branch पर हो लेकिन workflow `main` से dispatch किया गया हो, तो
-    `public_release_branch=release/YYYY.M.PATCH` सेट करें
-  - वास्तविक macOS publish के लिए सफल macOS `preflight_run_id` और
-    `validate_run_id` पास होना आवश्यक है
-  - वास्तविक publish paths artifacts को फिर से rebuild करने के बजाय तैयार artifacts को promote करते हैं
-- `YYYY.M.PATCH-N` जैसे स्थिर correction releases के लिए, post-publish verifier
-  `YYYY.M.PATCH` से `YYYY.M.PATCH-N` तक उसी temp-prefix upgrade path की भी जाँच करता है
-  ताकि release corrections चुपचाप पुराने global installs को
-  base stable payload पर न छोड़ सकें
-- npm release preflight तब तक fail closed होता है जब तक tarball में
-  `dist/control-ui/index.html` और non-empty `dist/control-ui/assets/` payload दोनों शामिल न हों
-  ताकि हम फिर से खाली browser dashboard ship न करें
-- Post-publish verification यह भी जाँचता है कि प्रकाशित Plugin entrypoints और
-  package metadata installed registry layout में मौजूद हैं। ऐसी release जो
-  Plugin runtime payloads के बिना ship होती है, postpublish verifier में fail होती है और
-  `latest` पर promote नहीं की जा सकती।
-- `pnpm test:install:smoke` candidate update tarball पर npm pack `unpackedSize` budget भी enforce करता है,
-  ताकि installer e2e release publish path से पहले accidental pack bloat पकड़ सके
-- अगर release work ने CI planning, extension timing manifests, या
-  extension test matrices को छुआ है, तो approval से पहले
-  `.github/workflows/plugin-prerelease.yml` से planner-owned
-  `plugin-prerelease-extension-shard` matrix outputs फिर से generate और review करें
-  ताकि release notes stale CI layout का वर्णन न करें
-- स्थिर macOS release readiness में updater surfaces भी शामिल हैं:
-  - GitHub release में अंततः packaged `.zip`, `.dmg`, और `.dSYM.zip` होने चाहिए
-  - publish के बाद `main` पर `appcast.xml` नए stable zip की ओर point करना चाहिए; macOS publish workflow
-    इसे automatically commit करता है, या direct push blocked होने पर appcast
-    PR खोलता है
-  - packaged app को non-debug bundle id, non-empty Sparkle feed
-    URL, और उस release version के canonical Sparkle build floor पर या उससे ऊपर का `CFBundleVersion`
-    बनाए रखना चाहिए
+
+  ```bash
+  gh workflow run package-acceptance.yml --ref main -f workflow_ref=main -f source=npm -f package_spec=openclaw@beta -f suite_profile=product -f published_upgrade_survivor_baseline=openclaw@2026.4.26 -f telegram_mode=mock-openai
+  ```
+
+  सामान्य प्रोफ़ाइल:
+  - `smoke`: इंस्टॉल/चैनल/एजेंट, Gateway नेटवर्क और कॉन्फ़िगरेशन रीलोड लेन
+  - `package`: OpenWebUI या लाइव ClawHub के बिना आर्टिफ़ैक्ट-नेटिव पैकेज/अपडेट/रीस्टार्ट/Plugin लेन
+  - `product`: पैकेज प्रोफ़ाइल के साथ MCP चैनल, cron/सबएजेंट क्लीनअप, OpenAI वेब खोज और OpenWebUI
+  - `full`: OpenWebUI के साथ Docker रिलीज़-पथ खंड
+  - `custom`: केंद्रित पुनः रन के लिए सटीक `docker_lanes` चयन
+
+- जब आपको रिलीज़ उम्मीदवार के लिए केवल निर्धारक सामान्य CI कवरेज चाहिए, तब मैन्युअल `CI` वर्कफ़्लो सीधे चलाएँ। मैन्युअल CI डिस्पैच परिवर्तित स्कोपिंग को बायपास करते हैं और Linux Node शार्ड, बंडल किए गए Plugin शार्ड, Plugin और चैनल अनुबंध शार्ड, Node 22 संगतता, `check-*`, `check-additional-*`, निर्मित-आर्टिफ़ैक्ट स्मोक जाँच, दस्तावेज़ जाँच, Python Skills, Windows, macOS और Control UI i18n लेन को अनिवार्य रूप से चलाते हैं। स्टैंडअलोन मैन्युअल CI Android को केवल `include_android=true` के साथ डिस्पैच किए जाने पर चलाता है; `Full Release Validation` अपने CI चाइल्ड को वह इनपुट भेजता है।
+
+  ```bash
+  gh workflow run ci.yml --ref release/YYYY.M.PATCH -f include_android=true
+  ```
+
+- रिलीज़ टेलीमेट्री सत्यापित करते समय `pnpm qa:otel:smoke` चलाएँ। यह स्थानीय OTLP/HTTP रिसीवर के माध्यम से QA-lab का परीक्षण करता है और Opik, Langfuse या किसी अन्य बाहरी कलेक्टर की आवश्यकता के बिना ट्रेस, मेट्रिक और लॉग निर्यात के साथ सीमित ट्रेस एट्रिब्यूट तथा सामग्री/पहचानकर्ता रिडैक्शन सत्यापित करता है।
+- कलेक्टर संगतता सत्यापित करते समय `pnpm qa:otel:collector-smoke` चलाएँ। यह स्थानीय रिसीवर अभिकथनों से पहले उसी QA-lab OTLP निर्यात को वास्तविक OpenTelemetry Collector Docker कंटेनर के माध्यम से रूट करता है।
+- संरक्षित Prometheus स्क्रैपिंग सत्यापित करते समय `pnpm qa:prometheus:smoke` चलाएँ। यह QA-lab का परीक्षण करता है, अप्रमाणित स्क्रैप अस्वीकार करता है और सत्यापित करता है कि रिलीज़-महत्वपूर्ण मेट्रिक परिवार प्रॉम्प्ट सामग्री, अपरिष्कृत पहचानकर्ताओं, प्रमाणीकरण टोकन और स्थानीय पथों से मुक्त रहें।
+- स्रोत-चेकआउट OpenTelemetry और Prometheus स्मोक लेन को लगातार चलाने के लिए `pnpm qa:observability:smoke` चलाएँ।
+- प्रत्येक टैग की गई रिलीज़ से पहले `pnpm release:check` चलाएँ।
+- `OpenClaw NPM Release` प्रीफ़्लाइट npm टारबॉल पैक करने से पहले निर्भरता रिलीज़ प्रमाण उत्पन्न करता है। npm एडवाइज़री भेद्यता गेट रिलीज़ को अवरुद्ध करता है। ट्रांज़िटिव मैनिफ़ेस्ट जोखिम, निर्भरता स्वामित्व/इंस्टॉल सतह और निर्भरता परिवर्तन रिपोर्ट केवल रिलीज़ प्रमाण हैं। निर्भरता परिवर्तन रिपोर्ट रिलीज़ उम्मीदवार की तुलना पिछले पहुँच योग्य रिलीज़ टैग से करती है। प्रीफ़्लाइट निर्भरता प्रमाण को `openclaw-release-dependency-evidence-<tag>` के रूप में अपलोड करता है और उसे तैयार किए गए npm प्रीफ़्लाइट आर्टिफ़ैक्ट के अंदर `dependency-evidence/` के अंतर्गत भी एम्बेड करता है। वास्तविक प्रकाशन पथ उस प्रीफ़्लाइट आर्टिफ़ैक्ट का पुनः उपयोग करता है, फिर उसी प्रमाण को GitHub रिलीज़ में `openclaw-<version>-dependency-evidence.zip` के रूप में संलग्न करता है।
+- टैग मौजूद होने के बाद परिवर्तनकारी प्रकाशन क्रम के लिए `OpenClaw Release Publish` चलाएँ। नियमित बीटा और स्थिर प्रकाशन विश्वसनीय `main` से डिस्पैच करें; रिलीज़ टैग फिर भी सटीक लक्ष्य कमिट चुनता है और `release/YYYY.M.PATCH` को इंगित कर सकता है। Tideclaw अल्फ़ा प्रकाशन अपनी संगत अल्फ़ा ब्रांच पर बने रहते हैं। सफल OpenClaw npm `preflight_run_id`, सफल `full_release_validation_run_id` और सटीक `full_release_validation_run_attempt` पास करें तथा डिफ़ॉल्ट Plugin प्रकाशन स्कोप `all-publishable` बनाए रखें, जब तक कि आप जानबूझकर केंद्रित मरम्मत न चला रहे हों। वर्कफ़्लो Plugin npm प्रकाशन, Plugin ClawHub प्रकाशन और OpenClaw npm प्रकाशन को क्रमबद्ध करता है, ताकि कोर पैकेज उसके बाह्यकृत Plugin से पहले प्रकाशित न हो; Windows और Android प्रमोशन ड्राफ़्ट रिलीज़ पृष्ठ के विरुद्ध कोर npm प्रकाशन के साथ-साथ चलता है। प्रकाशन के पुनः रन फिर से शुरू किए जा सकते हैं: पहले से प्रकाशित कोर npm संस्करण के लिए वर्कफ़्लो द्वारा यह सिद्ध करने के बाद कि रजिस्ट्री टारबॉल टैग के प्रीफ़्लाइट आर्टिफ़ैक्ट से मेल खाती है, कोर डिस्पैच छोड़ दिया जाता है; और जब रिलीज़ में सत्यापित एसेट अनुबंध पहले से मौजूद हो, तब Windows/Android प्रमोशन छोड़ दिया जाता है, इसलिए पुनः प्रयास केवल विफल चरणों को दोहराता है। केंद्रित केवल-Plugin मरम्मत के लिए `plugin_publish_scope=selected` और एक गैर-रिक्त Plugin सूची आवश्यक है। केवल-Plugin `all-publishable` रन के लिए पूर्ण अपरिवर्तनीय प्रीफ़्लाइट और पूर्ण रिलीज़ सत्यापन प्रमाण आवश्यक है; आंशिक प्रमाण अस्वीकार किया जाता है।
+- स्थिर `OpenClaw Release Publish` के लिए संगत गैर-प्रीरिलीज़ `openclaw/openclaw-windows-node` रिलीज़ के मौजूद होने के बाद सटीक `windows_node_tag` और उम्मीदवार-अनुमोदित `windows_node_installer_digests` मैप आवश्यक है। किसी भी प्रकाशन चाइल्ड को डिस्पैच करने से पहले, यह सत्यापित करता है कि स्रोत रिलीज़ प्रकाशित और गैर-प्रीरिलीज़ है, उसमें आवश्यक x64/ARM64 इंस्टॉलर मौजूद हैं और वह अभी भी उस अनुमोदित मैप से मेल खाती है। इसके बाद, जब OpenClaw रिलीज़ अभी भी ड्राफ़्ट होती है, यह पिन किए गए इंस्टॉलर डाइजेस्ट मैप को अपरिवर्तित रखते हुए `Windows Node Release` डिस्पैच करता है। चाइल्ड वर्कफ़्लो उसी सटीक टैग से हस्ताक्षरित Windows Hub इंस्टॉलर डाउनलोड करता है, उन्हें पिन किए गए डाइजेस्ट से मिलाता है, Windows रनर पर सत्यापित करता है कि उनके Authenticode हस्ताक्षर अपेक्षित OpenClaw Foundation हस्ताक्षरकर्ता का उपयोग करते हैं, SHA-256 मैनिफ़ेस्ट लिखता है और इंस्टॉलर तथा मैनिफ़ेस्ट को प्रामाणिक OpenClaw GitHub रिलीज़ पर अपलोड करता है; फिर प्रचारित एसेट दोबारा डाउनलोड करके मैनिफ़ेस्ट सदस्यता और हैश सत्यापित करता है। पैरेंट प्रकाशन से पहले वर्तमान x64, ARM64 और चेकसम एसेट अनुबंध सत्यापित करता है। प्रत्यक्ष पुनर्प्राप्ति अपेक्षित अनुबंध एसेट को पिन किए गए स्रोत बाइट से बदलने से पहले अनपेक्षित `OpenClawCompanion-*` एसेट नाम अस्वीकार करती है।
+
+  केवल पुनर्प्राप्ति के लिए `Windows Node Release` को मैन्युअल रूप से डिस्पैच करें और हमेशा एक सटीक टैग पास करें, कभी भी `latest` नहीं, साथ ही अनुमोदित स्रोत रिलीज़ से स्पष्ट `expected_installer_digests` JSON मैप पास करें। वेबसाइट डाउनलोड लिंक वर्तमान स्थिर रिलीज़ के लिए सटीक OpenClaw रिलीज़ एसेट URL को लक्षित करने चाहिए, या केवल यह सत्यापित करने के बाद `releases/latest/download/...` को कि GitHub का नवीनतम रीडायरेक्ट उसी रिलीज़ को इंगित करता है; केवल सहायक रिपॉज़िटरी के रिलीज़ पृष्ठ से लिंक न करें।
+
+- रिलीज़ जाँच अब एक अलग मैन्युअल वर्कफ़्लो में चलती हैं: `OpenClaw Release Checks`। यह रिलीज़ अनुमोदन से पहले QA Lab मॉक समतुल्यता लेन के साथ-साथ Matrix रिलीज़ प्रोफ़ाइल और Telegram QA लेन भी चलाता है। लाइव लेन `qa-live-shared` परिवेश का उपयोग करती हैं; Telegram, Convex CI क्रेडेंशियल लीज़ का भी उपयोग करता है। जब सभी अनुरक्षित Matrix परिदृश्य चाहिए हों, तो मैन्युअल `QA-Lab - All Lanes` वर्कफ़्लो को `matrix_profile=all` के साथ चलाएँ; वर्कफ़्लो उस चयन को ट्रांसपोर्ट, मीडिया और E2EE प्रोफ़ाइल में वितरित करता है, ताकि संपूर्ण प्रमाण प्रति-जॉब टाइमआउट के भीतर रहे।
+- क्रॉस-OS इंस्टॉल और अपग्रेड रनटाइम सत्यापन सार्वजनिक `OpenClaw Release Checks` और `Full Release Validation` का भाग है, जो पुनः उपयोग योग्य वर्कफ़्लो `.github/workflows/openclaw-cross-os-release-checks-reusable.yml` को सीधे कॉल करते हैं। यह विभाजन जानबूझकर किया गया है: वास्तविक npm रिलीज़ पथ को छोटा, नियतात्मक और आर्टिफ़ैक्ट-केंद्रित रखें, जबकि धीमी लाइव जाँच अपनी अलग लेन में रहें ताकि वे प्रकाशन को विलंबित या अवरुद्ध न करें।
+- सीक्रेट वाली रिलीज़ जाँच को `Full Release Validation` के माध्यम से या `main`/release वर्कफ़्लो रेफ़ से डिस्पैच किया जाना चाहिए, ताकि वर्कफ़्लो लॉजिक और सीक्रेट नियंत्रित रहें।
+- `OpenClaw Release Checks` किसी ब्रांच, टैग या पूर्ण कमिट SHA को स्वीकार करता है, बशर्ते समाधान किया गया कमिट किसी OpenClaw ब्रांच या रिलीज़ टैग से पहुँच योग्य हो।
+- `OpenClaw NPM Release` का केवल-सत्यापन प्रीफ़्लाइट, पुश किए गए टैग की आवश्यकता के बिना वर्तमान पूर्ण 40-वर्णीय वर्कफ़्लो-ब्रांच कमिट SHA को भी स्वीकार करता है। वह SHA पथ केवल सत्यापन के लिए है और उसे वास्तविक प्रकाशन में प्रमोट नहीं किया जा सकता। SHA मोड में वर्कफ़्लो केवल पैकेज मेटाडेटा जाँच के लिए `v<package.json version>` संश्लेषित करता है; वास्तविक प्रकाशन के लिए अब भी वास्तविक रिलीज़ टैग आवश्यक है।
+- दोनों वर्कफ़्लो वास्तविक प्रकाशन और प्रमोशन पथ को GitHub-होस्टेड रनर पर रखते हैं, जबकि गैर-परिवर्तनकारी सत्यापन पथ बड़े Blacksmith Linux रनर का उपयोग कर सकता है।
+- वह वर्कफ़्लो `OPENAI_API_KEY` और `ANTHROPIC_API_KEY` दोनों वर्कफ़्लो सीक्रेट का उपयोग करके `OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_CACHE_TEST=1 pnpm test:live:cache` चलाता है।
+- npm रिलीज़ प्रीफ़्लाइट अब अलग रिलीज़ जाँच लेन की प्रतीक्षा नहीं करता।
+- स्थानीय रूप से रिलीज़ कैंडिडेट टैग करने से पहले, `RELEASE_TAG=vYYYY.M.PATCH-beta.N pnpm release:fast-pretag-check` चलाएँ। सहायक तेज़ रिलीज़ सुरक्षा-जाँच, Plugin npm/ClawHub रिलीज़ जाँच, बिल्ड, UI बिल्ड और `release:openclaw:npm:check` को उस क्रम में चलाता है जो GitHub प्रकाशन वर्कफ़्लो शुरू होने से पहले अनुमोदन रोकने वाली सामान्य गलतियों को पकड़ता है।
+- अनुमोदन से पहले `RELEASE_TAG=vYYYY.M.PATCH node --import tsx scripts/openclaw-npm-release-check.ts` (या अनुरूप प्रीरिलीज़/सुधार टैग) चलाएँ।
+- npm प्रकाशन के बाद, नई अस्थायी प्रीफ़िक्स में प्रकाशित रजिस्ट्री इंस्टॉल पथ सत्यापित करने के लिए `node --import tsx scripts/openclaw-npm-postpublish-verify.ts YYYY.M.PATCH` (या अनुरूप बीटा/सुधार संस्करण) चलाएँ।
+- बीटा प्रकाशन के बाद, साझा लीज़ किए गए Telegram क्रेडेंशियल पूल का उपयोग करके प्रकाशित npm पैकेज के विरुद्ध इंस्टॉल किए गए पैकेज की ऑनबोर्डिंग, Telegram सेटअप और वास्तविक Telegram E2E सत्यापित करने के लिए `OPENCLAW_NPM_TELEGRAM_PACKAGE_SPEC=openclaw@YYYY.M.PATCH-beta.N OPENCLAW_NPM_TELEGRAM_CREDENTIAL_SOURCE=convex OPENCLAW_NPM_TELEGRAM_CREDENTIAL_ROLE=ci pnpm test:docker:npm-telegram-live` चलाएँ। स्थानीय मेंटेनर की एकबारगी जाँच Convex वेरिएबल छोड़ सकती है और तीन `OPENCLAW_QA_TELEGRAM_*` एनवायरनमेंट क्रेडेंशियल सीधे दे सकती है।
+- मेंटेनर मशीन से पूर्ण प्रकाशन-पश्चात बीटा स्मोक चलाने के लिए, `pnpm release:beta-smoke -- --beta betaN` का उपयोग करें। सहायक Parallels npm अपडेट/नए-लक्ष्य का सत्यापन चलाता है, `NPM Telegram Beta E2E` डिस्पैच करता है, सटीक वर्कफ़्लो रन को पोल करता है, आर्टिफ़ैक्ट डाउनलोड करता है और Telegram रिपोर्ट प्रिंट करता है।
+- मेंटेनर मैन्युअल `NPM Telegram Beta E2E` वर्कफ़्लो के माध्यम से GitHub Actions से वही प्रकाशन-पश्चात जाँच चला सकते हैं। यह जानबूझकर केवल मैन्युअल है और प्रत्येक मर्ज पर नहीं चलता।
+- मेंटेनर रिलीज़ स्वचालन प्रीफ़्लाइट-फिर-प्रमोट का उपयोग करता है:
+  - वास्तविक npm प्रकाशन को सफल npm `preflight_run_id` उत्तीर्ण करना अनिवार्य है।
+  - नियमित बीटा और स्थिर प्रकाशन का ऑर्केस्ट्रेशन और प्रीफ़्लाइट सटीक लक्ष्य टैग के विरुद्ध विश्वसनीय `main` का उपयोग करते हैं। Tideclaw अल्फ़ा प्रकाशन और प्रीफ़्लाइट अनुरूप अल्फ़ा ब्रांच का उपयोग करते हैं।
+  - स्थिर npm रिलीज़ डिफ़ॉल्ट रूप से `beta` का उपयोग करती हैं; स्थिर npm प्रकाशन वर्कफ़्लो इनपुट के माध्यम से स्पष्ट रूप से `latest` को लक्षित कर सकता है।
+  - टोकन-आधारित npm dist-tag परिवर्तन `openclaw/releases/.github/workflows/openclaw-npm-dist-tags.yml` में रहता है, क्योंकि `npm dist-tag add` को अब भी `NPM_TOKEN` की आवश्यकता है, जबकि स्रोत रिपॉज़िटरी केवल-OIDC प्रकाशन रखती है।
+  - सार्वजनिक `macOS Release` केवल सत्यापन के लिए है; जब कोई टैग केवल रिलीज़ ब्रांच पर हो, लेकिन वर्कफ़्लो `main` से डिस्पैच किया गया हो, तो `public_release_branch=release/YYYY.M.PATCH` सेट करें।
+  - वास्तविक macOS प्रकाशन को सफल macOS `preflight_run_id` और `validate_run_id` उत्तीर्ण करना अनिवार्य है।
+  - वास्तविक प्रकाशन पथ तैयार आर्टिफ़ैक्ट को दोबारा बनाने के बजाय प्रमोट करते हैं।
+- `YYYY.M.PATCH-N` जैसी स्थिर सुधार रिलीज़ के लिए, प्रकाशन-पश्चात सत्यापक `YYYY.M.PATCH` से `YYYY.M.PATCH-N` तक उसी अस्थायी-प्रीफ़िक्स अपग्रेड पथ की भी जाँच करता है, ताकि रिलीज़ सुधार पुराने वैश्विक इंस्टॉल को अनजाने में आधार स्थिर पेलोड पर न छोड़ें।
+- npm रिलीज़ प्रीफ़्लाइट तब तक विफल होकर बंद हो जाता है जब तक टारबॉल में `dist/control-ui/index.html` और गैर-रिक्त `dist/control-ui/assets/` पेलोड दोनों शामिल न हों, ताकि हम फिर से खाली ब्राउज़र डैशबोर्ड शिप न करें।
+- प्रकाशन-पश्चात सत्यापन यह भी जाँचता है कि प्रकाशित Plugin एंट्रीपॉइंट और पैकेज मेटाडेटा इंस्टॉल किए गए रजिस्ट्री लेआउट में मौजूद हैं। अनुपस्थित Plugin रनटाइम पेलोड वाली रिलीज़ प्रकाशन-पश्चात सत्यापक में विफल होती है और उसे `latest` में प्रमोट नहीं किया जा सकता।
+- `pnpm test:install:smoke` कैंडिडेट अपडेट टारबॉल पर npm pack `unpackedSize` बजट भी लागू करता है, ताकि इंस्टॉलर e2e रिलीज़ प्रकाशन पथ से पहले अनजाने पैक आकार-वृद्धि को पकड़ ले।
+- यदि रिलीज़ कार्य ने CI योजना, एक्सटेंशन समय मैनिफ़ेस्ट या एक्सटेंशन परीक्षण मैट्रिक्स को प्रभावित किया है, तो अनुमोदन से पहले `.github/workflows/plugin-prerelease.yml` से प्लानर-स्वामित्व वाले `plugin-prerelease-extension-shard` मैट्रिक्स आउटपुट दोबारा जनरेट करके उनकी समीक्षा करें, ताकि रिलीज़ नोट पुराने CI लेआउट का वर्णन न करें।
+- स्थिर macOS रिलीज़ की तत्परता में अपडेटर सतहें भी शामिल हैं: GitHub रिलीज़ में अंततः पैकेज किए गए `.zip`, `.dmg` और `.dSYM.zip` होने चाहिए; `main` पर `appcast.xml` को प्रकाशन के बाद नई स्थिर zip की ओर इंगित करना चाहिए (macOS प्रकाशन वर्कफ़्लो इसे स्वतः कमिट करता है, या प्रत्यक्ष पुश अवरुद्ध होने पर appcast PR खोलता है); पैकेज किए गए ऐप में गैर-डिबग बंडल id, गैर-रिक्त Sparkle फ़ीड URL और उस रिलीज़ संस्करण के लिए प्रामाणिक Sparkle बिल्ड न्यूनतम सीमा के बराबर या उससे अधिक `CFBundleVersion` बना रहना चाहिए।
 
 ## रिलीज़ परीक्षण बॉक्स
 
-`Full Release Validation` वह तरीका है जिससे ऑपरेटर सभी प्री-रिलीज़ परीक्षणों को
-एक ही प्रवेश बिंदु से शुरू करते हैं। तेज़ी से बदलती शाखा पर पिन किए गए कमिट प्रमाण के लिए,
-हेल्पर का उपयोग करें ताकि हर चाइल्ड कार्यप्रवाह लक्ष्य
-SHA पर तय अस्थायी शाखा से चले:
+`Full Release Validation` वह तरीका है जिससे ऑपरेटर एक एंट्रीपॉइंट से पूर्ण उत्पाद मैट्रिक्स शुरू करते हैं। सहायक का उपयोग करें, ताकि प्रत्येक चाइल्ड वर्कफ़्लो एक विश्वसनीय `main` वर्कफ़्लो SHA पर स्थिर अस्थायी ब्रांच से चले, जबकि अनुरोधित कमिट परीक्षणाधीन कैंडिडेट बना रहे:
 
 ```bash
-pnpm ci:full-release --sha <full-sha>
+pnpm ci:full-release \
+  --sha <code-sha> \
+  --target-ref release/YYYY.M.PATCH
 ```
 
-हेल्पर `release-ci/<sha>-...` पुश करता है, उस शाखा से `Full Release Validation`
-को `ref=<sha>` के साथ डिस्पैच करता है, सत्यापित करता है कि हर चाइल्ड कार्यप्रवाह `headSha`
-लक्ष्य से मेल खाता है, फिर अस्थायी शाखा हटा देता है। इससे गलती से किसी
-नए `main` चाइल्ड रन को प्रमाणित करने से बचाव होता है।
+सहायक वर्तमान `origin/main` फ़ेच करता है, उस विश्वसनीय वर्कफ़्लो कमिट पर `release-ci/<workflow-sha>-...` पुश करता है, अल्फ़ा/बीटा पैकेज संस्करणों से `beta` और अन्यथा `stable` का अनुमान लगाता है, `ref=<target-sha>` के साथ अस्थायी ब्रांच से `Full Release Validation` डिस्पैच करता है, सत्यापित करता है कि प्रत्येक चाइल्ड वर्कफ़्लो `headSha` पिन किए गए पैरेंट वर्कफ़्लो SHA से मेल खाता है, फिर अस्थायी ब्रांच हटा देता है। नया रन बाध्य करने के लिए `-f reuse_evidence=false`, व्यापक परामर्शात्मक स्वीप के लिए `-f release_profile=full`, या वर्तमान `origin/main` से अब भी पहुँच योग्य किसी पुराने कमिट को पिन करने के लिए `--workflow-sha <trusted-main-sha>` दें। वर्कफ़्लो स्वयं कभी रिपॉज़िटरी रेफ़ नहीं लिखता। इससे कैंडिडेट में टूलिंग कमिट जोड़े बिना केवल-main रिलीज़ टूलिंग उपलब्ध रहती है और गलती से किसी नए `main` चाइल्ड रन को प्रमाणित करने से बचाव होता है।
 
-रिलीज़ शाखा या टैग सत्यापन के लिए, इसे भरोसेमंद `main` कार्यप्रवाह
-रेफ से चलाएँ और रिलीज़ शाखा या टैग को `ref` के रूप में पास करें:
+Code SHA के सफल होने के बाद, केवल `CHANGELOG.md` कमिट करें और Release SHA के साथ वही सहायक चलाएँ:
 
 ```bash
-gh workflow run full-release-validation.yml \
-  --ref main \
-  -f ref=release/YYYY.M.PATCH \
-  -f provider=openai \
-  -f mode=both \
-  -f release_profile=stable \
-  -f evidence_package_spec=openclaw@YYYY.M.PATCH-beta.N
+pnpm ci:full-release \
+  --sha <release-sha> \
+  --target-ref release/YYYY.M.PATCH
 ```
 
-कार्यप्रवाह लक्ष्य रेफ का समाधान करता है, मैनुअल `CI` को
-`target_ref=<release-ref>` के साथ डिस्पैच करता है, फिर `OpenClaw Release Checks` डिस्पैच करता है।
-`OpenClaw Release Checks` इंस्टॉल स्मोक, क्रॉस-ओएस रिलीज़ जाँच,
-सोक सक्षम होने पर लाइव/E2E Docker रिलीज़-पाथ कवरेज, कैनोनिकल Telegram पैकेज E2E के साथ Package Acceptance,
-QA Lab समानता, लाइव Matrix, और लाइव
-Telegram को फैलाकर चलाता है। फुल/ऑल रन केवल तब स्वीकार्य है जब `Full Release Validation`
-सारांश में `normal_ci`, `plugin_prerelease`, और `release_checks`
-सफल दिखें, जब तक कि किसी केंद्रित री-रन ने अलग `Plugin
-Prerelease` चाइल्ड को जानबूझकर न छोड़ा हो। स्टैंडअलोन `npm-telegram` चाइल्ड का उपयोग केवल
-`release_package_spec` या `npm_telegram_package_spec` के साथ केंद्रित
-प्रकाशित-पैकेज री-रन के लिए करें। अंतिम सत्यापक सारांश में हर चाइल्ड रन के लिए
-सबसे धीमी जॉब तालिकाएँ शामिल होती हैं, ताकि रिलीज़ प्रबंधक लॉग डाउनलोड किए बिना
-मौजूदा महत्वपूर्ण पथ देख सके।
-पूर्ण चरण मैट्रिक्स, सटीक कार्यप्रवाह जॉब नाम, स्थिर बनाम पूर्ण प्रोफ़ाइल
-अंतर, आर्टिफैक्ट, और केंद्रित री-रन हैंडल के लिए [पूर्ण रिलीज़ सत्यापन](/hi/reference/full-release-validation) देखें।
-चाइल्ड कार्यप्रवाह उस भरोसेमंद रेफ से डिस्पैच होते हैं जो `Full Release
-Validation` चलाता है, सामान्यतः `--ref main`, भले ही लक्ष्य `ref` किसी
-पुरानी रिलीज़ शाखा या टैग की ओर इशारा करता हो। अलग Full Release Validation
-कार्यप्रवाह-रेफ इनपुट नहीं है; कार्यप्रवाह रन रेफ चुनकर भरोसेमंद हार्नेस चुनें।
-चलते हुए `main` पर सटीक कमिट प्रमाण के लिए `--ref main -f ref=<sha>` का उपयोग न करें;
-कच्चे कमिट SHA कार्यप्रवाह डिस्पैच रेफ नहीं हो सकते, इसलिए
-पिन की गई अस्थायी शाखा बनाने के लिए `pnpm ci:full-release --sha <sha>` का उपयोग करें।
+दूसरा पैरेंट उत्पाद प्रमाण का पुनः उपयोग केवल तभी करता है जब GitHub साबित करता है कि Release SHA, Code SHA से बना है और बदले हुए पथों का संपूर्ण सेट ठीक `CHANGELOG.md` है। यह `changelog-only-release-v1` रिकॉर्ड करता है और कोई उत्पाद चाइल्ड डिस्पैच नहीं करता। npm प्रीफ़्लाइट और पैकेज/इंस्टॉल स्वीकृति अब भी Release SHA पर चलते हैं, क्योंकि उसके टारबॉल बाइट बदल गए हैं।
+
+नए Code SHA के लिए, वर्कफ़्लो लक्ष्य का समाधान करता है, मैन्युअल `CI` डिस्पैच करता है, फिर `OpenClaw Release Checks` डिस्पैच करता है। सोक सक्षम होने पर `OpenClaw Release Checks` इंस्टॉल स्मोक, क्रॉस-OS रिलीज़ जाँच, लाइव/E2E Docker रिलीज़-पथ कवरेज, प्रामाणिक Telegram पैकेज E2E के साथ पैकेज स्वीकृति, QA Lab समतुल्यता, लाइव Matrix और लाइव Telegram को वितरित करता है। पूर्ण/सभी रन केवल तभी स्वीकार्य है जब `Full Release Validation` सारांश में `normal_ci`, `plugin_prerelease` और `release_checks` सफल दिखें, जब तक कि किसी केंद्रित पुनः रन ने जानबूझकर अलग `Plugin Prerelease` चाइल्ड को न छोड़ा हो। `release_package_spec` या `npm_telegram_package_spec` के साथ केंद्रित प्रकाशित-पैकेज पुनः रन के लिए ही स्वतंत्र `npm-telegram` चाइल्ड का उपयोग करें। अंतिम सत्यापक सारांश में प्रत्येक चाइल्ड रन के लिए सबसे धीमे जॉब की तालिकाएँ शामिल होती हैं, ताकि रिलीज़ प्रबंधक लॉग डाउनलोड किए बिना वर्तमान क्रिटिकल पाथ देख सके।
+
+इस रिलीज़ पथ में उत्पाद-प्रदर्शन चाइल्ड केवल-आर्टिफ़ैक्ट है। अम्ब्रेला इसे
+`publish_reports=false` के साथ डिस्पैच करता है, और सत्यापन तब तक अस्वीकार होता है
+जब तक इसकी केवल-आर्टिफ़ैक्ट सुरक्षा-जाँच यह साबित न करे कि Clawgrit रिपोर्ट प्रकाशक
+स्किप रहा।
+
+संपूर्ण चरण मैट्रिक्स, सटीक वर्कफ़्लो जॉब नामों, स्थिर बनाम पूर्ण प्रोफ़ाइल के अंतर, आर्टिफ़ैक्ट और केंद्रित पुनः रन हैंडल के लिए [पूर्ण रिलीज़ सत्यापन](/hi/reference/full-release-validation) देखें।
+
+चाइल्ड वर्कफ़्लो उस SHA-पिन किए गए विश्वसनीय रेफ़ से डिस्पैच किए जाते हैं जो `Full Release Validation` चलाता है। प्रत्येक चाइल्ड रन को सटीक पैरेंट वर्कफ़्लो SHA का उपयोग करना अनिवार्य है। रिलीज़ प्रमाण के लिए कच्चे `--ref main -f ref=<sha>` डिस्पैच का उपयोग न करें; `pnpm ci:full-release --sha <target-sha> --target-ref release/YYYY.M.PATCH` का उपयोग करें।
 
 लाइव/प्रदाता विस्तार चुनने के लिए `release_profile` का उपयोग करें:
 
-- `minimum`: सबसे तेज़ रिलीज़-महत्वपूर्ण OpenAI/core लाइव और Docker पाथ
-- `stable`: रिलीज़ स्वीकृति के लिए न्यूनतम के साथ स्थिर प्रदाता/बैकएंड कवरेज
-- `full`: स्थिर के साथ व्यापक सलाहकारी प्रदाता/मीडिया कवरेज
+- `beta`: सबसे तेज़ रिलीज़-महत्वपूर्ण OpenAI/कोर लाइव और Docker पथ
+- `stable`: रिलीज़ अनुमोदन के लिए बीटा के साथ स्थिर प्रदाता/बैकएंड कवरेज
+- `full`: स्थिर के साथ व्यापक परामर्शात्मक प्रदाता/मीडिया कवरेज
 
-स्थिर और पूर्ण सत्यापन हमेशा प्रमोशन से पहले विस्तृत लाइव/E2E, Docker
-रिलीज़-पाथ, और सीमित प्रकाशित अपग्रेड-सर्वाइवर स्वीप चलाते हैं।
-बीटा के लिए वही स्वीप माँगने के लिए `run_release_soak=true` का उपयोग करें। वह स्वीप
-नवीनतम चार स्थिर पैकेजों के साथ पिन किए गए `2026.4.23` और `2026.5.2`
-बेसलाइन तथा पुराने `2026.4.15` कवरेज को कवर करता है, डुप्लिकेट बेसलाइन हटाता है और
-हर बेसलाइन को उसके अपने Docker रनर जॉब में शार्ड करता है।
+स्थिर और पूर्ण सत्यापन प्रमोशन से पहले हमेशा संपूर्ण लाइव/E2E, Docker रिलीज़-पथ और सीमित प्रकाशित अपग्रेड-सर्वाइवर स्वीप चलाते हैं। बीटा के लिए उसी स्वीप का अनुरोध करने हेतु `run_release_soak=true` का उपयोग करें। यह स्वीप नवीनतम चार स्थिर पैकेजों के साथ पिन किए गए `2026.4.23` और `2026.5.2` बेसलाइन तथा पुराने `2026.4.15` कवरेज को शामिल करता है; डुप्लिकेट बेसलाइन हटा दिए जाते हैं और प्रत्येक बेसलाइन को उसके अपने Docker रनर जॉब में शार्ड किया जाता है।
 
-`OpenClaw Release Checks` लक्ष्य रेफ को एक बार `release-package-under-test` के रूप में
-समाधान करने के लिए भरोसेमंद कार्यप्रवाह रेफ का उपयोग करता है और सोक चलने पर उस आर्टिफैक्ट को
-क्रॉस-ओएस, Package Acceptance, और रिलीज़-पाथ Docker जाँचों में फिर से उपयोग करता है। इससे
-सभी पैकेज-फेसिंग बॉक्स समान बाइट्स पर रहते हैं और बार-बार पैकेज बिल्ड से बचते हैं।
-बीटा npm पर पहले से मौजूद होने के बाद, `release_package_spec=openclaw@YYYY.M.PATCH-beta.N` सेट करें
-ताकि रिलीज़ जाँचें शिप किए गए पैकेज को एक बार डाउनलोड करें, `dist/build-info.json` से उसका बिल्ड स्रोत
-SHA निकालें, और उस आर्टिफैक्ट को क्रॉस-ओएस,
-Package Acceptance, रिलीज़-पाथ Docker, और पैकेज Telegram लेनों के लिए फिर से उपयोग करें।
-क्रॉस-ओएस OpenAI इंस्टॉल स्मोक `OPENCLAW_CROSS_OS_OPENAI_MODEL` का उपयोग करता है जब
-रेपो/संगठन वेरिएबल सेट हो, अन्यथा `openai/gpt-5.4`, क्योंकि यह लेन
-सबसे धीमे डिफ़ॉल्ट मॉडल की बेंचमार्किंग के बजाय पैकेज इंस्टॉल, ऑनबोर्डिंग,
-Gateway स्टार्टअप, और एक लाइव एजेंट टर्न प्रमाणित कर रही है। व्यापक लाइव प्रदाता
-मैट्रिक्स मॉडल-विशिष्ट कवरेज के लिए स्थान बना रहता है।
+सोक चलने पर `OpenClaw Release Checks` लक्ष्य रेफ़ को एक बार `release-package-under-test` के रूप में समाधान करने के लिए विश्वसनीय वर्कफ़्लो रेफ़ का उपयोग करता है और उस आर्टिफ़ैक्ट का क्रॉस-OS, पैकेज स्वीकृति तथा रिलीज़-पथ Docker जाँच में पुनः उपयोग करता है। इससे पैकेज-संबंधी सभी बॉक्स समान बाइट पर रहते हैं और बार-बार पैकेज बिल्ड से बचते हैं। बीटा के npm पर पहले से उपलब्ध होने के बाद, `release_package_spec=openclaw@YYYY.M.PATCH-beta.N` सेट करें ताकि रिलीज़ जाँच शिप किया गया पैकेज एक बार डाउनलोड करे, `dist/build-info.json` से उसका बिल्ड स्रोत SHA निकाले और उस आर्टिफ़ैक्ट का क्रॉस-OS, पैकेज स्वीकृति, रिलीज़-पथ Docker तथा पैकेज Telegram लेन में पुनः उपयोग करे।
 
-रिलीज़ चरण के आधार पर ये वेरिएंट उपयोग करें:
+रिपॉज़िटरी/संगठन वेरिएबल सेट होने पर क्रॉस-OS OpenAI इंस्टॉल स्मोक `OPENCLAW_CROSS_OS_OPENAI_MODEL` का उपयोग करता है, अन्यथा `openai/gpt-5.6-luna` का, क्योंकि यह लेन सबसे सक्षम मॉडल का बेंचमार्क करने के बजाय पैकेज इंस्टॉल, ऑनबोर्डिंग, Gateway स्टार्टअप और एक लाइव एजेंट टर्न को प्रमाणित कर रही है। व्यापक लाइव प्रदाता मैट्रिक्स मॉडल-विशिष्ट कवरेज का स्थान बना रहता है।
+
+रिलीज़ चरण के आधार पर इन प्रकारों का उपयोग करें:
 
 ```bash
-# Validate an unpublished release candidate branch.
-gh workflow run full-release-validation.yml \
-  --ref main \
-  -f ref=release/YYYY.M.PATCH \
-  -f provider=openai \
-  -f mode=both \
-  -f release_profile=stable
+# उत्पाद-पूर्ण Code SHA को सत्यापित करें।
+pnpm ci:full-release \
+  --sha <code-sha> \
+  --target-ref release/YYYY.M.PATCH
 
-# Validate an exact pushed commit.
-gh workflow run full-release-validation.yml \
-  --ref main \
-  -f ref=<40-char-sha> \
-  -f provider=openai \
-  -f mode=both
+# Code SHA उत्पाद साक्ष्य का पुनः उपयोग करके केवल-चेंजलॉग Release SHA को सत्यापित करें।
+pnpm ci:full-release \
+  --sha <release-sha> \
+  --target-ref release/YYYY.M.PATCH
 
-# After publishing a beta, add published-package Telegram E2E.
-gh workflow run full-release-validation.yml \
-  --ref main \
-  -f ref=release/YYYY.M.PATCH \
-  -f provider=openai \
-  -f mode=both \
-  -f release_profile=full \
+# बीटा प्रकाशित करने के बाद, प्रकाशित-पैकेज Telegram E2E जोड़ें।
+pnpm ci:full-release \
+  --sha <release-sha> \
+  --target-ref release/YYYY.M.PATCH \
   -f release_package_spec=openclaw@YYYY.M.PATCH-beta.N \
   -f evidence_package_spec=openclaw@YYYY.M.PATCH-beta.N \
   -f npm_telegram_provider_mode=mock-openai
 ```
 
-केंद्रित फ़िक्स के बाद पहले री-रन के रूप में पूर्ण अम्ब्रेला का उपयोग न करें। यदि एक बॉक्स
-विफल होता है, तो अगले प्रमाण के लिए विफल चाइल्ड कार्यप्रवाह, जॉब, Docker लेन,
-पैकेज प्रोफ़ाइल, मॉडल प्रदाता, या QA लेन का उपयोग करें। पूर्ण अम्ब्रेला फिर से केवल तब चलाएँ
-जब फ़िक्स ने साझा रिलीज़ ऑर्केस्ट्रेशन बदला हो या पहले के ऑल-बॉक्स प्रमाण को
-बासी बना दिया हो। अम्ब्रेला का अंतिम सत्यापक दर्ज चाइल्ड कार्यप्रवाह रन
-आईडी को फिर से जाँचता है, इसलिए किसी चाइल्ड कार्यप्रवाह के सफलतापूर्वक फिर से चलने के बाद, केवल विफल
-`Verify full validation` पैरेंट जॉब को फिर से चलाएँ।
+केंद्रित सुधार के बाद पहले पुनः रन के रूप में पूर्ण अम्ब्रेला का उपयोग न करें। यदि एक बॉक्स विफल होता है, तो अगले प्रमाण के लिए विफल चाइल्ड वर्कफ़्लो, जॉब, Docker लेन, पैकेज प्रोफ़ाइल, मॉडल प्रदाता या QA लेन का उपयोग करें। पूर्ण अम्ब्रेला को केवल तभी दोबारा चलाएँ जब सुधार ने साझा रिलीज़ ऑर्केस्ट्रेशन बदला हो या पहले के सभी-बॉक्स साक्ष्य को अप्रचलित कर दिया हो। अम्ब्रेला का अंतिम सत्यापनकर्ता दर्ज किए गए चाइल्ड वर्कफ़्लो रन आईडी की फिर से जाँच करता है, इसलिए किसी चाइल्ड वर्कफ़्लो के सफलतापूर्वक दोबारा चलने के बाद केवल विफल `Verify full validation` पैरेंट जॉब को दोबारा चलाएँ।
 
-सीमित रिकवरी के लिए, अम्ब्रेला को `rerun_group` पास करें। `all` वास्तविक
-रिलीज़-कैंडिडेट रन है, `ci` केवल सामान्य CI चाइल्ड चलाता है, `plugin-prerelease`
-केवल रिलीज़-ओनली Plugin चाइल्ड चलाता है, `release-checks` हर रिलीज़
-बॉक्स चलाता है, और संकरे रिलीज़ समूह `install-smoke`, `cross-os`,
-`live-e2e`, `package`, `qa`, `qa-parity`, `qa-live`, और `npm-telegram` हैं।
-केंद्रित `npm-telegram` री-रन के लिए `release_package_spec` या
-`npm_telegram_package_spec` आवश्यक है; पूर्ण/ऑल रन Package Acceptance के अंदर कैनोनिकल पैकेज Telegram
-E2E का उपयोग करते हैं। केंद्रित
-क्रॉस-ओएस री-रन `cross_os_suite_filter=windows/packaged-upgrade` या
-दूसरा ओएस/सुइट फ़िल्टर जोड़ सकते हैं। QA रिलीज़-जाँच विफलताएँ सामान्य रिलीज़
-सत्यापन को रोकती हैं, जिसमें मानक टियर में आवश्यक OpenClaw डायनेमिक टूल ड्रिफ्ट शामिल है।
-Tideclaw अल्फा रन अब भी गैर-पैकेज-सुरक्षा रिलीज़-जाँच लेनों को
-सलाहकारी मान सकते हैं। जब `live_suite_filter` स्पष्ट रूप से Discord, WhatsApp, या Slack जैसी
-गेटेड QA लाइव लेन माँगता है, तो मेल खाने वाला
-`OPENCLAW_RELEASE_QA_*_LIVE_CI_ENABLED` रेपो वेरिएबल सक्षम होना चाहिए; अन्यथा
-इनपुट कैप्चर लेन को चुपचाप छोड़ने के बजाय विफल हो जाता है।
+जब रिलीज़ प्रोफ़ाइल, प्रभावी सोक सेटिंग और सत्यापन इनपुट मेल खाते हों तथा या तो लक्ष्य SHA समान हो या नया लक्ष्य ऐसा वंशज हो जिसका संपूर्ण परिवर्तित पथ सेट ठीक `CHANGELOG.md` हो, तब `rerun_group=all` किसी पूर्व सफल अम्ब्रेला रन का पुनः उपयोग कर सकता है। सटीक-लक्ष्य पुनः उपयोग `exact-target-full-validation-v1` दर्ज करता है; सत्यापन-पश्चात Release SHA `changelog-only-release-v1` दर्ज करता है। बाद वाला केवल उत्पाद सत्यापन का पुनः उपयोग करता है। Npm प्रीफ़्लाइट, पैकेज बाइट्स, रिलीज़-नोट उद्गम और इंस्टॉल/अपडेट स्वीकृति को फिर भी Release SHA के विरुद्ध चलना आवश्यक है। संस्करण, स्रोत, जनरेट की गई सामग्री, निर्भरता, पैकेज या वर्कफ़्लो-स्वामित्व वाले लक्ष्य में किसी भी बदलाव के लिए नया Code SHA और नया पूर्ण सत्यापन आवश्यक है। समान `release/*` रेफ़ और पुनः रन समूह के नए अम्ब्रेला रन, प्रगति पर चल रहे रन को स्वतः प्रतिस्थापित कर देते हैं। नया पूर्ण रन बाध्य करने के लिए `reuse_evidence=false` पास करें।
+
+सीमित पुनर्प्राप्ति के लिए अम्ब्रेला को `rerun_group` पास करें। `all` वास्तविक रिलीज़-कैंडिडेट रन है, `ci` केवल सामान्य CI चाइल्ड चलाता है, `plugin-prerelease` केवल रिलीज़-विशिष्ट Plugin चाइल्ड चलाता है, `release-checks` प्रत्येक रिलीज़ बॉक्स चलाता है, और अधिक संकीर्ण रिलीज़ समूह `install-smoke`, `cross-os`, `live-e2e`, `package`, `qa`, `qa-parity`, `qa-live`, और `npm-telegram` हैं। केंद्रित `npm-telegram` पुनः रन के लिए `release_package_spec` या `npm_telegram_package_spec` आवश्यक है; पूर्ण/सभी रन Package Acceptance के भीतर प्रामाणिक पैकेज Telegram E2E का उपयोग करते हैं। केंद्रित क्रॉस-OS पुनः रन में `cross_os_suite_filter=windows/packaged-upgrade` या कोई अन्य OS/सुइट फ़िल्टर जोड़ा जा सकता है। QA रिलीज़-जाँच विफलताएँ सामान्य रिलीज़ सत्यापन को अवरुद्ध करती हैं, जिसमें कोर रनटाइम-पेयर लेन में OpenClaw डायनेमिक टूल ड्रिफ़्ट भी शामिल है। Tideclaw अल्फ़ा रन गैर-पैकेज-सुरक्षा रिलीज़-जाँच लेन को अब भी परामर्शात्मक मान सकते हैं। `release_profile=beta` के साथ, `Run repo/live E2E validation` लाइव-प्रदाता सुइट परामर्शात्मक हैं (चेतावनियाँ, अवरोधक नहीं); स्थिर और पूर्ण प्रोफ़ाइल उन्हें अवरोधक बनाए रखते हैं। जब `live_suite_filter` स्पष्ट रूप से Discord, WhatsApp या Slack जैसी गेटेड QA लाइव लेन का अनुरोध करता है, तब संबंधित `OPENCLAW_RELEASE_QA_*_LIVE_CI_ENABLED` रेपो वेरिएबल सक्षम होना आवश्यक है; अन्यथा लेन को चुपचाप छोड़ने के बजाय इनपुट कैप्चर विफल हो जाता है।
 
 ### Vitest
 
-Vitest बॉक्स मैनुअल `CI` चाइल्ड कार्यप्रवाह है। मैनुअल CI जानबूझकर
-बदले हुए स्कोपिंग को बायपास करता है और रिलीज़
-कैंडिडेट के लिए सामान्य परीक्षण ग्राफ को मजबूर करता है: Linux Node शार्ड, बंडल्ड-Plugin शार्ड,
-Plugin और चैनल कॉन्ट्रैक्ट शार्ड, Node 22 संगतता, `check-*`, `check-additional-*`,
-बिल्ट-आर्टिफैक्ट स्मोक जाँचें, डॉक्स जाँचें, Python Skills, Windows, macOS,
-और Control UI i18n। Android शामिल होता है जब `Full Release Validation` बॉक्स चलाता है
-क्योंकि अम्ब्रेला `include_android=true` पास करता है; स्टैंडअलोन मैनुअल CI को
-Android कवरेज के लिए `include_android=true` चाहिए।
+Vitest बॉक्स मैन्युअल `CI` चाइल्ड वर्कफ़्लो है। मैन्युअल CI जानबूझकर परिवर्तित स्कोपिंग को बायपास करता है और रिलीज़ कैंडिडेट के लिए सामान्य परीक्षण ग्राफ़ बाध्य करता है: Linux Node शार्ड, बंडल किए गए Plugin शार्ड, Plugin और चैनल अनुबंध शार्ड, Node 22 संगतता, `check-*`, `check-additional-*`, निर्मित-आर्टिफ़ैक्ट स्मोक जाँच, दस्तावेज़ जाँच, Python Skills, Windows, macOS और Control UI i18n। जब `Full Release Validation` बॉक्स चलाता है तब Android शामिल होता है, क्योंकि अम्ब्रेला `include_android=true` पास करता है; स्वतंत्र मैन्युअल CI में Android कवरेज के लिए `include_android=true` आवश्यक है।
 
-इस बॉक्स का उपयोग इस प्रश्न का उत्तर देने के लिए करें: "क्या स्रोत ट्री ने पूरा सामान्य परीक्षण सुइट पास किया?"
-यह रिलीज़-पाथ उत्पाद सत्यापन जैसा नहीं है। रखने योग्य प्रमाण:
+“क्या स्रोत ट्री ने पूर्ण सामान्य परीक्षण सुइट पास किया?” का उत्तर देने के लिए इस बॉक्स का उपयोग करें। यह रिलीज़-पथ उत्पाद सत्यापन के समान नहीं है। सुरक्षित रखने योग्य साक्ष्य:
 
-- `Full Release Validation` सारांश जिसमें डिस्पैच किए गए `CI` रन URL दिखे
-- सटीक लक्ष्य SHA पर हरा `CI` रन
-- रिग्रेशन की जाँच करते समय CI जॉब से विफल या धीमे शार्ड नाम
-- जब किसी रन को प्रदर्शन विश्लेषण चाहिए, तब `.artifacts/vitest-shard-timings.json` जैसे Vitest टाइमिंग आर्टिफैक्ट
+- `Full Release Validation` सारांश, जो डिस्पैच किए गए `CI` रन का URL दिखाता है
+- सटीक लक्ष्य SHA पर सफल `CI` रन
+- रिग्रेशन की जाँच करते समय CI जॉब से विफल या धीमे शार्ड के नाम
+- जब किसी रन के प्रदर्शन विश्लेषण की आवश्यकता हो, तब `.artifacts/vitest-shard-timings.json` जैसे Vitest टाइमिंग आर्टिफ़ैक्ट
 
-मैनुअल CI सीधे केवल तब चलाएँ जब रिलीज़ को निर्धार्य सामान्य CI चाहिए लेकिन
-Docker, QA Lab, लाइव, क्रॉस-ओएस, या पैकेज बॉक्स नहीं चाहिए। गैर-Android प्रत्यक्ष CI के लिए
-पहला कमांड उपयोग करें। जब प्रत्यक्ष
-रिलीज़-कैंडिडेट CI को Android कवर करना हो, तो `include_android=true` जोड़ें:
+मैन्युअल CI को सीधे केवल तभी चलाएँ जब रिलीज़ को नियतात्मक सामान्य CI की आवश्यकता हो, लेकिन Docker, QA Lab, लाइव, क्रॉस-OS या पैकेज बॉक्स की नहीं। गैर-Android प्रत्यक्ष CI के लिए पहली कमांड का उपयोग करें। जब प्रत्यक्ष रिलीज़-कैंडिडेट CI में Android शामिल करना आवश्यक हो, तब `include_android=true` जोड़ें:
 
 ```bash
 gh workflow run ci.yml --ref main -f target_ref=release/YYYY.M.PATCH
@@ -665,118 +409,54 @@ gh workflow run ci.yml --ref main -f target_ref=release/YYYY.M.PATCH -f include_
 
 ### Docker
 
-Docker बॉक्स `OpenClaw Release Checks` में
-`openclaw-live-and-e2e-checks-reusable.yml` के माध्यम से रहता है, साथ ही रिलीज़-मोड
-`install-smoke` कार्यप्रवाह भी। यह रिलीज़ कैंडिडेट को केवल स्रोत-स्तर परीक्षणों के बजाय
-पैकेज्ड Docker वातावरणों के माध्यम से सत्यापित करता है।
+Docker बॉक्स `OpenClaw Release Checks` से `openclaw-live-and-e2e-checks-reusable.yml` तक, साथ ही रिलीज़-मोड `install-smoke` वर्कफ़्लो में स्थित है। यह केवल स्रोत-स्तरीय परीक्षणों के बजाय पैकेज किए गए Docker परिवेशों के माध्यम से रिलीज़ कैंडिडेट को सत्यापित करता है।
 
-रिलीज़ Docker कवरेज में शामिल है:
+रिलीज़ Docker कवरेज में शामिल हैं:
 
-- धीमे Bun ग्लोबल इंस्टॉल स्मोक के साथ पूर्ण इंस्टॉल स्मोक
-- लक्ष्य SHA द्वारा रूट Dockerfile स्मोक इमेज तैयारी/रीयूज़, जहाँ QR,
-  root/gateway, और installer/Bun स्मोक जॉब अलग install-smoke
-  शार्ड के रूप में चलती हैं
+- धीमे Bun ग्लोबल इंस्टॉल स्मोक को सक्षम करके पूर्ण इंस्टॉल स्मोक
+- लक्ष्य SHA के अनुसार रूट Dockerfile स्मोक इमेज की तैयारी/पुनः उपयोग, जिसमें QR, रूट/Gateway और इंस्टॉलर/Bun स्मोक जॉब अलग-अलग इंस्टॉल-स्मोक शार्ड के रूप में चलते हैं
 - रिपॉज़िटरी E2E लेन
-- रिलीज़-पाथ Docker चंक: `core`, `package-update-openai`,
-  `package-update-anthropic`, `package-update-core`, `plugins-runtime-plugins`,
-  `plugins-runtime-services`,
-  `plugins-runtime-install-a`, `plugins-runtime-install-b`,
-  `plugins-runtime-install-c`, `plugins-runtime-install-d`,
-  `plugins-runtime-install-e`, `plugins-runtime-install-f`,
-  `plugins-runtime-install-g`, और `plugins-runtime-install-h`
-- माँगे जाने पर `plugins-runtime-services` चंक के अंदर OpenWebUI कवरेज
-- विभाजित बंडल्ड Plugin इंस्टॉल/अनइंस्टॉल लेन
-  `bundled-plugin-install-uninstall-0` से
-  `bundled-plugin-install-uninstall-23` तक
-- जब रिलीज़ जाँचों में लाइव सुइट शामिल हों, तब लाइव/E2E प्रदाता सुइट और Docker लाइव मॉडल कवरेज
+- रिलीज़-पथ Docker खंड: `core`, `package-update-openai`, `package-update-anthropic`, `package-update-core`, `plugins-runtime-plugins`, `plugins-runtime-services`, `plugins-runtime-install-a` से `plugins-runtime-install-h` तक, और `openwebui`
+- अनुरोध किए जाने पर समर्पित बड़ी-डिस्क रनर पर OpenWebUI कवरेज
+- विभाजित बंडल किए गए Plugin इंस्टॉल/अनइंस्टॉल लेन `bundled-plugin-install-uninstall-0` से `bundled-plugin-install-uninstall-23` तक
+- जब रिलीज़ जाँच में लाइव सुइट शामिल हों, तब लाइव/E2E प्रदाता सुइट और Docker लाइव मॉडल कवरेज
 
-री-रन से पहले Docker आर्टिफैक्ट का उपयोग करें। रिलीज़-पाथ शेड्यूलर
-`.artifacts/docker-tests/` अपलोड करता है जिसमें लेन लॉग, `summary.json`, `failures.json`,
-फेज़ टाइमिंग, शेड्यूलर प्लान JSON, और री-रन कमांड शामिल होते हैं। केंद्रित रिकवरी के लिए,
-सभी रिलीज़ चंक फिर से चलाने के बजाय रीयूज़ेबल लाइव/E2E कार्यप्रवाह पर
-`docker_lanes=<lane[,lane]>` का उपयोग करें। जनरेट किए गए री-रन कमांड उपलब्ध होने पर पहले के
-`package_artifact_run_id` और तैयार Docker इमेज इनपुट शामिल करते हैं, ताकि
-विफल लेन वही टारबॉल और GHCR इमेज फिर से उपयोग कर सके।
+दोबारा चलाने से पहले Docker आर्टिफ़ैक्ट का उपयोग करें। रिलीज़-पथ शेड्यूलर लेन लॉग, `summary.json`, `failures.json`, चरण टाइमिंग, शेड्यूलर योजना JSON और पुनः रन कमांड के साथ `.artifacts/docker-tests/` अपलोड करता है। केंद्रित पुनर्प्राप्ति के लिए सभी रिलीज़ खंड दोबारा चलाने के बजाय पुनः उपयोग योग्य लाइव/E2E वर्कफ़्लो पर `docker_lanes=<lane[,lane]>` का उपयोग करें। जनरेट की गई पुनः रन कमांड में उपलब्ध होने पर पूर्व `package_artifact_run_id` और तैयार Docker इमेज इनपुट शामिल होते हैं, जिससे विफल लेन समान टारबॉल और GHCR इमेज का पुनः उपयोग कर सकती है।
 
 ### QA Lab
 
-QA Lab बॉक्स भी `OpenClaw Release Checks` का हिस्सा है। यह एजेंटिक
-व्यवहार और चैनल-स्तरीय रिलीज़ गेट है, Vitest और Docker
-पैकेज मैकेनिक्स से अलग।
+QA Lab बॉक्स भी `OpenClaw Release Checks` का भाग है। यह एजेंटिक व्यवहार और चैनल-स्तरीय रिलीज़ गेट है, जो Vitest और Docker पैकेज तंत्र से अलग है।
 
-रिलीज़ QA Lab कवरेज में शामिल है:
+रिलीज़ QA Lab कवरेज में शामिल हैं:
 
-- एजेंटिक समानता पैक का उपयोग करके OpenAI कैंडिडेट लेन की Opus 4.6
-  बेसलाइन से तुलना करने वाली मॉक समानता लेन
-- `qa-live-shared` वातावरण का उपयोग करने वाली तेज़ लाइव Matrix QA प्रोफ़ाइल
+- एजेंटिक पैरिटी पैक का उपयोग करके OpenAI कैंडिडेट लेन की `anthropic/claude-opus-4-8` बेसलाइन से तुलना करने वाली मॉक पैरिटी लेन
+- `qa-live-shared` परिवेश का उपयोग करने वाली Matrix लाइव-अडैप्टर रिलीज़ प्रोफ़ाइल
 - Convex CI क्रेडेंशियल लीज़ का उपयोग करने वाली लाइव Telegram QA लेन
-- जब रिलीज़ टेलीमेट्री को स्पष्ट स्थानीय प्रमाण चाहिए, तब `pnpm qa:otel:smoke`, `pnpm qa:otel:collector-smoke`,
-  `pnpm qa:prometheus:smoke`, या
-  `pnpm qa:observability:smoke`
+- जब रिलीज़ टेलीमेट्री को स्पष्ट स्थानीय प्रमाण चाहिए, तब `pnpm qa:otel:smoke`, `pnpm qa:otel:collector-smoke`, `pnpm qa:prometheus:smoke`, या `pnpm qa:observability:smoke`
 
-इस बॉक्स का उपयोग इस प्रश्न का उत्तर देने के लिए करें: "क्या रिलीज़ QA परिदृश्यों और
-लाइव चैनल फ्लो में सही व्यवहार करती है?" रिलीज़ स्वीकृत करते समय समानता, Matrix, और Telegram
-लेनों के आर्टिफैक्ट URL रखें। पूर्ण Matrix कवरेज डिफ़ॉल्ट रिलीज़-महत्वपूर्ण लेन के बजाय
-मैनुअल शार्डेड QA-Lab रन के रूप में उपलब्ध रहता है।
+“क्या रिलीज़ QA परिदृश्यों और लाइव चैनल प्रवाहों में सही व्यवहार करती है?” का उत्तर देने के लिए इस बॉक्स का उपयोग करें। रिलीज़ को स्वीकृत करते समय पैरिटी, Matrix और Telegram लेन के आर्टिफ़ैक्ट URL सुरक्षित रखें। पूर्ण Matrix कवरेज डिफ़ॉल्ट रिलीज़-महत्वपूर्ण लेन के बजाय मैन्युअल शार्ड किए गए QA-Lab रन के रूप में उपलब्ध रहता है।
 
 ### पैकेज
 
-पैकेज बॉक्स इंस्टॉल करने योग्य-उत्पाद गेट है। यह
-`Package Acceptance` और रिज़ॉल्वर
-`scripts/resolve-openclaw-package-candidate.mjs` पर आधारित है। रिज़ॉल्वर किसी
-कैंडिडेट को Docker E2E द्वारा खाए जाने वाले `package-under-test` टारबॉल में सामान्यीकृत करता है, पैकेज इन्वेंटरी सत्यापित करता है,
-पैकेज संस्करण और SHA-256 दर्ज करता है, और
-कार्यप्रवाह हार्नेस रेफ को पैकेज स्रोत रेफ से अलग रखता है।
+पैकेज बॉक्स इंस्टॉल किए जा सकने वाले उत्पाद का गेट है। यह `Package Acceptance` और रिज़ॉल्वर `scripts/resolve-openclaw-package-candidate.mjs` द्वारा समर्थित है। रिज़ॉल्वर किसी कैंडिडेट को Docker E2E द्वारा उपयोग किए जाने वाले `package-under-test` टारबॉल में सामान्यीकृत करता है, पैकेज इन्वेंट्री सत्यापित करता है, पैकेज संस्करण और SHA-256 दर्ज करता है तथा वर्कफ़्लो हार्नेस रेफ़ को पैकेज स्रोत रेफ़ से अलग रखता है।
 
 समर्थित कैंडिडेट स्रोत:
 
-- `source=npm`: `openclaw@beta`, `openclaw@latest`, या ठीक-ठीक OpenClaw रिलीज़
-  संस्करण
-- `source=ref`: चयनित `workflow_ref` हार्नेस के साथ कोई विश्वसनीय `package_ref` शाखा, टैग, या पूर्ण कमिट SHA
-  पैक करें
-- `source=url`: आवश्यक `package_sha256` के साथ सार्वजनिक HTTPS `.tgz` डाउनलोड करें;
-  URL क्रेडेंशियल, गैर-डिफ़ॉल्ट HTTPS पोर्ट, निजी/आंतरिक/विशेष-उपयोग
-  होस्टनाम या रिज़ॉल्व किए गए पते, और असुरक्षित रीडायरेक्ट अस्वीकार किए जाते हैं
-- `source=trusted-url`: `.github/package-trusted-sources.json` में
-  नामित नीति से आवश्यक `package_sha256` और `trusted_source_id` के साथ HTTPS `.tgz`
-  डाउनलोड करें; `source=url` में इनपुट-स्तर निजी-नेटवर्क बाइपास जोड़ने के बजाय
-  मेंटेनर-स्वामित्व वाले एंटरप्राइज़ मिरर या निजी पैकेज रिपॉज़िटरी के लिए इसका उपयोग करें
-- `source=artifact`: किसी अन्य GitHub Actions रन द्वारा अपलोड किए गए `.tgz` का फिर से उपयोग करें
+- `source=npm`: `openclaw@beta`, `openclaw@latest`, या OpenClaw का सटीक रिलीज़ संस्करण
+- `source=ref`: चयनित `workflow_ref` हार्नेस के साथ किसी विश्वसनीय `package_ref` ब्रांच, टैग या पूर्ण कमिट SHA को पैक करें
+- `source=url`: आवश्यक `package_sha256` के साथ सार्वजनिक HTTPS `.tgz` डाउनलोड करें; URL क्रेडेंशियल, गैर-डिफ़ॉल्ट HTTPS पोर्ट, निजी/आंतरिक/विशेष-उपयोग होस्टनेम या रिज़ॉल्व किए गए पते तथा असुरक्षित रीडायरेक्ट अस्वीकार किए जाते हैं
+- `source=trusted-url`: `.github/package-trusted-sources.json` में नामित नीति से आवश्यक `package_sha256` और `trusted_source_id` के साथ HTTPS `.tgz` डाउनलोड करें; `source=url` में इनपुट-स्तरीय निजी-नेटवर्क बायपास जोड़ने के बजाय अनुरक्षक-स्वामित्व वाले एंटरप्राइज़ मिरर या निजी पैकेज रिपॉज़िटरी के लिए इसका उपयोग करें
+- `source=artifact`: किसी अन्य GitHub Actions रन द्वारा अपलोड किए गए `.tgz` का पुनः उपयोग करें
 
-`OpenClaw Release Checks` `source=artifact`, तैयार रिलीज़ पैकेज आर्टिफ़ैक्ट,
-`suite_profile=custom`,
-`docker_lanes=doctor-switch update-channel-switch skill-install update-corrupt-plugin upgrade-survivor published-upgrade-survivor update-restart-auth plugins-offline plugin-update`,
-`telegram_mode=mock-openai` के साथ पैकेज स्वीकृति चलाता है। पैकेज स्वीकृति उसी रिज़ॉल्व किए गए
-टारबॉल के विरुद्ध माइग्रेशन, अपडेट, कॉन्फ़िगर किए गए-ऑथ अपडेट रीस्टार्ट, लाइव ClawHub skill इंस्टॉल,
-पुरानी Plugin निर्भरता क्लीनअप, ऑफ़लाइन Plugin फ़िक्स्चर, Plugin अपडेट, और Telegram पैकेज QA बनाए रखती है।
-ब्लॉकिंग रिलीज़ जाँचें डिफ़ॉल्ट नवीनतम प्रकाशित पैकेज बेसलाइन का उपयोग करती हैं; `run_release_soak=true`,
-`release_profile=stable`, या `release_profile=full` वाला बीटा प्रोफ़ाइल `2026.4.23` से `latest`
-तक हर स्थिर npm-प्रकाशित बेसलाइन और रिपोर्ट किए गए-इश्यू फ़िक्स्चर तक विस्तृत हो जाता है।
-पहले से शिप किए गए उम्मीदवार के लिए `source=npm` के साथ, प्रकाशित करने से पहले SHA-समर्थित स्थानीय npm
-टारबॉल के लिए `source=ref` के साथ, मेंटेनर-स्वामित्व वाले एंटरप्राइज़/निजी मिरर के लिए
-`source=trusted-url` के साथ, या किसी अन्य GitHub Actions रन द्वारा अपलोड किए गए तैयार टारबॉल के लिए
-`source=artifact` के साथ पैकेज स्वीकृति का उपयोग करें। यह अधिकांश पैकेज/अपडेट कवरेज का GitHub-नेटिव
-प्रतिस्थापन है, जिसके लिए पहले Parallels की आवश्यकता होती थी। OS-विशिष्ट ऑनबोर्डिंग, इंस्टॉलर, और
-प्लेटफ़ॉर्म व्यवहार के लिए क्रॉस-OS रिलीज़ जाँचें अब भी मायने रखती हैं, लेकिन पैकेज/अपडेट उत्पाद
-मान्यता में पैकेज स्वीकृति को प्राथमिकता देनी चाहिए।
+`OpenClaw Release Checks`, `source=artifact`, तैयार रिलीज़ पैकेज आर्टिफ़ैक्ट, `suite_profile=custom`, `docker_lanes=doctor-switch update-channel-switch skill-install update-corrupt-plugin upgrade-survivor published-upgrade-survivor root-managed-vps-upgrade update-restart-auth plugins-offline plugin-update plugin-binding-command-escape`, `telegram_mode=mock-openai` के साथ Package Acceptance चलाता है। Package Acceptance समान रिज़ॉल्व किए गए टारबॉल के विरुद्ध माइग्रेशन, अपडेट, रूट-प्रबंधित VPS अपग्रेड, कॉन्फ़िगर किए गए प्रमाणीकरण का अपडेट-पुनरारंभ, लाइव ClawHub स्किल इंस्टॉल, पुराने Plugin निर्भरता की सफ़ाई, ऑफ़लाइन Plugin फ़िक्स्चर, Plugin अपडेट, Plugin कमांड-बाइंडिंग एस्केप हार्डनिंग और Telegram पैकेज QA बनाए रखता है। अवरोधक रिलीज़ जाँच डिफ़ॉल्ट रूप से नवीनतम प्रकाशित पैकेज बेसलाइन का उपयोग करती हैं; `run_release_soak=true`, `release_profile=stable`, या `release_profile=full` वाली बीटा प्रोफ़ाइल, प्रकाशित-अपग्रेड-सर्वाइवर स्वीप को `last-stable-4` के साथ पिन की गई `2026.4.23`, `2026.5.2`, और `2026.4.15` बेसलाइन तथा `reported-issues` परिदृश्यों तक विस्तारित करती है। पहले से जारी कैंडिडेट के लिए `source=npm`, प्रकाशन से पहले SHA-समर्थित स्थानीय npm टारबॉल के लिए `source=ref`, अनुरक्षक-स्वामित्व वाले एंटरप्राइज़/निजी मिरर के लिए `source=trusted-url`, या किसी अन्य GitHub Actions रन द्वारा अपलोड किए गए तैयार टारबॉल के लिए `source=artifact` के साथ Package Acceptance का उपयोग करें।
 
-अपडेट और Plugin मान्यता के लिए कैनोनिकल चेकलिस्ट
-[अपडेट और Plugin का परीक्षण](/hi/help/testing-updates-plugins) है। जब यह तय करना हो कि कौन-सी
-स्थानीय, Docker, पैकेज स्वीकृति, या रिलीज़-जाँच लेन किसी Plugin इंस्टॉल/अपडेट, डॉक्टर क्लीनअप,
-या प्रकाशित-पैकेज माइग्रेशन बदलाव को साबित करती है, तो इसका उपयोग करें। हर स्थिर `2026.4.23+`
-पैकेज से विस्तृत प्रकाशित अपडेट माइग्रेशन एक अलग मैनुअल `Update Migration` वर्कफ़्लो है, Full Release CI
-का हिस्सा नहीं।
+यह अधिकांश पैकेज/अपडेट कवरेज का GitHub-मूल प्रतिस्थापन है, जिसके लिए पहले Parallels आवश्यक था। OS-विशिष्ट ऑनबोर्डिंग, इंस्टॉलर और प्लेटफ़ॉर्म व्यवहार के लिए क्रॉस-OS रिलीज़ जाँच अब भी महत्वपूर्ण हैं, लेकिन पैकेज/अपडेट उत्पाद सत्यापन में Package Acceptance को प्राथमिकता दी जानी चाहिए।
 
-लेगेसी पैकेज-स्वीकृति ढील जानबूझकर समय-सीमित है। `2026.4.25` तक के पैकेज npm पर पहले से प्रकाशित
-मेटाडेटा गैप के लिए संगतता पथ का उपयोग कर सकते हैं: टारबॉल से गायब निजी QA इन्वेंट्री प्रविष्टियाँ,
-गायब `gateway install --wrapper`, टारबॉल-व्युत्पन्न git फ़िक्स्चर में गायब पैच फ़ाइलें, गायब persisted
-`update.channel`, लेगेसी Plugin इंस्टॉल-रिकॉर्ड स्थान, गायब मार्केटप्लेस इंस्टॉल-रिकॉर्ड persistence,
-और `plugins update` के दौरान कॉन्फ़िग मेटाडेटा माइग्रेशन। प्रकाशित `2026.4.26` पैकेज स्थानीय बिल्ड
-मेटाडेटा स्टैम्प फ़ाइलों के लिए चेतावनी दे सकता है जो पहले ही शिप की जा चुकी थीं। बाद के पैकेजों को
-आधुनिक पैकेज अनुबंधों को पूरा करना होगा; वही गैप रिलीज़ मान्यता को विफल करते हैं।
+अपडेट और Plugin सत्यापन की प्रामाणिक जाँच-सूची [अपडेट और Plugin का परीक्षण](/hi/help/testing-updates-plugins) है। किसी Plugin इंस्टॉल/अपडेट, doctor सफ़ाई या प्रकाशित-पैकेज माइग्रेशन बदलाव को कौन-सी स्थानीय, Docker, Package Acceptance या रिलीज़-जाँच लेन प्रमाणित करती है, यह तय करते समय इसका उपयोग करें। प्रत्येक स्थिर `2026.4.23+` पैकेज से संपूर्ण प्रकाशित अपडेट माइग्रेशन एक अलग मैन्युअल `Update Migration` वर्कफ़्लो है, Full Release CI का भाग नहीं।
 
-जब रिलीज़ प्रश्न वास्तविक इंस्टॉल किए जा सकने वाले पैकेज के बारे में हो, तो व्यापक पैकेज स्वीकृति
-प्रोफ़ाइल का उपयोग करें:
+लेगेसी पैकेज-स्वीकृति उदारता जानबूझकर समय-सीमित है। `2026.4.25` तक के पैकेज npm पर पहले से प्रकाशित मेटाडेटा अंतराल के लिए संगतता पथ का उपयोग कर सकते हैं: टारबॉल से अनुपस्थित निजी QA इन्वेंट्री प्रविष्टियाँ, अनुपस्थित `gateway install --wrapper`, टारबॉल-व्युत्पन्न git फ़िक्स्चर में अनुपस्थित पैच फ़ाइलें, अनुपस्थित स्थायी `update.channel`, लेगेसी Plugin इंस्टॉल-रिकॉर्ड स्थान, अनुपस्थित मार्केटप्लेस इंस्टॉल-रिकॉर्ड स्थायित्व और `plugins update` के दौरान कॉन्फ़िगरेशन मेटाडेटा माइग्रेशन। प्रकाशित `2026.4.26` पैकेज पहले से जारी स्थानीय बिल्ड मेटाडेटा स्टैम्प फ़ाइलों के लिए चेतावनी दे सकता है। बाद के पैकेज को आधुनिक पैकेज अनुबंधों का पालन करना आवश्यक है; वही अंतराल रिलीज़ सत्यापन को विफल कर देते हैं।
+
+जब रिलीज़ का प्रश्न किसी वास्तविक इंस्टॉल किए जा सकने वाले पैकेज से संबंधित हो, तब व्यापक Package Acceptance प्रोफ़ाइल का उपयोग करें:
 
 ```bash
 gh workflow run package-acceptance.yml \
@@ -790,188 +470,193 @@ gh workflow run package-acceptance.yml \
 
 सामान्य पैकेज प्रोफ़ाइल:
 
-- `smoke`: त्वरित पैकेज इंस्टॉल/चैनल/एजेंट, Gateway नेटवर्क, और कॉन्फ़िग
-  रीलोड लेन
-- `package`: इंस्टॉल/अपडेट/रीस्टार्ट/Plugin पैकेज अनुबंध और लाइव ClawHub
-  skill इंस्टॉल प्रमाण; यह रिलीज़-जाँच डिफ़ॉल्ट है
-- `product`: `package` के साथ MCP चैनल, cron/सबएजेंट क्लीनअप, OpenAI वेब
-  खोज, और OpenWebUI
-- `full`: OpenWebUI के साथ Docker रिलीज़-पथ चंक
-- `custom`: केंद्रित दोबारा रन के लिए ठीक-ठीक `docker_lanes` सूची
+- `smoke`: त्वरित पैकेज इंस्टॉल/चैनल/एजेंट, Gateway नेटवर्क और कॉन्फ़िग रीलोड लेन
+- `package`: इंस्टॉल/अपडेट/रीस्टार्ट/Plugin पैकेज अनुबंध और लाइव ClawHub स्किल इंस्टॉल प्रमाण; यह रिलीज़-जाँच का डिफ़ॉल्ट है
+- `product`: `package` के साथ MCP चैनल, cron/सबएजेंट क्लीनअप, OpenAI वेब खोज और OpenWebUI
+- `full`: OpenWebUI सहित Docker रिलीज़-पथ खंड
+- `custom`: केंद्रित पुनः-रन के लिए सटीक `docker_lanes` सूची
 
-पैकेज-उम्मीदवार Telegram प्रमाण के लिए, पैकेज स्वीकृति पर `telegram_mode=mock-openai` या
-`telegram_mode=live-frontier` सक्षम करें। वर्कफ़्लो रिज़ॉल्व किए गए `package-under-test` टारबॉल को
-Telegram लेन में पास करता है; स्टैंडअलोन Telegram वर्कफ़्लो पोस्ट-पब्लिश जाँचों के लिए अब भी प्रकाशित
-npm स्पेक स्वीकार करता है।
+पैकेज-कैंडिडेट Telegram प्रमाण के लिए, Package Acceptance पर `telegram_mode=mock-openai` या `telegram_mode=live-frontier` सक्षम करें। वर्कफ़्लो समाधान किए गए `package-under-test` टारबॉल को Telegram लेन में भेजता है; स्वतंत्र Telegram वर्कफ़्लो प्रकाशन-पश्चात जाँचों के लिए अब भी प्रकाशित npm स्पेक स्वीकार करता है।
 
-## नियमित रिलीज़ प्रकाशन ऑटोमेशन
+## नियमित रिलीज़ प्रकाशन स्वचालन
 
-बीटा, `latest`, Plugin, GitHub Release, और प्लेटफ़ॉर्म प्रकाशन के लिए,
-`OpenClaw Release Publish` सामान्य म्यूटेटिंग एंट्रीपॉइंट है। मासिक
-`.33+` npm-केवल विस्तारित-स्थिर पथ इस orchestrator का उपयोग नहीं करता। नियमित वर्कफ़्लो
-रिलीज़ की आवश्यकता के क्रम में विश्वसनीय-प्रकाशक वर्कफ़्लो orchestrate करता है:
+बीटा, `latest`, Plugin, GitHub Release और प्लेटफ़ॉर्म प्रकाशन के लिए,
+`OpenClaw Release Publish` सामान्य परिवर्तनकारी प्रवेश-बिंदु है। मासिक
+`.33+` Gateway एक्सटेंडेड-स्टेबल पथ इस ऑर्केस्ट्रेटर का उपयोग नहीं करता। नियमित
+वर्कफ़्लो ट्रस्टेड-पब्लिशर वर्कफ़्लो को रिलीज़ की आवश्यकतानुसार इस क्रम में
+ऑर्केस्ट्रेट करता है:
 
-1. रिलीज़ टैग चेक आउट करें और उसका कमिट SHA रिज़ॉल्व करें।
-2. सत्यापित करें कि टैग `main` या `release/*` से reachable है।
+1. रिलीज़ टैग चेक आउट करें और उसका कमिट SHA समाधान करें।
+2. सत्यापित करें कि टैग `main` या `release/*` (या अल्फ़ा प्रीरिलीज़ के लिए Tideclaw अल्फ़ा ब्रांच) से पहुँच योग्य है।
 3. `pnpm plugins:sync:check` चलाएँ।
-4. `publish_scope=all-publishable` और `ref=<release-sha>` के साथ `Plugin NPM Release` dispatch करें।
-5. समान scope और SHA के साथ `Plugin ClawHub Release` dispatch करें।
-6. सहेजे गए `full_release_validation_run_id` को सत्यापित करने के बाद रिलीज़ टैग, npm dist-tag,
-   और सहेजे गए `preflight_run_id` के साथ `OpenClaw NPM Release` dispatch करें।
-7. स्थिर रिलीज़ के लिए, GitHub रिलीज़ को ड्राफ़्ट के रूप में बनाएँ या अपडेट करें, स्पष्ट
-   `windows_node_tag` और उम्मीदवार-स्वीकृत `windows_node_installer_digests` के साथ
-   `Windows Node Release` dispatch करें, और ड्राफ़्ट प्रकाशित करने से पहले कैनोनिकल
-   इंस्टॉलर/चेकसम assets सत्यापित करें।
+4. `publish_scope=all-publishable` और `ref=<release-sha>` के साथ `Plugin NPM Release` डिस्पैच करें।
+5. समान स्कोप और SHA के साथ `Plugin ClawHub Release` डिस्पैच करें।
+6. सहेजे गए `full_release_validation_run_id` और सटीक रन प्रयास को सत्यापित करने के बाद रिलीज़ टैग, npm dist-tag और सहेजे गए `preflight_run_id` के साथ `OpenClaw NPM Release` डिस्पैच करें।
+7. स्टेबल रिलीज़ के लिए, GitHub रिलीज़ को ड्राफ़्ट के रूप में बनाएँ या अपडेट करें, स्पष्ट `windows_node_tag` और कैंडिडेट-अनुमोदित `windows_node_installer_digests` के साथ `Windows Node Release` डिस्पैच करें और कैनॉनिकल Windows इंस्टॉलर/चेकसम एसेट सत्यापित करें। साथ ही सटीक-टैग वाला हस्ताक्षरित APK, चेकसम और प्रोवेनेंस बनाने के लिए `Android Release` डिस्पैच करें। ड्राफ़्ट प्रकाशित करने से पहले दोनों नेटिव एसेट अनुबंध सत्यापित करें।
 
 बीटा प्रकाशन उदाहरण:
 
 ```bash
 gh workflow run openclaw-release-publish.yml \
-  --ref release/YYYY.M.PATCH \
+  --ref main \
   -f tag=vYYYY.M.PATCH-beta.N \
   -f preflight_run_id=<successful-openclaw-npm-preflight-run-id> \
   -f full_release_validation_run_id=<successful-full-release-validation-run-id> \
+  -f full_release_validation_run_attempt=<successful-full-release-validation-run-attempt> \
   -f npm_dist_tag=beta
 ```
 
-डिफ़ॉल्ट बीटा dist-tag पर स्थिर प्रकाशन:
+डिफ़ॉल्ट बीटा dist-tag पर स्टेबल प्रकाशन:
 
 ```bash
 gh workflow run openclaw-release-publish.yml \
-  --ref release/YYYY.M.PATCH \
+  --ref main \
   -f tag=vYYYY.M.PATCH \
   -f windows_node_tag=vX.Y.Z \
   -f windows_node_installer_digests='{"OpenClawCompanion-Setup-x64.exe":"sha256:<approved-x64-sha256>","OpenClawCompanion-Setup-arm64.exe":"sha256:<approved-arm64-sha256>"}' \
   -f preflight_run_id=<successful-openclaw-npm-preflight-run-id> \
   -f full_release_validation_run_id=<successful-full-release-validation-run-id> \
+  -f full_release_validation_run_attempt=<successful-full-release-validation-run-attempt> \
   -f npm_dist_tag=beta
 ```
 
-सीधे `latest` पर स्थिर promotion स्पष्ट है:
+सीधे `latest` पर स्टेबल प्रोमोशन स्पष्ट है:
 
 ```bash
 gh workflow run openclaw-release-publish.yml \
-  --ref release/YYYY.M.PATCH \
+  --ref main \
   -f tag=vYYYY.M.PATCH \
   -f windows_node_tag=vX.Y.Z \
   -f windows_node_installer_digests='{"OpenClawCompanion-Setup-x64.exe":"sha256:<approved-x64-sha256>","OpenClawCompanion-Setup-arm64.exe":"sha256:<approved-arm64-sha256>"}' \
   -f preflight_run_id=<successful-openclaw-npm-preflight-run-id> \
   -f full_release_validation_run_id=<successful-full-release-validation-run-id> \
+  -f full_release_validation_run_attempt=<successful-full-release-validation-run-attempt> \
   -f npm_dist_tag=latest
 ```
 
-केवल केंद्रित मरम्मत या दोबारा प्रकाशन कार्य के लिए निचले-स्तर के `Plugin NPM Release` और
-`Plugin ClawHub Release` वर्कफ़्लो का उपयोग करें। `OpenClaw Release Publish`
-`publish_openclaw_npm=true` होने पर `plugin_publish_scope=selected` को अस्वीकार करता है, ताकि
-core पैकेज हर publishable आधिकारिक Plugin, जिसमें `@openclaw/diffs-language-pack` शामिल है, के बिना
-शिप न हो सके। चयनित Plugin मरम्मत के लिए, `plugin_publish_scope=selected` और `plugins=@openclaw/name`
-के साथ `publish_openclaw_npm=false` सेट करें, या child वर्कफ़्लो को सीधे dispatch करें।
+निचले-स्तर के `Plugin NPM Release` और `Plugin ClawHub Release` वर्कफ़्लो का उपयोग केवल केंद्रित मरम्मत या पुनः-प्रकाशन कार्य के लिए करें। जब `publish_openclaw_npm=true` हो, तब `OpenClaw Release Publish`, `plugin_publish_scope=selected` को अस्वीकार करता है, ताकि मुख्य पैकेज `@openclaw/diffs-language-pack` सहित प्रत्येक प्रकाशन-योग्य आधिकारिक Plugin के बिना शिप न हो सके। चुने गए Plugin की मरम्मत के लिए, `plugin_publish_scope=selected` और `plugins=@openclaw/name` के साथ `publish_openclaw_npm=false` सेट करें या चाइल्ड वर्कफ़्लो को सीधे डिस्पैच करें।
+
+पहली बार प्रकाशन वाला ClawHub बूटस्ट्रैप अपवाद है: विश्वसनीय `main`
+से `Plugin ClawHub New` डिस्पैच करें और पूर्ण लक्षित रिलीज़ SHA को `ref` के माध्यम से पास करें।
+बूटस्ट्रैप वर्कफ़्लो को कभी भी रिलीज़ टैग या ब्रांच से स्वयं न चलाएँ:
+
+```bash
+gh workflow run plugin-clawhub-new.yml \
+  --ref main \
+  -f plugins=@openclaw/name \
+  -f ref=<full-40-character-release-sha> \
+  -f pretag_validation=true \
+  -f dry_run=true
+```
+
+प्री-टैग सत्यापन के लिए `dry_run=true` आवश्यक है, यह रिलीज़-टैग और पैरेंट-रन
+इनपुट अस्वीकार करता है और केवल `main` या `release/*` से पहुँच योग्य सटीक लक्ष्य
+स्वीकार करता है। यह ClawHub क्रेडेंशियल लोड नहीं करता, पैकेज बाइट प्रकाशित नहीं करता या ट्रस्टेड
+पब्लिशर कॉन्फ़िगरेशन नहीं बदलता। वर्कफ़्लो फिर भी लाइव रजिस्ट्री योजना समाधान करता है,
+केवल सीक्रेट-रहित जॉब में लक्ष्य को चेक आउट और पैक करता है, लॉक किया गया
+ClawHub टूलचेन तैयार करता है और रिलीज़ टैग के अस्तित्व में आने से पहले अपरिवर्तनीय आर्टिफ़ैक्ट तथा पैकेज
+स्लग/पहचान सत्यापित करता है। सीक्रेट-रहित पैक जॉब
+समाप्त होने के बाद ही `clawhub-plugin-bootstrap` एनवायरनमेंट अनुमोदित करें; इस संरक्षित सत्यापन जॉब में
+कोई क्रेडेंशियल या परिवर्तन कमांड नहीं है।
+
+टैगिंग के बाद अनुमोदित ड्राई रन या वास्तविक बूटस्ट्रैप में सटीक
+रिलीज़ टैग के साथ पैरेंट `OpenClaw Release Publish` रन आईडी, प्रयास और
+ब्रांच शामिल होने चाहिए। पैरेंट अपने स्वयं के वर्कफ़्लो SHA और `Plugin ClawHub New` के लिए एक अलग सटीक विश्वसनीय
+`main` SHA को प्रमाणित करता है; चाइल्ड रन और प्रत्येक संरक्षित
+एनवायरनमेंट अनुमोदन को उस अनुमोदित चाइल्ड SHA से मेल खाना चाहिए। प्रत्येक प्रकाशन प्रयास और ट्रस्टेड-पब्लिशर परिवर्तन से
+पहले रिलीज़ टैग की पुनः जाँच की जाती है।
+
+पैक जॉब
+एक अपरिवर्तनीय आर्टिफ़ैक्ट अपलोड करता है, जिसका नाम, Actions आर्टिफ़ैक्ट आईडी/डाइजेस्ट,
+निर्माता रन/प्रयास, लक्ष्य SHA और प्रत्येक पैकेज का टारबॉल SHA-256/आकार
+सत्यापन और संरक्षित जॉब में आगे पहुँचाया जाता है। संरक्षित जॉब केवल विश्वसनीय `main`
+टूलिंग चेक आउट करता है, GitHub API के माध्यम से आर्टिफ़ैक्ट ट्यूपल सत्यापित करता है, सटीक आर्टिफ़ैक्ट आईडी से
+डाउनलोड करता है, प्रत्येक टारबॉल को पुनः हैश करता है और पिन किए गए CLI के USTAR कैनॉनिकलाइज़ेशन नियमों के अनुसार स्थानीय TAR पथ तथा
+पैकेज पहचान सत्यापित करता है। इसके बाद प्रत्येक
+कैंडिडेट पिन किए गए CLI के प्रकाशन ड्राई-रन से गुजरता है, जो रजिस्ट्री
+लुकअप या प्रमाणीकरण से पहले लौट आता है। क्रेडेंशियल-जॉब प्रीफ़िल्टर संपीड़ित ClawPacks
+को 120 MiB, कुल फ़ाइल पेलोड को 50 MiB, विस्तारित TAR डेटा को 64 MiB और
+TAR प्रविष्टि संख्या को 10,000 तक सीमित करता है। मौजूदा-पैकेज ट्रस्टेड-पब्लिशर मरम्मत केवल
+कॉन्फ़िगर तक सीमित रहती है, लेकिन ट्रस्टेड-पब्लिशर
+कॉन्फ़िगरेशन बदलने से पहले यह फिर भी लक्ष्य को पैक करती है और अनुरोधित टैग के साथ सटीक रजिस्ट्री बाइट तथा मेटाडेटा समानता
+अनिवार्य करती है। प्रकाशन-पश्चात सत्यापन ClawHub आर्टिफ़ैक्ट डाउनलोड करता है और
+समान SHA-256 तथा आकार आवश्यक करता है। विफल जॉब का पुनः-रन रिकवरी किसी पिछले
+प्रयास के पैकेज आर्टिफ़ैक्ट का पुनः उपयोग केवल तभी कर सकती है, जब सटीक निर्माता जॉब
+सफलतापूर्वक पूरा हुआ हो। अंतिम प्रमाण लॉक किए गए ClawHub संस्करण, लॉक
+SHA-256 और npm इंटीग्रिटी को भी बाँधता है। बेमेल होने पर नया पैकेज संस्करण आवश्यक है।
 
 ## NPM वर्कफ़्लो इनपुट
 
-`OpenClaw NPM Release` ये operator-नियंत्रित इनपुट स्वीकार करता है:
+`OpenClaw NPM Release` ये ऑपरेटर-नियंत्रित इनपुट स्वीकार करता है:
 
-- `tag`: आवश्यक रिलीज़ टैग, जैसे `v2026.4.2`, `v2026.4.2-1`, या
-  `v2026.4.2-beta.1`; जब `preflight_only=true` हो, तो यह validation-only preflight के लिए वर्तमान
-  पूर्ण 40-वर्ण workflow-branch commit SHA भी हो सकता है
-- `preflight_only`: validation/build/package-only के लिए `true`, वास्तविक publish path के लिए `false`
-- `preflight_run_id`: वास्तविक publish path पर आवश्यक, ताकि वर्कफ़्लो सफल preflight run से तैयार
-  tarball का फिर से उपयोग करे
-- `full_release_validation_run_id`: वास्तविक मासिक extended-stable और नियमित
-  non-beta प्रकाशन के लिए आवश्यक, ताकि वर्कफ़्लो ठीक-ठीक validation run को authenticate करे
-- `npm_dist_tag`: publish path के लिए npm target tag; `alpha`, `beta`,
-  `latest`, या `extended-stable` स्वीकार करता है और डिफ़ॉल्ट `beta` है। अंतिम patch `33` और बाद वाले को
-  `extended-stable` का उपयोग करना होगा; डिफ़ॉल्ट रूप से, `extended-stable` पहले के patch को अस्वीकार करता है,
-  और यह हमेशा non-final tags को अस्वीकार करता है।
-- `bypass_extended_stable_guard`: केवल-परीक्षण boolean, डिफ़ॉल्ट `false`; `npm_dist_tag=extended-stable`
-  के साथ, release identity, artifact, approval, और readback जाँचों को बनाए रखते हुए मासिक extended-stable
-  eligibility को bypass करता है।
+- `tag`: आवश्यक रिलीज़ टैग, जैसे `v2026.4.2`, `v2026.4.2-1`, `v2026.4.2-beta.1` या `v2026.4.2-alpha.1`; जब `preflight_only=true` हो, तो यह केवल-सत्यापन प्रीफ़्लाइट के लिए वर्तमान पूर्ण 40-वर्ण वाला वर्कफ़्लो-ब्रांच कमिट SHA भी हो सकता है
+- `preflight_only`: केवल सत्यापन/बिल्ड/पैकेज के लिए `true`, वास्तविक प्रकाशन पथ के लिए `false`
+- `preflight_run_id`: मौजूदा सफल प्रीफ़्लाइट रन आईडी, वास्तविक प्रकाशन पथ पर आवश्यक, ताकि वर्कफ़्लो तैयार टारबॉल को दोबारा बनाने के बजाय पुनः उपयोग करे
+- `full_release_validation_run_id`: इस टैग/SHA के लिए सफल `Full Release Validation` रन आईडी, वास्तविक प्रकाशन के लिए आवश्यक। बीटा प्रकाशन चेतावनी के साथ केवल प्रीफ़्लाइट पर आगे बढ़ सकते हैं, लेकिन स्टेबल/`latest` प्रोमोशन के लिए यह अब भी आवश्यक है।
+- `full_release_validation_run_attempt`: `full_release_validation_run_id` के साथ युग्मित सटीक सकारात्मक रन प्रयास; रन आईडी दिए जाने पर हमेशा आवश्यक, ताकि पुनः-रन प्रकाशन के दौरान प्राधिकरण प्रमाण न बदल सकें।
+- `release_publish_run_id`: अनुमोदित `OpenClaw Release Publish` रन आईडी; जब यह वर्कफ़्लो उस पैरेंट द्वारा डिस्पैच किया जाता है, तब आवश्यक (बॉट-एक्टर वास्तविक-प्रकाशन कॉल)
+- `plugin_npm_run_id`: सफल सटीक-हेड `Plugin NPM Release` रन आईडी; वास्तविक `extended-stable` कोर प्रकाशन के लिए आवश्यक
+- `npm_dist_tag`: प्रकाशन पथ के लिए npm लक्ष्य टैग; `alpha`, `beta`, `latest` या `extended-stable` स्वीकार करता है और डिफ़ॉल्ट `beta` है। अंतिम पैच `33` और उसके बाद के संस्करणों को `extended-stable` का उपयोग करना आवश्यक है; डिफ़ॉल्ट रूप से, `extended-stable` पहले के पैच अस्वीकार करता है और यह गैर-अंतिम टैग हमेशा अस्वीकार करता है।
+- `bypass_extended_stable_guard`: केवल-परीक्षण बूलियन, डिफ़ॉल्ट `false`; `npm_dist_tag=extended-stable` के साथ रिलीज़ पहचान, आर्टिफ़ैक्ट, अनुमोदन और रीडबैक जाँच सुरक्षित रखते हुए मासिक एक्सटेंडेड-स्टेबल पात्रता को बायपास करता है।
 
-`OpenClaw Release Publish` ये operator-नियंत्रित इनपुट स्वीकार करता है:
+`Plugin NPM Release` मौजूदा रिलीज़ व्यवहार के लिए `npm_dist_tag=default`
+या संरक्षित मासिक पथ के लिए `npm_dist_tag=extended-stable` स्वीकार करता है।
+एक्सटेंडेड-स्टेबल विकल्प के लिए `publish_scope=all-publishable`, खाली
+`plugins` इनपुट, `33` या उससे ऊपर का अंतिम पैच और अपने सटीक शीर्ष पर कैनॉनिकल
+`extended-stable/YYYY.M.33` ब्रांच आवश्यक है। यह Plugin
+`latest` या `beta` को कभी नहीं बदलता। नए पैकेज संस्करण OIDC ट्रस्टेड प्रकाशन (`npm publish --tag extended-stable`) के माध्यम से परमाण्विक रूप से
+`extended-stable` प्राप्त करते हैं; यह
+स्रोत वर्कफ़्लो टोकन-प्रमाणित `npm dist-tag add` का उपयोग नहीं करता। पुनः प्रयास
+npm में पहले से मौजूद सटीक संस्करणों को छोड़ देते हैं, फिर तब तक सुरक्षित रूप से विफल रहते हैं जब तक पूर्ण
+रीडबैक पुष्टि न कर दे कि प्रत्येक सटीक पैकेज और `extended-stable` टैग अभिसरित हो गए हैं।
+
+`OpenClaw Release Publish` ये ऑपरेटर-नियंत्रित इनपुट स्वीकार करता है:
 
 - `tag`: आवश्यक रिलीज़ टैग; पहले से मौजूद होना चाहिए
-- `preflight_run_id`: सफल `OpenClaw NPM Release` preflight run id;
-  `publish_openclaw_npm=true` होने पर आवश्यक
-- `full_release_validation_run_id`: सफल `Full Release Validation` run
-  id; `publish_openclaw_npm=true` होने पर आवश्यक
-- `windows_node_tag`: ठीक-ठीक non-prerelease `openclaw/openclaw-windows-node`
-  रिलीज़ टैग; स्थिर OpenClaw publish के लिए आवश्यक
-- `windows_node_installer_digests`: वर्तमान Windows installer नामों से उनके pinned `sha256:` digests तक का
-  उम्मीदवार-स्वीकृत compact JSON map; स्थिर OpenClaw publish के लिए आवश्यक
-- `npm_dist_tag`: OpenClaw पैकेज के लिए npm target tag
-- `plugin_publish_scope`: डिफ़ॉल्ट `all-publishable`; `publish_openclaw_npm=false` के साथ केवल
-  केंद्रित plugin-only repair work के लिए `selected` का उपयोग करें
-- `plugins`: जब `plugin_publish_scope=selected` हो, तो comma-separated `@openclaw/*` package names
-- `publish_openclaw_npm`: डिफ़ॉल्ट `true`; केवल workflow को plugin-only repair orchestrator के रूप में
-  उपयोग करते समय `false` सेट करें
-- `wait_for_clawhub`: डिफ़ॉल्ट `false`, ताकि npm availability ClawHub sidecar से blocked न हो;
-  `true` केवल तब सेट करें जब workflow completion में ClawHub completion शामिल होना ज़रूरी हो
+- `preflight_run_id`: सफल `OpenClaw NPM Release` प्रीफ़्लाइट रन आईडी; `publish_openclaw_npm=true` या `plugin_publish_scope=all-publishable` होने पर आवश्यक
+- `full_release_validation_run_id`: सफल `Full Release Validation` रन आईडी; `publish_openclaw_npm=true` या `plugin_publish_scope=all-publishable` होने पर आवश्यक
+- `full_release_validation_run_attempt`: `full_release_validation_run_id` के साथ युग्मित सटीक सकारात्मक प्रयास; रन आईडी दिए जाने पर हमेशा आवश्यक
+- `windows_node_tag`: सटीक गैर-प्रीरिलीज़ `openclaw/openclaw-windows-node` रिलीज़ टैग; स्टेबल OpenClaw प्रकाशन के लिए आवश्यक
+- `windows_node_installer_digests`: मौजूदा Windows इंस्टॉलर नामों से उनके पिन किए गए `sha256:` डाइजेस्ट तक कैंडिडेट-अनुमोदित संक्षिप्त JSON मैप; स्टेबल OpenClaw प्रकाशन के लिए आवश्यक
+- `npm_telegram_run_id`: अंतिम रिलीज़ प्रमाण में शामिल करने के लिए वैकल्पिक सफल `NPM Telegram Beta E2E` रन आईडी
+- `npm_dist_tag`: OpenClaw पैकेज के लिए npm लक्ष्य टैग, `alpha`, `beta` या `latest` में से एक
+- `plugin_publish_scope`: डिफ़ॉल्ट `all-publishable`; `publish_openclaw_npm=false` के साथ केवल केंद्रित Plugin-मरम्मत कार्य के लिए `selected` का उपयोग करें
+- `plugins`: `plugin_publish_scope=selected` होने पर कॉमा से अलग किए गए `@openclaw/*` पैकेज नाम
+- `publish_openclaw_npm`: डिफ़ॉल्ट `true`; वर्कफ़्लो को केवल-Plugin मरम्मत ऑर्केस्ट्रेटर के रूप में उपयोग करते समय ही `false` सेट करें
+- `release_profile`: रिलीज़ प्रमाण सारांशों के लिए उपयोग की जाने वाली रिलीज़ कवरेज प्रोफ़ाइल; डिफ़ॉल्ट `from-validation`, जो इसे सत्यापन मैनिफ़ेस्ट से पढ़ता है, या `beta`, `stable` अथवा `full` से ओवरराइड करें
+- `wait_for_clawhub`: डिफ़ॉल्ट `false`, ताकि npm उपलब्धता ClawHub साइडकार से अवरुद्ध न हो; `true` केवल तब सेट करें, जब वर्कफ़्लो पूर्णता में ClawHub पूर्णता शामिल होना आवश्यक हो
 
-`OpenClaw Release Checks` ये operator-नियंत्रित इनपुट स्वीकार करता है:
+`OpenClaw Release Checks` ये ऑपरेटर-नियंत्रित इनपुट स्वीकार करता है:
 
-- `ref`: validate करने के लिए branch, tag, या full commit SHA। secret-bearing checks के लिए resolved commit
-  का OpenClaw branch या release tag से reachable होना आवश्यक है।
-- `run_release_soak`: beta release checks के लिए exhaustive live/E2E, Docker release-path, और
-  all-since upgrade-survivor soak में opt in करें। यह `release_profile=stable` और
-  `release_profile=full` द्वारा forced on होता है।
+- `ref`: सत्यापित करने के लिए ब्रांच, टैग या पूर्ण कमिट SHA। सीक्रेट वाले जाँचों के लिए आवश्यक है कि समाधान किया गया कमिट किसी OpenClaw ब्रांच या रिलीज़ टैग से पहुँच योग्य हो।
+- `run_release_soak`: बीटा रिलीज़ जाँचों के लिए व्यापक लाइव/E2E, Docker रिलीज़-पथ और सभी-पिछले संस्करणों से अपग्रेड के बाद भी कार्यशील रहने की दीर्घकालिक जाँच को सक्षम करें। इसे `release_profile=stable` और `release_profile=full` द्वारा अनिवार्य रूप से सक्षम किया जाता है।
 
 नियम:
 
-- patch `33` से नीचे की regular final और correction versions या तो `beta` या `latest` पर publish हो सकती हैं।
-  patch `33` या उससे ऊपर की final versions को `extended-stable` पर publish करना होगा, और उस boundary पर
-  correction-suffix versions अस्वीकार की जाती हैं।
-- Beta prerelease tags केवल `beta` पर publish हो सकते हैं
-- `OpenClaw NPM Release` के लिए, full commit SHA input केवल `preflight_only=true` होने पर allowed है
-- `OpenClaw Release Checks` और `Full Release Validation` हमेशा validation-only हैं
-- वास्तविक publish path को वही `npm_dist_tag` उपयोग करना होगा जो preflight के दौरान उपयोग हुआ था;
-  workflow verify करता है कि publish से पहले metadata जारी रहे
+- पैच `33` से नीचे के नियमित अंतिम और सुधार संस्करण `beta` या `latest`, दोनों में से किसी पर प्रकाशित किए जा सकते हैं। पैच `33` या उससे ऊपर के अंतिम संस्करणों को `extended-stable` पर ही प्रकाशित करना आवश्यक है, और उस सीमा पर सुधार-प्रत्यय वाले संस्करण अस्वीकार कर दिए जाते हैं।
+- बीटा पूर्व-रिलीज़ टैग केवल `beta` पर प्रकाशित किए जा सकते हैं; अल्फ़ा पूर्व-रिलीज़ टैग केवल `alpha` पर प्रकाशित किए जा सकते हैं
+- `OpenClaw NPM Release` के लिए, पूर्ण कमिट SHA इनपुट की अनुमति केवल तब है जब `preflight_only=true`
+- `OpenClaw Release Checks` और `Full Release Validation` हमेशा केवल सत्यापन के लिए हैं
+- वास्तविक प्रकाशन पथ में प्रीफ़्लाइट के दौरान उपयोग किए गए उसी `npm_dist_tag` का उपयोग होना आवश्यक है; प्रकाशन जारी रहने से पहले वर्कफ़्लो उस मेटाडेटा को सत्यापित करता है
 
-## नियमित beta/latest स्थिर रिलीज़ क्रम
+## नियमित बीटा/नवीनतम स्थिर रिलीज़ क्रम
 
-यह legacy sequence उस नियमित orchestrated release के लिए है जो plugins, GitHub Release, Windows, और अन्य
-platform work का भी स्वामी है। यह इस पेज के शीर्ष पर दस्तावेज़ित मासिक `.33+` npm-only extended-stable
-path नहीं है।
+यह पुराना क्रम उस नियमित समन्वित रिलीज़ के लिए है, जो plugins, GitHub Release, Windows और अन्य प्लेटफ़ॉर्म कार्यों का भी स्वामी है। यह इस पृष्ठ के शीर्ष पर दस्तावेज़ित मासिक `.33+` Gateway विस्तारित-स्थिर पथ नहीं है।
 
-जब नियमित orchestrated stable release काट रहे हों:
+नियमित समन्वित स्थिर रिलीज़ तैयार करते समय:
 
-1. `preflight_only=true` के साथ `OpenClaw NPM Release` चलाएँ
-   - टैग मौजूद होने से पहले, आप प्रीफ्लाइट वर्कफ़्लो के केवल-सत्यापन ड्राई रन के लिए मौजूदा पूर्ण वर्कफ़्लो-शाखा कमिट
-     SHA का उपयोग कर सकते हैं
-2. सामान्य beta-first प्रवाह के लिए `npm_dist_tag=beta` चुनें, या `latest` केवल तब
-   जब आप जानबूझकर सीधा स्थिर प्रकाशन चाहते हों
-3. जब आप एक मैनुअल वर्कफ़्लो से सामान्य CI के साथ live prompt cache, Docker, QA Lab,
-   Matrix, और Telegram कवरेज चाहते हों, तो रिलीज़ शाखा, रिलीज़ टैग, या पूर्ण
-   कमिट SHA पर `Full Release Validation` चलाएँ
-4. यदि आपको जानबूझकर केवल नियतात्मक सामान्य टेस्ट ग्राफ़ चाहिए, तो इसके बजाय रिलीज़ ref पर
-   मैनुअल `CI` वर्कफ़्लो चलाएँ
-5. सटीक non-prerelease `openclaw/openclaw-windows-node` रिलीज़ टैग चुनें
-   जिसके signed x64 और ARM64 इंस्टॉलर शिप होने चाहिए। उसे
-   `windows_node_tag` के रूप में सहेजें, और उनके validated digest map को
-   `windows_node_installer_digests` के रूप में सहेजें। release-candidate helper दोनों को रिकॉर्ड करता है
-   और उन्हें अपनी जनरेट की गई publish command में शामिल करता है।
-6. सफल `preflight_run_id` और `full_release_validation_run_id` सहेजें
-7. उसी `tag`, उसी `npm_dist_tag`,
-   चुने गए `windows_node_tag`, उसके सहेजे गए `windows_node_installer_digests`,
-   सहेजे गए `preflight_run_id`, और सहेजे गए `full_release_validation_run_id` के साथ `OpenClaw Release Publish` चलाएँ;
-   यह OpenClaw npm पैकेज को promote करने से पहले externalized plugins को npm और ClawHub पर प्रकाशित करता है
-8. यदि रिलीज़ `beta` पर लैंड हुई है, तो उस स्थिर संस्करण को `beta` से `latest` पर promote करने के लिए
-   `openclaw/releases/.github/workflows/openclaw-npm-dist-tags.yml`
-   वर्कफ़्लो का उपयोग करें
-9. यदि रिलीज़ जानबूझकर सीधे `latest` पर प्रकाशित की गई है और `beta`
-   को तुरंत उसी स्थिर build का अनुसरण करना चाहिए, तो दोनों dist-tags को स्थिर संस्करण पर इंगित करने के लिए वही रिलीज़
-   वर्कफ़्लो उपयोग करें, या उसके scheduled
-   self-healing sync को बाद में `beta` स्थानांतरित करने दें
+1. `OpenClaw NPM Release` को `preflight_only=true` के साथ चलाएँ। टैग मौजूद होने से पहले, प्रीफ़्लाइट वर्कफ़्लो के केवल-सत्यापन ड्राई रन के लिए वर्तमान पूर्ण वर्कफ़्लो-ब्रांच कमिट SHA का उपयोग किया जा सकता है।
+2. सामान्य बीटा-प्रथम प्रवाह के लिए `npm_dist_tag=beta` चुनें, या केवल तभी `latest` चुनें जब आप जानबूझकर सीधे स्थिर प्रकाशन करना चाहते हों।
+3. जब एक मैन्युअल वर्कफ़्लो से सामान्य CI के साथ लाइव प्रॉम्प्ट कैश, Docker, QA Lab, Matrix और Telegram कवरेज चाहिए, तब रिलीज़ ब्रांच, रिलीज़ टैग या पूर्ण कमिट SHA पर `Full Release Validation` चलाएँ। यदि जानबूझकर केवल निर्धारक सामान्य परीक्षण ग्राफ़ चाहिए, तो इसके बजाय रिलीज़ रेफ़ पर मैन्युअल `CI` वर्कफ़्लो चलाएँ।
+4. उस सटीक गैर-पूर्व-रिलीज़ `openclaw/openclaw-windows-node` रिलीज़ टैग को चुनें, जिसके हस्ताक्षरित x64 और ARM64 इंस्टॉलर वितरित किए जाने चाहिए। इसे `windows_node_tag` के रूप में सहेजें और उनके सत्यापित डाइजेस्ट मैप को `windows_node_installer_digests` के रूप में सहेजें। रिलीज़-कैंडिडेट सहायक दोनों को रिकॉर्ड करता है और अपने जनरेट किए गए प्रकाशन कमांड में शामिल करता है।
+5. सफल `preflight_run_id`, `full_release_validation_run_id` और सटीक `full_release_validation_run_attempt` को सहेजें।
+6. विश्वसनीय `main` से `OpenClaw Release Publish` को उसी `tag`, उसी `npm_dist_tag`, चुने गए `windows_node_tag`, उसके सहेजे गए `windows_node_installer_digests`, सहेजे गए `preflight_run_id`, `full_release_validation_run_id` और `full_release_validation_run_attempt` के साथ चलाएँ। यह OpenClaw npm पैकेज को प्रोमोट करने से पहले बाहरीकृत plugins को npm और ClawHub पर प्रकाशित करता है।
+7. यदि रिलीज़ `beta` पर पहुँची है, तो उस स्थिर संस्करण को `beta` से `latest` पर प्रोमोट करने के लिए `openclaw/releases/.github/workflows/openclaw-npm-dist-tags.yml` वर्कफ़्लो का उपयोग करें।
+8. यदि रिलीज़ जानबूझकर सीधे `latest` पर प्रकाशित की गई है और `beta` को तुरंत उसी स्थिर बिल्ड का अनुसरण करना चाहिए, तो दोनों dist-tags को स्थिर संस्करण पर इंगित करने के लिए उसी रिलीज़ वर्कफ़्लो का उपयोग करें, या उसके निर्धारित स्व-सुधार सिंक को बाद में `beta` स्थानांतरित करने दें।
 
-dist-tag mutation रिलीज़ ledger repo में रहता है क्योंकि उसे अभी भी
-`NPM_TOKEN` की आवश्यकता होती है, जबकि source repo OIDC-only publish रखता है।
+dist-tag परिवर्तन रिलीज़ लेजर रेपो में रहता है क्योंकि इसके लिए अब भी `NPM_TOKEN` आवश्यक है, जबकि स्रोत रेपो प्रकाशन को केवल OIDC तक सीमित रखता है। इससे प्रत्यक्ष प्रकाशन पथ और बीटा-प्रथम प्रोमोशन पथ, दोनों दस्तावेज़ित और ऑपरेटर को दृश्यमान रहते हैं।
 
-यह direct publish path और beta-first promotion path दोनों को
-दस्तावेजीकृत और operator-visible बनाए रखता है।
-
-यदि किसी maintainer को local npm authentication पर fallback करना पड़े, तो कोई भी 1Password
-CLI (`op`) command केवल dedicated tmux session के अंदर चलाएँ। मुख्य agent shell से सीधे `op`
-कॉल न करें; इसे tmux के अंदर रखने से prompts,
-alerts, और OTP handling observable रहते हैं और repeated host alerts से बचाव होता है।
+यदि किसी मेंटेनर को स्थानीय npm प्रमाणीकरण का सहारा लेना पड़े, तो किसी भी 1Password CLI (`op`) कमांड को केवल एक समर्पित tmux सत्र के भीतर चलाएँ। मुख्य एजेंट शेल से सीधे `op` को कॉल न करें; इसे tmux के भीतर रखने से प्रॉम्प्ट, चेतावनियाँ और OTP प्रबंधन देखे जा सकते हैं तथा बार-बार आने वाली होस्ट चेतावनियाँ रोकी जाती हैं।
 
 ## सार्वजनिक संदर्भ
 
@@ -980,14 +665,13 @@ alerts, और OTP handling observable रहते हैं और repeated ho
 - [`.github/workflows/openclaw-npm-release.yml`](https://github.com/openclaw/openclaw/blob/main/.github/workflows/openclaw-npm-release.yml)
 - [`.github/workflows/openclaw-release-checks.yml`](https://github.com/openclaw/openclaw/blob/main/.github/workflows/openclaw-release-checks.yml)
 - [`.github/workflows/openclaw-cross-os-release-checks-reusable.yml`](https://github.com/openclaw/openclaw/blob/main/.github/workflows/openclaw-cross-os-release-checks-reusable.yml)
+- [`.github/workflows/docker-release.yml`](https://github.com/openclaw/openclaw/blob/main/.github/workflows/docker-release.yml)
 - [`scripts/resolve-openclaw-package-candidate.mjs`](https://github.com/openclaw/openclaw/blob/main/scripts/resolve-openclaw-package-candidate.mjs)
 - [`scripts/openclaw-npm-release-check.ts`](https://github.com/openclaw/openclaw/blob/main/scripts/openclaw-npm-release-check.ts)
 - [`scripts/package-mac-dist.sh`](https://github.com/openclaw/openclaw/blob/main/scripts/package-mac-dist.sh)
 - [`scripts/make_appcast.sh`](https://github.com/openclaw/openclaw/blob/main/scripts/make_appcast.sh)
 
-Maintainers वास्तविक runbook के लिए निजी रिलीज़ docs
-[`openclaw/maintainers/release/README.md`](https://github.com/openclaw/maintainers/blob/main/release/README.md)
-का उपयोग करते हैं।
+वास्तविक रनबुक के लिए मेंटेनर [`openclaw/maintainers/release/README.md`](https://github.com/openclaw/maintainers/blob/main/release/README.md) में निजी रिलीज़ दस्तावेज़ों का उपयोग करते हैं।
 
 ## संबंधित
 

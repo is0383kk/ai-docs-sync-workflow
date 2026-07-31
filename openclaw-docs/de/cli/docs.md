@@ -1,13 +1,14 @@
 ---
 read_when:
-    - Sie möchten die aktuellen OpenClaw-Dokumente über das Terminal durchsuchen
-    - Sie müssen wissen, welche gehostete Such-API die Dokumentations-CLI aufruft.
-summary: CLI-Referenz für `openclaw docs` (den Index der Live-Dokumentation durchsuchen)
+    - Sie möchten die aktuellen OpenClaw-Dokumente vom Terminal aus durchsuchen
+    - Sie müssen wissen, welche gehostete Such-API die Dokumentations-CLI aufruft
+summary: CLI-Referenz für `openclaw docs` (den Live-Dokumentationsindex durchsuchen)
 title: Dokumentation
 x-i18n:
-    generated_at: "2026-07-12T01:28:48Z"
+    generated_at: "2026-07-26T18:52:23Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: b0b575f0b76d40a53dd4f79c55fd65969a24eae27e27bd1c46d395f61fe89e42
     source_path: cli/docs.md
@@ -25,11 +26,11 @@ openclaw docs                       # Einstiegspunkt der Dokumentation und Beisp
 openclaw docs <query...>            # Live-Index der Dokumentation durchsuchen
 ```
 
-| Argument     | Beschreibung                                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------- |
-| `[query...]` | Frei formulierte Suchanfrage. Mehrteilige Anfragen werden mit Leerzeichen verbunden und als eine übermittelt. |
+| Argument     | Beschreibung                                                                        |
+| ------------ | ---------------------------------------------------------------------------------- |
+| `[query...]` | Freie Suchanfrage. Abfragen mit mehreren Wörtern werden mit Leerzeichen verbunden und als eine Abfrage gesendet. |
 
-Ohne Suchanfrage gibt `openclaw docs` die URL des Dokumentationseinstiegspunkts und einen Beispielbefehl für die Suche aus, anstatt eine Suche durchzuführen.
+Ohne Suchanfrage gibt `openclaw docs` die URL des Dokumentationseinstiegspunkts und einen Beispiel-Suchbefehl aus, statt eine Suche durchzuführen.
 
 ## Beispiele
 
@@ -45,23 +46,23 @@ openclaw docs gateway token secretref
 
 ## Ausgabe
 
-In einem ausgabestarken Terminal (TTY) werden die Ergebnisse als Überschrift mit anschließender Aufzählung dargestellt: Seitentitel, verlinkte URL der Dokumentation und ein kurzer Textausschnitt in der nächsten Zeile. Bei leeren Ergebnissen wird „Keine Ergebnisse.“ ausgegeben.
+In einem Rich-Terminal (TTY) werden die Ergebnisse als Überschrift mit anschließender Aufzählung dargestellt: Seitentitel, verlinkte Dokumentations-URL und ein kurzer Ausschnitt in der nächsten Zeile. Bei leeren Ergebnissen wird „Keine Ergebnisse.“ ausgegeben.
 
-Bei nicht ausgabestarker Ausgabe (weitergeleitet, `--no-color`, Skripte) werden dieselben Daten als Markdown dargestellt:
+Bei einer nicht formatierten Ausgabe (weitergeleitet, `--no-color`, Skripte) werden dieselben Daten als Markdown dargestellt:
 
 ```markdown
 # Dokumentationssuche: <query>
 
-- [Titel](https://docs.openclaw.ai/...) - Textausschnitt
-- [Titel](https://docs.openclaw.ai/...) - Textausschnitt
+- [Titel](https://docs.openclaw.ai/...) - Ausschnitt
+- [Titel](https://docs.openclaw.ai/...) - Ausschnitt
 ```
 
 ## Exit-Codes
 
-| Code | Bedeutung                                                                                  |
-| ---- | ------------------------------------------------------------------------------------------ |
-| `0`  | Suche erfolgreich, einschließlich Antworten ohne Ergebnisse.                              |
-| `1`  | Der Aufruf der gehosteten Such-API für die Dokumentation ist fehlgeschlagen; stderr gibt die Fehlermeldung aus. |
+| Code | Bedeutung                                                                  |
+| ---- | ------------------------------------------------------------------------ |
+| `0`  | Die Suche war erfolgreich, einschließlich Antworten mit null Ergebnissen.                       |
+| `1`  | Der API-Aufruf für die gehostete Dokumentationssuche ist fehlgeschlagen; stderr gibt die Fehlermeldung aus. |
 
 ## Verwandte Themen
 

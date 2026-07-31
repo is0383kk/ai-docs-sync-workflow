@@ -2,13 +2,14 @@
 read_when:
     - Je wilt Exa gebruiken voor web_search
     - Je hebt een EXA_API_KEY nodig
-    - Je wilt neuraal zoeken of inhoudsextractie
-summary: Exa AI-zoeken -- neuraal zoeken en zoeken op trefwoorden met inhoudsextractie
+    - Je wilt neuraal zoeken of inhoud extraheren
+summary: Exa AI-zoeken -- neurale zoekopdrachten en zoeken op trefwoorden met inhoudsextractie
 title: Exa-zoekopdracht
 x-i18n:
-    generated_at: "2026-07-12T09:28:25Z"
+    generated_at: "2026-07-27T06:36:13Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 3ddfd6fb471f92e705facf5a2d02361c1a343b9032fa8e0a7b135af634df65b7
     source_path: tools/exa-search.md
@@ -30,11 +31,11 @@ openclaw gateway restart
 
 <Steps>
   <Step title="Een account aanmaken">
-    Meld u aan bij [exa.ai](https://exa.ai/) en genereer een API-sleutel via uw
+    Meld je aan bij [exa.ai](https://exa.ai/) en genereer een API-sleutel via je
     dashboard.
   </Step>
   <Step title="De sleutel opslaan">
-    Stel `EXA_API_KEY` in de Gateway-omgeving in of configureer deze via:
+    Stel `EXA_API_KEY` in de Gateway-omgeving in, of configureer deze via:
 
     ```bash
     openclaw configure --section web
@@ -70,17 +71,16 @@ openclaw gateway restart
 ```
 
 **Alternatief via de omgeving:** stel `EXA_API_KEY` in de Gateway-omgeving in. Plaats
-deze voor een Gateway-installatie in `~/.openclaw/.env`. Zie
+deze bij een Gateway-installatie in `~/.openclaw/.env`. Zie
 [Omgevingsvariabelen](/nl/help/faq#env-vars-and-env-loading).
 
 ## Basis-URL overschrijven
 
-Stel `plugins.entries.exa.config.webSearch.baseUrl` in om Exa-zoekopdrachten
-via een compatibele proxy of een alternatief eindpunt te leiden. OpenClaw
-normaliseert kale hosts door `https://` voor te voegen en voegt `/search` toe,
-tenzij het pad daar al op eindigt. Het opgeloste eindpunt maakt deel uit van
-de sleutel voor de zoekcache, zodat resultaten van verschillende eindpunten
-nooit worden gedeeld.
+Stel `plugins.entries.exa.config.webSearch.baseUrl` in om Exa-zoekaanvragen
+via een compatibele proxy of alternatief eindpunt te leiden. OpenClaw
+normaliseert kale hosts door `https://` ervoor te plaatsen en voegt `/search` toe, tenzij
+het pad daar al mee eindigt. Het herleide eindpunt maakt deel uit van de
+cachesleutel voor zoekopdrachten, zodat resultaten van verschillende eindpunten nooit worden gedeeld.
 
 ## Toolparameters
 
@@ -114,11 +114,11 @@ Opties voor inhoudsextractie (zie hieronder).
 
 ### Inhoudsextractie
 
-Geef een `contents`-object door om de geëxtraheerde inhoud in resultaten te bepalen:
+Geef een `contents`-object door om de geëxtraheerde inhoud in resultaten te beheren:
 
 ```javascript
 await web_search({
-  query: "transformer architecture explained",
+  query: "transformerarchitectuur uitgelegd",
   type: "neural",
   contents: {
     text: true, // volledige paginatekst
@@ -128,37 +128,36 @@ await web_search({
 });
 ```
 
-| Inhoudsoptie    | Type                                                                  | Beschrijving                     |
-| --------------- | --------------------------------------------------------------------- | -------------------------------- |
+| Inhoudsoptie | Type                                                                  | Beschrijving                    |
+| ------------ | --------------------------------------------------------------------- | ------------------------------- |
 | `text`          | `boolean \| { maxCharacters }`                                        | Volledige paginatekst extraheren |
-| `highlights`    | `boolean \| { maxCharacters, query, numSentences, highlightsPerUrl }` | Kernzinnen extraheren             |
+| `highlights`    | `boolean \| { maxCharacters, query, numSentences, highlightsPerUrl }` | Kernzinnen extraheren           |
 | `summary`       | `boolean \| { query }`                                                | Door AI gegenereerde samenvatting |
 
-Als `contents` wordt weggelaten, gebruikt Exa standaard `{ highlights: true }`,
-zodat resultaten fragmenten met kernzinnen bevatten. Resultaatbeschrijvingen
-worden eerst afgeleid uit markeringen, vervolgens uit de samenvatting en daarna
-uit de volledige tekst, afhankelijk van wat het eerst beschikbaar is. Resultaten
-behouden ook de onbewerkte velden `highlightScores` en `summary` uit het antwoord
-van de Exa-API, indien beschikbaar.
+Als `contents` wordt weggelaten, gebruikt Exa standaard `{ highlights: true }`, zodat resultaten
+fragmenten met kernzinnen bevatten. Resultaatbeschrijvingen worden eerst uit markeringen
+gehaald, vervolgens uit de samenvatting en daarna uit de volledige tekst -- afhankelijk van wat het eerst beschikbaar is. Resultaten
+behouden indien beschikbaar ook de onbewerkte velden `highlightScores` en `summary` uit het
+Exa API-antwoord.
 
 ### Zoekmodi
 
-| Modus            | Beschrijving                                 |
-| ---------------- | -------------------------------------------- |
-| `auto`           | Exa kiest de beste modus (standaard)         |
-| `neural`         | Semantisch/op betekenis gebaseerd zoeken     |
-| `fast`           | Snel zoeken op trefwoorden                   |
-| `deep`           | Grondig diepgaand zoeken                     |
-| `deep-reasoning` | Diepgaand zoeken met redenering              |
-| `instant`        | Snelste resultaten                           |
+| Modus            | Beschrijving                                  |
+| ---------------- | --------------------------------------------- |
+| `auto`           | Exa kiest de beste modus (standaard)          |
+| `neural`         | Semantisch/op betekenis gebaseerd zoeken      |
+| `fast`           | Snel zoeken op trefwoorden                    |
+| `deep`           | Grondig diep zoeken                           |
+| `deep-reasoning` | Diep zoeken met redenering                    |
+| `instant`        | Snelste resultaten                            |
 
 ## Opmerkingen
 
 - `count` accepteert maximaal 100, afhankelijk van de limieten van het Exa-zoektype.
 - Resultaten worden standaard 15 minuten in de cache opgeslagen. Configureer de gedeelde
   `tools.web.search.cacheTtlMinutes` (minuten) en
-  `tools.web.search.timeoutSeconds` (standaard 30 s) om de cacheduur en
-  time-out van aanvragen voor alle `web_search`-providers, waaronder Exa, te wijzigen.
+  `tools.web.search.timeoutSeconds` (standaard 30s) om de cacheduur en
+  aanvraagtime-out voor alle `web_search`-providers, waaronder Exa, te wijzigen.
 
 ## Gerelateerd
 

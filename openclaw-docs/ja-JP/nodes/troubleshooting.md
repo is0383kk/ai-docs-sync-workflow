@@ -1,22 +1,23 @@
 ---
 read_when:
-    - Node は接続されていますが、カメラ/キャンバス/画面/実行ツールが失敗する
-    - Node のペアリングと承認の違いを理解する必要があります
-summary: Node のペアリング、フォアグラウンド要件、権限、ツールの失敗をトラブルシューティングする
+    - Node は接続されていますが、カメラ／キャンバス／画面／実行ツールが失敗する
+    - Node のペアリングと承認の違いに関するメンタルモデルを理解する必要があります
+summary: Node のペアリング、フォアグラウンド要件、権限、ツールの障害をトラブルシューティングする
 title: Node のトラブルシューティング
 x-i18n:
-    generated_at: "2026-07-11T22:23:10Z"
+    generated_at: "2026-07-26T09:28:47Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 53d082dcd2f4bb022eb683d72d193dbb6800b5a81a8f5ab9506d82feaa0dbc49
+    source_hash: 4a7ee9e48985805e91cd5acfa1b9f6b676b7e67236ce29fe91e2c8d03002e5c4
     source_path: nodes/troubleshooting.md
     workflow: 16
 ---
 
-ステータスに Node が表示されているのに Node ツールが失敗する場合は、このページを参照してください。
+ステータスに Node が表示されているものの、Node ツールが失敗する場合は、このページを参照してください。
 
-## コマンドの実行手順
+## コマンドの実行順序
 
 ```bash
 openclaw status
@@ -26,7 +27,7 @@ openclaw doctor
 openclaw channels status --probe
 ```
 
-続いて、Node 固有のチェックを実行します。
+次に、Node 固有のチェックを実行します。
 
 ```bash
 openclaw nodes status
@@ -34,17 +35,17 @@ openclaw nodes describe --node <idOrNameOrIp>
 openclaw approvals get --node <idOrNameOrIp>
 ```
 
-正常性を示す状態:
+正常性を示すシグナル：
 
-- Node が接続され、ロール `node` としてペアリングされている。
-- `nodes describe` に、呼び出そうとしているケイパビリティが含まれている。
-- 実行承認に、想定したモードと許可リストが表示されている。
+- Node が接続され、ロール `node` 用にペアリングされている。
+- `nodes describe` に、呼び出している機能が含まれている。
+- 実行承認に、想定されるモード／許可リストが表示されている。
 
 ## フォアグラウンド要件
 
-iOS/Android Node では、`canvas.*`、`camera.*`、`screen.*` はフォアグラウンドでのみ利用できます。
+`canvas.*`、`camera.*`、`screen.*` は、iOS／Android の Node ではフォアグラウンドでのみ動作します。
 
-簡易チェックと修正:
+簡易チェックと修正：
 
 ```bash
 openclaw nodes describe --node <idOrNameOrIp>
@@ -52,29 +53,29 @@ openclaw nodes canvas snapshot --node <idOrNameOrIp>
 openclaw logs --follow
 ```
 
-`NODE_BACKGROUND_UNAVAILABLE` が表示された場合は、Node アプリをフォアグラウンドに移して再試行してください。
+`NODE_BACKGROUND_UNAVAILABLE` が表示された場合は、Node アプリをフォアグラウンドに移動して再試行してください。
 
 ## 権限マトリクス
 
-| ケイパビリティ               | iOS                                             | Android                                          | macOS Node アプリ                     | 一般的なエラーコード                          |
-| ---------------------------- | ----------------------------------------------- | ------------------------------------------------ | ------------------------------------- | --------------------------------------------- |
-| `camera.snap`, `camera.clip` | カメラ（クリップ音声にはマイクも必要）          | カメラ（クリップ音声にはマイクも必要）           | カメラ（クリップ音声にはマイクも必要） | `*_PERMISSION_REQUIRED`                       |
-| `screen.record`              | 画面収録（マイクは任意）                        | 画面キャプチャの確認（マイクは任意）             | 画面収録                              | `*_PERMISSION_REQUIRED`                       |
-| `computer.act`               | 該当なし                                        | 該当なし                                         | アクセシビリティ + 画面収録           | `COMPUTER_DISABLED`, `ACCESSIBILITY_REQUIRED` |
-| `location.get`               | 使用中のみ、または常に（モードによる）          | モードに応じたフォアグラウンド/バックグラウンド位置情報 | 位置情報の権限                        | `LOCATION_PERMISSION_REQUIRED`                |
-| `system.run`                 | 該当なし（Node ホストのパス）                   | 該当なし（Node ホストのパス）                    | 実行承認が必要                        | `SYSTEM_RUN_DENIED`                           |
+| 機能                         | iOS                                     | Android                                      | macOS Node アプリ                 | 一般的なエラーコード                          |
+| ---------------------------- | --------------------------------------- | -------------------------------------------- | -------------------------------- | --------------------------------------------- |
+| `camera.snap`、`camera.clip` | カメラ（クリップ音声にはマイクも必要）           | カメラ（クリップ音声にはマイクも必要）                | カメラ（クリップ音声にはマイクも必要） | `*_PERMISSION_REQUIRED`                       |
+| `screen.record`              | 画面収録（マイクは任意）                 | 画面キャプチャの確認（マイクは任意）           | 画面収録                         | `*_PERMISSION_REQUIRED`                       |
+| `computer.act`               | 該当なし                                | 該当なし                                     | アクセシビリティ＋画面収録         | `COMPUTER_DISABLED`、`ACCESSIBILITY_REQUIRED` |
+| `location.get`               | While Using または Always（モードによる） | モードに応じたフォアグラウンド／バックグラウンド位置情報 | 位置情報の権限                    | `LOCATION_PERMISSION_REQUIRED`                |
+| `system.run`                 | 該当なし（Node ホストのパス）             | 該当なし（Node ホストのパス）                  | 実行承認が必要                    | `SYSTEM_RUN_DENIED`                           |
 
 ## ペアリングと承認の違い
 
-Node コマンドが成功するかどうかは、次の 3 つの独立したゲートによって制御されます。
+Node コマンドが成功するかどうかは、3 つの独立したゲートによって制御されます。
 
-1. **デバイスのペアリング**: この Node は Gateway に接続できるか？
-2. **Gateway の Node コマンドポリシー**: RPC コマンド ID は `gateway.nodes.allowCommands` / `denyCommands` とプラットフォームのデフォルトによって許可されているか？
-3. **実行承認**: この Node は特定のシェルコマンドをローカルで実行できるか？
+1. **デバイスのペアリング**：この Node は Gateway に接続できるか？
+2. **Gateway の Node コマンドポリシー**：RPC コマンド ID は、`gateway.nodes.commands.allow`／`gateway.nodes.commands.deny` とプラットフォームのデフォルト設定で許可されているか？
+3. **実行承認**：この Node は特定のシェルコマンドをローカルで実行できるか？
 
-Node のペアリングは ID と信頼性を確認するゲートであり、コマンドごとの承認機構ではありません。`system.run` の Node ごとのポリシーは、Gateway のペアリングレコードではなく、その Node の実行承認ファイル（`openclaw approvals get --node ...`）にあります。
+Node のペアリングは、コマンド単位の承認機能ではなく、ID／信頼性のゲートです。`system.run` の Node 単位のポリシーは、Gateway のペアリングレコードではなく、その Node の実行承認ファイル（`openclaw approvals get --node ...`）に保存されます。
 
-簡易チェック:
+簡易チェック：
 
 ```bash
 openclaw devices list
@@ -83,28 +84,28 @@ openclaw approvals get --node <idOrNameOrIp>
 openclaw approvals allowlist add --node <idOrNameOrIp> "/usr/bin/uname"
 ```
 
-- ペアリングがない場合: まず Node デバイスを承認します。
-- `nodes describe` にコマンドがない場合: Gateway の Node コマンドポリシーと、接続時に Node が実際にそのコマンドを宣言したかどうかを確認します。
-- ペアリングに問題はないが `system.run` が失敗する場合: その Node の実行承認または許可リストを修正します。
+- ペアリングがない：最初に Node デバイスを承認してください。
+- `nodes describe` にコマンドがない：Gateway の Node コマンドポリシーと、接続時に Node が実際にそのコマンドを宣言したかどうかを確認してください。
+- ペアリングは正常だが `system.run` が失敗する：その Node の実行承認／許可リストを修正してください。
 
-承認を必要とする `host=node` の実行では、Gateway は準備済みの正規 `systemRunPlan` にも実行を関連付けます。承認済みの実行が転送される前に、後続の呼び出し元がコマンド、cwd、またはセッションメタデータを変更した場合、Gateway は編集されたペイロードを信頼せず、承認内容の不一致として実行を拒否します。
+承認に基づく `host=node` の実行では、Gateway は実行内容を準備済みの正規 `systemRunPlan` にも関連付けます。承認された実行が転送される前に、後続の呼び出し元がコマンド、cwd、またはセッションメタデータを変更した場合、Gateway は編集されたペイロードを信頼せず、承認の不一致として実行を拒否します。
 
 ## 一般的な Node エラーコード
 
-| コード                                 | 意味                                                                                                                                                                                          |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NODE_BACKGROUND_UNAVAILABLE`          | アプリがバックグラウンドにあります。フォアグラウンドに移してください。                                                                                                                        |
-| `CAMERA_DISABLED`                      | Node 設定でカメラの切り替えが無効になっています。                                                                                                                                            |
-| `*_PERMISSION_REQUIRED`                | OS の権限がないか、拒否されています。                                                                                                                                                         |
-| `LOCATION_DISABLED`                    | 位置情報モードがオフになっています。                                                                                                                                                          |
-| `LOCATION_PERMISSION_REQUIRED`         | 要求された位置情報モードが許可されていません。                                                                                                                                                |
-| `LOCATION_BACKGROUND_UNAVAILABLE`      | アプリがバックグラウンドにありますが、「使用中のみ」の権限しかありません。                                                                                                                    |
-| `COMPUTER_DISABLED`                    | macOS アプリで **Allow Computer Control** を有効にしてから、ペアリングの更新を承認してください。                                                                                               |
-| `ACCESSIBILITY_REQUIRED`               | macOS System Settings で、現在の OpenClaw アプリバンドルにアクセシビリティ権限を付与してください。                                                                                            |
-| `SYSTEM_RUN_DENIED: approval required` | 実行要求には明示的な承認が必要です。                                                                                                                                                          |
-| `SYSTEM_RUN_DENIED: allowlist miss`    | 許可リストモードによってコマンドがブロックされました。Windows Node ホストでは、`cmd.exe /c ...` のようなシェルラッパー形式は、確認フローで承認されていない限り、許可リストモードで許可リスト不一致として扱われます。 |
+| コード                                 | 意味                                                                                                                                                                                    |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NODE_BACKGROUND_UNAVAILABLE`          | アプリがバックグラウンドになっています。フォアグラウンドに移動してください。                                                                                                              |
+| `CAMERA_DISABLED`                      | Node 設定でカメラの切り替えが無効になっています。                                                                                                                                         |
+| `*_PERMISSION_REQUIRED`                | OS の権限がないか、拒否されています。                                                                                                                                                     |
+| `LOCATION_DISABLED`                    | 位置情報モードがオフになっています。                                                                                                                                                      |
+| `LOCATION_PERMISSION_REQUIRED`         | 要求された位置情報モードが許可されていません。                                                                                                                                             |
+| `LOCATION_BACKGROUND_UNAVAILABLE`      | アプリがバックグラウンドになっていますが、While Using 権限しかありません。                                                                                                                 |
+| `COMPUTER_DISABLED`                    | macOS アプリで **Allow Computer Control** を有効にしてから、ペアリングの更新を承認してください。                                                                                              |
+| `ACCESSIBILITY_REQUIRED`               | macOS の System Settings で、現在の OpenClaw アプリバンドルに Accessibility を許可してください。                                                                                            |
+| `SYSTEM_RUN_DENIED: approval required` | 実行リクエストには明示的な承認が必要です。                                                                                                                                                |
+| `SYSTEM_RUN_DENIED: allowlist miss`    | 許可リストモードによってコマンドがブロックされました。Windows の Node ホストでは、`cmd.exe /c ...` のようなシェルラッパー形式は、確認フローで承認されない限り、許可リストモードで許可リスト不一致として扱われます。 |
 
-## 簡易復旧ループ
+## 高速復旧ループ
 
 ```bash
 openclaw nodes status
@@ -113,14 +114,14 @@ openclaw approvals get --node <idOrNameOrIp>
 openclaw logs --follow
 ```
 
-それでも解決しない場合:
+それでも解決しない場合：
 
 - デバイスのペアリングを再承認します。
 - Node アプリを再度開きます（フォアグラウンド）。
 - OS の権限を再付与します。
 - 実行承認ポリシーを再作成または調整します。
 
-コンピューター制御については、視覚機能に対応したエージェントが `computer` ツールを公開していること、画面収録権限を付与した状態で `screen.snapshot` が成功すること、`/phone status` に意図した一時的または永続的な Gateway 承認が表示されることも確認してください。`gateway.nodes.denyCommands` のエントリは常に `allowCommands` より優先されます。
+コンピューター操作の場合は、ビジョン対応エージェントが `computer` ツールを公開していること、画面収録権限を付与した状態で `screen.snapshot` が成功すること、および `/phone status` に意図した一時的または永続的な Gateway 承認が表示されていることも確認してください。`gateway.nodes.commands.deny` エントリは常に `gateway.nodes.commands.allow` より優先されます。
 
 ## 関連項目
 

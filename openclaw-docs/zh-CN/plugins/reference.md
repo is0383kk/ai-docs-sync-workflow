@@ -5,23 +5,24 @@ read_when:
 summary: OpenClaw 插件参考页面的生成索引
 title: 插件参考
 x-i18n:
-    generated_at: "2026-07-11T20:45:48Z"
+    generated_at: "2026-07-26T06:52:46Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 03099acfb0bcbe9814fa53f5d2d893a08a39f42bf713ff140e9604783f9cef0e
+    source_hash: 2f8dfd157054a2af95c5e0a9406c471c9565e80d30e1472b6de6cb71cb6069fd
     source_path: plugins/reference.md
     workflow: 16
 ---
 
 # 插件参考
 
-本页面根据 `extensions/*/package.json` 和
+此页面由 `extensions/*/package.json` 和
 `openclaw.plugin.json` 生成。使用以下命令重新生成：
 
 ```bash
 pnpm plugins:inventory:gen
 ```
 
-使用[插件清单](/zh-CN/plugins/plugin-inventory)，按发行方式、软件包和描述浏览全部 136 个
-生成的插件参考页面。
+使用[插件清单](/zh-CN/plugins/plugin-inventory)，按分发方式、软件包和描述浏览全部 143 个
+自动生成的插件参考页面。

@@ -5,9 +5,10 @@ read_when:
 summary: 'Yönlendirme: akış komutları `openclaw tasks flow` altında bulunur'
 title: Akışlar (yönlendirme)
 x-i18n:
-    generated_at: "2026-07-12T11:35:06Z"
+    generated_at: "2026-07-26T23:13:08Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 05d27154190d6087649612d81ce15f0cbc9459aa89ab22211582c18f4fc2943c
     source_path: cli/flows.md
@@ -16,7 +17,7 @@ x-i18n:
 
 # `openclaw tasks flow`
 
-Üst düzey bir `openclaw flows` komutu yoktur. Kalıcı TaskFlow inceleme işlevleri `openclaw tasks flow` altında yer alır.
+Üst düzey bir `openclaw flows` komutu yoktur. Kalıcı TaskFlow incelemesi `openclaw tasks flow` altında yer alır.
 
 ## Alt komutlar
 
@@ -26,17 +27,17 @@ openclaw tasks flow show   <lookup> [--json]
 openclaw tasks flow cancel <lookup>
 ```
 
-| Alt komut | Açıklama                       | Bağımsız değişkenler / seçenekler                                                               |
-| ---------- | ------------------------------ | ----------------------------------------------------------------------------------------------- |
-| `list`     | İzlenen TaskFlow'ları listeler. | `--json` makinece okunabilir çıktı; `--status <name>` filtresi (aşağıdaki durum değerlerine bakın). |
-| `show`     | Bir TaskFlow'u gösterir.        | `<lookup>` akış kimliği veya sahip anahtarı; `--json` makinece okunabilir çıktı.                 |
-| `cancel`   | Çalışan bir TaskFlow'u iptal eder. | `<lookup>` akış kimliği veya sahip anahtarı.                                                  |
+| Alt komut | Açıklama                | Argümanlar / seçenekler                                                                   |
+| ---------- | -------------------------- | ------------------------------------------------------------------------------------- |
+| `list`     | İzlenen TaskFlow'ları listeler.    | Makine tarafından okunabilir çıktı için `--json`; filtre için `--status <name>` (aşağıdaki durum değerlerine bakın). |
+| `show`     | Bir TaskFlow'u gösterir.         | Akış kimliği veya sahip anahtarı için `<lookup>`; makine tarafından okunabilir çıktı için `--json`.                    |
+| `cancel`   | Çalışan bir TaskFlow'u iptal eder. | Akış kimliği veya sahip anahtarı için `<lookup>`.                                                      |
 
-`<lookup>`, bir akış kimliğini (`list` / `show` tarafından döndürülür) veya akışın sahip anahtarını (sahip alt sistemin akışı izlemek için kullandığı kararlı tanımlayıcı) kabul eder.
+`<lookup>`, bir akış kimliğini (`list` / `show` tarafından döndürülür) veya akışın sahip anahtarını (akışın sahibi olan alt sistemin akışı izlemek için kullandığı kararlı tanımlayıcı) kabul eder.
 
 ### Durum filtresi değerleri
 
-`list` üzerindeki `--status` şu değerlerden birini kabul eder: `queued`, `running`, `waiting`, `blocked`, `succeeded`, `failed`, `cancelled`, `lost`.
+`list` üzerindeki `--status` şunlardan birini kabul eder: `queued`, `running`, `waiting`, `blocked`, `succeeded`, `failed`, `cancelled`, `lost`.
 
 ## Örnekler
 
@@ -49,10 +50,10 @@ openclaw tasks flow show flow_abc123 --json
 openclaw tasks flow cancel flow_abc123
 ```
 
-TaskFlow kavramları ve oluşturma hakkında bilgi için [TaskFlow](/tr/automation/taskflow) sayfasına bakın. Üst `tasks` komutu için [tasks CLI başvurusu](/tr/cli/tasks) sayfasına bakın.
+TaskFlow kavramları ve yazımı için [TaskFlow](/tr/automation/taskflow) sayfasına bakın. Üst `tasks` komutu için [tasks CLI referansı](/tr/cli/tasks) sayfasına bakın.
 
 ## İlgili
 
-- [CLI başvurusu](/tr/cli)
+- [CLI referansı](/tr/cli)
 - [Otomasyon](/tr/automation)
 - [TaskFlow](/tr/automation/taskflow)

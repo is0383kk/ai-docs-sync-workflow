@@ -1,14 +1,15 @@
 ---
 read_when:
-    - Sie möchten Exa für `web_search` verwenden.
+    - Sie möchten Exa für `web_search` verwenden
     - Sie benötigen einen EXA_API_KEY
-    - Sie möchten eine neuronale Suche oder Inhaltsextraktion
+    - Sie möchten neuronale Suche oder Inhaltsextraktion
 summary: Exa-AI-Suche – neuronale Suche und Stichwortsuche mit Inhaltsextraktion
 title: Exa-Suche
 x-i18n:
-    generated_at: "2026-07-12T02:13:08Z"
+    generated_at: "2026-07-26T19:16:37Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 3ddfd6fb471f92e705facf5a2d02361c1a343b9032fa8e0a7b135af634df65b7
     source_path: tools/exa-search.md
@@ -30,7 +31,7 @@ openclaw gateway restart
 
 <Steps>
   <Step title="Konto erstellen">
-    Registrieren Sie sich bei [exa.ai](https://exa.ai/) und generieren Sie über Ihr
+    Registrieren Sie sich unter [exa.ai](https://exa.ai/) und generieren Sie in Ihrem
     Dashboard einen API-Schlüssel.
   </Step>
   <Step title="Schlüssel speichern">
@@ -70,16 +71,16 @@ openclaw gateway restart
 ```
 
 **Alternative über Umgebungsvariable:** Legen Sie `EXA_API_KEY` in der Gateway-Umgebung fest. Bei
-einer Gateway-Installation tragen Sie die Variable in `~/.openclaw/.env` ein. Siehe
+einer Gateway-Installation tragen Sie sie in `~/.openclaw/.env` ein. Siehe
 [Umgebungsvariablen](/de/help/faq#env-vars-and-env-loading).
 
 ## Basis-URL überschreiben
 
 Legen Sie `plugins.entries.exa.config.webSearch.baseUrl` fest, um Exa-Suchanfragen
-über einen kompatiblen Proxy oder einen alternativen Endpunkt zu leiten. OpenClaw
-normalisiert reine Hostnamen, indem es `https://` voranstellt, und hängt `/search` an, sofern
-der Pfad nicht bereits damit endet. Der aufgelöste Endpunkt ist Bestandteil des
-Such-Cache-Schlüssels, sodass Ergebnisse verschiedener Endpunkte niemals gemeinsam verwendet werden.
+über einen kompatiblen Proxy oder einen alternativen Endpunkt weiterzuleiten. OpenClaw
+normalisiert reine Hosts, indem `https://` vorangestellt wird, und hängt `/search` an, sofern
+der Pfad nicht bereits damit endet. Der aufgelöste Endpunkt ist Teil des
+Suchcache-Schlüssels, sodass Ergebnisse verschiedener Endpunkte niemals gemeinsam genutzt werden.
 
 ## Tool-Parameter
 
@@ -88,7 +89,7 @@ Suchanfrage.
 </ParamField>
 
 <ParamField path="count" type="number" default="5">
-Anzahl der zurückzugebenden Ergebnisse (1–100, abhängig von den Einschränkungen des Exa-Suchtyps).
+Anzahl der zurückzugebenden Ergebnisse (1–100, abhängig von den Beschränkungen des Exa-Suchtyps).
 </ParamField>
 
 <ParamField path="type" type="'auto' | 'neural' | 'fast' | 'deep' | 'deep-reasoning' | 'instant'">
@@ -121,41 +122,41 @@ await web_search({
   type: "neural",
   contents: {
     text: true, // vollständiger Seitentext
-    highlights: { numSentences: 3 }, // Schlüsselsätze
+    highlights: { numSentences: 3 }, // Kernsätze
     summary: true, // KI-Zusammenfassung
   },
 });
 ```
 
-| Inhaltsoption   | Typ                                                                   | Beschreibung                       |
-| --------------- | --------------------------------------------------------------------- | ---------------------------------- |
+| Inhaltsoption | Typ                                                                   | Beschreibung                     |
+| ------------- | --------------------------------------------------------------------- | -------------------------------- |
 | `text`          | `boolean \| { maxCharacters }`                                        | Vollständigen Seitentext extrahieren |
-| `highlights`    | `boolean \| { maxCharacters, query, numSentences, highlightsPerUrl }` | Schlüsselsätze extrahieren         |
-| `summary`       | `boolean \| { query }`                                                | KI-generierte Zusammenfassung      |
+| `highlights`    | `boolean \| { maxCharacters, query, numSentences, highlightsPerUrl }` | Kernsätze extrahieren            |
+| `summary`       | `boolean \| { query }`                                                | KI-generierte Zusammenfassung    |
 
-Wenn `contents` nicht angegeben wird, verwendet Exa standardmäßig `{ highlights: true }`, sodass die Ergebnisse
-Auszüge mit Schlüsselsätzen enthalten. Ergebnisbeschreibungen werden zuerst aus Hervorhebungen,
+Wenn `contents` weggelassen wird, verwendet Exa standardmäßig `{ highlights: true }`, sodass die Ergebnisse
+Auszüge mit Kernsätzen enthalten. Ergebnisbeschreibungen werden zuerst aus Hervorhebungen,
 dann aus der Zusammenfassung und anschließend aus dem vollständigen Text übernommen – je nachdem, was zuerst verfügbar ist. Die Ergebnisse
-behalten außerdem die unverarbeiteten Felder `highlightScores` und `summary` aus der Antwort der Exa-API
-bei, sofern diese verfügbar sind.
+behalten außerdem die unverarbeiteten Felder `highlightScores` und `summary` aus der Exa-API-
+Antwort bei, sofern sie verfügbar sind.
 
 ### Suchmodi
 
-| Modus            | Beschreibung                                      |
-| ---------------- | ------------------------------------------------- |
-| `auto`           | Exa wählt den besten Modus aus (Standard)         |
-| `neural`         | Semantische beziehungsweise bedeutungsbasierte Suche |
-| `fast`           | Schnelle Schlüsselwortsuche                       |
-| `deep`           | Gründliche Tiefensuche                             |
-| `deep-reasoning` | Tiefensuche mit Schlussfolgerung                   |
-| `instant`        | Schnellste Ergebnisse                             |
+| Modus            | Beschreibung                                 |
+| ---------------- | -------------------------------------------- |
+| `auto`           | Exa wählt den besten Modus (Standard)        |
+| `neural`         | Semantische/bedeutungsbasierte Suche         |
+| `fast`           | Schnelle Schlüsselwortsuche                  |
+| `deep`           | Gründliche Tiefensuche                       |
+| `deep-reasoning` | Tiefensuche mit Schlussfolgerung             |
+| `instant`        | Schnellste Ergebnisse                        |
 
 ## Hinweise
 
-- `count` akzeptiert bis zu 100, abhängig von den Einschränkungen des Exa-Suchtyps.
-- Ergebnisse werden standardmäßig 15 Minuten zwischengespeichert. Konfigurieren Sie die gemeinsamen Optionen
+- `count` akzeptiert bis zu 100, abhängig von den Beschränkungen des Exa-Suchtyps.
+- Ergebnisse werden standardmäßig 15 Minuten zwischengespeichert. Konfigurieren Sie die gemeinsamen
   `tools.web.search.cacheTtlMinutes` (Minuten) und
-  `tools.web.search.timeoutSeconds` (Standardwert: 30 s), um die Cache-Dauer und
+  `tools.web.search.timeoutSeconds` (standardmäßig 30 s), um die Zwischenspeicherung und
   das Anfrage-Timeout für alle `web_search`-Provider einschließlich Exa zu ändern.
 
 ## Verwandte Themen

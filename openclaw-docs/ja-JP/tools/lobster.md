@@ -1,45 +1,59 @@
 ---
 read_when:
     - 明示的な承認を伴う、決定論的な複数ステップのワークフローが必要な場合
-    - 前の手順を再実行せずにワークフローを再開する必要がある場合
-summary: 再開可能な承認ゲートを備えた OpenClaw 向け型付きワークフローランタイム。
-title: ロブスター
+    - 以前の手順を再実行せずにワークフローを再開する必要がある
+summary: 再開可能な承認ゲートを備えた OpenClaw 用の型付きワークフローランタイム。
+title: Lobster
 x-i18n:
-    generated_at: "2026-07-11T22:45:09Z"
+    generated_at: "2026-07-26T10:07:02Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: eedb6577133588b726992a882a92d94f1f414e55998d0fc80644dd3a64ffc1ab
+    source_hash: 85b7900f86bfedc9d73fcc91c3d0dac37b81f7413b1e68c54dd8a797b70f79fc
     source_path: tools/lobster.md
     workflow: 16
 ---
 
-Lobster は、明示的な承認チェックポイントと再開トークンを備えた複数ステップのツールパイプラインを、決定論的な単一のツール呼び出しとして実行します。これは切り離されたバックグラウンド処理の一段上に位置します。多数の切り離されたタスクにまたがるフローをオーケストレーションするには、[Task Flow](/ja-JP/automation/taskflow)（`openclaw tasks flow`）を参照してください。タスクのアクティビティ台帳については、[バックグラウンドタスク](/ja-JP/automation/tasks)を参照してください。
+Lobster は、明示的な承認チェックポイントと再開トークンを使用して、複数ステップのツールパイプラインを単一の決定論的なツール呼び出しとして実行します。
+これは、デタッチされたバックグラウンド作業の一段上に位置します。多数のデタッチされたタスクにまたがるフローのオーケストレーションについては、
+[Task Flow](/ja-JP/automation/taskflow)（`openclaw tasks flow`）を参照してください。タスクの
+アクティビティ台帳については、[バックグラウンドタスク](/ja-JP/automation/tasks)を参照してください。
 
 ## 理由
 
-Lobster を使用しない場合、複数ステップのジョブには多数の往復ツール呼び出しが必要となり、モデルが各ステップをオーケストレーションします。Lobster は、そのオーケストレーションを型付きランタイムに移します。
+Lobster を使用しない場合、複数ステップのジョブには多数の往復ツール呼び出しが必要となり、
+モデルがすべてのステップをオーケストレーションします。Lobster は、そのオーケストレーションを型付き
+ランタイムに移します。
 
-- **多数の呼び出しを1回に集約**：単一の Lobster ツール呼び出しが、パイプライン全体の構造化された結果を返します。
-- **承認を内蔵**：副作用（送信、投稿、削除）が発生する前にワークフローを停止し、明示的な承認を待ちます。
-- **再開可能**：停止したワークフローはトークンを返します。承認して再開する際に、以前のステップを再実行する必要はありません。
+- **多数ではなく 1 回の呼び出し**：単一の Lobster ツール呼び出しが、パイプライン全体の構造化された
+  結果を返します。
+- **組み込みの承認**：副作用（送信、投稿、削除）が発生する場合、明示的に承認されるまでワークフローを
+  停止します。
+- **再開可能**：停止したワークフローはトークンを返します。承認して再開すれば、
+  それ以前のステップを再実行する必要はありません。
 
-Lobster は汎用スクリプト言語ではなく、小規模で制約された DSL です。承認と再開は永続性のある組み込みプリミティブです。パイプラインはデータであるため、ログ記録、差分確認、再実行、レビューが容易です。小さな文法によって「創造的」なコードパスが制限されるため、現実的な検証が可能です。また、タイムアウト、出力上限、サンドボックスチェック、許可リストは各スクリプトではなくランタイムによって適用されます。それでも各ステップから任意の CLI やスクリプトを呼び出せます。より表現力の高いオーサリング言語が必要な場合は、別のツールから `.lobster` ファイルを生成してください。
+Lobster は汎用スクリプト言語ではなく、小規模で制約された DSL です。
+承認と再開は永続的な組み込みプリミティブであり、パイプラインはデータであるため（ログ記録、差分確認、再実行、レビューが容易）、
+小さな文法によって「創造的な」コードパスが制限され、現実的な検証が可能になります。また、
+タイムアウト、出力上限、サンドボックスチェック、許可リストは、各スクリプトではなく
+ランタイムによって適用されます。各ステップから任意の CLI やスクリプトを呼び出すことは引き続き可能です。
+より高機能なオーサリング言語が必要な場合は、他のツールから `.lobster` ファイルを生成してください。
 
 Lobster を使用しない場合、定期的なメールのトリアージは次のようになります。
 
 ```text
 ユーザー：「メールを確認して返信の下書きを作成して」
-→ openclaw が gmail.list を呼び出す
+→ OpenClaw が gmail.list を呼び出す
 → LLM が要約する
 → ユーザー：「#2 と #5 への返信を下書きして」
-→ LLM が下書きする
+→ LLM が下書きを作成する
 → ユーザー：「#2 を送信して」
-→ openclaw が gmail.send を呼び出す
-（毎日繰り返され、何をトリアージしたかの記憶は残らない）
+→ OpenClaw が gmail.send を呼び出す
+（毎日繰り返され、何をトリアージしたかは記憶されない）
 ```
 
-Lobster を使用すると、同じジョブが承認のために停止し、その後再開できる単一の呼び出しになります。
+Lobster を使用すると、同じジョブが、承認のために停止して再開する 1 回の呼び出しになります。
 
 ```json
 { "action": "run", "pipeline": "email.triage --limit 20", "timeoutMs": 30000 }
@@ -49,10 +63,10 @@ Lobster を使用すると、同じジョブが承認のために停止し、そ
 {
   "ok": true,
   "status": "needs_approval",
-  "output": [{ "summary": "5 need replies, 2 need action" }],
+  "output": [{ "summary": "返信が必要なものが 5 件、対応が必要なものが 2 件" }],
   "requiresApproval": {
     "type": "approval_request",
-    "prompt": "Send 2 draft replies?",
+    "prompt": "2 件の返信下書きを送信しますか？",
     "items": [],
     "resumeToken": "..."
   }
@@ -61,11 +75,17 @@ Lobster を使用すると、同じジョブが承認のために停止し、そ
 
 ## 仕組み
 
-OpenClaw は、組み込みランナーとして同梱されている `@clawdbot/lobster` パッケージを使用し、Lobster ワークフローを**プロセス内**で実行します。外部の `lobster` サブプロセスは起動されず、ツール呼び出しから JSON エンベロープが直接返されます。パイプラインが承認のために停止した場合、後で続行できるように、エンベロープには再開トークン（または短い承認 ID）が含まれます。
+OpenClaw は、バンドルされた
+`@clawdbot/lobster` パッケージを組み込みランナーとして使用し、Lobster ワークフローを**プロセス内**で実行します。
+外部の `lobster`
+サブプロセスは起動されず、ツール呼び出しは JSON エンベロープを直接返します。
+パイプラインが承認のために停止した場合、エンベロープには再開トークン（または短い
+承認 ID）が含まれるため、後で続行できます。
 
 ## 有効化
 
-Lobster は**任意**の Plugin ツールであり、デフォルトでは有効になっていません。同梱されているため、個別のインストール手順は不要です。ツールを許可するだけで使用できます。
+Lobster は**任意**の Plugin ツールであり、デフォルトでは有効になっていません。バンドル済みであるため、
+個別のインストール手順は不要です。ツールを許可するだけです。
 
 ```json
 {
@@ -93,17 +113,21 @@ Lobster は**任意**の Plugin ツールであり、デフォルトでは有効
 ```
 
 <Note>
-`alsoAllow` は、他のコアツールを制限せずに、アクティブなツールプロファイルへ `lobster` を追加します。制限的な許可リストモードを使用する場合にのみ、代わりに `tools.allow` を使用してください。
+`alsoAllow` は、他のコアツールを制限せずに、アクティブなツールプロファイルへ `lobster` を追加します。
+制限的な許可リストモードにする場合にのみ、代わりに `tools.allow` を使用してください。
 </Note>
 
 サンドボックス化されたツールコンテキストでは、このツールは完全に無効になります。
 
-開発用または外部パイプライン用（組み込み Gateway ランナー外）のスタンドアロン Lobster CLI が必要な場合は、[Lobster リポジトリ](https://github.com/openclaw/lobster)からインストールし、`lobster` を `PATH` に追加してください。
+開発用または外部パイプライン用にスタンドアロンの Lobster CLI が必要な場合
+（組み込み Gateway ランナーの外部で使用する場合）は、
+[Lobster リポジトリ](https://github.com/openclaw/lobster)からインストールし、`lobster` を
+`PATH` に配置してください。
 
 ## パターン：小さな CLI + JSON パイプ + 承認
 
-JSON を扱う小さなコマンドを作成し、それらを単一の Lobster 呼び出しに連結します。
-（以下はコマンド名の例です。独自のものに置き換えてください。）
+JSON を扱う小さなコマンドを作成し、それらを 1 回の Lobster 呼び出しに連結します。
+（以下のコマンド名は例です。独自のものに置き換えてください。）
 
 ```bash
 inbox list --json
@@ -114,7 +138,7 @@ inbox apply --json
 ```json
 {
   "action": "run",
-  "pipeline": "exec --json --shell 'inbox list --json' | exec --stdin json --shell 'inbox categorize --json' | exec --stdin json --shell 'inbox apply --json' | approve --preview-from-stdin --limit 5 --prompt 'Apply changes?'",
+  "pipeline": "exec --json --shell 'inbox list --json' | exec --stdin json --shell 'inbox categorize --json' | exec --stdin json --shell 'inbox apply --json' | approve --preview-from-stdin --limit 5 --prompt '変更を適用しますか？'",
   "timeoutMs": 30000
 }
 ```
@@ -138,7 +162,8 @@ gog.gmail.search --query 'newer_than:1d' \
 
 ## JSON のみの LLM ステップ（llm-task）
 
-ワークフロー内で**構造化された LLM ステップ**を使用するには、任意の `llm-task` Plugin ツールを有効化し、Lobster から呼び出します。
+ワークフロー内で**構造化された LLM ステップ**を使用するには、任意の
+`llm-task` Plugin ツールを有効にし、Lobster から呼び出します。
 
 ```json
 {
@@ -158,23 +183,26 @@ gog.gmail.search --query 'newer_than:1d' \
 }
 ```
 
-### 重要な制限：組み込み Lobster と `openclaw.invoke` の違い
+### 重要な制限：組み込み Lobster と `openclaw.invoke`
 
-同梱されている Lobster Plugin は、Gateway 内でワークフローを**プロセス内**実行します。この組み込みモードでは、ネストされた OpenClaw CLI ツール呼び出しに対して、`openclaw.invoke` が Gateway URL や認証コンテキストを自動的に継承することは**ありません**。
+バンドルされた Lobster Plugin は、Gateway 内の**プロセス内**でワークフローを実行します。
+この組み込みモードでは、ネストされた OpenClaw CLI ツール呼び出しのための
+Gateway URL／認証コンテキストが `openclaw.invoke` に自動的に継承されることは**ありません**。
 
-そのため、次のパターンは、現在の組み込みランナーでは**信頼できません**。
+そのため、次のパターンは**現在、組み込みランナーでは信頼できません**。
 
 ```lobster
 openclaw.invoke --tool llm-task --action json --args-json '{ ... }'
 ```
 
-以下の例は、`openclaw.invoke` に正しい Gateway と認証のコンテキストがすでに設定された環境で、**スタンドアロン Lobster CLI** を実行する場合にのみ使用してください。
+以下の例は、正しい Gateway／認証コンテキストが `openclaw.invoke` にすでに設定されている環境で、
+**スタンドアロン Lobster CLI** を実行する場合にのみ使用してください。
 
 ```lobster
 openclaw.invoke --tool llm-task --action json --args-json '{
-  "prompt": "Given the input email, return intent and draft.",
+  "prompt": "入力されたメールに基づいて、意図と返信下書きを返してください。",
   "thinking": "low",
-  "input": { "subject": "Hello", "body": "Can you help?" },
+  "input": { "subject": "こんにちは", "body": "手伝ってもらえますか？" },
   "schema": {
     "type": "object",
     "properties": {
@@ -189,14 +217,17 @@ openclaw.invoke --tool llm-task --action json --args-json '{
 
 現在、組み込み Lobster Plugin を使用している場合は、次のいずれかを推奨します。
 
-- Lobster 外で `llm-task` ツールを直接呼び出す
-- サポート対象の組み込みブリッジが追加されるまで、Lobster パイプライン内では `openclaw.invoke` 以外のステップを使用する
+- Lobster の外部で `llm-task` ツールを直接呼び出す、または
+- サポートされる組み込みブリッジが追加されるまで、Lobster パイプライン内で `openclaw.invoke` 以外の
+  ステップを使用する。
 
 詳細と設定オプションについては、[LLM タスク](/ja-JP/tools/llm-task)を参照してください。
 
 ## ワークフローファイル（.lobster）
 
-Lobster は、`name`、`args`、`steps`、`env`、`condition`、`approval` フィールドを含む YAML/JSON ワークフローファイルを実行できます。ツール呼び出しの `pipeline` にファイルパスを設定します。
+Lobster は、`name`、`args`、`steps`、`env`、
+`condition`、`approval` フィールドを持つ YAML／JSON ワークフローファイルを実行できます。ツール
+呼び出しで `pipeline` にファイルパスを設定します。
 
 ```yaml
 name: inbox-triage
@@ -219,10 +250,28 @@ steps:
     condition: $approve.approved
 ```
 
-注記：
+注：
 
 - `stdin: $step.stdout` と `stdin: $step.json` は、前のステップの出力を渡します。
-- `condition`（または `when`）を使用すると、`$step.approved` に基づいてステップの実行を制御できます。
+- `condition`（または `when`）は、`$step.approved` に基づいてステップの実行を制御できます。
+
+### 注入される環境変数
+
+各ステップのシェルは、親環境に加えて次の Lobster 注入変数を継承します。
+これにより、コマンド文字列に未加工の値を埋め込まずに、解決済みのワークフロー引数をコマンドから参照できます。
+
+- `LOBSTER_ARG_<NAME>` - ワークフロー引数ごとに 1 つ。名前は大文字に変換され、
+  英数字以外の文字が連続する部分はそれぞれ `_` にまとめられます。そのため、引数 `user-id` は
+  `LOBSTER_ARG_USER_ID` になります。
+- `LOBSTER_ARGS_JSON` - 解決済みのすべての引数を単一の JSON 文字列として格納します。
+
+注入される変数はこれがすべてです。`LOBSTER_STEP_<id>_STDOUT` や `LOBSTER_STEP_<id>_JSON_<field>` のような
+ステップごとの出力変数は**ありません**。シェルはこれらの名前を未設定として扱うため、
+パラメーター展開のデフォルト値によってエラーが隠れる場合があります。
+前のステップの出力は、代わりにステップ参照（`$step.stdout`、
+`$step.json`、または `$step.json.<field>`）を `stdin:`、`env:`、または `condition:`
+の値で使用して読み取ってください。（`LOBSTER_STATE_DIR` は状態
+ディレクトリ用の独立したランタイム設定であり、実行ごとの引数ではありません。）
 
 ## ツールパラメーター
 
@@ -248,13 +297,13 @@ steps:
 }
 ```
 
-| フィールド       | デフォルト  | 注記                                                                                                                         |
-| ---------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `pipeline`       | 必須        | インラインパイプライン文字列、またはワークフローファイルを示す `.lobster`/`.yaml`/`.yml`/`.json` で終わるパス。              |
-| `cwd`            | Gateway の cwd | 相対作業ディレクトリ。Gateway の作業ディレクトリ内に解決される必要があります（絶対パスは拒否されます）。                    |
-| `timeoutMs`      | `20000`     | この時間を超えた場合、実行を中止します。                                                                                     |
-| `maxStdoutBytes` | `512000`    | 取得した標準出力または標準エラー出力がこのサイズを超えた場合、実行を中止します。                                             |
-| `argsJson`       | -           | ワークフローファイル用の引数を表す JSON 文字列（インラインパイプラインでは無視されます）。                                   |
+| フィールド            | デフォルト     | 注記                                                                                                        |
+| ---------------- | ----------- | ------------------------------------------------------------------------------------------------------------ |
+| `pipeline`       | 必須    | インラインパイプライン文字列、またはワークフローファイルを示す `.lobster`/`.yaml`/`.yml`/`.json` で終わるパス。           |
+| `cwd`            | Gateway の cwd | 相対作業ディレクトリ。Gateway の作業ディレクトリ内に解決される必要があります（絶対パスは拒否されます）。 |
+| `timeoutMs`      | `20000`     | 超過した場合は実行を中止します。                                                                                  |
+| `maxStdoutBytes` | `512000`    | 取得された stdout または stderr がこのサイズを超えた場合、実行を中止します。                                               |
+| `argsJson`       | -           | ワークフローファイル用の引数を表す JSON 文字列（インラインパイプラインでは無視されます）。                                      |
 
 ### `resume`
 
@@ -266,59 +315,84 @@ steps:
 }
 ```
 
-`resume` は、`token`（`requiresApproval` に含まれる完全な再開トークン）または `approvalId`（同じオブジェクトに含まれる短い ID）のいずれかを受け付けます。停止した実行が返した方を使用してください。`approve` は必須です。
+`resume` は、`token`（`requiresApproval` の完全な再開トークン）または
+`approvalId`（同じオブジェクトの短い ID）のいずれかを受け入れます。停止した
+実行が返した方を使用してください。`approve` は必須です。
 
 ### 管理対象 Task Flow モード
 
-`run` に `flowControllerId` と `flowGoal` を渡す（または `resume` に `flowId` と `flowExpectedRevision` を渡す）と、単純なエンベロープを返す代わりに、Plugin ランタイムの管理対象 [Task Flow](/ja-JP/automation/taskflow) API を通じて呼び出しが処理されます。OpenClaw は永続的なフローレコードを作成または再開し、Lobster エンベロープを適用し（承認待ちの場合は `waiting`、完了時は `succeeded`/`failed`）、`{ ok, envelope, flow, mutation }` を返します。このモードにはバインドされた Task Flow ランタイムが必要です。通常のアドホックなエージェント利用ではなく、Gateway の再起動後も永続的なフロー状態を必要とする Plugin またはコントローラーコード向けです。
+`run` に `flowControllerId` と `flowGoal` を渡す（または `resume` に
+`flowId` と `flowExpectedRevision` を渡す）と、裸のエンベロープを返す代わりに、Plugin
+ランタイムの管理対象 [Task Flow](/ja-JP/automation/taskflow) API を介して呼び出しが処理されます。
+OpenClaw は永続的なフローレコードを作成または再開し、Lobster エンベロープを適用して
+（承認時は `waiting`、完了時は `succeeded`/`failed`）、
+`{ ok, envelope, flow, mutation }` を返します。このモードには、バインドされた Task Flow ランタイムが必要です。
+通常のアドホックなエージェント利用ではなく、Gateway の再起動後も永続的なフロー状態を必要とする
+Plugin／コントローラーコードを対象としています。
 
 ## 出力エンベロープ
 
-Lobster は、次の3つのステータスのいずれかを持つ JSON エンベロープを返します。
+Lobster は、次の 3 つのステータスのいずれかを持つ JSON エンベロープを返します。
 
 - `ok` - 正常に完了
-- `needs_approval` - 一時停止中。`requiresApproval` に `resumeToken` と短い `approvalId` が含まれ、どちらでも実行を再開可能
-- `cancelled` - 明示的に拒否またはキャンセル済み
+- `needs_approval` - 一時停止。`requiresApproval` には `resumeToken` と短い
+  `approvalId` が含まれ、どちらを使用しても実行を再開できます
+- `cancelled` - 明示的に拒否またはキャンセル
 
-ツールは、エンベロープを `content`（整形済み JSON）と `details`（未加工オブジェクト）の両方で公開します。
+ツールは、エンベロープを `content`（整形済み JSON）と `details`
+（未加工オブジェクト）の両方で公開します。
 
 ## 承認
 
 `requiresApproval` が存在する場合は、プロンプトを確認して判断します。
 
-- `approve: true` - 再開し、副作用を伴う処理を続行
+- `approve: true` - 再開して副作用の処理を続行
 - `approve: false` - キャンセルしてワークフローを終了
 
-`approve --preview-from-stdin --limit N` を使用すると、独自の jq/heredoc 処理を作成せずに、承認リクエストへ JSON プレビューを添付できます。再開状態は、Lobster の状態ディレクトリ（デフォルトでは `~/.lobster/state`、`LOBSTER_STATE_DIR` で上書き可能）に小さな JSON ファイルとして保存されます。トークン自体には、パイプラインの完全な状態ではなく、その状態へのポインターのみがエンコードされます。
+カスタムの jq／heredoc 処理を使用せずに、承認リクエストへ JSON プレビューを添付するには、
+`approve --preview-from-stdin --limit N` を使用します。再開状態は、Lobster 状態ディレクトリ（デフォルトでは
+`~/.lobster/state`、`LOBSTER_STATE_DIR` で変更可能）配下に小さな JSON ファイルとして保存されます。
+トークン自体にはパイプライン状態全体ではなく、その状態へのポインターのみがエンコードされます。
 
 ## OpenProse
 
-OpenProse は Lobster と組み合わせて効果的に使用できます。`/prose` を使用して複数エージェントによる準備をオーケストレーションし、その後 Lobster パイプラインを実行して決定論的な承認を行います。Prose プログラムで Lobster が必要な場合は、`tools.subagents.tools` を使用してサブエージェントに `lobster` ツールを許可してください。[OpenProse](/ja-JP/prose)を参照してください。
+OpenProse は Lobster と相性よく連携します。`/prose` を使用して複数エージェントによる
+準備をオーケストレーションし、決定論的な承認処理には Lobster パイプラインを実行します。Prose
+プログラムで Lobster が必要な場合は、`tools.subagents.tools` を介してサブエージェントに
+`lobster` ツールを許可します。[OpenProse](/ja-JP/prose)を参照してください。
 
 ## 安全性
 
-- **ローカルのプロセス内のみ** - ワークフローは Gateway プロセス内で実行されます。Plugin 自体からネットワーク呼び出しは行いません。
-- **シークレットなし** - Lobster は OAuth を管理せず、それを行う OpenClaw ツールを呼び出します。
-- **サンドボックス対応** - ツールコンテキストがサンドボックス化されている場合は無効になります。
+- **ローカルのプロセス内のみ** - ワークフローは Gateway プロセス内で実行され、Plugin 自体からの
+  ネットワーク呼び出しはありません。
+- **シークレットなし** - Lobster は OAuth を管理せず、それを行う OpenClaw ツールを
+  呼び出します。
+- **サンドボックス対応** - ツールのコンテキストがサンドボックス化されている場合は無効になります。
 - **堅牢化** - 組み込みランナーによってタイムアウトと出力上限が適用されます。
 
 ## トラブルシューティング
 
-| エラー                                                        | 原因／修正方法                                                                                          |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `lobster runtime timed out`                                   | パイプラインが `timeoutMs` を超過しました。値を増やすか、パイプラインを分割してください。              |
-| `lobster stdout exceeded maxStdoutBytes`（または `stderr`）   | 取得した出力が上限を超えました。`maxStdoutBytes` を増やすか、出力を減らしてください。                   |
-| `run --args-json must be valid JSON`                          | `argsJson`（ワークフローファイルの実行）の解析に失敗しました。JSON 文字列を修正してください。          |
+| エラー                                                         | 原因 / 修正方法                                                                      |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `lobster runtime timed out`                                   | パイプラインが `timeoutMs` を超過しました。値を増やすか、パイプラインを分割してください。                |
+| `lobster stdout exceeded maxStdoutBytes`（または `stderr`）        | 取得された出力が上限を超過しました。`maxStdoutBytes` を増やすか、出力を減らしてください。       |
+| `run --args-json must be valid JSON`                          | `argsJson`（ワークフローファイルの実行）の解析に失敗しました。JSON 文字列を修正してください。            |
 | `lobster runtime failed`（または別の `runtime_error` メッセージ） | 組み込みランタイムがエラーエンベロープを返しました。詳細については Gateway のログを確認してください。 |
 
 ## 詳細情報
 
-- [Plugins](/ja-JP/tools/plugin)
+- [Plugin](/ja-JP/tools/plugin)
 - [Plugin ツールの作成](/ja-JP/plugins/building-plugins#registering-agent-tools)
 
 ## ケーススタディ：コミュニティのワークフロー
 
-公開されている例の一つは、3つの Markdown 保管庫（個人用、パートナー用、共有用）を管理する「第二の脳」CLI と Lobster パイプラインです。CLI は統計、受信トレイ一覧、古くなった項目のスキャン結果を JSON で出力します。Lobster はこれらのコマンドを連結し、`weekly-review`、`inbox-triage`、`memory-consolidation`、`shared-task-sync` などのワークフローを構成します。各ワークフローには承認ゲートがあります。AI が利用可能な場合は判断（分類）を行い、利用できない場合は決定論的なルールにフォールバックします。
+公開されている例の 1 つに、3 つの Markdown Vault（個人用、パートナー用、共有用）を管理する
+「セカンドブレイン」CLI と Lobster パイプラインがあります。CLI は統計、
+受信トレイの一覧、古くなった項目のスキャン結果を JSON として出力し、Lobster はそれらのコマンドを
+`weekly-review`、`inbox-triage`、`memory-consolidation`、
+`shared-task-sync` のようなワークフローに連結します。それぞれに承認ゲートがあります。AI が利用可能な場合は
+判断（分類）を処理し、利用できない場合は決定論的なルールに
+フォールバックします。
 
 - スレッド：[https://x.com/plattenschieber/status/2014508656335770033](https://x.com/plattenschieber/status/2014508656335770033)
 - リポジトリ：[https://github.com/bloomedai/brain-cli](https://github.com/bloomedai/brain-cli)
@@ -326,4 +400,4 @@ OpenProse は Lobster と組み合わせて効果的に使用できます。`/pr
 ## 関連項目
 
 - [自動化](/ja-JP/automation) - すべての自動化メカニズム
-- [ツール概要](/ja-JP/tools) - 利用可能なすべてのエージェントツール
+- [ツールの概要](/ja-JP/tools) - 利用可能なすべてのエージェントツール

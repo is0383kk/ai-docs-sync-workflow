@@ -5,46 +5,47 @@ read_when:
 summary: آداپتورهای RPC برای CLIهای خارجی (signal-cli، imsg) و الگوهای Gateway
 title: آداپتورهای RPC
 x-i18n:
-    generated_at: "2026-07-12T10:48:59Z"
+    generated_at: "2026-07-27T15:47:42Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 6ddb3fb741c90fe7b01ba35376b71865584b1e507cf610705392452790fb76f5
+    source_hash: 7deee8154dc824db4eccca9a26381711693972ba2606aec47d657e3724b3a5dd
     source_path: reference/rpc.md
     workflow: 16
 ---
 
-OpenClaw، CLIهای خارجی را از طریق JSON-RPC یکپارچه می‌کند. در حال حاضر از دو الگو استفاده می‌شود.
+OpenClaw از طریق JSON-RPC با CLIهای خارجی یکپارچه می‌شود. امروزه از دو الگو استفاده می‌شود.
 
-## الگوی A: دیمن HTTP (`signal-cli`)
+## الگوی A: دیمن HTTP (signal-cli)
 
 - `signal-cli` به‌صورت دیمن با JSON-RPC روی HTTP اجرا می‌شود.
 - جریان رویداد SSE است (`/api/v1/events`).
-- کاوشگر سلامت: `/api/v1/check`.
-- وقتی `channels.signal.autoStart=true` باشد، OpenClaw چرخهٔ عمر را مدیریت می‌کند.
+- پروب سلامت: `/api/v1/check`.
+- هنگامی که `channels.signal.transport.kind="managed-native"` باشد (حالت پیش‌فرض)، OpenClaw چرخهٔ حیات را مدیریت می‌کند.
 
-برای راه‌اندازی و نقاط پایانی، به [Signal](/fa/channels/signal) مراجعه کنید.
+برای راه‌اندازی و نقاط پایانی، [Signal](/fa/channels/signal) را ببینید.
 
-## الگوی B: فرایند فرزند stdio (`imsg`)
+## الگوی B: فرایند فرزند stdio (imsg)
 
-- OpenClaw، دستور `imsg rpc` را به‌عنوان فرایند فرزند برای [iMessage](/fa/channels/imessage) اجرا می‌کند.
-- JSON-RPC روی stdin/stdout به‌صورت سطرجداسازی‌شده است (در هر سطر یک شیء JSON).
-- هیچ درگاه TCP و هیچ دیمنی لازم نیست.
+- OpenClaw برای [iMessage](/fa/channels/imessage)، ‏`imsg rpc` را به‌عنوان فرایند فرزند اجرا می‌کند.
+- JSON-RPC روی stdin/stdout به‌صورت خط‌به‌خط جدا می‌شود (یک شیء JSON در هر خط).
+- به درگاه TCP یا دیمن نیازی نیست.
 
-متدهای اصلی مورد استفاده:
+متدهای اصلی مورداستفاده:
 
 - `watch.subscribe` ← اعلان‌ها (`method: "message"`)
 - `watch.unsubscribe`
 - `send`
-- `chats.list` (کاوش/عیب‌یابی)
+- `chats.list` (پروب/عیب‌یابی)
 
-برای راه‌اندازی و آدرس‌دهی (ترجیح `chat_id` بر رشته‌های نمایشی)، به [iMessage](/fa/channels/imessage) مراجعه کنید.
+برای راه‌اندازی و آدرس‌دهی، [iMessage](/fa/channels/imessage) را ببینید (`chat_id` بر رشته‌های نمایشی ترجیح دارد).
 
-## رهنمودهای آداپتور
+## دستورالعمل‌های آداپتور
 
-- Gateway مالک فرایند است (شروع/توقف به چرخهٔ عمر ارائه‌دهنده وابسته است).
+- Gateway فرایند را مدیریت می‌کند (شروع/توقف به چرخهٔ حیات ارائه‌دهنده وابسته است).
 - کلاینت‌های RPC را تاب‌آور نگه دارید: مهلت‌های زمانی و راه‌اندازی مجدد هنگام خروج.
-- شناسه‌های پایدار (برای مثال، `chat_id`) را به رشته‌های نمایشی ترجیح دهید.
+- شناسه‌های پایدار (برای مثال، `chat_id`) را بر رشته‌های نمایشی ترجیح دهید.
 
 ## مرتبط
 

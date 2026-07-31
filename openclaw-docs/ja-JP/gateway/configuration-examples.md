@@ -3,23 +3,24 @@ read_when:
     - OpenClaw の設定方法を学ぶ
     - 設定例を探す
     - OpenClaw を初めてセットアップする
-summary: 一般的な OpenClaw セットアップ向けのスキーマに正確に準拠した設定例
+summary: 一般的な OpenClaw セットアップ向けのスキーマに準拠した設定例
 title: 設定例
 x-i18n:
-    generated_at: "2026-07-11T22:10:22Z"
+    generated_at: "2026-07-26T09:02:10Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: c3ad82ccce62e0c8dbb72f81b0de62d60d8a6282f0a327ed1cbda7ffa3e47969
+    source_hash: ade743a23e24f2e927d1bb1e1828893e24d3d718ec321dd8fda3932830be8331
     source_path: gateway/configuration-examples.md
     workflow: 16
 ---
 
-以下の例は、現在の設定スキーマに準拠しています。網羅的なリファレンスとフィールドごとの注記については、[設定](/ja-JP/gateway/configuration)を参照してください。
+以下の例は、現在の設定スキーマに準拠しています。網羅的なリファレンスと各フィールドの注記については、[設定](/ja-JP/gateway/configuration)を参照してください。
 
 ## クイックスタート
 
-### 必要最小限
+### 最小限の設定
 
 ```json5
 {
@@ -28,7 +29,7 @@ x-i18n:
 }
 ```
 
-`~/.openclaw/openclaw.json` に保存すると、その番号からボットにダイレクトメッセージを送信できます。
+`~/.openclaw/openclaw.json` に保存すると、その番号からボットに DM を送信できます。
 
 ### 推奨スターター設定
 
@@ -39,16 +40,15 @@ x-i18n:
       workspace: "~/.openclaw/workspace",
       model: { primary: "anthropic/claude-sonnet-4-6" },
     },
-    list: [
-      {
-        id: "main",
+    entries: {
+      main: {
         identity: {
           name: "Clawd",
           theme: "helpful assistant",
           emoji: "🦞",
         },
       },
-    ],
+    },
   },
   channels: {
     whatsapp: {
@@ -59,20 +59,20 @@ x-i18n:
   messages: {
     visibleReplies: "automatic",
     groupChat: {
-      visibleReplies: "message_tool", // オプトイン。表示される出力には message(action=send) が必要
+      visibleReplies: "message_tool", // オプトイン。表示可能な出力には message(action=send) が必要
       unmentionedInbound: "room_event",
     },
   },
 }
 ```
 
-## 詳細な例（主要なオプション）
+## 拡張例（主要なオプション）
 
-> JSON5 では、コメントと末尾のカンマを使用できます。通常の JSON も使用できます。
+> JSON5 ではコメントと末尾のカンマを使用できます。通常の JSON も使用できます。
 
 ```json5
 {
-  // Environment + shell
+  // 環境変数とシェル
   env: {
     OPENROUTER_API_KEY: "sk-or-...",
     vars: {
@@ -84,7 +84,7 @@ x-i18n:
     },
   },
 
-  // Auth profile metadata (secrets live in auth-profiles.json)
+  // 認証プロファイルのメタデータ（シークレットは auth-profiles.json に保存）
   auth: {
     profiles: {
       "anthropic:default": { provider: "anthropic", mode: "api_key" },
@@ -98,9 +98,9 @@ x-i18n:
     },
   },
 
-  // Identity is per agent — set it on agents.list[].identity below.
+  // ID はエージェントごとに設定します。以下の agents.entries.<id>.identity に設定してください。
 
-  // Logging
+  // ロギング
   logging: {
     level: "info",
     file: "/tmp/openclaw/openclaw.log",
@@ -109,21 +109,19 @@ x-i18n:
     redactSensitive: "tools",
   },
 
-  // Message formatting
+  // メッセージの書式設定
   messages: {
-    messagePrefix: "[openclaw]",
     visibleReplies: "automatic",
     responsePrefix: ">",
     ackReaction: "👀",
     ackReactionScope: "group-mentions",
     groupChat: {
       historyLimit: 50,
-      visibleReplies: "message_tool", // opt in for shared rooms with tool-reliable models
+      visibleReplies: "message_tool", // ツールを確実に使用できるモデルを共有ルームで使う場合にオプトイン
       unmentionedInbound: "room_event",
     },
     queue: {
       mode: "followup",
-      debounceMs: 500,
       cap: 20,
       drop: "summarize",
       byChannel: {
@@ -138,31 +136,10 @@ x-i18n:
     },
   },
 
-  // Tooling
-  tools: {
-    media: {
-      audio: {
-        enabled: true,
-        maxBytes: 20971520,
-        models: [
-          { provider: "openai", model: "gpt-4o-transcribe" },
-          // Optional CLI fallback (Whisper binary):
-          // { type: "cli", command: "whisper", args: ["--model", "base", "{{MediaPath}}"] }
-        ],
-        timeoutSeconds: 120,
-      },
-      video: {
-        enabled: true,
-        maxBytes: 52428800,
-        models: [{ provider: "google", model: "gemini-3-flash-preview" }],
-      },
-    },
-  },
-
-  // Session behavior
+  // セッションの動作
   session: {
     scope: "per-sender",
-    dmScope: "per-channel-peer", // recommended for multi-user inboxes
+    dmScope: "per-channel-peer", // 複数ユーザーの受信トレイに推奨
     reset: {
       mode: "daily",
       atHour: 4,
@@ -177,18 +154,17 @@ x-i18n:
       mode: "warn",
       pruneAfter: "30d",
       maxEntries: 500,
-      resetArchiveRetention: "30d", // duration or false
-      maxDiskBytes: "500mb", // optional
-      highWaterBytes: "400mb", // optional (defaults to 80% of maxDiskBytes)
+      resetArchiveRetention: "30d", // 期間または false
+      maxDiskBytes: "500mb", // 省略可能
+      highWaterBytes: "400mb", // 省略可能（デフォルトは maxDiskBytes の 80%）
     },
-    typingIntervalSeconds: 5,
     sendPolicy: {
       default: "allow",
       rules: [{ action: "deny", match: { channel: "discord", chatType: "group" } }],
     },
   },
 
-  // Channels
+  // チャンネル
   channels: {
     whatsapp: {
       dmPolicy: "pairing",
@@ -210,7 +186,8 @@ x-i18n:
     discord: {
       enabled: true,
       token: "YOUR_DISCORD_BOT_TOKEN",
-      dm: { enabled: true, allowFrom: ["123456789012345678"] },
+      dmPolicy: "allowlist",
+      allowFrom: ["123456789012345678"],
       guilds: {
         "123456789012345678": {
           slug: "friends-of-openclaw",
@@ -230,7 +207,8 @@ x-i18n:
       channels: {
         "#general": { enabled: true, requireMention: true },
       },
-      dm: { enabled: true, allowFrom: ["U123"] },
+      dmPolicy: "allowlist",
+      allowFrom: ["U123"],
       slashCommand: {
         enabled: true,
         name: "openclaw",
@@ -240,7 +218,7 @@ x-i18n:
     },
   },
 
-  // Agent runtime
+  // エージェントランタイム
   agents: {
     defaults: {
       workspace: "~/.openclaw/workspace",
@@ -257,7 +235,7 @@ x-i18n:
         "anthropic/claude-sonnet-4-6": { alias: "sonnet" },
         "openai/gpt-5.4": { alias: "gpt" },
       },
-      skills: ["github", "weather"], // inherited by agents that omit list[].skills
+      skills: ["github", "weather"], // list[].skills を省略したエージェントに継承
       thinkingDefault: "low",
       verboseDefault: "off",
       toolProgressDetail: "explain",
@@ -284,22 +262,14 @@ x-i18n:
         every: "30m",
         model: "anthropic/claude-sonnet-4-6",
         target: "last",
-        directPolicy: "allow", // allow (default) | block
+        directPolicy: "allow", // allow（デフォルト）| block
         to: "+15555550123",
         prompt: "HEARTBEAT",
         ackMaxChars: 300,
       },
-      memorySearch: {
-        provider: "gemini",
-        model: "gemini-embedding-001",
-        remote: {
-          apiKey: "${GEMINI_API_KEY}",
-        },
-        extraPaths: ["../team-docs", "/srv/shared-notes"],
-      },
       sandbox: {
         mode: "non-main",
-        scope: "session", // preferred over legacy perSession: true
+        scope: "session", // 従来の perSession: true より推奨
         workspaceRoot: "~/.openclaw/sandboxes",
         docker: {
           image: "openclaw-sandbox:bookworm-slim",
@@ -314,38 +284,55 @@ x-i18n:
         },
       },
     },
-    list: [
-      {
-        id: "main",
+    entries: {
+      main: {
         default: true,
         identity: {
           name: "Samantha",
           theme: "helpful sloth",
           emoji: "🦥",
         },
-        // inherits defaults.skills -> github, weather
+        // defaults.skills（github、weather）を継承
         groupChat: {
           mentionPatterns: ["@openclaw", "openclaw"],
         },
-        thinkingDefault: "high", // per-agent thinking override
-        reasoningDefault: "on", // per-agent reasoning visibility
-        fastModeDefault: false, // per-agent fast mode
+        thinkingDefault: "high", // エージェントごとの思考設定の上書き
+        reasoningDefault: "on", // エージェントごとの推論表示設定
+        fastModeDefault: false, // エージェントごとの高速モード
       },
-      {
-        id: "quick",
-        skills: [], // no skills for this agent
-        fastModeDefault: true, // this agent always runs fast
+      quick: {
+        skills: [], // このエージェントでは Skills を使用しない
+        fastModeDefault: true, // このエージェントは常に高速で実行
         thinkingDefault: "off",
       },
-    ],
+    },
+  },
+
+  memory: {
+    search: {
+      provider: "gemini",
+      model: "gemini-embedding-001",
+      remote: {
+        apiKey: "${GEMINI_API_KEY}",
+      },
+      extraPaths: ["../team-docs", "/srv/shared-notes"],
+    },
   },
 
   tools: {
+    media: {
+      models: [
+        { provider: "openai", model: "gpt-4o-transcribe", capabilities: ["audio"] },
+        { provider: "google", model: "gemini-3-flash-preview", capabilities: ["video"] },
+      ],
+      audio: { enabled: true, maxBytes: 20971520, timeoutSeconds: 120 },
+      video: { enabled: true, maxBytes: 52428800 },
+    },
     allow: ["exec", "process", "read", "write", "edit", "apply_patch"],
     deny: ["browser", "canvas"],
     exec: {
       backgroundMs: 10000,
-      timeoutSec: 1800,
+      timeoutSeconds: 1800,
       cleanupMs: 1800000,
     },
     elevated: {
@@ -362,7 +349,7 @@ x-i18n:
     },
   },
 
-  // Custom model providers
+  // カスタムモデルプロバイダー
   models: {
     mode: "merge",
     providers: {
@@ -388,19 +375,14 @@ x-i18n:
     },
   },
 
-  // Cron jobs
+  // Cron ジョブ
   cron: {
     enabled: true,
     store: "~/.openclaw/cron/jobs.json",
-    maxConcurrentRuns: 8, // default; cron dispatch + isolated cron agent-turn execution
     sessionRetention: "24h",
-    runLog: {
-      maxBytes: "2mb",
-      keepLines: 2000,
-    },
   },
 
-  // Webhooks
+  // Webhook
   hooks: {
     enabled: true,
     path: "/hooks",
@@ -415,7 +397,7 @@ x-i18n:
         wakeMode: "now",
         name: "Gmail",
         sessionKey: "hook:gmail:{{messages[0].id}}",
-        messageTemplate: "From: {{messages[0].from}}\nSubject: {{messages[0].subject}}",
+        messageTemplate: "送信元: {{messages[0].from}}\n件名: {{messages[0].subject}}",
         textTemplate: "{{messages[0].snippet}}",
         deliver: true,
         channel: "last",
@@ -443,7 +425,7 @@ x-i18n:
     },
   },
 
-  // Gateway + networking
+  // Gateway とネットワーク
   gateway: {
     mode: "local",
     port: 18789,
@@ -456,7 +438,7 @@ x-i18n:
     },
     tailscale: { mode: "serve", resetOnExit: false },
     remote: { url: "ws://gateway-host.ts.net:18789", token: "remote-token" },
-    reload: { mode: "hybrid", debounceMs: 300 },
+    reload: { mode: "hybrid" },
   },
 
   skills: {
@@ -482,9 +464,9 @@ x-i18n:
 }
 ```
 
-### シンボリックリンクされた同階層のスキルリポジトリ
+### シンボリックリンクされた兄弟 Skills リポジトリ
 
-組み込みスキルのルートに同階層のリポジトリへのシンボリックリンクが含まれる場合に使用します。たとえば、`~/.agents/skills/manager -> ~/Projects/manager/skills`です。
+組み込み Skills のルートに兄弟リポジトリへのシンボリックリンクが含まれている場合に使用します。たとえば `~/.agents/skills/manager -> ~/Projects/manager/skills` です。
 
 ```json5
 {
@@ -497,13 +479,15 @@ x-i18n:
 }
 ```
 
-- `extraDirs`は、同階層のリポジトリを明示的なスキルルートとしてスキャンします。
-- `allowSymlinkTargets`を指定すると、任意のシンボリックリンクによる脱出を許可せずに、シンボリックリンクされたスキルフォルダを信頼済みの実ターゲットルートとして解決できます。
-- Skill Workshopが同じ信頼済みシンボリックリンク先を通じて書き込めるようにするには、`skills.workshop.allowSymlinkTargetWrites: true`を設定します。
+- `extraDirs` は、隣接するリポジトリを明示的な Skills ルートとしてスキャンします。
+- `allowSymlinkTargets` を使用すると、任意のシンボリックリンクによる脱出を許可せずに、シンボリックリンクされた Skills フォルダーを、その信頼済みの
+  実ターゲットルートへ解決できます。
+- Skill Workshop が同じ信頼済みシンボリックリンクターゲットを介して書き込みを適用できるようにするには、
+  `skills.workshop.allowSymlinkTargetWrites: true` を設定します。
 
 ## 一般的なパターン
 
-### 共有スキルの基準設定と1つの上書き
+### 1 つのオーバーライドを持つ共有 Skills ベースライン
 
 ```json5
 {
@@ -512,16 +496,16 @@ x-i18n:
       workspace: "~/.openclaw/workspace",
       skills: ["github", "weather"],
     },
-    list: [
-      { id: "main", default: true },
-      { id: "docs", workspace: "~/.openclaw/workspace-docs", skills: ["docs-search"] },
-    ],
+    entries: {
+      main: { default: true },
+      docs: { workspace: "~/.openclaw/workspace-docs", skills: ["docs-search"] },
+    },
   },
 }
 ```
 
 - `agents.defaults.skills` は共有ベースラインです。
-- `agents.list[].skills` は、1つのエージェントについてそのベースラインを置き換えます。
+- `agents.entries.*.skills` は、1 つのエージェントについてそのベースラインを置き換えます。
 - エージェントに Skills を一切表示しない場合は、`skills: []` を使用します。
 
 ### マルチプラットフォーム設定
@@ -530,7 +514,7 @@ x-i18n:
 {
   agents: { defaults: { workspace: "~/.openclaw/workspace" } },
   channels: {
-    whatsapp: { allowFrom: ["+15555550123"] },
+    whatsapp: { allowFrom: ["+15555550123"], responsePrefix: "[openclaw]" },
     telegram: {
       enabled: true,
       botToken: "YOUR_TOKEN",
@@ -539,7 +523,7 @@ x-i18n:
     discord: {
       enabled: true,
       token: "YOUR_TOKEN",
-      dm: { allowFrom: ["123456789012345678"] },
+      allowFrom: ["123456789012345678"],
     },
   },
 }
@@ -548,7 +532,7 @@ x-i18n:
 ### 信頼済み Node ネットワークの自動承認
 
 ネットワーク経路を管理している場合を除き、デバイスのペアリングは手動のままにしてください。専用の
-ラボまたは tailnet サブネットでは、CIDR または IP を厳密に指定することで、初回の Node デバイスの自動承認を
+ラボまたは tailnet サブネットでは、正確な CIDR または IP を指定して、初回の Node デバイスの自動承認を
 有効にできます。
 
 ```json5
@@ -563,13 +547,13 @@ x-i18n:
 }
 ```
 
-未設定の場合、この機能は無効のままです。これは、要求されたスコープがない
-新規の `role: node` ペアリングにのみ適用されます。オペレーター／ブラウザクライアント、およびロール、スコープ、メタデータ、または
+未設定の場合、これは無効のままです。要求されたスコープがない、新規の `role: node` ペアリングにのみ
+適用されます。オペレーター／ブラウザクライアント、およびロール、スコープ、メタデータ、または
 公開鍵のアップグレードには、引き続き手動承認が必要です。
 
 ### セキュア DM モード（共有受信トレイ／複数ユーザーの DM）
 
-複数の人がボットに DM できる場合（`allowFrom` に複数のエントリがある、複数の人に対するペアリング承認がある、または `dmPolicy: "open"` を使用している場合）は、**セキュア DM モード**を有効にして、異なる送信者からの DM がデフォルトで同じコンテキストを共有しないようにします。
+複数の人がボットに DM を送信できる場合（`allowFrom` に複数のエントリがある、複数の人のペアリングが承認されている、または `dmPolicy: "open"`）、**セキュア DM モード**を有効にすると、異なる送信者からの DM がデフォルトで同じコンテキストを共有しなくなります。
 
 ```json5
 {
@@ -587,16 +571,16 @@ x-i18n:
     discord: {
       enabled: true,
       token: "YOUR_DISCORD_BOT_TOKEN",
-      dm: { enabled: true, allowFrom: ["123456789012345678", "987654321098765432"] },
+      allowFrom: ["123456789012345678", "987654321098765432"],
     },
   },
 }
 ```
 
 Discord／Google Chat／IRC／Mattermost／Microsoft Teams／Slack では、送信者の認可はデフォルトで ID を優先します。
-このリスクを明示的に受け入れる場合に限り、各チャネルの `dangerouslyAllowNameMatching: true` を使用して、変更可能な名前／メールアドレス／ニックネームによる直接照合を有効にしてください。
+そのリスクを明示的に受け入れる場合に限り、各チャネルの `dangerouslyAllowNameMatching: true` で、変更可能な名前／メールアドレス／ニックネームの直接照合を有効にしてください。
 
-### Anthropic API キー + MiniMax フォールバック
+### Anthropic API キーと MiniMax フォールバック
 
 ```json5
 {
@@ -632,7 +616,7 @@ Discord／Google Chat／IRC／Mattermost／Microsoft Teams／Slack では、送�
 }
 ```
 
-### 業務用ボット（アクセス制限あり）
+### 業務用ボット（アクセス制限付き）
 
 ```json5
 {
@@ -641,15 +625,14 @@ Discord／Google Chat／IRC／Mattermost／Microsoft Teams／Slack では、送�
       workspace: "~/work-openclaw",
       elevatedDefault: "off",
     },
-    list: [
-      {
-        id: "main",
+    entries: {
+      main: {
         identity: {
           name: "WorkBot",
           theme: "professional assistant",
         },
       },
-    ],
+    },
   },
   channels: {
     slack: {
@@ -701,9 +684,9 @@ Discord／Google Chat／IRC／Mattermost／Microsoft Teams／Slack では、送�
 ## ヒント
 
 - `dmPolicy: "open"` を設定する場合、対応する `allowFrom` リストに `"*"` を含める必要があります。
-- プロバイダー ID の形式はそれぞれ異なります（電話番号、ユーザー ID、チャネル ID）。形式については、各プロバイダーのドキュメントで確認してください。
-- 後から追加できる任意のセクション：`web`、`browser`、`ui`、`discovery`、`plugins`、`talk`、`signal`、`imessage`。
-- より詳しい設定情報については、[プロバイダー](/ja-JP/providers)および[トラブルシューティング](/ja-JP/gateway/troubleshooting)を参照してください。
+- プロバイダー ID の形式は異なります（電話番号、ユーザー ID、チャネル ID）。形式を確認するには、プロバイダーのドキュメントを参照してください。
+- 後で追加できる任意のセクション：`web`、`browser`、`ui`、`discovery`、`plugins`、`talk`、`signal`、`imessage`。
+- 設定に関する詳細な注意事項については、[プロバイダー](/ja-JP/providers)と[トラブルシューティング](/ja-JP/gateway/troubleshooting)を参照してください。
 
 ## 関連項目
 

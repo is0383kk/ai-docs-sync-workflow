@@ -3,124 +3,125 @@ read_when:
     - Canvas のホスト、ツール、コマンド、ドキュメント、またはプロトコルの所有権の移管
     - Canvas が引き続きコア所有かどうかの監査
     - 実験的な Canvas Plugin の PR の準備またはレビュー
-summary: Canvas をコアから分離し、バンドルされた実験的 Plugin に移行するための計画および監査チェックリスト。
+summary: Canvas をコアからバンドルされた実験的 Plugin に移行するための計画および監査チェックリスト。
 title: Canvas Plugin のリファクタリング
 x-i18n:
-    generated_at: "2026-07-11T22:39:43Z"
+    generated_at: "2026-07-26T09:18:02Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 1470edb74d5f8fe96224d38821ba0b3b13f8ce756124125af64fc3e49df0fcb8
+    source_hash: ead3f865ea80acb1e47f45a5ab07acf19a6470035c00c81006b2b1230bedd71e
     source_path: refactor/canvas.md
     workflow: 16
 ---
 
 # Canvas plugin のリファクタリング
 
-Canvas は利用頻度が低く、実験的です。コア機能ではなく、同梱 Plugin として扱います。コアには汎用的な Gateway、Node、HTTP、認証、設定、ネイティブクライアントの基盤を残せますが、Canvas 固有の動作は `extensions/canvas` 配下に置く必要があります。
+Canvas は利用頻度が低い実験的な機能です。コア機能ではなく、バンドルされた plugin として扱います。コアには汎用的な Gateway、Node、HTTP、認証、設定、ネイティブクライアントの基盤を残せますが、Canvas 固有の動作は `extensions/canvas` 配下に置く必要があります。
 
 ## 目標
 
 現在のペアリング済み Node の動作を維持しながら、Canvas の所有権を `extensions/canvas` に移します。
 
-- エージェント向けの `canvas` ツールは Canvas Plugin が登録する
-- Canvas Node コマンドは、Canvas Plugin が登録した場合にのみ許可される
-- A2UI のホストおよびソースファイルは Canvas Plugin 配下に置く
-- Canvas ドキュメントの実体化は Canvas Plugin 配下に置く
-- CLI コマンドの実装は Canvas Plugin 配下に置くか、Plugin が所有するランタイムバレルを介して委譲する
-- ドキュメントと Plugin インベントリでは、Canvas を実験的かつ Plugin ベースとして説明する
+- エージェント向けの `canvas` ツールは Canvas plugin によって登録される
+- Canvas Node コマンドは Canvas plugin が登録した場合にのみ許可される
+- A2UI のホスト／ソースファイルは Canvas plugin 配下に置かれる
+- Canvas ドキュメントの実体化処理は Canvas plugin 配下に置かれる
+- CLI コマンドの実装は Canvas plugin 配下に置かれるか、plugin が所有するランタイム barrel を介して委譲される
+- ドキュメントと plugin インベントリでは、Canvas を実験的かつ plugin ベースの機能として説明する
 
 ## 対象外
 
 - このリファクタリングでは、ネイティブアプリの Canvas UI を再設計しない。
-- Canvas を削除するという別途の製品判断がない限り、iOS、Android、macOS から Canvas のプロトコル／クライアント対応を削除しない。
-- 同じ接続面を必要とする同梱 Plugin がほかに少なくとも 1 つない限り、Canvas のためだけに広範な Plugin サービスフレームワークを構築しない。
+- Canvas を削除するという別途のプロダクト判断がない限り、iOS、Android、macOS から Canvas のプロトコル／クライアントサポートを削除しない。
+- 少なくとももう 1 つのバンドル plugin が同じ接続面を必要としない限り、Canvas だけのために広範な plugin サービスフレームワークを構築しない。
 
 ## 現在のブランチの状態
 
 完了済み：
 
-- `extensions/canvas` に同梱 Plugin パッケージを追加。
+- `extensions/canvas` にバンドル plugin パッケージを追加。
 - `extensions/canvas/openclaw.plugin.json` を追加。
 - エージェントの `canvas` ツールを `src/agents/tools/canvas-tool.ts` から `extensions/canvas/src/tool.ts` に移動。
 - `src/agents/openclaw-tools.ts` から `createCanvasTool` のコア登録を削除。
-- Canvas ホスト実装を `src/canvas-host` から `extensions/canvas/src/host` に移動。
-- テスト、パッケージング、外部公開される Canvas ヘルパー向けに、Plugin が所有する互換性バレルとして `extensions/canvas/runtime-api.ts` を維持。
-- Canvas ドキュメントの実体化を `src/gateway/canvas-documents.ts` から `extensions/canvas/src/documents.ts` に移動。
-- Canvas CLI 実装と A2UI JSONL ヘルパーを `extensions/canvas/src/cli.ts` に移動。
+- Canvas ホストの実装を `src/canvas-host` から `extensions/canvas/src/host` に移動。
+- `extensions/canvas/runtime-api.ts` は、テスト、パッケージング、外部公開される Canvas ヘルパー向けに、plugin が所有する互換性 barrel として維持。
+- Canvas ドキュメントの実体化処理を `src/gateway/canvas-documents.ts` から `extensions/canvas/src/documents.ts` に移動。
+- Canvas CLI の実装と A2UI JSONL ヘルパーを `extensions/canvas/src/cli.ts` に移動。
 - Canvas ホスト URL とスコープ付きケイパビリティのヘルパーを `extensions/canvas/src` に移動。
-- Canvas Node コマンドのデフォルトを、ハードコードされたコアのリストから Plugin の `nodeInvokePolicies` に移動。
-- `plugins.entries.canvas.config.host` に Plugin 所有の Canvas ホスト設定を追加。
-- Canvas および A2UI の HTTP 配信を、Canvas Plugin の HTTP ルート登録の背後に移動。
-- Plugin 所有の HTTP ルート向けに、汎用的な Plugin WebSocket アップグレードディスパッチを追加。
-- Canvas 固有の Gateway ホスト URL と Node ケイパビリティ認証を、汎用的なホスト型 Plugin サーフェスおよび Node ケイパビリティヘルパーに置き換え。
-- Plugin 所有のホスト型メディアリゾルバーを追加し、コアが Canvas ドキュメント内部をインポートする代わりに、Canvas ドキュメント URL が Canvas Plugin を介して解決されるように変更。
-- `api.registerNodeCliFeature(...)` を追加し、親コマンドのパスを手動で記述せずに、Canvas が `openclaw nodes canvas` を Plugin 所有の Node 機能として宣言できるように変更。
-- 本番用 `src/**` からの `extensions/canvas/runtime-api.js` のインポートを削除。
+- Canvas Node コマンドのデフォルトを、ハードコードされたコアのリストから plugin の `nodeInvokePolicies` に移動。
+- `plugins.entries.canvas.config.host` に plugin 所有の Canvas ホスト設定を追加。
+- Canvas と A2UI の HTTP 配信を、Canvas plugin の HTTP ルート登録の背後に移動。
+- plugin 所有の HTTP ルート向けに、汎用的な plugin WebSocket アップグレードディスパッチを追加。
+- Canvas 固有の Gateway ホスト URL と Node ケイパビリティ認証を、汎用的なホスト型 plugin サーフェスおよび Node ケイパビリティヘルパーに置換。
+- plugin 所有のホスト型メディアリゾルバーを追加し、コアが Canvas ドキュメントの内部実装をインポートする代わりに、Canvas ドキュメントの URL が Canvas plugin を介して解決されるように変更。
+- `api.registerNodeCliFeature(...)` を追加し、Canvas が親コマンドのパスを手動で記述せずに、`openclaw nodes canvas` を plugin 所有の Node 機能として宣言できるように変更。
+- `extensions/canvas/runtime-api.js` の本番用 `src/**` インポートを削除。
 - A2UI バンドルのソースを `apps/shared/OpenClawKit/Tools/CanvasA2UI` から `extensions/canvas/src/host/a2ui-app` に移動。
-- A2UI のビルド／コピー実装を `extensions/canvas/scripts` 配下に移動し、ルートのビルド接続を汎用的な同梱 Plugin アセットフックに置き換え。
+- A2UI のビルド／コピー実装を `extensions/canvas/scripts` 配下に移動し、ルートのビルド配線を汎用的なバンドル plugin アセットフックに置換。
 - ランタイムのレガシーなトップレベル `canvasHost` 設定エイリアスを削除。
-- `openclaw doctor --fix` が古い `canvasHost` 設定を `plugins.entries.canvas.config.host` に書き換えるよう、Canvas の doctor マイグレーションを維持。
-- Gateway プロトコル v4 より前の旧エージェント向け Canvas プロトコル互換性を削除。ネイティブクライアントと Gateway は、`pluginSurfaceUrls.canvas` と `node.pluginSurface.refresh` のみを使用するようになりました。非推奨の `canvasHostUrl`、`canvasCapability`、`node.canvas.capability.refresh` の経路は、この実験的なリファクタリングでは意図的にサポートされません。
-- 生成された Plugin インベントリを更新し、Canvas を追加。
-- `docs/plugins/reference/canvas.md` に Plugin リファレンスドキュメントを追加。
+- Canvas の doctor マイグレーションを維持し、`openclaw doctor --fix` が古い `canvasHost` 設定を `plugins.entries.canvas.config.host` に書き換えるようにした。
+- Gateway プロトコル v4 より前の旧エージェント向け Canvas プロトコル互換性を削除。現在、ネイティブクライアントと Gateway は `pluginSurfaceUrls.canvas` と `node.pluginSurface.refresh` のみを使用する。非推奨の `canvasHostUrl`、`canvasCapability`、`node.canvas.capability.refresh` の経路は、この実験的なリファクタリングでは意図的にサポートしない。
+- 生成される plugin インベントリを更新し、Canvas を追加。
+- `docs/plugins/reference/canvas.md` に plugin リファレンスドキュメントを追加。
 
-コア所有のまま残っている既知の Canvas サーフェス：
+コアが所有する既知の残存 Canvas サーフェス：
 
-- `apps/` 配下のネイティブアプリの Canvas ハンドラーは、引き続き意図的に Canvas Plugin サーフェスを利用する
-- `apps/` 配下のネイティブアプリの Canvas プロトコル／クライアントハンドラー
-- 公開アーティファクトの出力は、後方互換性のあるランタイム検索のために引き続き `dist/canvas-host/a2ui` を使用するが、コピー手順は現在 Plugin が所有する
+- `apps/` 配下のネイティブアプリ Canvas ハンドラーは、引き続き意図的に Canvas plugin サーフェスを利用する
+- `apps/` 配下のネイティブアプリ Canvas プロトコル／クライアントハンドラー
+- 公開アーティファクトの出力では、後方互換性のあるランタイム検索のために引き続き `dist/canvas-host/a2ui` を使用するが、コピー処理は現在 plugin が所有している
 
-## 目標構成
+## 目標とする形
 
 `extensions/canvas` が所有するもの：
 
-- Plugin マニフェストとパッケージメタデータ
+- plugin マニフェストとパッケージメタデータ
 - エージェントツールの登録
 - Node invoke コマンドポリシー
 - Canvas ホストと A2UI ランタイム
 - Canvas A2UI バンドルのソースとアセットのビルド／コピースクリプト
 - Canvas ドキュメントの作成とアセット解決
 - Canvas CLI の実装
-- Canvas ドキュメントページと Plugin インベントリエントリ
+- Canvas ドキュメントページと plugin インベントリのエントリ
 
-コアが所有するのは汎用的な接続面のみ：
+コアが所有するのは汎用的な接続面のみとする：
 
-- Plugin の検出と登録
-- 汎用エージェントツールレジストリ
-- 汎用 Node invoke ポリシーレジストリ
-- 汎用 Gateway HTTP／認証と WebSocket アップグレードディスパッチ
-- 汎用ホスト型 Plugin サーフェス URL の解決
-- 汎用ホスト型メディアリゾルバーの登録
-- 汎用 Node ケイパビリティトランスポート
-- 汎用設定基盤
-- 汎用同梱 Plugin アセットフックの検出
+- plugin の検出と登録
+- 汎用的なエージェントツールレジストリ
+- 汎用的な Node invoke ポリシーレジストリ
+- 汎用的な Gateway HTTP／認証と WebSocket アップグレードディスパッチ
+- 汎用的なホスト型 plugin サーフェス URL の解決
+- 汎用的なホスト型メディアリゾルバーの登録
+- 汎用的な Node ケイパビリティ転送
+- 汎用的な設定基盤
+- 汎用的なバンドル plugin アセットフックの検出
 
-ネイティブアプリは、プロトコルのクライアントとして Canvas コマンドハンドラーを保持できます。ネイティブアプリは Plugin ランタイムの所有者ではありません。
+ネイティブアプリは、プロトコルのクライアントとして Canvas コマンドハンドラーを維持できます。ネイティブアプリは plugin ランタイムの所有者ではありません。
 
 ## 移行手順
 
-1. `plugins.entries.canvas.config.host` を Plugin 所有の設定サーフェスとして扱う。
-2. Canvas を実験的な同梱 Plugin として説明するようにドキュメントを更新する。
-3. Canvas に焦点を当てたテスト、Plugin インベントリチェック、Plugin SDK API チェック、およびランタイム境界の影響を受けるビルド／型ゲートを実行する。
+1. `plugins.entries.canvas.config.host` を plugin 所有の設定サーフェスとして扱う。
+2. Canvas を実験的なバンドル plugin として説明するようにドキュメントを更新する。
+3. 対象を絞った Canvas テスト、plugin インベントリチェック、plugin SDK API チェック、およびランタイム境界の影響を受けるビルド／型ゲートを実行する。
 
 ## 監査チェックリスト
 
 リファクタリングの完了を宣言する前に：
 
-- `rg "src/canvas-host|../canvas-host"` で使用中のソースインポートが検出されない。
-- `rg "canvas-tool|createCanvasTool" src` でコア所有の Canvas ツール実装が検出されない。
-- `rg "canvas.present|canvas.snapshot|canvas.a2ui" src/gateway` で、汎用 Plugin ポリシーテスト以外にハードコードされた許可リストのデフォルトが検出されない。
-- `rg "extensions/canvas/runtime-api" src --glob '!**/*.test.ts'` の結果が空である。
-- `rg "canvas-documents" src` の結果が空である。
-- `rg "registerNodesCanvasCommands|nodes-canvas" src` の結果が空である。Canvas Plugin は、ネストされた Plugin CLI メタデータを通じて `openclaw nodes canvas` を登録する。
-- `rg "createCanvasHostHandler|handleA2uiHttpRequest" src/gateway` で Gateway ランタイムの所有が検出されない。
-- `rg "apps/shared/OpenClawKit/Tools/CanvasA2UI|canvas-a2ui-copy|extensions/canvas/src/host/a2ui" scripts .github package.json` で、互換性ラッパーまたは Plugin 所有のパスのみが検出される。
+- `rg "src/canvas-host|../canvas-host"` が実際に使用されるソースインポートを返さない。
+- `rg "canvas-tool|createCanvasTool" src` で、コア所有の Canvas ツール実装が見つからない。
+- `rg "canvas.present|canvas.snapshot|canvas.a2ui" src/gateway` で、汎用的な plugin ポリシーテスト以外にハードコードされた許可リストのデフォルトが見つからない。
+- `rg "extensions/canvas/runtime-api" src --glob '!**/*.test.ts'` が空である。
+- `rg "canvas-documents" src` が空である。
+- `rg "registerNodesCanvasCommands|nodes-canvas" src` が空である。Canvas plugin は、ネストされた plugin CLI メタデータを介して `openclaw nodes canvas` を登録する。
+- `rg "createCanvasHostHandler|handleA2uiHttpRequest" src/gateway` が Gateway ランタイムの所有を返さない。
+- `rg "apps/shared/OpenClawKit/Tools/CanvasA2UI|canvas-a2ui-copy|extensions/canvas/src/host/a2ui" scripts .github package.json` では、互換性ラッパーまたは plugin 所有のパスのみが見つかる。
 - `pnpm plugins:inventory:check` が成功する。
-- `pnpm plugin-sdk:api:check` が成功するか、生成された API ベースラインが意図的に更新され、レビューされている。
-- Canvas を対象としたテストが成功する。
+- `pnpm plugin-sdk:api:check` が成功するか、生成された API 契約レコードが意図的に更新され、レビューされている。
+- 対象を絞った Canvas テストが成功する。
 - Canvas ホスト／A2UI パスの変更レーンテストが成功する。
-- PR 本文に、Canvas が実験的かつ Plugin ベースであることが明記されている。
+- PR 本文に、Canvas が実験的かつ plugin ベースであることが明記されている。
 
 ## 検証コマンド
 
@@ -136,4 +137,4 @@ pnpm plugins:inventory:check
 pnpm plugin-sdk:api:check
 ```
 
-ランタイムバレル、遅延インポート、パッケージング、または公開される Plugin サーフェスを変更した場合は、プッシュ前に `pnpm build` を実行します。
+ランタイム barrel、遅延インポート、パッケージング、または公開される plugin サーフェスが変更された場合は、push 前に `pnpm build` を実行します。

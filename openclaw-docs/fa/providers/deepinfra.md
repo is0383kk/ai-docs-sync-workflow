@@ -1,20 +1,21 @@
 ---
 read_when:
-    - شما یک کلید API واحد برای برترین مدل‌های زبانی بزرگ متن‌باز می‌خواهید
-    - می‌خواهید مدل‌ها را از طریق API دیپ‌اینفرا در OpenClaw اجرا کنید
-summary: برای دسترسی به محبوب‌ترین مدل‌های متن‌باز و پیشرو در OpenClaw، از API یکپارچهٔ DeepInfra استفاده کنید
+    - برای برترین LLMهای متن‌باز، یک کلید API واحد می‌خواهید
+    - می‌خواهید مدل‌ها را از طریق API شرکت DeepInfra در OpenClaw اجرا کنید
+summary: از API یکپارچهٔ DeepInfra برای دسترسی به محبوب‌ترین مدل‌های متن‌باز و پیشرو در OpenClaw استفاده کنید
 title: DeepInfra
 x-i18n:
-    generated_at: "2026-07-12T10:43:22Z"
+    generated_at: "2026-07-27T15:39:48Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 7f68bac84311d20348007c715803a34451ba8ab0c09beba63366ba5b1b29de05
+    source_hash: a63bdd4ffd2189cde50f0ee601fd7ee32ca86c943a9899072f0c140823608004
     source_path: providers/deepinfra.md
     workflow: 16
 ---
 
-DeepInfra درخواست‌ها را به مدل‌های متن‌باز محبوب و مدل‌های پیشرو، از طریق یک نقطه پایانی سازگار با OpenAI و یک کلید API واحد، هدایت می‌کند. بیشتر SDKهای OpenAI با تغییر نشانی پایه با آن کار می‌کنند.
+DeepInfra درخواست‌ها را از طریق یک نقطه پایانی سازگار با OpenAI و یک کلید API به مدل‌های متن‌باز محبوب و مدل‌های پیشرو هدایت می‌کند. بیشتر SDKهای OpenAI با تغییر URL پایه با آن کار می‌کنند.
 
 ## نصب Plugin
 
@@ -53,25 +54,25 @@ export DEEPINFRA_API_KEY="<your-deepinfra-api-key>" # pragma: allowlist secret
 }
 ```
 
-## قابلیت‌های پشتیبانی‌شده
+## سطوح پشتیبانی‌شده
 
-گفت‌وگو، تولید تصویر و تولید ویدئو، پس از پیکربندی `DEEPINFRA_API_KEY`، فهرست مدل‌های خود را به‌صورت زنده از `https://api.deepinfra.com/v1/openai/models?sort_by=openclaw&filter=with_meta` به‌روزرسانی می‌کنند. سایر قابلیت‌ها تا زمانی که به همین فهرست زنده منتقل شوند، از مقادیر پیش‌فرض ثابت زیر استفاده می‌کنند.
+کاتالوگ مدل‌های گفت‌وگو، تولید تصویر و تولید ویدئو پس از پیکربندی `DEEPINFRA_API_KEY`، به‌صورت زنده از `https://api.deepinfra.com/v1/openai/models?sort_by=openclaw&filter=with_meta` به‌روزرسانی می‌شود. کشف زنده فهرست مدل‌های قابل‌انتخاب را گسترش می‌دهد؛ مدل پیش‌فرض هر سطح همان مقدار ایستای زیر باقی می‌ماند. سطوح دیگر تا زمانی که به همین کاتالوگ زنده منتقل شوند، از کاتالوگ‌های ایستا استفاده می‌کنند.
 
-| قابلیت | مدل پیش‌فرض | پیکربندی/ابزار OpenClaw |
-| ------------------------ | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| گفت‌وگو / ارائه‌دهنده مدل | نخستین ورودی دارای برچسب گفت‌وگو در فهرست زنده (جایگزین ثابت `deepseek-ai/DeepSeek-V4-Flash`) | `agents.defaults.model` |
-| تولید/ویرایش تصویر | نخستین ورودی دارای برچسب `image-gen` در فهرست زنده (جایگزین ثابت `black-forest-labs/FLUX-1-schnell`) | `image_generate`، `agents.defaults.imageGenerationModel` |
-| درک رسانه | `moonshotai/Kimi-K2.5` برای تصاویر | درک تصاویر ورودی |
-| تبدیل گفتار به متن | `openai/whisper-large-v3-turbo` | رونویسی صوت ورودی |
-| تبدیل متن به گفتار | `hexgrad/Kokoro-82M` | `messages.tts.provider: "deepinfra"` |
-| تولید ویدئو | جایگزین ثابت `Pixverse/Pixverse-T2V` (در حال حاضر هیچ ردیف زنده‌ای با برچسب `video-gen` از DeepInfra وجود ندارد) | `video_generate`، `agents.defaults.videoGenerationModel` |
-| تعبیه‌های حافظه | `BAAI/bge-m3` | `agents.defaults.memorySearch.provider: "deepinfra"` |
+| سطح                      | مدل پیش‌فرض                                                                    | پیکربندی/ابزار OpenClaw                               |
+| ------------------------ | ------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| گفت‌وگو / ارائه‌دهنده مدل | `deepseek-ai/DeepSeek-V4-Flash` (کاتالوگ زنده مدل‌های گفت‌وگوی بیشتری اضافه می‌کند)         | `agents.defaults.model`                                    |
+| تولید/ویرایش تصویر       | `black-forest-labs/FLUX-1-schnell` (کاتالوگ زنده مدل‌های `image-gen` بیشتری اضافه می‌کند) | `image_generate`، `agents.defaults.mediaModels.image`                |
+| درک رسانه                | `moonshotai/Kimi-K2.5` برای تصاویر                                                 | درک تصاویر ورودی                                     |
+| تبدیل گفتار به متن       | `openai/whisper-large-v3-turbo`                                                            | رونویسی صوت ورودی                                     |
+| تبدیل متن به گفتار       | `hexgrad/Kokoro-82M`                                                            | `tts.provider: "deepinfra"`                                    |
+| تولید ویدئو              | `Pixverse/Pixverse-T2V` (کاتالوگ زنده مدل‌های `video-gen` بیشتری اضافه می‌کند) | `video_generate`، `agents.defaults.mediaModels.video`                |
+| تعبیه‌های حافظه          | `BAAI/bge-m3`                                                            | `memory.search.provider: "deepinfra"`                                    |
 
-DeepInfra همچنین بازرتبه‌بندی، طبقه‌بندی، تشخیص اشیا و انواع بومی دیگر مدل‌ها را ارائه می‌کند. OpenClaw هنوز برای این دسته‌ها قرارداد ارائه‌دهنده‌ای ندارد، بنابراین این Plugin آن‌ها را ثبت نمی‌کند.
+DeepInfra همچنین بازرتبه‌بندی، طبقه‌بندی، تشخیص اشیا و دیگر انواع مدل بومی را ارائه می‌دهد. OpenClaw هنوز برای این دسته‌ها قرارداد ارائه‌دهنده‌ای ندارد، بنابراین این Plugin آن‌ها را ثبت نمی‌کند.
 
 ## مدل‌های موجود
 
-OpenClaw پس از پیکربندی یک کلید، مدل‌های DeepInfra را به‌صورت پویا شناسایی می‌کند. برای مشاهده فهرست فعلی، از `/models deepinfra` یا `openclaw models list --provider deepinfra` استفاده کنید.
+OpenClaw پس از پیکربندی یک کلید، مدل‌های DeepInfra را به‌صورت پویا کشف می‌کند. برای مشاهده فهرست فعلی از `/models deepinfra` یا `openclaw models list --provider deepinfra` استفاده کنید.
 
 هر مدلی در [deepinfra.com](https://deepinfra.com/) با پیشوند `deepinfra/` کار می‌کند:
 
@@ -82,15 +83,15 @@ deepinfra/MiniMaxAI/MiniMax-M2.5
 deepinfra/moonshotai/Kimi-K2.5
 deepinfra/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B
 deepinfra/zai-org/GLM-5.1
-...و مدل‌های بسیار دیگر
+...و بسیاری مدل دیگر
 ```
 
 ## نکات
 
 - ارجاع‌های مدل به‌شکل `deepinfra/<provider>/<model>` هستند (برای مثال `deepinfra/Qwen/Qwen3-Max`).
 - مدل پیش‌فرض گفت‌وگو: `deepinfra/deepseek-ai/DeepSeek-V4-Flash`
-- نشانی پایه: `https://api.deepinfra.com/v1/openai`
-- تولید بومی ویدئو از `https://api.deepinfra.com/v1/inference/<model>` استفاده می‌کند.
+- URL پایه: `https://api.deepinfra.com/v1/openai`
+- تولید ویدئو از نقطه پایانی ناهمگام سازگار با OpenAI یعنی `https://api.deepinfra.com/v1/openai/videos` استفاده می‌کند (ارسال، سپس نظرسنجی). `baseUrl` پیکربندی‌شده رعایت می‌شود. `openclaw doctor --fix` مقادیر قدیمی `nativeBaseUrl` یا `/v1/inference` را در `api.deepinfra.com` به‌طور خودکار به `baseUrl` منتقل می‌کند؛ نقاط پایانی بومی سفارشی با یک اعلان doctor بازنشسته می‌شوند و به `baseUrl` سازگار با OpenAI که به‌صورت دستی پیکربندی شده باشد نیاز دارند. تا زمانی که `baseUrl` همچنان سطح بازنشسته‌شده `/v1/inference` را هدف قرار دهد، تولید ویدئو پیش از ارسال هرگونه درخواست با خطایی همراه با راهکار عملی ناموفق می‌شود.
 
 ## مرتبط
 

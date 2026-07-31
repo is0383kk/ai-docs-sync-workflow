@@ -1,41 +1,40 @@
 ---
 read_when:
     - การตั้งค่า OpenClaw เป็นครั้งแรก
-    - กำลังค้นหารูปแบบการกำหนดค่าที่พบบ่อย
-    - การนำทางไปยังส่วนการกำหนดค่าเฉพาะ
-summary: 'ภาพรวมการกำหนดค่า: งานทั่วไป การตั้งค่าอย่างรวดเร็ว และลิงก์ไปยังข้อมูลอ้างอิงฉบับเต็ม'
+    - กำลังค้นหารูปแบบการกำหนดค่าที่ใช้กันทั่วไป
+    - การไปยังส่วนการกำหนดค่าที่ระบุ
+summary: 'ภาพรวมการกำหนดค่า: งานทั่วไป การตั้งค่าอย่างรวดเร็ว และลิงก์ไปยังเอกสารอ้างอิงฉบับเต็ม'
 title: การกำหนดค่า
 x-i18n:
-    generated_at: "2026-07-02T09:00:38Z"
-    model: gpt-5.5
+    generated_at: "2026-07-20T05:56:18Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: a0044dd771effee8e11d5dfd99e6f14f105089328dcca23f5794ddff4995bca7
+    source_hash: d48a4ebb9a8ca212917ce4fe12a0670a44bf1030657bd1334343a91eef8ff742
     source_path: gateway/configuration.md
     workflow: 16
 ---
 
-OpenClaw อ่านการกำหนดค่า <Tooltip tip="JSON5 supports comments and trailing commas">**JSON5**</Tooltip> ที่เป็นทางเลือกจาก `~/.openclaw/openclaw.json`
-พาธการกำหนดค่าที่ใช้งานอยู่ต้องเป็นไฟล์ปกติ เลย์เอาต์ `openclaw.json`
-แบบ symlink ไม่รองรับสำหรับการเขียนที่ OpenClaw เป็นเจ้าของ การเขียนแบบ atomic อาจแทนที่
-พาธแทนการคง symlink ไว้ หากคุณเก็บการกำหนดค่าไว้นอกไดเรกทอรีสถานะ
-เริ่มต้น ให้ชี้ `OPENCLAW_CONFIG_PATH` ไปยังไฟล์จริงโดยตรง
+OpenClaw อ่านการกำหนดค่า <Tooltip tip="JSON5 รองรับความคิดเห็นและเครื่องหมายจุลภาคท้ายรายการ">**JSON5**</Tooltip> ที่เป็นทางเลือกจาก `~/.openclaw/openclaw.json` หากไม่มีไฟล์ OpenClaw จะใช้ค่าเริ่มต้นที่ปลอดภัย
 
-หากไฟล์หายไป OpenClaw จะใช้ค่าเริ่มต้นที่ปลอดภัย เหตุผลทั่วไปในการเพิ่มการกำหนดค่า:
+เส้นทางการกำหนดค่าที่ใช้งานอยู่ต้องเป็นไฟล์ปกติ การเขียนที่ OpenClaw เป็นเจ้าของจะแทนที่ไฟล์แบบอะตอมมิก (เปลี่ยนชื่อไปยังเส้นทางนั้น) ดังนั้น `openclaw.json` ที่เป็น symlink จะทำให้เป้าหมายถูกแทนที่แทนที่จะเขียนผ่าน symlink โปรดหลีกเลี่ยงโครงสร้างการกำหนดค่าแบบ symlink หากเก็บการกำหนดค่าไว้นอกไดเรกทอรีสถานะเริ่มต้น ให้ชี้ `OPENCLAW_CONFIG_PATH` ไปยังไฟล์จริงโดยตรง
 
-- เชื่อมต่อช่องทางและควบคุมว่าใครสามารถส่งข้อความถึงบอตได้
-- ตั้งค่าโมเดล เครื่องมือ sandboxing หรือ automation (cron, hooks)
+เหตุผลทั่วไปในการเพิ่มการกำหนดค่า:
+
+- เชื่อมต่อช่องทางและควบคุมว่าใครส่งข้อความถึงบอตได้
+- ตั้งค่าโมเดล เครื่องมือ sandboxing หรือระบบอัตโนมัติ (cron, hooks)
 - ปรับแต่งเซสชัน สื่อ เครือข่าย หรือ UI
 
-ดู [ข้อมูลอ้างอิงฉบับเต็ม](/th/gateway/configuration-reference) สำหรับทุกฟิลด์ที่ใช้ได้
+ดูทุกฟิลด์ที่พร้อมใช้งานได้ใน[เอกสารอ้างอิงฉบับเต็ม](/th/gateway/configuration-reference)
 
-เอเจนต์และ automation ควรใช้ `config.schema.lookup` เพื่อดูเอกสาร
-ระดับฟิลด์ที่แน่นอนก่อนแก้ไขการกำหนดค่า ใช้หน้านี้สำหรับคำแนะนำตามงาน และ
-[ข้อมูลอ้างอิงการกำหนดค่า](/th/gateway/configuration-reference) สำหรับแผนผัง
-ฟิลด์และค่าเริ่มต้นที่กว้างกว่า
+เอเจนต์และระบบอัตโนมัติควรใช้ `config.schema.lookup` เพื่อดูเอกสารระดับฟิลด์ที่แม่นยำ
+ก่อนแก้ไขการกำหนดค่า ใช้หน้านี้สำหรับคำแนะนำตามงาน และใช้
+[เอกสารอ้างอิงการกำหนดค่า](/th/gateway/configuration-reference) สำหรับภาพรวม
+ของฟิลด์และค่าเริ่มต้น
 
 <Tip>
-**เพิ่งเริ่มใช้การกำหนดค่าใช่ไหม** เริ่มด้วย `openclaw onboard` สำหรับการตั้งค่าแบบโต้ตอบ หรือดูคู่มือ [ตัวอย่างการกำหนดค่า](/th/gateway/configuration-examples) สำหรับการกำหนดค่าแบบคัดลอกแล้ววางที่ครบถ้วน
+**เพิ่งเริ่มใช้การกำหนดค่าใช่ไหม** เริ่มด้วย `openclaw onboard` สำหรับการตั้งค่าแบบโต้ตอบ หรือดูคู่มือ[ตัวอย่างการกำหนดค่า](/th/gateway/configuration-examples) เพื่อใช้การกำหนดค่าแบบสมบูรณ์ที่คัดลอกและวางได้
 </Tip>
 
 ## การกำหนดค่าขั้นต่ำ
@@ -51,13 +50,13 @@ OpenClaw อ่านการกำหนดค่า <Tooltip tip="JSON5 suppo
 ## การแก้ไขการกำหนดค่า
 
 <Tabs>
-  <Tab title="Interactive wizard">
+  <Tab title="ตัวช่วยแบบโต้ตอบ">
     ```bash
-    openclaw onboard       # full onboarding flow
-    openclaw configure     # config wizard
+    openclaw onboard       # ขั้นตอนการเริ่มต้นใช้งานทั้งหมด
+    openclaw configure     # ตัวช่วยการกำหนดค่า
     ```
   </Tab>
-  <Tab title="CLI (one-liners)">
+  <Tab title="CLI (คำสั่งบรรทัดเดียว)">
     ```bash
     openclaw config get agents.defaults.workspace
     openclaw config set agents.defaults.heartbeat.every "2h"
@@ -65,64 +64,66 @@ OpenClaw อ่านการกำหนดค่า <Tooltip tip="JSON5 suppo
     ```
   </Tab>
   <Tab title="Control UI">
-    เปิด [http://127.0.0.1:18789](http://127.0.0.1:18789) แล้วใช้แท็บ **การกำหนดค่า**
-    Control UI แสดงฟอร์มจากสคีมาการกำหนดค่าสด รวมถึงเมตาดาต้าเอกสารของฟิลด์
-    `title` / `description` พร้อมสคีมาของ Plugin และช่องทางเมื่อมี
-    โดยมีตัวแก้ไข **Raw JSON** เป็นทางออกสำรอง สำหรับ UI แบบเจาะลึก
-    และเครื่องมืออื่น Gateway ยังเปิดให้ใช้ `config.schema.lookup` เพื่อ
-    ดึงโหนดสคีมาตามพาธหนึ่งรายการพร้อมสรุปลูกโดยตรง
+    เปิด [http://127.0.0.1:18789](http://127.0.0.1:18789) และใช้แท็บ **Config**
+    Control UI แสดงผลฟอร์มจากสคีมาการกำหนดค่าที่ใช้งานอยู่ รวมถึงเมทาดาทาเอกสารของฟิลด์
+    `title` / `description` ตลอดจนสคีมาของ Plugin และช่องทางเมื่อ
+    พร้อมใช้งาน พร้อมเครื่องมือแก้ไข **Raw JSON** เป็นทางเลือกสำรอง สำหรับ UI
+    แบบเจาะลึกและเครื่องมืออื่น Gateway ยังเปิดให้ใช้ `config.schema.lookup` เพื่อ
+    ดึงโหนดสคีมาหนึ่งโหนดตามขอบเขตเส้นทาง พร้อมข้อมูลสรุปของโหนดย่อยโดยตรง
   </Tab>
-  <Tab title="Direct edit">
-    แก้ไข `~/.openclaw/openclaw.json` โดยตรง Gateway จะเฝ้าดูไฟล์และนำการเปลี่ยนแปลงไปใช้โดยอัตโนมัติ (ดู [hot reload](#config-hot-reload))
+  <Tab title="แก้ไขโดยตรง">
+    แก้ไข `~/.openclaw/openclaw.json` โดยตรง Gateway จะเฝ้าดูไฟล์และนำการเปลี่ยนแปลงไปใช้โดยอัตโนมัติ (ดู[การโหลดซ้ำแบบทันที](#config-hot-reload))
   </Tab>
 </Tabs>
 
-## การตรวจสอบแบบเข้มงวด
+## การตรวจสอบความถูกต้องแบบเข้มงวด
 
 <Warning>
-OpenClaw ยอมรับเฉพาะการกำหนดค่าที่ตรงกับสคีมาโดยสมบูรณ์ คีย์ที่ไม่รู้จัก ชนิดข้อมูลผิดรูปแบบ หรือค่าที่ไม่ถูกต้องจะทำให้ Gateway **ปฏิเสธการเริ่มทำงาน** ข้อยกเว้นเดียวในระดับ root คือ `$schema` (string) เพื่อให้ตัวแก้ไขแนบเมตาดาต้า JSON Schema ได้
+OpenClaw ยอมรับเฉพาะการกำหนดค่าที่ตรงกับสคีมาอย่างสมบูรณ์เท่านั้น คีย์ที่ไม่รู้จัก ชนิดข้อมูลผิดรูปแบบ หรือค่าที่ไม่ถูกต้องจะทำให้ Gateway **ปฏิเสธการเริ่มทำงาน** ข้อยกเว้นระดับรากเพียงรายการเดียวคือ `$schema` (string) เพื่อให้เครื่องมือแก้ไขแนบเมทาดาทา JSON Schema ได้
 </Warning>
 
 `openclaw config schema` พิมพ์ JSON Schema มาตรฐานที่ Control UI
-และการตรวจสอบใช้ `config.schema.lookup` ดึงโหนดเดียวตามพาธพร้อม
-สรุปลูกสำหรับเครื่องมือแบบเจาะลึก เมตาดาต้าเอกสารของฟิลด์ `title`/`description`
-ส่งต่อผ่านออบเจ็กต์ซ้อน wildcard (`*`), รายการอาร์เรย์ (`[]`) และกิ่ง `anyOf`/
-`oneOf`/`allOf` สคีมา Plugin และช่องทางขณะรันไทม์จะถูกรวมเข้าเมื่อโหลด
-manifest registry แล้ว
+และการตรวจสอบความถูกต้องใช้ `config.schema.lookup` ดึงโหนดหนึ่งโหนดตามขอบเขตเส้นทางพร้อม
+ข้อมูลสรุปโหนดย่อยสำหรับเครื่องมือแบบเจาะลึก เมทาดาทาเอกสารของฟิลด์ `title`/`description`
+ส่งต่อผ่านออบเจ็กต์ซ้อน wildcard (`*`) รายการอาร์เรย์ (`[]`) และสาขา `anyOf`/
+`oneOf`/`allOf` สคีมา Plugin และช่องทางขณะรันไทม์จะถูกรวมเข้ามาเมื่อ
+โหลดรีจิสทรี manifest แล้ว
 
-เมื่อการตรวจสอบล้มเหลว:
+เมื่อการตรวจสอบความถูกต้องล้มเหลว:
 
-- Gateway จะไม่บูต
-- ใช้ได้เฉพาะคำสั่งวินิจฉัย (`openclaw doctor`, `openclaw logs`, `openclaw health`, `openclaw status`)
+- Gateway ไม่เริ่มทำงาน
+- มีเพียงคำสั่งวินิจฉัยที่ใช้งานได้ (`openclaw doctor`, `openclaw logs`, `openclaw health`, `openclaw status`)
 - เรียกใช้ `openclaw doctor` เพื่อดูปัญหาที่แน่นอน
-- เรียกใช้ `openclaw doctor --fix` (หรือ `--yes`) เพื่อใช้การซ่อมแซม
+- เรียกใช้ `openclaw doctor --fix` (`--repair` เป็นแฟล็กเดียวกัน และ `--yes` ข้ามข้อความถามยืนยัน) เพื่อใช้การซ่อมแซม
 
-Gateway เก็บสำเนา last-known-good ที่เชื่อถือได้หลังการเริ่มทำงานสำเร็จแต่ละครั้ง
-แต่การเริ่มทำงานและ hot reload จะไม่กู้คืนสำเนานั้นโดยอัตโนมัติ หาก `openclaw.json`
-ตรวจสอบไม่ผ่าน (รวมถึงการตรวจสอบภายใน Plugin) การเริ่มทำงานของ Gateway จะล้มเหลว หรือ
-การโหลดซ้ำจะถูกข้ามและรันไทม์ปัจจุบันจะคงการกำหนดค่าล่าสุดที่ยอมรับไว้
-เรียกใช้ `openclaw doctor --fix` (หรือ `--yes`) เพื่อซ่อมแซมการกำหนดค่าที่มีคำนำหน้า/ถูกเขียนทับ หรือ
-กู้คืนสำเนา last-known-good การโปรโมตเป็น last-known-good จะถูกข้ามเมื่อ
-ตัวเลือกมี placeholder ความลับที่ถูกปกปิด เช่น `***`
+Gateway เก็บสำเนาล่าสุดที่ทราบว่าใช้งานได้และเชื่อถือได้หลังการเริ่มทำงานสำเร็จแต่ละครั้ง
+แต่การเริ่มทำงานและการโหลดซ้ำแบบทันทีจะไม่คืนค่าสำเนานั้นโดยอัตโนมัติ มีเพียง `openclaw doctor --fix`
+เท่านั้นที่ทำเช่นนั้น หาก `openclaw.json` ไม่ผ่านการตรวจสอบความถูกต้อง (รวมถึงการตรวจสอบภายใน Plugin) การเริ่มทำงานของ Gateway
+จะล้มเหลว หรือการโหลดซ้ำจะถูกข้าม และรันไทม์ปัจจุบันจะใช้การกำหนดค่าล่าสุดที่ยอมรับต่อไป
+การเขียนที่ถูกปฏิเสธจะถูกบันทึกเป็น `<path>.rejected.<timestamp>` เพื่อการตรวจสอบด้วย
+Gateway บล็อกการเขียนที่ดูเหมือนเป็นการเขียนทับโดยไม่ตั้งใจ ได้แก่ การลบ `gateway.mode`
+การสูญหายของบล็อก `meta` หรือการลดขนาดไฟล์ลงมากกว่าครึ่งหนึ่ง เว้นแต่การเขียนนั้น
+จะอนุญาตการเปลี่ยนแปลงแบบทำลายข้อมูลอย่างชัดเจน ระบบจะข้ามการเลื่อนสถานะเป็นสำเนาล่าสุดที่ทราบว่าใช้งานได้เมื่อ
+ข้อมูลที่เสนอมีตัวยึดตำแหน่งข้อมูลลับที่ปกปิดแล้ว เช่น `***` หรือ `[redacted]`
 
 ## งานทั่วไป
 
 <AccordionGroup>
-  <Accordion title="Set up a channel (WhatsApp, Telegram, Discord, etc.)">
-    แต่ละช่องทางมีส่วนการกำหนดค่าของตัวเองภายใต้ `channels.<provider>` ดูหน้าช่องทางเฉพาะสำหรับขั้นตอนการตั้งค่า:
+  <Accordion title="ตั้งค่าช่องทาง (WhatsApp, Telegram, Discord เป็นต้น)">
+    แต่ละช่องทางมีส่วนการกำหนดค่าของตนเองภายใต้ `channels.<provider>` ดูขั้นตอนการตั้งค่าในหน้าของช่องทางนั้นโดยเฉพาะ:
 
-    - [WhatsApp](/th/channels/whatsapp) - `channels.whatsapp`
-    - [Telegram](/th/channels/telegram) - `channels.telegram`
     - [Discord](/th/channels/discord) - `channels.discord`
     - [Feishu](/th/channels/feishu) - `channels.feishu`
     - [Google Chat](/th/channels/googlechat) - `channels.googlechat`
-    - [Microsoft Teams](/th/channels/msteams) - `channels.msteams`
-    - [Slack](/th/channels/slack) - `channels.slack`
-    - [Signal](/th/channels/signal) - `channels.signal`
     - [iMessage](/th/channels/imessage) - `channels.imessage`
     - [Mattermost](/th/channels/mattermost) - `channels.mattermost`
+    - [Microsoft Teams](/th/channels/msteams) - `channels.msteams`
+    - [Signal](/th/channels/signal) - `channels.signal`
+    - [Slack](/th/channels/slack) - `channels.slack`
+    - [Telegram](/th/channels/telegram) - `channels.telegram`
+    - [WhatsApp](/th/channels/whatsapp) - `channels.whatsapp`
 
-    ช่องทางทั้งหมดใช้รูปแบบนโยบาย DM เดียวกัน:
+    ทุกช่องทางใช้รูปแบบนโยบาย DM เดียวกัน:
 
     ```json5
     {
@@ -130,8 +131,8 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
         telegram: {
           enabled: true,
           botToken: "123:abc",
-          dmPolicy: "pairing",   // pairing | allowlist | open | disabled
-          allowFrom: ["tg:123"], // only for allowlist/open
+          dmPolicy: "pairing",   // การจับคู่ | รายการอนุญาต | เปิด | ปิดใช้งาน
+          allowFrom: ["tg:123"], // สำหรับรายการอนุญาต/เปิดเท่านั้น
         },
       },
     }
@@ -139,8 +140,8 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
 
   </Accordion>
 
-  <Accordion title="Choose and configure models">
-    ตั้งค่าโมเดลหลักและ fallback ที่เป็นทางเลือก:
+  <Accordion title="เลือกและกำหนดค่าโมเดล">
+    ตั้งค่าโมเดลหลักและโมเดลสำรองที่เป็นทางเลือก:
 
     ```json5
     {
@@ -159,39 +160,39 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
     }
     ```
 
-    - `agents.defaults.models` กำหนดแค็ตตาล็อกโมเดลและทำหน้าที่เป็น allowlist สำหรับ `/model`; รายการ `provider/*` จะกรอง `/model`, `/models` และตัวเลือกโมเดลให้เหลือ provider ที่เลือก ขณะยังใช้การค้นหาโมเดลแบบไดนามิก
-    - ใช้ `openclaw config set agents.defaults.models '<json>' --strict-json --merge` เพื่อเพิ่มรายการ allowlist โดยไม่ลบโมเดลที่มีอยู่ การแทนที่แบบธรรมดาที่จะลบรายการจะถูกปฏิเสธ เว้นแต่คุณส่ง `--replace`
+    - `agents.defaults.models` เก็บนามแฝงและการตั้งค่าแต่ละโมเดล การเพิ่มรายการจะไม่จำกัดการแทนที่ `/model` หรือ `--model`
+    - `agents.defaults.modelPolicy.allow` คือรายการอนุญาตอย่างชัดเจนสำหรับการแทนที่และตัวเลือกโมเดล โดยรับการอ้างอิงแบบตรงทั้งหมดและ wildcard `provider/*` หากไม่ระบุหรือใช้ `[]` จะอนุญาตทุกโมเดล
     - การอ้างอิงโมเดลใช้รูปแบบ `provider/model` (เช่น `anthropic/claude-opus-4-6`)
-    - `agents.defaults.imageMaxDimensionPx` ควบคุมการลดขนาดรูปภาพ transcript/tool (ค่าเริ่มต้น `1200`); ค่าที่ต่ำกว่ามักลดการใช้ vision-token ในการรันที่มีสกรีนช็อตจำนวนมาก
-    - ดู [Models CLI](/th/concepts/models) สำหรับการสลับโมเดลในแชต และ [Model Failover](/th/concepts/model-failover) สำหรับการหมุนเวียน auth และพฤติกรรม fallback
-    - สำหรับ provider แบบกำหนดเอง/โฮสต์เอง ดู [Custom providers](/th/gateway/config-tools#custom-providers-and-base-urls) ในข้อมูลอ้างอิง
+    - `agents.defaults.imageMaxDimensionPx` ควบคุมการลดขนาดรูปภาพในบทถอดความ/เครื่องมือ (ค่าเริ่มต้น `1200`) โดยทั่วไปค่าที่ต่ำกว่าจะลดการใช้โทเค็นภาพในการทำงานที่มีภาพหน้าจอจำนวนมาก
+    - ดู [CLI สำหรับโมเดล](/th/concepts/models) สำหรับการสลับโมเดลในแชต และ[การสลับใช้โมเดลเมื่อขัดข้อง](/th/concepts/model-failover) สำหรับการหมุนเวียนข้อมูลรับรองการยืนยันตัวตนและพฤติกรรมการสำรอง
+    - สำหรับผู้ให้บริการแบบกำหนดเอง/โฮสต์เอง ดู[ผู้ให้บริการแบบกำหนดเอง](/th/gateway/config-tools#custom-providers-and-base-urls) ในเอกสารอ้างอิง
 
   </Accordion>
 
-  <Accordion title="Control who can message the bot">
-    การเข้าถึง DM ถูกควบคุมต่อช่องทางผ่าน `dmPolicy`:
+  <Accordion title="ควบคุมว่าใครส่งข้อความถึงบอตได้">
+    การเข้าถึง DM ถูกควบคุมแยกตามช่องทางผ่าน `dmPolicy` (ค่าเริ่มต้น `"pairing"`):
 
-    - `"pairing"` (ค่าเริ่มต้น): ผู้ส่งที่ไม่รู้จักจะได้รับรหัสจับคู่แบบใช้ครั้งเดียวเพื่ออนุมัติ
-    - `"allowlist"`: เฉพาะผู้ส่งใน `allowFrom` (หรือที่เก็บการอนุญาตที่จับคู่แล้ว)
+    - `"pairing"`: ผู้ส่งที่ไม่รู้จักจะได้รับรหัสจับคู่แบบใช้ครั้งเดียวเพื่ออนุมัติ
+    - `"allowlist"`: เฉพาะผู้ส่งใน `allowFrom` (หรือคลังรายการอนุญาตที่จับคู่แล้ว)
     - `"open"`: อนุญาต DM ขาเข้าทั้งหมด (ต้องใช้ `allowFrom: ["*"]`)
     - `"disabled"`: ไม่สนใจ DM ทั้งหมด
 
-    สำหรับกลุ่ม ให้ใช้ `groupPolicy` + `groupAllowFrom` หรือ allowlist เฉพาะช่องทาง
+    สำหรับกลุ่ม ให้ใช้ `groupPolicy` (`"allowlist" | "open" | "disabled"`) ร่วมกับ `groupAllowFrom` หรือรายการอนุญาตเฉพาะช่องทาง
 
-    ดู [ข้อมูลอ้างอิงฉบับเต็ม](/th/gateway/config-channels#dm-and-group-access) สำหรับรายละเอียดต่อช่องทาง
+    ดูรายละเอียดแยกตามช่องทางใน[เอกสารอ้างอิงฉบับเต็ม](/th/gateway/config-channels#dm-and-group-access)
 
   </Accordion>
 
-  <Accordion title="Set up group chat mention gating">
-    ข้อความกลุ่มมีค่าเริ่มต้นเป็น **ต้องมี mention** กำหนดค่ารูปแบบ trigger ต่อเอเจนต์ การตอบกลับกลุ่ม/ช่องทางปกติจะโพสต์โดยอัตโนมัติ เลือกใช้พาธ message-tool สำหรับห้องที่ใช้ร่วมกันซึ่งเอเจนต์ควรตัดสินใจว่าจะพูดเมื่อใด:
+  <Accordion title="ตั้งค่าการควบคุมด้วยการกล่าวถึงในแชตกลุ่ม">
+    โดยค่าเริ่มต้น ข้อความกลุ่มจะ **ต้องมีการกล่าวถึง** กำหนดค่ารูปแบบทริกเกอร์แยกตามเอเจนต์ การตอบกลับปกติในกลุ่ม/ช่องทางจะโพสต์โดยอัตโนมัติ สำหรับห้องที่ใช้ร่วมกันซึ่งเอเจนต์ควรตัดสินใจว่าจะพูดเมื่อใด ให้เลือกใช้เส้นทางเครื่องมือส่งข้อความ:
 
     ```json5
     {
       messages: {
-        visibleReplies: "automatic", // set "message_tool" to require message-tool sends everywhere
+        visibleReplies: "automatic", // ตั้งเป็น "message_tool" เพื่อบังคับให้ส่งผ่านเครื่องมือส่งข้อความทุกที่
         groupChat: {
-          visibleReplies: "message_tool", // opt-in; visible output requires message(action=send)
-          unmentionedInbound: "room_event", // unmentioned always-on group chatter is quiet context
+          visibleReplies: "message_tool", // เลือกใช้; เอาต์พุตที่มองเห็นได้ต้องใช้ message(action=send)
+          unmentionedInbound: "room_event", // บทสนทนากลุ่มที่เปิดตลอดและไม่กล่าวถึงจะเป็นบริบทแบบเงียบ
         },
       },
       agents: {
@@ -212,16 +213,16 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
     }
     ```
 
-    - **Metadata mentions**: @-mentions แบบ native (WhatsApp tap-to-mention, Telegram @bot ฯลฯ)
-    - **Text patterns**: รูปแบบ regex ที่ปลอดภัยใน `mentionPatterns`
-    - **Visible replies**: `messages.visibleReplies` สามารถบังคับให้ส่งด้วย message-tool ทั่วทั้งระบบ; `messages.groupChat.visibleReplies` แทนที่ค่านั้นสำหรับกลุ่ม/ช่องทาง
-    - ดู [ข้อมูลอ้างอิงฉบับเต็ม](/th/gateway/config-channels#group-chat-mention-gating) สำหรับโหมด visible reply การแทนที่ต่อช่องทาง และโหมด self-chat
+    - **การกล่าวถึงผ่านเมทาดาทา**: @-mention แบบเนทีฟ (แตะเพื่อกล่าวถึงใน WhatsApp, @bot ใน Telegram เป็นต้น)
+    - **รูปแบบข้อความ**: รูปแบบ regex ที่ปลอดภัยใน `mentionPatterns`
+    - **การตอบกลับที่มองเห็นได้**: `messages.visibleReplies` สามารถบังคับให้ส่งผ่านเครื่องมือส่งข้อความทั่วทั้งระบบ และ `messages.groupChat.visibleReplies` จะแทนที่ค่านี้สำหรับกลุ่ม/ช่องทาง
+    - ดู[เอกสารอ้างอิงฉบับเต็ม](/th/gateway/config-channels#group-chat-mention-gating) สำหรับโหมดการตอบกลับที่มองเห็นได้ การแทนค่าตามช่องทาง และโหมดแชตกับตนเอง
 
   </Accordion>
 
-  <Accordion title="Restrict skills per agent">
-    ใช้ `agents.defaults.skills` เป็น baseline ร่วม จากนั้นแทนที่เอเจนต์เฉพาะ
-    ด้วย `agents.list[].skills`:
+  <Accordion title="จำกัด Skills แยกตามเอเจนต์">
+    ใช้ `agents.defaults.skills` เป็นค่าพื้นฐานที่ใช้ร่วมกัน แล้วแทนค่าสำหรับ
+    เอเจนต์เฉพาะด้วย `agents.list[].skills`:
 
     ```json5
     {
@@ -230,32 +231,27 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
           skills: ["github", "weather"],
         },
         list: [
-          { id: "writer" }, // inherits github, weather
-          { id: "docs", skills: ["docs-search"] }, // replaces defaults
-          { id: "locked-down", skills: [] }, // no skills
+          { id: "writer" }, // สืบทอด github, weather
+          { id: "docs", skills: ["docs-search"] }, // แทนที่ค่าเริ่มต้น
+          { id: "locked-down", skills: [] }, // ไม่มี Skills
         ],
       },
     }
     ```
 
-    - ละ `agents.defaults.skills` เพื่อให้ Skills ไม่ถูกจำกัดโดยค่าเริ่มต้น
-    - ละ `agents.list[].skills` เพื่อสืบทอดค่าเริ่มต้น
-    - ตั้งค่า `agents.list[].skills: []` เพื่อไม่มี Skills
+    - ไม่ต้องระบุ `agents.defaults.skills` หากต้องการให้ Skills ไม่ถูกจำกัดโดยค่าเริ่มต้น
+    - ไม่ต้องระบุ `agents.list[].skills` เพื่อสืบทอดค่าเริ่มต้น
+    - ตั้งค่า `agents.list[].skills: []` หากไม่ต้องการ Skills
     - ดู [Skills](/th/tools/skills), [การกำหนดค่า Skills](/th/tools/skills-config) และ
-      [ข้อมูลอ้างอิงการกำหนดค่า](/th/gateway/config-agents#agents-defaults-skills)
+      [เอกสารอ้างอิงการกำหนดค่า](/th/gateway/config-agents#agents-defaults-skills)
 
   </Accordion>
 
-  <Accordion title="Tune gateway channel health monitoring">
-    ควบคุมว่า gateway จะรีสตาร์ตช่องทางที่ดูค้างอย่างเข้มงวดเพียงใด:
+  <Accordion title="กำหนดค่าการตรวจสอบสถานะแยกตามช่องทาง">
+    ปิดหรือเปิดการรีสตาร์ตสถานะอัตโนมัติสำหรับช่องทางหรือบัญชี:
 
     ```json5
     {
-      gateway: {
-        channelHealthCheckMinutes: 5,
-        channelStaleEventThresholdMinutes: 30,
-        channelMaxRestartsPerHour: 10,
-      },
       channels: {
         telegram: {
           healthMonitor: { enabled: false },
@@ -269,38 +265,18 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
     }
     ```
 
-    - ตั้งค่า `gateway.channelHealthCheckMinutes: 0` เพื่อปิดการรีสตาร์ตของ health-monitor ทั่วทั้งระบบ
-    - `channelStaleEventThresholdMinutes` ควรมากกว่าหรือเท่ากับช่วงเวลาตรวจสอบ
-    - ใช้ `channels.<provider>.healthMonitor.enabled` หรือ `channels.<provider>.accounts.<id>.healthMonitor.enabled` เพื่อปิดการรีสตาร์ตอัตโนมัติสำหรับหนึ่งช่องทางหรือบัญชี โดยไม่ปิด monitor ส่วนกลาง
-    - ดู [Health Checks](/th/gateway/health) สำหรับการดีบักเชิงปฏิบัติการ และ [ข้อมูลอ้างอิงฉบับเต็ม](/th/gateway/configuration-reference#gateway) สำหรับทุกฟิลด์
+    - ใช้ `channels.<provider>.healthMonitor.enabled` หรือ `channels.<provider>.accounts.<id>.healthMonitor.enabled` เพื่อควบคุมการรีสตาร์ตอัตโนมัติสำหรับช่องทางหรือบัญชีหนึ่งรายการ
+    - ดู [การตรวจสอบสถานะ](/th/gateway/health) สำหรับการแก้ไขข้อบกพร่องด้านการปฏิบัติงาน และ[เอกสารอ้างอิงฉบับเต็ม](/th/gateway/configuration-reference#gateway) สำหรับฟิลด์ทั้งหมด
 
   </Accordion>
 
-  <Accordion title="Tune gateway WebSocket handshake timeout">
-    ให้ไคลเอนต์ภายในเครื่องมีเวลามากขึ้นในการทำ pre-auth WebSocket handshake บน
-    โฮสต์ที่มีโหลดสูงหรือใช้พลังประมวลผลต่ำ:
-
-    ```json5
-    {
-      gateway: {
-        handshakeTimeoutMs: 30000,
-      },
-    }
-    ```
-
-    - ค่าเริ่มต้นคือ `15000` มิลลิวินาที
-    - `OPENCLAW_HANDSHAKE_TIMEOUT_MS` ยังคงมีลำดับความสำคัญสูงกว่าสำหรับการ override บริการหรือ shell แบบครั้งเดียว
-    - ควรแก้การค้างของ startup/event-loop ก่อน knob นี้มีไว้สำหรับโฮสต์ที่ปกติดีแต่ช้าระหว่าง warmup
-
-  </Accordion>
-
-  <Accordion title="Configure sessions and resets">
-    เซสชันควบคุมความต่อเนื่องและการแยกขอบเขตของบทสนทนา:
+  <Accordion title="กำหนดค่าเซสชันและการรีเซ็ต">
+    เซสชันควบคุมความต่อเนื่องและการแยกบทสนทนา:
 
     ```json5
     {
       session: {
-        dmScope: "per-channel-peer",  // recommended for multi-user
+        dmScope: "per-channel-peer",  // แนะนำสำหรับผู้ใช้หลายคน
         threadBindings: {
           enabled: true,
           idleHours: 24,
@@ -316,38 +292,38 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
     ```
 
     - `dmScope`: `main` (ใช้ร่วมกัน) | `per-peer` | `per-channel-peer` | `per-account-channel-peer`
-    - `threadBindings`: ค่าเริ่มต้นส่วนกลางสำหรับการกำหนดเส้นทางเซสชันที่ผูกกับเธรด (Discord รองรับ `/focus`, `/unfocus`, `/agents`, `/session idle` และ `/session max-age`)
-    - ดู [การจัดการเซสชัน](/th/concepts/session) สำหรับขอบเขต ลิงก์ตัวตน และนโยบายการส่ง
-    - ดู [เอกสารอ้างอิงฉบับเต็ม](/th/gateway/config-agents#session) สำหรับทุกฟิลด์
+    - `threadBindings`: ค่าเริ่มต้นส่วนกลางสำหรับการกำหนดเส้นทางเซสชันที่ผูกกับเธรด `/focus`, `/unfocus`, `/agents`, `/session idle` และ `/session max-age` ใช้ผูก เลิกผูก แสดงรายการ และปรับแต่งค่านี้แยกตามเซสชัน (Discord ผูกเธรด ส่วน Telegram ผูกหัวข้อ/การสนทนา)
+    - ดูขอบเขต ลิงก์ข้อมูลประจำตัว และนโยบายการส่งได้ที่ [การจัดการเซสชัน](/th/concepts/session)
+    - ดูฟิลด์ทั้งหมดได้ที่ [ข้อมูลอ้างอิงฉบับเต็ม](/th/gateway/config-agents#session)
 
   </Accordion>
 
   <Accordion title="เปิดใช้แซนด์บ็อกซ์">
-    เรียกใช้เซสชันตัวแทนในรันไทม์แซนด์บ็อกซ์ที่แยกโดดเดี่ยว:
+    เรียกใช้เซสชันของเอเจนต์ในรันไทม์แซนด์บ็อกซ์ที่แยกออกจากกัน:
 
     ```json5
     {
       agents: {
         defaults: {
           sandbox: {
-            mode: "non-main",  // off | non-main | all
-            scope: "agent",    // session | agent | shared
+            mode: "non-main",  // ปิด | ไม่ใช่เซสชันหลัก | ทั้งหมด
+            scope: "agent",    // เซสชัน | เอเจนต์ | ใช้ร่วมกัน
           },
         },
       },
     }
     ```
 
-    สร้างอิมเมจก่อน - จากเช็กเอาต์ซอร์สให้เรียกใช้ `scripts/sandbox-setup.sh` หรือจากการติดตั้ง npm ให้ดูคำสั่ง `docker build` แบบอินไลน์ใน [แซนด์บ็อกซ์ § อิมเมจและการตั้งค่า](/th/gateway/sandboxing#images-and-setup)
+    สร้างอิมเมจก่อน โดยหากใช้ซอร์สเช็กเอาต์ให้เรียกใช้ `scripts/sandbox-setup.sh` หรือหากติดตั้งจาก npm ให้ดูคำสั่ง `docker build` แบบอินไลน์ใน [แซนด์บ็อกซ์ § อิมเมจและการตั้งค่า](/th/gateway/sandboxing#images-and-setup)
 
-    ดู [แซนด์บ็อกซ์](/th/gateway/sandboxing) สำหรับคู่มือฉบับเต็ม และ [เอกสารอ้างอิงฉบับเต็ม](/th/gateway/config-agents#agentsdefaultssandbox) สำหรับตัวเลือกทั้งหมด
+    ดูคู่มือฉบับเต็มได้ที่ [แซนด์บ็อกซ์](/th/gateway/sandboxing) และดูตัวเลือกทั้งหมดได้ที่ [ข้อมูลอ้างอิงฉบับเต็ม](/th/gateway/config-agents#agentsdefaultssandbox)
 
   </Accordion>
 
-  <Accordion title="เปิดใช้พุชที่มีรีเลย์รองรับสำหรับบิลด์ iOS ทางการ">
+  <Accordion title="เปิดใช้พุชที่มีรีเลย์รองรับสำหรับบิลด์ iOS อย่างเป็นทางการ">
     พุชที่มีรีเลย์รองรับสำหรับบิลด์ App Store สาธารณะใช้รีเลย์ OpenClaw ที่โฮสต์ไว้: `https://ios-push-relay.openclaw.ai`
 
-    การปรับใช้รีเลย์แบบกำหนดเองต้องใช้เส้นทางบิลด์/ปรับใช้ iOS ที่แยกอย่างตั้งใจ ซึ่ง URL รีเลย์ตรงกับ URL รีเลย์ของ Gateway หากคุณใช้บิลด์รีเลย์แบบกำหนดเอง ให้ตั้งค่านี้ในการกำหนดค่า Gateway:
+    การติดตั้งใช้งานรีเลย์แบบกำหนดเองต้องมีเส้นทางการบิลด์/ติดตั้งใช้งาน iOS ที่จงใจแยกออกมาต่างหาก โดย URL ของรีเลย์ต้องตรงกับ URL รีเลย์ของ Gateway หากใช้บิลด์รีเลย์แบบกำหนดเอง ให้ตั้งค่านี้ในการกำหนดค่า Gateway:
 
     ```json5
     {
@@ -356,7 +332,7 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
           apns: {
             relay: {
               baseUrl: "https://relay.example.com",
-              // Optional. Default: 10000
+              // ไม่บังคับ ค่าเริ่มต้น: 10000
               timeoutMs: 10000,
             },
           },
@@ -365,40 +341,40 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
     }
     ```
 
-    คำสั่ง CLI เทียบเท่า:
+    คำสั่ง CLI ที่เทียบเท่า:
 
     ```bash
     openclaw config set gateway.push.apns.relay.baseUrl https://relay.example.com
     ```
 
-    สิ่งที่การตั้งค่านี้ทำ:
+    การทำงานของการตั้งค่านี้:
 
-    - ให้ Gateway ส่ง `push.test`, การสะกิดปลุก และการปลุกเพื่อเชื่อมต่อใหม่ผ่านรีเลย์ภายนอกได้
-    - ใช้สิทธิ์ส่งที่จำกัดตามการลงทะเบียนซึ่งส่งต่อโดยแอป iOS ที่จับคู่ไว้ Gateway ไม่จำเป็นต้องมีโทเค็นรีเลย์ระดับการปรับใช้ทั้งหมด
-    - ผูกการลงทะเบียนที่มีรีเลย์รองรับแต่ละรายการกับตัวตนของ Gateway ที่แอป iOS จับคู่ไว้ เพื่อไม่ให้ Gateway อื่นใช้การลงทะเบียนที่จัดเก็บไว้ซ้ำได้
-    - คงบิลด์ iOS แบบ local/แมนนวลไว้บน APNs โดยตรง การส่งที่มีรีเลย์รองรับใช้กับบิลด์ที่แจกจ่ายอย่างเป็นทางการซึ่งลงทะเบียนผ่านรีเลย์เท่านั้น
-    - ต้องตรงกับ URL ฐานของรีเลย์ที่ฝังไว้ในบิลด์ iOS เพื่อให้ทราฟฟิกการลงทะเบียนและการส่งไปถึงการปรับใช้รีเลย์เดียวกัน
+    - ทำให้ Gateway ส่ง `push.test` การกระตุ้นให้ตื่น และการปลุกเพื่อเชื่อมต่อใหม่ผ่านรีเลย์ภายนอกได้
+    - ใช้สิทธิ์อนุญาตการส่งที่จำกัดขอบเขตตามการลงทะเบียน ซึ่งส่งต่อโดยแอป iOS ที่จับคู่แล้ว Gateway ไม่จำเป็นต้องใช้โทเค็นรีเลย์ที่ครอบคลุมทั้งการติดตั้งใช้งาน
+    - ผูกการลงทะเบียนที่มีรีเลย์รองรับแต่ละรายการเข้ากับข้อมูลประจำตัวของ Gateway ที่แอป iOS จับคู่ไว้ เพื่อไม่ให้ Gateway อื่นนำการลงทะเบียนที่จัดเก็บไว้ไปใช้ซ้ำได้
+    - ทำให้บิลด์ iOS แบบภายในเครื่อง/ด้วยตนเองยังคงใช้ APNs โดยตรง การส่งที่มีรีเลย์รองรับจะใช้เฉพาะกับบิลด์ที่เผยแพร่อย่างเป็นทางการและลงทะเบียนผ่านรีเลย์เท่านั้น
+    - ต้องตรงกับ URL ฐานของรีเลย์ที่ฝังอยู่ในบิลด์ iOS เพื่อให้ทราฟฟิกการลงทะเบียนและการส่งไปถึงการติดตั้งใช้งานรีเลย์เดียวกัน
 
-    โฟลว์ตั้งแต่ต้นจนจบ:
+    ขั้นตอนการทำงานตั้งแต่ต้นจนจบ:
 
-    1. ติดตั้งแอป iOS ทางการ
-    2. ไม่บังคับ: กำหนดค่า `gateway.push.apns.relay.baseUrl` บน Gateway เฉพาะเมื่อใช้บิลด์รีเลย์แบบกำหนดเองที่แยกอย่างตั้งใจ
-    3. จับคู่แอป iOS กับ Gateway และให้ทั้งเซสชันของ node และผู้ปฏิบัติงานเชื่อมต่อ
-    4. แอป iOS ดึงตัวตนของ Gateway ลงทะเบียนกับรีเลย์โดยใช้ App Attest พร้อมใบเสร็จของแอป จากนั้นเผยแพร่เพย์โหลด `push.apns.register` ที่มีรีเลย์รองรับไปยัง Gateway ที่จับคู่ไว้
-    5. Gateway จัดเก็บแฮนเดิลรีเลย์และสิทธิ์ส่ง จากนั้นใช้สำหรับ `push.test`, การสะกิดปลุก และการปลุกเพื่อเชื่อมต่อใหม่
+    1. ติดตั้งแอป iOS อย่างเป็นทางการ
+    2. ไม่บังคับ: กำหนดค่า `gateway.push.apns.relay.baseUrl` บน Gateway เฉพาะเมื่อใช้บิลด์รีเลย์แบบกำหนดเองที่จงใจแยกออกมาต่างหาก
+    3. จับคู่แอป iOS กับ Gateway และอนุญาตให้ทั้งเซสชัน Node และเซสชันผู้ดำเนินการเชื่อมต่อ
+    4. แอป iOS ดึงข้อมูลประจำตัวของ Gateway ลงทะเบียนกับรีเลย์โดยใช้ App Attest ร่วมกับใบเสร็จของแอป แล้วเผยแพร่เพย์โหลด `push.apns.register` ที่มีรีเลย์รองรับไปยัง Gateway ที่จับคู่ไว้
+    5. Gateway จัดเก็บแฮนเดิลรีเลย์และสิทธิ์อนุญาตการส่ง แล้วใช้ข้อมูลเหล่านี้สำหรับ `push.test` การกระตุ้นให้ตื่น และการปลุกเพื่อเชื่อมต่อใหม่
 
-    หมายเหตุการปฏิบัติงาน:
+    หมายเหตุด้านการปฏิบัติงาน:
 
-    - หากคุณสลับแอป iOS ไปยัง Gateway อื่น ให้เชื่อมต่อแอปใหม่เพื่อให้เผยแพร่การลงทะเบียนรีเลย์ใหม่ที่ผูกกับ Gateway นั้นได้
-    - หากคุณส่งบิลด์ iOS ใหม่ที่ชี้ไปยังการปรับใช้รีเลย์อื่น แอปจะรีเฟรชการลงทะเบียนรีเลย์ที่แคชไว้แทนการใช้ต้นทางรีเลย์เดิมซ้ำ
+    - หากเปลี่ยนให้แอป iOS ใช้ Gateway อื่น ให้เชื่อมต่อแอปใหม่เพื่อให้เผยแพร่การลงทะเบียนรีเลย์ใหม่ที่ผูกกับ Gateway นั้นได้
+    - หากเผยแพร่บิลด์ iOS ใหม่ที่ชี้ไปยังการติดตั้งใช้งานรีเลย์อื่น แอปจะรีเฟรชการลงทะเบียนรีเลย์ที่แคชไว้แทนการใช้ต้นทางรีเลย์เดิมซ้ำ
 
-    หมายเหตุความเข้ากันได้:
+    หมายเหตุด้านความเข้ากันได้:
 
-    - `OPENCLAW_APNS_RELAY_BASE_URL` และ `OPENCLAW_APNS_RELAY_TIMEOUT_MS` ยังใช้งานได้เป็นการแทนที่ผ่าน env ชั่วคราว
-    - URL รีเลย์ Gateway แบบกำหนดเองต้องตรงกับ URL ฐานของรีเลย์ที่ฝังไว้ในบิลด์ iOS ช่องทางเผยแพร่ App Store สาธารณะจะปฏิเสธการแทนที่ URL รีเลย์ iOS แบบกำหนดเอง
-    - `OPENCLAW_APNS_RELAY_ALLOW_HTTP=true` ยังคงเป็นช่องทางเลี่ยงสำหรับการพัฒนาแบบ loopback เท่านั้น อย่าคง URL รีเลย์ HTTP ไว้ในการกำหนดค่า
+    - `OPENCLAW_APNS_RELAY_BASE_URL` และ `OPENCLAW_APNS_RELAY_TIMEOUT_MS` ยังคงใช้เป็นการแทนที่ชั่วคราวผ่านตัวแปรสภาพแวดล้อมได้
+    - URL รีเลย์แบบกำหนดเองของ Gateway ต้องตรงกับ URL ฐานของรีเลย์ที่ฝังอยู่ในบิลด์ iOS โดยช่องทางเผยแพร่ App Store สาธารณะจะปฏิเสธการแทนที่ URL รีเลย์ iOS แบบกำหนดเอง
+    - `OPENCLAW_APNS_RELAY_ALLOW_HTTP=true` ยังคงเป็นช่องทางหลีกเลี่ยงสำหรับการพัฒนาที่ใช้ได้เฉพาะลูปแบ็กเท่านั้น ห้ามบันทึก URL รีเลย์แบบ HTTP ไว้ในการกำหนดค่า
 
-    ดู [แอป iOS](/th/platforms/ios#relay-backed-push-for-official-builds) สำหรับโฟลว์ตั้งแต่ต้นจนจบ และ [โฟลว์การตรวจสอบสิทธิ์และความเชื่อถือ](/th/platforms/ios#authentication-and-trust-flow) สำหรับโมเดลความปลอดภัยของรีเลย์
+    ดูขั้นตอนการทำงานตั้งแต่ต้นจนจบได้ที่ [แอป iOS](/th/platforms/ios#relay-backed-push-for-official-builds) และดูโมเดลความปลอดภัยของรีเลย์ได้ที่ [ขั้นตอนการยืนยันตัวตนและความเชื่อถือ](/th/platforms/ios#authentication-and-trust-flow)
 
   </Accordion>
 
@@ -416,10 +392,10 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
     }
     ```
 
-    - `every`: สตริงระยะเวลา (`30m`, `2h`) ตั้งค่า `0m` เพื่อปิดใช้งาน
-    - `target`: `last` | `none` | `<channel-id>` (เช่น `discord`, `matrix`, `telegram` หรือ `whatsapp`)
-    - `directPolicy`: `allow` (ค่าเริ่มต้น) หรือ `block` สำหรับเป้าหมาย Heartbeat รูปแบบ DM
-    - ดู [Heartbeat](/th/gateway/heartbeat) สำหรับคู่มือฉบับเต็ม
+    - `every`: สตริงระยะเวลา (`30m`, `2h`) ตั้งค่า `0m` เพื่อปิดใช้ ค่าเริ่มต้น: `30m`
+    - `target`: `last` | `none` | `<channel-id>` (ตัวอย่างเช่น `discord`, `matrix`, `telegram` หรือ `whatsapp`)
+    - `directPolicy`: `allow` (ค่าเริ่มต้น) หรือ `block` สำหรับเป้าหมาย Heartbeat แบบ DM
+    - ดูคู่มือฉบับเต็มได้ที่ [Heartbeat](/th/gateway/heartbeat)
 
   </Accordion>
 
@@ -428,24 +404,19 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
     {
       cron: {
         enabled: true,
-        maxConcurrentRuns: 8, // default; cron dispatch + isolated cron agent-turn execution
         sessionRetention: "24h",
-        runLog: {
-          maxBytes: "2mb",
-          keepLines: 2000,
-        },
       },
     }
     ```
 
-    - `sessionRetention`: ตัดเซสชันรันแบบแยกที่เสร็จแล้วออกจาก `sessions.json` (ค่าเริ่มต้น `24h`; ตั้งค่า `false` เพื่อปิดใช้งาน)
-    - `runLog`: ตัดแถวประวัติการรัน Cron ที่เก็บไว้ต่อหนึ่งงาน `maxBytes` ยังคงยอมรับสำหรับบันทึกการรันรุ่นเก่าที่มีไฟล์รองรับ
-    - ดู [งาน Cron](/th/automation/cron-jobs) สำหรับภาพรวมฟีเจอร์และตัวอย่าง CLI
+    - `sessionRetention`: ล้างเซสชันการเรียกใช้แบบแยกที่เสร็จสมบูรณ์แล้วออกจากแถวเซสชัน SQLite (ค่าเริ่มต้น `24h`; ตั้งค่า `false` เพื่อปิดใช้)
+    - ประวัติการเรียกใช้จะเก็บแถวเทอร์มินัลใหม่ล่าสุด 2000 แถวต่องานโดยอัตโนมัติ ส่วนแถวที่สูญหายยังคงมีกรอบเวลาล้างข้อมูล 24 ชั่วโมง
+    - ดูภาพรวมฟีเจอร์และตัวอย่าง CLI ได้ที่ [งาน Cron](/th/automation/cron-jobs)
 
   </Accordion>
 
-  <Accordion title="ตั้งค่า Webhook (hooks)">
-    เปิดใช้เอนด์พอยต์ HTTP Webhook บน Gateway:
+  <Accordion title="ตั้งค่า Webhook (ฮุก)">
+    เปิดใช้ปลายทาง Webhook แบบ HTTP บน Gateway:
 
     ```json5
     {
@@ -469,20 +440,20 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
     ```
 
     หมายเหตุด้านความปลอดภัย:
-    - ถือว่าเนื้อหาเพย์โหลด hook/webhook ทั้งหมดเป็นอินพุตที่ไม่น่าเชื่อถือ
-    - ใช้ `hooks.token` เฉพาะ อย่าใช้ความลับการตรวจสอบสิทธิ์ Gateway ที่ใช้งานอยู่ซ้ำ (`gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN` หรือ `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD`)
-    - การตรวจสอบสิทธิ์ Hook ใช้เฉพาะส่วนหัว (`Authorization: Bearer ...` หรือ `x-openclaw-token`); โทเค็นใน query string จะถูกปฏิเสธ
-    - `hooks.path` เป็น `/` ไม่ได้ ให้คงทางเข้า Webhook ไว้บนพาธย่อยเฉพาะ เช่น `/hooks`
-    - ปิดแฟล็กข้ามเนื้อหาที่ไม่ปลอดภัยไว้ (`hooks.gmail.allowUnsafeExternalContent`, `hooks.mappings[].allowUnsafeExternalContent`) เว้นแต่กำลังดีบักในขอบเขตที่จำกัดมาก
-    - หากคุณเปิดใช้ `hooks.allowRequestSessionKey` ให้ตั้งค่า `hooks.allowedSessionKeyPrefixes` ด้วย เพื่อจำกัดคีย์เซสชันที่ผู้เรียกเลือกได้
-    - สำหรับตัวแทนที่ขับเคลื่อนด้วย hook ให้เลือกเทียร์โมเดลสมัยใหม่ที่แข็งแกร่งและนโยบายเครื่องมือที่เข้มงวด (เช่น เฉพาะการส่งข้อความบวกกับแซนด์บ็อกซ์เมื่อทำได้)
+    - ถือว่าเนื้อหาเพย์โหลดของฮุก/Webhook ทั้งหมดเป็นอินพุตที่ไม่น่าเชื่อถือ
+    - ใช้ `hooks.token` โดยเฉพาะ ห้ามนำข้อมูลลับสำหรับยืนยันตัวตนของ Gateway ที่ใช้งานอยู่กลับมาใช้ซ้ำ (`gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN` หรือ `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD`)
+    - การยืนยันตัวตนของฮุกรองรับเฉพาะส่วนหัว (`Authorization: Bearer ...` หรือ `x-openclaw-token`) และจะปฏิเสธโทเค็นในสตริงการค้นหา
+    - `hooks.path` ต้องไม่เป็น `/`; ให้เก็บขาเข้า Webhook ไว้ในพาธย่อยเฉพาะ เช่น `/hooks`
+    - ปิดแฟล็กข้ามการตรวจสอบเนื้อหาที่ไม่ปลอดภัยไว้ (`hooks.gmail.allowUnsafeExternalContent`, `hooks.mappings[].allowUnsafeExternalContent`) เว้นแต่กำลังดีบักภายใต้ขอบเขตที่จำกัดอย่างเคร่งครัด
+    - หากเปิดใช้ `hooks.allowRequestSessionKey` ให้ตั้งค่า `hooks.allowedSessionKeyPrefixes` ด้วยเพื่อจำกัดขอบเขตคีย์เซสชันที่ผู้เรียกเลือก
+    - สำหรับเอเจนต์ที่ขับเคลื่อนด้วยฮุก ควรใช้โมเดลระดับสูงสมัยใหม่ที่มีประสิทธิภาพและนโยบายเครื่องมือที่เข้มงวด (ตัวอย่างเช่น อนุญาตเฉพาะการรับส่งข้อความร่วมกับแซนด์บ็อกซ์เมื่อทำได้)
 
-    ดู [เอกสารอ้างอิงฉบับเต็ม](/th/gateway/configuration-reference#hooks) สำหรับตัวเลือกการแมปทั้งหมดและการผสานรวม Gmail
+    ดูตัวเลือกการแมปทั้งหมดและการผสานรวม Gmail ได้ที่ [ข้อมูลอ้างอิงฉบับเต็ม](/th/gateway/configuration-reference#hooks)
 
   </Accordion>
 
-  <Accordion title="กำหนดค่าการกำหนดเส้นทางหลายตัวแทน">
-    เรียกใช้ตัวแทนหลายตัวที่แยกโดดเดี่ยว โดยมีเวิร์กสเปซและเซสชันแยกกัน:
+  <Accordion title="กำหนดค่าการกำหนดเส้นทางหลายเอเจนต์">
+    เรียกใช้เอเจนต์ที่แยกออกจากกันหลายตัว โดยแต่ละตัวมีเวิร์กสเปซและเซสชันของตนเอง:
 
     ```json5
     {
@@ -499,7 +470,7 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
     }
     ```
 
-    ดู [หลายตัวแทน](/th/concepts/multi-agent) และ [เอกสารอ้างอิงฉบับเต็ม](/th/gateway/config-agents#multi-agent-routing) สำหรับกฎการผูกและโปรไฟล์การเข้าถึงต่อหนึ่งตัวแทน
+    ดูกฎการผูกและโปรไฟล์การเข้าถึงแยกตามเอเจนต์ได้ที่ [หลายเอเจนต์](/th/concepts/multi-agent) และ [ข้อมูลอ้างอิงฉบับเต็ม](/th/gateway/config-agents#multi-agent-routing)
 
   </Accordion>
 
@@ -517,53 +488,50 @@ Gateway เก็บสำเนา last-known-good ที่เชื่อถ�
     }
     ```
 
-    - **ไฟล์เดียว**: แทนที่อ็อบเจกต์ที่บรรจุอยู่
-    - **อาร์เรย์ของไฟล์**: ผสานแบบลึกตามลำดับ (รายการหลังชนะ)
-    - **คีย์พี่น้อง**: ผสานหลัง include (เขียนทับค่าที่ include มา)
-    - **Include ซ้อนกัน**: รองรับลึกได้ถึง 10 ระดับ
-    - **พาธสัมพัทธ์**: แก้พาธโดยอิงกับไฟล์ที่ include
-    - **รูปแบบพาธ**: พาธ include ต้องไม่มีไบต์ null และต้องสั้นกว่า 4096 อักขระอย่างเคร่งครัด ทั้งก่อนและหลังการแก้พาธ
-    - **การเขียนที่ OpenClaw เป็นเจ้าของ**: เมื่อการเขียนเปลี่ยนเฉพาะส่วนระดับบนสุดหนึ่งส่วน
-      ที่มี include แบบไฟล์เดียวรองรับอยู่ เช่น `plugins: { $include: "./plugins.json5" }`
-      OpenClaw จะอัปเดตไฟล์ที่ include นั้นและปล่อย `openclaw.json` ไว้เหมือนเดิม
-    - **การเขียนทะลุที่ไม่รองรับ**: include ที่ราก, อาร์เรย์ include และ include
-      ที่มีการเขียนทับโดยคีย์พี่น้องจะล้มเหลวแบบปิดสำหรับการเขียนที่ OpenClaw เป็นเจ้าของ แทนที่จะ
-      flatten การกำหนดค่า
-    - **การจำกัดขอบเขต**: พาธ `$include` ต้องแก้พาธไปอยู่ใต้ไดเรกทอรีที่เก็บ
-      `openclaw.json` หากต้องการแชร์ทรีข้ามเครื่องหรือผู้ใช้ ให้ตั้งค่า
+    - **ไฟล์เดียว**: แทนที่ออบเจ็กต์ที่ครอบอยู่
+    - **อาร์เรย์ของไฟล์**: ผสานแบบลึกตามลำดับ (รายการหลังมีผลเหนือกว่า) ซ้อนได้ลึกสูงสุด 10 ระดับ
+    - **คีย์ระดับเดียวกัน**: ผสานหลังการรวมไฟล์ (แทนที่ค่าจากไฟล์ที่รวม)
+    - **พาธสัมพัทธ์**: แก้พาธโดยอ้างอิงจากไฟล์ที่ทำการรวม
+    - **รูปแบบพาธ**: พาธที่รวมต้องไม่มีไบต์ null และต้องสั้นกว่า 4096 อักขระอย่างเคร่งครัด ทั้งก่อนและหลังการแก้พาธ
+    - **การเขียนที่ OpenClaw เป็นเจ้าของ**: เมื่อการเขียนเปลี่ยนแปลงเฉพาะส่วนระดับบนสุดเพียงส่วนเดียว
+      ซึ่งมีไฟล์ที่รวมแบบไฟล์เดียวรองรับ เช่น `plugins: { $include: "./plugins.json5" }`
+      OpenClaw จะอัปเดตไฟล์ที่รวมดังกล่าวและคง `openclaw.json` ไว้ดังเดิม
+    - **ไม่รองรับการเขียนส่งผ่าน**: การรวมที่ระดับราก อาร์เรย์ของไฟล์ที่รวม และการรวม
+      ที่มีการแทนที่ด้วยคีย์ระดับเดียวกัน จะปฏิเสธการเขียนที่ OpenClaw เป็นเจ้าของอย่างปลอดภัย
+      แทนการแผ่การกำหนดค่าให้อยู่ในไฟล์เดียว
+    - **การจำกัดขอบเขต**: พาธ `$include` ต้องแก้ไปยังตำแหน่งภายใต้ไดเรกทอรีที่เก็บ
+      `openclaw.json` หากต้องการใช้โครงสร้างไดเรกทอรีร่วมกันระหว่างเครื่องหรือผู้ใช้ ให้ตั้งค่า
       `OPENCLAW_INCLUDE_ROOTS` เป็นรายการพาธ (`:` บน POSIX, `;` บน Windows) ของ
-      ไดเรกทอรีเพิ่มเติมที่ include อ้างอิงได้ Symlink จะถูกแก้พาธ
-      และตรวจสอบซ้ำ ดังนั้นพาธที่ตามตัวอักษรอยู่ในไดเรกทอรี config แต่เป้าหมายจริง
-      หลุดออกจาก root ที่อนุญาตทุกตัวก็ยังถูกปฏิเสธ
-    - **การจัดการข้อผิดพลาด**: ข้อผิดพลาดที่ชัดเจนสำหรับไฟล์ที่หายไป ข้อผิดพลาดการพาร์ส include แบบวงกลม รูปแบบพาธไม่ถูกต้อง และความยาวเกินกำหนด
+      ไดเรกทอรีเพิ่มเติมที่ไฟล์รวมสามารถอ้างอิงได้ ระบบจะแก้ symlink
+      และตรวจสอบอีกครั้ง ดังนั้นพาธที่ในเชิงข้อความอยู่ภายในไดเรกทอรีการกำหนดค่า แต่มี
+      เป้าหมายจริงอยู่นอกรากที่อนุญาตทั้งหมดจะยังคงถูกปฏิเสธ
+    - **การจัดการข้อผิดพลาด**: แสดงข้อผิดพลาดอย่างชัดเจนเมื่อไฟล์หาย การแยกวิเคราะห์ผิดพลาด การรวมเป็นวงกลม รูปแบบพาธไม่ถูกต้อง และความยาวเกินกำหนด
 
   </Accordion>
 </AccordionGroup>
 
-## การโหลดการกำหนดค่าใหม่แบบ hot
+## การโหลดการกำหนดค่าใหม่แบบทันที
 
-Gateway เฝ้าดู `~/.openclaw/openclaw.json` และนำการเปลี่ยนแปลงไปใช้โดยอัตโนมัติ - ไม่จำเป็นต้องรีสตาร์ทด้วยตนเองสำหรับการตั้งค่าส่วนใหญ่
+Gateway เฝ้าดู `~/.openclaw/openclaw.json` และนำการเปลี่ยนแปลงไปใช้โดยอัตโนมัติ โดยการตั้งค่าส่วนใหญ่ไม่จำเป็นต้องรีสตาร์ตด้วยตนเอง
 
-การแก้ไขไฟล์โดยตรงจะถือว่าไม่น่าเชื่อถือจนกว่าจะผ่านการตรวจสอบ watcher จะรอ
-ให้การเขียนไฟล์ชั่วคราว/การเปลี่ยนชื่อจากตัวแก้ไขสงบลง อ่านไฟล์สุดท้าย และปฏิเสธ
-การแก้ไขภายนอกที่ไม่ถูกต้องโดยไม่เขียน `openclaw.json` ใหม่ การเขียน config
-ที่ OpenClaw เป็นเจ้าของใช้ด่าน schema เดียวกันก่อนเขียน การเขียนทับแบบทำลาย เช่น
-การลบ `gateway.mode` หรือทำให้ไฟล์เล็กลงมากกว่าครึ่ง จะถูกปฏิเสธและ
-บันทึกเป็น `.rejected.*` เพื่อการตรวจสอบ
+การแก้ไขไฟล์โดยตรงจะถือว่าไม่น่าเชื่อถือจนกว่าจะผ่านการตรวจสอบ Watcher จะรอ
+ให้การเขียนไฟล์ชั่วคราว/การเปลี่ยนชื่อโดยโปรแกรมแก้ไขเสร็จสิ้น อ่านไฟล์สุดท้าย และปฏิเสธ
+การแก้ไขจากภายนอกที่ไม่ถูกต้องโดยไม่เขียนทับ `openclaw.json` การเขียนการกำหนดค่า
+ที่ OpenClaw เป็นเจ้าของจะผ่านเกตสคีมาเดียวกันก่อนเขียน (ดูกฎการเขียนทับ/ย้อนกลับ
+ที่ใช้กับการเขียนทุกครั้งได้ที่ [การตรวจสอบอย่างเข้มงวด](#strict-validation))
 
-หากคุณเห็น `config reload skipped (invalid config)` หรือการเริ่มต้นรายงาน `Invalid
-config` ให้ตรวจสอบ config เรียกใช้ `openclaw config validate` จากนั้นเรียกใช้ `openclaw
-doctor --fix` เพื่อซ่อมแซม ดู [การแก้ไขปัญหา Gateway](/th/gateway/troubleshooting#gateway-rejected-invalid-config)
-สำหรับเช็กลิสต์
+หากพบ `config reload skipped (invalid config)` หรือรายงานการเริ่มต้นแสดง `Invalid
+config` ให้ตรวจสอบการกำหนดค่า เรียกใช้ `openclaw config validate` แล้วเรียกใช้ `openclaw
+doctor --fix` เพื่อซ่อมแซม ดูรายการตรวจสอบได้ที่ [การแก้ไขปัญหา Gateway](/th/gateway/troubleshooting#gateway-rejected-invalid-config)
 
 ### โหมดการโหลดใหม่
 
-| โหมด                   | พฤติกรรม                                                                                |
+| โหมด                   | ลักษณะการทำงาน                                                                                |
 | ---------------------- | --------------------------------------------------------------------------------------- |
-| **`hybrid`** (ค่าเริ่มต้น) | นำการเปลี่ยนแปลงที่ปลอดภัยไปใช้แบบ hot ทันที รีสตาร์ทโดยอัตโนมัติสำหรับการเปลี่ยนแปลงที่สำคัญ           |
-| **`hot`**              | นำเฉพาะการเปลี่ยนแปลงที่ปลอดภัยไปใช้แบบ hot บันทึกคำเตือนเมื่อต้องรีสตาร์ท - คุณจัดการเอง |
-| **`restart`**          | รีสตาร์ท Gateway เมื่อมีการเปลี่ยนแปลง config ไม่ว่าจะปลอดภัยหรือไม่                                 |
-| **`off`**              | ปิดการเฝ้าดูไฟล์ การเปลี่ยนแปลงจะมีผลเมื่อรีสตาร์ทด้วยตนเองครั้งถัดไป                 |
+| **`hybrid`** (ค่าเริ่มต้น) | นำการเปลี่ยนแปลงที่ปลอดภัยไปใช้ทันทีโดยไม่รีสตาร์ต และรีสตาร์ตโดยอัตโนมัติสำหรับการเปลี่ยนแปลงที่สำคัญ           |
+| **`hot`**              | นำเฉพาะการเปลี่ยนแปลงที่ปลอดภัยไปใช้โดยไม่รีสตาร์ต บันทึกคำเตือนเมื่อต้องรีสตาร์ต โดยต้องดำเนินการเอง |
+| **`restart`**          | รีสตาร์ต Gateway เมื่อการกำหนดค่าเปลี่ยนแปลง ไม่ว่าจะปลอดภัยหรือไม่                                 |
+| **`off`**              | ปิดการเฝ้าดูไฟล์ การเปลี่ยนแปลงจะมีผลเมื่อรีสตาร์ตด้วยตนเองครั้งถัดไป                 |
 
 ```json5
 {
@@ -573,90 +541,95 @@ doctor --fix` เพื่อซ่อมแซม ดู [การแก้ไ
 }
 ```
 
-### สิ่งที่นำไปใช้แบบ hot ได้เทียบกับสิ่งที่ต้องรีสตาร์ท
+### สิ่งที่นำไปใช้ได้ทันทีเทียบกับสิ่งที่ต้องรีสตาร์ต
 
-ฟิลด์ส่วนใหญ่สามารถนำไปใช้แบบ hot ได้โดยไม่ต้องหยุดทำงาน ในโหมด `hybrid` การเปลี่ยนแปลงที่ต้องรีสตาร์ทจะได้รับการจัดการโดยอัตโนมัติ
+ฟิลด์ส่วนใหญ่ใช้การเปลี่ยนแปลงได้ทันทีโดยไม่มีช่วงหยุดให้บริการ ส่วนบางหัวข้อที่ใช้การเปลี่ยนแปลงทันทีจะรีสตาร์ทเฉพาะ
+ระบบย่อยนั้น (ช่องทาง, cron, heartbeat, ตัวตรวจสอบสถานะ) แทนที่จะรีสตาร์ท Gateway ทั้งหมด ใน
+โหมด `hybrid` การเปลี่ยนแปลงที่ต้องรีสตาร์ท Gateway จะได้รับการจัดการโดยอัตโนมัติ
 
-| หมวดหมู่            | ฟิลด์                                                            | ต้องรีสตาร์ทหรือไม่ |
-| ------------------- | ----------------------------------------------------------------- | --------------- |
-| ช่องทาง            | `channels.*`, `web` (WhatsApp) - ช่องทางในตัวและช่องทาง Plugin ทั้งหมด | ไม่              |
-| Agent และโมเดล      | `agent`, `agents`, `models`, `routing`                            | ไม่              |
-| ระบบอัตโนมัติ          | `hooks`, `cron`, `agent.heartbeat`                                | ไม่              |
-| เซสชันและข้อความ | `session`, `messages`                                             | ไม่              |
-| เครื่องมือและสื่อ       | `tools`, `browser`, `skills`, `mcp`, `audio`, `talk`              | ไม่              |
-| UI และเบ็ดเตล็ด           | `ui`, `logging`, `identity`, `bindings`                           | ไม่              |
-| เซิร์ฟเวอร์ Gateway      | `gateway.*` (port, bind, auth, tailscale, TLS, HTTP)              | **ใช่**         |
-| โครงสร้างพื้นฐาน      | `discovery`, `plugins`                                            | **ใช่**         |
-
-<Note>
-`gateway.reload` และ `gateway.remote` เป็นข้อยกเว้น - การเปลี่ยนค่าเหล่านี้จะ**ไม่**ทำให้เกิดการรีสตาร์ท
-</Note>
-
-### การวางแผนรีโหลด
-
-เมื่อคุณแก้ไขไฟล์ต้นทางที่ถูกอ้างอิงผ่าน `$include` OpenClaw จะวางแผน
-การรีโหลดจากเลย์เอาต์ที่เขียนไว้ในต้นทาง ไม่ใช่มุมมองในหน่วยความจำที่ถูกแผ่ให้แบนแล้ว
-วิธีนี้ทำให้การตัดสินใจ hot-reload (hot-apply เทียบกับ restart) คาดการณ์ได้ แม้เมื่อ
-ส่วนระดับบนสุดส่วนเดียวอยู่ในไฟล์ included ของตัวเอง เช่น
-`plugins: { $include: "./plugins.json5" }` การวางแผนรีโหลดจะล้มเหลวแบบปิดหาก
-เลย์เอาต์ต้นทางกำกวม
-
-## Config RPC (การอัปเดตเชิงโปรแกรม)
-
-สำหรับเครื่องมือที่เขียน config ผ่าน Gateway API แนะนำให้ใช้ลำดับนี้:
-
-- `config.schema.lookup` เพื่อตรวจสอบ subtree หนึ่งรายการ (โหนด schema แบบตื้น + สรุป child)
-- `config.get` เพื่อดึง snapshot ปัจจุบันพร้อม `hash`
-- `config.patch` สำหรับการอัปเดตบางส่วน (JSON merge patch: object จะ merge กัน, `null`
-  จะลบ, array จะ replace เมื่อยืนยันอย่างชัดเจนด้วย `replacePaths` หาก
-  รายการจะถูกนำออก)
-- `config.apply` เฉพาะเมื่อคุณตั้งใจจะแทนที่ config ทั้งหมด
-- `update.run` สำหรับการ self-update พร้อม restart อย่างชัดเจน; ใส่ `continuationMessage` เมื่อเซสชันหลังรีสตาร์ทควรรัน follow-up turn หนึ่งครั้ง
-- `update.status` เพื่อตรวจสอบ update restart sentinel ล่าสุดและยืนยันเวอร์ชันที่กำลังรันหลังการรีสตาร์ท
-
-Agents ควรถือว่า `config.schema.lookup` เป็นจุดเริ่มต้นสำหรับเอกสารและข้อจำกัด
-ระดับฟิลด์ที่แม่นยำ ใช้ [Configuration reference](/th/gateway/configuration-reference)
-เมื่อจำเป็นต้องดูแผนผัง config ที่กว้างขึ้น ค่าเริ่มต้น หรือลิงก์ไปยัง reference
-ของ subsystem เฉพาะ
+| หมวดหมู่            | ฟิลด์                                                                  | ต้องรีสตาร์ท Gateway หรือไม่?      |
+| ------------------- | ----------------------------------------------------------------------- | ---------------------------- |
+| ช่องทาง            | `channels.*`, `web` (WhatsApp) - ช่องทางแบบในตัวและช่องทางจาก Plugin ทั้งหมด       | ไม่ (รีสตาร์ทช่องทางนั้น)   |
+| เอเจนต์และโมเดล      | `agent`, `agents`, `models`, `routing`                                  | ไม่                           |
+| การทำงานอัตโนมัติ          | `hooks`, `cron`, `agent.heartbeat`                                      | ไม่ (รีสตาร์ทระบบย่อยนั้น) |
+| เซสชันและข้อความ | `session`, `messages`                                                   | ไม่                           |
+| เครื่องมือและสื่อ       | `tools`, `skills`, `mcp`, `audio`, `talk`                               | ไม่                           |
+| การกำหนดค่า Plugin       | `plugins.entries.*`, `plugins.allow`, `plugins.deny`, `plugins.enabled` | ไม่ (โหลดรันไทม์ของ Plugin ใหม่)  |
+| UI และอื่น ๆ           | `ui`, `logging`, `identity`, `bindings`                                 | ไม่                           |
+| เซิร์ฟเวอร์ Gateway      | `gateway.*` (พอร์ต, การผูก, การยืนยันตัวตน, tailscale, TLS, HTTP, push)              | **ใช่**                      |
+| โครงสร้างพื้นฐาน      | `discovery`, `browser`, `plugins.load`, `plugins.installs`              | **ใช่**                      |
 
 <Note>
-การเขียน control-plane (`config.apply`, `config.patch`, `update.run`) ถูก
-จำกัดอัตราไว้ที่ 3 คำขอต่อ 60 วินาทีต่อ `deviceId+clientIp` คำขอ restart
-จะถูกรวมกัน แล้วบังคับใช้ cooldown 30 วินาทีระหว่างรอบการ restart
-`update.status` เป็นแบบอ่านอย่างเดียว แต่จำกัดเฉพาะ admin เพราะ restart sentinel สามารถ
-มีสรุปขั้นตอนการอัปเดตและส่วนท้ายของ output คำสั่งได้
+`gateway.reload` และ `gateway.remote` เป็นข้อยกเว้นภายใต้ `gateway.*` การเปลี่ยนค่าเหล่านี้จะ **ไม่** ทำให้เกิดการรีสตาร์ท Plugin แต่ละรายการยังสามารถแทนที่ตารางนี้ได้ด้วย โดย Plugin ที่โหลดแล้วอาจประกาศคำนำหน้าการกำหนดค่าที่ทำให้ต้องรีสตาร์ทเอง (ตัวอย่างเช่น Canvas Plugin ที่รวมมาให้จะรีสตาร์ท Gateway สำหรับ `plugins.enabled`, `plugins.allow` และ `plugins.deny` ไม่ใช่เฉพาะ `plugins.entries.canvas` ของตนเอง) ดังนั้นลักษณะการทำงานจริงจึงขึ้นอยู่กับ Plugin ที่กำลังทำงานอยู่
 </Note>
 
-ตัวอย่าง partial patch:
+### การวางแผนโหลดใหม่
+
+เมื่อแก้ไขไฟล์ต้นฉบับที่อ้างอิงผ่าน `$include` OpenClaw จะวางแผน
+การโหลดใหม่จากเค้าโครงที่เขียนไว้ในต้นฉบับ ไม่ใช่มุมมองในหน่วยความจำที่ถูกทำให้แบน
+ซึ่งช่วยให้การตัดสินใจโหลดใหม่ทันที (ใช้การเปลี่ยนแปลงทันทีเทียบกับรีสตาร์ท) คาดการณ์ได้ แม้ว่า
+หัวข้อระดับบนสุดหนึ่งหัวข้อจะอยู่ในไฟล์ที่รวมแยกต่างหาก เช่น
+`plugins: { $include: "./plugins.json5" }` การวางแผนโหลดใหม่จะล้มเหลวแบบปิดกั้นหาก
+เค้าโครงต้นฉบับมีความกำกวม
+
+## Config RPC (การอัปเดตโดยใช้โปรแกรม)
+
+สำหรับเครื่องมือที่เขียนการกำหนดค่าผ่าน API ของ Gateway ให้ใช้ขั้นตอนนี้เป็นหลัก:
+
+- `config.schema.lookup` เพื่อตรวจสอบแผนผังย่อยหนึ่งรายการ (โหนดสคีมาแบบตื้น + ข้อมูลสรุป
+  ของโหนดลูก)
+- `config.get` เพื่อดึงสแนปช็อตปัจจุบันพร้อม `hash`
+- `config.patch` สำหรับการอัปเดตบางส่วน (JSON merge patch: ออบเจ็กต์จะผสานกัน, `null`
+  จะลบ, อาร์เรย์จะถูกแทนที่เมื่อตั้งใจยืนยันด้วย `replacePaths` หาก
+  จะมีการลบรายการ)
+- `config.apply` เฉพาะเมื่อต้องการแทนที่การกำหนดค่าทั้งหมด
+- `update.run` สำหรับการอัปเดตตัวเองพร้อมรีสตาร์ทอย่างชัดเจน ให้ใส่ `continuationMessage` เมื่อเซสชันหลังรีสตาร์ทควรทำงานต่ออีกหนึ่งรอบ
+- `update.status` เพื่อตรวจสอบตัวบ่งชี้การรีสตาร์ทจากการอัปเดตล่าสุด และยืนยันเวอร์ชันที่กำลังทำงานหลังการรีสตาร์ท
+
+เอเจนต์ควรใช้ `config.schema.lookup` เป็นจุดแรกสำหรับเอกสารและข้อจำกัด
+ระดับฟิลด์ที่แม่นยำ ใช้ [ข้อมูลอ้างอิงการกำหนดค่า](/th/gateway/configuration-reference)
+เมื่อต้องการแผนผังการกำหนดค่าที่กว้างขึ้น ค่าเริ่มต้น หรือลิงก์ไปยังข้อมูลอ้างอิง
+ของระบบย่อยโดยเฉพาะ
+
+<Note>
+การเขียนในระนาบควบคุม (`config.apply`, `config.patch`, `update.run`)
+ถูกจำกัดอัตราไว้ที่ 30 คำขอต่อ 60 วินาที ต่อเมธอด ต่อ
+`deviceId+clientIp` โปรดดู [การจำกัดอัตรา](/th/gateway/security/rate-limiting) คำขอรีสตาร์ท
+จะถูกรวมเข้าด้วยกัน จากนั้นบังคับใช้ช่วงพัก 30 วินาทีระหว่างรอบการรีสตาร์ท
+`update.status` เป็นแบบอ่านอย่างเดียวแต่จำกัดเฉพาะผู้ดูแลระบบ เนื่องจากตัวบ่งชี้การรีสตาร์ทอาจ
+มีข้อมูลสรุปขั้นตอนการอัปเดตและส่วนท้ายของเอาต์พุตคำสั่ง
+</Note>
+
+ตัวอย่างแพตช์บางส่วน:
 
 ```bash
-openclaw gateway call config.get --params '{}'  # capture payload.hash
+openclaw gateway call config.get --params '{}'  # บันทึก payload.hash
 openclaw gateway call config.patch --params '{
   "raw": "{ channels: { telegram: { groups: { \"*\": { requireMention: false } } } } }",
   "baseHash": "<hash>"
 }'
 ```
 
-ทั้ง `config.apply` และ `config.patch` รับ `raw`, `baseHash`, `sessionKey`,
-`note` และ `restartDelayMs` ต้องมี `baseHash` สำหรับทั้งสอง method เมื่อมี
-config อยู่แล้ว
+ทั้ง `config.apply` และ `config.patch` ยอมรับ `raw`, `baseHash`, `sessionKey`,
+`note` และ `restartDelayMs` โดยทั้งสองเมธอดต้องใช้ `baseHash` เมื่อมี
+ไฟล์การกำหนดค่าอยู่แล้ว (การเขียนครั้งแรกที่ยังไม่มีการกำหนดค่าจะข้ามการตรวจสอบนี้)
 
-`config.patch` ยังรับ `replacePaths` ซึ่งเป็น array ของ path ใน config ที่การแทนที่ array
-เป็นความตั้งใจ หาก patch จะแทนที่หรือลบ array ที่มีอยู่ด้วยรายการที่น้อยลง
-Gateway จะปฏิเสธการเขียน เว้นแต่ path ที่ตรงกันนั้นจะปรากฏใน
-`replacePaths`; array ซ้อนภายใต้รายการ array ใช้ `[]` เช่น
-`agents.list[].skills` วิธีนี้ป้องกันไม่ให้ snapshot จาก `config.get` ที่ถูกตัดทอน
-เขียนทับ array ของ routing หรือ allowlist โดยไม่ตั้งใจ ใช้ `config.apply` เมื่อคุณ
-ตั้งใจจะแทนที่ config ทั้งหมด
+`config.patch` ยังยอมรับ `replacePaths` ซึ่งเป็นอาร์เรย์ของพาธการกำหนดค่าที่ตั้งใจ
+ให้แทนที่อาร์เรย์ หากแพตช์จะแทนที่หรือลบอาร์เรย์ที่มีอยู่
+ด้วยจำนวนรายการที่น้อยลง Gateway จะปฏิเสธการเขียน เว้นแต่พาธนั้นจะปรากฏ
+ใน `replacePaths` โดยอาร์เรย์ซ้อนภายใต้รายการอาร์เรย์จะใช้ `[]` เช่น
+`agents.list[].skills` วิธีนี้ช่วยป้องกันไม่ให้สแนปช็อต `config.get` ที่ถูกตัดทอน
+เขียนทับอาร์เรย์การกำหนดเส้นทางหรือรายการอนุญาตโดยไม่มีการแจ้งเตือน ใช้ `config.apply` เมื่อ
+ตั้งใจแทนที่การกำหนดค่าทั้งหมด
 
 ## ตัวแปรสภาพแวดล้อม
 
-OpenClaw อ่าน env vars จาก parent process รวมถึง:
+OpenClaw อ่านตัวแปรสภาพแวดล้อมจากโปรเซสแม่ รวมทั้ง:
 
-- `.env` จากไดเรกทอรีทำงานปัจจุบัน (ถ้ามี)
-- `~/.openclaw/.env` (global fallback)
+- `.env` จากไดเรกทอรีการทำงานปัจจุบัน (ถ้ามี)
+- `~/.openclaw/.env` (ตัวสำรองส่วนกลาง)
 
-ไฟล์ทั้งสองจะไม่ override env vars ที่มีอยู่ คุณยังสามารถตั้งค่า env vars แบบ inline ใน config ได้:
+ทั้งสองไฟล์จะไม่แทนที่ตัวแปรสภาพแวดล้อมที่มีอยู่ นอกจากนี้ยังสามารถตั้งค่าตัวแปรสภาพแวดล้อมแบบอินไลน์ในการกำหนดค่าได้:
 
 ```json5
 {
@@ -667,8 +640,8 @@ OpenClaw อ่าน env vars จาก parent process รวมถึง:
 }
 ```
 
-<Accordion title="การนำเข้า shell env (ไม่บังคับ)">
-  หากเปิดใช้และ key ที่คาดไว้ยังไม่ได้ตั้งค่า OpenClaw จะรัน login shell ของคุณและนำเข้าเฉพาะ key ที่ขาดอยู่:
+<Accordion title="การนำเข้าตัวแปรสภาพแวดล้อมจากเชลล์ (ไม่บังคับ)">
+  หากเปิดใช้งานและไม่ได้ตั้งค่าคีย์ที่คาดไว้ OpenClaw จะเรียกใช้ล็อกอินเชลล์และนำเข้าเฉพาะคีย์ที่ขาดหายไป:
 
 ```json5
 {
@@ -678,11 +651,11 @@ OpenClaw อ่าน env vars จาก parent process รวมถึง:
 }
 ```
 
-Env var ที่เทียบเท่า: `OPENCLAW_LOAD_SHELL_ENV=1`
+ตัวแปรสภาพแวดล้อมที่เทียบเท่า: `OPENCLAW_LOAD_SHELL_ENV=1` ค่าเริ่มต้น `timeoutMs`: `15000`
 </Accordion>
 
-<Accordion title="การแทนที่ env var ในค่า config">
-  อ้างอิง env vars ในค่า string ใดก็ได้ของ config ด้วย `${VAR_NAME}`:
+<Accordion title="การแทนค่าตัวแปรสภาพแวดล้อมในค่าการกำหนดค่า">
+  อ้างอิงตัวแปรสภาพแวดล้อมในค่าสตริงการกำหนดค่าใด ๆ ด้วย `${VAR_NAME}`:
 
 ```json5
 {
@@ -693,16 +666,16 @@ Env var ที่เทียบเท่า: `OPENCLAW_LOAD_SHELL_ENV=1`
 
 กฎ:
 
-- จับคู่เฉพาะชื่ออักษรตัวใหญ่: `[A-Z_][A-Z0-9_]*`
-- vars ที่ขาดหายหรือว่างจะ throw error ตอนโหลด
-- Escape ด้วย `$${VAR}` สำหรับ output แบบ literal
-- ใช้งานได้ภายในไฟล์ `$include`
-- การแทนที่แบบ inline: `"${BASE}/v1"` → `"https://api.example.com/v1"`
+- จับคู่เฉพาะชื่อที่เป็นตัวพิมพ์ใหญ่: `[A-Z_][A-Z0-9_]*`
+- ตัวแปรที่ไม่มีอยู่หรือว่างเปล่าจะทำให้เกิดข้อผิดพลาดขณะโหลด
+- ใช้อักขระหลีก `$${VAR}` สำหรับเอาต์พุตตามตัวอักษร
+- ใช้ได้ภายในไฟล์ `$include`
+- การแทนค่าแบบอินไลน์: `"${BASE}/v1"` → `"https://api.example.com/v1"`
 
 </Accordion>
 
-<Accordion title="Secret refs (env, file, exec)">
-  สำหรับฟิลด์ที่รองรับ object SecretRef คุณสามารถใช้:
+<Accordion title="การอ้างอิงข้อมูลลับ (env, file, exec)">
+  สำหรับฟิลด์ที่รองรับออบเจ็กต์ SecretRef สามารถใช้:
 
 ```json5
 {
@@ -734,22 +707,22 @@ Env var ที่เทียบเท่า: `OPENCLAW_LOAD_SHELL_ENV=1`
 }
 ```
 
-รายละเอียด SecretRef (รวมถึง `secrets.providers` สำหรับ `env`/`file`/`exec`) อยู่ใน [Secrets Management](/th/gateway/secrets)
-path credential ที่รองรับระบุไว้ใน [SecretRef Credential Surface](/th/reference/secretref-credential-surface)
+รายละเอียด SecretRef (รวมถึง `secrets.providers` สำหรับ `env`/`file`/`exec`) อยู่ใน [การจัดการข้อมูลลับ](/th/gateway/secrets)
+พาธข้อมูลประจำตัวที่รองรับแสดงอยู่ใน [พื้นผิวข้อมูลประจำตัว SecretRef](/th/reference/secretref-credential-surface)
 </Accordion>
 
-ดู [Environment](/th/help/environment) สำหรับ precedence และแหล่งที่มาทั้งหมด
+ดู [สภาพแวดล้อม](/th/help/environment) สำหรับลำดับความสำคัญและแหล่งที่มาทั้งหมด
 
-## Reference ฉบับเต็ม
+## ข้อมูลอ้างอิงฉบับเต็ม
 
-สำหรับ reference แบบครบทุกฟิลด์ ดู **[Configuration Reference](/th/gateway/configuration-reference)**
+สำหรับข้อมูลอ้างอิงที่ครบถ้วนแบบรายฟิลด์ โปรดดู **[ข้อมูลอ้างอิงการกำหนดค่า](/th/gateway/configuration-reference)**
 
 ---
 
-_ที่เกี่ยวข้อง: [Configuration Examples](/th/gateway/configuration-examples) · [Configuration Reference](/th/gateway/configuration-reference) · [Doctor](/th/gateway/doctor)_
+_ที่เกี่ยวข้อง: [ตัวอย่างการกำหนดค่า](/th/gateway/configuration-examples) · [ข้อมูลอ้างอิงการกำหนดค่า](/th/gateway/configuration-reference) · [Doctor](/th/gateway/doctor)_
 
 ## ที่เกี่ยวข้อง
 
-- [Configuration reference](/th/gateway/configuration-reference)
-- [Configuration examples](/th/gateway/configuration-examples)
-- [Gateway runbook](/th/gateway)
+- [ข้อมูลอ้างอิงการกำหนดค่า](/th/gateway/configuration-reference)
+- [ตัวอย่างการกำหนดค่า](/th/gateway/configuration-examples)
+- [คู่มือปฏิบัติการ Gateway](/th/gateway)

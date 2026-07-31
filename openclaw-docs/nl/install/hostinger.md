@@ -3,12 +3,13 @@ read_when:
     - OpenClaw instellen op Hostinger
     - Op zoek naar een beheerde VPS voor OpenClaw
     - Hostinger 1-Click OpenClaw gebruiken
-summary: Host OpenClaw op Hostinger
+summary: Host OpenClaw bij Hostinger
 title: Hostinger
 x-i18n:
-    generated_at: "2026-07-12T08:55:21Z"
+    generated_at: "2026-07-27T05:58:00Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 7dc49e741f8581928553e2426ed91f92df6e7b0c31dd8780c0d6e891a07be263
     source_path: install/hostinger.md
@@ -24,11 +25,11 @@ Voer een permanente OpenClaw Gateway uit op [Hostinger](https://www.hostinger.co
 
 ## Optie A: OpenClaw met 1-Click
 
-Hostinger beheert de infrastructuur, Docker en automatische updates. Dit is de snelste manier om een werkende instantie op te zetten.
+Hostinger verzorgt de infrastructuur, Docker en automatische updates. De snelste manier om een werkende instantie te krijgen.
 
 <Steps>
   <Step title="Aanschaffen en starten">
-    1. Kies op de [Hostinger OpenClaw-pagina](https://www.hostinger.com/openclaw) een beheerd OpenClaw-abonnement en rond de aankoop af.
+    1. Kies op de [Hostinger OpenClaw-pagina](https://www.hostinger.com/openclaw) een beheerd OpenClaw-abonnement en rond de betaling af.
 
     <Note>
     Tijdens het afrekenen kun je vooraf aangeschafte **Ready-to-Use AI**-tegoeden selecteren die direct in OpenClaw worden geïntegreerd. Je hebt dan geen externe accounts of API-sleutels van andere providers nodig en kunt meteen beginnen met chatten. Je kunt tijdens de configuratie ook je eigen sleutel van Anthropic, OpenAI, Google Gemini of xAI opgeven.
@@ -52,22 +53,22 @@ Hostinger beheert de infrastructuur, Docker en automatische updates. Dit is de s
 
 ## Optie B: OpenClaw op een VPS
 
-Meer controle over de server. Hostinger implementeert OpenClaw via Docker op je VPS; je beheert dit via **Docker Manager** in hPanel.
+Meer controle over de server. Hostinger implementeert OpenClaw via Docker op je VPS; je beheert het via **Docker Manager** in hPanel.
 
 <Steps>
   <Step title="Een VPS aanschaffen">
-    1. Kies op de [Hostinger OpenClaw-pagina](https://www.hostinger.com/openclaw) een OpenClaw on VPS-abonnement en rond de aankoop af.
+    1. Kies op de [Hostinger OpenClaw-pagina](https://www.hostinger.com/openclaw) een OpenClaw on VPS-abonnement en rond de betaling af.
 
     <Note>
-    Je kunt tijdens het afrekenen vooraf aangeschafte **Ready-to-Use AI**-tegoeden selecteren. Deze worden direct in OpenClaw geïntegreerd, zodat je kunt beginnen met chatten zonder externe accounts of API-sleutels van andere providers.
+    Tijdens het afrekenen kun je vooraf aangeschafte **Ready-to-Use AI**-tegoeden selecteren. Deze worden direct in OpenClaw geïntegreerd, zodat je zonder externe accounts of API-sleutels van andere providers kunt beginnen met chatten.
     </Note>
 
   </Step>
 
   <Step title="OpenClaw configureren">
-    Vul de configuratievelden in nadat de VPS beschikbaar is gemaakt:
+    Vul de configuratievelden in zodra de VPS is ingericht:
 
-    - **Gateway-token** -- wordt automatisch gegenereerd; bewaar dit voor later gebruik.
+    - **Gateway-token** -- wordt automatisch gegenereerd; bewaar het voor later gebruik.
     - **WhatsApp-nummer** -- je nummer met landcode (optioneel).
     - **Telegram-bottoken** -- van [BotFather](https://t.me/BotFather) (optioneel).
     - **API-sleutels** -- alleen nodig als je tijdens het afrekenen geen Ready-to-Use AI-tegoeden hebt geselecteerd.
@@ -80,19 +81,19 @@ Meer controle over de server. Hostinger implementeert OpenClaw via Docker op je 
 
 </Steps>
 
-Logboeken, herstarts en updates worden uitgevoerd via de Docker Manager-interface in hPanel. Druk in Docker Manager op **Update** om de nieuwste image op te halen en de installatie bij te werken.
+Logboeken, herstarts en updates beheer je via de Docker Manager-interface in hPanel. Druk voor een update op **Update** in Docker Manager om de nieuwste image op te halen.
 
 ## Je configuratie verifiëren
 
-Stuur 'Hallo' naar je assistent via het kanaal dat je hebt verbonden. OpenClaw antwoordt en begeleidt je bij het instellen van de eerste voorkeuren.
+Stuur 'Hi' naar je assistent via het verbonden kanaal. OpenClaw antwoordt en helpt je bij het instellen van de eerste voorkeuren.
 
 ## Problemen oplossen
 
-**Dashboard wordt niet geladen** -- Wacht enkele minuten totdat de container volledig beschikbaar is gemaakt en controleer vervolgens de Docker Manager-logboeken in hPanel.
+**Dashboard wordt niet geladen** -- Wacht enkele minuten totdat de container volledig is ingericht en controleer vervolgens de Docker Manager-logboeken in hPanel.
 
 **Docker-container blijft opnieuw starten** -- Open de Docker Manager-logboeken en zoek naar configuratiefouten, zoals ontbrekende tokens of ongeldige API-sleutels.
 
-**Telegram-bot reageert niet** -- Als koppeling voor privéberichten vereist is, ontvangt een onbekende afzender een korte koppelingscode in plaats van een antwoord. Keur deze goed via de OpenClaw-dashboardchat of met `openclaw pairing approve telegram <CODE>` als je shelltoegang tot de container hebt. Zie [Koppeling](/nl/channels/pairing).
+**Telegram-bot reageert niet** -- Als DM-koppeling vereist is, ontvangt een onbekende afzender een korte koppelingscode in plaats van een antwoord. Keur deze goed via de chat in het OpenClaw-dashboard of met `openclaw pairing approve telegram <CODE>` als je shelltoegang tot de container hebt. Zie [Koppeling](/nl/channels/pairing).
 
 ## Volgende stappen
 

@@ -1,46 +1,51 @@
 ---
 read_when:
-    - आप चाहते हैं कि Prometheus, Grafana, VictoriaMetrics, या कोई अन्य scraper OpenClaw Gateway metrics एकत्र करे
-    - आपको डैशबोर्ड या अलर्ट के लिए Prometheus मीट्रिक नामों और लेबल नीति की आवश्यकता है
-    - आप OpenTelemetry collector चलाए बिना metrics चाहते हैं
+    - आप चाहते हैं कि Prometheus, Grafana, VictoriaMetrics या कोई अन्य स्क्रेपर OpenClaw Gateway मेट्रिक्स एकत्र करे
+    - आपको डैशबोर्ड या अलर्ट के लिए Prometheus मेट्रिक के नाम और लेबल नीति चाहिए
+    - आप OpenTelemetry कलेक्टर चलाए बिना मेट्रिक्स चाहते हैं
 sidebarTitle: Prometheus
-summary: diagnostics-prometheus Plugin के माध्यम से OpenClaw निदान को Prometheus टेक्स्ट मेट्रिक्स के रूप में उजागर करें
+summary: diagnostics-prometheus Plugin के माध्यम से OpenClaw डायग्नोस्टिक्स को Prometheus टेक्स्ट मेट्रिक्स के रूप में उपलब्ध कराएँ
 title: Prometheus मेट्रिक्स
 x-i18n:
-    generated_at: "2026-06-28T23:11:54Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:44:37Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f9d3f6cf5af2e3770cd3a86e968fe25d2c3b3b87524ba1d229ef585671d320a8
+    source_hash: 9d04a46bdb401df3cdd2571b973f2a60f264862cf74da02c5a9cfa1de6ea9ffe
     source_path: gateway/prometheus.md
     workflow: 16
 ---
 
-  OpenClaw आधिकारिक `diagnostics-prometheus` plugin के माध्यम से diagnostics metrics उजागर कर सकता है। यह विश्वसनीय diagnostics और core-emitted gateway stability events को सुनता है, फिर इस पते पर Prometheus text endpoint प्रस्तुत करता है:
+OpenClaw आधिकारिक
+`diagnostics-prometheus` Plugin के माध्यम से निदान मेट्रिक्स उपलब्ध करा सकता है। यह विश्वसनीय निदान के साथ-साथ
+आंतरिक रूप से टैग किए गए, डिस्पैचर-स्वामित्व वाले निदान इवेंट (क्यू, मेमोरी और
+सत्र-पुनर्प्राप्ति संकेत) सुनता है और यहाँ Prometheus टेक्स्ट एंडपॉइंट प्रस्तुत करता है:
 
-  ```text
-  GET /api/diagnostics/prometheus
-  ```
+```text
+GET /api/diagnostics/prometheus
+```
 
-  Content type `text/plain; version=0.0.4; charset=utf-8` है, जो मानक Prometheus exposition format है।
+कंटेंट टाइप `text/plain; version=0.0.4; charset=utf-8`, मानक
+Prometheus एक्सपोज़िशन फ़ॉर्मेट है।
 
-  <Warning>
-  यह route Gateway authentication (operator scope) का उपयोग करता है। इसे public unauthenticated `/metrics` endpoint के रूप में expose न करें। इसे उसी auth path के माध्यम से scrape करें जिसका उपयोग आप अन्य operator APIs के लिए करते हैं।
-  </Warning>
+<Warning>
+यह रूट Gateway प्रमाणीकरण (ऑपरेटर स्कोप, विश्वसनीय-ऑपरेटर सतह) का उपयोग करता है। इसे सार्वजनिक, अप्रमाणित `/metrics` एंडपॉइंट के रूप में उपलब्ध न कराएँ। इसे उसी प्रमाणीकरण पथ से स्क्रैप करें जिसका उपयोग आप अन्य ऑपरेटर API के लिए करते हैं।
+</Warning>
 
-  Traces, logs, OTLP push, और OpenTelemetry GenAI semantic attributes के लिए, [OpenTelemetry export](/hi/gateway/opentelemetry) देखें।
+ट्रेस, लॉग, OTLP पुश और OpenTelemetry GenAI सिमैंटिक एट्रिब्यूट के लिए, [OpenTelemetry एक्सपोर्ट](/hi/gateway/opentelemetry) देखें।
 
-  ## त्वरित शुरुआत
+## त्वरित शुरुआत
 
-  <Steps>
-  <Step title="Plugin install करें">
+<Steps>
+  <Step title="Plugin इंस्टॉल करें">
     ```bash
     openclaw plugins install clawhub:@openclaw/diagnostics-prometheus
     ```
   </Step>
-  <Step title="Plugin enable करें">
+  <Step title="Plugin सक्षम करें">
     <Tabs>
-      <Tab title="Config">
+      <Tab title="कॉन्फ़िगरेशन">
         ```json5
         {
           plugins: {
@@ -62,11 +67,11 @@ x-i18n:
       </Tab>
     </Tabs>
   </Step>
-  <Step title="Gateway restart करें">
-    HTTP route plugin startup पर register होता है, इसलिए enable करने के बाद reload करें।
+  <Step title="Gateway पुनः आरंभ करें">
+    HTTP रूट Plugin के आरंभ होने पर पंजीकृत होता है, इसलिए इसे सक्षम करने के बाद पुनः लोड करें।
   </Step>
-  <Step title="Protected route scrape करें">
-    वही gateway auth भेजें जिसका उपयोग आपके operator clients करते हैं:
+  <Step title="संरक्षित रूट स्क्रैप करें">
+    वही Gateway प्रमाणीकरण भेजें जिसका उपयोग आपके ऑपरेटर क्लाइंट करते हैं:
 
     ```bash
     curl -H "Authorization: Bearer $OPENCLAW_GATEWAY_TOKEN" \
@@ -74,7 +79,7 @@ x-i18n:
     ```
 
   </Step>
-  <Step title="Prometheus को वायर करें">
+  <Step title="Prometheus कनेक्ट करें">
     ```yaml
     # prometheus.yml
     scrape_configs:
@@ -90,141 +95,149 @@ x-i18n:
 </Steps>
 
 <Note>
-`diagnostics.enabled: true` आवश्यक है। इसके बिना, Plugin फिर भी HTTP route पंजीकृत करता है, लेकिन कोई diagnostic events exporter में प्रवाहित नहीं होते, इसलिए response खाली होता है।
+`diagnostics.enabled` का डिफ़ॉल्ट मान `true` है; इसे केवल अत्यधिक नियंत्रित परिवेशों में `false` पर सेट करें। यदि यह `false` है, तो Plugin फिर भी HTTP रूट पंजीकृत करता है, लेकिन एक्सपोर्टर में कोई निदान इवेंट प्रवाहित नहीं होता, इसलिए प्रतिक्रिया खाली होती है।
 </Note>
 
-## निर्यात किए गए metrics
+## एक्सपोर्ट किए गए मेट्रिक्स
 
-| Metric                                           | Type      | Labels                                                                                    |
+| मेट्रिक                                           | प्रकार      | लेबल                                                                                    |
 | ------------------------------------------------ | --------- | ----------------------------------------------------------------------------------------- |
-| `openclaw_run_completed_total`                   | counter   | `channel`, `model`, `outcome`, `provider`, `trigger`                                      |
-| `openclaw_run_duration_seconds`                  | histogram | `channel`, `model`, `outcome`, `provider`, `trigger`                                      |
-| `openclaw_model_call_total`                      | counter   | `api`, `error_category`, `model`, `outcome`, `provider`, `transport`                      |
-| `openclaw_model_call_duration_seconds`           | histogram | `api`, `error_category`, `model`, `outcome`, `provider`, `transport`                      |
-| `openclaw_model_failover_total`                  | counter   | `from_model`, `from_provider`, `lane`, `reason`, `suspended`, `to_model`, `to_provider`   |
-| `openclaw_model_tokens_total`                    | counter   | `agent`, `channel`, `model`, `provider`, `token_type`                                     |
-| `openclaw_gen_ai_client_token_usage`             | histogram | `model`, `provider`, `token_type`                                                         |
-| `openclaw_model_cost_usd_total`                  | counter   | `agent`, `channel`, `model`, `provider`                                                   |
-| `openclaw_skill_used_total`                      | counter   | `activation`, `agent`, `skill`, `source`                                                  |
-| `openclaw_tool_execution_total`                  | counter   | `error_category`, `outcome`, `params_kind`, `tool`, `tool_owner`, `tool_source`           |
-| `openclaw_tool_execution_duration_seconds`       | histogram | `error_category`, `outcome`, `params_kind`, `tool`, `tool_owner`, `tool_source`           |
-| `openclaw_tool_execution_blocked_total`          | counter   | `denied_reason`, `params_kind`, `tool`, `tool_owner`, `tool_source`                       |
-| `openclaw_harness_run_total`                     | counter   | `channel`, `error_category`, `harness`, `model`, `outcome`, `phase`, `plugin`, `provider` |
-| `openclaw_harness_run_duration_seconds`          | histogram | `channel`, `error_category`, `harness`, `model`, `outcome`, `phase`, `plugin`, `provider` |
-| `openclaw_webhook_received_total`                | counter   | `channel`, `webhook`                                                                      |
-| `openclaw_webhook_error_total`                   | counter   | `channel`, `webhook`                                                                      |
-| `openclaw_webhook_duration_seconds`              | histogram | `channel`, `webhook`                                                                      |
-| `openclaw_message_received_total`                | counter   | `channel`, `source`                                                                       |
-| `openclaw_message_dispatch_started_total`        | counter   | `channel`, `source`                                                                       |
-| `openclaw_message_dispatch_completed_total`      | counter   | `channel`, `outcome`, `reason`, `source`                                                  |
-| `openclaw_message_dispatch_duration_seconds`     | histogram | `channel`, `outcome`, `reason`, `source`                                                  |
-| `openclaw_message_processed_total`               | counter   | `channel`, `outcome`, `reason`                                                            |
-| `openclaw_message_processed_duration_seconds`    | histogram | `channel`, `outcome`, `reason`                                                            |
-| `openclaw_message_delivery_started_total`        | counter   | `channel`, `delivery_kind`                                                                |
-| `openclaw_message_delivery_total`                | counter   | `channel`, `delivery_kind`, `error_category`, `outcome`                                   |
-| `openclaw_message_delivery_duration_seconds`     | histogram | `channel`, `delivery_kind`, `error_category`, `outcome`                                   |
-| `openclaw_talk_event_total`                      | counter   | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
-| `openclaw_talk_event_duration_seconds`           | histogram | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
-| `openclaw_talk_audio_bytes`                      | histogram | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
-| `openclaw_queue_lane_size`                       | gauge     | `lane`                                                                                    |
-| `openclaw_queue_lane_wait_seconds`               | histogram | `lane`                                                                                    |
-| `openclaw_session_state_total`                   | counter   | `reason`, `state`                                                                         |
-| `openclaw_session_queue_depth`                   | gauge     | `state`                                                                                   |
-| `openclaw_session_turn_created_total`            | counter   | `agent`, `channel`, `trigger`                                                             |
-| `openclaw_session_stuck_total`                   | counter   | `reason`, `state`                                                                         |
-| `openclaw_session_stuck_age_seconds`             | histogram | `reason`, `state`                                                                         |
-| `openclaw_session_recovery_total`                | counter   | `action`, `active_work_kind`, `state`, `status`                                           |
-| `openclaw_session_recovery_age_seconds`          | histogram | `action`, `active_work_kind`, `state`, `status`                                           |
-| `openclaw_liveness_warning_total`                | counter   | `reason`                                                                                  |
-| `openclaw_liveness_sessions`                     | gauge     | `state`                                                                                   |
-| `openclaw_liveness_event_loop_delay_p99_seconds` | histogram | `reason`                                                                                  |
-| `openclaw_liveness_event_loop_delay_max_seconds` | histogram | `reason`                                                                                  |
-| `openclaw_liveness_event_loop_utilization_ratio` | histogram | `reason`                                                                                  |
-| `openclaw_liveness_cpu_core_ratio`               | histogram | `reason`                                                                                  |
-| `openclaw_payload_large_total`                   | counter   | `action`, `channel`, `plugin`, `reason`, `surface`                                        |
-| `openclaw_payload_large_bytes`                   | histogram | `action`, `channel`, `plugin`, `reason`, `surface`                                        |
-| `openclaw_memory_bytes`                          | gauge     | `kind`                                                                                    |
-| `openclaw_memory_rss_bytes`                      | histogram | none                                                                                      |
-| `openclaw_memory_pressure_total`                 | counter   | `level`, `reason`                                                                         |
-| `openclaw_telemetry_exporter_total`              | counter   | `exporter`, `reason`, `signal`, `status`                                                  |
-| `openclaw_prometheus_series_dropped_total`       | counter   | none                                                                                      |
+| `openclaw_run_completed_total`                   | काउंटर   | `channel`, `model`, `outcome`, `provider`, `trigger`                                      |
+| `openclaw_run_duration_seconds`                  | हिस्टोग्राम | `channel`, `model`, `outcome`, `provider`, `trigger`                                      |
+| `openclaw_model_call_total`                      | काउंटर   | `api`, `error_category`, `model`, `observation_unit`, `outcome`, `provider`, `transport`  |
+| `openclaw_model_call_duration_seconds`           | हिस्टोग्राम | `api`, `error_category`, `model`, `observation_unit`, `outcome`, `provider`, `transport`  |
+| `openclaw_model_failover_total`                  | काउंटर   | `from_model`, `from_provider`, `lane`, `reason`, `suspended`, `to_model`, `to_provider`   |
+| `openclaw_model_tokens_total`                    | काउंटर   | `agent`, `channel`, `model`, `provider`, `token_type`                                     |
+| `openclaw_gen_ai_client_token_usage`             | हिस्टोग्राम | `model`, `provider`, `token_type`                                                         |
+| `openclaw_model_cost_usd_total`                  | काउंटर   | `agent`, `channel`, `model`, `provider`                                                   |
+| `openclaw_model_usage_duration_seconds`          | हिस्टोग्राम | `agent`, `channel`, `model`, `provider`                                                   |
+| `openclaw_skill_used_total`                      | काउंटर   | `activation`, `agent`, `skill`, `source`                                                  |
+| `openclaw_tool_execution_total`                  | काउंटर   | `error_category`, `outcome`, `params_kind`, `tool`, `tool_owner`, `tool_source`           |
+| `openclaw_tool_execution_duration_seconds`       | हिस्टोग्राम | `error_category`, `outcome`, `params_kind`, `tool`, `tool_owner`, `tool_source`           |
+| `openclaw_tool_execution_blocked_total`          | काउंटर   | `denied_reason`, `params_kind`, `tool`, `tool_owner`, `tool_source`                       |
+| `openclaw_harness_run_total`                     | काउंटर   | `channel`, `error_category`, `harness`, `model`, `outcome`, `phase`, `plugin`, `provider` |
+| `openclaw_harness_run_duration_seconds`          | हिस्टोग्राम | `channel`, `error_category`, `harness`, `model`, `outcome`, `phase`, `plugin`, `provider` |
+| `openclaw_webhook_received_total`                | काउंटर   | `channel`, `webhook`                                                                      |
+| `openclaw_webhook_error_total`                   | काउंटर   | `channel`, `webhook`                                                                      |
+| `openclaw_webhook_duration_seconds`              | हिस्टोग्राम | `channel`, `webhook`                                                                      |
+| `openclaw_message_received_total`                | काउंटर   | `channel`, `source`                                                                       |
+| `openclaw_message_dispatch_started_total`        | काउंटर   | `channel`, `source`                                                                       |
+| `openclaw_message_dispatch_completed_total`      | काउंटर   | `channel`, `outcome`, `reason`, `source`                                                  |
+| `openclaw_message_dispatch_duration_seconds`     | हिस्टोग्राम | `channel`, `outcome`, `reason`, `source`                                                  |
+| `openclaw_message_processed_total`               | काउंटर   | `channel`, `outcome`, `reason`                                                            |
+| `openclaw_message_processed_duration_seconds`    | हिस्टोग्राम | `channel`, `outcome`, `reason`                                                            |
+| `openclaw_message_delivery_started_total`        | काउंटर   | `channel`, `delivery_kind`                                                                |
+| `openclaw_message_delivery_total`                | काउंटर   | `channel`, `delivery_kind`, `error_category`, `outcome`                                   |
+| `openclaw_message_delivery_duration_seconds`     | हिस्टोग्राम | `channel`, `delivery_kind`, `error_category`, `outcome`                                   |
+| `openclaw_talk_event_total`                      | काउंटर   | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
+| `openclaw_talk_event_duration_seconds`           | हिस्टोग्राम | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
+| `openclaw_talk_audio_bytes`                      | हिस्टोग्राम | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
+| `openclaw_queue_lane_size`                       | गेज     | `lane`                                                                                    |
+| `openclaw_queue_lane_wait_seconds`               | हिस्टोग्राम | `lane`                                                                                    |
+| `openclaw_session_state_total`                   | काउंटर   | `reason`, `state`                                                                         |
+| `openclaw_session_queue_depth`                   | गेज     | `state`                                                                                   |
+| `openclaw_session_turn_created_total`            | काउंटर   | `agent`, `channel`, `trigger`                                                             |
+| `openclaw_session_stuck_total`                   | काउंटर   | `reason`, `state`                                                                         |
+| `openclaw_session_stuck_age_seconds`             | हिस्टोग्राम | `reason`, `state`                                                                         |
+| `openclaw_session_recovery_total`                | काउंटर   | `action`, `active_work_kind`, `state`, `status`                                           |
+| `openclaw_session_recovery_age_seconds`          | हिस्टोग्राम | `action`, `active_work_kind`, `state`, `status`                                           |
+| `openclaw_liveness_warning_total`                | काउंटर   | `reason`                                                                                  |
+| `openclaw_liveness_sessions`                     | गेज     | `state`                                                                                   |
+| `openclaw_liveness_event_loop_delay_p99_seconds` | हिस्टोग्राम | `reason`                                                                                  |
+| `openclaw_liveness_event_loop_delay_max_seconds` | हिस्टोग्राम | `reason`                                                                                  |
+| `openclaw_liveness_event_loop_utilization_ratio` | हिस्टोग्राम | `reason`                                                                                  |
+| `openclaw_liveness_cpu_core_ratio`               | हिस्टोग्राम | `reason`                                                                                  |
+| `openclaw_payload_large_total`                   | काउंटर   | `action`, `channel`, `plugin`, `reason`, `surface`                                        |
+| `openclaw_payload_large_bytes`                   | हिस्टोग्राम | `action`, `channel`, `plugin`, `reason`, `surface`                                        |
+| `openclaw_memory_bytes`                          | गेज     | `kind`                                                                                    |
+| `openclaw_memory_rss_bytes`                      | हिस्टोग्राम | कोई नहीं                                                                                      |
+| `openclaw_memory_pressure_total`                 | काउंटर   | `level`, `reason`                                                                         |
+| `openclaw_telemetry_exporter_total`              | काउंटर   | `exporter`, `reason`, `signal`, `status`                                                  |
+| `openclaw_prometheus_series_dropped_total`       | काउंटर   | कोई नहीं                                                                                      |
+| `openclaw_diagnostic_async_queue_dropped_total`  | काउंटर   | `drop_class`                                                                              |
+| `openclaw_diagnostic_async_queue_length`         | गेज     | कोई नहीं                                                                                      |
 
-## Label नीति
+मॉडल-कॉल मेट्रिक्स के लिए, `observation_unit="request"` एक अवलोकनीय
+प्रदाता अनुरोध मापता है। `observation_unit="turn"` एक सिंथेटिक Claude Code
+या Codex CLI एजेंट टर्न मापता है, जिसमें कई छिपे हुए प्रदाता अनुरोध हो सकते हैं।
+लेटेंसी की तुलना करते समय इन शृंखलाओं को अलग रखें।
+
+## लेबल नीति
 
 <AccordionGroup>
-  <Accordion title="सीमित, कम-cardinality labels">
-    Prometheus labels सीमित और कम-cardinality रहते हैं। exporter कच्चे diagnostic identifiers जैसे `runId`, `sessionKey`, `sessionId`, `callId`, `toolCallId`, message IDs, chat IDs, या provider request IDs emit नहीं करता।
+  <Accordion title="सीमित, कम-कार्डिनैलिटी वाले लेबल">
+    Prometheus लेबल सीमित और कम-कार्डिनैलिटी वाले रहते हैं। एक्सपोर्टर `runId`, `sessionKey`, `sessionId`, `callId`, `toolCallId`, संदेश ID, चैट ID या प्रदाता अनुरोध ID जैसे अपरिष्कृत डायग्नोस्टिक पहचानकर्ता उत्सर्जित नहीं करता।
 
-    Label values को redact किया जाता है और उन्हें OpenClaw की कम-cardinality character policy से मेल खाना चाहिए। जो values policy में fail होती हैं, उन्हें metric के आधार पर `unknown`, `other`, या `none` से बदल दिया जाता है। scoped agent session keys जैसी दिखने वाली labels को भी `unknown` से बदल दिया जाता है।
-
-  </Accordion>
-  <Accordion title="Series cap और overflow accounting">
-    exporter counters, gauges, और histograms को मिलाकर memory में retained time series को **2048** series पर cap करता है। उस cap से आगे की नई series drop कर दी जाती हैं, और हर बार `openclaw_prometheus_series_dropped_total` एक से increment होता है।
-
-    इस counter को इस hard signal के रूप में देखें कि upstream attribute high-cardinality values leak कर रहा है। exporter कभी भी cap को अपने-आप नहीं बढ़ाता; अगर यह बढ़ता है, तो cap disable करने के बजाय source को fix करें।
+    लेबल मानों से संवेदनशील जानकारी हटा दी जाती है और उनका OpenClaw की कम-कार्डिनैलिटी वर्ण नीति से मेल खाना आवश्यक है। नीति में विफल मानों को मेट्रिक के आधार पर `unknown`, `other` या `none` से बदल दिया जाता है। स्कोप किए गए एजेंट सत्र कुंजियों जैसे दिखने वाले लेबल भी `unknown` से बदल दिए जाते हैं।
 
   </Accordion>
-  <Accordion title="What never appears in Prometheus output">
+  <Accordion title="शृंखला सीमा और ओवरफ़्लो लेखांकन">
+    एक्सपोर्टर काउंटर, गेज और हिस्टोग्राम को मिलाकर मेमोरी में रखी गई समय शृंखलाओं की सीमा **2048** शृंखलाओं पर निर्धारित करता है। इस सीमा से आगे की नई शृंखलाएँ छोड़ दी जाती हैं और हर बार `openclaw_prometheus_series_dropped_total` में एक की वृद्धि होती है।
+
+    इस काउंटर को इस स्पष्ट संकेत के रूप में देखें कि अपस्ट्रीम का कोई एट्रिब्यूट उच्च-कार्डिनैलिटी वाले मान लीक कर रहा है। एक्सपोर्टर कभी भी सीमा को अपने-आप नहीं बढ़ाता; यदि यह काउंटर बढ़ता है, तो सीमा अक्षम करने के बजाय स्रोत को ठीक करें।
+
+  </Accordion>
+  <Accordion title="Prometheus आउटपुट में क्या कभी दिखाई नहीं देता">
     - प्रॉम्प्ट टेक्स्ट, प्रतिक्रिया टेक्स्ट, टूल इनपुट, टूल आउटपुट, सिस्टम प्रॉम्प्ट
-    - Talk ट्रांसक्रिप्ट, ऑडियो पेलोड, कॉल आईडी, रूम आईडी, हैंडऑफ टोकन, टर्न आईडी, और कच्चे सेशन आईडी
-    - कच्चे प्रदाता अनुरोध आईडी (जहां लागू हो, केवल spans पर सीमित हैश — metrics पर कभी नहीं)
-    - सेशन कुंजियां और सेशन आईडी
-    - होस्टनाम, फाइल पाथ, गुप्त मान
+    - Talk ट्रांसक्रिप्ट, ऑडियो पेलोड, कॉल ID, रूम ID, हैंडऑफ़ टोकन, टर्न ID और अपरिष्कृत सत्र ID
+    - अपरिष्कृत प्रदाता अनुरोध ID (केवल सीमित हैश, जहाँ लागू हों, स्पैन पर — मेट्रिक्स पर कभी नहीं)
+    - सत्र कुंजियाँ और सत्र ID
+    - होस्टनेम, फ़ाइल पथ, गुप्त मान
 
   </Accordion>
 </AccordionGroup>
 
-## PromQL recipes
+## PromQL विधियाँ
 
 ```promql
-# Tokens per minute, split by provider
+# प्रति मिनट टोकन, प्रदाता के अनुसार विभाजित
 sum by (provider) (rate(openclaw_model_tokens_total[1m]))
 
-# Spend (USD) over the last hour, by model
+# पिछले एक घंटे का खर्च (USD), मॉडल के अनुसार
 sum by (model) (increase(openclaw_model_cost_usd_total[1h]))
 
-# 95th percentile model run duration
+# मॉडल रन अवधि का 95वाँ पर्सेंटाइल
 histogram_quantile(
   0.95,
   sum by (le, provider, model)
     (rate(openclaw_run_duration_seconds_bucket[5m]))
 )
 
-# Queue wait time SLO (95p under 2s)
+# क्यू प्रतीक्षा समय SLO (95p, 2s से कम)
 histogram_quantile(
   0.95,
   sum by (le, lane) (rate(openclaw_queue_lane_wait_seconds_bucket[5m]))
 ) < 2
 
-# Skill usage, split by bounded source
+# Skill उपयोग, सीमित स्रोत के अनुसार विभाजित
 sum by (skill, source) (increase(openclaw_skill_used_total[24h]))
 
-# Dropped Prometheus series (cardinality alarm)
+# छोड़ी गई Prometheus शृंखलाएँ (कार्डिनैलिटी चेतावनी)
 increase(openclaw_prometheus_series_dropped_total[15m]) > 0
 ```
 
 <Tip>
-क्रॉस-प्रदाता डैशबोर्ड के लिए `gen_ai_client_token_usage` को प्राथमिकता दें: यह OpenTelemetry GenAI semantic conventions का पालन करता है और गैर-OpenClaw GenAI सेवाओं की metrics के अनुरूप है।
+अलग-अलग प्रदाताओं वाले डैशबोर्ड के लिए `gen_ai_client_token_usage` को प्राथमिकता दें: यह OpenTelemetry GenAI सिमेंटिक कन्वेंशन का पालन करता है और गैर-OpenClaw GenAI सेवाओं के मेट्रिक्स के अनुरूप है।
 </Tip>
 
-## Prometheus और OpenTelemetry निर्यात के बीच चयन
+## Prometheus और OpenTelemetry एक्सपोर्ट के बीच चयन
 
-OpenClaw दोनों surfaces को स्वतंत्र रूप से समर्थन देता है। आप इनमें से किसी एक को, दोनों को, या किसी को भी नहीं चला सकते हैं।
+OpenClaw दोनों सतहों का स्वतंत्र रूप से समर्थन करता है। आप किसी एक को, दोनों को या किसी को भी नहीं चला सकते हैं।
 
 <Tabs>
   <Tab title="diagnostics-prometheus">
-    - **Pull** मॉडल: Prometheus `/api/diagnostics/prometheus` को scrape करता है।
-    - किसी बाहरी collector की आवश्यकता नहीं है।
-    - सामान्य Gateway auth के माध्यम से प्रमाणित।
-    - Surface केवल metrics है (traces या logs नहीं)।
-    - उन stacks के लिए सर्वोत्तम जो पहले से Prometheus + Grafana पर मानकीकृत हैं।
+    - **पुल** मॉडल: Prometheus `/api/diagnostics/prometheus` को स्क्रैप करता है।
+    - किसी बाहरी कलेक्टर की आवश्यकता नहीं है।
+    - सामान्य Gateway प्रमाणीकरण के माध्यम से प्रमाणित।
+    - इस सतह पर केवल मेट्रिक्स उपलब्ध हैं (ट्रेस या लॉग नहीं)।
+    - उन स्टैक के लिए सर्वोत्तम, जो पहले से Prometheus + Grafana पर मानकीकृत हैं।
 
   </Tab>
   <Tab title="diagnostics-otel">
-    - **Push** मॉडल: OpenClaw OTLP/HTTP को collector या OTLP-संगत backend पर भेजता है।
-    - Surface में metrics, traces, और logs शामिल हैं।
-    - जब आपको दोनों की आवश्यकता हो, तो OpenTelemetry Collector (`prometheus` या `prometheusremotewrite` exporter) के माध्यम से Prometheus से जोड़ता है।
-    - पूर्ण कैटलॉग के लिए [OpenTelemetry निर्यात](/hi/gateway/opentelemetry) देखें।
+    - **पुश** मॉडल: OpenClaw किसी कलेक्टर या OTLP-संगत बैकएंड को OTLP/HTTP भेजता है।
+    - इस सतह में मेट्रिक्स, ट्रेस और लॉग शामिल हैं।
+    - जब दोनों की आवश्यकता हो, तो OpenTelemetry Collector (`prometheus` या `prometheusremotewrite` एक्सपोर्टर) के माध्यम से Prometheus से जोड़ता है।
+    - पूरी सूची के लिए [OpenTelemetry एक्सपोर्ट](/hi/gateway/opentelemetry) देखें।
 
   </Tab>
 </Tabs>
@@ -232,26 +245,26 @@ OpenClaw दोनों surfaces को स्वतंत्र रूप स�
 ## समस्या निवारण
 
 <AccordionGroup>
-  <Accordion title="Empty response body">
-    - config में `diagnostics.enabled: true` जांचें।
-    - पुष्टि करें कि Plugin सक्षम है और `openclaw plugins list --enabled` के साथ लोड है।
-    - कुछ traffic जनरेट करें; counters और histograms कम से कम एक event के बाद ही lines emit करते हैं।
+  <Accordion title="खाली प्रतिक्रिया बॉडी">
+    - जाँचें कि कॉन्फ़िगरेशन में `diagnostics.enabled`, `false` पर सेट न हो (इसका डिफ़ॉल्ट `true` है)।
+    - पुष्टि करें कि Plugin सक्षम है और `openclaw plugins list --enabled` के साथ लोड हुआ है।
+    - कुछ ट्रैफ़िक उत्पन्न करें; काउंटर और हिस्टोग्राम कम-से-कम एक घटना के बाद ही पंक्तियाँ उत्सर्जित करते हैं।
 
   </Accordion>
-  <Accordion title="401 / unauthorized">
-    Endpoint को Gateway operator scope (`auth: "gateway"` के साथ `gatewayRuntimeScopeSurface: "trusted-operator"`) की आवश्यकता होती है। वही token या password उपयोग करें जो Prometheus किसी अन्य Gateway operator route के लिए उपयोग करता है। कोई सार्वजनिक unauthenticated mode नहीं है।
+  <Accordion title="401 / अनधिकृत">
+    एंडपॉइंट को Gateway ऑपरेटर स्कोप (`auth: "gateway"` के साथ `gatewayRuntimeScopeSurface: "trusted-operator"`) की आवश्यकता होती है। वही टोकन या पासवर्ड उपयोग करें जिसका उपयोग Prometheus किसी अन्य Gateway ऑपरेटर रूट के लिए करता है। कोई सार्वजनिक अप्रमाणित मोड नहीं है।
   </Accordion>
-  <Accordion title="`openclaw_prometheus_series_dropped_total` is climbing">
-    कोई नया attribute **2048**-series cap से अधिक हो रहा है। अनपेक्षित रूप से high-cardinality label के लिए हाल की metrics का निरीक्षण करें और उसे source पर ठीक करें। Exporter labels को चुपचाप rewrite करने के बजाय जानबूझकर नई series drop करता है।
+  <Accordion title="`openclaw_prometheus_series_dropped_total` बढ़ रहा है">
+    कोई नया एट्रिब्यूट **2048**-शृंखला सीमा पार कर रहा है। हाल के मेट्रिक्स में अप्रत्याशित रूप से उच्च-कार्डिनैलिटी वाले लेबल की जाँच करें और उसे स्रोत पर ठीक करें। एक्सपोर्टर लेबल को चुपचाप फिर से लिखने के बजाय जानबूझकर नई शृंखलाएँ छोड़ता है।
   </Accordion>
-  <Accordion title="Prometheus shows stale series after a restart">
-    Plugin state को केवल memory में रखता है। Gateway restart के बाद, counters शून्य पर reset हो जाते हैं और gauges अपनी अगली reported value से restart होते हैं। resets को साफ़ तरह से संभालने के लिए PromQL `rate()` और `increase()` का उपयोग करें।
+  <Accordion title="पुनः आरंभ के बाद Prometheus पुरानी शृंखलाएँ दिखाता है">
+    Plugin केवल मेमोरी में स्थिति बनाए रखता है। Gateway पुनः आरंभ होने के बाद काउंटर शून्य पर रीसेट हो जाते हैं और गेज अपने अगले रिपोर्ट किए गए मान से पुनः आरंभ होते हैं। रीसेट को सही ढंग से संभालने के लिए PromQL `rate()` और `increase()` का उपयोग करें।
   </Accordion>
 </AccordionGroup>
 
 ## संबंधित
 
-- [Diagnostics निर्यात](/hi/gateway/diagnostics) — support bundles के लिए local diagnostics zip
-- [Health और readiness](/hi/gateway/health) — `/healthz` और `/readyz` probes
-- [Logging](/hi/logging) — file-based logging
-- [OpenTelemetry निर्यात](/hi/gateway/opentelemetry) — traces, metrics, और logs के लिए OTLP push
+- [डायग्नोस्टिक एक्सपोर्ट](/hi/gateway/diagnostics) — सहायता बंडल के लिए स्थानीय डायग्नोस्टिक zip
+- [स्वास्थ्य और तत्परता](/hi/gateway/health) — `/healthz` और `/readyz` प्रोब
+- [लॉगिंग](/hi/logging) — फ़ाइल-आधारित लॉगिंग
+- [OpenTelemetry एक्सपोर्ट](/hi/gateway/opentelemetry) — ट्रेस, मेट्रिक्स और लॉग के लिए OTLP पुश

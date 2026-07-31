@@ -1,50 +1,51 @@
 ---
 read_when:
-    - می‌خواهید OpenClaw به‌صورت شبانه‌روزی روی GCP اجرا شود
-    - شما یک Gateway همیشه‌فعال و در سطح تولید روی ماشین مجازی خودتان می‌خواهید
+    - می‌خواهید OpenClaw به‌صورت ۲۴/۷ روی GCP اجرا شود
+    - یک Gateway همیشه‌فعال و در سطح تولید روی ماشین مجازی خود می‌خواهید
     - می‌خواهید کنترل کاملی بر ماندگاری، فایل‌های اجرایی و رفتار راه‌اندازی مجدد داشته باشید
-summary: Gateway ‏OpenClaw را به‌صورت ۲۴/۷ روی یک ماشین مجازی GCP Compute Engine ‏(Docker) با وضعیت پایدار اجرا کنید
+summary: اجرای ۲۴/۷ Gateway ‏OpenClaw روی ماشین مجازی GCP Compute Engine ‏(Docker) با وضعیت پایدار
 title: GCP
 x-i18n:
-    generated_at: "2026-07-12T10:16:46Z"
+    generated_at: "2026-07-27T15:20:59Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 6ca46b2ee78731162261cae6ea5a26b718be6035b998fa92e4ee5c9ea2e7ae07
     source_path: install/gcp.md
     workflow: 16
 ---
 
-یک Gateway پایدار OpenClaw را با استفاده از Docker، وضعیت ماندگار، فایل‌های اجرایی تعبیه‌شده و رفتار راه‌اندازی مجدد ایمن، روی یک ماشین مجازی GCP Compute Engine اجرا کنید.
+یک Gateway پایدار OpenClaw را با استفاده از Docker روی یک ماشین مجازی GCP Compute Engine اجرا کنید؛ به‌گونه‌ای که وضعیت ماندگار، فایل‌های اجرایی تعبیه‌شده و رفتار راه‌اندازی مجدد ایمن داشته باشد.
 
-قیمت‌گذاری بر اساس نوع ماشین و منطقه متفاوت است؛ کوچک‌ترین ماشین مجازی متناسب با بار کاری خود را انتخاب کنید و اگر با خطاهای کمبود حافظه مواجه شدید، منابع آن را افزایش دهید.
+قیمت‌گذاری بر اساس نوع ماشین و منطقه متفاوت است؛ کوچک‌ترین ماشین مجازی متناسب با بار کاری خود را انتخاب کنید و اگر با خطاهای کمبود حافظه مواجه شدید، منابع را افزایش دهید.
 
-می‌توانید از طریق انتقال پورت SSH از لپ‌تاپ خود به Gateway دسترسی پیدا کنید، یا اگر دیواره آتش و توکن‌ها را خودتان مدیریت می‌کنید، پورت را مستقیماً در معرض دسترسی قرار دهید.
+می‌توان از لپ‌تاپ از طریق انتقال پورت SSH به Gateway دسترسی پیدا کرد، یا اگر دیواره آتش و توکن‌ها را خودتان مدیریت می‌کنید، پورت را مستقیماً در دسترس قرار داد.
 
-این راهنما از Debian روی GCP Compute Engine استفاده می‌کند. Ubuntu نیز قابل استفاده است؛ بسته‌ها را متناسب با آن تطبیق دهید. برای روند عمومی Docker، به [Docker](/fa/install/docker) مراجعه کنید.
+این راهنما از Debian روی GCP Compute Engine استفاده می‌کند. Ubuntu نیز کار می‌کند؛ بسته‌ها را متناسب با آن جایگزین کنید. برای روند عمومی Docker، به [Docker](/fa/install/docker) مراجعه کنید.
 
 ## پیش‌نیازها
 
-- حساب GCP (`e2-micro` واجد شرایط سطح رایگان است)
-- `gcloud` CLI یا [Cloud Console](https://console.cloud.google.com)
+- حساب GCP (`e2-micro` واجد شرایط استفاده از سطح رایگان است)
+- CLI ‏`gcloud`، یا [Cloud Console](https://console.cloud.google.com)
 - دسترسی SSH از لپ‌تاپ
 - Docker و Docker Compose
 - اعتبارنامه‌های احراز هویت مدل
-- اعتبارنامه‌های اختیاری ارائه‌دهندگان (کد QR واتس‌اپ، توکن ربات Telegram، OAuth جیمیل)
-- حدود ۲۰ تا ۳۰ دقیقه زمان
+- اعتبارنامه‌های اختیاری ارائه‌دهنده (کد QR ‏WhatsApp، توکن ربات Telegram، ‏OAuth ‏Gmail)
+- حدود 20-30 دقیقه
 
 ## مسیر سریع
 
-1. یک پروژه GCP ایجاد کنید و صورت‌حساب و Compute Engine API را فعال کنید
-2. یک ماشین مجازی Compute Engine ایجاد کنید (`e2-small`، Debian 12، با فضای 20GB)
-3. از طریق SSH به ماشین مجازی متصل شوید و Docker را نصب کنید
+1. یک پروژه GCP ایجاد و صورت‌حساب و Compute Engine API را فعال کنید
+2. یک ماشین مجازی Compute Engine ایجاد کنید (`e2-small`، ‏Debian 12، ‏20GB)
+3. از طریق SSH وارد ماشین مجازی شوید و Docker را نصب کنید
 4. مخزن OpenClaw را کلون کنید
 5. دایرکتوری‌های ماندگار میزبان را ایجاد کنید
-6. فایل‌های `.env` و `docker-compose.yml` را پیکربندی کنید
-7. فایل‌های اجرایی موردنیاز را در تصویر تعبیه کنید، آن را بسازید و راه‌اندازی کنید
+6. `.env` و `docker-compose.yml` را پیکربندی کنید
+7. فایل‌های اجرایی لازم را در ایمیج تعبیه کنید، بسازید و راه‌اندازی کنید
 
 <Steps>
-  <Step title="نصب gcloud CLI (یا استفاده از کنسول)">
+  <Step title="نصب gcloud CLI (یا استفاده از Console)">
     آن را از [cloud.google.com/sdk/docs/install](https://cloud.google.com/sdk/docs/install) نصب کنید، سپس:
 
     ```bash
@@ -52,7 +53,7 @@ x-i18n:
     gcloud auth login
     ```
 
-    یا در عوض، همه مراحل زیر را از طریق رابط وب [Cloud Console](https://console.cloud.google.com) انجام دهید.
+    یا تمام مراحل زیر را از طریق رابط وب [Cloud Console](https://console.cloud.google.com) انجام دهید.
 
   </Step>
 
@@ -65,16 +66,16 @@ x-i18n:
 
     صورت‌حساب را در [console.cloud.google.com/billing](https://console.cloud.google.com/billing) فعال کنید (برای Compute Engine الزامی است).
 
-    معادل آن در کنسول: IAM & Admin > Create Project، صورت‌حساب را فعال کنید، سپس APIs & Services > Enable APIs > "Compute Engine API" > Enable.
+    معادل آن در Console: ‏IAM & Admin > Create Project، صورت‌حساب را فعال کنید، سپس APIs & Services > Enable APIs > "Compute Engine API" > Enable.
 
   </Step>
 
   <Step title="ایجاد ماشین مجازی">
-    | نوع       | مشخصات                    | هزینه                  | توضیحات                                               |
-    | --------- | ------------------------ | ---------------------- | ----------------------------------------------------- |
-    | e2-medium | ۲ پردازنده مجازی، 4GB رم | حدود ۲۵ دلار در ماه     | مطمئن‌ترین گزینه برای ساخت محلی Docker                |
-    | e2-small  | ۲ پردازنده مجازی، 2GB رم | حدود ۱۲ دلار در ماه     | حداقل گزینه پیشنهادی برای ساخت Docker                 |
-    | e2-micro  | ۲ پردازنده مجازی (اشتراکی)، 1GB رم | واجد شرایط سطح رایگان | ساخت Docker اغلب به‌دلیل کمبود حافظه شکست می‌خورد (خروج ۱۳۷) |
+    | نوع       | مشخصات                   | هزینه              | توضیحات                                              |
+    | --------- | ------------------------ | ------------------ | ---------------------------------------------------- |
+    | e2-medium | 2 vCPU، ‏4GB RAM         | ~$25/mo            | مطمئن‌ترین گزینه برای ساخت محلی Docker               |
+    | e2-small  | 2 vCPU، ‏2GB RAM         | ~$12/mo            | حداقل گزینه توصیه‌شده برای ساخت Docker               |
+    | e2-micro  | 2 vCPU (اشتراکی)، ‏1GB RAM | واجد شرایط سطح رایگان | اغلب ساخت Docker به‌دلیل کمبود حافظه شکست می‌خورد (خروجی 137) |
 
     ```bash
     gcloud compute instances create openclaw-gateway \
@@ -87,14 +88,14 @@ x-i18n:
 
   </Step>
 
-  <Step title="اتصال به ماشین مجازی از طریق SSH">
+  <Step title="ورود به ماشین مجازی از طریق SSH">
     ```bash
     gcloud compute ssh openclaw-gateway --zone=us-central1-a
     ```
 
-    در کنسول: کنار ماشین مجازی در داشبورد Compute Engine روی "SSH" کلیک کنید.
+    در Console: در داشبورد Compute Engine، کنار ماشین مجازی روی "SSH" کلیک کنید.
 
-    انتشار کلید SSH ممکن است پس از ایجاد ماشین مجازی ۱ تا ۲ دقیقه طول بکشد؛ اگر اتصال رد شد، صبر کنید و دوباره تلاش کنید.
+    انتشار کلید SSH پس از ایجاد ماشین مجازی ممکن است 1-2 دقیقه طول بکشد؛ اگر اتصال رد شد، صبر کنید و دوباره تلاش کنید.
 
   </Step>
 
@@ -131,12 +132,12 @@ x-i18n:
     cd openclaw
     ```
 
-    این راهنما یک تصویر سفارشی می‌سازد تا همه فایل‌های اجرایی تعبیه‌شده در آن پس از راه‌اندازی‌های مجدد باقی بمانند.
+    این راهنما یک ایمیج سفارشی می‌سازد تا همه فایل‌های اجرایی تعبیه‌شده در راه‌اندازی‌های مجدد باقی بمانند.
 
   </Step>
 
   <Step title="ایجاد دایرکتوری‌های ماندگار میزبان">
-    کانتینرهای Docker موقتی هستند؛ تمام وضعیت‌های بلندمدت باید روی میزبان نگهداری شوند.
+    کانتینرهای Docker موقتی هستند؛ تمام وضعیت بلندمدت باید روی میزبان نگهداری شود.
 
     ```bash
     mkdir -p ~/.openclaw
@@ -161,13 +162,18 @@ x-i18n:
     XDG_CONFIG_HOME=/home/node/.openclaw
     ```
 
-    برای مدیریت توکن پایدار Gateway از طریق `.env`، مقدار `OPENCLAW_GATEWAY_TOKEN` را تنظیم کنید؛ در غیر این صورت، پیش از اتکا به کلاینت‌ها در راه‌اندازی‌های مجدد، `gateway.auth.token` را پیکربندی کنید. اگر هیچ‌کدام تنظیم نشده باشند، OpenClaw برای همان راه‌اندازی از یک توکن صرفاً زمان‌اجرا استفاده می‌کند. برای `GOG_KEYRING_PASSWORD` یک گذرواژه دسته‌کلید ایجاد کنید:
+    برای مدیریت توکن پایدار Gateway از طریق
+    `.env`، مقدار `OPENCLAW_GATEWAY_TOKEN` را تنظیم کنید؛ در غیر این صورت، پیش از اتکا به کلاینت‌ها
+    در راه‌اندازی‌های مجدد، `gateway.auth.token` را پیکربندی کنید. اگر هیچ‌کدام تنظیم نشده باشد، OpenClaw برای
+    همان راه‌اندازی از توکنی استفاده می‌کند که فقط در زمان اجرا معتبر است. برای `GOG_KEYRING_PASSWORD` یک گذرواژه keyring ایجاد کنید:
 
     ```bash
     openssl rand -hex 32
     ```
 
-    **این فایل را کامیت نکنید.** این فایل شامل متغیرهای محیطی کانتینر/زمان‌اجرا مانند `OPENCLAW_GATEWAY_TOKEN` است. احراز هویت ذخیره‌شده OAuth/کلید API ارائه‌دهنده در فایل متصل‌شده `~/.openclaw/agents/<agentId>/agent/auth-profiles.json` قرار دارد.
+    **این فایل را commit نکنید.** این فایل شامل متغیرهای محیطی کانتینر/زمان اجرا مانند
+    `OPENCLAW_GATEWAY_TOKEN` است. احراز هویت ذخیره‌شده OAuth/کلید API ارائه‌دهنده در
+    `~/.openclaw/agents/<agentId>/agent/auth-profiles.json` مونت‌شده قرار دارد.
 
   </Step>
 
@@ -196,8 +202,8 @@ x-i18n:
           - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
           - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
         ports:
-          # توصیه می‌شود: Gateway را روی ماشین مجازی فقط به رابط محلی محدود کنید؛ از طریق تونل SSH به آن دسترسی بگیرید.
-          # برای در معرض دسترسی عمومی قرار دادن آن، پیشوند `127.0.0.1:` را حذف و دیواره آتش را متناسب با آن پیکربندی کنید.
+          # توصیه می‌شود Gateway را فقط روی loopback ماشین مجازی نگه دارید و از طریق تونل SSH به آن دسترسی پیدا کنید.
+          # برای دسترسی عمومی، پیشوند `127.0.0.1:` را حذف و دیواره آتش را متناسب با آن پیکربندی کنید.
           - "127.0.0.1:${OPENCLAW_GATEWAY_PORT}:18789"
         command:
           [
@@ -212,24 +218,24 @@ x-i18n:
           ]
     ```
 
-    گزینه `--allow-unconfigured` فقط برای سهولت راه‌اندازی اولیه است و جایگزین پیکربندی واقعی Gateway نیست. همچنان احراز هویت (`gateway.auth.token` یا گذرواژه) و یک حالت اتصال ایمن را برای استقرار خود تنظیم کنید.
+    `--allow-unconfigured` فقط برای سهولت راه‌اندازی اولیه است و جایگزین پیکربندی واقعی Gateway نیست. همچنان احراز هویت (`gateway.auth.token` یا گذرواژه) و حالت اتصال ایمن را برای استقرار خود تنظیم کنید.
 
   </Step>
 
-  <Step title="مراحل مشترک زمان‌اجرای ماشین مجازی Docker">
-    برای روند عمومی میزبان Docker، راهنمای مشترک زمان‌اجرا را دنبال کنید:
+  <Step title="مراحل مشترک زمان اجرای ماشین مجازی Docker">
+    برای روند مشترک میزبان Docker، راهنمای زمان اجرای مشترک را دنبال کنید:
 
-    - [تعبیه فایل‌های اجرایی موردنیاز در تصویر](/fa/install/docker-vm-runtime#bake-required-binaries-into-the-image)
+    - [تعبیه فایل‌های اجرایی لازم در ایمیج](/fa/install/docker-vm-runtime#bake-required-binaries-into-the-image)
     - [ساخت و راه‌اندازی](/fa/install/docker-vm-runtime#build-and-launch)
-    - [محل ماندگاری اجزا](/fa/install/docker-vm-runtime#what-persists-where)
+    - [محل ماندگاری هر بخش](/fa/install/docker-vm-runtime#what-persists-where)
     - [به‌روزرسانی‌ها](/fa/install/docker-vm-runtime#updates)
 
   </Step>
 
   <Step title="نکات راه‌اندازی ویژه GCP">
-    اگر ساخت هنگام اجرای `pnpm install --frozen-lockfile` با پیام `Killed` یا `exit code 137` شکست خورد، حافظه ماشین مجازی تمام شده است. حداقل از `e2-small` یا برای ساخت اولیه مطمئن‌تر از `e2-medium` استفاده کنید.
+    اگر ساخت هنگام `pnpm install --frozen-lockfile` با `Killed` یا `exit code 137` شکست خورد، حافظه ماشین مجازی تمام شده است. حداقل از `e2-small` یا برای ساخت اولیه مطمئن‌تر از `e2-medium` استفاده کنید.
 
-    هنگام اتصال به شبکه محلی (`OPENCLAW_GATEWAY_BIND=lan`)، پیش از ادامه یک مبدأ مرورگر مورداعتماد را پیکربندی کنید:
+    هنگام اتصال به LAN ‏(`OPENCLAW_GATEWAY_BIND=lan`)، پیش از ادامه یک origin مرورگر مورد اعتماد پیکربندی کنید:
 
     ```bash
     docker compose run --rm openclaw-cli config set gateway.controlUi.allowedOrigins '["http://127.0.0.1:18789"]' --strict-json
@@ -240,30 +246,33 @@ x-i18n:
   </Step>
 
   <Step title="دسترسی از لپ‌تاپ">
-    برای انتقال پورت Gateway یک تونل SSH ایجاد کنید:
+    برای انتقال پورت Gateway، یک تونل SSH ایجاد کنید:
 
     ```bash
     gcloud compute ssh openclaw-gateway --zone=us-central1-a -- -L 18789:127.0.0.1:18789
     ```
 
-    نشانی `http://127.0.0.1:18789/` را در مرورگر خود باز کنید.
+    `http://127.0.0.1:18789/` را در مرورگر خود باز کنید.
 
-    یک پیوند تمیز برای داشبورد دوباره نمایش دهید:
+    یک پیوند پاک داشبورد را دوباره نمایش دهید:
 
     ```bash
     docker compose run --rm openclaw-cli dashboard --no-open
     ```
 
-    اگر رابط کاربری احراز هویت با راز مشترک را درخواست کرد، توکن یا گذرواژه پیکربندی‌شده را در تنظیمات رابط کنترل وارد کنید (این روند Docker به‌طور پیش‌فرض یک توکن می‌نویسد؛ اگر به احراز هویت با گذرواژه تغییر داده‌اید، به‌جای آن از گذرواژه پیکربندی‌شده خود استفاده کنید).
+    اگر رابط کاربری برای احراز هویت با راز مشترک درخواست داد، توکن یا
+    گذرواژه پیکربندی‌شده را در تنظیمات Control UI وارد کنید (این روند Docker به‌طور
+    پیش‌فرض یک توکن می‌نویسد؛ اگر به احراز هویت با گذرواژه تغییر داده‌اید، به‌جای آن
+    از گذرواژه پیکربندی‌شده استفاده کنید).
 
-    اگر رابط کنترل پیام `unauthorized` یا `disconnected (1008): pairing required` را نشان داد، دستگاه مرورگر را تأیید کنید:
+    اگر Control UI عبارت `unauthorized` یا `disconnected (1008): pairing required` را نشان داد، دستگاه مرورگر را تأیید کنید:
 
     ```bash
     docker compose run --rm openclaw-cli devices list
     docker compose run --rm openclaw-cli devices approve <requestId>
     ```
 
-    برای نقشه مشترک ماندگاری به [زمان‌اجرای ماشین مجازی Docker](/fa/install/docker-vm-runtime#what-persists-where) و برای روند به‌روزرسانی به [روند به‌روزرسانی](/fa/install/docker-vm-runtime#updates) مراجعه کنید.
+    برای نقشه ماندگاری مشترک و [روند به‌روزرسانی](/fa/install/docker-vm-runtime#updates)، به [زمان اجرای ماشین مجازی Docker](/fa/install/docker-vm-runtime#what-persists-where) مراجعه کنید.
 
   </Step>
 </Steps>
@@ -272,11 +281,11 @@ x-i18n:
 
 **اتصال SSH رد شد**
 
-انتشار کلید SSH ممکن است پس از ایجاد ماشین مجازی ۱ تا ۲ دقیقه طول بکشد. صبر کنید و دوباره تلاش کنید.
+انتشار کلید SSH پس از ایجاد ماشین مجازی ممکن است 1-2 دقیقه طول بکشد. صبر کنید و دوباره تلاش کنید.
 
-**مشکلات ورود به سیستم‌عامل**
+**مشکلات OS Login**
 
-نمایه ورود به سیستم‌عامل خود را بررسی کنید:
+پروفایل OS Login خود را بررسی کنید:
 
 ```bash
 gcloud compute os-login describe-profile
@@ -284,9 +293,9 @@ gcloud compute os-login describe-profile
 
 مطمئن شوید حساب شما مجوزهای IAM لازم را دارد (Compute OS Login یا Compute OS Admin Login).
 
-**کمبود حافظه**
+**کمبود حافظه (OOM)**
 
-اگر ساخت Docker با `Killed` و `exit code 137` شکست خورد، فرایند ماشین مجازی به‌دلیل کمبود حافظه خاتمه یافته است:
+اگر ساخت Docker با `Killed` و `exit code 137` شکست خورد، ماشین مجازی به‌دلیل کمبود حافظه متوقف شده است:
 
 ```bash
 # ابتدا ماشین مجازی را متوقف کنید
@@ -301,9 +310,9 @@ gcloud compute instances set-machine-type openclaw-gateway \
 gcloud compute instances start openclaw-gateway --zone=us-central1-a
 ```
 
-## حساب‌های سرویس (بهترین شیوه امنیتی)
+## حساب‌های سرویس (روش برتر امنیتی)
 
-برای استفاده شخصی، حساب کاربری پیش‌فرض شما مناسب است. برای خودکارسازی یا CI/CD، یک حساب سرویس اختصاصی با حداقل مجوزها ایجاد کنید:
+برای استفاده شخصی، حساب کاربری پیش‌فرض شما به‌خوبی کار می‌کند. برای خودکارسازی یا CI/CD، یک حساب سرویس اختصاصی با حداقل مجوزها ایجاد کنید:
 
 ```bash
 gcloud iam service-accounts create openclaw-deploy \
@@ -314,15 +323,15 @@ gcloud projects add-iam-policy-binding my-openclaw-project \
   --role="roles/compute.instanceAdmin.v1"
 ```
 
-برای خودکارسازی از نقش Owner استفاده نکنید؛ محدودترین نقشی را انتخاب کنید که کار می‌کند. به [آشنایی با نقش‌ها](https://cloud.google.com/iam/docs/understanding-roles) مراجعه کنید.
+برای خودکارسازی از نقش Owner استفاده نکنید؛ محدودترین نقشی را به‌کار ببرید که نیاز شما را برآورده می‌کند. به [آشنایی با نقش‌ها](https://cloud.google.com/iam/docs/understanding-roles) مراجعه کنید.
 
 ## مراحل بعدی
 
 - کانال‌های پیام‌رسانی را راه‌اندازی کنید: [کانال‌ها](/fa/channels)
-- دستگاه‌های محلی را به‌عنوان گره جفت کنید: [گره‌ها](/fa/nodes)
+- دستگاه‌های محلی را به‌عنوان Node جفت کنید: [Nodeها](/fa/nodes)
 - Gateway را پیکربندی کنید: [پیکربندی Gateway](/fa/gateway/configuration)
 
-## مطالب مرتبط
+## مرتبط
 
 - [نمای کلی نصب](/fa/install)
 - [Azure](/fa/install/azure)

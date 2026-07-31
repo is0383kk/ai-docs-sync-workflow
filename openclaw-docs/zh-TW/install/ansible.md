@@ -1,42 +1,42 @@
 ---
 read_when:
-    - 你想要具備安全強化措施的自動化伺服器部署
-    - 你需要具備 VPN 存取能力且有防火牆隔離的設定
-    - 你正在部署到遠端 Debian/Ubuntu 伺服器
+    - 你想要具備安全強化的自動化伺服器部署
+    - 你需要具備 VPN 存取能力且由防火牆隔離的設定環境
+    - 你正在部署至遠端 Debian/Ubuntu 伺服器
 summary: 使用 Ansible、Tailscale VPN 與防火牆隔離，自動化且強化安全性的 OpenClaw 安裝方式
 title: Ansible
 x-i18n:
-    generated_at: "2026-07-14T13:51:33Z"
+    generated_at: "2026-07-26T07:21:43Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
-    prompt_version: 25
+    prompt_version: 32
     provider: openai
     source_hash: 2f6b473cd5a8b80389b5ed746c4e2f2729d95bb15a2daaaa183fbdfbe144e647
     source_path: install/ansible.md
     workflow: 16
 ---
 
-使用以安全性為優先架構的自動化安裝程式 **[openclaw-ansible](https://github.com/openclaw/openclaw-ansible)**，將 OpenClaw 部署到正式環境伺服器。
+將 OpenClaw 部署至正式環境伺服器，使用採安全優先架構的自動化安裝程式 **[openclaw-ansible](https://github.com/openclaw/openclaw-ansible)**。
 
 <Info>
-[openclaw-ansible](https://github.com/openclaw/openclaw-ansible) 儲存庫是 Ansible 部署的權威來源。本頁提供快速概覽。
+[openclaw-ansible](https://github.com/openclaw/openclaw-ansible) 儲存庫是 Ansible 部署的唯一真實來源。本頁提供快速概覽。
 </Info>
 
-## 必要條件
+## 先決條件
 
-| 需求        | 詳細資訊                                                  |
+| 需求 | 詳細資訊                                                   |
 | ----------- | --------------------------------------------------------- |
-| 作業系統    | Debian 11+ 或 Ubuntu 20.04+                               |
-| 存取權限    | Root 或 sudo 權限                                         |
-| 網路        | 用於安裝套件的網際網路連線                                |
-| Ansible     | 2.14+（快速入門指令碼會自動安裝）                         |
+| 作業系統          | Debian 11+ 或 Ubuntu 20.04+                               |
+| 存取權限      | Root 或 sudo 權限                                   |
+| 網路     | 用於安裝套件的網際網路連線              |
+| Ansible     | 2.14+（由快速入門指令碼自動安裝） |
 
 ## 你會獲得什麼
 
 - 防火牆優先的安全性：UFW + Docker 隔離（僅可連線至 SSH + Tailscale）
 - 使用 Tailscale VPN 進行遠端存取，無須將服務公開
-- 使用 Docker 建立僅繫結至 localhost 的隔離沙箱容器
-- 整合具安全強化功能的 Systemd，並在開機時自動啟動
+- 使用 Docker 建立隔離的沙箱容器，僅繫結至 localhost
+- Systemd 整合與安全強化，開機時自動啟動
 - 單一命令完成設定
 
 ## 快速入門
@@ -51,12 +51,12 @@ curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-ansible/main/inst
 2. UFW 防火牆（僅開放 SSH + Tailscale 連接埠）
 3. Docker CE + Compose V2（預設的代理程式沙箱後端）
 4. Node.js 和 pnpm（OpenClaw 需要 Node 22.22.3+、24.15+ 或 25.9+；建議使用 Node 24）
-5. OpenClaw，安裝於主機上，而非容器中
-6. 具安全強化功能的 systemd 服務
+5. 以主機模式安裝、未容器化的 OpenClaw
+6. 具備安全強化的 systemd 服務
 
 <Note>
-閘道直接在主機上執行，而非在 Docker 中執行。代理程式沙箱功能為
-選用；此 playbook 會安裝 Docker，因為它是預設的沙箱
+閘道直接在主機上執行，而非在 Docker 中。代理程式沙箱為
+選用功能；此 playbook 會安裝 Docker，因為它是預設的沙箱
 後端。其他後端請參閱[沙箱](/zh-TW/gateway/sandboxing)。
 </Note>
 
@@ -68,10 +68,10 @@ curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-ansible/main/inst
     sudo -i -u openclaw
     ```
   </Step>
-  <Step title="執行初始設定精靈">
-    安裝後指令碼會引導你完成 OpenClaw 的設定。
+  <Step title="執行新手引導精靈">
+    安裝後指令碼會引導你設定 OpenClaw。
   </Step>
-  <Step title="連接訊息頻道">
+  <Step title="連線訊息頻道">
     登入 WhatsApp、Telegram、Discord 或 Signal：
     ```bash
     openclaw channels login --channel <name>
@@ -83,7 +83,7 @@ curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-ansible/main/inst
     sudo journalctl -u openclaw -f
     ```
   </Step>
-  <Step title="連接至 Tailscale">
+  <Step title="連線至 Tailscale">
     加入你的 VPN 網狀網路，以進行安全的遠端存取。
   </Step>
 </Steps>
@@ -94,13 +94,13 @@ curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-ansible/main/inst
 # 檢查服務狀態
 sudo systemctl status openclaw
 
-# 檢視即時記錄
+# 檢視即時日誌
 sudo journalctl -u openclaw -f
 
 # 重新啟動閘道
 sudo systemctl restart openclaw
 
-# 登入頻道（以 openclaw 使用者身分執行）
+# 頻道登入（以 openclaw 使用者身分執行）
 sudo -i -u openclaw
 openclaw channels login --channel <name>
 ```
@@ -109,9 +109,9 @@ openclaw channels login --channel <name>
 
 四層防禦模型：
 
-1. 防火牆（UFW）：僅將 SSH（22）和 Tailscale（41641/udp）公開
-2. VPN（Tailscale）：只能透過 VPN 網狀網路連線至閘道
-3. Docker 隔離：`DOCKER-USER` iptables 鏈可防止連接埠對外開放
+1. 防火牆（UFW）：僅對外公開 SSH (22) 和 Tailscale (41641/udp)
+2. VPN（Tailscale）：僅能透過 VPN 網狀網路連線至閘道
+3. Docker 隔離：`DOCKER-USER` iptables 鏈可防止連接埠對外公開
 4. Systemd 安全強化：`NoNewPrivileges`、`PrivateTmp`、非特權使用者
 
 驗證你的外部攻擊面：
@@ -120,14 +120,14 @@ openclaw channels login --channel <name>
 nmap -p- YOUR_SERVER_IP
 ```
 
-只有連接埠 22（SSH）應為開放狀態。閘道和 Docker 會維持封鎖。
+應只有連接埠 22 (SSH) 開放。閘道和 Docker 會維持鎖定狀態。
 
-Docker 用於代理程式沙箱（隔離的工具執行環境），並非用於執行閘道。沙箱設定請參閱[多代理程式沙箱與工具](/zh-TW/tools/multi-agent-sandbox-tools)。
+Docker 用於代理程式沙箱（隔離的工具執行環境），而非用於執行閘道。沙箱設定請參閱[多代理程式沙箱與工具](/zh-TW/tools/multi-agent-sandbox-tools)。
 
 ## 手動安裝
 
 <Steps>
-  <Step title="安裝必要條件">
+  <Step title="安裝先決條件">
     ```bash
     sudo apt update && sudo apt install -y ansible git
     ```
@@ -161,26 +161,26 @@ Docker 用於代理程式沙箱（隔離的工具執行環境），並非用於�
 
 Ansible 安裝程式會將 OpenClaw 設定為手動更新；標準流程請參閱[更新](/zh-TW/install/updating)。
 
-若要重新執行 playbook（例如在變更設定後）：
+若要重新執行 playbook（例如變更設定後）：
 
 ```bash
 cd openclaw-ansible
 ./run-playbook.sh
 ```
 
-此操作具冪等性，可安全地重複執行。
+此操作具備冪等性，可安全地多次執行。
 
 ## 疑難排解
 
 <AccordionGroup>
   <Accordion title="防火牆封鎖我的連線">
     - 請先透過 Tailscale VPN 連線；依設計，閘道只能透過此方式存取。
-    - 一律允許 SSH（連接埠 22）。
+    - SSH（連接埠 22）一律允許連線。
 
   </Accordion>
   <Accordion title="服務無法啟動">
     ```bash
-    # 檢查記錄
+    # 檢查日誌
     sudo journalctl -u openclaw -n 100
 
     # 驗證權限
@@ -201,7 +201,7 @@ cd openclaw-ansible
     # 檢查沙箱映像檔
     sudo docker images | grep openclaw-sandbox
 
-    # 若缺少沙箱映像檔，請進行建置（需要原始碼簽出）
+    # 若缺少沙箱映像檔，請建置該映像檔（需要原始碼簽出）
     cd /opt/openclaw/openclaw
     sudo -u openclaw ./scripts/sandbox-setup.sh
     # 若使用 npm 安裝且沒有原始碼簽出，請參閱
@@ -220,10 +220,10 @@ cd openclaw-ansible
 
 ## 進階設定
 
-如需詳細的安全架構和疑難排解資訊，請參閱 openclaw-ansible 儲存庫：
+如需詳細的安全架構與疑難排解資訊，請參閱 openclaw-ansible 儲存庫：
 
 - [安全架構](https://github.com/openclaw/openclaw-ansible/blob/main/docs/security.md)
-- [技術詳細資訊](https://github.com/openclaw/openclaw-ansible/blob/main/docs/architecture.md)
+- [技術細節](https://github.com/openclaw/openclaw-ansible/blob/main/docs/architecture.md)
 - [疑難排解指南](https://github.com/openclaw/openclaw-ansible/blob/main/docs/troubleshooting.md)
 
 ## 相關內容
@@ -231,4 +231,4 @@ cd openclaw-ansible
 - [openclaw-ansible](https://github.com/openclaw/openclaw-ansible)：完整部署指南
 - [Docker](/zh-TW/install/docker)：容器化閘道設定
 - [沙箱](/zh-TW/gateway/sandboxing)：代理程式沙箱設定
-- [多代理程式沙箱與工具](/zh-TW/tools/multi-agent-sandbox-tools)：各代理程式的隔離設定
+- [多代理程式沙箱與工具](/zh-TW/tools/multi-agent-sandbox-tools)：個別代理程式隔離

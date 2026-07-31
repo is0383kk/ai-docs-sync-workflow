@@ -1,172 +1,117 @@
 ---
 read_when:
     - आप वर्तमान सत्र के बारे में एक छोटा-सा अतिरिक्त प्रश्न पूछना चाहते हैं
-    - आप क्लाइंट्स में BTW व्यवहार लागू कर रहे हैं या डीबग कर रहे हैं
-summary: /btw के साथ अस्थायी सहायक प्रश्न
-title: वैसे, अन्य प्रश्न
+    - आप विभिन्न क्लाइंट में BTW व्यवहार लागू कर रहे हैं या उसे डीबग कर रहे हैं
+summary: /btw के साथ अस्थायी पूरक प्रश्न
+title: वैसे, अतिरिक्त प्रश्न
 x-i18n:
-    generated_at: "2026-06-29T00:17:18Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T20:05:23Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: cf97c17fb02c2464b1d1b31cfec652d52c60be6ce0cad25eaf32a9c080843ef2
+    source_hash: 338a54d0e15ec90aebaeeaee551559a26f1437f7b6dcdde4a4b1e63347ad0759
     source_path: tools/btw.md
     workflow: 16
 ---
 
-`/btw` आपको **वर्तमान सत्र** के बारे में एक त्वरित अतिरिक्त प्रश्न पूछने देता है, बिना
-उस प्रश्न को सामान्य बातचीत इतिहास में बदले। `/side` इसका alias है।
+`/btw` (उपनाम `/side`) **वर्तमान
+सत्र** के बारे में एक छोटा अतिरिक्त प्रश्न पूछता है, उसे वार्तालाप इतिहास में जोड़े बिना। यह
+Claude Code के `/btw` पर आधारित है और OpenClaw के Gateway तथा मल्टी-चैनल
+आर्किटेक्चर के अनुकूल बनाया गया है।
 
-यह Claude Code के `/btw` व्यवहार पर आधारित है, लेकिन OpenClaw के
-Gateway और मल्टी-चैनल आर्किटेक्चर के लिए अनुकूलित है।
+```text
+/btw क्या बदला है?
+/side इस त्रुटि का क्या अर्थ है?
+```
 
 ## यह क्या करता है
 
-जब आप भेजते हैं:
+1. वर्तमान सत्र का बैकग्राउंड संदर्भ के रूप में स्नैपशॉट लेता है (इसमें प्रगति पर चल रहे
+   मुख्य रन का प्रॉम्प्ट भी शामिल है)।
+2. एक अलग, एकबारगी अतिरिक्त क्वेरी चलाता है, जो मॉडल को केवल
+   अतिरिक्त प्रश्न का उत्तर देने और मुख्य कार्य को फिर से शुरू या निर्देशित न करने के लिए कहती है।
+3. उत्तर को सामान्य सहायक संदेश के बजाय लाइव अतिरिक्त परिणाम के रूप में
+   वितरित करता है।
+4. प्रश्न या उत्तर को सत्र इतिहास अथवा `chat.history` में कभी नहीं लिखता।
 
-```text
-/btw what changed?
-```
+यदि मुख्य रन सक्रिय है, तो उसे बिना छेड़े छोड़ दिया जाता है।
 
-OpenClaw:
+Codex हार्नेस सत्रों के लिए, BTW अलग प्रदाता कॉल चलाने के बजाय सक्रिय Codex ऐप-सर्वर थ्रेड को
+एक अस्थायी चाइल्ड थ्रेड में फ़ोर्क करता है। इससे Codex OAuth और नेटिव टूल/थ्रेड व्यवहार
+अपरिवर्तित रहते हैं, और फ़ोर्क किया गया थ्रेड पैरेंट थ्रेड की वर्तमान अनुमोदन नीति, सैंडबॉक्स तथा नेटिव
+टूल सतह को बनाए रखता है। फ़ोर्क किए गए थ्रेड को एक सीमा प्रॉम्प्ट मिलता है, जो मॉडल को बताता है कि
+उससे पहले की हर चीज़ विरासत में मिला संदर्भ है, सक्रिय निर्देश नहीं,
+और सीमा के बाद के संदेश ही लाइव हैं। `/btw` के लिए एक
+मौजूदा Codex थ्रेड आवश्यक है; पहले एक सामान्य संदेश भेजें।
 
-1. वर्तमान सत्र संदर्भ का snapshot लेता है,
-2. एक अलग क्षणिक अतिरिक्त क्वेरी चलाता है,
-3. केवल अतिरिक्त प्रश्न का उत्तर देता है,
-4. मुख्य रन को अलग छोड़ देता है,
-5. BTW प्रश्न या उत्तर को सत्र इतिहास में **नहीं** लिखता,
-6. उत्तर को सामान्य assistant संदेश के बजाय **लाइव side result** के रूप में emit करता है।
-
-महत्वपूर्ण मानसिक मॉडल है:
-
-- वही सत्र संदर्भ
-- अलग one-shot अतिरिक्त क्वेरी
-- जब सत्र native harness का उपयोग करता है, वही native harness transport
-- भविष्य के संदर्भ में कोई प्रदूषण नहीं
-- transcript persistence नहीं
-
-Codex harness सत्रों के लिए, BTW सक्रिय
-app-server thread को क्षणिक side thread के रूप में fork करके Codex के अंदर रहता है। इससे Codex OAuth और native
-thread व्यवहार सही रहता है, और साथ ही side answer को parent
-transcript से अलग रखा जाता है। Codex `/side` की तरह, side thread वर्तमान Codex
-permissions और native tool surface को बनाए रखता है, guardrails के साथ जो model को बताते हैं कि
-विरासत में मिले parent-thread काम को सक्रिय निर्देशों की तरह न माने।
-
-CLI runtime aliases के लिए, BTW direct provider call पर fallback करने के बजाय
-owning CLI backend को side-question mode में उपयोग करता है। OpenClaw sanitized
-conversation context को एक नए one-shot CLI invocation में seed करता है, उस invocation के लिए OpenClaw MCP
-tool bundling और reusable CLI session state को disable करता है, और
-backend को समर्थित कोई भी CLI-native no-resume या no-tools flags जोड़ने देता है। Direct
-non-CLI runtimes direct one-shot path रखते हैं।
+CLI रनटाइम उपनामों के लिए, BTW स्वामित्व वाले CLI बैकएंड को एकबारगी
+अतिरिक्त-प्रश्न मोड में आमंत्रित करता है: यह टूल बंडलिंग और पुन: प्रयोज्य सत्र स्थिति को अक्षम रखते हुए
+साफ़ किए गए वार्तालाप संदर्भ को एक नए CLI आमंत्रण में प्रारंभिक संदर्भ के रूप में देता है और
+बैकएंड द्वारा समर्थित कोई भी पुनः आरंभ न करने/टूल का उपयोग न करने वाले फ़्लैग जोड़ता है। प्रत्यक्ष (गैर-CLI) रनटाइम
+इसके बजाय प्रत्यक्ष एकबारगी प्रदाता कॉल का उपयोग करते हैं।
 
 ## यह क्या नहीं करता
 
-`/btw` यह **नहीं** करता:
+`/btw` कोई स्थायी सत्र नहीं बनाता, अधूरे मुख्य कार्य को जारी नहीं रखता,
+प्रश्न/उत्तर डेटा को ट्रांसक्रिप्ट इतिहास में स्थायी नहीं करता और रीलोड के बाद बना नहीं रहता।
 
-- नया durable सत्र बनाना,
-- अधूरे मुख्य task को जारी रखना,
-- BTW question/answer data को transcript history में लिखना,
-- `chat.history` में दिखाई देना,
-- reload के बाद बने रहना।
+## वितरण मॉडल
 
-यह जानबूझकर **क्षणिक** है।
+सामान्य सहायक चैट Gateway के `chat` इवेंट का उपयोग करती है। BTW एक अलग
+`chat.side_result` इवेंट का उपयोग करता है, ताकि क्लाइंट इसे नियमित
+वार्तालाप इतिहास न समझें। चूँकि इसे `chat.history` से दोबारा नहीं चलाया जाता, इसलिए यह
+रीलोड के बाद गायब हो जाता है।
 
-## Context कैसे काम करता है
+## सतह का व्यवहार
 
-BTW वर्तमान सत्र को केवल **background context** के रूप में उपयोग करता है।
+| सतह              | व्यवहार                                                                                                                                                                                                                                                                             |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TUI               | चैट लॉग में इनलाइन रेंडर किया जाता है, सामान्य उत्तर से स्पष्ट रूप से अलग दिखाई देता है और `Enter` या `Esc` से हटाया जा सकता है।                                                                                                                                 |
+| बाहरी चैनल        | स्पष्ट लेबल वाले एकबारगी उत्तर के रूप में वितरित किया जाता है (Telegram, WhatsApp, Discord में कोई स्थानीय अस्थायी ओवरले नहीं है)।                                                                                                                                                      |
+| Control UI / वेब  | थ्रेड पर पिन किए गए फ़्लोटिंग "अतिरिक्त चैट" पैनल के रूप में रेंडर किया जाता है। उत्तर टर्न के रूप में एकत्रित होते हैं और "आगे पूछें" इनपुट अगला अतिरिक्त प्रश्न पूछता है। बंद करने पर (`Esc` या X) वार्तालाप बनी रहती है और अगले उत्तर पर फिर खुलती है; ट्रैश बटन इसे हटा देता है और लंबित रन रोक देता है। |
 
-अगर मुख्य रन वर्तमान में सक्रिय है, तो OpenClaw वर्तमान message
-state का snapshot लेता है और in-flight main prompt को background context के रूप में शामिल करता है, साथ ही
-model को स्पष्ट रूप से बताता है:
+## चयन पॉपअप (Control UI)
 
-- केवल अतिरिक्त प्रश्न का उत्तर दें,
-- अधूरे मुख्य task को resume या complete न करें,
-- parent conversation को steer न करें।
+Control UI में किसी चैट संदेश के भीतर टेक्स्ट हाइलाइट करने पर दो क्रियाओं वाला एक छोटा
+चयन पॉपअप खुलता है:
 
-इससे BTW मुख्य रन से अलग रहता है, फिर भी उसे पता रहता है कि
-सत्र किस बारे में है।
+- **अधिक विवरण** तुरंत एक अंतर्निहित `/btw` प्रश्न भेजता है, जो
+  मॉडल से वर्तमान सत्र के संदर्भ में हाइलाइट किए गए टेक्स्ट की व्याख्या करने के लिए कहता है।
+  उत्तर फ़्लोटिंग अतिरिक्त चैट पैनल में आता है।
+- **अतिरिक्त चैट में पूछें** कंपोज़र में हाइलाइट किए गए टेक्स्ट को उद्धृत करने वाला
+  `/btw` ड्राफ़्ट पहले से भर देता है, ताकि आप उसके बारे में अपना प्रश्न लिख सकें।
 
-## Delivery model
+दोनों क्रियाएँ सामान्य `/btw` अर्थविज्ञान का पालन करती हैं: प्रश्न और उत्तर
+सत्र इतिहास से बाहर रहते हैं और मुख्य रन को बिना छेड़े छोड़ दिया जाता है।
 
-BTW सामान्य assistant transcript message के रूप में deliver **नहीं** होता।
+## इसका उपयोग कब करें
 
-Gateway protocol स्तर पर:
-
-- सामान्य assistant chat `chat` event का उपयोग करता है
-- BTW `chat.side_result` event का उपयोग करता है
-
-यह separation जानबूझकर है। अगर BTW सामान्य `chat` event path को reuse करता,
-तो clients इसे नियमित conversation history की तरह मानते।
-
-क्योंकि BTW अलग live event का उपयोग करता है और
-`chat.history` से replay नहीं होता, यह reload के बाद गायब हो जाता है।
-
-## Surface behavior
-
-### TUI
-
-TUI में, BTW वर्तमान session view में inline render होता है, लेकिन यह
-क्षणिक रहता है:
-
-- सामान्य assistant reply से स्पष्ट रूप से अलग
-- `Enter` या `Esc` से dismissible
-- reload पर replay नहीं होता
-
-### External channels
-
-Telegram, WhatsApp, और Discord जैसे channels पर, BTW को
-स्पष्ट रूप से labeled one-off reply के रूप में deliver किया जाता है क्योंकि इन surfaces में local
-ephemeral overlay concept नहीं होता।
-
-उत्तर को अभी भी side result माना जाता है, सामान्य session history नहीं।
-
-### Control UI / web
-
-Gateway BTW को सही ढंग से `chat.side_result` के रूप में emit करता है, और BTW
-`chat.history` में शामिल नहीं होता, इसलिए persistence contract web के लिए पहले से सही है।
-
-वर्तमान Control UI को अभी भी browser में BTW को live render करने के लिए dedicated `chat.side_result` consumer की जरूरत है। जब तक वह client-side support नहीं आता, BTW
-पूर्ण TUI और external-channel behavior के साथ Gateway-level feature है, लेकिन अभी
-complete browser UX नहीं है।
-
-## BTW कब उपयोग करें
-
-`/btw` का उपयोग करें जब आप चाहते हैं:
-
-- वर्तमान काम के बारे में त्वरित clarification,
-- लंबे रन के अभी भी प्रगति में रहने के दौरान factual side answer,
-- temporary answer जो भविष्य के session context का हिस्सा नहीं बनना चाहिए।
-
-Examples:
+किसी त्वरित स्पष्टीकरण, लंबे रन के जारी रहने के दौरान किसी तथ्यात्मक अतिरिक्त उत्तर,
+या भविष्य के सत्र संदर्भ में शामिल न किए जाने वाले अस्थायी उत्तर के लिए `/btw` का उपयोग करें।
 
 ```text
-/btw what file are we editing?
-/side what changed while the main run continued?
-/btw what does this error mean?
-/btw summarize the current task in one sentence
-/btw what is 17 * 19?
+/btw हम कौन-सी फ़ाइल संपादित कर रहे हैं?
+/btw वर्तमान कार्य को एक वाक्य में संक्षेपित करें
+/btw 17 * 19 कितना है?
 ```
 
-## BTW कब उपयोग न करें
+जिस भी चीज़ को आप सत्र के भविष्य के कार्य संदर्भ का हिस्सा बनाना चाहते हैं,
+उसे इसके बजाय मुख्य सत्र में सामान्य रूप से पूछें।
 
-जब आप चाहते हैं कि उत्तर session के
-future working context का हिस्सा बने, तब `/btw` का उपयोग न करें।
-
-ऐसे मामले में, BTW का उपयोग करने के बजाय main session में सामान्य रूप से पूछें।
-
-## Related
+## संबंधित
 
 <CardGroup cols={2}>
-  <Card title="Slash commands" href="/hi/tools/slash-commands" icon="terminal">
-    Native command catalog और chat directives.
+  <Card title="स्लैश कमांड" href="/hi/tools/slash-commands" icon="terminal">
+    नेटिव कमांड कैटलॉग और चैट निर्देश।
   </Card>
-  <Card title="Thinking levels" href="/hi/tools/thinking" icon="brain">
-    side-question model call के लिए reasoning effort levels.
+  <Card title="विचार स्तर" href="/hi/tools/thinking" icon="brain">
+    अतिरिक्त-प्रश्न मॉडल कॉल के लिए तर्क प्रयास के स्तर।
   </Card>
-  <Card title="Session" href="/hi/concepts/session" icon="comments">
-    Session keys, history, और persistence semantics.
+  <Card title="सत्र" href="/hi/concepts/session" icon="comments">
+    सत्र कुंजियाँ, इतिहास और स्थायित्व का अर्थविज्ञान।
   </Card>
-  <Card title="Steer command" href="/hi/tools/steer" icon="arrow-right">
-    active run में steering message inject करें, उसे खत्म किए बिना।
+  <Card title="निर्देशन कमांड" href="/hi/tools/steer" icon="arrow-right">
+    सक्रिय रन को समाप्त किए बिना उसमें एक निर्देशन संदेश डालें।
   </Card>
 </CardGroup>

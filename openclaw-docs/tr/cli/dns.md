@@ -1,13 +1,14 @@
 ---
 read_when:
-    - Tailscale + CoreDNS aracılığıyla geniş alan keşfi (DNS-SD) istiyorsunuz
+    - Tailscale + CoreDNS üzerinden geniş alan keşfi (DNS-SD) istiyorsunuz
     - You're setting up split DNS for a custom discovery domain (example: openclaw.internal)
-summary: '`openclaw dns` için CLI referansı (geniş alan keşif yardımcıları)'
+summary: '`openclaw dns` için CLI başvurusu (geniş alan keşif yardımcıları)'
 title: DNS
 x-i18n:
-    generated_at: "2026-07-12T12:08:47Z"
+    generated_at: "2026-07-26T23:52:16Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: bb07353df03f9d169e1aede2da0b711ffb68e8c9d21d51359e93e92cc0818ca2
     source_path: cli/dns.md
@@ -16,7 +17,7 @@ x-i18n:
 
 # `openclaw dns`
 
-Geniş alan keşfi için DNS yardımcıları (Tailscale + CoreDNS). Şu anda yalnızca macOS + Homebrew CoreDNS desteklenir.
+Geniş alan keşfi (Tailscale + CoreDNS) için DNS yardımcıları. Şu anda yalnızca macOS + Homebrew CoreDNS desteklenmektedir.
 
 İlgili:
 
@@ -33,23 +34,23 @@ openclaw dns setup --domain openclaw.internal
 openclaw dns setup --apply
 ```
 
-| Seçenek             | Etki                                                                                                    |
-| ------------------- | ------------------------------------------------------------------------------------------------------- |
-| `--domain <domain>` | Geniş alan keşif alan adı (örneğin `openclaw.internal`).                                                |
-| `--apply`           | CoreDNS yapılandırmasını kurar/günceller ve hizmeti (yeniden) başlatır. sudo gerektirir, yalnızca macOS. |
+| Seçenek              | Etki                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| `--domain <domain>` | Geniş alan keşif etki alanı (örneğin `openclaw.internal`).                       |
+| `--apply`           | CoreDNS yapılandırmasını yükler/günceller ve hizmeti (yeniden) başlatır. sudo gerektirir, yalnızca macOS. |
 
 `--domain` olmadan OpenClaw, yapılandırmadaki `discovery.wideArea.domain` değerini kullanır.
 
 `--apply` olmadan komut yalnızca şunları yazdırır:
 
-- Çözümlenen keşif alan adı ve bölge dosyası yolu
+- Çözümlenen keşif etki alanı ve bölge dosyası yolu
 - Geçerli tailnet IP'leri
 - Önerilen `openclaw.json` keşif yapılandırması
-- Tailscale yönetici konsolunda ayarlanacak Tailscale Split DNS ad sunucusu/alan adı değerleri
+- Tailscale yönetici konsolunda ayarlanacak Tailscale Bölünmüş DNS ad sunucusu/etki alanı değerleri
 
 `--apply` ile (yalnızca macOS, Homebrew CoreDNS gerektirir):
 
-- Eksikse bölge dosyasını ilk kullanıma hazırlar
+- Eksikse bölge dosyasını başlatır
 - Eksikse CoreDNS içe aktarma bölümünü ekler
 - `coredns` brew hizmetini yeniden başlatır
 

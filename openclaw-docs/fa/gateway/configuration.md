@@ -2,32 +2,33 @@
 read_when:
     - راه‌اندازی OpenClaw برای نخستین بار
     - در جست‌وجوی الگوهای رایج پیکربندی
-    - رفتن به بخش‌های مشخص پیکربندی
-summary: 'نمای کلی پیکربندی: کارهای رایج، راه‌اندازی سریع، و پیوندهایی به مرجع کامل'
+    - پیمایش به بخش‌های مشخص پیکربندی
+summary: 'نمای کلی پیکربندی: کارهای رایج، راه‌اندازی سریع و پیوندها به مرجع کامل'
 title: پیکربندی
 x-i18n:
-    generated_at: "2026-07-02T08:37:04Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T15:14:14Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: a0044dd771effee8e11d5dfd99e6f14f105089328dcca23f5794ddff4995bca7
+    source_hash: 09cc04efa16f32e12d6ebcea7a1d36b336df32227fe66953c5d70107708ee6c3
     source_path: gateway/configuration.md
     workflow: 16
 ---
 
-OpenClaw یک پیکربندی اختیاری <Tooltip tip="JSON5 از کامنت‌ها و کاماهای انتهایی پشتیبانی می‌کند">**JSON5**</Tooltip> را از `~/.openclaw/openclaw.json` می‌خواند.
-مسیر پیکربندی فعال باید یک فایل معمولی باشد. چیدمان‌های `openclaw.json`
-که با symlink ساخته شده‌اند، برای نوشتن‌های متعلق به OpenClaw پشتیبانی نمی‌شوند؛ یک نوشتن اتمیک ممکن است
-به‌جای حفظ symlink، مسیر را جایگزین کند. اگر پیکربندی را بیرون از
-دایرکتوری وضعیت پیش‌فرض نگه می‌دارید، `OPENCLAW_CONFIG_PATH` را مستقیما به فایل واقعی اشاره دهید.
+OpenClaw یک پیکربندی اختیاری <Tooltip tip="JSON5 از توضیحات و ویرگول‌های انتهایی پشتیبانی می‌کند">**JSON5**</Tooltip> را از `~/.openclaw/openclaw.json` می‌خواند. اگر فایل وجود نداشته باشد، OpenClaw از پیش‌فرض‌های امن استفاده می‌کند.
 
-اگر فایل وجود نداشته باشد، OpenClaw از پیش‌فرض‌های امن استفاده می‌کند. دلایل رایج برای افزودن پیکربندی:
+مسیر پیکربندی فعال باید یک فایل معمولی باشد. نوشتن‌های متعلق به OpenClaw آن را به‌صورت اتمی جایگزین می‌کنند (با تغییر نام روی مسیر)، بنابراین هدف یک `openclaw.json` پیوند نمادین، به‌جای نوشتن از طریق آن، جایگزین می‌شود — از چیدمان‌های پیکربندی دارای پیوند نمادین پرهیز کنید. اگر پیکربندی را خارج از دایرکتوری پیش‌فرض وضعیت نگه می‌دارید، `OPENCLAW_CONFIG_PATH` را مستقیماً به فایل واقعی اشاره دهید.
 
-- اتصال کانال‌ها و کنترل اینکه چه کسی می‌تواند به بات پیام بدهد
-- تنظیم مدل‌ها، ابزارها، sandboxing، یا خودکارسازی (cron، هوک‌ها)
-- تنظیم دقیق نشست‌ها، رسانه، شبکه، یا UI
+دلایل رایج برای افزودن پیکربندی:
 
-برای همه فیلدهای موجود، [مرجع کامل](/fa/gateway/configuration-reference) را ببینید.
+- کانال‌ها را متصل کنید و کنترل کنید چه کسانی می‌توانند به بات پیام دهند
+- مدل‌ها، ابزارها، سندباکس‌سازی یا خودکارسازی (cron، هوک‌ها) را تنظیم کنید
+- نشست‌ها، رسانه، شبکه یا رابط کاربری را تنظیم دقیق کنید
+
+برای مشاهده همه فیلدهای موجود، [مرجع کامل](/fa/gateway/configuration-reference) را ببینید.
+
+پیکربندی از یک قاعده دو‌بخشی پیروی می‌کند: هم‌سطح‌های ریشه، زیرساخت و پیش‌فرض‌های میان‌عامل را نگه می‌دارند، درحالی‌که `agents.defaults` رفتار حلقه عامل را نگه می‌دارد. ورودی‌های زیر `agents.entries` می‌توانند هرکدام از این دو بخش را، در جاهایی که شِما از بازنویسی به‌ازای هر عامل پشتیبانی می‌کند، بازنویسی کنند.
 
 عامل‌ها و خودکارسازی باید پیش از ویرایش پیکربندی، برای مستندات دقیق در سطح فیلد
 از `config.schema.lookup` استفاده کنند. از این صفحه برای راهنمایی وظیفه‌محور و از
@@ -35,7 +36,7 @@ OpenClaw یک پیکربندی اختیاری <Tooltip tip="JSON5 از کامن�
 فیلدها و پیش‌فرض‌ها استفاده کنید.
 
 <Tip>
-**تازه با پیکربندی آشنا شده‌اید؟** برای راه‌اندازی تعاملی با `openclaw onboard` شروع کنید، یا راهنمای [نمونه‌های پیکربندی](/fa/gateway/configuration-examples) را برای پیکربندی‌های کامل آماده کپی و چسباندن ببینید.
+**با پیکربندی آشنا نیستید؟** برای راه‌اندازی تعاملی با `openclaw onboard` شروع کنید، یا برای پیکربندی‌های کامل و آماده کپی‌کردن، راهنمای [نمونه‌های پیکربندی](/fa/gateway/configuration-examples) را بررسی کنید.
 </Tip>
 
 ## پیکربندی حداقلی
@@ -51,10 +52,10 @@ OpenClaw یک پیکربندی اختیاری <Tooltip tip="JSON5 از کامن�
 ## ویرایش پیکربندی
 
 <Tabs>
-  <Tab title="جادوگر تعاملی">
+  <Tab title="ویزارد تعاملی">
     ```bash
-    openclaw onboard       # full onboarding flow
-    openclaw configure     # config wizard
+    openclaw onboard       # فرایند کامل آغاز به کار
+    openclaw configure     # ویزارد پیکربندی
     ```
   </Tab>
   <Tab title="CLI (دستورهای تک‌خطی)">
@@ -64,65 +65,77 @@ OpenClaw یک پیکربندی اختیاری <Tooltip tip="JSON5 از کامن�
     openclaw config unset plugins.entries.brave.config.webSearch.apiKey
     ```
   </Tab>
-  <Tab title="UI کنترل">
-    [http://127.0.0.1:18789](http://127.0.0.1:18789) را باز کنید و از زبانه **پیکربندی** استفاده کنید.
-    UI کنترل یک فرم را از schema پیکربندی زنده رندر می‌کند، از جمله metadata مستندات
-    فیلدهای `title` / `description` به‌علاوه schemaهای Plugin و کانال، در صورت
-    موجود بودن، همراه با ویرایشگر **JSON خام** به‌عنوان راه خروج. برای UIهای جزئیات‌محور
-    و ابزارهای دیگر، Gateway همچنین `config.schema.lookup` را برای
-    واکشی یک گره schema محدود به مسیر به‌همراه خلاصه‌های فرزند بلافاصله ارائه می‌کند.
+  <Tab title="رابط کاربری کنترل">
+    [http://127.0.0.1:18789](http://127.0.0.1:18789) را باز کنید و از زبانه **Config** استفاده کنید.
+    رابط کاربری کنترل، فرمی را از شِمای زنده پیکربندی رندر می‌کند که شامل فراداده مستندات
+    فیلد `title` / `description` و نیز شِماهای Plugin و کانال در صورت
+    موجود بودن است و یک ویرایشگر **Raw JSON** را به‌عنوان راه گریز ارائه می‌دهد. برای رابط‌های کاربری
+    جزئی‌نگر و ابزارهای دیگر، Gateway همچنین `config.schema.lookup` را ارائه می‌کند تا
+    یک گره شِمای محدود به مسیر را همراه با خلاصه فرزندان مستقیم واکشی کند.
+    تنظیمات ابتدا فیلدهای رایج را نمایش می‌دهند. هر بخش فیلدهای پیشرفته خود را
+    در یک گروه جمع‌شده **Advanced (N)** نگه می‌دارد؛ برای بازکردن همه
+    گروه‌ها از **Show advanced** استفاده کنید. جست‌وجوی تنظیمات همیشه هر دو سطح را در بر می‌گیرد و در صورت نیاز
+    گروه پیشرفته منطبق را باز می‌کند.
   </Tab>
   <Tab title="ویرایش مستقیم">
-    `~/.openclaw/openclaw.json` را مستقیما ویرایش کنید. Gateway فایل را زیر نظر می‌گیرد و تغییرات را به‌طور خودکار اعمال می‌کند (به [بارگذاری مجدد داغ](#config-hot-reload) مراجعه کنید).
+    `~/.openclaw/openclaw.json` را مستقیماً ویرایش کنید. Gateway فایل را زیر نظر می‌گیرد و تغییرات را به‌طور خودکار اعمال می‌کند ([بارگذاری مجدد فوری](#config-hot-reload) را ببینید).
   </Tab>
 </Tabs>
 
 ## اعتبارسنجی سخت‌گیرانه
 
 <Warning>
-OpenClaw فقط پیکربندی‌هایی را می‌پذیرد که کاملا با schema مطابق باشند. کلیدهای ناشناخته، نوع‌های بدشکل، یا مقدارهای نامعتبر باعث می‌شوند Gateway **از شروع به کار خودداری کند**. تنها استثنای سطح ریشه `$schema` (رشته) است، تا ویرایشگرها بتوانند metadata مربوط به JSON Schema را پیوست کنند.
+OpenClaw فقط پیکربندی‌هایی را می‌پذیرد که کاملاً با شِما مطابقت داشته باشند. کلیدهای ناشناخته، نوع‌های نادرست یا مقادیر نامعتبر باعث می‌شوند Gateway **از راه‌اندازی خودداری کند**. تنها استثنا در سطح ریشه `$schema` (رشته) است تا ویرایشگرها بتوانند فراداده JSON Schema را پیوست کنند.
 </Warning>
 
-`openclaw config schema`‏ JSON Schema معیار را که Control UI
-و اعتبارسنجی استفاده می‌کنند چاپ می‌کند. `config.schema.lookup` یک گره محدود به مسیر به‌همراه
-خلاصه‌های فرزند را برای ابزارهای جزئیات‌محور واکشی می‌کند. metadata مستندات فیلدهای `title`/`description`
-از طریق آبجکت‌های تودرتو، wildcard (`*`)، آیتم آرایه (`[]`)، و شاخه‌های `anyOf`/
-`oneOf`/`allOf` منتقل می‌شود. schemaهای Plugin و کانال در زمان اجرا وقتی
-registry مانیفست بارگذاری شده باشد ادغام می‌شوند.
+`openclaw config schema`، JSON Schema متعارفی را که رابط کاربری کنترل
+و اعتبارسنجی استفاده می‌کنند چاپ می‌کند. `config.schema.lookup` یک گره محدود به مسیر را همراه با
+خلاصه فرزندان برای ابزارهای جزئی‌نگر واکشی می‌کند. فراداده مستندات فیلد `title`/`description`
+در اشیای تودرتو، نویسه عام (`*`)، عضو آرایه (`[]`) و شاخه‌های `anyOf`/
+`oneOf`/`allOf` منتقل می‌شود. شِماهای زمان اجرای Plugin و کانال هنگام بارگذاری
+رجیستری مانیفست ادغام می‌شوند.
 
-وقتی اعتبارسنجی شکست می‌خورد:
+هر برگ پیکربندی در `uiHints` دارای سطح نمایش رایج یا پیشرفته است.
+`advanced: false` تنظیمات رایج و `advanced: true` تنظیمات پیشرفته را
+مشخص می‌کند. برگی که راهنمای مستقیمی ندارد، سطح نزدیک‌ترین نیای خود را به ارث می‌برد؛
+مسیرهایی که هیچ نیای تعریف‌شده‌ای ندارند به‌طور پیش‌فرض پیشرفته‌اند. این فقط بر نمایش
+اثر می‌گذارد، نه بر اعتبارسنجی، پیش‌فرض‌ها، رفتار بارگذاری مجدد یا امکان تنظیم کلید.
 
-- Gateway بوت نمی‌شود
+هنگام شکست اعتبارسنجی:
+
+- Gateway راه‌اندازی نمی‌شود
 - فقط دستورهای تشخیصی کار می‌کنند (`openclaw doctor`، `openclaw logs`، `openclaw health`، `openclaw status`)
-- برای دیدن مشکلات دقیق، `openclaw doctor` را اجرا کنید
-- برای اعمال تعمیرها، `openclaw doctor --fix` (یا `--yes`) را اجرا کنید
+- برای مشاهده مشکلات دقیق، `openclaw doctor` را اجرا کنید
+- برای اعمال تعمیرات، `openclaw doctor --fix` را اجرا کنید (`--repair` همان پرچم است؛ `--yes` اعلان‌ها را رد می‌کند)
 
-Gateway پس از هر راه‌اندازی موفق، یک کپی مورد اعتماد از آخرین وضعیت سالم نگه می‌دارد،
-اما راه‌اندازی و بارگذاری مجدد داغ آن را به‌طور خودکار بازیابی نمی‌کنند. اگر `openclaw.json`
-اعتبارسنجی را رد کند (از جمله اعتبارسنجی محلی Plugin)، راه‌اندازی Gateway شکست می‌خورد یا
-بارگذاری مجدد نادیده گرفته می‌شود و runtime فعلی آخرین پیکربندی پذیرفته‌شده را نگه می‌دارد.
-برای تعمیر پیکربندی دارای پیشوند/بازنویسی‌شده یا
-بازیابی کپی آخرین وضعیت سالم، `openclaw doctor --fix` (یا `--yes`) را اجرا کنید. ارتقا به آخرین وضعیت سالم زمانی نادیده گرفته می‌شود که یک
-کاندید شامل placeholderهای secret redacted مانند `***` باشد.
+Gateway پس از هر راه‌اندازی موفق یک نسخه قابل‌اعتماد از آخرین پیکربندی سالم نگه می‌دارد،
+اما راه‌اندازی و بارگذاری مجدد فوری آن را به‌طور خودکار بازیابی نمی‌کنند — فقط `openclaw doctor --fix`
+این کار را انجام می‌دهد. اگر اعتبارسنجی `openclaw.json` شکست بخورد (از جمله اعتبارسنجی محلی Plugin)، راه‌اندازی Gateway
+شکست می‌خورد یا بارگذاری مجدد نادیده گرفته می‌شود و زمان اجرای فعلی آخرین پیکربندی پذیرفته‌شده را
+نگه می‌دارد. یک نوشتن ردشده نیز برای بررسی با نام `<path>.rejected.<timestamp>` ذخیره می‌شود.
+Gateway نوشتن‌هایی را که شبیه بازنویسی کامل تصادفی باشند مسدود می‌کند — حذف `gateway.mode`،
+از دست رفتن بلوک `meta` یا کوچک‌شدن فایل به بیش از نصف — مگر اینکه نوشتن
+صراحتاً تغییرات مخرب را مجاز کند. اگر گزینه پیشنهادی حاوی جای‌نگهدار راز سانسورشده‌ای مانند `***` یا `[redacted]` باشد،
+ارتقای آن به آخرین پیکربندی سالم انجام نمی‌شود.
 
 ## کارهای رایج
 
 <AccordionGroup>
-  <Accordion title="راه‌اندازی یک کانال (WhatsApp، Telegram، Discord، و غیره)">
-    هر کانال بخش پیکربندی خودش را زیر `channels.<provider>` دارد. برای مراحل راه‌اندازی، صفحه اختصاصی کانال را ببینید:
+  <Accordion title="راه‌اندازی یک کانال (WhatsApp، Telegram، Discord و غیره)">
+    هر کانال بخش پیکربندی خود را زیر `channels.<provider>` دارد. برای مراحل راه‌اندازی، صفحه اختصاصی کانال را ببینید:
 
-    - [WhatsApp](/fa/channels/whatsapp) - `channels.whatsapp`
-    - [Telegram](/fa/channels/telegram) - `channels.telegram`
-    - [Discord](/fa/channels/discord) - `channels.discord`
-    - [Feishu](/fa/channels/feishu) - `channels.feishu`
-    - [Google Chat](/fa/channels/googlechat) - `channels.googlechat`
-    - [Microsoft Teams](/fa/channels/msteams) - `channels.msteams`
-    - [Slack](/fa/channels/slack) - `channels.slack`
-    - [Signal](/fa/channels/signal) - `channels.signal`
-    - [iMessage](/fa/channels/imessage) - `channels.imessage`
-    - [Mattermost](/fa/channels/mattermost) - `channels.mattermost`
+    - [Discord](/fa/channels/discord) — `channels.discord`
+    - [Feishu](/fa/channels/feishu) — `channels.feishu`
+    - [Google Chat](/fa/channels/googlechat) — `channels.googlechat`
+    - [iMessage](/fa/channels/imessage) — `channels.imessage`
+    - [Mattermost](/fa/channels/mattermost) — `channels.mattermost`
+    - [Microsoft Teams](/fa/channels/msteams) — `channels.msteams`
+    - [Signal](/fa/channels/signal) — `channels.signal`
+    - [Slack](/fa/channels/slack) — `channels.slack`
+    - [Telegram](/fa/channels/telegram) — `channels.telegram`
+    - [WhatsApp](/fa/channels/whatsapp) — `channels.whatsapp`
 
-    همه کانال‌ها از الگوی سیاست DM یکسانی استفاده می‌کنند:
+    همه کانال‌ها از الگوی سیاست پیام مستقیم یکسانی استفاده می‌کنند:
 
     ```json5
     {
@@ -130,8 +143,8 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
         telegram: {
           enabled: true,
           botToken: "123:abc",
-          dmPolicy: "pairing",   // pairing | allowlist | open | disabled
-          allowFrom: ["tg:123"], // only for allowlist/open
+          dmPolicy: "pairing",   // جفت‌سازی | فهرست مجاز | باز | غیرفعال
+          allowFrom: ["tg:123"], // فقط برای فهرست مجاز/باز
         },
       },
     }
@@ -140,7 +153,7 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
   </Accordion>
 
   <Accordion title="انتخاب و پیکربندی مدل‌ها">
-    مدل اصلی و fallbackهای اختیاری را تنظیم کنید:
+    مدل اصلی و جایگزین‌های اختیاری را تنظیم کنید:
 
     ```json5
     {
@@ -159,39 +172,39 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
     }
     ```
 
-    - `agents.defaults.models` کاتالوگ مدل را تعریف می‌کند و به‌عنوان allowlist برای `/model` عمل می‌کند؛ ورودی‌های `provider/*`، `/model`، `/models` و انتخابگرهای مدل را به ارائه‌دهندگان منتخب محدود می‌کنند، در حالی که همچنان از کشف پویای مدل استفاده می‌شود.
-    - برای افزودن ورودی‌های allowlist بدون حذف مدل‌های موجود، از `openclaw config set agents.defaults.models '<json>' --strict-json --merge` استفاده کنید. جایگزینی‌های ساده‌ای که ورودی‌ها را حذف کنند رد می‌شوند، مگر اینکه `--replace` را پاس بدهید.
-    - ارجاع‌های مدل از قالب `provider/model` استفاده می‌کنند (مثلا `anthropic/claude-opus-4-6`).
-    - `agents.defaults.imageMaxDimensionPx` کوچک‌سازی تصویرهای transcript/tool را کنترل می‌کند (پیش‌فرض `1200`)؛ مقدارهای کمتر معمولا مصرف توکن بینایی را در اجراهای پر از اسکرین‌شات کاهش می‌دهند.
-    - برای تغییر مدل‌ها در چت، [CLI مدل‌ها](/fa/concepts/models) را ببینید و برای چرخش auth و رفتار fallback، [Failover مدل](/fa/concepts/model-failover) را ببینید.
-    - برای ارائه‌دهندگان سفارشی/خودمیزبان، [ارائه‌دهندگان سفارشی](/fa/gateway/config-tools#custom-providers-and-base-urls) را در مرجع ببینید.
+    - `agents.defaults.models` نام‌های مستعار و تنظیمات هر مدل را ذخیره می‌کند؛ افزودن یک ورودی هرگز بازنویسی‌های `/model` یا `--model` را محدود نمی‌کند.
+    - `agents.defaults.modelPolicy.allow` فهرست مجاز صریح برای بازنویسی‌ها و انتخابگرهای مدل است. این فهرست ارجاع‌های دقیق و نویسه‌های عام `provider/*` را می‌پذیرد؛ برای مجاز کردن هر مدلی، آن را حذف کنید یا از `[]` استفاده کنید.
+    - ارجاع‌های مدل از قالب `provider/model` استفاده می‌کنند (برای مثال `anthropic/claude-opus-4-6`).
+    - `agents.defaults.imageMaxDimensionPx` کوچک‌سازی تصاویر رونوشت/ابزار را کنترل می‌کند (پیش‌فرض `1200`)؛ مقادیر کمتر معمولاً مصرف توکن بینایی را در اجراهای دارای اسکرین‌شات زیاد کاهش می‌دهند.
+    - برای تعویض مدل‌ها در گفت‌وگو، [CLI مدل‌ها](/fa/concepts/models) و برای چرخش احراز هویت و رفتار جایگزینی، [جایگزینی مدل](/fa/concepts/model-failover) را ببینید.
+    - برای ارائه‌دهندگان سفارشی/خودمیزبان، بخش [ارائه‌دهندگان سفارشی](/fa/gateway/config-tools#custom-providers-and-base-urls) را در مرجع ببینید.
 
   </Accordion>
 
-  <Accordion title="کنترل اینکه چه کسی می‌تواند به بات پیام بدهد">
-    دسترسی DM برای هر کانال از طریق `dmPolicy` کنترل می‌شود:
+  <Accordion title="کنترل افرادی که می‌توانند به بات پیام دهند">
+    دسترسی پیام مستقیم برای هر کانال از طریق `dmPolicy` کنترل می‌شود (پیش‌فرض `"pairing"`):
 
-    - `"pairing"` (پیش‌فرض): فرستندگان ناشناخته یک کد pair یک‌بارمصرف برای تایید دریافت می‌کنند
-    - `"allowlist"`: فقط فرستندگان موجود در `allowFrom` (یا ذخیره allow جفت‌شده)
-    - `"open"`: همه DMهای ورودی را مجاز می‌کند (به `allowFrom: ["*"]` نیاز دارد)
-    - `"disabled"`: همه DMها را نادیده می‌گیرد
+    - `"pairing"`: فرستندگان ناشناخته یک کد جفت‌سازی یک‌بارمصرف برای تأیید دریافت می‌کنند
+    - `"allowlist"`: فقط فرستندگان موجود در `allowFrom` (یا مخزن مجازِ جفت‌شده)
+    - `"open"`: همه پیام‌های مستقیم ورودی را مجاز می‌کند (به `allowFrom: ["*"]` نیاز دارد)
+    - `"disabled"`: همه پیام‌های مستقیم را نادیده می‌گیرد
 
-    برای گروه‌ها، از `groupPolicy` + `groupAllowFrom` یا allowlistهای مخصوص کانال استفاده کنید.
+    برای گروه‌ها، از `groupPolicy` (`"allowlist" | "open" | "disabled"`) همراه با `groupAllowFrom` یا فهرست‌های مجاز مختص کانال استفاده کنید.
 
     برای جزئیات هر کانال، [مرجع کامل](/fa/gateway/config-channels#dm-and-group-access) را ببینید.
 
   </Accordion>
 
-  <Accordion title="راه‌اندازی gate کردن mention در چت گروهی">
-    پیام‌های گروهی به‌صورت پیش‌فرض **نیازمند mention** هستند. الگوهای trigger را برای هر عامل پیکربندی کنید. پاسخ‌های معمول گروه/کانال به‌طور خودکار ارسال می‌شوند؛ برای اتاق‌های مشترکی که عامل باید تصمیم بگیرد چه زمانی صحبت کند، مسیر message-tool را فعال کنید:
+  <Accordion title="راه‌اندازی محدودسازی اشاره در گفت‌وگوی گروهی">
+    پیام‌های گروهی به‌طور پیش‌فرض **به اشاره نیاز دارند**. الگوهای فعال‌سازی را برای هر عامل پیکربندی کنید. پاسخ‌های عادی گروه/کانال به‌طور خودکار ارسال می‌شوند؛ برای اتاق‌های مشترکی که عامل باید درباره زمان صحبت‌کردن تصمیم بگیرد، مسیر ابزار پیام را فعال کنید:
 
     ```json5
     {
       messages: {
-        visibleReplies: "automatic", // set "message_tool" to require message-tool sends everywhere
+        visibleReplies: "automatic", // برای الزام ارسال با ابزار پیام در همه‌جا، روی "message_tool" تنظیم کنید
         groupChat: {
-          visibleReplies: "message_tool", // opt-in; visible output requires message(action=send)
-          unmentionedInbound: "room_event", // unmentioned always-on group chatter is quiet context
+          visibleReplies: "message_tool", // اختیاری؛ خروجی قابل‌مشاهده به message(action=send) نیاز دارد
+          unmentionedInbound: "room_event", // گفت‌وگوی گروهی همیشگیِ بدون اشاره، زمینه‌ای بی‌صدا است
         },
       },
       agents: {
@@ -212,16 +225,16 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
     }
     ```
 
-    - **mentionهای metadata**: @-mentionهای بومی (WhatsApp tap-to-mention، Telegram @bot، و غیره)
-    - **الگوهای متن**: الگوهای regex امن در `mentionPatterns`
-    - **پاسخ‌های قابل مشاهده**: `messages.visibleReplies` می‌تواند ارسال با message-tool را به‌صورت سراسری الزامی کند؛ `messages.groupChat.visibleReplies` این را برای گروه‌ها/کانال‌ها override می‌کند.
-    - برای حالت‌های پاسخ قابل مشاهده، overrideهای هر کانال، و حالت self-chat، [مرجع کامل](/fa/gateway/config-channels#group-chat-mention-gating) را ببینید.
+    - **اشاره‌های فراداده‌ای**: اشاره‌های بومی @ (اشاره با لمس در WhatsApp، ‎@bot در Telegram و غیره)
+    - **الگوهای متنی**: الگوهای عبارت منظم امن در `mentionPatterns`
+    - **پاسخ‌های قابل‌مشاهده**: `messages.visibleReplies` می‌تواند ارسال با ابزار پیام را به‌صورت سراسری الزامی کند؛ `messages.groupChat.visibleReplies` آن را برای گروه‌ها/کانال‌ها بازنویسی می‌کند.
+    - برای حالت‌های پاسخ قابل‌مشاهده، بازنویسی‌های هر کانال و حالت گفت‌وگو با خود، [مرجع کامل](/fa/gateway/config-channels#group-chat-mention-gating) را ببینید.
 
   </Accordion>
 
-  <Accordion title="محدود کردن Skills برای هر عامل">
-    برای baseline مشترک از `agents.defaults.skills` استفاده کنید، سپس عامل‌های خاص را با
-    `agents.list[].skills` override کنید:
+  <Accordion title="محدودکردن Skills برای هر عامل">
+    برای خط پایه مشترک از `agents.defaults.skills` استفاده کنید، سپس عامل‌های
+    مشخص را با `agents.entries.*.skills` بازنویسی کنید:
 
     ```json5
     {
@@ -230,32 +243,27 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
           skills: ["github", "weather"],
         },
         list: [
-          { id: "writer" }, // inherits github, weather
-          { id: "docs", skills: ["docs-search"] }, // replaces defaults
-          { id: "locked-down", skills: [] }, // no skills
+          { id: "writer" }, // github و weather را به ارث می‌برد
+          { id: "docs", skills: ["docs-search"] }, // پیش‌فرض‌ها را جایگزین می‌کند
+          { id: "locked-down", skills: [] }, // بدون Skills
         ],
       },
     }
     ```
 
-    - برای Skills نامحدود به‌صورت پیش‌فرض، `agents.defaults.skills` را حذف کنید.
-    - برای ارث‌بری پیش‌فرض‌ها، `agents.list[].skills` را حذف کنید.
-    - برای نداشتن Skills، `agents.list[].skills: []` را تنظیم کنید.
-    - [Skills](/fa/tools/skills)، [پیکربندی Skills](/fa/tools/skills-config)، و
+    - برای نامحدود بودن Skills به‌طور پیش‌فرض، `agents.defaults.skills` را حذف کنید.
+    - برای به‌ارث‌بردن پیش‌فرض‌ها، `agents.entries.*.skills` را حذف کنید.
+    - برای نداشتن Skills، `agents.entries.*.skills: []` را تنظیم کنید.
+    - [Skills](/fa/tools/skills)، [پیکربندی Skills](/fa/tools/skills-config) و
       [مرجع پیکربندی](/fa/gateway/config-agents#agents-defaults-skills) را ببینید.
 
   </Accordion>
 
-  <Accordion title="تنظیم دقیق پایش سلامت کانال Gateway">
-    کنترل کنید Gateway با چه شدتی کانال‌هایی را که کهنه به نظر می‌رسند restart کند:
+  <Accordion title="پیکربندی پایش سلامت برای هر کانال">
+    راه‌اندازی مجدد خودکار سلامت را برای یک کانال یا حساب غیرفعال یا فعال کنید:
 
     ```json5
     {
-      gateway: {
-        channelHealthCheckMinutes: 5,
-        channelStaleEventThresholdMinutes: 30,
-        channelMaxRestartsPerHour: 10,
-      },
       channels: {
         telegram: {
           healthMonitor: { enabled: false },
@@ -269,38 +277,18 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
     }
     ```
 
-    - برای غیرفعال کردن restartهای health-monitor به‌صورت سراسری، `gateway.channelHealthCheckMinutes: 0` را تنظیم کنید.
-    - `channelStaleEventThresholdMinutes` باید بزرگ‌تر یا مساوی بازه بررسی باشد.
-    - برای غیرفعال کردن restart خودکار برای یک کانال یا حساب بدون غیرفعال کردن monitor سراسری، از `channels.<provider>.healthMonitor.enabled` یا `channels.<provider>.accounts.<id>.healthMonitor.enabled` استفاده کنید.
-    - برای اشکال‌زدایی عملیاتی، [بررسی‌های سلامت](/fa/gateway/health) و برای همه فیلدها [مرجع کامل](/fa/gateway/configuration-reference#gateway) را ببینید.
+    - برای کنترل راه‌اندازی مجدد خودکار یک کانال یا حساب، از `channels.<provider>.healthMonitor.enabled` یا `channels.<provider>.accounts.<id>.healthMonitor.enabled` استفاده کنید.
+    - برای اشکال‌زدایی عملیاتی، [بررسی‌های سلامت](/fa/gateway/health) و برای همه فیلدها، [مرجع کامل](/fa/gateway/configuration-reference#gateway) را ببینید.
 
   </Accordion>
 
-  <Accordion title="تنظیم دقیق timeout دست‌دهی WebSocket در Gateway">
-    به clientهای محلی زمان بیشتری بدهید تا دست‌دهی WebSocket پیش از auth را روی
-    میزبان‌های پربار یا کم‌قدرت کامل کنند:
-
-    ```json5
-    {
-      gateway: {
-        handshakeTimeoutMs: 30000,
-      },
-    }
-    ```
-
-    - پیش‌فرض `15000` میلی‌ثانیه است.
-    - `OPENCLAW_HANDSHAKE_TIMEOUT_MS` همچنان برای overrideهای موردی service یا shell اولویت دارد.
-    - ابتدا رفع stallهای startup/event-loop را ترجیح دهید؛ این knob برای میزبان‌هایی است که سالم‌اند اما هنگام warmup کند هستند.
-
-  </Accordion>
-
-  <Accordion title="پیکربندی نشست‌ها و resetها">
+  <Accordion title="پیکربندی نشست‌ها و بازنشانی‌ها">
     نشست‌ها تداوم و جداسازی مکالمه را کنترل می‌کنند:
 
     ```json5
     {
       session: {
-        dmScope: "per-channel-peer",  // recommended for multi-user
+        dmScope: "per-channel-peer",  // برای چندکاربر توصیه می‌شود
         threadBindings: {
           enabled: true,
           idleHours: 24,
@@ -313,17 +301,17 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
         },
       },
     }
-```
+    ```
 
     - `dmScope`: `main` (مشترک) | `per-peer` | `per-channel-peer` | `per-account-channel-peer`
-    - `threadBindings`: پیش‌فرض‌های سراسری برای مسیریابی نشست‌های وابسته به رشته (Discord از `/focus`، `/unfocus`، `/agents`، `/session idle`، و `/session max-age` پشتیبانی می‌کند).
-    - برای دامنه‌بندی، پیوندهای هویت، و سیاست ارسال، [مدیریت نشست](/fa/concepts/session) را ببینید.
+    - `threadBindings`: پیش‌فرض‌های سراسری برای مسیریابی نشست متصل به رشته. `/focus`، `/unfocus`، `/agents`، `/session idle` و `/session max-age` این اتصال را برای هر نشست برقرار، قطع، فهرست و تنظیم می‌کنند (Discord رشته‌ها را متصل می‌کند و Telegram موضوع‌ها/مکالمه‌ها را).
+    - برای محدوده‌بندی، پیوندهای هویتی و سیاست ارسال، به [مدیریت نشست](/fa/concepts/session) مراجعه کنید.
     - برای همه فیلدها، [مرجع کامل](/fa/gateway/config-agents#session) را ببینید.
 
   </Accordion>
 
-  <Accordion title="فعال‌سازی ایزوله‌سازی">
-    نشست‌های عامل را در زمان‌اجرای ایزوله‌شده اجرا کنید:
+  <Accordion title="فعال‌سازی سندباکس">
+    نشست‌های عامل را در محیط‌های اجرای سندباکس ایزوله اجرا کنید:
 
     ```json5
     {
@@ -338,16 +326,16 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
     }
     ```
 
-    ابتدا تصویر را بسازید - از یک checkout منبع، `scripts/sandbox-setup.sh` را اجرا کنید، یا از یک نصب npm، دستور درون‌خطی `docker build` را در [ایزوله‌سازی § تصاویر و راه‌اندازی](/fa/gateway/sandboxing#images-and-setup) ببینید.
+    ابتدا ایمیج را بسازید — در یک نسخه دریافت‌شده از کد منبع، `scripts/sandbox-setup.sh` را اجرا کنید؛ یا برای نصب از npm، فرمان درون‌خطی `docker build` را در [سندباکس § ایمیج‌ها و راه‌اندازی](/fa/gateway/sandboxing#images-and-setup) ببینید.
 
-    برای راهنمای کامل، [ایزوله‌سازی](/fa/gateway/sandboxing) و برای همه گزینه‌ها [مرجع کامل](/fa/gateway/config-agents#agentsdefaultssandbox) را ببینید.
+    برای راهنمای کامل به [سندباکس](/fa/gateway/sandboxing) و برای همه گزینه‌ها به [مرجع کامل](/fa/gateway/config-agents#agentsdefaultssandbox) مراجعه کنید.
 
   </Accordion>
 
-  <Accordion title="فعال‌سازی push مبتنی بر relay برای buildهای رسمی iOS">
-    push مبتنی بر relay برای buildهای عمومی App Store از relay میزبانی‌شده OpenClaw استفاده می‌کند: `https://ios-push-relay.openclaw.ai`.
+  <Accordion title="فعال‌سازی پوش مبتنی بر رله برای بیلدهای رسمی iOS">
+    پوش مبتنی بر رله برای بیلدهای عمومی App Store از رله میزبانی‌شده OpenClaw استفاده می‌کند: `https://ios-push-relay.openclaw.ai`.
 
-    استقرارهای relay سفارشی به یک مسیر build/استقرار iOS عمدا جداگانه نیاز دارند که URL relay آن با URL relay در gateway مطابقت داشته باشد. اگر از یک build relay سفارشی استفاده می‌کنید، این را در پیکربندی gateway تنظیم کنید:
+    استقرارهای سفارشی رله به مسیر بیلد/استقرار iOS عمداً مجزایی نیاز دارند که URL رله آن با URL رله Gateway مطابقت داشته باشد. اگر از بیلد رله سفارشی استفاده می‌کنید، این مورد را در پیکربندی Gateway تنظیم کنید:
 
     ```json5
     {
@@ -356,7 +344,7 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
           apns: {
             relay: {
               baseUrl: "https://relay.example.com",
-              // Optional. Default: 10000
+              // اختیاری. پیش‌فرض: 10000
               timeoutMs: 10000,
             },
           },
@@ -371,34 +359,34 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
     openclaw config set gateway.push.apns.relay.baseUrl https://relay.example.com
     ```
 
-    این کار چه می‌کند:
+    کارکرد این تنظیم:
 
-    - به gateway اجازه می‌دهد `push.test`، تلنگرهای بیدارباش، و بیدارباش‌های اتصال مجدد را از طریق relay خارجی ارسال کند.
-    - از یک مجوز ارسال محدود به ثبت‌نام استفاده می‌کند که توسط اپ iOS جفت‌شده منتقل می‌شود. gateway به توکن relay سراسری برای استقرار نیاز ندارد.
-    - هر ثبت‌نام مبتنی بر relay را به هویت gateway که اپ iOS با آن جفت شده متصل می‌کند، بنابراین gateway دیگر نمی‌تواند از ثبت‌نام ذخیره‌شده دوباره استفاده کند.
-    - buildهای محلی/دستی iOS را روی APNs مستقیم نگه می‌دارد. ارسال‌های مبتنی بر relay فقط برای buildهای رسمی توزیع‌شده‌ای اعمال می‌شوند که از طریق relay ثبت‌نام کرده‌اند.
-    - باید با URL پایه relay که در build iOS تعبیه شده مطابقت داشته باشد، تا ترافیک ثبت‌نام و ارسال به همان استقرار relay برسد.
+    - به Gateway امکان می‌دهد `push.test`، تلنگرهای بیدارسازی و بیدارسازی‌های اتصال مجدد را از طریق رله خارجی ارسال کند.
+    - از مجوز ارسال مختص ثبت‌نام استفاده می‌کند که برنامه جفت‌شده iOS آن را منتقل می‌کند. Gateway به توکن رله سراسریِ استقرار نیاز ندارد.
+    - هر ثبت‌نام مبتنی بر رله را به هویت Gateway جفت‌شده با برنامه iOS متصل می‌کند تا Gateway دیگری نتواند از ثبت‌نام ذخیره‌شده دوباره استفاده کند.
+    - بیلدهای محلی/دستی iOS را روی APNs مستقیم نگه می‌دارد. ارسال‌های مبتنی بر رله فقط برای بیلدهای رسمی توزیع‌شده‌ای اعمال می‌شوند که از طریق رله ثبت‌نام کرده‌اند.
+    - باید با URL پایه رله تعبیه‌شده در بیلد iOS مطابقت داشته باشد تا ترافیک ثبت‌نام و ارسال به همان استقرار رله برسد.
 
     جریان سرتاسری:
 
-    1. اپ رسمی iOS را نصب کنید.
-    2. اختیاری: `gateway.push.apns.relay.baseUrl` را فقط زمانی روی gateway پیکربندی کنید که از یک build relay سفارشی عمدا جداگانه استفاده می‌کنید.
-    3. اپ iOS را با gateway جفت کنید و اجازه دهید هر دو نشست نود و اپراتور متصل شوند.
-    4. اپ iOS هویت gateway را دریافت می‌کند، با استفاده از App Attest به‌همراه رسید اپ در relay ثبت‌نام می‌کند، و سپس بار `push.apns.register` مبتنی بر relay را در gateway جفت‌شده منتشر می‌کند.
-    5. gateway دسته relay و مجوز ارسال را ذخیره می‌کند، سپس از آن‌ها برای `push.test`، تلنگرهای بیدارباش، و بیدارباش‌های اتصال مجدد استفاده می‌کند.
+    1. برنامه رسمی iOS را نصب کنید.
+    2. اختیاری: فقط هنگام استفاده از یک بیلد رله سفارشی و عمداً مجزا، `gateway.push.apns.relay.baseUrl` را روی Gateway پیکربندی کنید.
+    3. برنامه iOS را با Gateway جفت کنید و اجازه دهید نشست‌های Node و اپراتور هر دو متصل شوند.
+    4. برنامه iOS هویت Gateway را دریافت می‌کند، با استفاده از App Attest به‌همراه رسید برنامه در رله ثبت‌نام می‌کند و سپس محموله `push.apns.register` مبتنی بر رله را در Gateway جفت‌شده منتشر می‌کند.
+    5. Gateway هندل رله و مجوز ارسال را ذخیره می‌کند، سپس از آن‌ها برای `push.test`، تلنگرهای بیدارسازی و بیدارسازی‌های اتصال مجدد استفاده می‌کند.
 
     نکات عملیاتی:
 
-    - اگر اپ iOS را به gateway دیگری منتقل کردید، اپ را دوباره متصل کنید تا بتواند یک ثبت‌نام relay جدیدِ متصل به آن gateway منتشر کند.
-    - اگر build جدیدی از iOS منتشر کنید که به استقرار relay متفاوتی اشاره دارد، اپ به‌جای استفاده مجدد از مبدا relay قدیمی، ثبت‌نام relay کش‌شده خود را تازه‌سازی می‌کند.
+    - اگر برنامه iOS را به Gateway دیگری منتقل کردید، برنامه را دوباره متصل کنید تا بتواند ثبت‌نام رله جدیدی را که به آن Gateway متصل است منتشر کند.
+    - اگر بیلد جدیدی از iOS منتشر کنید که به استقرار رله دیگری اشاره می‌کند، برنامه به‌جای استفاده مجدد از مبدأ رله قدیمی، ثبت‌نام رله ذخیره‌شده خود را تازه‌سازی می‌کند.
 
     نکته سازگاری:
 
-    - `OPENCLAW_APNS_RELAY_BASE_URL` و `OPENCLAW_APNS_RELAY_TIMEOUT_MS` همچنان به‌عنوان بازنویسی‌های موقت env کار می‌کنند.
-    - URLهای relay سفارشی gateway باید با URL پایه relay که در build iOS تعبیه شده مطابقت داشته باشند. مسیر انتشار عمومی App Store، بازنویسی‌های URL relay سفارشی iOS را رد می‌کند.
-    - `OPENCLAW_APNS_RELAY_ALLOW_HTTP=true` همچنان یک راه فرار توسعه فقط برای loopback باقی می‌ماند؛ URLهای relay مبتنی بر HTTP را در config پایدار نکنید.
+    - `OPENCLAW_APNS_RELAY_BASE_URL` و `OPENCLAW_APNS_RELAY_TIMEOUT_MS` همچنان به‌عنوان بازنویسی‌های موقت محیطی کار می‌کنند.
+    - URLهای رله سفارشی Gateway باید با URL پایه رله تعبیه‌شده در بیلد iOS مطابقت داشته باشند؛ مسیر انتشار عمومی App Store بازنویسی‌های URL رله سفارشی iOS را رد می‌کند.
+    - `OPENCLAW_APNS_RELAY_ALLOW_HTTP=true` همچنان یک راه گریز توسعه‌ای محدود به loopback است؛ URLهای رله HTTP را در پیکربندی ماندگار نکنید.
 
-    برای جریان سرتاسری، [اپ iOS](/fa/platforms/ios#relay-backed-push-for-official-builds) و برای مدل امنیتی relay، [جریان احراز هویت و اعتماد](/fa/platforms/ios#authentication-and-trust-flow) را ببینید.
+    برای جریان سرتاسری، [برنامه iOS](/fa/platforms/ios#relay-backed-push-for-official-builds) و برای مدل امنیتی رله، [جریان احراز هویت و اعتماد](/fa/platforms/ios#authentication-and-trust-flow) را ببینید.
 
   </Accordion>
 
@@ -416,10 +404,10 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
     }
     ```
 
-    - `every`: رشته مدت‌زمان (`30m`، `2h`). برای غیرفعال‌سازی، `0m` را تنظیم کنید.
-    - `target`: `last` | `none` | `<channel-id>` (برای مثال `discord`، `matrix`، `telegram`، یا `whatsapp`)
-    - `directPolicy`: برای اهداف Heartbeat به سبک DM، `allow` (پیش‌فرض) یا `block`
-    - برای راهنمای کامل، [Heartbeat](/fa/gateway/heartbeat) را ببینید.
+    - `every`: رشته مدت‌زمان (`30m`، `2h`). برای غیرفعال‌سازی، `0m` را تنظیم کنید. پیش‌فرض: `30m`.
+    - `target`: `last` | `none` | `<channel-id>` (برای نمونه `discord`، `matrix`، `telegram` یا `whatsapp`)
+    - `directPolicy`: `allow` (پیش‌فرض) یا `block` برای مقصدهای Heartbeat به سبک پیام مستقیم
+    - برای راهنمای کامل به [Heartbeat](/fa/gateway/heartbeat) مراجعه کنید.
 
   </Accordion>
 
@@ -428,24 +416,19 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
     {
       cron: {
         enabled: true,
-        maxConcurrentRuns: 8, // default; cron dispatch + isolated cron agent-turn execution
         sessionRetention: "24h",
-        runLog: {
-          maxBytes: "2mb",
-          keepLines: 2000,
-        },
       },
     }
     ```
 
-    - `sessionRetention`: نشست‌های اجرای ایزوله تکمیل‌شده را از `sessions.json` پاک‌سازی می‌کند (پیش‌فرض `24h`؛ برای غیرفعال‌سازی `false` را تنظیم کنید).
-    - `runLog`: ردیف‌های تاریخچه اجرای Cron نگه‌داری‌شده را برای هر کار پاک‌سازی می‌کند. `maxBytes` همچنان برای لاگ‌های اجرای قدیمی‌ترِ مبتنی بر فایل پذیرفته می‌شود.
-    - برای نمای کلی قابلیت و مثال‌های CLI، [کارهای Cron](/fa/automation/cron-jobs) را ببینید.
+    - `sessionRetention`: نشست‌های تکمیل‌شده اجرای ایزوله را از ردیف‌های نشست SQLite پاک‌سازی می‌کند (پیش‌فرض `24h`؛ برای غیرفعال‌سازی، `false` را تنظیم کنید).
+    - تاریخچه اجرا به‌طور خودکار جدیدترین 2000 ردیف ترمینال را برای هر کار نگه می‌دارد؛ ردیف‌های گم‌شده بازه پاک‌سازی 24 ساعته خود را حفظ می‌کنند.
+    - برای نمای کلی قابلیت و نمونه‌های CLI به [کارهای Cron](/fa/automation/cron-jobs) مراجعه کنید.
 
   </Accordion>
 
-  <Accordion title="راه‌اندازی webhooks (hooks)">
-    endpointهای HTTP Webhook را روی Gateway فعال کنید:
+  <Accordion title="راه‌اندازی Webhookها (هوک‌ها)">
+    نقاط پایانی Webhook مبتنی بر HTTP را روی Gateway فعال کنید:
 
     ```json5
     {
@@ -469,20 +452,20 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
     ```
 
     نکته امنیتی:
-    - همه محتوای payload مربوط به hook/webhook را ورودی غیرقابل اعتماد در نظر بگیرید.
-    - از یک `hooks.token` اختصاصی استفاده کنید؛ secretهای فعال احراز هویت Gateway (`gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN` یا `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD`) را دوباره استفاده نکنید.
-    - احراز هویت hook فقط از طریق header است (`Authorization: Bearer ...` یا `x-openclaw-token`)؛ توکن‌های query-string رد می‌شوند.
-    - `hooks.path` نمی‌تواند `/` باشد؛ ورودی webhook را روی یک زیرمسیر اختصاصی مانند `/hooks` نگه دارید.
-    - flagهای عبور از محتوای ناامن را غیرفعال نگه دارید (`hooks.gmail.allowUnsafeExternalContent`، `hooks.mappings[].allowUnsafeExternalContent`) مگر برای اشکال‌زدایی با دامنه بسیار محدود.
-    - اگر `hooks.allowRequestSessionKey` را فعال می‌کنید، `hooks.allowedSessionKeyPrefixes` را نیز تنظیم کنید تا کلیدهای نشست انتخاب‌شده توسط فراخوان محدود شوند.
-    - برای عامل‌های هدایت‌شده با hook، tierهای مدل مدرن قوی و سیاست ابزار سخت‌گیرانه را ترجیح دهید (برای مثال فقط پیام‌رسانی به‌همراه ایزوله‌سازی هر جا ممکن است).
+    - تمام محتوای محموله هوک/Webhook را ورودی غیرقابل‌اعتماد در نظر بگیرید.
+    - از یک `hooks.token` اختصاصی استفاده کنید؛ اسرار فعال احراز هویت Gateway ‏(`gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN` یا `gateway.auth.password` / `OPENCLAW_GATEWAY_PASSWORD`) را دوباره استفاده نکنید.
+    - احراز هویت هوک فقط از طریق هدر انجام می‌شود (`Authorization: Bearer ...` یا `x-openclaw-token`)؛ توکن‌های رشته پرس‌وجو رد می‌شوند.
+    - `hooks.path` نمی‌تواند `/` باشد؛ ورودی Webhook را روی یک زیرمسیر اختصاصی مانند `/hooks` نگه دارید.
+    - پرچم‌های دور زدن محتوای ناامن (`hooks.gmail.allowUnsafeExternalContent`، `hooks.mappings[].allowUnsafeExternalContent`) را غیرفعال نگه دارید، مگر هنگام اشکال‌زدایی با محدوده کاملاً محدود.
+    - اگر `hooks.allowRequestSessionKey` را فعال می‌کنید، `hooks.allowedSessionKeyPrefixes` را نیز تنظیم کنید تا کلیدهای نشست انتخاب‌شده توسط فراخواننده محدود شوند.
+    - برای عامل‌های هدایت‌شده با هوک، رده‌های قدرتمند مدل‌های مدرن و سیاست سخت‌گیرانه ابزار را ترجیح دهید (برای نمونه، فقط پیام‌رسانی به‌همراه سندباکس در صورت امکان).
 
-    برای همه گزینه‌های نگاشت و یکپارچه‌سازی Gmail، [مرجع کامل](/fa/gateway/configuration-reference#hooks) را ببینید.
+    برای همه گزینه‌های نگاشت و یکپارچه‌سازی Gmail به [مرجع کامل](/fa/gateway/configuration-reference#hooks) مراجعه کنید.
 
   </Accordion>
 
   <Accordion title="پیکربندی مسیریابی چندعاملی">
-    چند عامل ایزوله را با workspaceها و نشست‌های جداگانه اجرا کنید:
+    چند عامل ایزوله را با فضاهای کاری و نشست‌های جداگانه اجرا کنید:
 
     ```json5
     {
@@ -499,12 +482,12 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
     }
     ```
 
-    برای قواعد اتصال و پروفایل‌های دسترسی برای هر عامل، [چندعاملی](/fa/concepts/multi-agent) و [مرجع کامل](/fa/gateway/config-agents#multi-agent-routing) را ببینید.
+    برای قواعد اتصال و پروفایل‌های دسترسی هر عامل، [چندعاملی](/fa/concepts/multi-agent) و [مرجع کامل](/fa/gateway/config-agents#multi-agent-routing) را ببینید.
 
   </Accordion>
 
-  <Accordion title="تقسیم config به چند فایل ($include)">
-    از `$include` برای سازمان‌دهی configهای بزرگ استفاده کنید:
+  <Accordion title="تقسیم پیکربندی میان چند فایل ($include)">
+    برای سازمان‌دهی پیکربندی‌های بزرگ از `$include` استفاده کنید:
 
     ```json5
     // ~/.openclaw/openclaw.json
@@ -517,52 +500,51 @@ Gateway پس از هر راه‌اندازی موفق، یک کپی مورد ا�
     }
     ```
 
-    - **فایل تکی**: شیء دربرگیرنده را جایگزین می‌کند
-    - **آرایه‌ای از فایل‌ها**: به‌ترتیب به‌صورت عمیق ادغام می‌شوند (موردهای بعدی برنده‌اند)
+    - **یک فایل**: شیء دربرگیرنده را جایگزین می‌کند
+    - **آرایه‌ای از فایل‌ها**: به‌ترتیب به‌صورت عمیق ادغام می‌شوند (مورد بعدی اولویت دارد)، تا عمق 10 سطح تودرتو
     - **کلیدهای هم‌سطح**: پس از includeها ادغام می‌شوند (مقادیر includeشده را بازنویسی می‌کنند)
-    - **includeهای تو در تو**: تا عمق 10 سطح پشتیبانی می‌شوند
-    - **مسیرهای نسبی**: نسبت به فایلِ includeکننده resolve می‌شوند
-    - **فرمت مسیر**: مسیرهای include نباید شامل بایت null باشند و باید پیش و پس از resolve شدن، اکیدا کوتاه‌تر از 4096 کاراکتر باشند
-    - **نوشتن‌های مالکیت‌شده توسط OpenClaw**: وقتی یک نوشتن فقط یک بخش سطح‌بالا را تغییر می‌دهد
-      که توسط یک include تک‌فایلی مانند `plugins: { $include: "./plugins.json5" }` پشتیبانی می‌شود،
+    - **مسیرهای نسبی**: نسبت به فایل includeکننده تفکیک می‌شوند
+    - **قالب مسیر**: مسیرهای include نباید شامل بایت null باشند و باید پیش و پس از تفکیک، اکیداً کوتاه‌تر از 4096 نویسه باشند
+    - **نوشتن‌های متعلق به OpenClaw**: وقتی یک نوشتن فقط یک بخش سطح‌بالا را تغییر می‌دهد
+      که پشتوانه آن یک include تک‌فایلی مانند `plugins: { $include: "./plugins.json5" }` است،
       OpenClaw همان فایل includeشده را به‌روزرسانی می‌کند و `openclaw.json` را دست‌نخورده باقی می‌گذارد
-    - **write-through پشتیبانی‌نشده**: includeهای root، آرایه‌های include، و includeهایی
-      با بازنویسی‌های هم‌سطح، برای نوشتن‌های مالکیت‌شده توسط OpenClaw به‌جای
-      تخت کردن config، fail closed می‌شوند
-    - **محدودسازی**: مسیرهای `$include` باید زیر دایرکتوری نگه‌دارنده
-      `openclaw.json` resolve شوند. برای اشتراک‌گذاری یک درخت میان ماشین‌ها یا کاربران، `OPENCLAW_INCLUDE_ROOTS` را روی یک path-list (`:` در POSIX، `;` در Windows) از
-      دایرکتوری‌های اضافی تنظیم کنید که includeها می‌توانند به آن‌ها ارجاع دهند. symlinkها resolve
-      و دوباره بررسی می‌شوند، بنابراین مسیری که از نظر لغوی در یک دایرکتوری config قرار دارد اما
-      مقصد واقعی آن از همه rootهای مجاز خارج می‌شود همچنان رد می‌شود.
-    - **مدیریت خطا**: خطاهای روشن برای فایل‌های گم‌شده، خطاهای parse، includeهای چرخه‌ای، فرمت مسیر نامعتبر، و طول بیش از حد
+    - **نوشتن عبوری پشتیبانی‌نشده**: includeهای ریشه، آرایه‌های include و includeهایی
+      که بازنویسی هم‌سطح دارند، برای نوشتن‌های متعلق به OpenClaw به‌صورت بسته و ایمن شکست می‌خورند،
+      به‌جای اینکه پیکربندی را تخت کنند
+    - **محصورسازی**: مسیرهای `$include` باید در دایرکتوری نگهدارنده
+      `openclaw.json` تفکیک شوند. برای اشتراک‌گذاری یک درخت میان چند ماشین یا کاربر،
+      `OPENCLAW_INCLUDE_ROOTS` را روی فهرستی از مسیرها (`:` در POSIX، ‏`;` در Windows) شامل
+      دایرکتوری‌های اضافی قابل ارجاع توسط includeها تنظیم کنید. پیوندهای نمادین تفکیک
+      و دوباره بررسی می‌شوند؛ بنابراین مسیری که از نظر واژگانی در دایرکتوری پیکربندی قرار دارد، اما
+      مقصد واقعی‌اش از همه ریشه‌های مجاز خارج می‌شود، همچنان رد خواهد شد.
+    - **مدیریت خطا**: خطاهای روشن برای فایل‌های مفقود، خطاهای تجزیه، includeهای حلقوی، قالب نامعتبر مسیر و طول بیش‌ازحد
 
   </Accordion>
 </AccordionGroup>
 
-## بارگذاری مجدد داغ config
+## بارگذاری مجدد فوری پیکربندی
 
-Gateway فایل `~/.openclaw/openclaw.json` را زیر نظر می‌گیرد و تغییرات را به‌صورت خودکار اعمال می‌کند - برای بیشتر تنظیمات نیازی به راه‌اندازی مجدد دستی نیست.
+Gateway بر `~/.openclaw/openclaw.json` نظارت می‌کند و تغییرات را به‌طور خودکار اعمال می‌کند — برای بیشتر تنظیمات نیازی به راه‌اندازی مجدد دستی نیست.
 
-ویرایش‌های مستقیم فایل تا زمانی که اعتبارسنجی شوند غیرقابل اعتماد در نظر گرفته می‌شوند. ناظر منتظر می‌ماند
-تا churn ناشی از temp-write/rename ویرایشگر آرام شود، فایل نهایی را می‌خواند، و
-ویرایش‌های خارجی نامعتبر را بدون بازنویسی `openclaw.json` رد می‌کند. نوشتن‌های config
-مالکیت‌شده توسط OpenClaw پیش از نوشتن از همان gate schema استفاده می‌کنند؛ clobberهای مخرب مانند
-حذف `gateway.mode` یا کوچک کردن فایل به بیش از نصف، رد می‌شوند و
-برای بررسی به‌صورت `.rejected.*` ذخیره می‌شوند.
+ویرایش مستقیم فایل تا زمان اعتبارسنجی، غیرقابل‌اعتماد در نظر گرفته می‌شود. ناظر منتظر می‌ماند
+تا آشفتگی ناشی از نوشتن فایل موقت/تغییرنام توسط ویرایشگر فروکش کند، فایل نهایی را می‌خواند و
+ویرایش‌های خارجی نامعتبر را بدون بازنویسی `openclaw.json` رد می‌کند. نوشتن‌های پیکربندی
+متعلق به OpenClaw پیش از نوشتن از همان دروازه طرح‌واره عبور می‌کنند (برای قواعد بازنویسی/بازگردانی
+اعمال‌شده بر همه نوشتن‌ها، [اعتبارسنجی سخت‌گیرانه](#strict-validation) را ببینید).
 
-اگر `config reload skipped (invalid config)` را می‌بینید یا startup گزارش `Invalid
-config` می‌دهد، config را بررسی کنید، `openclaw config validate` را اجرا کنید، سپس برای تعمیر `openclaw
-doctor --fix` را اجرا کنید. برای checklist، [عیب‌یابی Gateway](/fa/gateway/troubleshooting#gateway-rejected-invalid-config)
-را ببینید.
+اگر `config reload skipped (invalid config)` را مشاهده کردید یا هنگام راه‌اندازی `Invalid
+config` گزارش شد، پیکربندی را بررسی کنید، `openclaw config validate` و سپس برای تعمیر `openclaw
+doctor --fix` را اجرا کنید. برای چک‌لیست به [عیب‌یابی Gateway](/fa/gateway/troubleshooting#gateway-rejected-invalid-config)
+مراجعه کنید.
 
 ### حالت‌های بارگذاری مجدد
 
 | حالت                   | رفتار                                                                                |
 | ---------------------- | --------------------------------------------------------------------------------------- |
-| **`hybrid`** (پیش‌فرض) | تغییرات امن را فورا به‌صورت داغ اعمال می‌کند. برای موارد حیاتی به‌صورت خودکار راه‌اندازی مجدد می‌کند.           |
-| **`hot`**              | فقط تغییرات امن را به‌صورت داغ اعمال می‌کند. وقتی راه‌اندازی مجدد لازم باشد هشدار log می‌کند - مدیریت آن با شماست. |
-| **`restart`**          | Gateway را با هر تغییر config، امن یا غیرامن، راه‌اندازی مجدد می‌کند.                                 |
-| **`off`**              | نظارت بر فایل را غیرفعال می‌کند. تغییرات در راه‌اندازی مجدد دستی بعدی اعمال می‌شوند.                 |
+| **`hybrid`** (پیش‌فرض) | تغییرات امن را فوراً و بدون راه‌اندازی مجدد اعمال می‌کند. برای تغییرات حیاتی به‌طور خودکار راه‌اندازی مجدد می‌شود.           |
+| **`hot`**              | فقط تغییرات امن را بدون راه‌اندازی مجدد اعمال می‌کند. وقتی راه‌اندازی مجدد لازم باشد، هشداری ثبت می‌کند — مدیریت آن بر عهده شماست. |
+| **`restart`**          | با هر تغییر پیکربندی، چه امن باشد چه نباشد، Gateway را راه‌اندازی مجدد می‌کند.                                 |
+| **`off`**              | پایش فایل را غیرفعال می‌کند. تغییرات در راه‌اندازی مجدد دستی بعدی اعمال می‌شوند.                 |
 
 ```json5
 {
@@ -572,86 +554,95 @@ doctor --fix` را اجرا کنید. برای checklist، [عیب‌یابی Ga
 }
 ```
 
-### چه چیزهایی به‌صورت داغ اعمال می‌شوند و چه چیزهایی به راه‌اندازی مجدد نیاز دارند
+### چه چیزهایی بدون راه‌اندازی مجدد اعمال می‌شوند و چه چیزهایی به راه‌اندازی مجدد نیاز دارند
 
-بیشتر فیلدها بدون downtime به‌صورت داغ اعمال می‌شوند. در حالت `hybrid`، تغییراتی که به راه‌اندازی مجدد نیاز دارند به‌صورت خودکار مدیریت می‌شوند.
+بیشتر فیلدها بدون وقفه و بدون راه‌اندازی مجدد اعمال می‌شوند؛ برخی بخش‌هایی که بدون راه‌اندازی مجدد اعمال می‌شوند، به‌جای کل Gateway فقط همان
+زیرسامانه (کانال، cron، heartbeat، پایشگر سلامت) را راه‌اندازی مجدد می‌کنند. در حالت
+`hybrid`، تغییراتی که به راه‌اندازی مجدد Gateway نیاز دارند، به‌طور خودکار مدیریت می‌شوند.
 
-| دسته‌بندی | فیلدها | نیاز به راه‌اندازی مجدد؟ |
-| ------------------- | ----------------------------------------------------------------- | --------------- |
-| کانال‌ها | `channels.*`، `web` (WhatsApp) - همهٔ کانال‌های داخلی و Plugin | خیر |
-| عامل و مدل‌ها | `agent`، `agents`، `models`، `routing` | خیر |
-| خودکارسازی | `hooks`، `cron`، `agent.heartbeat` | خیر |
-| نشست‌ها و پیام‌ها | `session`، `messages` | خیر |
-| ابزارها و رسانه | `tools`، `browser`، `skills`، `mcp`، `audio`، `talk` | خیر |
-| UI و متفرقه | `ui`، `logging`، `identity`، `bindings` | خیر |
-| سرور Gateway | `gateway.*` (port، bind، auth، tailscale، TLS، HTTP) | **بله** |
-| زیرساخت | `discovery`، `plugins` | **بله** |
+| دسته            | فیلدها                                                                  | نیازمند راه‌اندازی مجدد Gateway؟      |
+| ------------------- | ----------------------------------------------------------------------- | ---------------------------- |
+| کانال‌ها            | `channels.*`، `web` (WhatsApp) — همه کانال‌های داخلی و کانال‌های Plugin       | خیر (همان کانال را راه‌اندازی مجدد می‌کند)   |
+| عامل و مدل‌ها      | `agent`، `agents`، `models`، `routing`                                  | خیر                           |
+| خودکارسازی          | `hooks`، `cron`، `agent.heartbeat`                                      | خیر (همان زیرسامانه را راه‌اندازی مجدد می‌کند) |
+| نشست‌ها و پیام‌ها | `session`، `messages`                                                   | خیر                           |
+| ابزارها و رسانه       | `tools`، `skills`، `mcp`، `audio`، `talk`                               | خیر                           |
+| پیکربندی Plugin       | `plugins.entries.*`، `plugins.allow`، `plugins.deny`، `plugins.enabled` | خیر (زمان‌اجرای Plugin را بارگذاری مجدد می‌کند)  |
+| رابط کاربری و موارد متفرقه           | `ui`، `logging`، `identity`، `bindings`                                 | خیر                           |
+| سرور Gateway      | `gateway.*` (درگاه، اتصال، احراز هویت، tailscale، TLS، HTTP، ارسال)              | **بله**                      |
+| زیرساخت      | `discovery`، `browser`، `plugins.load`، `plugins.installs`              | **بله**                      |
 
 <Note>
-`gateway.reload` و `gateway.remote` استثنا هستند - تغییر آن‌ها راه‌اندازی مجدد را **فعال نمی‌کند**.
+`gateway.reload` و `gateway.remote` در `gateway.*` استثنا هستند — تغییر آن‌ها باعث راه‌اندازی مجدد **نمی‌شود**. هر Plugin نیز می‌تواند این جدول را بازنویسی کند: یک Plugin بارگذاری‌شده ممکن است پیشوندهای پیکربندی مختص خود را که موجب راه‌اندازی مجدد می‌شوند اعلام کند (برای نمونه، Plugin همراه Canvas برای `plugins.enabled`، `plugins.allow` و `plugins.deny`، و نه فقط `plugins.entries.canvas` متعلق به خودش، Gateway را راه‌اندازی مجدد می‌کند)؛ بنابراین رفتار واقعی به Pluginهای فعال بستگی دارد.
 </Note>
 
 ### برنامه‌ریزی بارگذاری مجدد
 
-وقتی یک فایل منبع را که از طریق `$include` ارجاع داده شده ویرایش می‌کنید، OpenClaw
-بارگذاری مجدد را از چیدمان نوشته‌شده در منبع برنامه‌ریزی می‌کند، نه از نمای تخت‌شدهٔ درون حافظه.
-این کار تصمیم‌های بارگذاری مجدد داغ (اعمال داغ در برابر راه‌اندازی مجدد) را قابل پیش‌بینی نگه می‌دارد، حتی وقتی یک
-بخش سطح‌بالای واحد در فایل include شدهٔ خودش قرار دارد، مانند
-`plugins: { $include: "./plugins.json5" }`. اگر چیدمان منبع مبهم باشد، برنامه‌ریزی بارگذاری مجدد به‌صورت بسته شکست می‌خورد.
+وقتی فایل منبعی را که از طریق `$include` ارجاع شده است ویرایش می‌کنید، OpenClaw
+بارگذاری مجدد را براساس چیدمان نوشته‌شده در منبع برنامه‌ریزی می‌کند، نه نمای مسطح‌شده در حافظه.
+این کار تصمیم‌های بارگذاری مجدد بدون توقف (اعمال مستقیم در برابر راه‌اندازی مجدد) را حتی زمانی قابل‌پیش‌بینی نگه می‌دارد که
+یک بخش سطح‌بالا در فایل شامل‌شده جداگانه‌ای مانند
+`plugins: { $include: "./plugins.json5" }` قرار داشته باشد. اگر
+چیدمان منبع مبهم باشد، برنامه‌ریزی بارگذاری مجدد به‌صورت ایمن متوقف می‌شود.
 
 ## RPC پیکربندی (به‌روزرسانی‌های برنامه‌نویسی‌شده)
 
-برای ابزارهایی که پیکربندی را از طریق API Gateway می‌نویسند، این جریان را ترجیح دهید:
+برای ابزارهایی که پیکربندی را از طریق API مربوط به Gateway می‌نویسند، این روند ترجیح داده می‌شود:
 
-- `config.schema.lookup` برای بررسی یک زیردرخت (گره طرح‌وارهٔ سطحی + خلاصه‌های فرزند)
-- `config.get` برای دریافت snapshot فعلی به‌همراه `hash`
-- `config.patch` برای به‌روزرسانی‌های جزئی (JSON merge patch: آبجکت‌ها merge می‌شوند، `null`
-  حذف می‌کند، آرایه‌ها وقتی به‌طور صریح با `replacePaths` تأیید شده باشند جایگزین می‌شوند اگر
-  ورودی‌هایی حذف شوند)
-- `config.apply` فقط وقتی قصد دارید کل پیکربندی را جایگزین کنید
-- `update.run` برای خودبه‌روزرسانی صریح به‌همراه راه‌اندازی مجدد؛ وقتی نشست پس از راه‌اندازی مجدد باید یک نوبت پیگیری اجرا کند، `continuationMessage` را شامل کنید
-- `update.status` برای بررسی آخرین نشانگر راه‌اندازی مجددِ به‌روزرسانی و تأیید نسخهٔ در حال اجرا پس از راه‌اندازی مجدد
+- `config.schema.lookup` برای بررسی یک زیردرخت (گره کم‌عمق طرح‌واره + خلاصه‌های
+  فرزندان)
+- `config.get` برای دریافت تصویر لحظه‌ای فعلی به‌همراه `hash`
+- `config.patch` برای به‌روزرسانی‌های جزئی (وصله ادغام JSON: اشیا ادغام می‌شوند، `null`
+  حذف می‌کند و آرایه‌ها، اگر حذف ورودی‌ها با `replacePaths` صریحاً تأیید شده باشد،
+  جایگزین می‌شوند)
+- `config.apply` فقط زمانی که قصد دارید کل پیکربندی را جایگزین کنید
+- `update.run` برای خودبه‌روزرسانی صریح به‌همراه راه‌اندازی مجدد؛ اگر نشست پس از راه‌اندازی مجدد باید یک نوبت پیگیری را اجرا کند، `continuationMessage` را وارد کنید
+- `update.status` برای بررسی جدیدترین نشانگر راه‌اندازی مجددِ به‌روزرسانی و تأیید نسخه در حال اجرا پس از راه‌اندازی مجدد
 
-عامل‌ها باید `config.schema.lookup` را اولین نقطهٔ مراجعه برای مستندات و محدودیت‌های دقیق
-در سطح فیلد بدانند. وقتی به نقشهٔ گسترده‌تر پیکربندی، پیش‌فرض‌ها، یا لینک به مراجع اختصاصی
-زیرسامانه‌ها نیاز دارند، از [مرجع پیکربندی](/fa/gateway/configuration-reference) استفاده کنید.
+عامل‌ها باید `config.schema.lookup` را نخستین مرجع برای مستندات و محدودیت‌های دقیق
+در سطح فیلد در نظر بگیرند. وقتی به نقشه گسترده‌تر پیکربندی، مقادیر پیش‌فرض یا پیوندهای ارجاعات اختصاصی
+زیرسامانه‌ها نیاز دارند، از [مرجع پیکربندی](/fa/gateway/configuration-reference)
+استفاده کنند.
 
 <Note>
-نوشتن‌های سطح کنترل (`config.apply`، `config.patch`، `update.run`) به
-۳ درخواست در هر ۶۰ ثانیه برای هر `deviceId+clientIp` محدود می‌شوند. درخواست‌های راه‌اندازی مجدد
-با هم تجمیع می‌شوند و سپس یک دورهٔ انتظار ۳۰ ثانیه‌ای بین چرخه‌های راه‌اندازی مجدد اعمال می‌کنند.
-`update.status` فقط‌خواندنی است، اما به مدیر محدود شده، چون نشانگر راه‌اندازی مجدد می‌تواند
-شامل خلاصه‌های مراحل به‌روزرسانی و انتهای خروجی فرمان باشد.
+نوشتن‌های صفحه کنترل (`config.apply`، `config.patch`، `update.run`)
+برای هر متد و هر `deviceId+clientIp` به 30 درخواست در هر 60 ثانیه
+محدود شده‌اند؛ [محدودسازی نرخ](/gateway/security/rate-limiting) را ببینید. درخواست‌های راه‌اندازی مجدد
+با هم ادغام می‌شوند و سپس بین چرخه‌های راه‌اندازی مجدد، یک دوره انتظار 30 ثانیه‌ای اعمال می‌شود.
+`update.status` فقط‌خواندنی است، اما دامنه دسترسی مدیر را لازم دارد، زیرا نشانگر راه‌اندازی مجدد می‌تواند
+شامل خلاصه مراحل به‌روزرسانی و بخش‌های انتهایی خروجی فرمان باشد.
 </Note>
 
-نمونه patch جزئی:
+نمونه وصله جزئی:
 
 ```bash
-openclaw gateway call config.get --params '{}'  # capture payload.hash
+openclaw gateway call config.get --params '{}'  # ثبت payload.hash
 openclaw gateway call config.patch --params '{
   "raw": "{ channels: { telegram: { groups: { \"*\": { requireMention: false } } } } }",
   "baseHash": "<hash>"
 }'
 ```
 
-هر دو `config.apply` و `config.patch` مقدارهای `raw`، `baseHash`، `sessionKey`،
-`note`، و `restartDelayMs` را می‌پذیرند. وقتی پیکربندی از قبل وجود داشته باشد،
-`baseHash` برای هر دو روش الزامی است.
+هر دو `config.apply` و `config.patch`، مقادیر `raw`، `baseHash`، `sessionKey`،
+`note` و `restartDelayMs` را می‌پذیرند. پس از آنکه فایل پیکربندی از قبل وجود داشته باشد،
+`baseHash` برای هر دو متد الزامی است (در نخستین نوشتن، اگر پیکربندی موجود نباشد، این بررسی انجام نمی‌شود).
 
-`config.patch` همچنین `replacePaths` را می‌پذیرد؛ آرایه‌ای از مسیرهای پیکربندی که جایگزینی آرایهٔ
-آن‌ها عمدی است. اگر یک patch بخواهد آرایه‌ای موجود را با ورودی‌های کمتر جایگزین یا حذف کند،
-Gateway نوشتن را رد می‌کند مگر اینکه همان مسیر دقیق در `replacePaths` آمده باشد؛ آرایه‌های تو در تو زیر ورودی‌های آرایه از `[]` استفاده می‌کنند، مانند
-`agents.list[].skills`. این کار از آن جلوگیری می‌کند که snapshotهای کوتاه‌شدهٔ `config.get`
-آرایه‌های مسیریابی یا فهرست مجاز را بی‌صدا بازنویسی کنند. وقتی قصد دارید کل پیکربندی را جایگزین کنید، از `config.apply` استفاده کنید.
+`config.patch` همچنین `replacePaths` را می‌پذیرد؛ آرایه‌ای از مسیرهای پیکربندی که
+جایگزینی آرایه در آن‌ها عمدی است. اگر وصله‌ای یک آرایه موجود را با ورودی‌های کمتر جایگزین
+یا حذف کند، Gateway نوشتن را رد می‌کند، مگر آنکه همان مسیر دقیق در
+`replacePaths` وجود داشته باشد؛ آرایه‌های تودرتوی داخل ورودی‌های آرایه از `[]` استفاده می‌کنند، مانند
+`agents.entries.*.skills`. این کار مانع می‌شود تصاویر لحظه‌ای ناقص `config.get`
+آرایه‌های مسیریابی یا فهرست مجاز را بی‌سروصدا بازنویسی کنند. وقتی قصد دارید
+کل پیکربندی را جایگزین کنید، از `config.apply` استفاده کنید.
 
 ## متغیرهای محیطی
 
-OpenClaw متغیرهای محیطی را از فرایند والد به‌همراه موارد زیر می‌خواند:
+OpenClaw متغیرهای محیطی را از فرایند والد و همچنین موارد زیر می‌خواند:
 
-- `.env` از دایرکتوری کاری فعلی (اگر وجود داشته باشد)
-- `~/.openclaw/.env` (fallback سراسری)
+- `.env` از دایرکتوری کاری فعلی (در صورت وجود)
+- `~/.openclaw/.env` (جایگزین سراسری)
 
-هیچ‌کدام از این فایل‌ها متغیرهای محیطی موجود را بازنویسی نمی‌کنند. همچنین می‌توانید متغیرهای محیطی inline را در پیکربندی تنظیم کنید:
+هیچ‌یک از این فایل‌ها متغیرهای محیطی موجود را بازنویسی نمی‌کنند. همچنین می‌توانید متغیرهای محیطی درون‌خطی را در پیکربندی تنظیم کنید:
 
 ```json5
 {
@@ -662,8 +653,8 @@ OpenClaw متغیرهای محیطی را از فرایند والد به‌هم
 }
 ```
 
-<Accordion title="درون‌ریزی env شل (اختیاری)">
-  اگر فعال باشد و کلیدهای مورد انتظار تنظیم نشده باشند، OpenClaw شل ورود شما را اجرا می‌کند و فقط کلیدهای مفقود را درون‌ریزی می‌کند:
+<Accordion title="واردکردن محیط پوسته (اختیاری)">
+  اگر فعال باشد و کلیدهای مورد انتظار تنظیم نشده باشند، OpenClaw پوسته ورود شما را اجرا و فقط کلیدهای موجودنبود‌ه را وارد می‌کند:
 
 ```json5
 {
@@ -673,11 +664,11 @@ OpenClaw متغیرهای محیطی را از فرایند والد به‌هم
 }
 ```
 
-معادل متغیر محیطی: `OPENCLAW_LOAD_SHELL_ENV=1`
+متغیر محیطی معادل: `OPENCLAW_LOAD_SHELL_ENV=1`. مقدار پیش‌فرض `timeoutMs`: `15000`.
 </Accordion>
 
 <Accordion title="جایگزینی متغیر محیطی در مقادیر پیکربندی">
-  در هر مقدار رشته‌ای پیکربندی، با `${VAR_NAME}` به متغیرهای محیطی ارجاع دهید:
+  با `${VAR_NAME}` در هر مقدار رشته‌ای پیکربندی به متغیرهای محیطی ارجاع دهید:
 
 ```json5
 {
@@ -688,16 +679,16 @@ OpenClaw متغیرهای محیطی را از فرایند والد به‌هم
 
 قواعد:
 
-- فقط نام‌های حروف بزرگ match می‌شوند: `[A-Z_][A-Z0-9_]*`
-- متغیرهای مفقود/خالی هنگام load خطا ایجاد می‌کنند
-- برای خروجی literal با `$${VAR}` escape کنید
-- داخل فایل‌های `$include` کار می‌کند
-- جایگزینی inline: `"${BASE}/v1"` → `"https://api.example.com/v1"`
+- فقط نام‌های بزرگ‌نویسی‌شده تطبیق داده می‌شوند: `[A-Z_][A-Z0-9_]*`
+- متغیرهای موجودنبوده یا خالی هنگام بارگذاری خطا ایجاد می‌کنند
+- برای خروجی تحت‌اللفظی با `$${VAR}` از نویسه گریز استفاده کنید
+- درون فایل‌های `$include` کار می‌کند
+- جایگزینی درون‌خطی: `"${BASE}/v1"` → `"https://api.example.com/v1"`
 
 </Accordion>
 
-<Accordion title="ارجاع‌های محرمانه (env، file، exec)">
-  برای فیلدهایی که از آبجکت‌های SecretRef پشتیبانی می‌کنند، می‌توانید از این‌ها استفاده کنید:
+<Accordion title="ارجاعات محرمانه (محیط، فایل، اجرا)">
+  برای فیلدهایی که از اشیای SecretRef پشتیبانی می‌کنند، می‌توانید از موارد زیر استفاده کنید:
 
 ```json5
 {
@@ -719,7 +710,7 @@ OpenClaw متغیرهای محیطی را از فرایند والد به‌هم
   },
   channels: {
     googlechat: {
-      serviceAccountRef: {
+      serviceAccount: {
         source: "exec",
         provider: "vault",
         id: "channels/googlechat/serviceAccount",
@@ -730,7 +721,7 @@ OpenClaw متغیرهای محیطی را از فرایند والد به‌هم
 ```
 
 جزئیات SecretRef (از جمله `secrets.providers` برای `env`/`file`/`exec`) در [مدیریت اسرار](/fa/gateway/secrets) آمده است.
-مسیرهای credential پشتیبانی‌شده در [سطح credential برای SecretRef](/fa/reference/secretref-credential-surface) فهرست شده‌اند.
+مسیرهای اعتبارنامه پشتیبانی‌شده در [سطح اعتبارنامه SecretRef](/fa/reference/secretref-credential-surface) فهرست شده‌اند.
 </Accordion>
 
 برای تقدم کامل و منابع، [محیط](/fa/help/environment) را ببینید.
@@ -747,4 +738,4 @@ _مرتبط: [نمونه‌های پیکربندی](/fa/gateway/configuration-ex
 
 - [مرجع پیکربندی](/fa/gateway/configuration-reference)
 - [نمونه‌های پیکربندی](/fa/gateway/configuration-examples)
-- [runbook Gateway](/fa/gateway)
+- [راهنمای عملیاتی Gateway](/fa/gateway)

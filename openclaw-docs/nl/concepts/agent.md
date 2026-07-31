@@ -1,30 +1,30 @@
 ---
 read_when:
-    - Agentruntime, werkruimte-bootstrap of sessiegedrag wijzigen
-summary: Agentruntime, workspacecontract en sessiebootstrap
+    - Agentruntime, werkruimte-initialisatie of sessiegedrag wijzigen
+summary: Agentruntime, werkruimtecontract en sessie-initialisatie
 title: Agentruntime
 x-i18n:
-    generated_at: "2026-06-27T17:25:10Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T06:10:26Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2fb4d3f0bb6e8aa2a23d00f5def5eb0ffa152bc75f82a12c40ac7ed00776011c
+    source_hash: 4d3dd9c0c65e4ccd791a2a6131f1b7457c8cfee6da71502d93c355280e094390
     source_path: concepts/agent.md
     workflow: 16
 ---
 
-OpenClaw voert een **single embedded agent-runtime** uit - één agentproces per
-Gateway, met een eigen werkruimte, bootstrapbestanden en sessieopslag. Deze pagina
-beschrijft dat runtimecontract: wat de werkruimte moet bevatten, welke bestanden
-worden geïnjecteerd en hoe sessies daartegen bootstrappen.
+OpenClaw levert één **ingebouwde agentruntime**: een ingebouwde agentlus, toolkoppeling en promptopbouw, los van het delegeren van beurten aan een extern harnessproces. Elke geconfigureerde agent (zie [Routering met meerdere agents](/nl/concepts/multi-agent) voor het uitvoeren van meerdere agents) heeft een eigen werkruimte, bootstrapbestanden en sessieopslag. Deze pagina behandelt het runtimecontract: wat de werkruimte moet bevatten, welke bestanden worden geïnjecteerd en hoe sessies daarmee worden opgestart.
 
 ## Werkruimte (vereist)
 
-OpenClaw gebruikt één agentwerkruimtemap (`agents.defaults.workspace`) als de **enige** werkmap (`cwd`) van de agent voor tools en context.
+Elke agent gebruikt één werkruimtemap (`agents.defaults.workspace`, of
+`agents.entries.*.workspace` per agent) als zijn **enige** werkmap (`cwd`)
+voor tools en context.
 
-Aanbevolen: gebruik `openclaw setup` om `~/.openclaw/openclaw.json` aan te maken als die ontbreekt en de werkruimtebestanden te initialiseren.
+Aanbevolen: gebruik `openclaw setup` om `~/.openclaw/openclaw.json` aan te maken als deze ontbreekt en de werkruimtebestanden te initialiseren.
 
-Volledige werkruimte-indeling + back-upgids: [Agentwerkruimte](/nl/concepts/agent-workspace)
+Volledige indeling van de werkruimte + back-uphandleiding: [Agentwerkruimte](/nl/concepts/agent-workspace)
 
 Als `agents.defaults.sandbox` is ingeschakeld, kunnen niet-hoofdsessies dit overschrijven met
 werkruimten per sessie onder `agents.defaults.sandbox.workspaceRoot` (zie
@@ -32,26 +32,37 @@ werkruimten per sessie onder `agents.defaults.sandbox.workspaceRoot` (zie
 
 ## Bootstrapbestanden (geïnjecteerd)
 
-Binnen `agents.defaults.workspace` verwacht OpenClaw deze door de gebruiker bewerkbare bestanden:
+In de werkruimte verwacht OpenClaw deze door de gebruiker bewerkbare bestanden:
 
-- `AGENTS.md` - bedieningsinstructies + "geheugen"
-- `SOUL.md` - persona, grenzen, toon
-- `TOOLS.md` - door de gebruiker onderhouden toolnotities (bijv. `imsg`, `sag`, conventies)
-- `BOOTSTRAP.md` - eenmalig ritueel voor de eerste uitvoering (verwijderd na voltooiing)
-- `IDENTITY.md` - agentnaam/uitstraling/emoji
-- `USER.md` - gebruikersprofiel + voorkeursaanspreekvorm
+| Bestand        | Doel                                                 |
+| -------------- | ---------------------------------------------------- |
+| `AGENTS.md`    | Gebruiksinstructies + "geheugen"                     |
+| `SOUL.md`      | Persona, grenzen, toon                               |
+| `TOOLS.md`     | Door de gebruiker beheerde toolnotities en conventies |
+| `IDENTITY.md`  | Naam/sfeer/emoji van de agent                        |
+| `USER.md`      | Gebruikersprofiel + voorkeursaanspreekvorm           |
+| `HEARTBEAT.md` | Heartbeat-specifieke instructies                     |
+| `BOOTSTRAP.md` | Eenmalig ritueel bij de eerste uitvoering (na voltooiing verwijderd) |
+| `MEMORY.md`    | Hoofdbestand voor langetermijngeheugen, indien aanwezig |
 
-Bij de eerste beurt van een nieuwe sessie injecteert OpenClaw de inhoud van deze bestanden in de Projectcontext van de systeemprompt.
+Tijdens de eerste beurt van een nieuwe sessie injecteert OpenClaw de inhoud van deze bestanden in de Projectcontext van de systeemprompt. `MEMORY.md` wordt alleen geïnjecteerd wanneer het in de hoofdmap van de werkruimte bestaat.
 
-Lege bestanden worden overgeslagen. Grote bestanden worden ingekort en afgekapt met een markering zodat prompts compact blijven (lees het bestand voor de volledige inhoud).
+Lege bestanden worden overgeslagen. Grote bestanden worden ingekort en afgekapt met een markering, zodat prompts beknopt blijven (lees het bestand voor de volledige inhoud). Voor een ontbrekend bestand (behalve `MEMORY.md`) wordt in plaats daarvan één markeringsregel voor een "ontbrekend bestand" geïnjecteerd; `openclaw setup` maakt hiervoor een veilige standaardsjabloon.
 
-Als een bestand ontbreekt, injecteert OpenClaw één markeringsregel voor een "ontbrekend bestand" (en `openclaw setup` maakt een veilige standaardsjabloon aan).
+`BOOTSTRAP.md` wordt alleen aangemaakt voor een **volledig nieuwe werkruimte** (waarin geen andere bootstrapbestanden aanwezig zijn). Zolang dit bestand in behandeling is, houdt OpenClaw het in de Projectcontext en voegt het bootstrapbegeleiding voor het eerste ritueel toe aan de systeemprompt, in plaats van het naar het gebruikersbericht te kopiëren. Als je het na voltooiing van het ritueel verwijdert, wordt het bij latere herstarts niet opnieuw aangemaakt.
 
-`BOOTSTRAP.md` wordt alleen aangemaakt voor een **gloednieuwe werkruimte** (geen andere bootstrapbestanden aanwezig). Zolang het in behandeling is, houdt OpenClaw het in Projectcontext en voegt het bootstrapbegeleiding in de systeemprompt toe voor het initiële ritueel in plaats van het naar het gebruikersbericht te kopiëren. Als je het verwijdert nadat je het ritueel hebt voltooid, hoort het bij latere herstarts niet opnieuw te worden aangemaakt.
+Nadat een werkruimte is waargenomen, slaat OpenClaw de instellingsstatus en
+attestatie ervan op in de gedeelde SQLite-database op
+`~/.openclaw/state/openclaw.sqlite`. Als een onlangs geattesteerde werkruimte
+verdwijnt of wordt gewist, weigert het opstartproces `BOOTSTRAP.md` stilzwijgend opnieuw te vullen;
+herstel de werkruimte of voer een volledige onboardingreset uit, zodat de werkruimte en
+de databasestatus ervan samen worden gewist.
 
-Nadat een werkruimte is waargenomen, bewaart OpenClaw ook een attestatiemarkering in de statusmap voor het werkruimtepad. Als een recent geattesteerde werkruimte verdwijnt of wordt gewist, weigert de opstart stilzwijgend `BOOTSTRAP.md` opnieuw te seeden; herstel de werkruimte of gebruik een volledige onboard-reset zodat de werkruimte en markering samen worden gewist.
+Oudere releases gebruikten JSON-bestanden voor werkruimten en `.attested`-sidecarbestanden. De runtime leest
+deze bestanden niet. Voer `openclaw doctor --fix` uit om ze te valideren, hun
+status in SQLite te importeren en elke bron te verwijderen nadat de geïmporteerde rijen zijn geverifieerd.
 
-Om het aanmaken van bootstrapbestanden volledig uit te schakelen (voor vooraf geseede werkruimten), stel je het volgende in:
+Stel het volgende in om het aanmaken van bootstrapbestanden volledig uit te schakelen (voor vooraf gevulde werkruimten):
 
 ```json5
 { agents: { defaults: { skipBootstrap: true } } }
@@ -59,77 +70,81 @@ Om het aanmaken van bootstrapbestanden volledig uit te schakelen (voor vooraf ge
 
 ## Ingebouwde tools
 
-Kerntools (read/exec/edit/write en gerelateerde systeemtools) zijn altijd beschikbaar,
-afhankelijk van het toolbeleid. `apply_patch` is optioneel en wordt afgeschermd door
-`tools.exec.applyPatch`. `TOOLS.md` bepaalt **niet** welke tools bestaan; het is
-begeleiding voor hoe _jij_ wilt dat ze worden gebruikt.
+Kerntools (lezen/uitvoeren/bewerken/schrijven en gerelateerde systeemtools) zijn altijd beschikbaar,
+onder voorbehoud van het toolbeleid. `apply_patch` is standaard ingeschakeld voor OpenAI-modellen en wordt beheerst door
+`tools.exec.applyPatch` (`enabled`, `workspaceOnly`, `allowModels`). `TOOLS.md` bepaalt **niet** welke tools bestaan; het is
+een richtlijn voor hoe _je_ wilt dat ze worden gebruikt.
 
 ## Skills
 
 OpenClaw laadt Skills vanaf deze locaties (hoogste prioriteit eerst):
 
 - Werkruimte: `<workspace>/skills`
-- Projectagentskills: `<workspace>/.agents/skills`
-- Persoonlijke agentskills: `~/.agents/skills`
+- Agent-Skills van het project: `<workspace>/.agents/skills`
+- Persoonlijke agent-Skills: `~/.agents/skills`
 - Beheerd/lokaal: `~/.openclaw/skills`
-- Meegeleverd (meegeleverd met de installatie)
-- Extra Skills-mappen: `skills.load.extraDirs`
+- Gebundeld (meegeleverd met de installatie)
+- Extra mappen met Skills: `skills.load.extraDirs`
 
-Skillroots kunnen gegroepeerde mappen bevatten, zoals
-`<workspace>/skills/personal/foo/SKILL.md`; de Skill wordt nog steeds beschikbaar gemaakt via de
-platte frontmatternaam, bijvoorbeeld `foo`.
+Hoofdmappen van Skills kunnen gegroepeerde mappen bevatten, zoals
+`<workspace>/skills/personal/foo/SKILL.md`; de Skill wordt nog steeds beschikbaar gesteld onder de
+platte frontmatter-naam, bijvoorbeeld `foo`.
 
-Skills kunnen worden afgeschermd via configuratie/env (zie `skills` in [Gateway-configuratie](/nl/gateway/configuration)).
+Skills kunnen worden beheerst door configuratie/omgevingsvariabelen (zie `skills` in [Gateway-configuratie](/nl/gateway/configuration)).
 
 ## Runtimegrenzen
 
-De embedded agent-runtime is eigendom van OpenClaw: modeldetectie, toolbedrading,
-promptassemblage, sessiebeheer en kanaallevering delen één geïntegreerd
-runtime-oppervlak.
+De ingebouwde agentruntime is eigendom van OpenClaw: modeldetectie, toolkoppeling,
+promptopbouw, sessiebeheer en kanaalbezorging delen één geïntegreerd
+runtimeoppervlak.
 
 ## Sessies
 
-Sessietranscripten worden als JSONL opgeslagen op:
+Sessierijen worden opgeslagen in de SQLite-database per agent:
 
-- `~/.openclaw/agents/<agentId>/sessions/<SessionId>.jsonl`
+- `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`
 
-De sessie-ID is stabiel en wordt gekozen door OpenClaw.
-Verouderde sessiemappen van andere tools worden niet gelezen.
+JSONL-transcriptbestanden kunnen nog steeds onder
+`~/.openclaw/agents/<agentId>/sessions/` staan als invoer voor verouderde migraties, verwijderde of
+geresette archieven, imports, exports en ondersteuningsartefacten. Actieve agentgeschiedenis wordt
+samen met de sessierijen in SQLite opgeslagen. De sessie-ID is stabiel en wordt door
+OpenClaw gekozen. OpenClaw leest geen sessiemappen van andere tools.
 
-## Sturen tijdens het streamen
+## Bijsturen tijdens streamen
 
-Binnenkomende prompts die halverwege een uitvoering aankomen, worden standaard naar de huidige uitvoering gestuurd.
-Sturing wordt geleverd **nadat de huidige assistentbeurt klaar is met het uitvoeren van zijn
-toolaanroepen**, vóór de volgende LLM-aanroep, en slaat niet langer resterende toolaanroepen
-uit het huidige assistentbericht over.
+Binnenkomende prompts die tijdens een uitvoering arriveren, worden standaard naar de huidige uitvoering gestuurd.
+Bijsturing wordt geleverd **nadat de huidige assistentbeurt klaar is met het uitvoeren van de
+toolaanroepen**, vóór de volgende LLM-aanroep, en slaat resterende toolaanroepen
+uit het huidige assistentbericht niet langer over.
 
-`/queue steer` is het standaardgedrag voor actieve uitvoeringen. `/queue followup` en
-`/queue collect` laten berichten wachten op een latere beurt in plaats van te sturen.
+`/queue steer` is het standaardgedrag tijdens een actieve uitvoering. `/queue followup` en
+`/queue collect` laten berichten wachten op een latere beurt in plaats van ze bij te sturen.
 `/queue interrupt` breekt in plaats daarvan de actieve uitvoering af. Zie [Wachtrij](/nl/concepts/queue)
-en [Sturingswachtrij](/nl/concepts/queue-steering) voor wachtrij- en grensgedrag.
+en [Bijsturingswachtrij](/nl/concepts/queue-steering) voor het gedrag van wachtrijen en grenzen.
 
-Blokstreaming verstuurt voltooide assistentblokken zodra ze klaar zijn; het staat
-**standaard uit** (`agents.defaults.blockStreamingDefault: "off"`).
-Stem de grens af via `agents.defaults.blockStreamingBreak` (`text_end` versus `message_end`; standaard is text_end).
-Beheer zachte blokchunking met `agents.defaults.blockStreamingChunk` (standaard
-800-1200 tekens; geeft de voorkeur aan alinea-einden, daarna nieuwe regels; zinnen als laatste).
-Voeg gestreamde chunks samen met `agents.defaults.blockStreamingCoalesce` om
-spam met losse regels te verminderen (op idle gebaseerde samenvoeging vóór verzending). Niet-Telegram-kanalen vereisen
-expliciet `*.blockStreaming: true` om blokantwoorden in te schakelen.
-Uitgebreide toolsamenvattingen worden uitgezonden bij de start van de tool (geen debounce); Control UI
-streamt tooluitvoer via agentevents wanneer beschikbaar.
-Meer details: [Streamen + chunking](/nl/concepts/streaming).
+Blokstreaming verzendt voltooide assistentblokken zodra ze gereed zijn; dit is
+**standaard uitgeschakeld** (`agents.defaults.blockStreamingDefault: "off"`).
+Stel de grens af via `agents.defaults.blockStreamingBreak` (`text_end` tegenover `message_end`; standaard `text_end`).
+Beheer het opdelen in zachte blokken met `agents.defaults.blockStreamingChunk` (standaard
+800-1200 tekens; geeft de voorkeur aan alinea-einden, daarna regeleinden; zinnen als laatste).
+Voeg gestreamde fragmenten samen met `agents.defaults.blockStreamingCoalesce` om
+spam van afzonderlijke regels te verminderen (samenvoeging op basis van inactiviteit vóór verzending). Voor andere kanalen dan Telegram is
+expliciet `*.streaming.block.enabled: true` vereist om blokantwoorden in te schakelen (QQ Bot
+streamt blokantwoorden juist, tenzij `channels.qqbot.streaming.mode` `"off"` is).
+Uitgebreide toolsamenvattingen worden bij het starten van de tool gegenereerd (zonder debounce); de Control UI
+streamt tooluitvoer via agentgebeurtenissen wanneer beschikbaar.
+Meer informatie: [Streamen + opdelen](/nl/concepts/streaming).
 
 ## Modelverwijzingen
 
-Modelverwijzingen in configuratie (bijvoorbeeld `agents.defaults.model` en `agents.defaults.models`) worden geparsed door te splitsen op de **eerste** `/`.
+Modelverwijzingen in de configuratie (bijvoorbeeld `agents.defaults.model` en `agents.defaults.models`) worden geparseerd door ze te splitsen op de **eerste** `/`.
 
 - Gebruik `provider/model` bij het configureren van modellen.
 - Als de model-ID zelf `/` bevat (OpenRouter-stijl), neem dan het providerprefix op (voorbeeld: `openrouter/moonshotai/kimi-k2`).
 - Als je de provider weglaat, probeert OpenClaw eerst een alias, daarna een unieke
-  match met geconfigureerde provider voor die exacte model-id, en valt pas daarna terug
+  overeenkomst met een geconfigureerde provider voor die exacte model-ID, en valt het pas daarna terug
   op de geconfigureerde standaardprovider. Als die provider het
-  geconfigureerde standaardmodel niet langer aanbiedt, valt OpenClaw terug op de eerste geconfigureerde
+  geconfigureerde standaardmodel niet langer aanbiedt, valt OpenClaw terug op het eerste geconfigureerde
   provider/model in plaats van een verouderde standaard van een verwijderde provider te tonen.
 
 ## Configuratie (minimaal)
@@ -139,12 +154,9 @@ Stel minimaal het volgende in:
 - `agents.defaults.workspace`
 - `channels.whatsapp.allowFrom` (sterk aanbevolen)
 
----
-
-_Volgende: [Groepschats](/nl/channels/group-messages)_ 🦞
-
 ## Gerelateerd
 
 - [Agentwerkruimte](/nl/concepts/agent-workspace)
-- [Multi-agentroutering](/nl/concepts/multi-agent)
+- [Routering met meerdere agents](/nl/concepts/multi-agent)
 - [Sessiebeheer](/nl/concepts/session)
+- [Groepschats](/nl/channels/group-messages)

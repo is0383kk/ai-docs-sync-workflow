@@ -1,13 +1,14 @@
 ---
 read_when:
     - OpenClaw implementeren op Upstash Box
-    - U wilt een beheerde Linux-omgeving voor OpenClaw met via SSH getunnelde toegang tot het dashboard
-summary: Host OpenClaw op Upstash Box met keep-alive en toegang via een SSH-tunnel
+    - Je wilt een beheerde Linux-omgeving voor OpenClaw met via SSH getunnelde toegang tot het dashboard
+summary: Host OpenClaw op Upstash Box met keepalive en toegang via een SSH-tunnel
 title: Upstash Box
 x-i18n:
-    generated_at: "2026-07-12T08:56:57Z"
+    generated_at: "2026-07-27T05:19:31Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 29232c43e0e4940b7445ab8896c9ccd3e81d0fdbdd522d7f50cb8c8057ac18f0
     source_path: install/upstash.md
@@ -24,26 +25,26 @@ bloot aan het openbare internet.
 
 - Upstash-account
 - Keep-alive Upstash Box
-- SSH-client op uw lokale computer
+- SSH-client op je lokale machine
 
 ## Een Box maken
 
 Maak een keep-alive Box in de Upstash Console. Noteer de Box-ID (bijvoorbeeld
-`right-flamingo-14486`) en uw Box-API-sleutel.
+`right-flamingo-14486`) en je Box-API-sleutel.
 
 Upstash onderhoudt de actuele handleiding voor OpenClaw Box op
 [OpenClaw instellen](https://upstash.com/docs/box/guides/openclaw-setup).
 
-## Verbinding maken via een SSH-tunnel
+## Verbinding maken met een SSH-tunnel
 
-Stuur de OpenClaw-dashboardpoort door naar uw lokale computer. Gebruik uw Box-API-sleutel
+Stuur de OpenClaw-dashboardpoort door naar je lokale machine. Gebruik je Box-API-sleutel
 als het SSH-wachtwoord wanneer daarom wordt gevraagd:
 
 ```bash
 ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -L 18789:127.0.0.1:18789 <box-id>@us-east-1.box.upstash.com
 ```
 
-De keep-alive-opties verminderen het wegvallen van inactieve tunnels tijdens de onboarding.
+De keepalive-opties verminderen het wegvallen van inactieve tunnels tijdens de onboarding.
 
 ## OpenClaw installeren
 
@@ -70,7 +71,7 @@ openclaw config set gateway.bind lan
 nohup openclaw gateway > gateway.log 2>&1 &
 ```
 
-Open, terwijl de SSH-tunnel actief is, de dashboard-URL lokaal:
+Open de dashboard-URL lokaal terwijl de SSH-tunnel actief is:
 
 ```text
 http://127.0.0.1:18789/#token=<your-token>
@@ -87,14 +88,14 @@ nohup openclaw gateway > gateway.log 2>&1 &
 
 ## Problemen oplossen
 
-Als SSH tijdens de onboarding vastloopt, maakt u opnieuw verbinding met een schone SSH-configuratie en
-keep-alive-opties:
+Als SSH tijdens de onboarding vastloopt, maak dan opnieuw verbinding met een schone SSH-configuratie en
+keepalives:
 
 ```bash
 ssh -F /dev/null -o ControlMaster=no -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -L 18789:127.0.0.1:18789 <box-id>@us-east-1.box.upstash.com
 ```
 
-Hiermee worden verouderde lokale instellingen in `~/.ssh/config` omzeild en blijft de tunnel actief
+Hiermee worden verouderde lokale `~/.ssh/config`-instellingen omzeild en blijft de tunnel actief
 tijdens perioden van netwerkinactiviteit.
 
 ## Gerelateerd

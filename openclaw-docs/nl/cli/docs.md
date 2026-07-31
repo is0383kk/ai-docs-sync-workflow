@@ -1,13 +1,14 @@
 ---
 read_when:
-    - Je wilt vanuit de terminal de actuele OpenClaw-documentatie doorzoeken
-    - Je moet weten welke gehoste zoek-API de documentatie-CLI aanroept
+    - Je wilt de actuele OpenClaw-documentatie doorzoeken vanuit de terminal
+    - Je moet weten welke gehoste zoek-API de docs-CLI aanroept
 summary: CLI-referentie voor `openclaw docs` (doorzoek de actuele documentatie-index)
 title: Documentatie
 x-i18n:
-    generated_at: "2026-07-12T08:43:00Z"
+    generated_at: "2026-07-27T06:08:30Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: b0b575f0b76d40a53dd4f79c55fd65969a24eae27e27bd1c46d395f61fe89e42
     source_path: cli/docs.md
@@ -21,15 +22,15 @@ Doorzoek de live OpenClaw-documentatie-index vanuit de terminal.
 ## Gebruik
 
 ```bash
-openclaw docs                       # print docs entrypoint and example search
-openclaw docs <query...>            # search the live docs index
+openclaw docs                       # toon het beginpunt van de documentatie en een voorbeeldzoekopdracht
+openclaw docs <query...>            # doorzoek de live documentatie-index
 ```
 
-| Argument     | Beschrijving                                                                    |
-| ------------ | ------------------------------------------------------------------------------- |
-| `[query...]` | Vrije zoekopdracht. Zoekopdrachten met meerdere woorden worden met spaties samengevoegd en als één geheel verzonden. |
+| Argument     | Beschrijving                                                                        |
+| ------------ | ---------------------------------------------------------------------------------- |
+| `[query...]` | Vrije zoekopdracht. Zoekopdrachten met meerdere woorden worden met spaties samengevoegd en als één zoekopdracht verzonden. |
 
-Zonder zoekopdracht toont `openclaw docs` de URL van het documentatie-ingangspunt en een voorbeeld van een zoekopdracht, in plaats van een zoekactie uit te voeren.
+Zonder zoekopdracht toont `openclaw docs` de URL van het beginpunt van de documentatie en een voorbeeldzoekopdracht in plaats van een zoekopdracht uit te voeren.
 
 ## Voorbeelden
 
@@ -41,27 +42,27 @@ openclaw docs gateway token secretref
 
 ## Werking
 
-`openclaw docs` roept `https://docs.openclaw.ai/api/search` aan en geeft de JSON-resultaten weer. Voor het zoekverzoek geldt een vaste time-out van 30 seconden.
+`openclaw docs` roept `https://docs.openclaw.ai/api/search` aan en geeft de JSON-resultaten weer. Voor de zoekaanvraag geldt een vaste time-out van 30 seconden.
 
 ## Uitvoer
 
-In een terminal met uitgebreide opmaak (TTY) worden de resultaten weergegeven als een kop gevolgd door een lijst met opsommingstekens: de paginatitel, een gekoppelde documentatie-URL en op de volgende regel een kort fragment. Bij lege resultaten wordt "Geen resultaten." weergegeven.
+In een uitgebreide (TTY-)terminal worden resultaten weergegeven als een kop gevolgd door een lijst met opsommingstekens: paginatitel, gekoppelde documentatie-URL en een kort fragment op de volgende regel. Bij lege resultaten wordt "Geen resultaten." weergegeven.
 
-In uitvoer zonder uitgebreide opmaak (via een pipe, `--no-color`, scripts) worden dezelfde gegevens als Markdown weergegeven:
+In niet-uitgebreide uitvoer (via een pipe, `--no-color`, scripts) worden dezelfde gegevens als Markdown weergegeven:
 
 ```markdown
-# Docs search: <query>
+# Documentatie doorzoeken: <query>
 
-- [Title](https://docs.openclaw.ai/...) - snippet
-- [Title](https://docs.openclaw.ai/...) - snippet
+- [Titel](https://docs.openclaw.ai/...) - fragment
+- [Titel](https://docs.openclaw.ai/...) - fragment
 ```
 
 ## Afsluitcodes
 
-| Code | Betekenis                                                                    |
-| ---- | ---------------------------------------------------------------------------- |
-| `0`  | De zoekactie is geslaagd, ook bij antwoorden zonder resultaten.              |
-| `1`  | De aanroep van de gehoste API voor het doorzoeken van de documentatie is mislukt; stderr toont de foutmelding. |
+| Code | Betekenis                                                                  |
+| ---- | ------------------------------------------------------------------------ |
+| `0`  | De zoekopdracht is geslaagd, ook als er geen resultaten zijn.                       |
+| `1`  | De API-aanroep voor het doorzoeken van de gehoste documentatie is mislukt; stderr toont de foutmelding. |
 
 ## Gerelateerd
 

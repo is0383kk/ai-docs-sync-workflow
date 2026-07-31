@@ -1,12 +1,13 @@
 ---
 read_when:
-    - U installeert, configureert of controleert de oc-path-plugin
-summary: Voegt de openclaw path-CLI toe voor het adresseren van werkruimtebestanden via oc://.
-title: Oc Path-Plugin
+    - Je installeert, configureert of controleert de oc-path-plugin
+summary: Voegt de OpenClaw-pad-CLI toe voor het adresseren van werkruimtebestanden via oc://.
+title: Oc Path-plugin
 x-i18n:
-    generated_at: "2026-07-12T09:13:21Z"
+    generated_at: "2026-07-27T06:03:43Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 6f05e58467149f00a531f2e50fc196babdd165cb71bf6ec97144559ee8657b7b
     source_path: plugins/reference/oc-path.md
@@ -15,7 +16,7 @@ x-i18n:
 
 # Oc Path-plugin
 
-Voegt de openclaw path-CLI toe voor bestandsadressering in werkruimten via oc://.
+Voegt de openclaw path-CLI toe voor het adresseren van werkruimtebestanden via oc://.
 
 ## Distributie
 

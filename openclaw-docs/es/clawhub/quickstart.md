@@ -1,13 +1,14 @@
 ---
 read_when:
-    - Primera vez usando ClawHub
-    - Instalar una habilidad o un Plugin desde el registro
+    - Primera vez que se usa ClawHub
+    - Instalación de una skill o un plugin desde el registro
     - Publicación en ClawHub
-summary: 'Comienza a usar ClawHub: busca, instala, actualiza y publica Skills o plugins.'
+summary: 'Empieza a usar ClawHub: busca, instala, actualiza y publica Skills o plugins.'
 x-i18n:
-    generated_at: "2026-07-04T20:24:10Z"
-    model: gpt-5.5
+    generated_at: "2026-07-26T05:33:47Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: f6d61bd32a359a843e68140cc90b4ff4bcc64645ea425ea4654c668d6d3d04ec
     source_path: clawhub/quickstart.md
@@ -16,86 +17,85 @@ x-i18n:
 
 # Inicio rápido
 
-ClawHub es un registro para Skills y plugins de OpenClaw.
+ClawHub es un registro de Skills y plugins para OpenClaw.
 
-Usa OpenClaw cuando estés instalando cosas en OpenClaw. Usa la CLI `clawhub`
-cuando inicies sesión, publiques, gestiones tus propios listados o uses
+Use OpenClaw cuando instale elementos en OpenClaw. Use la CLI `clawhub`
+cuando inicie sesión, publique, gestione sus propios listados o utilice
 flujos de trabajo específicos del registro.
 
-## Buscar e instalar un Skill
+## Buscar e instalar una Skill
 
-Busca desde OpenClaw:
+Busque desde OpenClaw:
 
 ```bash
 openclaw skills search "calendar"
 ```
 
-Instala un Skill:
+Instale una Skill:
 
 ```bash
 openclaw skills install @openclaw/demo
 ```
 
-Actualiza los Skills instalados:
+Actualice las Skills instaladas:
 
 ```bash
 openclaw skills update --all
 ```
 
-OpenClaw registra de dónde provino el Skill para que las actualizaciones
-posteriores puedan seguir resolviéndose a través de ClawHub.
+OpenClaw registra de dónde procede la Skill para que las actualizaciones posteriores puedan seguir
+resolviéndose mediante ClawHub.
 
-## Buscar e instalar un Plugin
+## Buscar e instalar un plugin
 
-Busca desde OpenClaw:
+Busque desde OpenClaw:
 
 ```bash
 openclaw plugins search "calendar"
 ```
 
-Instala un Plugin alojado en ClawHub con un origen explícito de ClawHub:
+Instale un plugin alojado en ClawHub con una fuente de ClawHub explícita:
 
 ```bash
 openclaw plugins install clawhub:<package>
 ```
 
-Actualiza los plugins instalados:
+Actualice los plugins instalados:
 
 ```bash
 openclaw plugins update --all
 ```
 
-Usa el prefijo `clawhub:` cuando quieras que OpenClaw resuelva el paquete a
-través de ClawHub en lugar de npm u otro origen.
+Use el prefijo `clawhub:` cuando quiera que OpenClaw resuelva el paquete mediante
+ClawHub en lugar de npm u otra fuente.
 
 ## Iniciar sesión para publicar
 
-Instala la CLI de ClawHub:
+Instale la CLI de ClawHub:
 
 ```bash
 npm i -g clawhub
-# or
+# o
 pnpm add -g clawhub
 ```
 
-Inicia sesión con GitHub:
+Inicie sesión con GitHub:
 
 ```bash
 clawhub login
 clawhub whoami
 ```
 
-Los entornos sin interfaz gráfica pueden usar un token de API desde la interfaz
-web de ClawHub:
+Los entornos sin interfaz gráfica pueden usar un token de API de la interfaz web de ClawHub:
 
 ```bash
 clawhub login --token clh_...
 ```
 
-## Publicar un Skill
+## Publicar una Skill
 
-Un Skill es una carpeta con un archivo `SKILL.md` obligatorio y archivos de
-soporte opcionales.
+Una Skill es una carpeta con un archivo `SKILL.md` obligatorio y archivos auxiliares
+opcionales.
 
 ```bash
 clawhub skill publish ./my-skill \
@@ -104,18 +104,16 @@ clawhub skill publish ./my-skill \
   --changelog "Initial release"
 ```
 
-El comando omite el contenido sin cambios. Los Skills nuevos comienzan en
-`1.0.0`; los cambios posteriores publican automáticamente la siguiente versión
-de parche. Usa `--dry-run` para previsualizar o `--version` para elegir una
-versión explícita.
+El comando omite el contenido sin cambios. Las Skills nuevas comienzan en `1.0.0`; los cambios posteriores
+publican automáticamente la siguiente versión de parche. Use `--dry-run` para obtener una vista previa o
+`--version` para elegir una versión explícita.
 
-Antes de publicar, revisa los metadatos en `SKILL.md`. Declara las variables de
-entorno, herramientas y permisos requeridos para que los usuarios puedan
-entender qué necesita el Skill antes de instalarlo. Consulta [Formato de Skill](/es/clawhub/skill-format).
+Antes de publicar, compruebe los metadatos de `SKILL.md`. Declare las
+variables de entorno, herramientas y permisos necesarios para que los usuarios puedan saber qué
+necesita la Skill antes de instalarla. Consulte [Formato de las Skills](/es/clawhub/skill-format).
 
-Para repositorios que contienen varios Skills, el flujo de trabajo reutilizable
-de GitHub llama a `skill publish` para cada carpeta inmediata de Skill dentro de
-`skills/`:
+Para los repositorios que contienen varias Skills, el flujo de trabajo reutilizable de GitHub llama a
+`skill publish` para cada carpeta de Skill inmediata en `skills/`:
 
 ```yaml
 jobs:
@@ -125,35 +123,31 @@ jobs:
       dry_run: true
 ```
 
-## Publicar un Plugin
+## Publicar un plugin
 
-Publica un Plugin desde una carpeta local, un repositorio de GitHub, una ref de
-GitHub o un archivo existente:
+Publique un plugin desde una carpeta local, un repositorio de GitHub, una referencia de GitHub o un
+archivo existente:
 
 ```bash
 clawhub package publish <source> --family code-plugin --dry-run
 clawhub package publish <source> --family code-plugin
 ```
 
-Usa `--dry-run` primero para previsualizar los metadatos resueltos del paquete,
-los campos de compatibilidad, la atribución de origen y el plan de carga sin
-publicar.
+Use primero `--dry-run` para obtener una vista previa de los metadatos resueltos del paquete, los campos de
+compatibilidad, la atribución de la fuente y el plan de carga sin publicar.
 
-Los plugins de código deben incluir metadatos de compatibilidad con OpenClaw en
-`package.json`, incluidos `openclaw.compat.pluginApi` y
-`openclaw.build.openclawVersion`.
+Los plugins de código deben incluir metadatos de compatibilidad con OpenClaw en `package.json`,
+incluidos `openclaw.compat.pluginApi` y `openclaw.build.openclawVersion`.
 
 ## Inspeccionar antes de instalar
 
-Antes de instalar, usa la página web de ClawHub o los comandos de detalle de la
-CLI para inspeccionar metadatos, enlaces de origen, versiones, registros de
-cambios y estado de análisis:
+Antes de instalar, use la página web de ClawHub o los comandos de detalles de la CLI para inspeccionar
+los metadatos, enlaces de origen, versiones, registros de cambios y estado del análisis:
 
 ```bash
 clawhub inspect @openclaw/demo
 clawhub package inspect <package>
 ```
 
-Los listados públicos muestran el estado de análisis más reciente. Las versiones
-retenidas o bloqueadas por moderación pueden ocultarse de las superficies de
-búsqueda e instalación hasta que se resuelvan.
+Los listados públicos muestran el estado del análisis más reciente. Las versiones retenidas o bloqueadas por
+moderación pueden permanecer ocultas en las superficies de búsqueda e instalación hasta que se resuelva la situación.

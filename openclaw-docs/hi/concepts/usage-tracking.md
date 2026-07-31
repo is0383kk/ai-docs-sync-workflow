@@ -1,113 +1,121 @@
 ---
 read_when:
-    - आप प्रदाता उपयोग/कोटा सतहों को जोड़ रहे हैं
-    - आपको उपयोग ट्रैकिंग व्यवहार या प्रमाणीकरण आवश्यकताओं की व्याख्या करनी है
-summary: उपयोग ट्रैकिंग सर्फेस और क्रेडेंशियल आवश्यकताएँ
+    - आप प्रदाता के उपयोग/कोटा इंटरफ़ेस जोड़ रहे हैं
+    - आपको उपयोग ट्रैकिंग के व्यवहार या प्रमाणीकरण आवश्यकताओं की व्याख्या करनी होगी
+summary: उपयोग ट्रैकिंग की उपलब्ध सुविधाएँ और क्रेडेंशियल संबंधी आवश्यकताएँ
 title: उपयोग ट्रैकिंग
 x-i18n:
-    generated_at: "2026-07-01T18:13:37Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:38:52Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: fa9b2b0b19ca0b4beeea40bfd50b07a92155178d5ec0e1877013843e0caba4fb
+    source_hash: 5a1bc9aeb95cd80a48ab57a18fcd24894fdd6fb71e10e8bea8bae67a8688b78e
     source_path: concepts/usage-tracking.md
     workflow: 16
 ---
 
 ## यह क्या है
 
-- प्रदाता उपयोग/कोटा सीधे उनके उपयोग endpoints से खींचता है।
-- कोई अनुमानित लागत नहीं; केवल प्रदाता-रिपोर्टेड कोटा विंडो या खाता-स्थिति
-  सारांश।
-- मानव-पठनीय कोटा-विंडो स्थिति आउटपुट को `X% left` में सामान्यीकृत किया जाता है, भले ही
-  upstream API consumed quota, remaining quota, या केवल raw
-  counts रिपोर्ट करे। जिन प्रदाताओं के पास resettable quota windows नहीं हैं, वे इसके बजाय प्रदाता सारांश
-  पाठ दिखा सकते हैं, जैसे balance।
-- सत्र-स्तर `/status` और `session_status` नवीनतम
-  transcript usage entry पर fallback कर सकते हैं जब live session snapshot sparse हो। यह
-  fallback missing token/cache counters भरता है, active runtime
-  model label पुनर्प्राप्त कर सकता है, और session
-  metadata missing या छोटा होने पर बड़े prompt-oriented total को प्राथमिकता देता है। मौजूदा nonzero live values फिर भी जीतती हैं।
+- प्रत्येक प्रदाता के उपयोग एंडपॉइंट से सीधे प्रदाता उपयोग/कोटा प्राप्त करता है। प्रदाता बिलिंग का कोई अनुमान नहीं; केवल प्रदाता द्वारा रिपोर्ट किए गए प्लान के नाम, कोटा विंडो, शेष राशियाँ, व्यय, बजट, दैनिक लागत इतिहास, टोकन/मॉडल श्रेय या खाता-स्थिति सारांश।
+- मानव-पठनीय कोटा-विंडो आउटपुट को `X% left` में सामान्यीकृत किया जाता है, भले ही कोई प्रदाता उपभोग किया गया कोटा, शेष कोटा या केवल अपरिष्कृत गणनाएँ रिपोर्ट करे। रीसेट की जा सकने वाली कोटा विंडो के बिना प्रदाता इसके बजाय प्रदाता सारांश पाठ दिखाते हैं (उदाहरण के लिए, शेष राशि)।
+- लाइव सत्र स्नैपशॉट में टोकन/मॉडल डेटा न होने पर, सत्र-स्तरीय `/status` और `session_status` टूल सत्र के ट्रांसक्रिप्ट लॉग का फ़ॉलबैक के रूप में उपयोग करते हैं। वह फ़ॉलबैक अनुपलब्ध टोकन/कैश काउंटर भरता है, सक्रिय रनटाइम मॉडल लेबल पुनर्प्राप्त कर सकता है और सत्र मेटाडेटा अनुपलब्ध या छोटा होने पर प्रॉम्प्ट-उन्मुख बड़े कुल को प्राथमिकता देता है (`totalTokensFresh !== true`, शून्य या ट्रांसक्रिप्ट से प्राप्त मान से कम)। शून्येतर लाइव मान हमेशा फ़ॉलबैक पर प्राथमिकता पाते हैं।
 
-## यह कहां दिखता है
+## यह कहाँ दिखाई देता है
 
-- chats में `/status`: session tokens + estimated cost (केवल API key) के साथ emoji-rich status card। Provider usage **current model provider** के लिए, उपलब्ध होने पर, normalized `X% left` window या provider summary text के रूप में दिखता है।
-- chats में `/usage off|tokens|full`: प्रति-response usage footer।
-- chats में `/usage cost`: OpenClaw session logs से aggregated local cost summary।
-- CLI: `openclaw status --usage` पूरा per-provider breakdown प्रिंट करता है।
-- CLI: `openclaw channels list` provider config के साथ वही usage snapshot प्रिंट करता है (skip करने के लिए `--no-usage` इस्तेमाल करें)।
-- macOS menu bar: Context के अंतर्गत "Usage" section (केवल उपलब्ध होने पर)।
+- चैट में `/status`: सत्र टोकन और अनुमानित लागत वाला स्थिति कार्ड (केवल API कुंजी मॉडल)। उपलब्ध होने पर **वर्तमान मॉडल प्रदाता** के लिए प्रदाता उपयोग, सामान्यीकृत `X% left` विंडो या प्रदाता सारांश पाठ के रूप में दिखाई देता है।
+- चैट में `/usage off|tokens|full`: प्रत्येक प्रतिक्रिया के लिए उपयोग फ़ुटर।
+- चैट में `/usage cost`: OpenClaw सत्र लॉग से एकत्रित स्थानीय लागत सारांश।
+- CLI: `openclaw status --usage` प्रत्येक प्रदाता के उपयोग/कोटा का पूरा विवरण प्रिंट करता है।
+- CLI: `openclaw models status` OAuth/टोकन प्रमाणीकरण प्रोफ़ाइल सूचीबद्ध करता है और जिन प्रदाताओं के पास उपयोग विंडो है, उनके पास उसका सारांश दिखाता है।
+- Control UI: **उपयोग** में OpenClaw के सत्र से प्राप्त टोकन और अनुमानित-लागत विश्लेषण के ऊपर प्रदाता प्लान और बिलिंग कार्ड दिखते हैं। Anthropic और OpenAI Admin API क्रेडेंशियल प्रदाता द्वारा रिपोर्ट किया गया आज का, 7-दिन और 30-दिन का व्यय, दैनिक रुझान, टोकन कुल, शीर्ष मॉडल और लागत श्रेणियाँ जोड़ते हैं।
+- Control UI: चैट कंपोज़र के कॉन्टेक्स्ट रिंग पॉपओवर में सदस्यता प्रदाताओं के लिए **प्लान उपयोग** दिखता है—रीसेट समय सहित प्रत्येक विंडो की पट्टियाँ (5-घंटे, साप्ताहिक, मॉडल-सीमित), ज्ञात होने पर प्रदाता प्लान (उदाहरण के लिए `Max (20x)`) और अतिरिक्त-उपयोग क्रेडिट। प्लान के माध्यम से बिल किए गए सत्र प्रति-टोकन डॉलर अनुमान छिपाते हैं; API द्वारा बिल किए गए सत्र `Est. cost` और प्रकार के अनुसार लागत विवरण बनाए रखते हैं। Claude Code CLI (`claude-cli`) सेटअप उसी Anthropic सदस्यता उपयोग का पुनः उपयोग करते हैं।
+- macOS मेनू बार: प्रदाता उपयोग स्नैपशॉट उपलब्ध होने पर Context के नीचे मूल "Usage" अनुभाग दिखाई देता है। [मेनू बार](/hi/platforms/mac/menu-bar) देखें।
 
-## डिफॉल्ट usage footer mode
+`openclaw channels list` अब प्रदाता उपयोग प्रिंट नहीं करता; इसके बजाय यह उपयोगकर्ताओं को `openclaw status` या `openclaw models list` की ओर निर्देशित करता है।
 
-`/usage off|tokens|full` किसी session के लिए footer सेट करता है और उस
-session के लिए याद रखा जाता है। `messages.responseUsage` उन sessions के लिए mode seed करता है जिन्होंने
-कोई mode नहीं चुना है, ताकि हर बार `/usage` टाइप किए बिना footer default रूप से on हो सके।
+## Anthropic और OpenAI लागत इतिहास
 
-हर channel के लिए एक mode सेट करें, या `default` fallback के साथ per-channel map:
+सदस्यता कोटा और API बिलिंग प्रदाता के अलग-अलग इंटरफ़ेस हैं:
+
+- Anthropic सदस्यता/सेटअप क्रेडेंशियल Claude कोटा विंडो और वैकल्पिक अतिरिक्त-उपयोग बजट दिखाना जारी रखते हैं। इसके बजाय संगठन का Usage and Cost API इतिहास दिखाने के लिए `ANTHROPIC_ADMIN_KEY` या `ANTHROPIC_ADMIN_API_KEY` सेट करें। `sk-ant-admin` से शुरू होने वाले Anthropic प्रदाता क्रेडेंशियल का स्वचालित रूप से पता लगाया जाता है।
+- OpenAI ChatGPT/Codex OAuth प्लान, कोटा विंडो और क्रेडिट शेष दिखाना जारी रखता है। इसके बजाय संगठन की लागत और completions-usage इतिहास दिखाने के लिए `OPENAI_ADMIN_KEY` सेट करें; इसे किसी एक प्रोजेक्ट तक सीमित करने के लिए वैकल्पिक रूप से `OPENAI_PROJECT_ID` सेट करें। OpenClaw कभी भी `OPENAI_API_KEY`, प्रदाता कॉन्फ़िगरेशन या प्रमाणीकरण प्रोफ़ाइल के अनुमान क्रेडेंशियल संगठन API को नहीं भेजता, क्योंकि वे कुंजियाँ कस्टम एंडपॉइंट से संबंधित हो सकती हैं।
+
+Admin क्रेडेंशियल को प्राथमिकता मिलती है, क्योंकि वे संगठन की वास्तविक बिलिंग प्रदान करते हैं। OpenClaw प्रदाता द्वारा रिपोर्ट किए गए इन कुल मानों को अपने स्थानीय सत्र अनुमानों के साथ संयोजित नहीं करता; दोनों अनुभाग जानबूझकर अलग-अलग प्रश्नों के उत्तर देते हैं।
+
+## डिफ़ॉल्ट उपयोग फ़ुटर मोड
+
+`/usage off|tokens|full` किसी सत्र के लिए फ़ुटर सेट करता है और उसे उस
+सत्र के लिए याद रखा जाता है। `messages.responseUsage` उन सत्रों के लिए उस मोड का प्रारंभिक मान निर्धारित करता है जिन्होंने
+कोई मोड नहीं चुना है, ताकि हर बार `/usage` टाइप किए बिना फ़ुटर डिफ़ॉल्ट रूप से चालू रह सके।
+
+प्रत्येक चैनल के लिए एक मोड या `default` फ़ॉलबैक वाला प्रति-चैनल मैप सेट करें:
 
 ```jsonc
 {
   "messages": {
     "responseUsage": "tokens",
-    // or: { "default": "off", "discord": "full" }
+    // या: { "default": "off", "discord": "full" }
   },
 }
 ```
 
-### तीन अलग-अलग session states
+स्वीकृत मान: `"off"`, `"tokens"`, `"full"` और पुराना उपनाम `"on"` (इसे `"tokens"` माना जाता है)।
 
-किसी session के `responseUsage` field में तीन representable states हैं, हर एक की
-semantics अलग है:
+### सत्र की तीन अलग-अलग स्थितियाँ
 
-| State                  | Stored value                    | Effective mode                                                                  |
-| ---------------------- | ------------------------------- | ------------------------------------------------------------------------------- |
-| **Unset / inherit**    | `undefined` (absent)            | `messages.responseUsage` config default, फिर `off` तक falls through।            |
-| **Explicit off**       | `"off"` (stored)                | हमेशा off — non-off config default footer को दोबारा enable नहीं कर सकता।        |
-| **Explicit on**        | `"tokens"` या `"full"` (stored) | वही mode, config default की परवाह किए बिना।                                     |
+किसी सत्र के `responseUsage` फ़ील्ड की तीन निरूपणीय स्थितियाँ होती हैं, जिनमें से प्रत्येक के
+अलग अर्थ हैं:
+
+| स्थिति               | संग्रहीत मान                    | प्रभावी मोड                                                        |
+| ------------------- | ------------------------------- | --------------------------------------------------------------------- |
+| **सेट नहीं / इनहेरिट** | `undefined` (अनुपस्थित)            | `messages.responseUsage` कॉन्फ़िगरेशन डिफ़ॉल्ट, फिर `off` पर जाता है। |
+| **स्पष्ट रूप से बंद**    | `"off"` (संग्रहीत)                | हमेशा बंद; बंद से अलग कॉन्फ़िगरेशन डिफ़ॉल्ट फ़ुटर को फिर से चालू नहीं कर सकता।     |
+| **स्पष्ट रूप से चालू**     | `"tokens"` या `"full"` (संग्रहीत) | कॉन्फ़िगरेशन डिफ़ॉल्ट की परवाह किए बिना वही मोड।                              |
 
 ### प्राथमिकता
 
-Effective mode = session override → channel config entry → `default` → `off`.
+प्रभावी मोड = सत्र ओवरराइड → चैनल कॉन्फ़िगरेशन प्रविष्टि → `default` → `off`।
 
-Explicit `/usage off` session में literal value `"off"` के रूप में **persisted** होता है,
-"unset" जैसा नहीं। इसका मतलब है कि non-off `messages.responseUsage`
-default, user द्वारा explicit disable करने के बाद footer को वापस on नहीं कर सकता।
+स्पष्ट `/usage off` सत्र में शाब्दिक मान `"off"` के रूप में **स्थायी रूप से संग्रहीत** होता है,
+यह "सेट नहीं" के समान नहीं है। उपयोगकर्ता द्वारा स्पष्ट रूप से अक्षम किए जाने के बाद, बंद से अलग `messages.responseUsage`
+डिफ़ॉल्ट फ़ुटर को फिर से चालू नहीं कर सकता।
 
-### Reset करना बनाम off करना
+### रीसेट करना बनाम बंद करना
 
-- `/usage off` — footer को off करने के लिए मजबूर करता है और उस choice को persist करता है। Configured
-  non-off default इसे override नहीं कर सकता।
-- `/usage reset` (aliases: `inherit`, `clear`, `default`) — session
-  override clear करता है। फिर session effective config default
-  (`messages.responseUsage`) को **inherits** करता है। अगर कोई default configured नहीं है, तो footer off रहता है
-  (पहले जैसा ही)। इसे explicitly footer on किए बिना "default पर वापस जाने" के लिए इस्तेमाल करें।
-- Full session reset (`/reset` या `/new`) या session rollover explicit usage-mode preference को **preserves**
-  करता है ताकि user की display choice session rollovers के बाद भी बनी रहे।
-  केवल `/usage reset` (और उसके aliases) वास्तव में
-  override clear करते हैं।
+- `/usage off` फ़ुटर को जबरन बंद करता है और उस विकल्प को स्थायी रूप से संग्रहीत करता है। कॉन्फ़िगर किया गया
+  बंद से अलग डिफ़ॉल्ट इसे ओवरराइड नहीं कर सकता।
+- `/usage reset` (उपनाम: `default`, `inherit`, `inherited`, `clear`, `unpin`) सत्र
+  ओवरराइड साफ़ करता है। इसके बाद सत्र प्रभावी कॉन्फ़िगरेशन डिफ़ॉल्ट
+  (`messages.responseUsage`) को **इनहेरिट** करता है। यदि कोई डिफ़ॉल्ट कॉन्फ़िगर नहीं है, तो फ़ुटर बंद रहता है।
+- पूर्ण सत्र रीसेट (`/reset` या `/new`) या सत्र रोलओवर स्पष्ट उपयोग-मोड प्राथमिकता को **बनाए रखता है**,
+  ताकि उपयोगकर्ता की प्रदर्शन पसंद सत्र रोलओवर के बाद भी बनी रहे।
+  केवल `/usage reset` (और उसके उपनाम) ओवरराइड साफ़ करते हैं।
 
-### Toggle behavior
+### टॉगल व्यवहार
 
-बिना arguments के `/usage` cycle करता है: off → tokens → full → off। Cycle का starting point
-**effective** current mode होता है (unset होने पर session override config default तक falling through
-करता है), इसलिए cycle हमेशा उस चीज़ से consistent रहता है जो
-user footer में देखता है।
+बिना आर्ग्युमेंट के `/usage` इस क्रम में चक्रित होता है: बंद → टोकन → पूर्ण → बंद। चक्र का प्रारंभिक बिंदु
+**प्रभावी** वर्तमान मोड होता है (सेट नहीं होने पर सत्र ओवरराइड से कॉन्फ़िगरेशन डिफ़ॉल्ट
+तक जाना), इसलिए चक्र हमेशा फ़ुटर में उपयोगकर्ता को वर्तमान में दिखाई देने वाली स्थिति से
+मेल खाता है।
 
-### Config
+### कॉन्फ़िगरेशन
 
-Config न होने पर previous behavior बना रहता है (footer `/usage` तक off)। किसी session override को clear करने और configured default को फिर से inherit करने के लिए
-`/usage reset` इस्तेमाल करें।
+बिना कॉन्फ़िगरेशन के पिछला व्यवहार बना रहता है (`/usage` तक फ़ुटर बंद)। सत्र ओवरराइड साफ़ करने और कॉन्फ़िगर किए गए डिफ़ॉल्ट को फिर से इनहेरिट करने के लिए
+`/usage reset` का उपयोग करें।
 
-## Custom `/usage full` footer
+## कस्टम `/usage full` फ़ुटर
 
-`/usage full` model, reasoning, fast/slow,
-context window, और cost के साथ built-in compact footer दिखाता है जब ये fields उपलब्ध हों। Token और cache fields
-custom templates के लिए उपलब्ध रहते हैं। कोई template file जरूरी नहीं है।
+`/usage tokens` हमेशा एक साधारण `Usage: X in / Y out` पंक्ति रेंडर करता है (साथ ही उपलब्ध होने पर कैश और
+अनुमानित-लागत प्रत्यय)। केवल `/usage full` नीचे वर्णित अधिक समृद्ध
+फ़ुटर रेंडर करता है।
 
-`messages.usageTemplate` केवल advanced custom layouts के लिए है। Value एक
-JSON file path (`~` supported) या inline object है, और valid होने पर यह built-in
-footer को replace करता है:
+`/usage full` मॉडल, रीजनिंग, तेज़/धीमा, कॉन्टेक्स्ट विंडो और लागत के साथ अंतर्निहित संक्षिप्त फ़ुटर दिखाता है, जब वे फ़ील्ड उपलब्ध हों। अंतर्निहित फ़ुटर के लिए किसी टेम्पलेट फ़ाइल की
+आवश्यकता नहीं है।
+
+`messages.usageTemplate` केवल उन्नत कस्टम लेआउट के लिए है। इसका मान एक
+JSON फ़ाइल पथ (`~` समर्थित) या इनलाइन ऑब्जेक्ट है और मान्य होने पर यह अंतर्निहित
+फ़ुटर को प्रतिस्थापित करता है। फ़ाइल पथ पर नज़र रखी जाती है और बदलाव होने पर उसे लाइव पुनः लोड किया जाता है।
 
 ```json
 {
@@ -117,11 +125,11 @@ footer को replace करता है:
 }
 ```
 
-Missing या empty templates चुपचाप built-in footer पर fall back करते हैं। Unreadable
-या invalid configured templates भी built-in footer पर fall back करते हैं और
-operator warning emit करते हैं।
+अनुपलब्ध या खाली टेम्पलेट बिना सूचना के अंतर्निहित फ़ुटर का फ़ॉलबैक उपयोग करते हैं। अपठनीय
+या अमान्य कॉन्फ़िगर किए गए टेम्पलेट (खराब JSON या ऐसी संरचना जिसमें रेंडर करने योग्य आउटपुट
+खंड न हों) भी अंतर्निहित फ़ुटर का फ़ॉलबैक उपयोग करते हैं और ऑपरेटर चेतावनी जारी करते हैं।
 
-Custom templates को built-in shape से शुरू करें, फिर वे parts edit करें जिन्हें आप
+कस्टम टेम्पलेट को अंतर्निहित संरचना से शुरू करें, फिर उन भागों को संपादित करें जिन्हें आप
 बदलना चाहते हैं:
 
 ```jsonc
@@ -164,9 +172,9 @@ Custom templates को built-in shape से शुरू करें, फि�
       { "map": "state.fast_mode", "cases": { "true": "⚡️", "false": "🐌" } },
       {
         "when": "context.max_tokens",
-        "text": "\u00A0| 📚[{context.pct_used|meter:5:braille}]{context.max_tokens|num}",
+        "text": " | 📚[{context.pct_used|meter:5:braille}]{context.max_tokens|num}",
       },
-      { "when": "cost.turn_usd", "text": "\u00A0💰{cost.turn_usd|fixed:4}" },
+      { "when": "cost.turn_usd", "text": " 💰{cost.turn_usd|fixed:4}" },
     ],
     "surfaces": {
       "discord": [
@@ -178,86 +186,95 @@ Custom templates को built-in shape से शुरू करें, फि�
         { "map": "state.fast_mode", "cases": { "true": "⚡️", "false": "🐌" } },
         {
           "when": "context.max_tokens",
-          "text": "\u00A0| 📚[{context.pct_used|meter:5:braille}]{context.max_tokens|num}",
+          "text": " | 📚[{context.pct_used|meter:5:braille}]{context.max_tokens|num}",
         },
-        { "when": "cost.turn_usd", "text": "\u00A0💰{cost.turn_usd|fixed:4}" },
+        { "when": "cost.turn_usd", "text": " 💰{cost.turn_usd|fixed:4}" },
       ],
     },
   },
 }
 ```
 
-### Shape
+### संरचना
 
 ```jsonc
 {
   "schema": "openclaw.usageBar.v1",
-  "scales": { "<name>": "low-to-high glyphs" }, // string (1 glyph/char) or array
+  "scales": { "<name>": "निम्न-से-उच्च ग्लिफ़" }, // स्ट्रिंग (1 ग्लिफ़/वर्ण) या ऐरे
   "aliases": { "<table>": { "<value>": "<label>" } },
   "output": {
-    "sep": "", // joins surviving pieces
-    "default": [
-      /* pieces */
-    ], // fallback for any surface
+    "sep": "", // शेष खंडों को जोड़ता है
+    "default": [/* pieces */], // किसी भी इंटरफ़ेस के लिए फ़ॉलबैक
     "surfaces": {
-      "discord": [
-        /* pieces */
-      ],
-      "telegram": [
-        /* pieces */
-      ],
+      "discord": [/* pieces */],
+      "telegram": [/* pieces */],
     },
   },
 }
 ```
 
-हर surface **pieces** की ordered list है; engine हर item render करता है, empties drop करता है,
-और survivors को `sep` से join करता है। Entry न होने वाली surface
-`output.default` इस्तेमाल करती है।
+प्रत्येक इंटरफ़ेस **खंडों** की एक क्रमबद्ध सूची है; इंजन प्रत्येक को रेंडर करता है, खाली
+खंडों को हटा देता है और शेष खंडों को `sep` से जोड़ता है। बिना प्रविष्टि वाला इंटरफ़ेस
+`output.default` का उपयोग करता है।
 
-### Contract Paths
+### अनुबंध पथ
 
-एक piece per-turn contract से dot-path द्वारा values पढ़ता है। Absent values
-empty होते हैं (इसलिए `when` guard या `|fallback` piece को clean रखता है)।
+कोई खंड प्रति-टर्न अनुबंध से डॉट-पथ द्वारा मान पढ़ता है। अनुपस्थित मान
+खाली होते हैं (इसलिए `when` गार्ड या `|fallback` खंड को साफ़ रखता है)।
 
-| Path                                                                                | Meaning                                  |
-| ----------------------------------------------------------------------------------- | ---------------------------------------- |
-| `surface`                                                                           | channel id (`discord`/`telegram`/etc.)   |
-| `model.provider` / `model.display_name`                                             | provider id / model id                   |
-| `model.reasoning`                                                                   | effort (`off` से `xhigh` तक)             |
-| `model.is_fallback` / `model.is_override`                                           | bool: fallback used / model pinned       |
-| `state.fast_mode`                                                                   | bool: fast vs slow                       |
-| `context.max_tokens` / `context.pct_used`                                           | window budget / 0-100 used               |
-| `usage.input_tokens` / `usage.output_tokens` / `usage.total_tokens`                 | turn aggregate                           |
-| `usage.has_split_tokens` / `usage.has_total_only_tokens` / `usage.cache_hit_pct`    | token display guards और cache percent    |
-| `usage.last.input_tokens` / `usage.last.output_tokens` / `usage.last.cache_hit_pct` | केवल final model call                    |
-| `cost.turn_usd`                                                                     | estimated turn cost                      |
-| `identity.name` / `identity.emoji`                                                  | agent name / चुना हुआ emoji              |
+| पथ                                                                                | अर्थ                                                                                              |
+| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `surface`                                                                           | चैनल आईडी (`discord`/`telegram`/आदि)                                                               |
+| `agentId` / `chat_type`                                                             | स्वामी एजेंट आईडी / चैट सतह का प्रकार                                                                  |
+| `model.id` / `model.display_name` / `model.provider`                                | मॉडल आईडी / प्रदर्शन नाम / प्रदाता आईडी                                                                |
+| `model.actual`, `model.resolved_ref`                                                | टर्न के लिए वास्तव में उपयोग किया गया प्रदाता/मॉडल संदर्भ                                                        |
+| `model.requested`                                                                   | अनुरोधित प्रदाता/मॉडल संदर्भ (फ़ॉलबैक से पहले)                                                       |
+| `model.reasoning`                                                                   | प्रयास (`off` से `xhigh` तक)                                                                       |
+| `model.is_fallback` / `model.is_override`                                           | बूलियन: फ़ॉलबैक उपयोग हुआ / मॉडल पिन किया गया                                                                   |
+| `model.override_source` / `model.auth_mode`                                         | ओवरराइड स्रोत लेबल / क्रेडेंशियल मोड (`oauth`, `api-key`, `token`, `mixed`, `aws-sdk`, `unknown`) |
+| `state.fast_mode`                                                                   | बूलियन: तेज़ बनाम धीमा                                                                                   |
+| `state.compactions`                                                                 | सत्र के लिए Compaction की संख्या                                                                     |
+| `context.max_tokens` / `context.used_tokens` / `context.pct_used`                   | विंडो बजट / प्रयुक्त टोकन / उपयोग का 0-100 प्रतिशत                                                         |
+| `usage.input_tokens` / `usage.output_tokens` / `usage.total_tokens`                 | टर्न का समुच्चय                                                                                       |
+| `usage.cache_read_tokens` / `usage.cache_write_tokens`                              | टर्न के लिए कैश-पठन और कैश-लेखन टोकन                                                       |
+| `usage.has_tokens` / `usage.has_split_tokens` / `usage.has_total_only_tokens`       | टोकन प्रदर्शन गार्ड                                                                                 |
+| `usage.cache_hit_pct`                                                               | कुल प्रॉम्प्ट टोकन में कैश-पठन का हिस्सा                                                              |
+| `usage.last.input_tokens` / `usage.last.output_tokens` / `usage.last.cache_hit_pct` | केवल अंतिम मॉडल कॉल (इसमें `cache_read_tokens`, `cache_write_tokens`, `total_tokens` भी हैं)           |
+| `cost.turn_usd` / `cost.available`                                                  | टर्न की अनुमानित लागत / क्या लागत तालिका हल हुई                                                  |
+| `timing.duration_ms`                                                                | वास्तविक समय के अनुसार टर्न की अवधि                                                                             |
+| `identity.name` / `identity.emoji` / `identity.avatar`                              | एजेंट पहचान का नाम / इमोजी / अवतार                                                                 |
+| `session.id`                                                                        | सत्र आईडी                                                                                           |
 
-(Provider rate-limit windows इस contract में **नहीं** हैं।)
+(प्रदाता की दर-सीमा विंडो इस अनुबंध में **नहीं** हैं; आज कोई ऐरे-मान वाला पथ नहीं है, इसलिए `each` अंश के पास पुनरावृत्ति करने के लिए कुछ नहीं है।)
 
-### Verbs
+### क्रियाएँ
 
-Value को verbs से left to right pipe करें; non-verb segment fallback है।
+किसी मान को क्रियाओं से बाएँ से दाएँ पाइप करें; जो खंड क्रिया नहीं है, वह फ़ॉलबैक है।
 
-| Verb            | Effect                                      | Example                           |
-| --------------- | ------------------------------------------- | --------------------------------- |
-| `num`           | compact count                               | `272000 -> 272k`                  |
-| `fixed:N`       | N decimals (default 2)                      | `0.0377`                          |
-| `dur`           | seconds to duration                         | `14820 -> 4h07m`                  |
-| `pct`           | `%` append करें                             | `96 -> 96%`                       |
-| `inv`           | `100 - x`                                   | used को remaining में बदलने के लिए |
-| `alias:TABLE`   | `aliases` में lookup, unlisted हो तो echo   | `medium -> 🌗`                    |
-| `meter:W:SCALE` | 0-100 value पर W-cell glyph bar             | `[⣿⣿⠐⠐⠐]` (`meter:1` = one glyph) |
+| क्रिया            | प्रभाव                                | उदाहरण                           |
+| --------------- | ------------------------------------- | --------------------------------- |
+| `num`           | संक्षिप्त संख्या                         | `272000 -> 272k`                  |
+| `fixed:N`       | N दशमलव स्थान (`0..100`, डिफ़ॉल्ट 2)      | `0.0377`                          |
+| `dur`           | सेकंड से अवधि                   | `14820 -> 4h07m`                  |
+| `pct`           | `%` जोड़ें                            | `96 -> 96%`                       |
+| `inv`           | `100 - x`                             | प्रयुक्त को शेष में बदलने के लिए             |
+| `alias:TABLE`   | `aliases` में खोजें, सूचीबद्ध न होने पर वही लौटाएँ | `medium -> 🌗`                    |
+| `meter:W:SCALE` | 0-100 मान पर W-सेल ग्लिफ़ बार   | `[⣿⣿⠐⠐⠐]` (`meter:1` = एक ग्लिफ़) |
 
-### Piece forms
+`fixed:N` केवल 0 से 100 तक की पूर्ण दशमलव पूर्णांक संख्या स्वीकार करता है। अमान्य
+परिशुद्धता आर्ग्युमेंट उस इंटरपोलेशन को रिक्त कर देते हैं।
 
-- `{ "text": "📚 {context.max_tokens|num}" }`: literal + interpolation।
-- `{ "when": "<path>", "text": "..." }`: path truthy होने पर ही render करें।
-- `{ "map": "<path>", "cases": { "true": "⚡", "false": "🐌" } }`: value to glyph।
-- `{ "each": "limits.windows", "item": "{label}" }`: array iterate करें।
+`meter:W:SCALE` केवल 1 से 100 तक की पूर्ण दशमलव पूर्णांक चौड़ाई स्वीकार करता है। डिफ़ॉल्ट 5 (`meter::braille`) का उपयोग करने के लिए चौड़ाई रिक्त छोड़ें; अमान्य
+चौड़ाइयाँ उस इंटरपोलेशन को रिक्त कर देती हैं।
 
-### Example
+### अंश के रूप
+
+- `{ "text": "📚 {context.max_tokens|num}" }`: लिटरल + इंटरपोलेशन।
+- `{ "when": "<path>", "text": "..." }`: केवल तभी रेंडर करें जब पथ सत्य हो।
+- `{ "map": "<path>", "cases": { "true": "⚡", "false": "🐌" } }`: मान से ग्लिफ़ (एक `_default` केस बेमेल मानों को समाहित करता है)।
+- `{ "each": "<array-path>", "item": "{label}" }`: ऐरे-मान वाले पथ पर पुनरावृत्ति करें (वर्तमान अनुबंध का कोई पथ ऐरे नहीं है)।
+
+### उदाहरण
 
 ```jsonc
 {
@@ -280,45 +297,70 @@ Value को verbs से left to right pipe करें; non-verb segment fall
 }
 ```
 
-render करता है, जैसे `claude-sonnet-4-6 🌗 🐌 | 📚 [⣿⣿⣿⣿⣧]272k`।
+उदाहरण के लिए `claude-sonnet-4-6 🌗 🐌 | 📚 [⣿⣿⣿⣿⣧]272k` रेंडर करता है।
 
-## Providers + credentials
+## प्रदाता + क्रेडेंशियल
 
-- **Anthropic (Claude)**: auth प्रोफाइलों में OAuth टोकन।
-- **GitHub Copilot**: auth प्रोफाइलों में OAuth टोकन।
-- **Gemini CLI**: auth प्रोफाइलों में OAuth टोकन।
-  - JSON उपयोग `stats` पर वापस चला जाता है; `stats.cached` को
-    `cacheRead` में सामान्यीकृत किया जाता है।
-- **OpenAI Codex**: auth प्रोफाइलों में OAuth टोकन (मौजूद होने पर accountId उपयोग किया जाता है)।
-- **MiniMax**: API कुंजी या MiniMax OAuth auth प्रोफाइल। OpenClaw
-  `minimax`, `minimax-cn`, और `minimax-portal` को समान MiniMax quota
-  सतह मानता है, मौजूद होने पर संग्रहीत MiniMax OAuth को प्राथमिकता देता है,
-  और अन्यथा `MINIMAX_CODE_PLAN_KEY`, `MINIMAX_CODING_API_KEY`, या `MINIMAX_API_KEY`
-  पर वापस चला जाता है।
-  उपयोग polling, configured होने पर `models.providers.minimax-portal.baseUrl`
-  या `models.providers.minimax.baseUrl` से Coding Plan host निकालता है, और अन्यथा
-  MiniMax CN host का उपयोग करता है।
-  MiniMax के raw `usage_percent` / `usagePercent` फ़ील्ड का अर्थ **शेष**
-  quota है, इसलिए OpenClaw उन्हें display से पहले उलट देता है; count-based फ़ील्ड
-  मौजूद होने पर प्राथमिकता पाते हैं।
-  - Coding-plan window labels मौजूद होने पर provider के hours/minutes फ़ील्ड से आते हैं,
-    फिर `start_time` / `end_time` span पर वापस चले जाते हैं।
-  - अगर coding-plan endpoint `model_remains` लौटाता है, तो OpenClaw
-    chat-model entry को प्राथमिकता देता है, explicit `window_hours` / `window_minutes`
-    फ़ील्ड अनुपस्थित होने पर timestamps से window label निकालता है, और plan label में model
-    name शामिल करता है।
-- **Xiaomi MiMo**: env/config/auth store (`XIAOMI_API_KEY`) के ज़रिए API कुंजी।
-- **z.ai**: env/config/auth store के ज़रिए API कुंजी।
-- **DeepSeek**: env/config/auth store (`DEEPSEEK_API_KEY`) के ज़रिए API कुंजी।
-  OpenClaw DeepSeek के balance endpoint को call करता है और percent-left quota window के बजाय
-  provider-reported balance को text के रूप में दिखाता है।
+जब कोई उपयोग योग्य प्रदाता उपयोग प्रमाणीकरण हल नहीं किया जा सकता, तब उपयोग छिपा रहता है। OpenClaw
+स्वचालित रूप से उन सक्षम प्रदाता plugins को खोजता है जो
+`contracts.usageProviders` घोषित करते हैं और `resolveUsageAuth` तथा
+`fetchUsageSnapshot` दोनों को लागू करते हैं; कोई अलग कोर प्रदाता अनुमति-सूची नहीं है। स्थिर
+अनुबंध प्रत्येक प्रदाता Plugin को आयात किए बिना खोज को सीमित रखता है। प्रत्येक
+Plugin अपने अपस्ट्रीम एंडपॉइंट और प्रतिक्रिया मैपिंग का स्वामी है। साझा
+स्नैपशॉट योजना के नामों, कोटा विंडो, शेष राशि, व्यय और बजट को
+CLI, ऐप और Control UI उपभोक्ताओं के लिए प्रदाता-निरपेक्ष रखता है।
 
-जब कोई usable provider usage auth हल नहीं किया जा सकता, तो उपयोग छिपा दिया जाता है। Providers
-plugin-specific usage auth logic दे सकते हैं; अन्यथा OpenClaw auth profiles, environment variables,
-या config से matching OAuth/API-key credentials पर वापस चला जाता है।
+- **Anthropic (Claude)**: प्रमाणीकरण प्रोफ़ाइल में OAuth टोकन। यदि OAuth टोकन में
+  `user:profile` स्कोप नहीं है, तो सेट होने पर `claude.ai` वेब सत्र (`CLAUDE_AI_SESSION_KEY`,
+  `CLAUDE_WEB_SESSION_KEY`, या `CLAUDE_WEB_COOKIE` में एक `sessionKey=` कुकी) पर फ़ॉलबैक करता है।
+  जब Anthropic इन्हें रिपोर्ट करता है, तब मॉडल-स्कोप सीमाएँ और सक्षम अतिरिक्त-उपयोग का मासिक व्यय/बजट
+  शामिल किए जाते हैं। इसके बजाय एक स्पष्ट Anthropic Admin API कुंजी, या
+  स्वतः पहचानी गई `sk-ant-admin...` प्रदाता प्रोफ़ाइल, 30-दिन की
+  संगठन लागत और Messages API इतिहास दिखाती है।
+- **ClawRouter**: API कुंजी (`CLAWROUTER_API_KEY`)। कॉन्फ़िगर होने पर मासिक बजट विंडो
+  और प्रकारयुक्त USD बजट दिखाता है; अन्यथा समग्र व्यय और
+  अनुरोध/टोकन/लागत सारांश दिखाता है।
+- **DeepSeek**: env/config/auth स्टोर के माध्यम से API कुंजी (`DEEPSEEK_API_KEY`)।
+  प्रदाता द्वारा रिपोर्ट की गई प्रत्येक मुद्रा की शेष राशि दिखाता है।
+- **GitHub Copilot**: प्रमाणीकरण प्रोफ़ाइल में OAuth टोकन।
+- **Gemini CLI**: प्रमाणीकरण प्रोफ़ाइल में OAuth टोकन।
+- **MiniMax**: API कुंजी या MiniMax OAuth प्रमाणीकरण प्रोफ़ाइल। OpenClaw
+  `minimax`, `minimax-cn`, और `minimax-portal` को एक ही MiniMax कोटा
+  सतह मानता है, उपलब्ध होने पर संग्रहीत MiniMax OAuth को प्राथमिकता देता है, और अन्यथा
+  `MINIMAX_CODE_PLAN_KEY`, `MINIMAX_CODING_API_KEY`, या `MINIMAX_API_KEY` पर फ़ॉलबैक करता है।
+  कॉन्फ़िगर होने पर उपयोग पोलिंग, Coding Plan होस्ट को `models.providers.minimax-portal.baseUrl`
+  या `models.providers.minimax.baseUrl` से प्राप्त करती है, और अन्यथा
+  MiniMax CN होस्ट का उपयोग करती है।
+  MiniMax के कच्चे `usage_percent` / `usagePercent` फ़ील्ड का अर्थ **शेष**
+  कोटा है, इसलिए OpenClaw प्रदर्शन से पहले उन्हें उलट देता है; उपलब्ध होने पर
+  संख्या-आधारित फ़ील्ड को प्राथमिकता मिलती है।
+  - विंडो लेबल उपलब्ध होने पर प्रदाता के घंटे/मिनट फ़ील्ड से आते हैं, फिर
+    `start_time` / `end_time` अवधि पर फ़ॉलबैक करते हैं।
+  - यदि coding-plan एंडपॉइंट `model_remains` लौटाता है, तो OpenClaw
+    चैट-मॉडल प्रविष्टि को प्राथमिकता देता है, स्पष्ट
+    `window_hours` / `window_minutes` फ़ील्ड अनुपस्थित होने पर टाइमस्टैम्प से विंडो लेबल प्राप्त करता है, और योजना
+    लेबल में मॉडल का नाम शामिल करता है।
+- **OpenAI (Codex/ChatGPT योजना)**: प्रमाणीकरण प्रोफ़ाइल में OAuth टोकन (खाता आईडी उपलब्ध होने पर
+  `ChatGPT-Account-Id` हेडर भेजा जाता है)। रिपोर्ट होने पर ChatGPT योजना, रीसेट की जा सकने वाली
+  Codex विंडो और क्रेडिट शेष दिखाता है। क्रेडिट प्रदाता
+  क्रेडिट ही रहते हैं; OpenClaw उन्हें डॉलर के रूप में लेबल नहीं करता। `OPENAI_ADMIN_KEY`
+  तब 30-दिन की संगठन लागत और completions-usage इतिहास जोड़ता है, जब कुंजी के पास Usage
+  Dashboard पहुँच हो। इनफ़रेंस क्रेडेंशियल कभी भी संगठन API को अग्रेषित नहीं किए जाते।
+- **OpenRouter**: API कुंजी या OAuth-समर्थित API कुंजी (`OPENROUTER_API_KEY` या कोई प्रमाणीकरण
+  प्रोफ़ाइल)। खाता क्रेडिट एंडपॉइंट को कुंजी कोटा एंडपॉइंट के साथ जोड़ता है,
+  ताकि जब क्रेडेंशियल उन्हें एक्सेस कर सके, तब खाते की शेष राशि/व्यय, कुंजी बजट और दैनिक/साप्ताहिक/मासिक उपयोग
+  दिखाई दें। कोई भी एंडपॉइंट स्वतंत्र रूप से स्नैपशॉट को
+  समृद्ध कर सकता है।
+- **Venice**: env/config/auth स्टोर के माध्यम से API कुंजी (`VENICE_API_KEY`)। रिपोर्ट होने पर USD और
+  DIEM शेष राशि के साथ DIEM युग आवंटन उपयोग दिखाता है।
+- **Xiaomi MiMo**: दो अलग-अलग उपयोग सतहें। उपयोग के अनुसार भुगतान में API कुंजी
+  (`XIAOMI_API_KEY`) का उपयोग होता है; Token Plan एक अलग कुंजी (`XIAOMI_TOKEN_PLAN_API_KEY`) का उपयोग करता है।
+  वर्तमान में दोनों में से कोई भी कोटा विंडो रिपोर्ट नहीं करता।
+- **z.ai**: env/config/auth स्टोर के माध्यम से API कुंजी (`ZAI_API_KEY` या `Z_AI_API_KEY`)।
 
 ## संबंधित
 
-- [Token उपयोग और लागतें](/hi/reference/token-use)
-- [API उपयोग और लागतें](/hi/reference/api-usage-costs)
-- [Prompt caching](/hi/reference/prompt-caching)
+- [टोकन उपयोग और लागत](/hi/reference/token-use)
+- [API उपयोग और लागत](/hi/reference/api-usage-costs)
+- [प्रॉम्प्ट कैशिंग](/hi/reference/prompt-caching)
+- [मेन्यू बार](/hi/platforms/mac/menu-bar)

@@ -2,35 +2,36 @@
 read_when:
     - Sie wechseln von Claude Code oder Claude Desktop und möchten Anweisungen, MCP-Server und Skills beibehalten
     - Sie müssen verstehen, was OpenClaw automatisch importiert und was ausschließlich im Archiv verbleibt.
-summary: Verschieben Sie den lokalen Status von Claude Code und Claude Desktop mit einem vorab angezeigten Import nach OpenClaw
+summary: Lokalen Status von Claude Code und Claude Desktop mit einem Import samt Vorschau in OpenClaw übertragen
 title: Migration von Claude
 x-i18n:
-    generated_at: "2026-07-12T01:46:38Z"
+    generated_at: "2026-07-26T18:26:09Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: f31088b749a1bebe39b16f519b1817ffeb71ca31e8cbf46fd59db6ff603dbe0f
+    source_hash: 0d5a5e63727e1583fc3fa27ac45215c72df9074b21d7c5f6b33800bec916769b
     source_path: install/migrating-claude.md
     workflow: 16
 ---
 
-OpenClaw importiert den lokalen Claude-Status über den gebündelten Claude-Migrations-Provider. Der Provider zeigt vor jeder Statusänderung eine Vorschau aller Elemente an, schwärzt Geheimnisse in Plänen und Berichten und erstellt vor der Anwendung eine verifizierte Sicherung.
+OpenClaw importiert lokalen Claude-Status über den gebündelten Claude-Migrations-Provider. Der Provider zeigt vor jeder Statusänderung eine Vorschau aller Elemente an und schwärzt Geheimnisse in Plänen und Berichten. Der eigenständige Aufruf `openclaw migrate` erstellt eine verifizierte Sicherung; beim Ablauf für eine neue Ersteinrichtung wird der Import zunächst vorbereitet und erst nach erfolgreicher Verifizierung veröffentlicht.
 
 <Note>
-Importe während des Onboardings erfordern eine neue OpenClaw-Einrichtung. Wenn bereits ein lokaler OpenClaw-Status vorhanden ist, setzen Sie zunächst Konfiguration, Anmeldedaten, Sitzungen und den Arbeitsbereich zurück oder verwenden Sie nach Prüfung des Plans direkt `openclaw migrate` mit `--overwrite`.
+Importe während der Ersteinrichtung erfordern eine neue OpenClaw-Einrichtung. Wenn bereits lokaler OpenClaw-Status vorhanden ist, setzen Sie zuerst Konfiguration, Anmeldedaten, Sitzungen und den Arbeitsbereich zurück, oder verwenden Sie `openclaw migrate` nach Prüfung des Plans direkt mit `--overwrite`.
 </Note>
 
 ## Zwei Importmöglichkeiten
 
 <Tabs>
-  <Tab title="Onboarding-Assistent">
-    Der Assistent bietet Claude an, wenn er einen lokalen Claude-Status erkennt.
+  <Tab title="Einrichtungsassistent">
+    Der Assistent bietet Claude an, wenn er lokalen Claude-Status erkennt.
 
     ```bash
     openclaw onboard --flow import
     ```
 
-    Alternativ können Sie eine bestimmte Quelle angeben:
+    Alternativ kann eine bestimmte Quelle angegeben werden:
 
     ```bash
     openclaw onboard --import-from claude --import-source ~/.claude
@@ -54,50 +55,50 @@ Importe während des Onboardings erfordern eine neue OpenClaw-Einrichtung. Wenn 
 
 <AccordionGroup>
   <Accordion title="Anweisungen und Speicher">
-    - Der Inhalt von `CLAUDE.md` und `.claude/CLAUDE.md` eines Projekts wird in die Datei `AGENTS.md` des OpenClaw-Agent-Arbeitsbereichs kopiert oder an sie angehängt.
-    - Der Inhalt der Benutzerdatei `~/.claude/CLAUDE.md` wird an die Datei `USER.md` des Arbeitsbereichs angehängt.
+    - Inhalte aus dem Projekt `CLAUDE.md` und `.claude/CLAUDE.md` werden in den OpenClaw-Agentenarbeitsbereich `AGENTS.md` kopiert oder daran angehängt.
+    - Inhalte aus dem Benutzerverzeichnis `~/.claude/CLAUDE.md` werden an den Arbeitsbereich `USER.md` angehängt.
 
   </Accordion>
   <Accordion title="MCP-Server">
-    Definitionen von MCP-Servern werden, sofern vorhanden, aus der Projektdatei `.mcp.json`, der Claude-Code-Datei `~/.claude.json` und der Claude-Desktop-Datei `claude_desktop_config.json` importiert.
+    Definitionen von MCP-Servern werden, sofern vorhanden, aus dem Projekt `.mcp.json`, aus Claude Code `~/.claude.json` und aus Claude Desktop `claude_desktop_config.json` importiert.
   </Accordion>
   <Accordion title="Skills und Befehle">
-    - Claude-Skills mit einer `SKILL.md`-Datei werden in das Skills-Verzeichnis des OpenClaw-Arbeitsbereichs kopiert.
-    - Markdown-Dateien mit Claude-Befehlen unter `.claude/commands/` oder `~/.claude/commands/` werden in OpenClaw-Skills mit `disable-model-invocation: true` umgewandelt.
+    - Claude-Skills mit einer Datei `SKILL.md` werden in das Skills-Verzeichnis des OpenClaw-Arbeitsbereichs kopiert.
+    - Markdown-Dateien mit Claude-Befehlen unter `.claude/commands/` oder `~/.claude/commands/` werden mit `disable-model-invocation: true` in OpenClaw-Skills umgewandelt.
 
   </Accordion>
 </AccordionGroup>
 
-## Was ausschließlich im Archiv verbleibt
+## Was ausschließlich archiviert wird
 
-Der Provider kopiert die folgenden Elemente zur manuellen Prüfung in den Migrationsbericht, lädt sie jedoch **nicht** in die aktive OpenClaw-Konfiguration:
+Der Provider kopiert Folgendes zur manuellen Prüfung in den Migrationsbericht, lädt es jedoch **nicht** in die aktive OpenClaw-Konfiguration:
 
 - Claude-Hooks
-- Claude-Berechtigungen und umfassende Werkzeug-Zulassungslisten
-- Claude-Standardwerte für Umgebungsvariablen
+- Claude-Berechtigungen und umfassende Zulassungslisten für Tools
+- Claude-Standardwerte für die Umgebung
 - `CLAUDE.local.md`
 - `.claude/rules/`
 - Claude-Unteragenten unter `.claude/agents/` oder `~/.claude/agents/`
-- Cache-, Plan- und Projektverlaufsverzeichnisse von Claude Code
+- Caches, Pläne und Projektverlaufsverzeichnisse von Claude Code
 - Claude-Desktop-Erweiterungen und im Betriebssystem gespeicherte Anmeldedaten
 
-OpenClaw weigert sich, Hooks auszuführen, Berechtigungs-Zulassungslisten zu vertrauen oder undurchsichtige OAuth- und Desktop-Anmeldedaten automatisch zu entschlüsseln. Übertragen Sie benötigte Inhalte nach Prüfung des Archivs manuell.
+OpenClaw weigert sich, Hooks auszuführen, Berechtigungs-Zulassungslisten zu vertrauen oder undurchsichtige OAuth- und Desktop-Anmeldedaten automatisch zu dekodieren. Übertragen Sie benötigte Elemente nach Prüfung des Archivs manuell.
 
 ## Quellenauswahl
 
-Ohne `--from` untersucht OpenClaw das standardmäßige Claude-Code-Stammverzeichnis unter `~/.claude`, die stichprobenartig ausgewertete Claude-Code-Statusdatei `~/.claude.json` und unter macOS die MCP-Konfiguration von Claude Desktop.
+Ohne `--from` prüft OpenClaw das standardmäßige Claude-Code-Stammverzeichnis unter `~/.claude`, die stichprobenartig ausgewählte Claude-Code-Statusdatei `~/.claude.json` und die MCP-Konfiguration von Claude Desktop unter macOS.
 
-Wenn `--from` auf ein Projektstammverzeichnis verweist, importiert OpenClaw ausschließlich die Claude-Dateien dieses Projekts, beispielsweise `CLAUDE.md`, `.claude/settings.json`, `.claude/commands/`, `.claude/skills/` und `.mcp.json`. Bei einem Import aus einem Projektstammverzeichnis wird das globale Claude-Stammverzeichnis nicht gelesen.
+Wenn `--from` auf ein Projektstammverzeichnis verweist, importiert OpenClaw nur die Claude-Dateien dieses Projekts, beispielsweise `CLAUDE.md`, `.claude/settings.json`, `.claude/commands/`, `.claude/skills/` und `.mcp.json`. Bei einem Import aus einem Projektstammverzeichnis wird das globale Claude-Stammverzeichnis nicht gelesen.
 
 ## Empfohlener Ablauf
 
 <Steps>
-  <Step title="Plan in der Vorschau anzeigen">
+  <Step title="Vorschau des Plans anzeigen">
     ```bash
     openclaw migrate claude --dry-run
     ```
 
-    Der Plan führt alle bevorstehenden Änderungen auf, einschließlich Konflikten, übersprungenen Elementen und vertraulichen Werten, die in verschachtelten MCP-Feldern namens `env` oder `headers` geschwärzt wurden.
+    Der Plan führt alle bevorstehenden Änderungen auf, einschließlich Konflikten, übersprungenen Elementen und sensiblen Werten, die in verschachtelten MCP-Feldern `env` oder `headers` geschwärzt wurden.
 
   </Step>
   <Step title="Mit Sicherung anwenden">
@@ -113,7 +114,7 @@ Wenn `--from` auf ein Projektstammverzeichnis verweist, importiert OpenClaw auss
     openclaw doctor
     ```
 
-    [Doctor](/de/gateway/doctor) prüft nach dem Import auf Konfigurations- oder Statusprobleme.
+    [Doctor](/de/gateway/doctor) prüft nach dem Import auf Probleme mit der Konfiguration oder dem Status.
 
   </Step>
   <Step title="Neu starten und überprüfen">
@@ -122,20 +123,20 @@ Wenn `--from` auf ein Projektstammverzeichnis verweist, importiert OpenClaw auss
     openclaw status
     ```
 
-    Vergewissern Sie sich, dass das Gateway ordnungsgemäß funktioniert und Ihre importierten Anweisungen, MCP-Server und Skills geladen sind.
+    Vergewissern Sie sich, dass das Gateway fehlerfrei funktioniert und die importierten Anweisungen, MCP-Server und Skills geladen sind.
 
   </Step>
 </Steps>
 
 ## Konfliktbehandlung
 
-Die Anwendung wird nicht fortgesetzt, wenn der Plan Konflikte meldet, weil am Ziel bereits eine Datei oder ein Konfigurationswert vorhanden ist.
+Die Anwendung wird verweigert, wenn der Plan Konflikte meldet, weil am Ziel bereits eine Datei oder ein Konfigurationswert vorhanden ist.
 
 <Warning>
 Führen Sie den Vorgang nur dann erneut mit `--overwrite` aus, wenn das vorhandene Ziel absichtlich ersetzt werden soll. Provider können für überschriebene Dateien weiterhin Sicherungen auf Elementebene im Verzeichnis des Migrationsberichts erstellen.
 </Warning>
 
-Bei einer neuen OpenClaw-Installation sind Konflikte ungewöhnlich. Sie treten normalerweise auf, wenn Sie den Import für eine Einrichtung wiederholen, die bereits Benutzeränderungen enthält.
+Bei einer neuen OpenClaw-Installation sind Konflikte ungewöhnlich. Sie treten normalerweise auf, wenn der Import für eine Einrichtung erneut ausgeführt wird, die bereits Benutzeränderungen enthält.
 
 ## JSON-Ausgabe für die Automatisierung
 
@@ -144,22 +145,22 @@ openclaw migrate claude --dry-run --json
 openclaw migrate apply claude --json --yes
 ```
 
-Außerhalb eines interaktiven Terminals ist `--yes` für `migrate apply` erforderlich. Ohne dieses Flag gibt OpenClaw einen Fehler aus, statt die Änderungen anzuwenden. Skripte und CI müssen `--yes` daher ausdrücklich übergeben. Zeigen Sie zunächst mit `--dry-run --json` eine Vorschau an und wenden Sie die Änderungen anschließend mit `--json --yes` an, sobald der Plan korrekt aussieht.
+`--yes` ist für `migrate apply` außerhalb eines interaktiven Terminals erforderlich. Ohne diese Angabe gibt OpenClaw einen Fehler aus, statt die Änderungen anzuwenden. Skripte und die CI müssen `--yes` daher ausdrücklich übergeben. Zeigen Sie zuerst mit `--dry-run --json` eine Vorschau an und wenden Sie die Änderungen anschließend mit `--json --yes` an, sobald der Plan korrekt aussieht.
 
 ## Fehlerbehebung
 
 <AccordionGroup>
   <Accordion title="Der Claude-Status befindet sich außerhalb von ~/.claude">
-    Übergeben Sie `--from /actual/path` über die CLI oder `--import-source /actual/path` beim Onboarding.
+    Übergeben Sie `--from /actual/path` für die CLI oder `--import-source /actual/path` für die Ersteinrichtung.
   </Accordion>
-  <Accordion title="Das Onboarding verweigert den Import in eine bestehende Einrichtung">
-    Importe während des Onboardings erfordern eine neue Einrichtung. Setzen Sie entweder den Status zurück und führen Sie das Onboarding erneut aus oder verwenden Sie direkt `openclaw migrate apply claude`, das `--overwrite` und eine explizite Sicherungssteuerung unterstützt.
+  <Accordion title="Die Ersteinrichtung verweigert den Import in eine vorhandene Einrichtung">
+    Importe während der Ersteinrichtung erfordern eine neue Einrichtung. Setzen Sie entweder den Status zurück und führen Sie die Ersteinrichtung erneut durch, oder verwenden Sie direkt `openclaw migrate apply claude`, das `--overwrite` und eine ausdrückliche Steuerung der Sicherung unterstützt.
   </Accordion>
   <Accordion title="MCP-Server aus Claude Desktop wurden nicht importiert">
-    Claude Desktop liest `claude_desktop_config.json` aus einem plattformspezifischen Pfad. Lassen Sie `--from` auf das Verzeichnis dieser Datei verweisen, wenn OpenClaw sie nicht automatisch erkannt hat.
+    Claude Desktop liest `claude_desktop_config.json` aus einem plattformspezifischen Pfad. Lassen Sie `--from` auf das Verzeichnis dieser Datei verweisen, falls OpenClaw es nicht automatisch erkannt hat.
   </Accordion>
   <Accordion title="Claude-Befehle wurden zu Skills mit deaktiviertem Modellaufruf">
-    Dies ist beabsichtigt. Claude-Befehle werden vom Benutzer ausgelöst. Deshalb importiert OpenClaw sie als Skills mit `disable-model-invocation: true`. Bearbeiten Sie den Frontmatter-Block des jeweiligen Skills, wenn der Agent sie automatisch aufrufen soll.
+    Dies ist beabsichtigt. Claude-Befehle werden durch Benutzer ausgelöst, daher importiert OpenClaw sie als Skills mit `disable-model-invocation: true`. Bearbeiten Sie das Frontmatter jedes Skills, wenn der Agent sie automatisch aufrufen soll.
   </Accordion>
 </AccordionGroup>
 
@@ -168,6 +169,6 @@ Außerhalb eines interaktiven Terminals ist `--yes` für `migrate apply` erforde
 - [`openclaw migrate`](/de/cli/migrate): vollständige CLI-Referenz, Plugin-Vertrag und JSON-Strukturen.
 - [Migrationsleitfaden](/de/install/migrating): alle Migrationspfade.
 - [Migration von Hermes](/de/install/migrating-hermes): der andere systemübergreifende Importpfad.
-- [Onboarding](/de/cli/onboard): Assistentenablauf und Flags für die nicht interaktive Verwendung.
+- [Ersteinrichtung](/de/cli/onboard): Assistentenablauf und Flags für die nicht interaktive Verwendung.
 - [Doctor](/de/gateway/doctor): Zustandsprüfung nach der Migration.
-- [Agent-Arbeitsbereich](/de/concepts/agent-workspace): Speicherort von `AGENTS.md`, `USER.md` und Skills.
+- [Agentenarbeitsbereich](/de/concepts/agent-workspace): Speicherort von `AGENTS.md`, `USER.md` und Skills.

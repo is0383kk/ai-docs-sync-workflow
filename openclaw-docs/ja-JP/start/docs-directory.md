@@ -1,12 +1,13 @@
 ---
 read_when:
     - 主要なドキュメントページにすばやくアクセスしたい場合
-summary: OpenClawドキュメントで最もよく参照されるページへの厳選リンク。
+summary: よく利用される OpenClaw ドキュメントへの厳選リンク。
 title: ドキュメントディレクトリ
 x-i18n:
-    generated_at: "2026-07-11T22:43:36Z"
+    generated_at: "2026-07-26T10:31:36Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 48859dc0b31139f1f5acaa403e506cd6d9767ee32e502a4ef74340dbbc21918f
     source_path: start/docs-directory.md
@@ -14,11 +15,11 @@ x-i18n:
 ---
 
 <Note>
-このページは厳選された索引です。初めての場合は、[はじめに](/ja-JP/start/getting-started)から始めてください。
-ドキュメントの全体像については、[ドキュメントハブ](/ja-JP/start/hubs)を参照してください。
+このページは厳選された索引です。初めての方は、[はじめに](/ja-JP/start/getting-started)からお読みください。
+ドキュメント全体のマップについては、[ドキュメントハブ](/ja-JP/start/hubs)を参照してください。
 </Note>
 
-## ここから始める
+## まずはこちら
 
 - [ドキュメントハブ（全ページへのリンク）](/ja-JP/start/hubs)
 - [ヘルプ](/ja-JP/help)
@@ -60,7 +61,7 @@ x-i18n:
 - [iOS アプリ](/ja-JP/platforms/ios)
 - [Linux アプリ](/ja-JP/platforms/linux)
 - [macOS アプリ](/ja-JP/platforms/macos)
-- [Windows ハブ](/ja-JP/platforms/windows)
+- [Windows Hub](/ja-JP/platforms/windows)
 
 ## 運用と安全性
 

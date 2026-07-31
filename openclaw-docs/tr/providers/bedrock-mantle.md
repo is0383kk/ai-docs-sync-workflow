@@ -1,28 +1,32 @@
 ---
 read_when:
-    - Bedrock Mantle üzerinde barındırılan açık kaynak modellerini OpenClaw ile kullanmak istiyorsunuz
+    - OpenClaw ile Bedrock Mantle üzerinde barındırılan açık kaynaklı modelleri kullanmak istiyorsunuz
     - GPT-OSS, Qwen, Kimi veya GLM için Mantle'ın OpenAI uyumlu uç noktasına ihtiyacınız var
-    - Amazon Bedrock Mantle üzerinden Claude Sonnet 5 veya Mythos 5 kullanmak istiyorsunuz
+    - Claude Opus 5, Sonnet 5 veya Mythos 5'i Amazon Bedrock Mantle üzerinden kullanmak istiyorsunuz
 summary: Amazon Bedrock Mantle'ın OpenAI uyumlu ve Claude Messages modellerini OpenClaw ile kullanın
 title: Amazon Bedrock Mantle
 x-i18n:
-    generated_at: "2026-07-12T12:07:22Z"
+    generated_at: "2026-07-26T22:58:13Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 107ffdc76e3971a085f7d64d8d766f6cd8706ce882d8bab80d27c72ab545eec1
+    source_hash: 3d2b49120560c4466aff217c3101fab057dd87c1c501f1b8eb94d74f62bd1037
     source_path: providers/bedrock-mantle.md
     workflow: 16
 ---
 
-OpenClaw, Mantle OpenAI uyumlu uç noktasına bağlanan, paketle birlikte sunulan bir **Amazon Bedrock Mantle** sağlayıcısı içerir. Mantle, Bedrock altyapısıyla desteklenen standart bir `/v1/chat/completions` yüzeyi üzerinden açık kaynaklı ve üçüncü taraf modelleri (GPT-OSS, Qwen, Kimi, GLM ve benzerleri) barındırır. Mantle ayrıca Anthropic Claude modellerini bir Anthropic Messages rotası üzerinden sunar.
+OpenClaw, Mantle'ın OpenAI uyumlu uç noktasına bağlanan yerleşik bir **Amazon Bedrock Mantle** sağlayıcısı içerir. Mantle, Bedrock altyapısıyla desteklenen standart bir
+`/v1/chat/completions` yüzeyi üzerinden açık kaynak ve
+üçüncü taraf modelleri (GPT-OSS, Qwen, Kimi, GLM ve benzerleri) barındırır. Mantle ayrıca
+Anthropic Claude modellerini bir Anthropic Messages rotası üzerinden sunar.
 
-| Özellik        | Değer                                                                                                      |
-| -------------- | ---------------------------------------------------------------------------------------------------------- |
-| Sağlayıcı kimliği | `amazon-bedrock-mantle`                                                                                 |
-| API            | Keşfedilen OSS modelleri için `openai-completions`, Claude modelleri için `anthropic-messages`              |
-| Kimlik doğrulama | Açıkça belirtilen `AWS_BEARER_TOKEN_BEDROCK` veya IAM kimlik bilgisi zinciriyle bearer token oluşturma    |
-| Varsayılan bölge | `us-east-1` (`AWS_REGION` veya `AWS_DEFAULT_REGION` ile geçersiz kılınabilir)                             |
+| Özellik        | Değer                                                                                  |
+| -------------- | -------------------------------------------------------------------------------------- |
+| Sağlayıcı kimliği | `amazon-bedrock-mantle`                                                                |
+| API            | Keşfedilen OSS modelleri için `openai-completions`, Claude modelleri için `anthropic-messages` |
+| Kimlik doğrulama | Açıkça belirtilen `AWS_BEARER_TOKEN_BEDROCK` veya IAM kimlik bilgisi zinciriyle bearer token oluşturma |
+| Varsayılan bölge | `us-east-1` (`AWS_REGION` veya `AWS_DEFAULT_REGION` ile geçersiz kılınabilir) |
 
 ## Başlarken
 
@@ -30,7 +34,7 @@ Tercih ettiğiniz kimlik doğrulama yöntemini seçin ve kurulum adımlarını i
 
 <Tabs>
   <Tab title="Açıkça belirtilen bearer token">
-    **En uygun kullanım:** Zaten bir Mantle bearer token'ına sahip olduğunuz ortamlar.
+    **En uygun olduğu durum:** Zaten bir Mantle bearer token'ına sahip olduğunuz ortamlar.
 
     <Steps>
       <Step title="Bearer token'ı Gateway ana makinesinde ayarlayın">
@@ -49,18 +53,19 @@ Tercih ettiğiniz kimlik doğrulama yöntemini seçin ve kurulum adımlarını i
         openclaw models list
         ```
 
-        Keşfedilen modeller `amazon-bedrock-mantle` sağlayıcısı altında görünür. Varsayılanları geçersiz kılmak istemediğiniz sürece ek yapılandırma gerekmez.
+        Keşfedilen modeller `amazon-bedrock-mantle` sağlayıcısı altında görünür. Varsayılanları
+        geçersiz kılmak istemediğiniz sürece ek yapılandırma gerekmez.
       </Step>
     </Steps>
 
   </Tab>
 
   <Tab title="IAM kimlik bilgileri">
-    **En uygun kullanım:** AWS SDK uyumlu kimlik bilgilerinin kullanılması (paylaşılan yapılandırma, SSO, web kimliği, bulut sunucusu veya görev rolleri).
+    **En uygun olduğu durum:** AWS SDK uyumlu kimlik bilgilerinin kullanılması (paylaşılan yapılandırma, SSO, web kimliği, bulut sunucusu veya görev rolleri).
 
     <Steps>
       <Step title="AWS kimlik bilgilerini Gateway ana makinesinde yapılandırın">
-        AWS SDK ile uyumlu herhangi bir kimlik doğrulama kaynağı kullanılabilir:
+        AWS SDK uyumlu herhangi bir kimlik doğrulama kaynağı kullanılabilir:
 
         ```bash
         export AWS_PROFILE="default"
@@ -77,7 +82,7 @@ Tercih ettiğiniz kimlik doğrulama yöntemini seçin ve kurulum adımlarını i
     </Steps>
 
     <Tip>
-    `AWS_BEARER_TOKEN_BEDROCK` ayarlanmadığında OpenClaw; paylaşılan kimlik bilgileri/yapılandırma profilleri, SSO, web kimliği ve bulut sunucusu veya görev rolleri dâhil olmak üzere AWS varsayılan kimlik bilgisi zincirinden sizin için bearer token oluşturur.
+    `AWS_BEARER_TOKEN_BEDROCK` ayarlanmadığında OpenClaw, paylaşılan kimlik bilgileri/yapılandırma profilleri, SSO, web kimliği ve bulut sunucusu veya görev rolleri dâhil olmak üzere AWS varsayılan kimlik bilgisi zincirinden bearer token'ı sizin için oluşturur.
     </Tip>
 
   </Tab>
@@ -85,21 +90,25 @@ Tercih ettiğiniz kimlik doğrulama yöntemini seçin ve kurulum adımlarını i
 
 ## Otomatik model keşfi
 
-`AWS_BEARER_TOKEN_BEDROCK` ayarlandığında OpenClaw bunu doğrudan kullanır. Aksi hâlde OpenClaw, AWS varsayılan kimlik bilgisi zincirinden bir Mantle bearer token'ı oluşturmaya çalışır. Ardından bölgenin `/v1/models` uç noktasını sorgulayarak kullanılabilir Mantle modellerini keşfeder.
+`AWS_BEARER_TOKEN_BEDROCK` ayarlandığında OpenClaw bunu doğrudan kullanır. Aksi takdirde
+OpenClaw, AWS varsayılan kimlik bilgisi zincirinden bir Mantle bearer token'ı
+oluşturmaya çalışır. Ardından bölgenin `/v1/models` uç noktasını sorgulayarak
+kullanılabilir Mantle modellerini keşfeder.
 
-| Davranış          | Ayrıntı                                                                                              |
-| ----------------- | ---------------------------------------------------------------------------------------------------- |
-| Keşif önbelleği   | Sonuçlar bölge başına 1 saat önbelleğe alınır; getirme hatasında son önbelleğe alınmış sonuç döndürülür |
-| IAM token yenileme | Bölge başına önbelleğe alınarak 2 saatte bir                                                     |
+| Davranış          | Ayrıntı                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| Keşif önbelleği   | Sonuçlar bölge başına 1 saat önbelleğe alınır; getirme hatasında önbelleğe alınmış son sonuç döndürülür |
+| IAM token yenileme | Bölge başına önbelleğe alınarak her 2 saatte bir                                      |
 
-Mantle Plugin'ini etkin tutarken otomatik keşfi ve IAM bearer token oluşturmayı devre dışı bırakmak için Plugin'e ait keşif anahtarını kapatın:
+Mantle Plugin'ini etkin tutarken otomatik keşfi ve IAM
+bearer token oluşturmayı engellemek için Plugin'e ait keşif geçişini devre dışı bırakın:
 
 ```bash
 openclaw config set plugins.entries.amazon-bedrock-mantle.config.discovery.enabled false
 ```
 
 <Note>
-Bearer token, standart [Amazon Bedrock](/tr/providers/bedrock) sağlayıcısının kullandığı `AWS_BEARER_TOKEN_BEDROCK` ile aynıdır.
+Bearer token, standart [Amazon Bedrock](/tr/providers/bedrock) sağlayıcısı tarafından kullanılan `AWS_BEARER_TOKEN_BEDROCK` ile aynıdır.
 </Note>
 
 ### Desteklenen bölgeler
@@ -138,41 +147,81 @@ Otomatik keşif yerine açık yapılandırmayı tercih ediyorsanız:
 }
 ```
 
-Açıkça belirtilen ve boş olmayan bir `models` listesi belirleyicidir ve aşağıdaki Claude satırları dâhil olmak üzere keşfedilen tüm satırların yerini alır. Otomatik Mantle kataloğunu korumak için `models` alanını atlayın veya kullanmak istediğiniz Claude modellerinin tüm girdilerini ekleyin.
+Açıkça belirtilen ve boş olmayan bir `models` listesi belirleyicidir ve aşağıdaki
+Claude satırları dâhil keşfedilen tüm satırların yerini alır. Otomatik Mantle
+kataloğunu korumak için `models` değerini atlayın veya kullanmak istediğiniz eksiksiz Claude
+model girdilerini ekleyin.
 
 ## Gelişmiş yapılandırma
 
 <AccordionGroup>
   <Accordion title="Akıl yürütme desteği">
-    Akıl yürütme desteği; `thinking`, `reasoner`, `reasoning`, `deepseek.r`, `gpt-oss-120b` veya `gpt-oss-safeguard-120b` gibi kalıpları içeren model kimliklerinden çıkarılır. OpenClaw, keşif sırasında eşleşen modeller için otomatik olarak `reasoning: true` ayarlar.
+    Akıl yürütme desteği, model kimliklerinde
+    `thinking`, `reasoner`, `reasoning`, `deepseek.r`, `gpt-oss-120b` veya
+    `gpt-oss-safeguard-120b` gibi kalıpların bulunmasından çıkarılır. OpenClaw, keşif sırasında
+    eşleşen modeller için `reasoning: true` değerini otomatik olarak ayarlar.
   </Accordion>
 
   <Accordion title="Uç noktanın kullanılamaması">
-    Mantle uç noktası kullanılamıyorsa, model döndürmüyorsa veya bearer token çözümlemesi başarısız oluyorsa keşif boş bir sonuç döndürür ve örtük sağlayıcı atlanır. OpenClaw hata vermez; yapılandırılmış diğer sağlayıcılar normal şekilde çalışmaya devam eder.
+    Mantle uç noktası kullanılamıyorsa, model döndürmüyorsa veya bearer token
+    çözümlemesi başarısız olursa keşif boş bir sonuç döndürür ve örtük
+    sağlayıcı atlanır. OpenClaw hata vermez; yapılandırılmış diğer sağlayıcılar
+    normal şekilde çalışmaya devam eder.
   </Accordion>
 
   <Accordion title="Anthropic Messages rotası üzerinden Claude">
-    Model listesi otomatik keşif tarafından yönetildiğinde OpenClaw, `/v1/models` yanıtından bağımsız olarak başarılı bir sorgulamadan sonra dört Claude modeli ekler: `amazon-bedrock-mantle/anthropic.claude-sonnet-5` (Claude Sonnet 5), `amazon-bedrock-mantle/anthropic.claude-opus-4-7` (Claude Opus 4.7), `amazon-bedrock-mantle/anthropic.claude-mythos-5` (Claude Mythos 5) ve `amazon-bedrock-mantle/anthropic.claude-mythos-preview` (Claude Mythos Preview). Bunlar `anthropic-messages` API yüzeyini kullanır ve bearer kimlik doğrulamalı, Anthropic uyumlu aynı uç nokta (`<mantle-base>/anthropic`) üzerinden akış gerçekleştirir; dolayısıyla AWS bearer token'ı bir Anthropic API anahtarı olarak değerlendirilmez.
+    Model listesini otomatik keşif yönetirken OpenClaw, `/v1/models` ne döndürürse döndürsün
+    başarılı bir aramanın ardından beş Claude
+    modeli ekler:
+    `amazon-bedrock-mantle/anthropic.claude-opus-5` (Claude Opus 5),
+    `amazon-bedrock-mantle/anthropic.claude-sonnet-5` (Claude Sonnet 5),
+    `amazon-bedrock-mantle/anthropic.claude-opus-4-7` (Claude Opus 4.7) ve
+    `amazon-bedrock-mantle/anthropic.claude-mythos-5` (Claude Mythos 5), ayrıca
+    `amazon-bedrock-mantle/anthropic.claude-mythos-preview` (Claude Mythos
+    Preview). Bunlar `anthropic-messages` API yüzeyini kullanır ve bearer ile kimliği doğrulanan aynı Anthropic uyumlu uç nokta
+    (`<mantle-base>/anthropic`) üzerinden akış gerçekleştirir; dolayısıyla AWS bearer token'ı bir
+    Anthropic API anahtarı olarak değerlendirilmez.
 
-    Claude Sonnet 5 her zaman uyarlamalı düşünmeyi kullanır ve varsayılan çaba düzeyi `high` olur. Mantle rotası düşünmeyi devre dışı bırakamadığından `/think off` ve `/think minimal`, `low` olarak eşlenir. OpenClaw ayrıca Sonnet 5 isteklerinde özel sıcaklık değerini kullanmaz.
+    Claude Opus 5; 1,000,000 token'lık bağlam penceresi, 128,000 token'lık
+    çıktı sınırı, görüntü girdisi ve `$5/$25` girdi/çıktı fiyatlandırması sunar. Uyarlanabilir
+    düşünmenin varsayılanı `high` değeridir; `/think off` düşünmeyi devre dışı bırakır ve
+    `/think xhigh|max` modelin yerel çaba düzeylerini kullanır. OpenClaw,
+    çağıranın seçtiği örnekleme parametrelerini atlar.
 
-    Claude Mythos 5 sınırlı erişime sahiptir. 1.000.000 token'lık bağlam penceresi ve 128.000 token'lık çıktı sınırı sunar; her zaman uyarlamalı düşünmeyi kullanır, `/think off` ve `/think minimal` değerlerini `low` olarak eşler ve çağıran tarafından seçilen örnekleme parametrelerini kullanmaz.
+    Claude Sonnet 5 her zaman uyarlanabilir düşünmeyi kullanır ve varsayılan çaba düzeyi `high`
+    değeridir. Mantle rotası düşünmeyi devre dışı bırakamadığından `/think off` ve `/think minimal`, `low` ile eşlenir.
+    OpenClaw ayrıca Sonnet 5 istekleri için özel sıcaklık değerini atlar.
 
-    Claude Mythos Preview her zaman akıl yürütme talep eder ve `/think` düzeyi ayarlanmadığında varsayılan çaba düzeyi `high` olur (`xhigh`/`max`, `high` düzeyine; `minimal` ise `low` düzeyine eşlenir). Mantle üzerindeki Opus 4.7, model tarafından sağlanan akıl yürütme olmadan akış gerçekleştirir. Opus 4.7 bu rotada örnekleme geçersiz kılmalarını kabul etmediğinden OpenClaw, `temperature` parametresini kullanmaz; Mythos Preview ise `temperature` geçersiz kılmasını normal şekilde kabul eder.
+    Claude Mythos 5 sınırlı erişime sahiptir. 1,000,000 token'lık bağlam
+    penceresi ve 128,000 token'lık çıktı sınırı sunar, her zaman uyarlanabilir düşünmeyi kullanır,
+    `/think off` ve `/think minimal` değerlerini `low` ile eşler ve çağıranın seçtiği
+    örnekleme parametrelerini atlar.
 
-    Boş olmayan açık bir `models.providers["amazon-bedrock-mantle"].models` listesi, keşfedilen kataloğun tamamının yerini alır. Yerleşik Claude satırlarını kullanmak istediğinizde bu listeyi atlayın.
+    Claude Mythos Preview her zaman akıl yürütme ister; hiçbir `/think` düzeyi ayarlanmadığında varsayılan
+    çaba düzeyi `high` olur (`xhigh`/`max` değerlerinden `high` değerine düşürülür,
+    `minimal` değerinden `low` değerine yükseltilir). Mantle üzerindeki Opus 4.7, model tarafından sağlanan
+    akıl yürütme olmadan akış gerçekleştirir ve Opus 4.7 bu rotada örnekleme geçersiz kılmalarını kabul etmediğinden OpenClaw
+    `temperature` parametresini atlar; Mythos
+    Preview ise bir `temperature` geçersiz kılmasını normal şekilde kabul eder.
+
+    Boş olmayan ve açıkça belirtilmiş bir `models.providers["amazon-bedrock-mantle"].models`
+    listesi, keşfedilen kataloğun tamamının yerini alır. Bu yerleşik Claude
+    satırlarını istediğinizde bu listeyi atlayın.
 
   </Accordion>
 
   <Accordion title="Amazon Bedrock sağlayıcısıyla ilişkisi">
-    Bedrock Mantle, standart [Amazon Bedrock](/tr/providers/bedrock) sağlayıcısından ayrı bir sağlayıcıdır. Mantle, OSS kataloğu için OpenAI uyumlu bir `/v1` yüzeyi kullanırken standart Bedrock sağlayıcısı yerel Bedrock Converse API'sini kullanır.
+    Bedrock Mantle, standart
+    [Amazon Bedrock](/tr/providers/bedrock) sağlayıcısından ayrı bir sağlayıcıdır. Mantle, OSS kataloğu için
+    OpenAI uyumlu bir `/v1` yüzeyi kullanırken standart
+    Bedrock sağlayıcısı yerel Bedrock Converse API'sini kullanır.
 
-    Mevcut olduğunda her iki sağlayıcı da aynı `AWS_BEARER_TOKEN_BEDROCK` kimlik bilgisini paylaşır.
+    Her iki sağlayıcı da mevcut olduğunda aynı `AWS_BEARER_TOKEN_BEDROCK` kimlik bilgisini paylaşır.
 
   </Accordion>
 </AccordionGroup>
 
-## İlgili konular
+## İlgili kaynaklar
 
 <CardGroup cols={2}>
   <Card title="Amazon Bedrock" href="/tr/providers/bedrock" icon="cloud">

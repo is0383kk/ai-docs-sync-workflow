@@ -1,15 +1,16 @@
 ---
 read_when:
     - Quieres conectar OpenClaw a un espacio de trabajo de Raft
-    - Está configurando un agente externo de Raft
+    - Se está configurando un agente externo de Raft
     - Estás depurando la entrega de activación de Raft
 sidebarTitle: Raft
 summary: Compatibilidad con agentes externos de Raft mediante el puente de activación de la CLI de Raft
-title: Balsa
+title: Raft
 x-i18n:
-    generated_at: "2026-07-11T22:55:37Z"
+    generated_at: "2026-07-26T05:06:49Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: 454d92d764a4ec3b0ec52467cba254dcad795870e04d1d32d4cf65d8b451a0de
     source_path: channels/raft.md
@@ -18,7 +19,7 @@ x-i18n:
 
 Raft conecta un agente de OpenClaw con un agente externo de Raft mediante la
 CLI local de Raft. Raft envía avisos de activación autenticados al Gateway; después, el agente
-usa la CLI de Raft para consultar y enviar mensajes. Solo chat directo (sin grupos).
+usa la CLI de Raft para comprobar y enviar mensajes. Solo chat directo (sin grupos).
 
 ## Instalación
 
@@ -34,12 +35,12 @@ Detalles: [Plugins](/es/tools/plugin)
 ## Requisitos previos
 
 - Un espacio de trabajo de Raft con un agente externo.
-- La CLI de Raft instalada en el mismo host que el Gateway de OpenClaw y disponible en el
+- La CLI de Raft instalada en el mismo host que el Gateway de OpenClaw, en el
   `PATH` del servicio.
-- Un perfil de la CLI de Raft que ya tenga una sesión iniciada y esté asociado con ese
+- Un perfil de la CLI de Raft con una sesión ya iniciada y asociado a ese
   agente externo.
 
-El plugin no almacena las credenciales de Raft; la CLI de Raft mantiene esa
+El plugin no almacena las credenciales de Raft; la CLI de Raft conserva esa
 autenticación en su propio perfil.
 
 ## Configuración
@@ -93,17 +94,17 @@ openclaw channels add --channel raft
 
 Cuando se inicia el Gateway, el plugin:
 
-1. Abre un punto de conexión HTTP de activación accesible solo mediante local loopback en un puerto efímero.
-2. Inicia `raft --profile <profile> agent bridge` con ese punto de conexión y un
+1. Abre un endpoint HTTP de activación exclusivo para la interfaz de bucle invertido en un puerto efímero.
+2. Inicia `raft --profile <profile> agent bridge` con ese endpoint y un
    token por proceso.
 3. Acepta únicamente avisos de activación autenticados, sin contenido y con una identidad
    de repetición procedentes del puente local.
-4. Exige uno de `eventId`, `attemptId`, `messageId`, `delivery_id`,
+4. Requiere uno de `eventId`, `attemptId`, `messageId`, `delivery_id`,
    `wake_id` o `id` en cada carga útil de activación.
-5. Deduplica durante 24 horas las entregas de activación reintentadas según el identificador de evento del puente,
+5. Deduplica durante 24 horas las entregas de activación reintentadas mediante el identificador de evento del puente,
    incluso tras reinicios del Gateway.
-6. Devuelve una sesión de ejecución estable para el puente actual y un lote vacío
-   de vaciado de actividad para el protocolo de la CLI de Raft.
+6. Devuelve una sesión de ejecución estable para el puente actual y un lote
+   vacío de vaciado de actividad para el protocolo de la CLI de Raft.
 7. Inicia un turno serializado del agente de OpenClaw por cada activación aceptada.
 
 El puente gestiona los reintentos de entrega y las reconexiones de Raft. El turno de OpenClaw
@@ -130,7 +131,7 @@ openclaw plugins inspect raft --runtime --json
 
 Después, envíe un mensaje al agente externo de Raft. El registro del Gateway debería mostrar
 el inicio del puente de Raft, seguido de una activación entrante. El agente debería usar
-el perfil de Raft configurado para consultar sus mensajes pendientes.
+el perfil de Raft configurado para comprobar sus mensajes pendientes.
 
 ## Solución de problemas
 
@@ -140,12 +141,12 @@ el perfil de Raft configurado para consultar sus mensajes pendientes.
     `PATH` del servicio. Verifíquelo con `raft --help` y, después, reinicie el Gateway.
   </Accordion>
   <Accordion title="El puente se cierra inmediatamente">
-    Verifique que el perfil configurado tenga una sesión iniciada y pertenezca al
-    agente externo de Raft previsto. Ejecute directamente `raft --profile <profile> agent bridge`
+    Compruebe que el perfil configurado tenga una sesión iniciada y pertenezca al
+    agente externo de Raft previsto. Ejecute `raft --profile <profile> agent bridge` directamente
     para ver el diagnóstico de la CLI.
   </Accordion>
   <Accordion title="Llega una activación, pero no se envía ninguna respuesta de Raft">
-    Este comportamiento es el esperado cuando el agente no invoca la CLI de Raft. El puente de
+    Esto es lo esperado cuando el agente no invoca la CLI de Raft. El puente de
     activación no transporta cuerpos de mensajes ni respuestas finales automáticas. Compruebe la
     política de herramientas del agente y asegúrese de que pueda ejecutar `raft --profile <profile>
     message check` y `message send`.
@@ -156,4 +157,4 @@ el perfil de Raft configurado para consultar sus mensajes pendientes.
 
 - [Raft](https://raft.build/)
 - [Documentación de Raft](https://docs.raft.build/welcome/)
-- [Integración de Hermes con Raft](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/raft)
+- [Integración de Raft con Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/raft)

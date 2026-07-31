@@ -1,35 +1,36 @@
 ---
 read_when:
     - Sie möchten Groq mit OpenClaw verwenden
-    - Sie benötigen die Umgebungsvariable für den API-Schlüssel oder die CLI-Authentifizierungsoption
+    - Sie benötigen die Umgebungsvariable für den API-Schlüssel oder die CLI-Authentifizierungsauswahl
     - Sie konfigurieren die Whisper-Audiotranskription auf Groq
 summary: Groq-Einrichtung (Authentifizierung + Modellauswahl + Whisper-Transkription)
 title: Groq
 x-i18n:
-    generated_at: "2026-07-12T02:03:52Z"
+    generated_at: "2026-07-26T18:03:05Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
     source_hash: f04f9365127c72aa2f976f453e5d11657b19d6b4a57de1179b88924744db1dc1
     source_path: providers/groq.md
     workflow: 16
 ---
 
-[Groq](https://groq.com) bietet ultraschnelle Inferenz für Modelle mit offenen Gewichtungen (Llama, Gemma, Kimi, Qwen, GPT OSS und weitere) mithilfe eigens entwickelter LPU-Hardware. Das Groq-Plugin registriert sowohl einen OpenAI-kompatiblen Chat-Provider als auch einen Provider für das Medienverständnis von Audioinhalten.
+[Groq](https://groq.com) bietet ultraschnelle Inferenz für Open-Weight-Modelle (Llama, Gemma, Kimi, Qwen, GPT OSS und weitere) mithilfe spezieller LPU-Hardware. Das Groq-Plugin registriert sowohl einen OpenAI-kompatiblen Chat-Provider als auch einen Provider für das Medienverständnis von Audio.
 
-| Eigenschaft                  | Wert                                     |
-| ---------------------------- | ---------------------------------------- |
-| Provider-ID                  | `groq`                                   |
-| Plugin                       | offizielles externes Paket               |
-| Umgebungsvariable für Authentifizierung | `GROQ_API_KEY`                |
-| API                          | OpenAI-kompatibel (`openai-completions`) |
-| Basis-URL                    | `https://api.groq.com/openai/v1`         |
-| Audiotranskription           | `whisper-large-v3-turbo` (Standard)      |
-| Empfohlenes Standard-Chatmodell | `groq/llama-3.3-70b-versatile`        |
+| Eigenschaft            | Wert                                     |
+| ---------------------- | ---------------------------------------- |
+| Provider-ID            | `groq`                                   |
+| Plugin                 | offizielles externes Paket               |
+| Umgebungsvariable für die Authentifizierung | `GROQ_API_KEY`                           |
+| API                    | OpenAI-kompatibel (`openai-completions`) |
+| Basis-URL              | `https://api.groq.com/openai/v1`         |
+| Audiotranskription     | `whisper-large-v3-turbo` (Standard)       |
+| Empfohlenes Standard-Chatmodell | `groq/llama-3.3-70b-versatile`           |
 
 ## Plugin installieren
 
-Installieren Sie das offizielle Plugin und starten Sie anschließend den Gateway neu:
+Installieren Sie das offizielle Plugin und starten Sie anschließend das Gateway neu:
 
 ```bash
 openclaw plugins install @openclaw/groq-provider
@@ -80,41 +81,41 @@ export GROQ_API_KEY=gsk_...
 
 ## Integrierter Katalog
 
-OpenClaw enthält einen manifestgestützten Groq-Katalog mit Einträgen für Modelle mit und ohne Schlussfolgerungsfunktion. Führen Sie `openclaw models list --provider groq` aus, um die statischen Einträge Ihrer installierten Version anzuzeigen, oder prüfen Sie unter [console.groq.com/docs/models](https://console.groq.com/docs/models) die maßgebliche Modellliste von Groq.
+OpenClaw wird mit einem manifestgestützten Groq-Katalog ausgeliefert, der sowohl Einträge mit als auch ohne Reasoning enthält. Führen Sie `openclaw models list --provider groq` aus, um die statischen Zeilen Ihrer installierten Version anzuzeigen, oder prüfen Sie die maßgebliche Liste von Groq unter [console.groq.com/docs/models](https://console.groq.com/docs/models).
 
-| Modellreferenz                                    | Name                    | Schlussfolgerung | Eingabe      | Kontext |
-| ------------------------------------------------- | ----------------------- | ---------------- | ------------ | ------- |
-| `groq/llama-3.3-70b-versatile`                    | Llama 3.3 70B Versatile | nein             | Text         | 131,072 |
-| `groq/llama-3.1-8b-instant`                       | Llama 3.1 8B Instant    | nein             | Text         | 131,072 |
-| `groq/meta-llama/llama-4-scout-17b-16e-instruct`  | Llama 4 Scout 17B       | nein             | Text + Bild  | 131,072 |
-| `groq/openai/gpt-oss-120b`                        | GPT OSS 120B            | ja               | Text         | 131,072 |
-| `groq/openai/gpt-oss-20b`                         | GPT OSS 20B             | ja               | Text         | 131,072 |
-| `groq/openai/gpt-oss-safeguard-20b`               | Safety GPT OSS 20B      | ja               | Text         | 131,072 |
-| `groq/qwen/qwen3-32b`                             | Qwen3 32B               | ja               | Text         | 131,072 |
-| `groq/groq/compound`                              | Compound                | ja               | Text         | 131,072 |
-| `groq/groq/compound-mini`                         | Compound Mini           | ja               | Text         | 131,072 |
+| Modellreferenz                                   | Name                    | Reasoning | Eingabe      | Kontext |
+| ------------------------------------------------ | ----------------------- | --------- | ------------ | ------- |
+| `groq/llama-3.3-70b-versatile`                   | Llama 3.3 70B Versatile | nein      | Text         | 131,072 |
+| `groq/llama-3.1-8b-instant`                      | Llama 3.1 8B Instant    | nein      | Text         | 131,072 |
+| `groq/meta-llama/llama-4-scout-17b-16e-instruct` | Llama 4 Scout 17B       | nein      | Text + Bild  | 131,072 |
+| `groq/openai/gpt-oss-120b`                       | GPT OSS 120B            | ja        | Text         | 131,072 |
+| `groq/openai/gpt-oss-20b`                        | GPT OSS 20B             | ja        | Text         | 131,072 |
+| `groq/openai/gpt-oss-safeguard-20b`              | Safety GPT OSS 20B      | ja        | Text         | 131,072 |
+| `groq/qwen/qwen3-32b`                            | Qwen3 32B               | ja        | Text         | 131,072 |
+| `groq/groq/compound`                             | Compound                | ja        | Text         | 131,072 |
+| `groq/groq/compound-mini`                        | Compound Mini           | ja        | Text         | 131,072 |
 
 <Tip>
-  Der Katalog wird mit jeder OpenClaw-Version weiterentwickelt. `openclaw models list --provider groq` zeigt die Einträge an, die Ihrer installierten Version bekannt sind. Gleichen Sie diese für neu hinzugefügte oder veraltete Modelle mit [console.groq.com/docs/models](https://console.groq.com/docs/models) ab.
+  Der Katalog entwickelt sich mit jeder OpenClaw-Version weiter. `openclaw models list --provider groq` zeigt die Einträge, die Ihrer installierten Version bekannt sind. Gleichen Sie diese mit [console.groq.com/docs/models](https://console.groq.com/docs/models) ab, um neu hinzugefügte oder veraltete Modelle zu prüfen.
 </Tip>
 
-## Schlussfolgerungsmodelle
+## Reasoning-Modelle
 
-Groq-Schlussfolgerungsmodelle (`reasoning: true` in der obigen Tabelle) ordnen die gemeinsamen `/think`-Stufen von OpenClaw den `reasoning_effort`-Werten `low`, `medium` oder `high` zu. Bei `/think off` oder `/think none` wird `reasoning_effort` in der Anfrage weggelassen, statt einen deaktivierten Wert zu senden.
+Groq-Reasoning-Modelle (`reasoning: true` in der obigen Tabelle) bilden die gemeinsamen `/think`-Stufen von OpenClaw auf `reasoning_effort`-Werte von `low`, `medium` oder `high` ab. Bei `/think off` oder `/think none` wird `reasoning_effort` aus der Anfrage weggelassen, statt einen deaktivierten Wert zu senden.
 
-Weitere Informationen zu den gemeinsamen `/think`-Stufen und dazu, wie OpenClaw sie für jeden Provider übersetzt, finden Sie unter [Denkmodi](/de/tools/thinking).
+Unter [Denkmodi](/de/tools/thinking) finden Sie Informationen zu den gemeinsamen `/think`-Stufen und dazu, wie OpenClaw sie für jeden Provider übersetzt.
 
 ## Audiotranskription
 
-Das Groq-Plugin registriert außerdem einen **Provider für das Medienverständnis von Audioinhalten**, damit Sprachnachrichten über die gemeinsame Oberfläche `tools.media.audio` transkribiert werden können.
+Das Groq-Plugin registriert außerdem einen **Provider für das Medienverständnis von Audio**, sodass Sprachnachrichten über die gemeinsame `tools.media.audio`-Schnittstelle transkribiert werden können.
 
 | Eigenschaft                 | Wert                                      |
 | --------------------------- | ----------------------------------------- |
-| Gemeinsamer Konfigurationspfad | `tools.media.audio`                    |
+| Gemeinsamer Konfigurationspfad | `tools.media.audio`                       |
 | Standard-Basis-URL          | `https://api.groq.com/openai/v1`          |
 | Standardmodell              | `whisper-large-v3-turbo`                  |
 | Automatische Priorität      | 20                                        |
-| API-Endpunkt                | OpenAI-kompatibel: `/audio/transcriptions` |
+| API-Endpunkt                | OpenAI-kompatibel `/audio/transcriptions` |
 
 So legen Sie Groq als standardmäßiges Audio-Backend fest:
 
@@ -132,16 +133,16 @@ So legen Sie Groq als standardmäßiges Audio-Backend fest:
 
 <AccordionGroup>
   <Accordion title="Verfügbarkeit der Umgebung für den Daemon">
-    Wenn der Gateway als verwalteter Dienst ausgeführt wird (launchd, systemd, Docker), muss `GROQ_API_KEY` für diesen Prozess sichtbar sein – nicht nur für Ihre interaktive Shell.
+    Wenn das Gateway als verwalteter Dienst ausgeführt wird (launchd, systemd, Docker), muss `GROQ_API_KEY` für diesen Prozess sichtbar sein – nicht nur für Ihre interaktive Shell.
 
     <Warning>
-      Ein ausschließlich in einer interaktiven Shell exportierter Schlüssel steht einem launchd- oder systemd-Daemon nur zur Verfügung, wenn diese Umgebung auch dort importiert wird. Legen Sie den Schlüssel in `~/.openclaw/.env` oder über `env.shellEnv` fest, damit er vom Gateway-Prozess gelesen werden kann.
+      Ein nur in einer interaktiven Shell exportierter Schlüssel hilft einem launchd- oder systemd-Daemon nicht, sofern diese Umgebung dort nicht ebenfalls importiert wird. Legen Sie den Schlüssel in `~/.openclaw/.env` oder über `env.shellEnv` fest, damit der Gateway-Prozess darauf zugreifen kann.
     </Warning>
 
   </Accordion>
 
   <Accordion title="Benutzerdefinierte Groq-Modell-IDs">
-    OpenClaw akzeptiert zur Laufzeit jede Groq-Modell-ID. Verwenden Sie die von Groq angezeigte exakte ID und stellen Sie ihr `groq/` voran. Der statische Katalog deckt die gängigen Fälle ab; nicht katalogisierte IDs verwenden die standardmäßige OpenAI-kompatible Vorlage.
+    OpenClaw akzeptiert zur Laufzeit jede Groq-Modell-ID. Verwenden Sie die von Groq angezeigte exakte ID und stellen Sie ihr `groq/` voran. Der statische Katalog deckt die üblichen Fälle ab; nicht katalogisierte IDs verwenden die OpenAI-kompatible Standardvorlage.
 
     ```json5
     {
@@ -163,7 +164,7 @@ So legen Sie Groq als standardmäßiges Audio-Backend fest:
     Auswahl von Providern, Modellreferenzen und Failover-Verhalten.
   </Card>
   <Card title="Denkmodi" href="/de/tools/thinking" icon="brain">
-    Stufen des Schlussfolgerungsaufwands und Zusammenspiel mit Provider-Richtlinien.
+    Stufen des Reasoning-Aufwands und Zusammenspiel mit Provider-Richtlinien.
   </Card>
   <Card title="Konfigurationsreferenz" href="/de/gateway/configuration-reference" icon="gear">
     Vollständiges Konfigurationsschema einschließlich Provider- und Audioeinstellungen.

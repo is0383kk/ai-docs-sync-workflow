@@ -1,48 +1,49 @@
 ---
 read_when:
     - DigitalOcean पर OpenClaw सेट अप करना
-    - OpenClaw के लिए एक सरल भुगतान वाला VPS ढूंढना
+    - OpenClaw के लिए एक साधारण सशुल्क VPS की तलाश है
 summary: DigitalOcean Droplet पर OpenClaw होस्ट करें
 title: DigitalOcean
 x-i18n:
-    generated_at: "2026-06-28T23:19:44Z"
-    model: gpt-5.5
+    generated_at: "2026-07-27T19:59:40Z"
+    model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 2ddfe3e6df5e48616584e912e12eede30a62f869fc307f586c9604c9c06c9e5b
+    source_hash: e124a59c079efda0c8e880018f2657fad784af1489ca3f98ed8ab609249e35bd
     source_path: install/digitalocean.md
     workflow: 16
 ---
 
-DigitalOcean Droplet पर एक स्थायी OpenClaw Gateway चलाएं (1 GB Basic प्लान के लिए लगभग $6/माह)।
+DigitalOcean Droplet पर एक स्थायी OpenClaw Gateway चलाएँ (1 GB Basic प्लान के लिए ~$6/माह)।
 
-DigitalOcean सबसे सरल सशुल्क VPS रास्ता है। अगर आप सस्ते या मुफ्त विकल्प पसंद करते हैं:
+DigitalOcean एक सरल सशुल्क VPS विकल्प है। सस्ते या निःशुल्क विकल्पों के लिए:
 
-- [Hetzner](/hi/install/hetzner) — €3.79/माह, प्रति डॉलर अधिक कोर/RAM।
-- [Oracle Cloud](/hi/install/oracle) — Always Free ARM (4 OCPU, 24 GB RAM तक), लेकिन साइनअप थोड़ा कठिन हो सकता है और यह केवल ARM है।
+- [Hetzner](/hi/install/hetzner) -- प्रति डॉलर अधिक कोर/RAM।
+- [Oracle Cloud](/hi/install/oracle) -- Always Free ARM टियर (अधिकतम 4 OCPU, 24 GB RAM), लेकिन साइनअप में परेशानी हो सकती है और यह केवल ARM के लिए है।
 
-## पूर्वापेक्षाएं
+## पूर्वापेक्षाएँ
 
-- DigitalOcean खाता ([signup](https://cloud.digitalocean.com/registrations/new))
-- SSH कुंजी जोड़ी (या पासवर्ड auth उपयोग करने की इच्छा)
+- DigitalOcean खाता ([साइनअप](https://cloud.digitalocean.com/registrations/new))
+- SSH कुंजी युग्म (या पासवर्ड प्रमाणीकरण का उपयोग करने की इच्छा)
 - लगभग 20 मिनट
 
 ## सेटअप
 
 <Steps>
-  <Step title="Droplet बनाएं">
+  <Step title="Droplet बनाएँ">
     <Warning>
-    साफ बेस इमेज (Ubuntu 24.04 LTS) का उपयोग करें। जब तक आपने उनके स्टार्टअप स्क्रिप्ट और फ़ायरवॉल डिफ़ॉल्ट की समीक्षा न की हो, तृतीय-पक्ष Marketplace 1-click इमेज से बचें।
+    एक साफ़ बेस इमेज (Ubuntu 24.04 LTS) का उपयोग करें। तृतीय-पक्ष Marketplace 1-क्लिक इमेज से बचें, जब तक कि आपने उनकी स्टार्टअप स्क्रिप्ट और फ़ायरवॉल डिफ़ॉल्ट की समीक्षा न कर ली हो।
     </Warning>
 
     1. [DigitalOcean](https://cloud.digitalocean.com/) में लॉग इन करें।
     2. **Create > Droplets** पर क्लिक करें।
     3. चुनें:
-       - **Region:** आपके सबसे नज़दीक
+       - **Region:** आपके सबसे निकट
        - **Image:** Ubuntu 24.04 LTS
        - **Size:** Basic, Regular, 1 vCPU / 1 GB RAM / 25 GB SSD
-       - **Authentication:** SSH कुंजी (अनुशंसित) या पासवर्ड
-    4. **Create Droplet** पर क्लिक करें और IP पता नोट करें।
+       - **Authentication:** SSH key (अनुशंसित) या password
+    4. **Create Droplet** पर क्लिक करें और IP पता नोट कर लें।
 
   </Step>
 
@@ -52,14 +53,14 @@ DigitalOcean सबसे सरल सशुल्क VPS रास्ता �
 
     apt update && apt upgrade -y
 
-    # Install Node.js 24
+    # Node.js 24 इंस्टॉल करें
     curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
     apt install -y nodejs
 
-    # Install OpenClaw
+    # OpenClaw इंस्टॉल करें
     curl -fsSL https://openclaw.ai/install.sh | bash
 
-    # Create the non-root user that will own OpenClaw state and services.
+    # वह गैर-रूट उपयोगकर्ता बनाएँ जो OpenClaw की स्थिति और सेवाओं का स्वामी होगा।
     adduser openclaw
     usermod -aG sudo openclaw
     loginctl enable-linger openclaw
@@ -68,20 +69,20 @@ DigitalOcean सबसे सरल सशुल्क VPS रास्ता �
     openclaw --version
     ```
 
-    root shell का उपयोग केवल सिस्टम bootstrap के लिए करें। OpenClaw कमांड non-root `openclaw` उपयोगकर्ता के रूप में चलाएं ताकि state `/home/openclaw/.openclaw/` के अंतर्गत रहे और Gateway उस उपयोगकर्ता की systemd सेवा के रूप में इंस्टॉल हो।
+    रूट शेल का उपयोग केवल सिस्टम बूटस्ट्रैप के लिए करें। OpenClaw कमांड गैर-रूट `openclaw` उपयोगकर्ता के रूप में चलाएँ, ताकि स्थिति `/home/openclaw/.openclaw/` के अंतर्गत रहे और Gateway उस उपयोगकर्ता की systemd `--user` सेवा के रूप में इंस्टॉल हो।
 
   </Step>
 
-  <Step title="ऑनबोर्डिंग चलाएं">
+  <Step title="ऑनबोर्डिंग चलाएँ">
     ```bash
     openclaw onboard --install-daemon
     ```
 
-    विज़ार्ड आपको model auth, चैनल सेटअप, gateway token generation, और daemon installation (systemd) से गुज़ारता है।
+    विज़ार्ड आपको मॉडल प्रमाणीकरण, चैनल सेटअप, Gateway टोकन जनरेशन और डेमन इंस्टॉलेशन (systemd उपयोगकर्ता सेवा) की प्रक्रिया पूरी कराता है।
 
   </Step>
 
-  <Step title="swap जोड़ें (1 GB Droplets के लिए अनुशंसित)">
+  <Step title="स्वैप जोड़ें (1 GB Droplets के लिए अनुशंसित)">
     ```bash
     fallocate -l 2G /swapfile
     chmod 600 /swapfile
@@ -91,7 +92,7 @@ DigitalOcean सबसे सरल सशुल्क VPS रास्ता �
     ```
   </Step>
 
-  <Step title="gateway सत्यापित करें">
+  <Step title="Gateway सत्यापित करें">
     ```bash
     openclaw status
     systemctl --user status openclaw-gateway.service
@@ -99,13 +100,13 @@ DigitalOcean सबसे सरल सशुल्क VPS रास्ता �
     ```
   </Step>
 
-  <Step title="Control UI तक पहुंचें">
-    gateway डिफ़ॉल्ट रूप से loopback से bind होता है। इनमें से एक विकल्प चुनें।
+  <Step title="Control UI तक पहुँचें">
+    Gateway डिफ़ॉल्ट रूप से लूपबैक से बाइंड होता है। इनमें से एक विकल्प चुनें।
 
-    **विकल्प A: SSH tunnel (सबसे सरल)**
+    **विकल्प A: SSH टनल (सबसे सरल)**
 
     ```bash
-    # From your local machine
+    # अपनी स्थानीय मशीन से
     ssh -L 18789:localhost:18789 root@YOUR_DROPLET_IP
     ```
 
@@ -120,63 +121,63 @@ DigitalOcean सबसे सरल सशुल्क VPS रास्ता �
     openclaw gateway restart
     ```
 
-    फिर अपने tailnet पर किसी भी डिवाइस से `https://<magicdns>/` खोलें।
+    फिर अपने टेलनेट के किसी भी डिवाइस से `https://<magicdns>/` खोलें।
 
-    Tailscale Serve, tailnet identity headers के ज़रिए Control UI और WebSocket traffic को authenticate करता है, जो मानता है कि gateway host स्वयं trusted है। HTTP API endpoints, इसके बावजूद, gateway के सामान्य auth mode (token/password) का पालन करते हैं। Serve पर स्पष्ट shared-secret credentials आवश्यक करने के लिए, `gateway.auth.allowTailscale: false` सेट करें और `gateway.auth.mode: "token"` या `"password"` का उपयोग करें।
+    Tailscale Serve टेलनेट पहचान हेडर के माध्यम से Control UI और WebSocket ट्रैफ़िक को प्रमाणित करता है, जिसमें यह माना जाता है कि Gateway होस्ट स्वयं विश्वसनीय है। इसके बावजूद, HTTP API एंडपॉइंट Gateway के सामान्य प्रमाणीकरण मोड (टोकन/पासवर्ड) का पालन करते हैं। Serve पर स्पष्ट साझा-गुप्त क्रेडेंशियल आवश्यक करने के लिए, `gateway.auth.allowTailscale: false` सेट करें और `gateway.auth.mode: "token"` या `"password"` का उपयोग करें।
 
-    **विकल्प C: Tailnet bind (Serve नहीं)**
+    **विकल्प C: टेलनेट बाइंड (Serve के बिना)**
 
     ```bash
     openclaw config set gateway.bind tailnet
     openclaw gateway restart
     ```
 
-    फिर `http://<tailscale-ip>:18789` खोलें (token आवश्यक)।
+    फिर `http://<tailscale-ip>:18789` खोलें (टोकन आवश्यक है)।
 
   </Step>
 </Steps>
 
-## स्थायित्व और backup
+## स्थायित्व और बैकअप
 
-OpenClaw state यहां रहता है:
+OpenClaw की स्थिति यहाँ रहती है:
 
-- `~/.openclaw/` — `openclaw.json`, per-agent `auth-profiles.json`, channel/provider state, और session data।
-- `~/.openclaw/workspace/` — agent workspace (SOUL.md, memory, artifacts)।
+- `~/.openclaw/` -- `openclaw.json`, चैनल/प्रदाता क्रेडेंशियल, प्रति-एजेंट `auth-profiles.json` और सत्र डेटा।
+- `~/.openclaw/workspace/` -- एजेंट वर्कस्पेस (SOUL.md, मेमोरी, आर्टिफ़ैक्ट)।
 
-ये Droplet reboot के बाद भी बने रहते हैं। portable snapshot लेने के लिए:
+ये Droplet रीबूट के बाद भी बने रहते हैं। पोर्टेबल स्नैपशॉट लेने के लिए:
 
 ```bash
 openclaw backup create
 ```
 
-DigitalOcean snapshots पूरे Droplet का backup लेते हैं; `openclaw backup create` hosts के बीच portable है।
+DigitalOcean स्नैपशॉट पूरे Droplet का बैकअप लेते हैं; `openclaw backup create` को होस्ट के बीच स्थानांतरित किया जा सकता है।
 
-## 1 GB RAM सुझाव
+## 1 GB RAM के लिए सुझाव
 
-$6 Droplet में केवल 1 GB RAM है। चीज़ों को सुचारु रखने के लिए:
+$6 वाले Droplet में केवल 1 GB RAM होती है। सुचारू संचालन बनाए रखने के लिए:
 
-- सुनिश्चित करें कि ऊपर दिया गया swap step `/etc/fstab` में है, ताकि यह reboots के बाद भी बना रहे।
-- स्थानीय models के बजाय API-based models (Claude, GPT) को प्राथमिकता दें — स्थानीय LLM inference 1 GB में फिट नहीं होता।
-- अगर बड़े prompts पर OOMs आते हैं तो `agents.defaults.model.primary` को छोटे model पर सेट करें।
-- `free -h` और `htop` से monitor करें।
+- सुनिश्चित करें कि ऊपर दिया गया स्वैप चरण `/etc/fstab` में है, ताकि वह रीबूट के बाद भी बना रहे।
+- स्थानीय मॉडल के बजाय API-आधारित मॉडल (Claude, GPT) को प्राथमिकता दें -- स्थानीय LLM अनुमान 1 GB में नहीं समाता।
+- यदि बड़े प्रॉम्प्ट पर OOM होता है, तो `agents.defaults.model.primary` को किसी छोटे मॉडल पर सेट करें।
+- `free -h` और `htop` से निगरानी करें।
 
 ## समस्या निवारण
 
-**Gateway शुरू नहीं होगा** -- `openclaw doctor --non-interactive` चलाएं और `journalctl --user -u openclaw-gateway.service -n 50` से logs जांचें।
+**Gateway शुरू नहीं होता** -- `openclaw doctor --non-interactive` चलाएँ और `journalctl --user -u openclaw-gateway.service -n 50` से लॉग जाँचें।
 
-**Port पहले से उपयोग में है** -- process ढूंढने के लिए `lsof -i :18789` चलाएं, फिर उसे रोकें।
+**पोर्ट पहले से उपयोग में है** -- प्रक्रिया खोजने के लिए `lsof -i :18789` चलाएँ, फिर उसे रोकें।
 
-**Memory कम पड़ रही है** -- `free -h` से सत्यापित करें कि swap active है। अगर फिर भी OOM आ रहा है, तो स्थानीय models के बजाय API-based models (Claude, GPT) का उपयोग करें, या 2 GB Droplet पर upgrade करें।
+**मेमोरी समाप्त हो गई** -- `free -h` से सत्यापित करें कि स्वैप सक्रिय है। यदि फिर भी OOM हो रहा है, तो स्थानीय मॉडल के बजाय API-आधारित मॉडल (Claude, GPT) पर स्विच करें या 2 GB Droplet में अपग्रेड करें।
 
-## अगले कदम
+## अगले चरण
 
-- [Channels](/hi/channels) -- Telegram, WhatsApp, Discord, और अन्य कनेक्ट करें
-- [Gateway configuration](/hi/gateway/configuration) -- सभी config options
-- [Updating](/hi/install/updating) -- OpenClaw को up to date रखें
+- [चैनल](/hi/channels) -- Telegram, WhatsApp, Discord और अन्य सेवाएँ कनेक्ट करें
+- [Gateway कॉन्फ़िगरेशन](/hi/gateway/configuration) -- सभी कॉन्फ़िगरेशन विकल्प
+- [अपडेट करना](/hi/install/updating) -- OpenClaw को अद्यतित रखें
 
 ## संबंधित
 
-- [Install overview](/hi/install)
+- [इंस्टॉलेशन अवलोकन](/hi/install)
 - [Fly.io](/hi/install/fly)
 - [Hetzner](/hi/install/hetzner)
-- [VPS hosting](/hi/vps)
+- [VPS होस्टिंग](/hi/vps)

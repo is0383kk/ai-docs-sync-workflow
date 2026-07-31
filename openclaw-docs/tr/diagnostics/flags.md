@@ -5,36 +5,43 @@ read_when:
 summary: Hedefli hata ayıklama günlükleri için tanılama bayrakları
 title: Tanılama bayrakları
 x-i18n:
-    generated_at: "2026-07-12T12:15:26Z"
+    generated_at: "2026-07-26T22:45:07Z"
     model: gpt-5.6
     postprocess_version: locale-links-v1
+    prompt_version: 32
     provider: openai
-    source_hash: 9847f464fde89d9e639b089fe54fb933deb9debad2a6d8b120ab01bacff181a8
+    source_hash: ad3bdab6ba1fd98ba58c99c93f9a12d31f57e2655cb0c1eb2de09e34b970f56c
     source_path: diagnostics/flags.md
     workflow: 16
 ---
 
-Tanılama bayrakları, genel olarak `logging.level` düzeyini yükseltmeden tek bir alt sistem için ek günlük kaydını etkinleştirir. Bir alt sistem tarafından denetlenmediği sürece bayrağın hiçbir etkisi olmaz.
+Tanılama bayrakları, genel olarak `logging.level` düzeyini yükseltmeden tek bir alt sistem için ek günlük kaydını etkinleştirir. Bir alt sistem bayrağı denetlemediği sürece bayrağın hiçbir etkisi olmaz.
 
 ## Nasıl çalışır?
 
-- Bayraklar büyük/küçük harfe duyarsız dizelerdir; yapılandırmadaki `diagnostics.flags` ile `OPENCLAW_DIAGNOSTICS` ortam değişkeni geçersiz kılma değerinden çözümlenir, yinelenenler kaldırılır ve küçük harfe dönüştürülür.
-- `name.*`, hem `name` değerinin kendisiyle hem de `name.` altındaki her şeyle eşleşir (örneğin `telegram.*`, `telegram.http` ile eşleşir).
-- `*` veya `all`, tüm bayrakları etkinleştirir.
-- Yapılandırmada `diagnostics.flags` değiştirildikten sonra Gateway'i yeniden başlatın; bu ayar çalışırken yeniden yüklenmez.
+- Bayraklar büyük/küçük harfe duyarlı olmayan dizelerdir; yapılandırmadaki `diagnostics.flags` ile
+  `OPENCLAW_DIAGNOSTICS` ortam değişkeni geçersiz kılmasından çözümlenir, yinelenenler kaldırılır ve küçük harfe dönüştürülür.
+- `name.*`, doğrudan `name` ile ve `name.` altındaki her şeyle eşleşir (örneğin
+  `telegram.*`, `telegram.http` ile eşleşir).
+- `*` veya `all` tüm bayrakları etkinleştirir.
+- Yapılandırmadaki `diagnostics.flags` değiştirildikten sonra Gateway'i yeniden başlatın; bu ayar
+  çalışırken yeniden yüklenmez.
 
 ## Bilinen bayraklar
 
-| Bayrak           | Etkinleştirdiği                                           |
-| ---------------- | --------------------------------------------------------- |
-| `telegram.http`  | Telegram Bot API HTTP hata günlükleri                     |
-| `brave.http`     | Brave Search istek/yanıt/önbellek günlükleri              |
-| `profiler`       | Yanıt aşaması profilleyicisi ve Codex uygulama sunucusu profilleyicisi (ikisi de) |
-| `reply.profiler` | Yalnızca yanıt aşaması profilleyicisi                     |
-| `codex.profiler` | Yalnızca Codex uygulama sunucusu profilleyicisi           |
-| `timeline`       | Yapılandırılmış JSONL zaman çizelgesi yapıtı (aşağıya bakın) |
+| Bayrak                | Etkinleştirdiği özellikler                                |
+| --------------------- | --------------------------------------------------------- |
+| `telegram.http`       | Telegram Bot API HTTP hata günlükleri                     |
+| `brave.http`          | Brave Search istek/yanıt/önbellek günlükleri              |
+| `profiler`            | Yanıt aşaması profil oluşturucusu ve Codex uygulama sunucusu profil oluşturucusu (ikisi de) |
+| `reply.profiler`      | Yalnızca yanıt aşaması profil oluşturucusu                |
+| `codex.profiler`      | Yalnızca Codex uygulama sunucusu profil oluşturucusu      |
+| `health`              | Gateway sistem durumu yoklaması/hesap/bağlama hata ayıklama ayrıntıları |
+| `ingress.timing`      | Oturum yükleme, model seçimi ve model kataloğu zamanlamaları |
+| `plugin.load-profile` | Eşzamanlı Plugin modülü yükleme zamanlamaları              |
+| `timeline`            | Yapılandırılmış JSONL zaman çizelgesi yapıtı (aşağıya bakın) |
 
-## Yapılandırma üzerinden etkinleştirme
+## Yapılandırma aracılığıyla etkinleştirme
 
 ```json
 {
@@ -62,36 +69,39 @@ OPENCLAW_DIAGNOSTICS=telegram.http,brave.http
 
 Değerler virgül veya boşluklardan bölünür. Özel değerler:
 
-| Değer                       | Etki                                                     |
-| --------------------------- | -------------------------------------------------------- |
+| Değer                       | Etki                                     |
+| --------------------------- | ---------------------------------------- |
 | `0`, `false`, `off`, `none` | Yapılandırmayı da geçersiz kılarak tüm bayrakları devre dışı bırakır |
-| `1`, `true`, `all`, `*`     | Tüm bayrakları etkinleştirir                             |
+| `1`, `true`, `all`, `*`     | Tüm bayrakları etkinleştirir              |
 
-`OPENCLAW_DIAGNOSTICS=0`, söz konusu işlem için hem ortam değişkeninden hem de yapılandırmadan gelen bayrakları devre dışı bırakır. Bu, dosyayı düzenlemeden yapılandırmada açık bırakılan bir profilleyici bayrağını geçici olarak susturmak için kullanışlıdır.
+`OPENCLAW_DIAGNOSTICS=0`, söz konusu işlem için hem ortam değişkenindeki hem de yapılandırmadaki bayrakları devre dışı bırakır;
+bu, yapılandırmada açık bırakılmış bir profil oluşturucu bayrağını dosyayı
+düzenlemeden geçici olarak susturmak için kullanışlıdır.
 
-## Profilleyici bayrakları
+## Profil oluşturucu bayrakları
 
-Profilleyici bayrakları, düşük maliyetli zamanlama aralıklarını denetler; kapalı olduklarında ek yük oluşturmazlar.
+Profil oluşturucu bayrakları, hafif zamanlama aralıklarını denetler; kapalı olduklarında ek yük oluşturmazlar.
 
-Tek bir Gateway çalıştırmasında profilleyici tarafından denetlenen tüm aralıkları etkinleştirin:
+Bir Gateway çalıştırması için profil oluşturucu tarafından denetlenen tüm aralıkları etkinleştirin:
 
 ```bash
 OPENCLAW_DIAGNOSTICS=profiler openclaw gateway run
 ```
 
-Yalnızca yanıt dağıtımı profilleyici aralıklarını etkinleştirin:
+Yalnızca yanıt gönderimi profil oluşturucu aralıklarını etkinleştirin:
 
 ```bash
 OPENCLAW_DIAGNOSTICS=reply.profiler openclaw gateway run
 ```
 
-Yalnızca Codex uygulama sunucusunun başlangıç/araç/iş parçacığı profilleyici aralıklarını etkinleştirin:
+Yalnızca Codex uygulama sunucusunun başlatma/araç/iş parçacığı profil oluşturucu aralıklarını etkinleştirin:
 
 ```bash
 OPENCLAW_DIAGNOSTICS=codex.profiler openclaw gateway run
 ```
 
-`profiler`, hem yanıt profilleyicisini hem de Codex profilleyicisini etkinleştirir; yalnızca birini etkinleştirmek için kapsamı belirtilmiş bayrak adlarını kullanın.
+`profiler`, hem yanıt profil oluşturucusunu hem de Codex profil oluşturucusunu etkinleştirir; yalnızca birini
+etkinleştirmek için kapsamlı bayrak adlarını kullanın.
 
 Alternatif olarak yapılandırmada ayarlayın:
 
@@ -103,11 +113,14 @@ Alternatif olarak yapılandırmada ayarlayın:
 }
 ```
 
-Yapılandırma bayraklarını değiştirdikten sonra Gateway'i yeniden başlatın. Bir profilleyici bayrağını devre dışı bırakmak için bayrağı `diagnostics.flags` içinden kaldırıp yeniden başlatın veya söz konusu çalıştırmada tüm tanılama bayraklarını geçersiz kılmak için işlemi `OPENCLAW_DIAGNOSTICS=0` ile başlatın.
+Yapılandırma bayraklarını değiştirdikten sonra Gateway'i yeniden başlatın. Bir profil oluşturucu bayrağını devre dışı bırakmak için
+bayrağı `diagnostics.flags` içinden kaldırıp yeniden başlatın veya söz konusu çalıştırmada
+tüm tanılama bayraklarını geçersiz kılmak için işlemi `OPENCLAW_DIAGNOSTICS=0` ile başlatın.
 
 ## Zaman çizelgesi yapıtları
 
-`timeline` bayrağı (`diagnostics.timeline` diğer adı), harici kalite güvencesi düzenekleri için yapılandırılmış başlangıç ve çalışma zamanı zamanlama olaylarını JSONL olarak yazar:
+`timeline` bayrağı (takma ad: `diagnostics.timeline`), harici QA düzenekleri için yapılandırılmış başlatma
+ve çalışma zamanı zamanlama olaylarını JSONL olarak yazar:
 
 ```bash
 OPENCLAW_DIAGNOSTICS=timeline \
@@ -125,60 +138,84 @@ Alternatif olarak yapılandırmada etkinleştirin:
 }
 ```
 
-Bayrağın kendisi yapılandırmada ayarlanmış olsa bile çıktı yolu her zaman `OPENCLAW_DIAGNOSTICS_TIMELINE_PATH` üzerinden alınır; yol için bir yapılandırma anahtarı yoktur. `timeline` yalnızca yapılandırmadan etkinleştirildiğinde OpenClaw henüz yapılandırmayı okumamış olduğundan en erken yapılandırma yükleme aralıkları eksik olur; sonraki başlangıç aralıkları normal şekilde kaydedilir.
+Bayrağın kendisi yapılandırmada ayarlanmış olsa bile çıktı yolu her zaman `OPENCLAW_DIAGNOSTICS_TIMELINE_PATH` değerinden
+alınır; yol için bir yapılandırma anahtarı yoktur.
+`timeline` yalnızca yapılandırmadan etkinleştirildiğinde, OpenClaw henüz yapılandırmayı okumadığı için en erken yapılandırma yükleme aralıkları
+eksik olur; sonraki başlatma aralıkları normal şekilde yakalanır.
 
-`OPENCLAW_DIAGNOSTICS=1`, `=all` ve `=*` de tüm bayrakları etkinleştirdikleri için zaman çizelgesini etkinleştirir. Yalnızca JSONL yapıtını istiyor, diğer tüm tanılama bayraklarını istemiyorsanız kapsamı belirtilmiş `timeline` bayrağını tercih edin.
+`OPENCLAW_DIAGNOSTICS=1`, `=all` ve `=*` de tüm bayrakları etkinleştirdikleri için zaman çizelgesini etkinleştirir.
+Yalnızca JSONL yapıtını isteyip diğer tüm tanılama bayraklarını istemediğinizde kapsamlı `timeline`
+bayrağını tercih edin.
 
-Zaman çizelgesindeki olay döngüsü gecikmesi örnekleri için `timeline` dışında bir ek etkinleştirme daha gerekir: zaman çizelgesini etkinleştirmenin yanı sıra `OPENCLAW_DIAGNOSTICS_EVENT_LOOP=1` (veya `on`/`true`/`yes`) ayarlayın.
+Zaman çizelgesindeki olay döngüsü gecikme örnekleri, `timeline` dışında bir ek açık onay daha gerektirir:
+zaman çizelgesini etkinleştirmenin yanı sıra `OPENCLAW_DIAGNOSTICS_EVENT_LOOP=1` (veya `on`/`true`/`yes`) ayarlayın.
 
-Zaman çizelgesi kayıtları `openclaw.diagnostics.v1` zarfını kullanır ve işlem kimliklerini, aşama adlarını, aralık adlarını, süreleri, Plugin kimliklerini, bağımlılık sayılarını, olay döngüsü gecikmesi örneklerini, sağlayıcı işlem adlarını, alt işlem çıkış durumunu ve başlangıç hatası adlarını/iletilerini içerebilir. Zaman çizelgesi dosyalarını yerel tanılama yapıtları olarak değerlendirin; makinenizin dışında paylaşmadan önce inceleyin.
+Zaman çizelgesi kayıtları `openclaw.diagnostics.v1` zarfını kullanır ve
+işlem kimliklerini, aşama adlarını, aralık adlarını, süreleri, Plugin kimliklerini, bağımlılık
+sayılarını, olay döngüsü gecikme örneklerini, sağlayıcı işlem adlarını, alt işlem çıkış
+durumunu ve başlatma hatası adlarını/iletilerini içerebilir. Zaman çizelgesi dosyalarını yerel
+tanılama yapıtları olarak değerlendirin; makinenizin dışında paylaşmadan önce inceleyin.
 
-## Günlüklerin konumu
+## Günlüklerin kaydedildiği yer
 
-Bayraklar günlükleri standart tanılama günlük dosyasına yazar. Varsayılan olarak:
+Bayraklar, standart tanılama günlüğü dosyasına günlük kayıtları gönderir. Varsayılan olarak:
 
 ```
 /tmp/openclaw/openclaw-YYYY-MM-DD.log
 ```
 
-`logging.file` ayarlarsanız bunun yerine o yolu kullanın. Günlükler JSONL biçimindedir (satır başına bir JSON nesnesi). `logging.redactSensitive` ayarına göre gizleme uygulanmaya devam eder. Günlük yolu çözümleme, döndürme ve gizleme modelinin tamamı için [Günlük Kaydı](/tr/logging) bölümüne bakın.
+Adlandırılmış profiller `/tmp/openclaw/openclaw-<profile>-YYYY-MM-DD.log` kullanır; örneğin
+`--dev`, `openclaw-dev-YYYY-MM-DD.log` kullanır.
+
+`logging.file` ayarlanırsa bunun yerine o yolu kullanın. Günlükler JSONL biçimindedir (satır başına bir JSON
+nesnesi). `logging.redactSensitive` temelinde redaksiyon uygulanmaya devam eder.
+Günlük yolu çözümleme, döndürme ve redaksiyon modelinin tamamı için [Günlük Kaydı](/tr/logging) bölümüne
+bakın.
 
 ## Günlükleri çıkarma
 
-En son günlük dosyasını seçin:
+Etkin profilin en son günlük dosyasını okuyun:
 
 ```bash
-ls -t /tmp/openclaw/openclaw-*.log | head -n 1
+openclaw logs --plain
+# Adlandırılmış profil örneği:
+openclaw --profile work logs --plain
 ```
 
 Telegram HTTP tanılamalarını filtreleyin:
 
 ```bash
-rg "telegram http error" /tmp/openclaw/openclaw-*.log
+openclaw logs --plain --limit 5000 | rg "telegram http error"
 ```
 
 Brave Search HTTP tanılamalarını filtreleyin:
 
 ```bash
-rg "brave http" /tmp/openclaw/openclaw-*.log
+openclaw logs --plain --limit 5000 | rg "brave http"
 ```
 
-Alternatif olarak sorunu yeniden oluştururken günlüğü canlı izleyin:
+Ya da sorunu yeniden oluştururken günlükleri takip edin:
 
 ```bash
-tail -f /tmp/openclaw/openclaw-$(date +%F).log | rg "telegram http error"
+openclaw logs --follow --plain | rg "telegram http error"
 ```
 
-Uzak Gateway'ler için bunun yerine `openclaw logs --follow` kullanın (bkz. [/cli/logs](/tr/cli/logs)).
+Uzak Gateway'ler için bunun yerine `openclaw logs --follow` kullanın (bkz.
+[/cli/logs](/tr/cli/logs)).
 
 ## Notlar
 
-- `logging.level`, `warn` düzeyinden daha yüksek bir düzeye ayarlanırsa bayrakla denetlenen günlükler bastırılabilir. Varsayılan `info` uygundur.
-- `brave.http`, Brave Search istek URL'lerini/sorgu parametrelerini, yanıt durumunu/zamanlamasını ve önbellek isabeti/ıskalaması/yazma olaylarını günlüğe kaydeder. API anahtarını (istek başlığı olarak gönderilir) veya yanıt gövdelerini günlüğe kaydetmez; ancak arama sorguları hassas olabilir.
-- Bayrakları etkin bırakmak güvenlidir; yalnızca ilgili alt sistemin günlük hacmini etkilerler.
-- Günlük hedeflerini, düzeylerini ve gizlemeyi değiştirmek için [/logging](/tr/logging) bölümünü kullanın.
+- `logging.level`, `warn` değerinden daha yüksek ayarlanırsa bayrakla denetlenen günlükler
+  bastırılabilir. Varsayılan `info` uygundur.
+- `brave.http`, Brave Search istek URL'lerini/sorgu parametrelerini, yanıt
+  durumunu/zamanlamasını ve önbellek isabet/ıskalama/yazma olaylarını günlüğe kaydeder. API anahtarını
+  (istek üstbilgisi olarak gönderilir) veya yanıt gövdelerini günlüğe kaydetmez; ancak arama sorguları
+  hassas olabilir.
+- Bayrakları etkin bırakmak güvenlidir; yalnızca ilgili alt sistemin
+  günlük hacmini etkilerler.
+- Günlük hedeflerini, düzeylerini ve redaksiyonu değiştirmek için [/logging](/tr/logging) sayfasını kullanın.
 
-## İlgili konular
+## İlgili
 
-- [Gateway tanılaması](/tr/gateway/diagnostics)
+- [Gateway tanılama](/tr/gateway/diagnostics)
 - [Gateway sorun giderme](/tr/gateway/troubleshooting)
